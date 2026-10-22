@@ -1,0 +1,802 @@
+.animation-content {
+  display: contents;
+}
+.animation-overlay,
+.animation-overlay.intro,
+.animation-overlay.exp-loader,
+.animation-overlay.route-transition {
+  position: fixed;
+  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 300px;
+  z-index: 1000;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+  opacity: 1;
+  transform: none;
+  animation: none !important;
+  background: transparent;
+  color: var(--animation-ink);
+  font-family: "DM Sans", Arial, sans-serif;
+  pointer-events: auto;
+  touch-action: none;
+  overscroll-behavior: contain;
+  gap: 0;
+}
+.animation-surface {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  overflow: hidden;
+  --aperture: 0%;
+  background: transparent;
+}
+.animation-theme-01 .animation-surface,
+.animation-theme-02 .animation-surface,
+.animation-theme-03 .animation-surface {
+  mask-image: radial-gradient(
+    circle at center,
+    transparent var(--aperture),
+    #000 calc(var(--aperture) + 1px)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    transparent var(--aperture),
+    #000 calc(var(--aperture) + 1px)
+  );
+}
+.animation-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--animation-bg) var(--animation-background) center/cover;
+  z-index: 0;
+}
+.animation-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--animation-primary) 10%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--animation-primary) 10%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse, #000, transparent 73%);
+  z-index: 1;
+  opacity: 0;
+}
+.animation-theme-06 .animation-grid {
+  opacity: 0.8;
+}
+.animation-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.animation-atmosphere > [data-dom-orbit] {
+  position: absolute;
+  top: calc(50% - 250px);
+  left: calc(50% - 285px);
+  width: 570px;
+  height: 360px;
+  border: 1px solid
+    color-mix(in srgb, var(--animation-primary) 25%, transparent);
+  border-radius: 50%;
+  transform: rotate(-20deg);
+  opacity: 0;
+  box-shadow:
+    0 0 45px color-mix(in srgb, var(--animation-primary) 5%, transparent),
+    inset 0 0 40px color-mix(in srgb, var(--animation-primary) 3%, transparent);
+}
+.animation-atmosphere > [data-dom-orbit]:nth-child(2) {
+  width: 490px;
+  height: 440px;
+  left: calc(50% - 245px);
+  top: calc(50% - 290px);
+  transform: rotate(25deg);
+  border-color: color-mix(in srgb, var(--animation-secondary) 20%, transparent);
+}
+.animation-theme-04 .animation-atmosphere > [data-dom-orbit] {
+  border-color: #b4924b30;
+  box-shadow: 0 0 60px #b98e2610;
+}
+.animation-theme-05 .animation-atmosphere > [data-dom-orbit] {
+  border-radius: 75% 25% 65% 35%;
+  border-color: #efbad1a0;
+  box-shadow: inset 0 0 50px #fff7;
+}
+.animation-scene {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 355px);
+  transform: translateX(-50%);
+  width: min(760px, 85vw);
+  height: 470px;
+  z-index: 4;
+  pointer-events: none;
+  transform-origin: 50% 60%;
+}
+.animation-scene > div {
+  position: absolute !important;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.animation-fallback {
+  object-fit: contain;
+  transition: opacity 0.16s;
+  z-index: -1;
+}
+.animation-scene.scene-ready .animation-fallback {
+  opacity: 0;
+}
+.animation-brand {
+  position: absolute;
+  top: 64%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(600px, 90vw);
+  text-align: center;
+  z-index: 6;
+  color: var(--animation-ink);
+  opacity: 0;
+}
+.animation-brand-mark {
+  width: 26px;
+  height: 31px;
+  display: block;
+  margin: 0 auto 11px;
+  color: var(--animation-primary);
+}
+.animation-brand > span {
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 29px;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+  font-weight: 650;
+  display: block;
+  overflow-wrap: anywhere;
+}
+.animation-brand > small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 4px;
+  line-height: 1.8;
+  font-weight: 450;
+  color: var(--animation-primary);
+  margin: 9px 0 0;
+  padding-left: 4px;
+}
+.animation-tagline {
+  position: absolute;
+  top: 79%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(750px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 6;
+  line-height: 1.25;
+  gap: 3px;
+  text-align: center;
+  pointer-events: none;
+}
+.animation-tagline > span {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  letter-spacing: -0.7px;
+  color: var(--animation-ink);
+  display: block;
+  white-space: normal;
+  opacity: 0;
+}
+.animation-tagline > span:last-child {
+  color: var(--animation-primary);
+}
+.animation-skip {
+  position: absolute;
+  z-index: 9;
+  right: max(35px, env(safe-area-inset-right));
+  bottom: max(30px, env(safe-area-inset-bottom));
+  border: 1px solid
+    color-mix(in srgb, var(--animation-primary) 30%, transparent);
+  background: color-mix(in srgb, var(--animation-bg) 82%, transparent);
+  color: var(--animation-ink);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 17px;
+  min-height: 44px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.6;
+  font-weight: 450;
+  letter-spacing: 0.2px;
+  touch-action: manipulation;
+}
+.animation-skip:focus-visible {
+  outline: 3px solid var(--animation-primary);
+  outline-offset: 4px;
+}
+.animation-skip:hover {
+  border-color: var(--animation-primary);
+}
+.animation-gold-sweep {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: -15%;
+  width: 13%;
+  transform: skewX(-14deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--animation-primary) 12%, transparent),
+    color-mix(in srgb, var(--animation-primary) 24%, transparent),
+    transparent
+  );
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0;
+}
+.animation-theme-04 .animation-brand > span {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 34px;
+  letter-spacing: -0.4px;
+}
+.animation-theme-04 .animation-brand-mark {
+  stroke-width: 1;
+}
+.animation-theme-04 .animation-tagline > span {
+  font-size: 33px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+}
+.animation-theme-04 .animation-skip {
+  border-radius: 0;
+  letter-spacing: 0.5px;
+}
+.animation-theme-03 .animation-brand > span {
+  font-weight: 750;
+  color: #0d526d;
+}
+.animation-theme-03 .animation-tagline > span {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1586a1;
+}
+.animation-theme-03 .animation-tagline > span:last-child {
+  color: #cc6b9d;
+}
+.animation-bubble {
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 1px solid #fff9;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #fff8,
+    #b5e8fa24 45%,
+    #a3d9ef40
+  );
+  box-shadow: inset 0 -5px 10px #72b7d01a;
+}
+.bubble-one {
+  top: 27%;
+  left: 24%;
+  width: 33px;
+  height: 33px;
+}
+.bubble-two {
+  top: 38%;
+  right: 24%;
+  width: 55px;
+  height: 55px;
+}
+.animation-heart {
+  position: absolute;
+  top: 22%;
+  right: 32%;
+  color: #eaa2c4;
+  fill: #efb8d377;
+  transform: rotate(15deg);
+}
+.animation-theme-05 .animation-brand > span {
+  font-family: Georgia, serif;
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+.animation-theme-05 .animation-tagline > span {
+  font-size: 34px;
+  font-style: italic;
+  letter-spacing: -0.5px;
+}
+.animation-theme-05 .animation-skip {
+  border-radius: 25px;
+}
+.animation-ribbon-sweep {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.12;
+}
+.animation-ribbon-sweep > path {
+  fill: none;
+  stroke: var(--animation-primary);
+  stroke-width: 70;
+  stroke-linecap: round;
+}
+.animation-theme-06 .animation-brand > span {
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 550;
+  letter-spacing: -0.6px;
+}
+.animation-theme-06 .animation-tagline > span {
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 25px;
+  font-weight: 450;
+  letter-spacing: 0.4px;
+}
+.animation-tiles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+.animation-tiles > i {
+  background: var(--animation-bg);
+  border: 0.5px solid #47b9e114;
+  display: block;
+  transform-origin: center;
+}
+.animation-mode-initial .animation-tiles,
+.animation-mode-refresh .animation-tiles {
+  display: none;
+}
+.animation-mode-switch .animation-scene {
+  height: 310px;
+  top: calc(50% - 220px);
+  width: min(520px, 75vw);
+}
+.animation-mode-switch .animation-brand {
+  top: 63%;
+}
+.animation-mode-switch .animation-brand-mark {
+  display: none;
+}
+.animation-mode-switch .animation-brand > span {
+  font-size: 24px;
+}
+.animation-mode-switch .animation-tagline {
+  display: none;
+}
+.animation-mode-switch .animation-skip {
+  font-size: 9px;
+}
+.animation-mode-refresh .animation-tagline {
+  display: none;
+}
+.animation-mode-refresh .animation-brand {
+  top: 70%;
+}
+.animation-mode-refresh .animation-scene {
+  top: calc(50% - 280px);
+  height: 420px;
+}
+.animation-mode-refresh .animation-brand-mark {
+  width: 23px;
+  height: 28px;
+}
+.animation-reduced .animation-scene,
+.animation-reduced .animation-atmosphere,
+.animation-reduced .animation-grid,
+.animation-reduced .animation-tiles {
+  display: none;
+}
+.animation-reduced .animation-brand {
+  top: 45%;
+}
+.animation-reduced .animation-skip {
+  display: none;
+}
+html[data-dental-animation="active"]
+  .animation-content
+  :is(
+    .hero-copy,
+    .hero-visual,
+    .cinema-hero-copy,
+    .family-hero-copy,
+    .luxury-hero-copy,
+    .lifestyle-hero-copy,
+    .digital-hero-copy
+  ) {
+  opacity: 0 !important;
+  animation: none !important;
+  transition: none !important;
+}
+html[data-dental-animation="active"]
+  .animation-content
+  :is(
+    .hero-photo,
+    .cinema-hero-image,
+    .family-hero-portrait,
+    .luxury-portrait,
+    .lifestyle-photo,
+    .digital-hero-image
+  ) {
+  animation: none !important;
+  transition: none !important;
+}
+html[data-dental-animation="active"] .animation-content .inner-title-group {
+  animation: none !important;
+  opacity: 0;
+}
+html:not([data-dental-animation]) .inner-title-group {
+  opacity: 1;
+}
+.animation-content h1[tabindex="-1"]:focus-visible {
+  outline: none;
+}
+@media (min-width: 1600px) {
+  .animation-scene {
+    width: 850px;
+    height: 530px;
+    top: calc(50% - 395px);
+  }
+  .animation-brand {
+    top: 64%;
+  }
+  .animation-tagline > span {
+    font-size: 37px;
+  }
+  .animation-theme-06 .animation-tagline > span {
+    font-size: 28px;
+  }
+  .animation-brand > span {
+    font-size: 32px;
+  }
+  .animation-atmosphere > [data-dom-orbit] {
+    width: 680px;
+    height: 430px;
+    left: calc(50% - 340px);
+    top: calc(50% - 300px);
+  }
+}
+@media (max-height: 780px) and (min-width: 601px) {
+  .animation-scene {
+    height: 380px;
+    top: calc(50% - 300px);
+    width: 650px;
+  }
+  .animation-brand {
+    top: 63%;
+  }
+  .animation-brand > span {
+    font-size: 25px;
+  }
+  .animation-brand-mark {
+    width: 22px;
+    height: 26px;
+    margin-bottom: 8px;
+  }
+  .animation-tagline {
+    top: 80%;
+  }
+  .animation-tagline > span {
+    font-size: 25px;
+  }
+  .animation-skip {
+    bottom: 20px;
+    right: 25px;
+  }
+  .animation-atmosphere > [data-dom-orbit] {
+    height: 280px;
+    width: 470px;
+    left: calc(50% - 235px);
+    top: calc(50% - 230px);
+  }
+}
+@media (max-width: 1100px) and (min-width: 601px) {
+  .animation-scene {
+    width: 680px;
+    max-width: 90vw;
+  }
+  .animation-tagline > span {
+    font-size: 29px;
+  }
+  .animation-theme-06 .animation-tagline > span {
+    font-size: 23px;
+  }
+  .animation-atmosphere > [data-dom-orbit] {
+    width: 500px;
+    left: calc(50% - 250px);
+  }
+  .animation-brand > span {
+    font-size: 28px;
+  }
+}
+@media (max-width: 600px) {
+  .animation-overlay {
+    min-height: 0;
+  }
+  .animation-backdrop {
+    background-image: var(--animation-mobile-background);
+  }
+  .animation-scene {
+    top: calc(42% - 260px);
+    width: 100%;
+    max-width: 100%;
+    height: 365px;
+  }
+  .animation-brand {
+    top: 62%;
+    width: 86vw;
+  }
+  .animation-brand > span {
+    font-size: 26px;
+    letter-spacing: -0.7px;
+  }
+  .animation-brand-mark {
+    width: 23px;
+    height: 28px;
+    margin-bottom: 10px;
+  }
+  .animation-brand > small {
+    font-size: 7px;
+    letter-spacing: 3.6px;
+    margin-top: 9px;
+  }
+  .animation-tagline {
+    top: 77%;
+    width: 91vw;
+    gap: 4px;
+  }
+  .animation-tagline > span {
+    font-size: 25px;
+    line-height: 1.2;
+    letter-spacing: -0.6px;
+  }
+  .animation-theme-03 .animation-tagline > span {
+    font-size: 25px;
+  }
+  .animation-theme-04 .animation-tagline > span {
+    font-size: 25px;
+    letter-spacing: -0.25px;
+  }
+  .animation-theme-04 .animation-brand > span,
+  .animation-theme-05 .animation-brand > span {
+    font-size: 29px;
+  }
+  .animation-theme-05 .animation-tagline > span {
+    font-size: 27px;
+    letter-spacing: -0.5px;
+  }
+  .animation-theme-06 .animation-tagline > span {
+    font-size: 19px;
+    letter-spacing: -0.25px;
+  }
+  .animation-theme-06 .animation-brand > span {
+    font-size: 25px;
+  }
+  .animation-atmosphere > [data-dom-orbit] {
+    top: calc(42% - 210px);
+    left: calc(50% - 165px);
+    width: 330px;
+    height: 285px;
+    box-shadow: 0 0 35px
+      color-mix(in srgb, var(--animation-primary) 4%, transparent);
+  }
+  .animation-atmosphere > [data-dom-orbit]:nth-child(2) {
+    top: calc(42% - 235px);
+    left: calc(50% - 140px);
+    width: 280px;
+    height: 330px;
+  }
+  .animation-skip {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    font-size: 9px;
+    gap: 14px;
+    min-height: 44px;
+    padding: 12px 15px;
+  }
+  .bubble-one {
+    top: 25%;
+    left: 7%;
+    width: 24px;
+    height: 24px;
+  }
+  .bubble-two {
+    right: 7%;
+    top: 36%;
+    width: 36px;
+    height: 36px;
+  }
+  .animation-heart {
+    top: 22%;
+    right: 17%;
+    width: 22px;
+    height: 22px;
+  }
+  .animation-ribbon-sweep > path {
+    stroke-width: 50;
+  }
+  .animation-mode-switch .animation-scene {
+    width: 100%;
+    max-width: 100%;
+    height: 320px;
+    top: calc(45% - 220px);
+  }
+  .animation-mode-switch .animation-brand {
+    top: 63%;
+  }
+  .animation-mode-switch .animation-brand > span {
+    font-size: 23px;
+  }
+  .animation-mode-refresh .animation-scene {
+    height: 345px;
+    top: calc(45% - 245px);
+    width: 100%;
+  }
+  .animation-mode-refresh .animation-brand {
+    top: 67%;
+  }
+  .animation-mode-refresh .animation-brand > span {
+    font-size: 25px;
+  }
+  .animation-mode-refresh .animation-atmosphere > [data-dom-orbit] {
+    top: calc(45% - 210px);
+  }
+  .animation-tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+  }
+  .animation-mode-switch.animation-reduced .animation-brand {
+    top: 45%;
+  }
+}
+@media (max-width: 350px) {
+  .animation-scene {
+    top: calc(42% - 235px);
+    height: 330px;
+  }
+  .animation-brand {
+    top: 61%;
+    width: 86vw;
+  }
+  .animation-brand > span {
+    font-size: 23px;
+  }
+  .animation-brand-mark {
+    width: 21px;
+    height: 25px;
+  }
+  .animation-brand > small {
+    font-size: 6px;
+    letter-spacing: 3.2px;
+  }
+  .animation-tagline {
+    top: 76%;
+    width: 91vw;
+  }
+  .animation-tagline > span,
+  .animation-theme-03 .animation-tagline > span {
+    font-size: 22px;
+  }
+  .animation-theme-04 .animation-tagline > span {
+    font-size: 22px;
+  }
+  .animation-theme-05 .animation-tagline > span {
+    font-size: 23px;
+  }
+  .animation-theme-06 .animation-tagline > span {
+    font-size: 16.5px;
+  }
+  .animation-theme-04 .animation-brand > span,
+  .animation-theme-05 .animation-brand > span {
+    font-size: 26px;
+  }
+  .animation-atmosphere > [data-dom-orbit] {
+    width: 290px;
+    height: 255px;
+    left: calc(50% - 145px);
+    top: calc(42% - 190px);
+  }
+  .animation-atmosphere > [data-dom-orbit]:nth-child(2) {
+    width: 255px;
+    height: 290px;
+    left: calc(50% - 127.5px);
+    top: calc(42% - 210px);
+  }
+  .animation-skip {
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    right: 17px;
+    font-size: 8px;
+  }
+  .animation-mode-refresh .animation-scene {
+    height: 315px;
+  }
+  .animation-theme-06 .animation-brand > span {
+    font-size: 23px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animation-overlay {
+    animation: none !important;
+  }
+  .animation-content :is(.hero-copy, .hero-visual, .inner-title-group) {
+    animation: none !important;
+  }
+  .animation-scene > div {
+    display: none;
+  }
+}
+html[data-dental-animation] {
+  overflow: hidden;
+}
+.animation-atmosphere > [data-dom-orbit]::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  background: var(--animation-orbit-texture) center/100% 100% no-repeat;
+  opacity: 0.3;
+}
+.animation-accent-particle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  top: 29%;
+  left: 29%;
+  background: var(--animation-accent-texture) center/contain no-repeat;
+  opacity: 0.4;
+}
+@media (max-width: 600px) {
+  .animation-accent-particle {
+    left: 13%;
+    top: 24%;
+    width: 18px;
+    height: 18px;
+  }
+}
+.animation-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.animation-skip {
+  font-size: 12px;
+}
+.animation-brand > small {
+  font-size: 9px;
+}
+@media (max-width: 600px) {
+  .animation-skip {
+    font-size: 11px;
+  }
+  .animation-brand > small {
+    font-size: 8px;
+    letter-spacing: 2.6px;
+  }
+}
+/* The provider owns Template 01's entrance; avoid replaying its older CSS intro in parallel. */
+.animation-content :is(.hero-copy, .hero-visual) {
+  animation: none !important;
+}

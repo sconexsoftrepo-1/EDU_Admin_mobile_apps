@@ -1,0 +1,85 @@
+{
+  "workbooks": 13,
+  "input_tabs": 24,
+  "fields": 439,
+  "preview_count": 109,
+  "checks": [
+    "All headers match v2 contract",
+    "Blank client data preserved",
+    "Dates and identifiers formatted",
+    "Dropdowns exported",
+    "Monochrome headers and table styles exported",
+    "Both row and identifier columns frozen",
+    "Calculated columns populated at first, middle and final rows",
+    "Finance recalculation tested in authoring engine",
+    "Backend empty"
+  ],
+  "native_excel_engine": "not run",
+  "files": [
+    {
+      "file": "01_Students_and_Parents.xlsx",
+      "input_tabs": 3,
+      "fields": 73
+    },
+    {
+      "file": "02_Courses_and_Subjects.xlsx",
+      "input_tabs": 3,
+      "fields": 49
+    },
+    {
+      "file": "03_Employees.xlsx",
+      "input_tabs": 1,
+      "fields": 39
+    },
+    {
+      "file": "04_Teachers.xlsx",
+      "input_tabs": 1,
+      "fields": 18
+    },
+    {
+      "file": "05_Staff.xlsx",
+      "input_tabs": 1,
+      "fields": 15
+    },
+    {
+      "file": "06_Student_Enrollments.xlsx",
+      "input_tabs": 1,
+      "fields": 21
+    },
+    {
+      "file": "07_Fee_Heads.xlsx",
+      "input_tabs": 1,
+      "fields": 14
+    },
+    {
+      "file": "08_Fee_Structures_and_Scholarships.xlsx",
+      "input_tabs": 3,
+      "fields": 51
+    },
+    {
+      "file": "09_Student_Charges_and_Payments.xlsx",
+      "input_tabs": 3,
+      "fields": 38
+    },
+    {
+      "file": "10_Bus_Transport.xlsx",
+      "input_tabs": 3,
+      "fields": 40
+    },
+    {
+      "file": "11_Hostel_Rooms_and_Allocations.xlsx",
+      "input_tabs": 2,
+      "fields": 32
+    },
+    {
+      "file": "12_Leave_Types.xlsx",
+      "input_tabs": 1,
+      "fields": 22
+    },
+    {
+      "file": "13_College_Calendar_and_Events.xlsx",
+      "input_tabs": 1,
+      "fields": 27
+    }
+  ]
+}

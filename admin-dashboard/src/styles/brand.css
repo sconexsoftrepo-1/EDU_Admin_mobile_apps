@@ -1,0 +1,643 @@
+/* Cosmic identity: editable type + a code-native star, over generated landscape and live geometry. */
+.cosmic-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.cosmic-brand-logo > span {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.brand-star {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px #8055ff55);
+  transition:
+    transform 0.45s,
+    filter 0.45s;
+}
+.cosmic-brand-logo:hover .brand-star {
+  transform: rotate(12deg) scale(1.08);
+  filter: drop-shadow(0 0 16px #9b60ff99);
+}
+.brand-wordmark {
+  font-family: Manrope, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  background: linear-gradient(105deg, #f0efff 5%, #b4a2ff 50%, #9654f2);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cosmic-brand-logo small {
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: #c1b6dd;
+  text-transform: uppercase;
+}
+.showroom-brand .cosmic-brand-logo {
+  gap: 8px;
+}
+.showroom-brand .brand-star {
+  width: 31px;
+  height: 36px;
+}
+.showroom-brand .brand-wordmark {
+  font-size: 22px;
+}
+.showroom-brand .cosmic-brand-logo > span {
+  gap: 5px;
+}
+.showroom-brand .cosmic-brand-logo small {
+  font-size: 6px;
+  letter-spacing: 0.2em;
+}
+.showroom-brand > span:last-child {
+  font-size: inherit;
+}
+.cosmic-hero {
+  position: relative;
+  height: min(850px, 100svh);
+  min-height: 650px;
+  background: #080d13;
+  isolation: isolate;
+  overflow: hidden;
+  --cosmic-px: 0;
+}
+.cosmic-sky,
+.cosmic-rocks {
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/brand/cosmic-environment/cosmic-background.webp");
+  background-size: cover;
+  background-position: center;
+  z-index: -3;
+}
+.cosmic-sky {
+  transform: scale(1.025) translateX(calc(var(--cosmic-px) * -7px));
+  transition: transform 0.4s ease-out;
+}
+.cosmic-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, #080d13b8, transparent 55%),
+    linear-gradient(0deg, #080d13, transparent 18%);
+}
+.cosmic-rocks {
+  background-image: url("/assets/brand/cosmic-environment/rocky-foreground.webp");
+  z-index: -1;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+}
+.cosmic-environment {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  isolation: isolate;
+}
+.cosmic-hero > .cosmic-environment {
+  left: 35%;
+  right: 2%;
+  top: 80px;
+  bottom: 70px;
+  z-index: -2;
+}
+.cosmic-environment > div {
+  position: absolute !important;
+  inset: 0;
+}
+.cosmic-planet-fallback {
+  object-fit: contain;
+  transition: opacity 0.25s;
+  padding: 5%;
+}
+.cosmic-environment.is-rendered > .cosmic-planet-fallback {
+  opacity: 0;
+}
+.cosmic-hero-copy {
+  position: absolute;
+  left: 7vw;
+  top: 50%;
+  transform: translateY(-42%);
+  max-width: 560px;
+  z-index: 2;
+}
+.cosmic-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #e4e4f4;
+  line-height: 1.9;
+}
+.cosmic-eyebrow span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+.cosmic-hero h1 {
+  margin: 22px 0 18px;
+  font-size: clamp(57px, 5.8vw, 94px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.cosmic-hero h1 .brand-star {
+  width: clamp(52px, 5.7vw, 88px);
+  height: clamp(65px, 7vw, 107px);
+}
+.cosmic-hero h1 .cosmic-brand-logo {
+  gap: 18px;
+}
+.cosmic-tagline {
+  font-size: 10px;
+  letter-spacing: 0.37em;
+  color: #dedafa;
+  margin-left: calc(clamp(52px, 5.7vw, 88px) + 18px) !important;
+}
+.cosmic-description {
+  margin-top: 30px !important;
+  max-width: 310px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #c7c8e0;
+  text-wrap: pretty;
+}
+.cosmic-explore {
+  margin-top: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 13px 22px;
+  border: 1px solid #c0b3ffb0;
+  border-radius: 50px;
+  background: #080d1380;
+  box-shadow: inset 0 0 18px #6c63ff15;
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  min-height: 46px;
+  transition:
+    box-shadow 0.25s,
+    border-color 0.25s;
+}
+.cosmic-explore:hover,
+.cosmic-explore:focus-visible {
+  border-color: #d6caff;
+  box-shadow:
+    0 0 32px #8655ff40,
+    inset 0 0 22px #6c63ff25;
+}
+.cosmic-values {
+  position: absolute;
+  right: 4vw;
+  top: 42%;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #d8d2f0;
+}
+.cosmic-scroll {
+  position: absolute;
+  bottom: 27px;
+  left: 7vw;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #beb4d4 !important;
+  min-height: 44px;
+}
+/* Existing template collection follows immediately; it is no longer a second page-sized entrance. */
+.showroom .universe-hero {
+  padding-top: 48px;
+}
+.universe-hero-intro .universe-stage-title {
+  font-size: clamp(30px, 3.3vw, 55px);
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+  font-weight: 500;
+}
+.showroom .universe-hero-intro .showroom-kicker {
+  margin-bottom: 9px;
+}
+.creator-brand {
+  margin-bottom: 30px;
+  font-size: 30px;
+}
+.creator-brand .brand-star {
+  height: 48px;
+  width: 48px;
+}
+.creator-brand .cosmic-brand-logo small {
+  font-size: 7px;
+}
+.creator-email:hover,
+.creator-email:focus-visible {
+  border-color: #a855f7;
+  box-shadow: 0 0 22px #a855f717;
+}
+.creator-phone:hover,
+.creator-phone:focus-visible {
+  border-color: #22d3ee;
+  box-shadow: 0 0 22px #22d3ee17;
+}
+.brand-boot {
+  position: fixed;
+  inset: 0;
+  background: #080d13;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  font-size: clamp(30px, 6vw, 65px);
+}
+.cosmic-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: block !important;
+  background: #080d13;
+  isolation: isolate;
+  --animation-bg: #080d13;
+  --animation-ink: #f8fafc;
+  color: #f8fafc;
+  overflow: hidden;
+  perspective: 1600px;
+}
+.cosmic-overlay-surface {
+  position: absolute;
+  inset: 0;
+  background: #080d13;
+  overflow: hidden;
+  --aperture: 0%;
+}
+.cosmic-overlay-sky {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/brand/cosmic-environment/cosmic-background.webp")
+    center/cover;
+  opacity: 0.35;
+}
+.cosmic-overlay-world {
+  position: absolute;
+  inset: 0;
+  background: url("/assets/brand/cosmic-environment/cosmic-background.webp")
+    center/cover;
+  opacity: 0;
+  transform: scale(1.12);
+}
+.cosmic-overlay-scene {
+  position: absolute;
+  inset: 0;
+}
+.cosmic-overlay-scene .cosmic-planet-fallback {
+  padding: 20%;
+  object-fit: contain;
+}
+.cosmic-overlay-identity {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(90%, 650px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  transform-origin: center;
+}
+.cosmic-overlay-identity [data-brand] {
+  display: inline-block;
+  font-size: clamp(36px, 6vw, 76px);
+}
+.cosmic-overlay-identity [data-brand] .brand-star {
+  width: clamp(42px, 5vw, 70px);
+  height: clamp(52px, 6vw, 80px);
+}
+.cosmic-overlay-tagline {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-top: 20px;
+}
+.cosmic-overlay-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220px;
+  height: 220px;
+  margin: -110px 0 0 -110px;
+  border: 1px solid #ad72ff99;
+  border-radius: 50%;
+  box-shadow:
+    0 0 50px #8f43ff50,
+    inset 0 0 40px #6c63ff20;
+  transform: rotateX(60deg);
+  pointer-events: none;
+}
+.cosmic-overlay-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 18px -35px;
+  border: 1px solid #4faaff80;
+  border-radius: 50%;
+  transform: rotate(-32deg);
+}
+.cosmic-overlay-orbit .brand-star {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 80px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+}
+.cosmic-overlay-initial[data-animation-stage="2"]
+  .cosmic-overlay-orbit
+  .brand-star,
+.cosmic-overlay-initial[data-animation-stage="3"]
+  .cosmic-overlay-orbit
+  .brand-star,
+.cosmic-overlay-refresh[data-animation-stage="2"]
+  .cosmic-overlay-orbit
+  .brand-star {
+  opacity: 0;
+}
+.cosmic-overlay-initial[data-animation-stage="4"]
+  .cosmic-overlay-scene
+  .cosmic-planet-fallback,
+.cosmic-overlay-initial[data-animation-stage="5"]
+  .cosmic-overlay-scene
+  .cosmic-planet-fallback {
+  content: url("/assets/brand/fallbacks/planet.webp");
+  padding: 5%;
+}
+.cosmic-overlay .animation-skip {
+  bottom: 30px;
+  right: 30px;
+  z-index: 9;
+  border-color: #c4a3ff65;
+  background: #080d13bf;
+  color: #e9ddff;
+}
+.cosmic-energy-streak {
+  position: absolute;
+  inset: -25%;
+  background: url("/assets/brand/transitions/energy-sweep.svg") center/100% 100%
+    no-repeat;
+  filter: drop-shadow(0 0 9px #a855f7);
+  pointer-events: none;
+}
+.cosmic-switch-grid {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  transform: translate(-50%, -50%);
+}
+.cosmic-switch-grid i {
+  border: 1px solid #b993ff;
+  border-radius: 7px;
+  background: #6c63ff66;
+  box-shadow: 0 0 15px #a855f7;
+}
+.cosmic-destination-preview {
+  position: absolute;
+  width: min(64vw, 900px);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--destination-accent);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 90px #774aff50;
+  opacity: 0;
+  background: #111021;
+}
+.cosmic-destination-preview > span {
+  display: block;
+  padding: 10px 15px;
+  color: #ebe5ff;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+.cosmic-destination-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 72svh;
+  object-fit: contain;
+  background: #0a0d14;
+}
+@media (min-width: 701px) and (max-height: 760px) {
+  .cosmic-hero {
+    min-height: 580px;
+  }
+  .cosmic-hero-copy {
+    transform: translateY(-38%);
+  }
+  .cosmic-hero h1 {
+    font-size: 65px;
+  }
+  .cosmic-description {
+    margin-top: 18px !important;
+  }
+}
+@media (max-width: 1024px) {
+  .cosmic-hero-copy {
+    left: 6vw;
+    max-width: 450px;
+  }
+  .cosmic-hero h1 {
+    font-size: 65px;
+  }
+  .cosmic-description {
+    max-width: 270px;
+    font-size: 12px;
+  }
+  .cosmic-hero > .cosmic-environment {
+    left: 37%;
+    right: -2%;
+  }
+  .cosmic-values {
+    right: 3vw;
+    font-size: 8px;
+    gap: 14px;
+  }
+  .cosmic-tagline {
+    font-size: 8px;
+    letter-spacing: 0.27em;
+  }
+}
+@media (max-width: 700px) {
+  .cosmic-hero {
+    height: 100svh;
+    min-height: 710px;
+    max-height: 900px;
+  }
+  .cosmic-sky {
+    background-image: url("/assets/brand/mobile/cosmic-background.webp");
+    background-position: center;
+  }
+  .cosmic-hero > .cosmic-environment {
+    inset: auto 0 110px;
+    height: 350px;
+    z-index: -2;
+  }
+  .cosmic-rocks {
+    background-position: 63% center;
+    background-size: auto 100%;
+    opacity: 0.8;
+  }
+  .cosmic-hero::after {
+    background: linear-gradient(180deg, #080d1380, transparent 50%, #080d1366);
+  }
+  .cosmic-hero-copy {
+    left: 24px;
+    right: 24px;
+    top: 120px;
+    transform: none;
+    max-width: none;
+  }
+  .cosmic-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+  .cosmic-eyebrow span {
+    font-size: 8px;
+  }
+  .cosmic-hero h1 {
+    font-size: clamp(38px, 10.5vw, 49px);
+    margin: 16px 0 8px;
+  }
+  .cosmic-hero h1 .brand-star {
+    width: 42px;
+    height: 57px;
+  }
+  .cosmic-hero h1 .cosmic-brand-logo {
+    gap: 10px;
+  }
+  .cosmic-tagline {
+    margin-left: 52px !important;
+    font-size: 8px;
+    letter-spacing: 0.23em;
+  }
+  .cosmic-description {
+    font-size: 11px;
+    line-height: 1.75;
+    max-width: 310px;
+    margin-top: 19px !important;
+  }
+  .cosmic-explore {
+    font-size: 11px;
+    margin-top: 18px;
+    padding: 11px 18px;
+    gap: 24px;
+  }
+  .cosmic-values {
+    display: none;
+  }
+  .cosmic-scroll {
+    left: 24px;
+    bottom: 10px;
+    font-size: 9px;
+  }
+  .cosmic-overlay-identity {
+    width: 92%;
+  }
+  .cosmic-overlay-identity [data-brand] {
+    font-size: clamp(30px, 8vw, 46px);
+  }
+  .cosmic-overlay-identity [data-brand] .brand-star {
+    height: 50px;
+    width: 38px;
+  }
+  .cosmic-overlay-tagline {
+    font-size: 8px;
+    line-height: 1.8;
+  }
+  .cosmic-overlay-sky,
+  .cosmic-overlay-world {
+    background-image: url("/assets/brand/mobile/cosmic-background.webp");
+  }
+  .cosmic-destination-preview {
+    width: 90vw;
+  }
+  .cosmic-overlay-scene {
+    inset: 15% 0;
+  }
+  .cosmic-overlay-scene .cosmic-planet-fallback {
+    padding: 30% 25%;
+  }
+  .cosmic-overlay .animation-skip {
+    right: 20px;
+    bottom: 22px;
+  }
+  .showroom-brand .brand-wordmark {
+    font-size: 19px;
+  }
+  .showroom-brand .brand-star {
+    width: 27px;
+  }
+  .showroom-brand .cosmic-brand-logo small {
+    font-size: 5px;
+  }
+  .creator-brand {
+    font-size: 26px;
+  }
+  .creator-brand .brand-star {
+    width: 40px;
+    height: 45px;
+  }
+  .creator-brand .cosmic-brand-logo small {
+    font-size: 6px;
+  }
+  .showroom .universe-hero {
+    padding-top: 35px;
+  }
+  .universe-hero-intro .universe-stage-title {
+    font-size: 31px;
+  }
+}
+@media (max-width: 370px) {
+  .cosmic-hero {
+    min-height: 720px;
+  }
+  .cosmic-hero-copy {
+    top: 112px;
+    left: 20px;
+    right: 20px;
+  }
+  .cosmic-hero h1 {
+    font-size: 37px;
+  }
+  .cosmic-hero > .cosmic-environment {
+    height: 300px;
+    bottom: 85px;
+  }
+  .cosmic-description {
+    font-size: 11px;
+    max-width: 270px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-star,
+  .cosmic-sky {
+    transition: none;
+  }
+  .cosmic-hero .cosmic-explore {
+    transform: none !important;
+  }
+  .cosmic-hero-copy {
+    opacity: 1 !important;
+  }
+  .cosmic-rocks {
+    transform: none !important;
+  }
+}

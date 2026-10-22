@@ -1,0 +1,4841 @@
+[
+  {
+    "name": "institutions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "country",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "website",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "affiliation",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "campuses",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "code",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "academic_years",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date > start_date)"
+    ]
+  },
+  {
+    "name": "departments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "programs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "code",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "qualification",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "duration_semesters",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "intake_capacity",
+        "type": "positive_int",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "batches",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "code",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entry_year",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "graduation_year",
+        "type": "positive_int",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "semesters",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "code",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date > start_date)"
+    ]
+  },
+  {
+    "name": "sections",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "batch_code",
+        "type": "code",
+        "required": true,
+        "reference": "batches",
+        "choices": []
+      },
+      {
+        "name": "semester_code",
+        "type": "code",
+        "required": true,
+        "reference": "semesters",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "positive_int",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "code",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "credits",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "theory",
+          "practical",
+          "project",
+          "elective"
+        ]
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "curriculum_subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "code",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "subject_code",
+        "type": "code",
+        "required": true,
+        "reference": "subjects",
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_required",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(program_code,subject_code,semester_number)"
+    ]
+  },
+  {
+    "name": "rooms",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "classroom",
+          "laboratory",
+          "hall",
+          "office"
+        ]
+      },
+      {
+        "name": "capacity",
+        "type": "positive_int",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "employees",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "code",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "teacher",
+          "staff"
+        ]
+      },
+      {
+        "name": "designation",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "female",
+          "male",
+          "other",
+          "prefer_not_to_say"
+        ]
+      },
+      {
+        "name": "join_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employment_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "permanent",
+          "contract",
+          "part_time"
+        ]
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "on_leave",
+          "left"
+        ]
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "teachers",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "qualification",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "specialization",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "experience_years",
+        "type": "decimal",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(employee_code)"
+    ]
+  },
+  {
+    "name": "staff_profiles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "responsibility",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "shift",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(employee_code)"
+    ]
+  },
+  {
+    "name": "students",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "admission_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "female",
+          "male",
+          "other",
+          "prefer_not_to_say"
+        ]
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "country",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "blood_group",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "A+",
+          "A-",
+          "B+",
+          "B-",
+          "AB+",
+          "AB-",
+          "O+",
+          "O-",
+          "unknown"
+        ]
+      },
+      {
+        "name": "nationality",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_institution",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_qualification",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_score",
+        "type": "decimal",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_phone",
+        "type": "phone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "graduated",
+          "withdrawn",
+          "suspended"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(admission_number)"
+    ]
+  },
+  {
+    "name": "parents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "alternate_phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occupation",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "student_parents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "code",
+        "required": true,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "relationship",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "father",
+          "mother",
+          "guardian",
+          "other"
+        ]
+      },
+      {
+        "name": "is_primary",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "can_pickup",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "receives_notifications",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(student_code,parent_code)"
+    ]
+  },
+  {
+    "name": "student_enrollments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "section_code",
+        "type": "code",
+        "required": true,
+        "reference": "sections",
+        "choices": []
+      },
+      {
+        "name": "roll_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "enrolled_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "completed",
+          "transferred",
+          "withdrawn"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(student_code,section_code)",
+      "UNIQUE(section_code,roll_number)"
+    ]
+  },
+  {
+    "name": "subject_offerings",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject_code",
+        "type": "code",
+        "required": true,
+        "reference": "subjects",
+        "choices": []
+      },
+      {
+        "name": "section_code",
+        "type": "code",
+        "required": true,
+        "reference": "sections",
+        "choices": []
+      },
+      {
+        "name": "teacher_code",
+        "type": "code",
+        "required": true,
+        "reference": "teachers",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(subject_code,section_code,teacher_code)"
+    ]
+  },
+  {
+    "name": "student_subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "enrollment_code",
+        "type": "code",
+        "required": true,
+        "reference": "student_enrollments",
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(enrollment_code,offering_code)"
+    ]
+  },
+  {
+    "name": "timetable_slots",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "code",
+        "required": true,
+        "reference": "rooms",
+        "choices": []
+      },
+      {
+        "name": "weekday",
+        "type": "weekday",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_time > start_time)",
+      "UNIQUE(room_code,weekday,start_time)"
+    ]
+  },
+  {
+    "name": "attendance_sessions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "session_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "recorded_by_code",
+        "type": "code",
+        "required": true,
+        "reference": "teachers",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_time > start_time)",
+      "UNIQUE(offering_code,session_date,start_time)"
+    ]
+  },
+  {
+    "name": "student_attendance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "session_code",
+        "type": "code",
+        "required": true,
+        "reference": "attendance_sessions",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "present",
+          "absent",
+          "late",
+          "excused"
+        ]
+      },
+      {
+        "name": "remarks",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(session_code,student_code)"
+    ]
+  },
+  {
+    "name": "employee_attendance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "attendance_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "check_in",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "check_out",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "present",
+          "absent",
+          "leave",
+          "holiday",
+          "half_day"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(employee_code,attendance_date)",
+      "CHECK (check_out IS NULL OR check_in IS NULL OR check_out >= check_in)"
+    ]
+  },
+  {
+    "name": "leave_types",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "annual_days",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "leave_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "leave_type_code",
+        "type": "code",
+        "required": true,
+        "reference": "leave_types",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date >= start_date)"
+    ]
+  },
+  {
+    "name": "student_leave_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date >= start_date)"
+    ]
+  },
+  {
+    "name": "admission_applications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "code",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "code",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "applied_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "submitted",
+          "reviewing",
+          "offered",
+          "accepted",
+          "rejected"
+        ]
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "fee_heads",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "fee_structures",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "code",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "code",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "fee_head_code",
+        "type": "code",
+        "required": true,
+        "reference": "fee_heads",
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(program_code,academic_year_code,fee_head_code,semester_number)"
+    ]
+  },
+  {
+    "name": "student_fee_charges",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "fee_structure_code",
+        "type": "code",
+        "required": true,
+        "reference": "fee_structures",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(student_code,fee_structure_code)"
+    ]
+  },
+  {
+    "name": "payments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paid_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "method",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "cash",
+          "bank_transfer",
+          "upi",
+          "card",
+          "cheque"
+        ]
+      },
+      {
+        "name": "transaction_reference",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "settled",
+          "failed",
+          "refunded"
+        ]
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "payment_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "code",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "code",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(payment_code,charge_code)"
+    ]
+  },
+  {
+    "name": "receipts",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "code",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "receipt_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(payment_code)",
+      "UNIQUE(receipt_number)"
+    ]
+  },
+  {
+    "name": "refunds",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "code",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "refunded_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reference",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "scholarships",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sponsor",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "code",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "maximum_amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "student_scholarships",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "scholarship_code",
+        "type": "code",
+        "required": true,
+        "reference": "scholarships",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "disbursed"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(student_code,scholarship_code)"
+    ]
+  },
+  {
+    "name": "fee_adjustments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "code",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "adjustment_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "discount",
+          "waiver",
+          "fine"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approved_by_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "vendors",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "tax_reference",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "expenses",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "vendor_code",
+        "type": "code",
+        "required": false,
+        "reference": "vendors",
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expense_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approved_by_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "employee_salary_components",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "component",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "component_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "earning",
+          "deduction"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "effective_from",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "effective_to",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (effective_to IS NULL OR effective_to >= effective_from)"
+    ]
+  },
+  {
+    "name": "payroll_runs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "period_start",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "period_end",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "approved",
+          "paid"
+        ]
+      }
+    ],
+    "constraints": [
+      "CHECK (period_end >= period_start)"
+    ]
+  },
+  {
+    "name": "payslips",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payroll_run_code",
+        "type": "code",
+        "required": true,
+        "reference": "payroll_runs",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "gross_amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "deduction_amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "net_amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(payroll_run_code,employee_code)",
+      "CHECK (net_amount = gross_amount - deduction_amount)"
+    ]
+  },
+  {
+    "name": "payslip_lines",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payslip_code",
+        "type": "code",
+        "required": true,
+        "reference": "payslips",
+        "choices": []
+      },
+      {
+        "name": "component",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "component_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "earning",
+          "deduction"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "money",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "exams",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semester_code",
+        "type": "code",
+        "required": true,
+        "reference": "semesters",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "exam_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "internal",
+          "semester",
+          "practical",
+          "supplementary"
+        ]
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date >= start_date)"
+    ]
+  },
+  {
+    "name": "exam_papers",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "exam_code",
+        "type": "code",
+        "required": true,
+        "reference": "exams",
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "code",
+        "required": false,
+        "reference": "rooms",
+        "choices": []
+      },
+      {
+        "name": "exam_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "max_marks",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pass_marks",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (max_marks > 0 AND pass_marks <= max_marks)",
+      "CHECK (end_time > start_time)"
+    ]
+  },
+  {
+    "name": "exam_results",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paper_code",
+        "type": "code",
+        "required": true,
+        "reference": "exam_papers",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "marks",
+        "type": "decimal",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_absent",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "grade",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(paper_code,student_code)",
+      "CHECK (NOT is_absent OR marks IS NULL)"
+    ]
+  },
+  {
+    "name": "assignments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "instructions",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "max_marks",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "assignment_submissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "assignment_code",
+        "type": "code",
+        "required": true,
+        "reference": "assignments",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "submitted_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_url",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "marks",
+        "type": "decimal",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "feedback",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(assignment_code,student_code)"
+    ]
+  },
+  {
+    "name": "learning_resources",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "code",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "resource_url",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "resource_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "document",
+          "video",
+          "link",
+          "other"
+        ]
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "hostels",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "warden_employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "hostel_rooms",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "hostel_code",
+        "type": "code",
+        "required": true,
+        "reference": "hostels",
+        "choices": []
+      },
+      {
+        "name": "room_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(hostel_code,room_number)"
+    ]
+  },
+  {
+    "name": "hostel_beds",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "code",
+        "required": true,
+        "reference": "hostel_rooms",
+        "choices": []
+      },
+      {
+        "name": "bed_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(room_code,bed_number)"
+    ]
+  },
+  {
+    "name": "hostel_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "bed_code",
+        "type": "code",
+        "required": true,
+        "reference": "hostel_beds",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date IS NULL OR end_date >= start_date)"
+    ]
+  },
+  {
+    "name": "hostel_permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "leave_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "return_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "returned"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (return_at > leave_at)"
+    ]
+  },
+  {
+    "name": "vehicles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "registration_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "driver_employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(registration_number)"
+    ]
+  },
+  {
+    "name": "transport_routes",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "vehicle_code",
+        "type": "code",
+        "required": false,
+        "reference": "vehicles",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "transport_stops",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "route_code",
+        "type": "code",
+        "required": true,
+        "reference": "transport_routes",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sequence_number",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pickup_time",
+        "type": "time",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drop_time",
+        "type": "time",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(route_code,sequence_number)"
+    ]
+  },
+  {
+    "name": "transport_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "stop_code",
+        "type": "code",
+        "required": true,
+        "reference": "transport_stops",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (end_date IS NULL OR end_date >= start_date)"
+    ]
+  },
+  {
+    "name": "library_books",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "author",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "isbn",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "publisher",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "library_copies",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "book_code",
+        "type": "code",
+        "required": true,
+        "reference": "library_books",
+        "choices": []
+      },
+      {
+        "name": "accession_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "available",
+          "issued",
+          "lost",
+          "damaged"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(accession_number)"
+    ]
+  },
+  {
+    "name": "library_loans",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "copy_code",
+        "type": "code",
+        "required": true,
+        "reference": "library_copies",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "returned_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "fine_amount",
+        "type": "money",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK ((student_code IS NULL) <> (employee_code IS NULL))",
+      "CHECK (due_on >= issued_on)",
+      "CHECK (returned_on IS NULL OR returned_on >= issued_on)"
+    ]
+  },
+  {
+    "name": "inventory_items",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "quantity",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "unit",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "code",
+        "required": false,
+        "reference": "rooms",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "inventory_movements",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "item_code",
+        "type": "code",
+        "required": true,
+        "reference": "inventory_items",
+        "choices": []
+      },
+      {
+        "name": "movement_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "received",
+          "issued",
+          "returned",
+          "disposed"
+        ]
+      },
+      {
+        "name": "quantity",
+        "type": "decimal",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "movement_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (quantity > 0)"
+    ]
+  },
+  {
+    "name": "certificate_types",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "template_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "certificate_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "type_code",
+        "type": "code",
+        "required": true,
+        "reference": "certificate_types",
+        "choices": []
+      },
+      {
+        "name": "requested_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "issued"
+        ]
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "certificates",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "request_code",
+        "type": "code",
+        "required": true,
+        "reference": "certificate_requests",
+        "choices": []
+      },
+      {
+        "name": "certificate_number",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_by_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "verification_token",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_url",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "revoked_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(request_code)",
+      "UNIQUE(certificate_number)",
+      "UNIQUE(verification_token)"
+    ]
+  },
+  {
+    "name": "users",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "password_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "code",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "is_active",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(email)",
+      "CHECK (num_nonnulls(student_code,parent_code,employee_code) <= 1)"
+    ]
+  },
+  {
+    "name": "roles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(name)"
+    ]
+  },
+  {
+    "name": "permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(name)"
+    ]
+  },
+  {
+    "name": "user_roles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "role_code",
+        "type": "code",
+        "required": true,
+        "reference": "roles",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(user_code,role_code,campus_code)"
+    ]
+  },
+  {
+    "name": "role_permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "role_code",
+        "type": "code",
+        "required": true,
+        "reference": "roles",
+        "choices": []
+      },
+      {
+        "name": "permission_code",
+        "type": "code",
+        "required": true,
+        "reference": "permissions",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(role_code,permission_code)"
+    ]
+  },
+  {
+    "name": "refresh_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "revoked_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(token_hash)"
+    ]
+  },
+  {
+    "name": "password_reset_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "used_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(token_hash)"
+    ]
+  },
+  {
+    "name": "device_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "platform",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "android",
+          "ios",
+          "web"
+        ]
+      },
+      {
+        "name": "last_seen_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(token)"
+    ]
+  },
+  {
+    "name": "announcements",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "author_code",
+        "type": "code",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "announcement_recipients",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "announcement_code",
+        "type": "code",
+        "required": true,
+        "reference": "announcements",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "read_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(announcement_code,user_code)"
+    ]
+  },
+  {
+    "name": "notifications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "in_app",
+          "email",
+          "sms",
+          "push"
+        ]
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "queued",
+          "sent",
+          "failed",
+          "read"
+        ]
+      },
+      {
+        "name": "sent_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "message_threads",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "created_by_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "thread_members",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "thread_code",
+        "type": "code",
+        "required": true,
+        "reference": "message_threads",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(thread_code,user_code)"
+    ]
+  },
+  {
+    "name": "messages",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "thread_code",
+        "type": "code",
+        "required": true,
+        "reference": "message_threads",
+        "choices": []
+      },
+      {
+        "name": "sender_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sent_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "calendar_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "starts_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ends_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "event_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "holiday",
+          "academic",
+          "cultural",
+          "sports",
+          "meeting"
+        ]
+      }
+    ],
+    "constraints": [
+      "CHECK (ends_at >= starts_at)"
+    ]
+  },
+  {
+    "name": "placement_companies",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "contact_email",
+        "type": "email",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "website",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "placement_drives",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "company_code",
+        "type": "code",
+        "required": true,
+        "reference": "placement_companies",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "code",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "job_title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drive_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "placement_applications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drive_code",
+        "type": "code",
+        "required": true,
+        "reference": "placement_drives",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "applied",
+          "shortlisted",
+          "selected",
+          "rejected",
+          "joined"
+        ]
+      }
+    ],
+    "constraints": [
+      "UNIQUE(drive_code,student_code)"
+    ]
+  },
+  {
+    "name": "grievances",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "open",
+          "in_progress",
+          "resolved",
+          "closed"
+        ]
+      },
+      {
+        "name": "assigned_employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "documents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "code",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "document_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "storage_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "original_filename",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "mime_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "verified_by_code",
+        "type": "code",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "verified_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (num_nonnulls(student_code,employee_code,parent_code) = 1)"
+    ]
+  },
+  {
+    "name": "consents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "code",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "code",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "purpose",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "granted",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "recorded_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "withdrawn_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "import_jobs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "uploaded_by_code",
+        "type": "code",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "filename",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "file_sha256",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "uploaded",
+          "validated",
+          "committed",
+          "failed"
+        ]
+      },
+      {
+        "name": "total_rows",
+        "type": "int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "successful_rows",
+        "type": "int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "failed_rows",
+        "type": "int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "finished_at",
+        "type": "timestamp",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "CHECK (successful_rows + failed_rows <= total_rows)"
+    ]
+  },
+  {
+    "name": "import_rows",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "job_code",
+        "type": "code",
+        "required": true,
+        "reference": "import_jobs",
+        "choices": []
+      },
+      {
+        "name": "sheet_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "row_number",
+        "type": "positive_int",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_code",
+        "type": "code",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "valid",
+          "invalid",
+          "imported"
+        ]
+      },
+      {
+        "name": "error_details",
+        "type": "json",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(job_code,sheet_name,row_number)"
+    ]
+  },
+  {
+    "name": "audit_logs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "actor_code",
+        "type": "code",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "action",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_table",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "before_data",
+        "type": "json",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "after_data",
+        "type": "json",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ip_address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": []
+  },
+  {
+    "name": "institution_settings",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "code",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "setting_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "setting_value",
+        "type": "json",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(institution_code,setting_key)"
+    ]
+  },
+  {
+    "name": "website_pages",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "code",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "content",
+        "type": "json",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published",
+        "type": "bool",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ],
+    "constraints": [
+      "UNIQUE(institution_code,slug)"
+    ]
+  },
+  {
+    "name": "contact_enquiries",
+    "fields": [
+      {
+        "name": "code",
+        "type": "code",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "code",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "email",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "phone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "new",
+          "responded",
+          "closed"
+        ]
+      }
+    ],
+    "constraints": []
+  }
+]

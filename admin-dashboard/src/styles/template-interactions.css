@@ -1,0 +1,534 @@
+/* Shared behavior, six deliberately different materials. */
+.template-one .navigation,
+.experience .exp-nav {
+  transition:
+    box-shadow 0.3s,
+    padding 0.3s,
+    background 0.3s,
+    top 0.3s;
+  isolation: isolate;
+}
+.template-one .navigation.nav-compact,
+.experience .exp-nav.nav-compact {
+  box-shadow: 0 12px 35px #00000014;
+}
+.template-one .navigation.nav-compact {
+  background: #fcfaffed;
+}
+.experience .exp-nav.nav-compact {
+  backdrop-filter: blur(20px);
+}
+.template-one .navigation nav a,
+.experience .exp-nav nav a {
+  position: relative;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+}
+.template-one .navigation nav a::after,
+.experience .exp-nav nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+.template-one .navigation nav a:hover::after,
+.template-one .navigation nav a[aria-current="page"]::after,
+.experience .exp-nav nav a:hover::after,
+.experience .exp-nav nav a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+.template-one .navigation {
+  border: 1px solid #d9caf0aa;
+  box-shadow: 0 12px 35px #63419d12;
+  border-radius: 50px;
+}
+.exp-nav-02 {
+  border: 1px solid #9681f14a !important;
+  background: linear-gradient(120deg, #0c0d23f2, #17152de6) !important;
+  box-shadow: 0 0 28px #ad74f60b !important;
+}
+.exp-nav-02 nav a::after {
+  box-shadow: 0 0 9px #aa6ffb;
+}
+.exp-nav-03 {
+  border-radius: 30px !important;
+  border: 1px solid #b8e3ea !important;
+  box-shadow:
+    0 8px 0 #99dce912,
+    0 15px 35px #2f8ba41a !important;
+}
+.exp-nav-03 nav a::after {
+  height: 4px !important;
+  border-radius: 10px;
+}
+.exp-nav-04 {
+  border-radius: 5px !important;
+  border: 1px solid #b18d4a55 !important;
+  background: #11100cf0 !important;
+  box-shadow: 0 8px 35px #0002 !important;
+}
+.exp-nav-04 nav a::after {
+  height: 1px !important;
+  background: #dabb7d !important;
+}
+.exp-nav-05 {
+  border-radius: 15px 15px 30px 15px !important;
+  border: 1px solid #ebbfceaa !important;
+  background: #fff7faf0 !important;
+  box-shadow: 0 12px 35px #b93f7414 !important;
+}
+.exp-nav-05 nav a::after {
+  height: 2px !important;
+  background: linear-gradient(90deg, #e6a1b8, #b33669, #f0c2cf) !important;
+  border-radius: 70% 15% 70% 15%;
+  transform: scaleX(0) rotate(-2deg);
+}
+.exp-nav-06 {
+  border-radius: 4px 20px 4px 20px !important;
+  border: 1px solid #45b7ec55 !important;
+  background: #061e33ed !important;
+  box-shadow:
+    inset 0 0 18px #45c8ff08,
+    0 15px 35px #0003 !important;
+}
+.exp-nav-06::before,
+.exp-nav-06::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: #77d9fb55;
+  pointer-events: none;
+}
+.exp-nav-06::before {
+  left: 4px;
+}
+.exp-nav-06::after {
+  right: 4px;
+}
+.exp-nav-06 nav a::after {
+  height: 1px !important;
+  box-shadow: 0 0 7px #55c6ef;
+}
+.template-one .service-card,
+.template-one .doctor-card,
+.experience .exp-service,
+.experience .exp-doctor {
+  transform-style: preserve-3d;
+  transition:
+    translate 0.3s,
+    box-shadow 0.3s,
+    border-color 0.3s;
+}
+.template-one .service-card:hover,
+.template-one .doctor-card:hover {
+  translate: 0 -6px;
+  box-shadow: 0 18px 45px #8860b923;
+  border-color: #aa84d8;
+}
+.template-one .doctor-portrait,
+.experience .exp-portrait {
+  overflow: hidden;
+}
+.template-one .generated-portrait,
+.experience .exp-portrait img {
+  transition:
+    transform 0.7s,
+    filter 0.7s;
+}
+.template-one .doctor-card:hover .generated-portrait,
+.experience .exp-doctor:hover .exp-portrait img {
+  transform: scale(1.04);
+}
+.template-one .hero-glass-tooth {
+  border-radius: 48% 52% 43% 57%;
+  box-shadow:
+    0 20px 55px #7444ad24,
+    inset 0 0 25px #fff5;
+}
+.template-one .hero-copy h1 {
+  letter-spacing: -3px;
+}
+.template-one .care-pillars > div {
+  transition:
+    translate 0.3s,
+    background 0.3s;
+}
+.template-one .care-pillars > div:hover {
+  translate: 0 -3px;
+  background: #fbf8ff;
+}
+.template-one .appointment-section {
+  border: 1px solid #dfd0ef;
+  border-radius: 30px;
+  box-shadow: 0 25px 70px #8554ac14;
+}
+.template-one .about-strip {
+  position: relative;
+}
+.template-one .about-strip::after {
+  content: "";
+  position: absolute;
+  width: 70px;
+  height: 1px;
+  background: #b693d2;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+}
+.experience .exp-service:hover,
+.experience .exp-doctor:hover {
+  translate: 0 -5px;
+}
+.theme-02 .exp-service:hover,
+.theme-02 .exp-doctor:hover {
+  box-shadow:
+    0 0 0 1px #9464d78a,
+    0 15px 45px #744bc51c;
+}
+.theme-03 .exp-service:hover,
+.theme-03 .exp-doctor:hover {
+  translate: 0 -7px;
+  transition-timing-function: cubic-bezier(0.2, 1.5, 0.4, 1);
+  box-shadow: 0 17px 40px #4ca2b31e;
+}
+.theme-04 .exp-service,
+.theme-04 .exp-doctor {
+  position: relative;
+}
+.theme-04 .exp-service::after,
+.theme-04 .exp-doctor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid #c4a26966;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.5s;
+  pointer-events: none;
+}
+.theme-04 .exp-service:hover::after,
+.theme-04 .exp-doctor:hover::after {
+  clip-path: inset(0 0 0 0);
+}
+.theme-05 .exp-service-art {
+  overflow: hidden;
+}
+.theme-05 .exp-service-art::after {
+  content: "";
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  height: 12px;
+  bottom: 10px;
+  border: 1px solid #dc7ea16b;
+  border-radius: 50%;
+  rotate: -8deg;
+  translate: -20% 0;
+  transition:
+    translate 0.6s,
+    rotate 0.6s;
+  pointer-events: none;
+}
+.theme-05 .exp-service:hover .exp-service-art::after {
+  translate: 15% 0;
+  rotate: 5deg;
+}
+.theme-05 .exp-service .dental-art {
+  transition: transform 0.7s;
+}
+.theme-05 .exp-service:hover .dental-art {
+  transform: scale(1.06);
+}
+.theme-05 .exp-doctor:hover {
+  box-shadow: 0 20px 50px #b159781c;
+}
+.theme-06 .exp-service {
+  position: relative;
+  overflow: hidden;
+}
+.theme-06 .exp-service::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10%;
+  height: 1px;
+  background: #7dddff77;
+  box-shadow: 0 0 12px #65d5ff55;
+  transition: top 0.6s;
+  pointer-events: none;
+}
+.theme-06 .exp-service:hover::after {
+  top: 110%;
+}
+.experience .exp-button {
+  transition:
+    translate 0.25s,
+    box-shadow 0.25s,
+    background 0.3s,
+    border-radius 0.3s;
+}
+.experience .exp-button:hover,
+.template-one .button:hover {
+  translate: 0 -2px;
+}
+.theme-05 .exp-button:hover {
+  border-radius: 25px 15px 25px 15px;
+  box-shadow: 0 8px 20px #b7446f19;
+}
+.theme-02 .exp-button:hover {
+  box-shadow: 0 0 20px #a972df33;
+}
+.theme-04 .exp-button:hover {
+  box-shadow: 0 0 20px #d8b67616;
+}
+.theme-06 .exp-button:hover {
+  box-shadow: 0 0 20px #65d5ff22;
+}
+/* Satin and pearl recur through the aesthetic template. */
+.lifestyle-hero {
+  isolation: isolate;
+}
+.lifestyle-pearl-stage {
+  position: absolute;
+  bottom: 45px;
+  left: 43%;
+  width: 215px;
+  height: 275px;
+  z-index: 5;
+  pointer-events: auto;
+  transform: rotate(-5deg);
+}
+.signature-object {
+  position: relative;
+  width: 100%;
+  height: 235px;
+  touch-action: pan-y;
+}
+.signature-object > img {
+  object-fit: contain;
+  transition: opacity 0.2s;
+}
+.signature-object.is-ready > img {
+  opacity: 0;
+}
+.signature-object > div {
+  position: absolute !important;
+  inset: 0;
+}
+.lifestyle-pearl-stage > span {
+  display: block;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #9c456d;
+  letter-spacing: 0.7px;
+}
+.theme-05 .exp-about,
+.theme-05 .exp-treatments,
+.theme-05 .exp-team,
+.theme-05 .exp-booking {
+  position: relative;
+  isolation: isolate;
+}
+.theme-05 .exp-about::before,
+.theme-05 .exp-treatments::before,
+.theme-05 .exp-team::before,
+.theme-05 .exp-booking::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 70%;
+  height: 110px;
+  right: -20%;
+  top: 50%;
+  border-top: 12px solid #eeb8ca24;
+  border-bottom: 1px solid #eab3c540;
+  border-radius: 50%;
+  transform: rotate(-15deg);
+  pointer-events: none;
+}
+.theme-05 .lifestyle-intro h2 {
+  font-size: clamp(40px, 5.7vw, 85px);
+  line-height: 1.05;
+  letter-spacing: -3px;
+  max-width: 950px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.theme-05 .exp-gallery .gallery-card img {
+  transition: transform 0.8s;
+}
+.theme-05 .exp-gallery .gallery-card:hover img {
+  transform: scale(1.04);
+}
+.theme-05 .exp-booking {
+  border-top: 1px solid #e9b1c7;
+  border-radius: 35px 35px 0 0;
+}
+.theme-05 .exp-form-shell {
+  box-shadow: 0 30px 70px #bd4b7517;
+}
+.switch-trigger {
+  top: 46%;
+  bottom: auto;
+  border-radius: 18px 0 0 18px;
+  transition:
+    transform 0.25s,
+    background 0.25s;
+}
+.switch-trigger:hover {
+  transform: translateX(-4px);
+}
+.switch-trigger > svg {
+  transition: transform 0.4s;
+}
+.switch-trigger:hover > svg {
+  transform: rotate(-10deg);
+}
+.switch-option {
+  transition:
+    background 0.25s,
+    translate 0.25s;
+}
+.switch-option:hover {
+  translate: 0 -2px;
+}
+@media (max-width: 760px) {
+  .template-one .navigation {
+    border-radius: 24px;
+  }
+  .experience .exp-nav nav.open {
+    animation: template-menu-in 0.3s both;
+    box-shadow: 0 25px 50px #0003;
+  }
+  .template-one .nav-links.open {
+    animation: template-menu-in 0.3s both;
+  }
+  .exp-nav-02 .exp-links.open {
+    background: #12102aef !important;
+    border: 1px solid #9473ca55;
+    border-radius: 18px;
+  }
+  .exp-nav-03 .exp-links.open {
+    background: #f2fdff !important;
+    border: 1px solid #bbe3eb;
+    border-radius: 35px 35px 22px 22px;
+    box-shadow: 0 16px 0 #a9dce924;
+  }
+  .exp-nav-04 .exp-links.open {
+    background: #17130ff5 !important;
+    border: 1px solid #b08b4a66;
+    border-radius: 3px;
+  }
+  .exp-nav-05 .exp-links.open {
+    background: #fff2f7fa !important;
+    border: 1px solid #e7abc4;
+    border-radius: 12px 12px 32px 12px;
+  }
+  .exp-nav-06 .exp-links.open {
+    background: #051d31f5 !important;
+    border: 1px solid #3d9fc466;
+    border-radius: 2px 25px 2px 25px;
+  }
+  .experience .exp-links a,
+  .template-one .nav-links a {
+    min-height: 44px !important;
+  }
+  .lifestyle-pearl-stage {
+    width: 135px;
+    height: 175px;
+    bottom: 35px;
+    left: 51%;
+    transform: rotate(-5deg);
+  }
+  .signature-object {
+    height: 145px;
+  }
+  .lifestyle-pearl-stage > span {
+    font-size: 7px;
+    line-height: 1.5;
+  }
+  .theme-05 .lifestyle-intro h2 {
+    font-size: 44px;
+    letter-spacing: -2px;
+  }
+  .theme-05 .exp-about::before,
+  .theme-05 .exp-treatments::before,
+  .theme-05 .exp-team::before,
+  .theme-05 .exp-booking::before {
+    width: 50%;
+    right: -25%;
+    height: 60px;
+    border-top-width: 6px;
+    opacity: 0.65;
+  }
+  .template-one .hero-copy h1 {
+    letter-spacing: -1.6px;
+  }
+  .template-one .appointment-section {
+    border-radius: 20px;
+  }
+  .switch-trigger {
+    top: auto;
+    bottom: 95px;
+    right: 14px;
+    border-radius: 18px;
+  }
+  .template-one .hero-glass-tooth {
+    box-shadow: 0 15px 35px #7444ad20;
+  }
+}
+@media (max-width: 370px) {
+  .lifestyle-pearl-stage {
+    width: 115px;
+    left: 53%;
+    bottom: 32px;
+  }
+  .signature-object {
+    height: 130px;
+  }
+  .lifestyle-pearl-stage > span {
+    display: none;
+  }
+  .theme-05 .lifestyle-intro h2 {
+    font-size: 38px;
+  }
+}
+@keyframes template-menu-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .template-one *,
+  .experience * {
+    scroll-behavior: auto !important;
+  }
+  .experience .exp-links.open,
+  .template-one .nav-links.open {
+    animation: none !important;
+  }
+  .experience .exp-service,
+  .experience .exp-doctor,
+  .template-one .service-card,
+  .template-one .doctor-card {
+    transition: none !important;
+  }
+  .lifestyle-pearl-stage {
+    transform: none !important;
+  }
+}

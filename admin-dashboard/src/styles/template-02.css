@@ -1,0 +1,763 @@
+.theme-02 {
+  --exp-bg: #080c21;
+  --exp-ink: #f7f3ff;
+  --exp-accent: #d089ff;
+  --exp-muted: #a5adc8;
+  --exp-panel: #10172f;
+  --exp-line: #a98cd12f;
+  --exp-soft: #7848de12;
+}
+.theme-02 .exp-nav {
+  margin: 0 30px;
+  height: 80px;
+  border: 1px solid #9494f020;
+  border-radius: 0 0 15px 15px;
+  background: linear-gradient(130deg, #0c1127, #080c21);
+  padding: 0 30px;
+}
+.theme-02 .exp-brand > svg {
+  color: #c39bff;
+  filter: drop-shadow(0 0 8px #8c4fef88);
+}
+.theme-02 .nav-cta {
+  background: #d7c8ff;
+  box-shadow: 0 0 25px #a55cff18;
+}
+.cinema-hero {
+  position: relative;
+  min-height: 660px;
+  height: calc(100svh - 160px);
+  max-height: 860px;
+  isolation: isolate;
+  overflow: hidden;
+}
+.cinema-hero-image {
+  object-fit: cover;
+  object-position: 70% center;
+  z-index: -2;
+}
+.cinema-hero:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      #080c21 0%,
+      #080c21f0 22%,
+      #080c2140 55%,
+      transparent 80%
+    ),
+    linear-gradient(0deg, #080c21, transparent 25%);
+  z-index: -1;
+}
+.cinema-atmosphere {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#c8bbff66 0.5px, transparent 0.5px);
+  background-size: 71px 73px;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+}
+.cinema-hero-copy {
+  position: relative;
+  z-index: 2;
+  margin-left: max(64px, calc((100vw - 1300px) / 2));
+  padding-top: 95px;
+  max-width: 610px;
+}
+.cinema-hero h1 {
+  font-size: clamp(66px, 6.1vw, 91px);
+}
+.cinema-hero h1 em {
+  font-size: 0.62em;
+  line-height: 1.2;
+  display: inline-block;
+  color: #e6a0ee;
+  letter-spacing: -1.7px;
+  margin-top: 10px;
+}
+.cinema-hero-copy > p {
+  font-size: 12px;
+  color: #bcc3dd;
+  margin-top: 25px;
+  line-height: 1.9;
+}
+.cinema-hero-copy .hero-buttons {
+  margin-top: 28px;
+}
+.cinema-hero .hero-buttons > .exp-button:first-child {
+  background: linear-gradient(115deg, #be27c9, #e04dae);
+  color: white;
+  box-shadow: 0 8px 35px #c42ed42a;
+}
+.cinema-hero .hero-buttons > .secondary {
+  background: #0e1737a8;
+  border-color: #9c98ff30;
+}
+.cinema-footnote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 43px;
+}
+.cinema-footnote > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #a78aff;
+  box-shadow: 0 0 14px #b088ff;
+}
+.cinema-footnote p {
+  font-size: 9px;
+  letter-spacing: 0.4px;
+}
+.cinema-holo {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: #111a3b9e;
+  border: 1px solid #9b87f16e;
+  padding: 15px 18px;
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  color: #d1c0ff;
+  box-shadow: 0 5px 30px #1e07254d;
+}
+.cinema-holo > span {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.cinema-holo small {
+  display: block;
+  font-size: 7px;
+  color: #a4abcc;
+}
+.holo-one {
+  right: 8%;
+  top: 14%;
+  transform: rotate(3deg);
+}
+.holo-two {
+  right: 5%;
+  bottom: 17%;
+  transform: rotate(-3deg);
+}
+.hero-explore {
+  position: absolute;
+  bottom: 28px;
+  left: max(64px, calc((100vw - 1300px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  font-size: 9px;
+  color: #9995c3;
+}
+.pillars-02 {
+  border: 0;
+  gap: 16px;
+  margin-top: -3px;
+  padding: 0 10px 30px;
+  position: relative;
+  z-index: 3;
+}
+.pillars-02 > div {
+  flex-direction: column;
+  padding: 26px 15px 24px;
+  border: 1px solid #8174b331 !important;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #131c3d, #0b1029);
+  gap: 16px;
+  font-size: 11px;
+  box-shadow: inset 0 1px 0 #c4b4ff0d;
+}
+.pillars-02 svg {
+  width: 27px;
+  height: 27px;
+  filter: drop-shadow(0 0 8px #a87cff);
+}
+.theme-02 .exp-treatments {
+  padding-top: 50px;
+}
+.theme-02 .exp-treatments .exp-section-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.theme-02 .exp-treatments .exp-label {
+  flex: 0 0 100%;
+  margin-bottom: -20px;
+}
+.theme-02 .exp-treatments h2 {
+  font-size: 44px;
+  max-width: 500px;
+}
+.theme-02 .exp-treatments .exp-section-title > p {
+  max-width: 250px;
+  font-size: 11px;
+}
+.treatments-02 .exp-service {
+  border-color: #788ed83d;
+  background: linear-gradient(145deg, #172649, #0b1533);
+  box-shadow: inset 0 1px 0 #d1d3ff30;
+}
+.treatments-02 .exp-service-art {
+  background: radial-gradient(ellipse at 50% 50%, #3c79a13d, transparent 70%);
+  height: 190px;
+}
+.treatments-02 .dental-art {
+  filter: drop-shadow(0 0 20px #74a5f64d);
+}
+.treatments-02 .little-tooth {
+  box-shadow:
+    inset -6px -4px 7px #5b89d044,
+    inset 4px 5px 5px white;
+}
+.technology-02 {
+  max-width: 1200px;
+  border-radius: 25px;
+  background: linear-gradient(120deg, #101b39, #0d1025);
+  border: 1px solid #6b6ccb29;
+  margin-top: 20px;
+  margin-bottom: 25px;
+  padding: 55px 45px;
+  grid-template-columns: 0.85fr 1.15fr;
+}
+.technology-02 .tech-model {
+  background: radial-gradient(ellipse, #6c3faf23, transparent 70%);
+  border: 0;
+  border-radius: 50%;
+}
+.technology-02 .viewer-canvas {
+  height: 400px;
+}
+.technology-02 .dental-viewer {
+  height: 520px;
+}
+.about-02 {
+  grid-template-columns: 1.1fr 0.9fr;
+}
+.about-02 .about-image {
+  border-radius: 130px 15px 15px 15px;
+  filter: saturate(0.65);
+}
+.cinema-feature {
+  text-align: center;
+  max-width: none;
+  background: radial-gradient(ellipse at 50% 80%, #6430ae18, transparent 70%);
+  padding-top: 70px;
+  padding-bottom: 80px;
+  border-top: 1px solid var(--exp-line);
+  border-bottom: 1px solid var(--exp-line);
+}
+.cinema-feature h2 {
+  font-size: 66px;
+}
+.cinema-feature > p {
+  max-width: 390px;
+  margin: 25px auto;
+  font-size: 12px;
+}
+.cinema-feature > div {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+  color: #ac7de2;
+  margin: 30px 0;
+}
+.journey-02 ol {
+  gap: 0;
+}
+.journey-02 li {
+  padding: 25px;
+  border-left: 1px solid #7d72bd38;
+  background: linear-gradient(0deg, #17153644, transparent);
+}
+.journey-02 li:first-child {
+  border-radius: 15px 0 0 15px;
+}
+.journey-02 li:last-child {
+  border-radius: 0 15px 15px 0;
+  border-right: 1px solid #7d72bd38;
+}
+.team-02 .exp-portrait {
+  filter: saturate(0.45);
+  border-radius: 14px 14px 0 0;
+}
+.team-02 .exp-doctor {
+  background: #10162e;
+  border-radius: 14px;
+  border: 1px solid var(--exp-line);
+  overflow: hidden;
+}
+.team-02 .exp-doctor-caption {
+  padding: 22px;
+}
+.team-02 .exp-doctor-caption > svg {
+  right: 20px;
+}
+.compare-02 {
+  background: #0d1229;
+  border-top: 1px solid var(--exp-line);
+  border-bottom: 1px solid var(--exp-line);
+}
+.gallery-02 .gallery-composition {
+  grid-template-columns: 1.5fr 1fr;
+  grid-template-rows: 260px 200px;
+}
+.gallery-02 .gallery-tile-2 {
+  display: block;
+  grid-column: 2;
+}
+.gallery-02 .gallery-note {
+  display: none;
+}
+.gallery-02 .gallery-tile-0 img {
+  filter: saturate(0.7);
+}
+.feedback-02 {
+  max-width: 1100px;
+  padding: 70px 80px;
+}
+.feedback-02 .feedback-slide blockquote {
+  font-size: 39px;
+}
+.booking-02 {
+  background: linear-gradient(135deg, #171535, #0f152d);
+  max-width: 1160px;
+  margin-bottom: 50px;
+  border: 1px solid #9a6ebf32;
+  border-radius: 25px;
+  padding: 60px 45px;
+}
+.booking-02 .exp-form-shell {
+  background: #080c2177;
+  border-color: #b19adc20;
+}
+.closing-02 {
+  background: radial-gradient(ellipse, #a252e921, transparent 70%);
+  position: relative;
+}
+.closing-02:before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  left: 20%;
+  right: 20%;
+  bottom: 30px;
+  border: 1px solid #a481d31a;
+  border-radius: 50%;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+.footer-02 .exp-footer-invite > a {
+  color: #d898ee;
+}
+.inner-02 {
+  background: radial-gradient(ellipse at 80% 50%, #6636a52e, transparent 55%);
+}
+.inner-02 .inner-hero-motif > span {
+  transform: rotateX(40deg) rotateZ(-20deg);
+}
+@media (max-width: 1100px) {
+  .cinema-hero-copy {
+    margin-left: 40px;
+    padding-top: 90px;
+  }
+  .cinema-hero h1 {
+    font-size: 74px;
+  }
+  .holo-one {
+    right: 4%;
+    top: 11%;
+  }
+  .holo-two {
+    right: 3%;
+    bottom: 13%;
+  }
+  .cinema-holo {
+    padding: 13px;
+  }
+  .hero-explore {
+    left: 40px;
+  }
+  .technology-02 {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .booking-02 {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .pillars-02 {
+    margin-left: 30px;
+    margin-right: 30px;
+  }
+  .cinema-hero-image {
+    object-position: 65% center;
+  }
+  .cinema-feature h2 {
+    font-size: 57px;
+  }
+  .theme-02 .exp-nav {
+    margin: 0 20px;
+    padding: 0 22px;
+  }
+  .theme-02 .exp-treatments h2 {
+    font-size: 40px;
+  }
+}
+@media (max-width: 850px) {
+  .cinema-hero {
+    min-height: 640px;
+  }
+  .cinema-hero-copy {
+    margin-left: 30px;
+    max-width: 430px;
+    padding-top: 95px;
+  }
+  .cinema-hero h1 {
+    font-size: 65px;
+  }
+  .cinema-hero-copy .hero-buttons {
+    gap: 10px;
+  }
+  .cinema-hero .hero-buttons .exp-button {
+    font-size: 9px;
+    gap: 13px;
+    padding: 13px 15px;
+  }
+  .cinema-holo {
+    max-width: 150px;
+    padding: 12px;
+    gap: 8px;
+  }
+  .cinema-holo > svg {
+    width: 16px;
+  }
+  .cinema-holo small {
+    font-size: 6px;
+  }
+  .cinema-holo > span {
+    font-size: 8px;
+  }
+  .holo-one {
+    top: 9%;
+  }
+  .holo-two {
+    bottom: 14%;
+  }
+  .technology-02 {
+    padding: 40px 30px;
+    gap: 25px;
+  }
+  .technology-02 .viewer-canvas {
+    height: 340px;
+  }
+  .technology-02 .dental-viewer {
+    height: 460px;
+  }
+  .journey-02 li {
+    padding: 20px 15px;
+  }
+  .booking-02 {
+    padding: 45px 30px;
+  }
+  .pillars-02 {
+    gap: 12px;
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .pillars-02 > div {
+    padding: 22px 10px;
+    font-size: 9px;
+  }
+  .theme-02 .exp-treatments .exp-section-title {
+    display: block;
+  }
+  .theme-02 .exp-treatments .exp-label {
+    margin-bottom: 15px;
+  }
+  .theme-02 .exp-treatments .exp-section-title > p {
+    max-width: none;
+  }
+  .gallery-02 .gallery-composition {
+    grid-template-rows: 220px 180px;
+  }
+  .feedback-02 {
+    padding: 55px 35px;
+  }
+  .feedback-02 .feedback-slide blockquote {
+    font-size: 32px;
+  }
+}
+@media (max-width: 600px) {
+  .theme-02 .exp-nav {
+    height: 70px;
+    margin: 0 10px;
+    padding: 0 12px;
+    border-radius: 0 0 10px 10px;
+    gap: 10px;
+  }
+  .theme-02 .nav-cta {
+    padding: 10px 9px;
+    font-size: 7px;
+  }
+  .cinema-hero {
+    height: auto;
+    min-height: 765px;
+    max-height: none;
+    padding-bottom: 345px;
+  }
+  .cinema-hero-image {
+    object-fit: cover;
+    inset: auto 0 0 !important;
+    height: 430px !important;
+    object-position: 73% 50%;
+    z-index: -2;
+  }
+  .cinema-hero:after {
+    background:
+      linear-gradient(
+        180deg,
+        #080c21 0%,
+        #080c21 43%,
+        #080c2177 59%,
+        transparent 70%
+      ),
+      linear-gradient(0deg, #080c21, transparent 22%);
+  }
+  .cinema-hero-copy {
+    padding: 42px 22px 0;
+    margin: 0;
+    max-width: none;
+  }
+  .cinema-hero .exp-label {
+    font-size: 7px;
+    letter-spacing: 1.7px;
+    margin-bottom: 18px;
+  }
+  .cinema-hero h1 {
+    font-size: 58px;
+    letter-spacing: -2.7px;
+    line-height: 1.02;
+  }
+  .cinema-hero h1 em {
+    font-size: 0.58em;
+    letter-spacing: -0.7px;
+    margin-top: 8px;
+  }
+  .cinema-hero-copy > p {
+    font-size: 10px;
+    margin-top: 20px;
+    line-height: 1.85;
+  }
+  .cinema-hero-copy .hero-buttons {
+    margin-top: 25px;
+    flex-wrap: nowrap;
+    gap: 9px;
+  }
+  .cinema-hero .hero-buttons .exp-button {
+    font-size: 8px;
+    gap: 7px;
+    padding: 12px 13px;
+  }
+  .cinema-footnote {
+    display: none;
+  }
+  .cinema-holo {
+    padding: 9px 10px;
+    gap: 7px;
+    border-radius: 8px;
+    max-width: 150px;
+  }
+  .cinema-holo > span {
+    font-size: 8px;
+  }
+  .cinema-holo small {
+    font-size: 6px;
+  }
+  .cinema-holo > svg {
+    width: 15px;
+    height: 15px;
+  }
+  .holo-one {
+    top: auto;
+    bottom: 250px;
+    right: 20px;
+    transform: rotate(3deg);
+  }
+  .holo-two {
+    bottom: 70px;
+    left: 20px;
+    right: auto;
+    transform: rotate(-3deg);
+  }
+  .hero-explore {
+    left: 22px;
+    bottom: 20px;
+    font-size: 7px;
+    gap: 10px;
+  }
+  .cinema-hero .exp-image-note {
+    bottom: 20px;
+    font-size: 5px;
+  }
+  .pillars-02 {
+    margin: 0 15px;
+    padding: 0 0 20px;
+    gap: 9px;
+  }
+  .pillars-02 > div {
+    padding: 18px 10px !important;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    font-size: 8px;
+    border: 1px solid #8174b331 !important;
+    border-radius: 9px;
+  }
+  .pillars-02 > div:nth-child(2),
+  .pillars-02 > div:nth-child(4) {
+    padding-left: 12px !important;
+  }
+  .pillars-02 svg {
+    width: 21px;
+    height: 21px;
+  }
+  .theme-02 .exp-treatments {
+    padding-top: 35px;
+  }
+  .theme-02 .exp-treatments h2 {
+    font-size: 34px;
+  }
+  .treatments-02 .exp-service-art {
+    height: 150px;
+  }
+  .technology-02 {
+    margin: 0 15px 15px;
+    padding: 35px 18px;
+    border-radius: 17px;
+  }
+  .technology-02 .dental-viewer {
+    height: 430px;
+  }
+  .technology-02 .viewer-canvas {
+    height: 315px;
+  }
+  .technology-02 .exp-section-title h2 {
+    font-size: 34px;
+  }
+  .about-02 .about-image {
+    border-radius: 90px 10px 10px 10px;
+    height: 270px;
+  }
+  .cinema-feature {
+    padding: 50px 22px;
+  }
+  .cinema-feature h2 {
+    font-size: 43px;
+  }
+  .cinema-feature > p {
+    font-size: 11px;
+  }
+  .cinema-feature > div {
+    gap: 25px;
+    margin: 25px 0;
+  }
+  .journey-02 ol {
+    gap: 12px;
+  }
+  .journey-02 li {
+    border: 1px solid var(--exp-line) !important;
+    border-radius: 10px !important;
+    padding: 20px 15px;
+  }
+  .team-02 .exp-portrait {
+    height: 280px;
+  }
+  .team-02 .exp-doctor-caption {
+    padding: 19px;
+  }
+  .gallery-02 .gallery-composition {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px 170px;
+  }
+  .gallery-02 .gallery-tile-2 {
+    grid-column: 2;
+  }
+  .feedback-02 {
+    padding: 50px 22px;
+  }
+  .feedback-02 .feedback-slide blockquote {
+    font-size: 28px;
+  }
+  .booking-02 {
+    margin: 0 15px 30px;
+    padding: 35px 18px;
+    border-radius: 17px;
+  }
+  .booking-02 .exp-form-shell {
+    padding: 22px 15px;
+  }
+  .closing-02 h2 {
+    font-size: 44px;
+  }
+  .inner-02 .inner-title-group h1 {
+    font-size: 43px;
+  }
+}
+@media (max-width: 350px) {
+  .cinema-hero-copy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .cinema-hero h1 {
+    font-size: 51px;
+  }
+  .cinema-hero {
+    min-height: 730px;
+    padding-bottom: 320px;
+  }
+  .cinema-hero .hero-buttons .exp-button {
+    font-size: 7px;
+    gap: 5px;
+    padding: 12px 10px;
+  }
+  .theme-02 .exp-brand {
+    font-size: 13px;
+  }
+  .theme-02 .exp-brand small {
+    font-size: 4px;
+    letter-spacing: 1.8px;
+  }
+  .theme-02 .exp-brand > svg {
+    width: 20px;
+  }
+  .theme-02 .nav-cta {
+    font-size: 6px;
+    padding: 9px 7px;
+  }
+  .pillars-02 > div {
+    font-size: 7px;
+    gap: 7px;
+    padding: 17px 9px !important;
+  }
+  .pillars-02 svg {
+    width: 18px;
+  }
+  .technology-02 .dental-viewer {
+    height: 410px;
+  }
+  .technology-02 .viewer-canvas {
+    height: 290px;
+  }
+  .theme-02 .exp-treatments h2 {
+    font-size: 30px;
+  }
+}

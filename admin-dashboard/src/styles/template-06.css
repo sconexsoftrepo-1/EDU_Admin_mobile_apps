@@ -1,0 +1,1536 @@
+.theme-06 {
+  --exp-bg: #051827;
+  --exp-ink: #e5f7ff;
+  --exp-accent: #65d8fc;
+  --exp-muted: #88a9bd;
+  --exp-panel: #0a2235;
+  --exp-line: #62bede2b;
+  --exp-soft: #0a8ec815;
+}
+.theme-06 h1,
+.theme-06 h2 {
+  font-family: Manrope, "DM Sans", Arial, sans-serif;
+  font-weight: 550;
+}
+.theme-06 h1 {
+  letter-spacing: -4px;
+}
+.theme-06 .exp-demo-strip {
+  background: #061e2e;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  color: #75a6bf;
+}
+.theme-06 .exp-nav {
+  background: #061c2d;
+  border-bottom: 1px solid #5cbce230;
+  height: 85px;
+}
+.theme-06 .exp-brand {
+  font-size: 18px;
+  font-weight: 650;
+}
+.theme-06 .exp-brand > svg {
+  color: #8adaff;
+  filter: drop-shadow(0 0 7px #6cd3ff55);
+}
+.theme-06 .exp-button {
+  background: linear-gradient(110deg, #a6ebff, #6bc5f3);
+  color: #082a40;
+  border-radius: 5px;
+  box-shadow: 0 0 20px #5fcbff0d;
+}
+.theme-06 .exp-button.secondary {
+  background: #092a3c;
+  border-color: #67c9ed42;
+  color: #a8ddf2;
+}
+.digital-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 670px;
+  height: calc(100svh - 170px);
+  max-height: 850px;
+  overflow: hidden;
+  background: #041928;
+}
+.digital-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(#0a547a15 1px, transparent 1px),
+    linear-gradient(90deg, #0a547a15 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: linear-gradient(90deg, black, transparent);
+}
+.digital-hero-image {
+  position: absolute;
+  inset: 0 0 0 17%;
+  z-index: -2;
+}
+.digital-hero-image > img {
+  object-fit: cover;
+  object-position: 70% center;
+}
+.digital-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      90deg,
+      #051827 0%,
+      #051827f5 18%,
+      #05182755 48%,
+      transparent 70%
+    ),
+    linear-gradient(0deg, #051827, transparent 28%);
+}
+.digital-hero-copy {
+  position: relative;
+  z-index: 2;
+  padding: 90px 0 75px;
+  margin-left: max(65px, calc((100vw - 1300px) / 2));
+  max-width: 570px;
+}
+.digital-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 8px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #7abed7;
+  margin-bottom: 24px;
+}
+.digital-status > span {
+  height: 5px;
+  width: 5px;
+  border-radius: 50%;
+  background: #73dcff;
+  box-shadow: 0 0 12px #44ccff80;
+}
+.digital-hero h1 {
+  font-size: clamp(66px, 5.9vw, 88px);
+  line-height: 1.08;
+  letter-spacing: -4px;
+  font-weight: 500;
+}
+.digital-hero h1 em {
+  font-style: normal;
+  color: #9ce3ff;
+}
+.digital-hero-copy > p {
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 24px;
+  color: #9db9cc;
+}
+.digital-model-link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #9cbaca;
+  font-size: 10px;
+  margin-left: 8px;
+}
+.digital-data {
+  display: flex;
+  gap: 25px;
+  margin-top: 42px;
+}
+.digital-data > div {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding-right: 24px;
+  border-right: 1px solid #8fc4d62b;
+  color: #8bd7f6;
+}
+.digital-data > div:last-child {
+  border: 0;
+  padding: 0;
+}
+.digital-data > div > span {
+  font-size: 9px;
+  color: #c2e1ee;
+}
+.digital-data small {
+  font-size: 7px;
+  display: block;
+  color: #6c99b2;
+  margin-top: 3px;
+}
+.diagnostic-chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #9fe7ff;
+  background: #07293bbf;
+  border: 1px solid #4ab8e457;
+  border-radius: 10px;
+  padding: 13px 16px;
+  backdrop-filter: blur(12px);
+  z-index: 2;
+  box-shadow:
+    inset 0 1px 0 #b5f4ff0a,
+    0 5px 30px #00203533;
+  transition: background 0.2s;
+}
+.diagnostic-chip:hover {
+  background: #0c3a52;
+}
+.diagnostic-chip > span {
+  font-size: 10px;
+}
+.diagnostic-chip small {
+  display: block;
+  font-size: 7px;
+  color: #79b4cc;
+  margin-top: 3px;
+}
+.chip-top {
+  top: 13%;
+  right: 10%;
+}
+.chip-bottom {
+  bottom: 16%;
+  right: 5%;
+}
+.digital-scan-line {
+  position: absolute;
+  left: 45%;
+  right: 3%;
+  top: 55%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #61ceff99, transparent);
+  box-shadow: 0 0 25px #60d8ff77;
+  z-index: 1;
+  pointer-events: none;
+}
+.pillars-06 {
+  max-width: 1160px;
+  border: 1px solid #3889b43d;
+  gap: 0;
+  padding: 0;
+  background: #082338;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.pillars-06 > div {
+  padding: 27px 15px;
+  font-size: 10px;
+  gap: 12px;
+  border-right: 1px solid #398baf33;
+  background: linear-gradient(0deg, #05304e22, transparent);
+}
+.pillars-06 > div svg {
+  color: #82d8ff;
+}
+.technology-06 {
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 65px;
+  padding-top: 95px;
+  padding-bottom: 95px;
+  position: relative;
+}
+.technology-06 .tech-model {
+  background-color: #082538;
+  background-image:
+    linear-gradient(#23668814 1px, transparent 1px),
+    linear-gradient(90deg, #23668814 1px, transparent 1px);
+  background-size: 30px 30px;
+  border: 1px solid #62bede40;
+  box-shadow: inset 0 0 60px #1384bf0b;
+  border-radius: 15px;
+}
+.technology-06 .tech-text .exp-section-title h2 {
+  font-size: 47px;
+  line-height: 1.17;
+}
+.technology-06 .tech-text > .exp-button {
+  margin-top: 23px;
+}
+.digital-timeline {
+  margin-top: 30px;
+}
+.timeline-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #58bfe433;
+}
+.timeline-tabs > button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 12px 3px;
+  font-size: 10px;
+  color: #759eb5;
+  position: relative;
+  top: 1px;
+}
+.timeline-tabs > button[aria-selected="true"] {
+  border-bottom-color: #6cd4fc;
+  color: #b6ecff;
+}
+.timeline-tabs > button > span {
+  font-size: 8px;
+  color: #3d789a;
+}
+.timeline-tabs > button > svg {
+  color: #85cce8;
+}
+.digital-timeline [role="tabpanel"] {
+  padding: 23px 0 0;
+  min-height: 170px;
+}
+.digital-timeline h3 {
+  font-size: 18px;
+  line-height: 1.45;
+  max-width: 340px;
+}
+.digital-timeline p {
+  font-size: 11px;
+  line-height: 1.85;
+  margin-top: 12px;
+  max-width: 330px;
+}
+.next-stage {
+  background: transparent;
+  border: 0;
+  color: #80cbe9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  padding: 0;
+  margin-top: 16px;
+}
+.treatments-06 {
+  max-width: none;
+  background: #071e30;
+  padding-left: max(64px, calc((100vw - 1150px) / 2));
+  padding-right: max(64px, calc((100vw - 1150px) / 2));
+  border-top: 1px solid #327b9d25;
+  border-bottom: 1px solid #327b9d25;
+}
+.treatments-06 .exp-services {
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.treatments-06 .exp-service {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  border-radius: 10px;
+  background: linear-gradient(115deg, #0c2c43, #0a2337);
+  border-color: #3580a140;
+  position: relative;
+}
+.treatments-06 .exp-service:before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 5px;
+  height: 5px;
+  border-left: 1px solid #7ccfe5;
+  border-top: 1px solid #7ccfe5;
+}
+.treatments-06 .exp-service-art {
+  height: 190px;
+  background: radial-gradient(ellipse, #12608a27, transparent 70%);
+}
+.treatments-06 .exp-service-art .dental-art {
+  transform: scale(0.95);
+  filter: drop-shadow(0 6px 17px #48a8ef26);
+}
+.treatments-06 .exp-service-body {
+  padding: 30px 25px 25px 0;
+  align-self: center;
+}
+.treatments-06 .exp-service-body h3 {
+  font-size: 16px;
+  font-family: Manrope, Arial;
+  font-weight: 550;
+}
+.treatments-06 .exp-service-body p {
+  font-size: 10px;
+}
+.treatments-06 .exp-service-body > span {
+  margin-top: 23px;
+  font-size: 9px;
+}
+.journey-06 {
+  padding-top: 90px;
+  padding-bottom: 90px;
+}
+.journey-06 ol {
+  gap: 0;
+  border: 1px solid var(--exp-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0a2235;
+}
+.journey-06 li {
+  padding: 30px 25px;
+  border-right: 1px solid var(--exp-line);
+  position: relative;
+}
+.journey-06 li:last-child {
+  border: 0;
+}
+.journey-06 li:after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 42px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #59b4d7;
+  border-radius: 50%;
+  background: #0d2d44;
+  z-index: 2;
+}
+.journey-06 li:last-child:after {
+  display: none;
+}
+.journey-06 li > span {
+  font-family: Manrope, Arial;
+  font-size: 27px;
+  font-weight: 400;
+  color: #71bedf;
+}
+.journey-06 li h3 {
+  font-family: Manrope, Arial;
+  font-size: 15px;
+}
+.journey-06 li p {
+  font-size: 10px;
+}
+.about-06 {
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 70px;
+  padding-top: 0;
+}
+.about-06 .about-image {
+  border: 1px solid #4e9eb94d;
+  border-radius: 12px;
+  height: 420px;
+  filter: saturate(0.5);
+}
+.about-06 .about-image > span {
+  background: #06263bd9;
+  color: #b8d9ea;
+  border: 1px solid #4f9dba3b;
+}
+.about-06 .about-text h2 {
+  font-size: 45px;
+  line-height: 1.18;
+}
+.digital-manifesto {
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 70%, #0b75ad1c, transparent 75%);
+  max-width: none;
+  border-top: 1px solid var(--exp-line);
+  border-bottom: 1px solid var(--exp-line);
+  padding-top: 85px;
+  padding-bottom: 85px;
+}
+.digital-manifesto h2 {
+  font-size: 57px;
+  line-height: 1.15;
+}
+.digital-manifesto > p {
+  max-width: 420px;
+  margin: 23px auto 27px;
+  font-size: 12px;
+}
+.team-06 .exp-doctors {
+  gap: 20px;
+}
+.team-06 .exp-doctor {
+  display: grid;
+  grid-template-columns: 115px 1fr;
+  gap: 20px;
+  align-items: center;
+  border: 1px solid var(--exp-line);
+  background: #092337;
+  border-radius: 12px;
+  padding: 15px;
+}
+.team-06 .exp-portrait {
+  height: 140px;
+  border-radius: 8px;
+  background-size: 300% auto;
+  filter: saturate(0.5);
+}
+.team-06 .exp-portrait > span {
+  font-size: 5px;
+  padding: 3px 4px;
+  left: 5px;
+  right: 5px;
+  bottom: 6px;
+  text-align: center;
+}
+.team-06 .exp-doctor-caption {
+  padding: 10px 0 35px;
+}
+.team-06 .exp-doctor-caption h3 {
+  font-size: 13px;
+}
+.team-06 .exp-doctor-caption p {
+  font-size: 9px;
+  line-height: 1.5;
+}
+.team-06 .exp-doctor-caption > svg {
+  top: auto;
+  bottom: 5px;
+  left: 0;
+}
+.compare-06 {
+  background: #071e30;
+  border-top: 1px solid var(--exp-line);
+  border-bottom: 1px solid var(--exp-line);
+}
+.compare-06 .comparison {
+  border: 1px solid #4385a43b;
+  border-radius: 10px;
+}
+.compare-06 .smile-study h2 {
+  font-size: 44px;
+}
+.gallery-06 .gallery-composition {
+  grid-template-columns: 1.1fr 1fr 1fr;
+  grid-template-rows: 330px;
+  gap: 20px;
+}
+.gallery-06 .gallery-tile {
+  border: 1px solid #6cb3d444;
+  border-radius: 12px;
+}
+.gallery-06 .gallery-tile-0 {
+  grid-row: 1;
+  grid-column: 1;
+}
+.gallery-06 .gallery-tile-1 {
+  grid-column: 2;
+  grid-row: 1;
+}
+.gallery-06 .gallery-tile-2 {
+  display: block;
+  grid-column: 3;
+  grid-row: 1;
+}
+.gallery-06 .gallery-tile-0 > img,
+.gallery-06 .gallery-tile-2 > img {
+  filter: saturate(0.5);
+  object-position: 70% center;
+}
+.gallery-06 .gallery-note {
+  display: none;
+}
+.feedback-06 .feedback-slide blockquote {
+  font-family: Manrope, Arial;
+  font-size: 32px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.feedback-06 .feedback-slide > span {
+  font-family: Georgia;
+  font-size: 85px;
+  color: #56a5c7;
+}
+.questions-06 .exp-section-title h2 {
+  font-size: 44px;
+  line-height: 1.2;
+}
+.questions-06 .experience-faq > div {
+  border: 1px solid #3882a435;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: #0b2539;
+  padding: 0 20px;
+}
+.questions-06 .experience-faq button {
+  padding: 19px 0;
+  font-size: 11px;
+}
+.booking-06 {
+  background: linear-gradient(120deg, #0a2a40, #071d30);
+  max-width: 1160px;
+  border: 1px solid #5fb4d338;
+  margin: 10px auto 50px;
+  border-radius: 15px;
+  padding: 55px 45px;
+  gap: 75px;
+}
+.booking-06 .booking-intro h2 {
+  font-size: 46px;
+  line-height: 1.18;
+}
+.booking-06 .exp-form-shell {
+  border: 1px solid #59a2bb2d;
+  background: #051b2dbf;
+  border-radius: 10px;
+  padding: 30px;
+}
+.booking-06 .booking-form input,
+.booking-06 .booking-form select,
+.booking-06 .booking-form textarea {
+  border-radius: 4px;
+  background: #08283c;
+  border-color: #5aacc338;
+}
+.booking-06 .booking-form .primary {
+  background: linear-gradient(110deg, #a1e9ff, #75cfff);
+  color: #062a41;
+  border-radius: 4px;
+}
+.closing-06 {
+  background: radial-gradient(ellipse at center, #0d44682e, transparent 70%);
+  position: relative;
+}
+.closing-06:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(#0c507218 1px, transparent 1px),
+    linear-gradient(90deg, #0c507218 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse, black, transparent 65%);
+}
+.closing-06 h2 {
+  font-size: 65px;
+  line-height: 1.15;
+  position: relative;
+}
+.closing-06 > .exp-button {
+  position: relative;
+}
+.theme-06 .footer-06 {
+  background: #03121f;
+  grid-template-columns: 1.1fr 0.9fr 1fr;
+}
+.footer-06 .exp-footer-invite > a {
+  font-family: Manrope, Arial;
+  font-size: 23px;
+  font-weight: 450;
+}
+.footer-06 .exp-footer-brand > svg {
+  filter: drop-shadow(0 0 10px #54d8ff55);
+}
+.inner-06 {
+  background-color: #082238;
+  background-image:
+    linear-gradient(#2a71931a 1px, transparent 1px),
+    linear-gradient(90deg, #2a71931a 1px, transparent 1px);
+  background-size: 40px 40px;
+  border-color: #5cabc538;
+}
+.inner-06 .inner-title-group h1 {
+  font-family: Manrope, Arial;
+  font-size: 65px;
+  line-height: 1.16;
+  letter-spacing: -2.5px;
+}
+.inner-06 .inner-hero-motif {
+  opacity: 0.12;
+}
+.profile-06 .profile-photo {
+  border: 1px solid var(--exp-line);
+  filter: saturate(0.5);
+  border-radius: 12px;
+}
+.theme-06 .tech-explanation-grid > article {
+  border-radius: 10px;
+  background: #0b2b40;
+  border-color: #4d9ebc3b;
+}
+.theme-06 .exp-mobile-book {
+  background: #051c2d;
+}
+.theme-06 .exp-mobile-book > a {
+  background: linear-gradient(110deg, #a4e9ff, #6dc6f0);
+  color: #072a40;
+  border-radius: 5px;
+}
+@media (max-width: 1100px) {
+  .digital-hero-copy {
+    margin-left: 45px;
+    padding-top: 85px;
+    max-width: 500px;
+  }
+  .digital-hero h1 {
+    font-size: 76px;
+  }
+  .digital-status {
+    font-size: 7px;
+    letter-spacing: 1.2px;
+  }
+  .digital-hero-image {
+    left: 5%;
+  }
+  .digital-data {
+    gap: 15px;
+  }
+  .digital-data > div {
+    padding-right: 15px;
+  }
+  .diagnostic-chip {
+    padding: 12px 14px;
+  }
+  .chip-top {
+    right: 6%;
+  }
+  .chip-bottom {
+    right: 4%;
+    bottom: 14%;
+  }
+  .pillars-06 {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .technology-06 {
+    gap: 40px;
+  }
+  .technology-06 .tech-text .exp-section-title h2 {
+    font-size: 41px;
+  }
+  .treatments-06 {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+  .treatments-06 .exp-service {
+    grid-template-columns: 120px 1fr;
+  }
+  .treatments-06 .exp-service-art {
+    height: 180px;
+  }
+  .treatments-06 .exp-service-body {
+    padding: 25px 20px 25px 0;
+  }
+  .treatments-06 .exp-service-body h3 {
+    font-size: 14px;
+  }
+  .treatments-06 .dental-art {
+    transform: scale(0.8) !important;
+  }
+  .journey-06 li {
+    padding: 27px 20px;
+  }
+  .about-06 {
+    gap: 45px;
+  }
+  .about-06 .about-text h2 {
+    font-size: 39px;
+  }
+  .team-06 .exp-doctor {
+    grid-template-columns: 90px 1fr;
+    gap: 15px;
+    padding: 12px;
+  }
+  .team-06 .exp-portrait {
+    height: 125px;
+  }
+  .team-06 .exp-doctor-caption h3 {
+    font-size: 11px;
+  }
+  .team-06 .exp-doctor-caption p {
+    font-size: 8px;
+  }
+  .gallery-06 .gallery-composition {
+    gap: 15px;
+    grid-template-rows: 290px;
+  }
+  .booking-06 {
+    margin-left: 25px;
+    margin-right: 25px;
+    padding: 45px 35px;
+    gap: 45px;
+  }
+  .booking-06 .booking-intro h2 {
+    font-size: 40px;
+  }
+  .booking-06 .exp-form-shell {
+    padding: 25px;
+  }
+  .digital-manifesto h2 {
+    font-size: 49px;
+  }
+}
+@media (max-width: 850px) {
+  .digital-hero {
+    min-height: 660px;
+  }
+  .digital-hero-copy {
+    margin-left: 30px;
+    max-width: 430px;
+    padding-top: 85px;
+  }
+  .digital-hero h1 {
+    font-size: 65px;
+  }
+  .digital-hero-copy > p {
+    font-size: 11px;
+  }
+  .digital-status {
+    font-size: 6px;
+    letter-spacing: 0.9px;
+  }
+  .digital-model-link {
+    font-size: 8px;
+    margin-left: 0;
+    gap: 5px;
+  }
+  .digital-hero .hero-buttons {
+    gap: 10px;
+  }
+  .digital-hero .exp-button {
+    font-size: 9px;
+    padding: 13px 15px;
+    gap: 11px;
+  }
+  .digital-data {
+    gap: 13px;
+  }
+  .digital-data > div {
+    gap: 7px;
+    padding-right: 13px;
+  }
+  .digital-data > div > svg {
+    width: 16px;
+  }
+  .digital-data > div > span {
+    font-size: 8px;
+  }
+  .digital-data small {
+    font-size: 6px;
+  }
+  .diagnostic-chip {
+    padding: 10px 12px;
+    border-radius: 8px;
+    gap: 8px;
+  }
+  .diagnostic-chip > svg {
+    width: 15px;
+  }
+  .diagnostic-chip > span {
+    font-size: 8px;
+  }
+  .diagnostic-chip small {
+    font-size: 6px;
+  }
+  .chip-top {
+    right: 4%;
+    top: 10%;
+  }
+  .chip-bottom {
+    bottom: 13%;
+    right: 3%;
+  }
+  .technology-06 {
+    gap: 30px;
+  }
+  .technology-06 .tech-text .exp-section-title h2 {
+    font-size: 35px;
+  }
+  .digital-timeline h3 {
+    font-size: 16px;
+  }
+  .digital-timeline p {
+    font-size: 10px;
+  }
+  .timeline-tabs > button {
+    font-size: 9px;
+    gap: 5px;
+  }
+  .treatments-06 .exp-service {
+    grid-template-columns: 100px 1fr;
+  }
+  .treatments-06 .exp-service-body h3 {
+    font-size: 13px;
+  }
+  .treatments-06 .exp-service-body p {
+    font-size: 9px;
+  }
+  .treatments-06 .exp-service-body > span {
+    font-size: 8px;
+  }
+  .treatments-06 .exp-service-art {
+    height: 180px;
+  }
+  .treatments-06 .dental-art {
+    transform: scale(0.72) !important;
+  }
+  .treatments-06 .exp-service-body {
+    padding-right: 15px;
+  }
+  .journey-06 li {
+    padding: 25px 15px;
+  }
+  .journey-06 li > span {
+    font-size: 23px;
+  }
+  .journey-06 li h3 {
+    font-size: 13px;
+  }
+  .journey-06 li p {
+    font-size: 9px;
+  }
+  .about-06 {
+    gap: 30px;
+  }
+  .about-06 .about-image {
+    height: 360px;
+  }
+  .about-06 .about-text h2 {
+    font-size: 35px;
+  }
+  .team-06 .exp-doctors {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .team-06 .exp-doctor {
+    grid-template-columns: 110px 1fr;
+    gap: 25px;
+    padding: 15px;
+  }
+  .team-06 .exp-portrait {
+    height: 130px;
+  }
+  .team-06 .exp-doctor-caption {
+    padding: 10px 0;
+  }
+  .team-06 .exp-doctor-caption h3 {
+    font-size: 17px;
+  }
+  .team-06 .exp-doctor-caption p {
+    font-size: 11px;
+  }
+  .team-06 .exp-doctor-caption > svg {
+    left: auto;
+    right: 10px;
+    bottom: 20px;
+  }
+  .gallery-06 .gallery-composition {
+    grid-template-rows: 250px;
+  }
+  .gallery-06 .gallery-tile > span {
+    font-size: 9px;
+    gap: 8px;
+    padding: 25px 13px 13px;
+  }
+  .compare-06 .smile-study h2 {
+    font-size: 37px;
+  }
+  .questions-06 .exp-section-title h2 {
+    font-size: 37px;
+  }
+  .booking-06 {
+    padding: 40px 28px;
+    gap: 30px;
+  }
+  .booking-06 .booking-intro h2 {
+    font-size: 35px;
+  }
+  .booking-06 .exp-form-shell {
+    padding: 22px;
+  }
+  .digital-manifesto h2 {
+    font-size: 44px;
+  }
+  .closing-06 h2 {
+    font-size: 53px;
+  }
+  .inner-06 .inner-title-group h1 {
+    font-size: 55px;
+  }
+  .theme-06 .exp-nav {
+    height: 80px;
+  }
+  .theme-06 .exp-brand {
+    font-size: 16px;
+  }
+  .pillars-06 > div {
+    font-size: 9px;
+    padding: 25px 10px;
+    gap: 9px;
+  }
+}
+@media (max-width: 600px) {
+  .theme-06 .exp-nav {
+    height: 73px;
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .theme-06 .exp-brand {
+    font-size: 15px;
+  }
+  .theme-06 .exp-brand small {
+    font-size: 4px;
+    letter-spacing: 2.5px;
+  }
+  .theme-06 .exp-brand > svg {
+    width: 23px;
+    height: 23px;
+  }
+  .theme-06 .nav-cta {
+    font-size: 7px;
+    padding: 10px 9px;
+    gap: 6px;
+    min-height: 36px;
+  }
+  .digital-hero {
+    height: auto;
+    min-height: 835px;
+    max-height: none;
+    padding-bottom: 385px;
+  }
+  .digital-hero-image {
+    inset: 345px 0 0 0;
+    z-index: -2;
+  }
+  .digital-hero-image > img {
+    object-position: 72% center;
+  }
+  .digital-hero:before {
+    background:
+      linear-gradient(
+        180deg,
+        #051827 0%,
+        #051827 39%,
+        #05182777 52%,
+        transparent 65%
+      ),
+      linear-gradient(0deg, #051827 0%, transparent 30%);
+  }
+  .digital-hero-copy {
+    margin: 0;
+    padding: 40px 22px 0;
+    max-width: none;
+  }
+  .digital-status {
+    font-size: 6px;
+    letter-spacing: 1.1px;
+    gap: 7px;
+    margin-bottom: 22px;
+  }
+  .digital-status > span {
+    width: 4px;
+    height: 4px;
+  }
+  .digital-hero h1 {
+    font-size: 57px;
+    letter-spacing: -3px;
+    line-height: 1.06;
+  }
+  .digital-hero h1 br:nth-of-type(2) {
+    display: none;
+  }
+  .digital-hero h1 em {
+    display: block;
+  }
+  .digital-hero-copy > p {
+    font-size: 10px;
+    margin-top: 23px;
+  }
+  .digital-hero .hero-buttons {
+    margin-top: 26px;
+    gap: 13px;
+    flex-wrap: nowrap;
+  }
+  .digital-hero .exp-button {
+    font-size: 8px;
+    padding: 12px 13px;
+    gap: 8px;
+  }
+  .digital-model-link {
+    font-size: 8px;
+    gap: 5px;
+  }
+  .digital-model-link svg {
+    width: 12px;
+  }
+  .digital-data {
+    margin-top: 25px;
+    gap: 15px;
+  }
+  .digital-data > div {
+    gap: 8px;
+    padding-right: 15px;
+  }
+  .digital-data > div > span {
+    font-size: 8px;
+  }
+  .digital-data small {
+    font-size: 6px;
+  }
+  .digital-data > div > svg {
+    width: 17px;
+  }
+  .diagnostic-chip {
+    padding: 9px 10px;
+    gap: 7px;
+    border-radius: 7px;
+  }
+  .diagnostic-chip > span {
+    font-size: 8px;
+  }
+  .diagnostic-chip small {
+    font-size: 6px;
+  }
+  .diagnostic-chip > svg {
+    width: 15px;
+  }
+  .chip-top {
+    top: auto;
+    right: 18px;
+    bottom: 280px;
+  }
+  .chip-bottom {
+    right: auto;
+    left: 18px;
+    bottom: 55px;
+  }
+  .digital-scan-line {
+    left: 10%;
+    right: 3%;
+    top: auto;
+    bottom: 205px;
+    opacity: 0.5;
+  }
+  .digital-hero .exp-image-note {
+    font-size: 5px;
+    right: 18px;
+    bottom: 16px;
+  }
+  .pillars-06 {
+    margin: 0 15px;
+    border-radius: 10px;
+    padding: 0 10px;
+    gap: 0;
+  }
+  .pillars-06 > div {
+    padding: 20px 2px;
+    font-size: 8px;
+    gap: 9px;
+    border-bottom: 1px solid #398baf33;
+  }
+  .pillars-06 > div:nth-child(2),
+  .pillars-06 > div:nth-child(4) {
+    padding-left: 15px;
+  }
+  .pillars-06 > div:nth-child(3) {
+    border-bottom: 0;
+  }
+  .pillars-06 svg {
+    width: 20px;
+    height: 20px;
+  }
+  .technology-06 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+    gap: 28px;
+  }
+  .technology-06 .tech-text .exp-section-title h2 {
+    font-size: 35px;
+    line-height: 1.18;
+  }
+  .digital-timeline {
+    margin-top: 25px;
+  }
+  .digital-timeline h3 {
+    font-size: 18px;
+    max-width: 280px;
+  }
+  .digital-timeline p {
+    font-size: 11px;
+    max-width: none;
+  }
+  .digital-timeline [role="tabpanel"] {
+    min-height: 170px;
+    padding-top: 22px;
+  }
+  .timeline-tabs > button {
+    font-size: 10px;
+    padding: 13px 3px;
+    gap: 7px;
+  }
+  .timeline-tabs > button > span {
+    font-size: 8px;
+  }
+  .technology-06 .tech-model {
+    border-radius: 12px;
+  }
+  .technology-06 .viewer-06 {
+    height: 535px;
+  }
+  .technology-06 .viewer-canvas {
+    height: 315px;
+  }
+  .treatments-06 {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .treatments-06 .exp-services {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .treatments-06 .exp-service {
+    grid-template-columns: 110px 1fr;
+    border-radius: 9px;
+  }
+  .treatments-06 .exp-service-art {
+    height: 165px;
+  }
+  .treatments-06 .exp-service-body {
+    padding: 23px 19px 23px 0;
+  }
+  .treatments-06 .exp-service-body h3 {
+    font-size: 14px;
+  }
+  .treatments-06 .exp-service-body p {
+    font-size: 10px;
+    margin-top: 10px;
+  }
+  .treatments-06 .exp-service-body > span {
+    font-size: 8px;
+    margin-top: 18px;
+  }
+  .treatments-06 .dental-art {
+    transform: scale(0.8) !important;
+  }
+  .journey-06 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+  }
+  .journey-06 ol {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-radius: 10px;
+  }
+  .journey-06 li {
+    padding: 24px 17px;
+    border-bottom: 1px solid var(--exp-line);
+  }
+  .journey-06 li:nth-child(2) {
+    border-right: 0;
+  }
+  .journey-06 li:nth-child(3) {
+    border-bottom: 0;
+  }
+  .journey-06 li:last-child {
+    border: 0;
+  }
+  .journey-06 li:after {
+    display: none;
+  }
+  .journey-06 li > span {
+    font-size: 25px;
+    margin-bottom: 16px;
+  }
+  .journey-06 li h3 {
+    font-size: 13px;
+  }
+  .journey-06 li p {
+    font-size: 9px;
+  }
+  .about-06 {
+    padding-top: 0;
+    gap: 28px;
+  }
+  .about-06 .about-image {
+    height: 280px;
+    border-radius: 11px;
+  }
+  .about-06 .about-text h2 {
+    font-size: 35px;
+  }
+  .digital-manifesto {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+  .digital-manifesto h2 {
+    font-size: 36px;
+    line-height: 1.18;
+  }
+  .digital-manifesto > p {
+    font-size: 11px;
+    max-width: 290px;
+  }
+  .team-06 .exp-doctors {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    gap: 15px;
+  }
+  .team-06 .exp-doctor {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 20px;
+    padding: 13px;
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+  }
+  .team-06 .exp-portrait {
+    height: 130px;
+    border-radius: 7px;
+  }
+  .team-06 .exp-doctor-caption {
+    padding: 8px 0 33px;
+  }
+  .team-06 .exp-doctor-caption h3 {
+    font-size: 16px;
+  }
+  .team-06 .exp-doctor-caption p {
+    font-size: 10px;
+  }
+  .team-06 .exp-doctor-caption > svg {
+    left: 0;
+    right: auto;
+    bottom: 7px;
+  }
+  .team-06 .exp-portrait > span {
+    font-size: 5px;
+    left: 5px;
+    right: 5px;
+  }
+  .compare-06 .smile-study h2 {
+    font-size: 35px;
+  }
+  .gallery-06 .gallery-composition {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px 190px;
+    gap: 13px;
+  }
+  .gallery-06 .gallery-tile-0 {
+    grid-column: 1/-1;
+    grid-row: 1;
+  }
+  .gallery-06 .gallery-tile-1 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .gallery-06 .gallery-tile-2 {
+    grid-column: 2;
+    grid-row: 2;
+    display: block;
+  }
+  .gallery-06 .gallery-tile {
+    border-radius: 9px;
+  }
+  .gallery-06 .gallery-tile > span {
+    font-size: 8px;
+    line-height: 1.5;
+    padding: 25px 12px 13px;
+    gap: 5px;
+  }
+  .feedback-06 .feedback-slide blockquote {
+    font-size: 25px;
+    line-height: 1.5;
+    letter-spacing: -0.7px;
+  }
+  .questions-06 .exp-section-title h2 {
+    font-size: 35px;
+  }
+  .questions-06 .experience-faq > div {
+    padding: 0 15px;
+    border-radius: 7px;
+  }
+  .questions-06 .experience-faq button {
+    font-size: 10px;
+    padding: 18px 0;
+  }
+  .booking-06 {
+    margin: 0 15px 30px;
+    padding: 35px 18px;
+    border-radius: 12px;
+  }
+  .booking-06 .booking-intro h2 {
+    font-size: 36px;
+    line-height: 1.2;
+  }
+  .booking-06 .exp-form-shell {
+    padding: 23px 15px;
+    border-radius: 9px;
+  }
+  .closing-06 {
+    padding: 70px 22px;
+  }
+  .closing-06 h2 {
+    font-size: 42px;
+    line-height: 1.2;
+    letter-spacing: -1.8px;
+  }
+  .theme-06 .footer-06 .exp-footer-brand h2 {
+    font-family: Manrope, Arial;
+    font-size: 23px;
+    font-weight: 600;
+  }
+  .footer-06 .exp-footer-invite > a {
+    font-family: Manrope, Arial;
+    font-size: 23px;
+    line-height: 1.4;
+  }
+  .inner-06 .inner-title-group h1 {
+    font-size: 42px;
+    line-height: 1.2;
+    letter-spacing: -1.8px;
+  }
+  .theme-06 .tech-explanation-grid > article {
+    border-radius: 8px;
+  }
+  .profile-06 .profile-photo {
+    border-radius: 10px;
+  }
+}
+@media (max-width: 350px) {
+  .theme-06 .exp-nav {
+    padding: 0 15px;
+    gap: 9px;
+  }
+  .theme-06 .exp-brand {
+    font-size: 13px;
+    gap: 7px;
+  }
+  .theme-06 .exp-brand > svg {
+    width: 21px;
+  }
+  .theme-06 .exp-brand small {
+    font-size: 3.5px;
+    letter-spacing: 2.1px;
+  }
+  .theme-06 .nav-cta {
+    font-size: 6px;
+    padding: 9px 7px;
+    gap: 4px;
+  }
+  .digital-hero-copy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .digital-status {
+    font-size: 5px;
+    letter-spacing: 0.8px;
+  }
+  .digital-hero h1 {
+    font-size: 50px;
+    letter-spacing: -2.6px;
+  }
+  .digital-hero {
+    min-height: 790px;
+    padding-bottom: 365px;
+  }
+  .digital-hero-image {
+    top: 320px;
+  }
+  .digital-hero .hero-buttons {
+    gap: 9px;
+  }
+  .digital-hero .exp-button {
+    font-size: 7px;
+    padding: 12px 10px;
+    gap: 5px;
+  }
+  .digital-model-link {
+    font-size: 7px;
+    gap: 4px;
+  }
+  .digital-data {
+    gap: 11px;
+    margin-top: 22px;
+  }
+  .digital-data > div {
+    gap: 6px;
+    padding-right: 11px;
+  }
+  .digital-data > div > span {
+    font-size: 7px;
+  }
+  .digital-data small {
+    font-size: 5px;
+  }
+  .chip-top {
+    bottom: 260px;
+    right: 15px;
+  }
+  .chip-bottom {
+    left: 15px;
+    bottom: 50px;
+  }
+  .pillars-06 > div {
+    font-size: 7px;
+    gap: 7px;
+  }
+  .pillars-06 svg {
+    width: 18px;
+  }
+  .treatments-06 {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .treatments-06 .exp-service {
+    grid-template-columns: 95px 1fr;
+  }
+  .treatments-06 .exp-service-art {
+    height: 160px;
+  }
+  .treatments-06 .exp-service-body {
+    padding-right: 15px;
+  }
+  .treatments-06 .exp-service-body h3 {
+    font-size: 13px;
+  }
+  .treatments-06 .exp-service-body p {
+    font-size: 9px;
+  }
+  .treatments-06 .dental-art {
+    transform: scale(0.7) !important;
+  }
+  .journey-06 li {
+    padding: 22px 14px;
+  }
+  .journey-06 li h3 {
+    font-size: 12px;
+  }
+  .journey-06 li p {
+    font-size: 8px;
+  }
+  .team-06 .exp-doctor {
+    grid-template-columns: 85px 1fr;
+    gap: 17px;
+    padding: 12px;
+  }
+  .team-06 .exp-doctor-caption h3 {
+    font-size: 14px;
+  }
+  .team-06 .exp-portrait {
+    height: 115px;
+  }
+  .booking-06 .booking-intro h2 {
+    font-size: 32px;
+  }
+  .closing-06 h2 {
+    font-size: 37px;
+  }
+  .digital-manifesto h2 {
+    font-size: 32px;
+  }
+  .inner-06 .inner-title-group h1 {
+    font-size: 37px;
+  }
+}

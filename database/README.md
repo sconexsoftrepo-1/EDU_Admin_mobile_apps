@@ -1,0 +1,9 @@
+# Database
+
+`edunexa_schema.sql` defines 94 relational tables for PostgreSQL 16 or newer. Apply once to a fresh database using `psql -v ON_ERROR_STOP=1 -d edunexa -f edunexa_schema.sql`. No database is provisioned and no production data is included.
+
+Domains: institution and campus setup, academic years, programs, curriculum, enrollments, student/parent relationships, employees, faculty and staff, timetable, attendance, leaves, admission, fees, payments, refunds, scholarships, expenses, payroll, exams, assignments, resources, hostel, transport, library, inventory, certificates, users and access control, notifications, messaging, events, placements, grievances, documents, consent, website content, imports and audit logs.
+
+Every table has an internal identity ID and unique external `code`. References use codes so client spreadsheet rows can be joined before internal IDs exist. Foreign keys restrict deletion; change a person's status instead of deleting historical records. Timestamps are maintained by triggers. This is a single-institution schema with multiple campuses, not a tenant-isolated SaaS schema. Money is stored in major currency units with two decimal places (INR 1500.00), unlike any legacy demo amounts in paise.
+
+Python service rules still required: authorization and campus scoping; password hashing and token hashing; teacher/staff employee-type consistency; enrollment/offering/semester consistency; timetable teacher and room interval conflicts; hostel date overlaps and capacity; attendance membership; exam/assignment maximum-mark checks; payment allocation totals, currency matching, reconciliation and refund limits; payroll approvals; consent and private document access. Store uploaded files privately, not in SQL. `audit_logs` must be written by the service. Updating data does not automatically produce audit records.

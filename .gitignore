@@ -1,0 +1,11 @@
+**/node_modules/
+**/.next/
+**/.dart_tool/
+**/build/
+**/.flutter-plugins-dependencies
+**/android/local.properties
+**/ios/Pods/
+**/ios/.symlinks/
+**/*.tsbuildinfo
+**/.env
+**/.env.local

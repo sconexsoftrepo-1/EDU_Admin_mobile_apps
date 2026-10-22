@@ -1,0 +1,1316 @@
+.theme-05 {
+  --exp-bg: #fff8f8;
+  --exp-ink: #721d44;
+  --exp-accent: #c51d69;
+  --exp-muted: #a27c8b;
+  --exp-panel: #fff;
+  --exp-line: #d6a4b63d;
+  --exp-soft: #f6d9e34d;
+}
+.theme-05 .exp-demo-strip {
+  background: #faecf1;
+  border: 0;
+  color: #a66d88;
+}
+.theme-05 .exp-nav {
+  background: #fffafa;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 30px;
+  padding: 0 50px;
+  height: 94px;
+  border-bottom: 1px solid #e8c9d633;
+}
+.theme-05 .exp-brand {
+  grid-column: 2;
+  grid-row: 1;
+  justify-content: center;
+  font-family: Georgia, serif;
+  font-size: 25px;
+  font-weight: 400;
+  gap: 8px;
+}
+.theme-05 .exp-brand small {
+  text-align: center;
+  letter-spacing: 3.5px;
+  font-size: 5px;
+  margin-top: 6px;
+}
+.theme-05 .exp-brand > svg {
+  width: 23px;
+  height: 23px;
+}
+.theme-05 .exp-links {
+  grid-column: 1;
+  grid-row: 1;
+  gap: 18px;
+  font-size: 9px;
+}
+.theme-05 .exp-links > a:nth-child(4),
+.theme-05 .exp-links > a:nth-child(5),
+.theme-05 .exp-links > a:nth-child(6) {
+  display: none;
+}
+.theme-05 .nav-cta {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  margin-left: 0;
+}
+.theme-05 .exp-button {
+  border-radius: 50px;
+  background: #d22977;
+  color: #fff;
+  box-shadow: 0 4px 15px #c4337520;
+  font-size: 10px;
+  gap: 23px;
+}
+.theme-05 .exp-button.secondary {
+  background: #fff;
+  color: #a62a60;
+  border-color: #edceda;
+  box-shadow: none;
+}
+.lifestyle-hero {
+  position: relative;
+  min-height: 660px;
+  height: calc(100svh - 180px);
+  max-height: 850px;
+  isolation: isolate;
+  overflow: hidden;
+  background: #fff4f5;
+}
+.lifestyle-photo {
+  position: absolute;
+  inset: 0 0 0 14%;
+  z-index: -2;
+}
+.lifestyle-photo > img {
+  object-fit: cover;
+  object-position: 70% center;
+}
+.lifestyle-hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      #fff6f7 0%,
+      #fff6f7f0 20%,
+      #fff6f777 43%,
+      transparent 65%
+    ),
+    linear-gradient(0deg, #fce6ee91, transparent 25%);
+  z-index: -1;
+}
+.lifestyle-hero-copy {
+  padding: 110px 0 75px;
+  margin-left: max(65px, calc((100vw - 1300px) / 2));
+  max-width: 650px;
+  position: relative;
+  z-index: 2;
+}
+.lifestyle-hero .exp-label {
+  font-size: 9px;
+  line-height: 1.9;
+  letter-spacing: 2.5px;
+  color: #91546f;
+  margin-bottom: 26px;
+}
+.lifestyle-hero h1 {
+  font-size: clamp(65px, 5.8vw, 88px);
+  letter-spacing: -4px;
+  line-height: 1.04;
+  color: #a51b59;
+}
+.lifestyle-hero h1 em {
+  color: #d73582;
+  font-style: italic;
+}
+.lifestyle-hero-copy > p {
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 27px;
+  color: #9d6680;
+}
+.lifestyle-hero .hero-buttons {
+  margin-top: 31px;
+  gap: 13px;
+}
+.lifestyle-note {
+  position: absolute;
+  right: 35px;
+  top: 85px;
+  background: #fffaf3df;
+  backdrop-filter: blur(10px);
+  padding: 18px 22px 20px;
+  border-radius: 5px 22px 5px 22px;
+  box-shadow: 0 10px 30px #99395f14;
+  transform: rotate(8deg);
+  font-family: Georgia, serif;
+  font-size: 19px;
+  line-height: 1.3;
+  color: #8f365b;
+}
+.lifestyle-note > svg {
+  display: block;
+  color: #d76b99;
+  margin-bottom: 8px;
+}
+.lifestyle-note em {
+  font-size: 24px;
+  color: #c63f77;
+}
+.lifestyle-ribbon {
+  position: absolute;
+  width: 650px;
+  height: 100px;
+  border: 1px solid #fff9;
+  border-radius: 50%;
+  transform: rotate(-13deg);
+  bottom: 15px;
+  left: 0;
+  pointer-events: none;
+  box-shadow:
+    0 -25px 0 #ffc4dc25,
+    0 25px 0 #ffdcea29;
+}
+.pillars-05 {
+  background: #fffbfc;
+  border: 1px solid #efd3df;
+  border-radius: 20px;
+  padding: 28px 10px;
+  margin-top: 12px;
+  max-width: 1160px;
+}
+.pillars-05 > div {
+  flex-direction: column;
+  gap: 12px;
+  font-size: 10px;
+  color: #973557;
+}
+.pillars-05 > div svg {
+  color: #ca5287;
+  stroke-width: 1.2;
+}
+.lifestyle-intro {
+  text-align: center;
+  max-width: 850px;
+  padding-top: 85px;
+  padding-bottom: 70px;
+}
+.lifestyle-intro h2 {
+  font-size: 65px;
+  line-height: 1.1;
+  color: #9a285a;
+}
+.lifestyle-intro h2 em {
+  color: #d45b90;
+}
+.lifestyle-intro > p {
+  font-size: 12px;
+  max-width: 390px;
+  margin: 22px auto 25px;
+}
+.compare-05 {
+  background: linear-gradient(110deg, #fff7f6, #fbe9f0);
+  max-width: 1160px;
+  margin: 0 auto;
+  border-radius: 25px;
+  overflow: hidden;
+}
+.compare-05 .smile-study {
+  padding: 55px 40px;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 60px;
+}
+.compare-05 .smile-study h2 {
+  font-size: 47px;
+}
+.compare-05 .comparison {
+  height: 320px;
+  border-radius: 14px;
+  box-shadow: 0 15px 40px #9b557317;
+}
+.treatments-05 {
+  padding-top: 95px;
+}
+.treatments-05 .exp-section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 25px;
+}
+.treatments-05 .exp-label {
+  flex-basis: 100%;
+  margin-bottom: -15px;
+}
+.treatments-05 .exp-section-title h2 {
+  font-size: 50px;
+  max-width: 550px;
+}
+.treatments-05 .exp-section-title > p {
+  max-width: 270px;
+  font-size: 11px;
+}
+.treatments-05 .exp-services {
+  grid-template-columns: 1fr 1fr;
+  gap: 25px 30px;
+  align-items: start;
+}
+.treatments-05 .exp-service {
+  border-radius: 100px 15px 15px 15px;
+  border: 1px solid #edcfdc;
+  background: #fffbfb;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  align-items: center;
+  min-height: 250px;
+}
+.treatments-05 .exp-service:nth-child(2),
+.treatments-05 .exp-service:nth-child(4) {
+  transform: translateY(35px);
+  border-radius: 15px 100px 15px 15px;
+}
+.treatments-05 .exp-service:nth-child(2):hover,
+.treatments-05 .exp-service:nth-child(4):hover {
+  transform: translateY(30px);
+}
+.treatments-05 .exp-service-art {
+  height: 245px;
+  background: radial-gradient(ellipse at center, #f7e0eb, transparent 65%);
+}
+.treatments-05 .exp-service-body {
+  padding: 25px 25px 25px 0;
+}
+.treatments-05 .exp-service-body h3 {
+  font-family: Georgia, serif;
+  font-size: 24px;
+  line-height: 1.1;
+  font-weight: 400;
+}
+.treatments-05 .exp-service-body p {
+  font-size: 10px;
+  margin-top: 15px;
+}
+.treatments-05 .exp-service-body > span {
+  font-size: 9px;
+  margin-top: 25px;
+}
+.gallery-05 {
+  padding-top: 120px;
+  max-width: none;
+  background: #fceff3;
+  margin-top: 40px;
+  padding-left: max(64px, calc((100vw - 1150px) / 2));
+  padding-right: max(64px, calc((100vw - 1150px) / 2));
+}
+.gallery-05 .exp-section-title {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 45px;
+}
+.gallery-05 .gallery-composition {
+  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-rows: 260px 180px;
+  gap: 25px;
+}
+.gallery-05 .gallery-tile-0 {
+  grid-column: 2;
+  grid-row: 1;
+  transform: translateY(30px);
+  border-radius: 20px;
+}
+.gallery-05 .gallery-tile-1 {
+  grid-column: 1;
+  grid-row: span 2;
+  border-radius: 140px 140px 15px 15px;
+}
+.gallery-05 .gallery-tile-1 > img {
+  object-position: 77% center;
+}
+.gallery-05 .gallery-note {
+  grid-column: 2;
+  grid-row: 2;
+  transform: translateY(30px);
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 25px 10px;
+}
+.gallery-05 .gallery-note p {
+  font-size: 29px;
+  color: #a34270;
+  font-style: italic;
+}
+.technology-05 {
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 90px;
+  padding-top: 95px;
+  padding-bottom: 95px;
+}
+.technology-05 .tech-model {
+  order: 1;
+  border: 0;
+  border-radius: 45% 45% 10px 10px;
+  background: radial-gradient(ellipse, #f7dbe7, #fcf0f4);
+}
+.technology-05 .tech-text {
+  order: 2;
+}
+.technology-05 .tech-text h2 {
+  font-size: 48px;
+}
+.technology-05 .viewer-controls button {
+  border-radius: 30px;
+  background: #fff6f9;
+  border-color: #eac4d5;
+}
+.about-05 {
+  padding-top: 0;
+}
+.about-05 .about-image {
+  height: 420px;
+  border-radius: 20px 120px 20px 20px;
+}
+.about-05 .about-text h2 {
+  font-size: 48px;
+}
+.team-05 {
+  max-width: none;
+  background: #fff0f3;
+  padding-left: max(64px, calc((100vw - 1150px) / 2));
+  padding-right: max(64px, calc((100vw - 1150px) / 2));
+}
+.team-05 .exp-section-title {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 45px;
+}
+.team-05 .exp-doctors {
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 35px;
+  align-items: start;
+}
+.team-05 .exp-portrait {
+  border-radius: 150px 150px 12px 12px;
+  height: 390px;
+}
+.team-05 .exp-doctor:first-child .exp-portrait {
+  height: 455px;
+}
+.team-05 .exp-doctor:nth-child(2) {
+  padding-top: 60px;
+}
+.team-05 .exp-doctor:nth-child(3) {
+  padding-top: 110px;
+}
+.team-05 .exp-doctor-caption h3 {
+  font-family: Georgia;
+  font-size: 23px;
+  font-weight: 400;
+}
+.team-05 .exp-text-link {
+  margin-top: 35px;
+}
+.journey-05 {
+  text-align: center;
+  padding-top: 90px;
+  padding-bottom: 90px;
+}
+.journey-05 ol {
+  text-align: left;
+}
+.journey-05 li {
+  border-top: 1px solid #deb5c6;
+  padding-top: 25px;
+}
+.journey-05 li > span {
+  font-size: 40px;
+  color: #c788a3;
+  opacity: 1;
+}
+.journey-05 li h3 {
+  font-family: Georgia;
+  font-size: 24px;
+}
+.journey-05 li p {
+  font-size: 10px;
+}
+.feedback-05 {
+  padding-top: 90px;
+  padding-bottom: 90px;
+}
+.feedback-05 .feedback-slide blockquote {
+  font-size: 39px;
+  font-style: italic;
+  color: #922b59;
+}
+.feedback-05 .feedback-slide > span {
+  color: #d578a2;
+}
+.questions-05 {
+  max-width: 1100px;
+  gap: 85px;
+}
+.questions-05 .exp-section-title h2 {
+  font-size: 46px;
+}
+.questions-05 .experience-faq button {
+  color: #823454;
+  font-size: 11px;
+}
+.booking-05 {
+  max-width: 1160px;
+  margin: 30px auto 45px;
+  padding: 55px 45px;
+  border: 1px solid #efd3df;
+  background: #fdf0f4;
+  border-radius: 25px;
+  gap: 75px;
+  align-items: start;
+}
+.booking-05 .booking-intro h2 {
+  font-size: 49px;
+}
+.booking-05 .exp-form-shell {
+  border: 0;
+  background: #fff9fa;
+  box-shadow: 0 8px 30px #a73d6b07;
+  border-radius: 20px;
+  padding: 30px;
+}
+.booking-05 .booking-form input,
+.booking-05 .booking-form select,
+.booking-05 .booking-form textarea {
+  border-radius: 8px;
+  background: #fff;
+  border-color: #ebd1db;
+}
+.booking-05 .booking-form .primary {
+  background: #d22977;
+  color: white;
+  border-radius: 30px;
+  gap: 15px;
+}
+.booking-05 .booking-form .consent input {
+  accent-color: #d22977;
+}
+.closing-05 {
+  background: linear-gradient(120deg, #fff4f6, #f9e1eb);
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  padding: 100px 25px;
+}
+.closing-05:before {
+  content: "";
+  position: absolute;
+  inset: 60px -50px 60px -50px;
+  border: 1px solid #fff9;
+  border-radius: 50%;
+  transform: rotate(-8deg);
+  pointer-events: none;
+  box-shadow:
+    0 -25px 0 #ffffff18,
+    0 25px 0 #ffffff18;
+}
+.closing-05 h2 {
+  font-size: 80px;
+  color: #a13665;
+  max-width: 800px;
+  position: relative;
+}
+.closing-05 > .exp-button {
+  position: relative;
+}
+.theme-05 .footer-05 {
+  background: #fff8f9;
+  grid-template-columns: 0.9fr 1.3fr 0.8fr;
+}
+.footer-05 .exp-footer-brand h2 {
+  font-family: Georgia;
+  font-size: 30px;
+  font-weight: 400;
+  color: #9a2c5a;
+}
+.footer-05 .exp-footer-invite > a {
+  font-style: italic;
+  font-size: 29px;
+}
+.inner-05 {
+  background: #fceef3;
+  border-radius: 0 0 70px 0;
+}
+.inner-05 .inner-title-group h1 {
+  font-style: italic;
+  font-size: 76px;
+  color: #a33266;
+}
+.inner-05 .inner-hero-motif > span {
+  border-radius: 50% 50% 0 0;
+  border-color: #d4a1b7;
+  transform: rotate(15deg);
+}
+.profile-05 .profile-photo {
+  border-radius: 180px 180px 15px 15px;
+}
+.theme-05 .exp-mobile-book {
+  background: #fff8fb;
+}
+.theme-05 .exp-mobile-book > a {
+  background: #d22977;
+  color: white;
+  border-radius: 25px;
+}
+@media (max-width: 1100px) {
+  .theme-05 .exp-nav {
+    padding: 0 35px;
+    gap: 20px;
+  }
+  .theme-05 .exp-links {
+    gap: 15px;
+    font-size: 8px;
+  }
+  .theme-05 .exp-brand {
+    font-size: 23px;
+  }
+  .lifestyle-hero-copy {
+    margin-left: 45px;
+    padding-top: 100px;
+    max-width: 575px;
+  }
+  .lifestyle-hero h1 {
+    font-size: 76px;
+  }
+  .lifestyle-note {
+    right: 25px;
+    top: 65px;
+    font-size: 17px;
+    padding: 16px;
+  }
+  .lifestyle-note em {
+    font-size: 22px;
+  }
+  .pillars-05 {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .compare-05 {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+  .compare-05 .smile-study {
+    padding: 45px 30px;
+    gap: 40px;
+  }
+  .compare-05 .smile-study h2 {
+    font-size: 41px;
+  }
+  .treatments-05 .exp-service {
+    min-height: 225px;
+  }
+  .treatments-05 .exp-service-art {
+    height: 220px;
+  }
+  .treatments-05 .exp-service-body {
+    padding-right: 20px;
+  }
+  .treatments-05 .exp-service-body h3 {
+    font-size: 22px;
+  }
+  .gallery-05 {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+  .technology-05 {
+    gap: 50px;
+  }
+  .technology-05 .tech-text h2 {
+    font-size: 42px;
+  }
+  .about-05 .about-text h2 {
+    font-size: 42px;
+  }
+  .team-05 {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+  .team-05 .exp-doctors {
+    gap: 25px;
+  }
+  .team-05 .exp-portrait {
+    height: 345px;
+  }
+  .team-05 .exp-doctor:first-child .exp-portrait {
+    height: 405px;
+  }
+  .booking-05 {
+    margin-left: 25px;
+    margin-right: 25px;
+    gap: 45px;
+    padding: 45px 35px;
+  }
+  .booking-05 .booking-intro h2 {
+    font-size: 43px;
+  }
+  .booking-05 .exp-form-shell {
+    padding: 25px;
+  }
+  .closing-05 h2 {
+    font-size: 70px;
+  }
+  .questions-05 {
+    gap: 50px;
+  }
+}
+@media (max-width: 850px) {
+  .theme-05 .exp-nav {
+    padding: 0 25px;
+    gap: 15px;
+  }
+  .theme-05 .exp-brand {
+    font-size: 21px;
+  }
+  .theme-05 .exp-brand > svg {
+    width: 20px;
+  }
+  .theme-05 .exp-links {
+    gap: 12px;
+    font-size: 8px;
+  }
+  .theme-05 .nav-cta {
+    font-size: 8px;
+    padding: 11px 13px;
+  }
+  .lifestyle-hero {
+    min-height: 620px;
+  }
+  .lifestyle-hero-copy {
+    margin-left: 30px;
+    padding-top: 95px;
+    max-width: 520px;
+  }
+  .lifestyle-hero h1 {
+    font-size: 65px;
+    letter-spacing: -3px;
+  }
+  .lifestyle-hero-copy > p {
+    font-size: 11px;
+  }
+  .lifestyle-note {
+    right: 20px;
+    top: 40px;
+    padding: 13px;
+    font-size: 14px;
+  }
+  .lifestyle-note em {
+    font-size: 19px;
+  }
+  .lifestyle-note svg {
+    width: 16px;
+  }
+  .lifestyle-photo {
+    left: 5%;
+  }
+  .lifestyle-photo > img {
+    object-position: 65% center;
+  }
+  .lifestyle-hero .hero-buttons .exp-button {
+    font-size: 8px;
+    padding: 13px 14px;
+    gap: 12px;
+  }
+  .lifestyle-intro h2 {
+    font-size: 55px;
+  }
+  .treatments-05 .exp-service {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    border-radius: 70px 12px 12px 12px;
+  }
+  .treatments-05 .exp-service:nth-child(2),
+  .treatments-05 .exp-service:nth-child(4) {
+    border-radius: 12px 70px 12px 12px;
+  }
+  .treatments-05 .exp-service-art {
+    height: 200px;
+  }
+  .treatments-05 .exp-service-body {
+    padding: 0 25px 25px;
+  }
+  .treatments-05 .exp-service-body h3 {
+    font-size: 26px;
+  }
+  .treatments-05 .exp-service-body p {
+    font-size: 10px;
+  }
+  .treatments-05 .exp-section-title {
+    display: block;
+  }
+  .treatments-05 .exp-label {
+    margin-bottom: 15px;
+  }
+  .treatments-05 .exp-section-title h2 {
+    font-size: 42px;
+  }
+  .treatments-05 .exp-section-title > p {
+    max-width: none;
+  }
+  .technology-05 {
+    gap: 35px;
+  }
+  .technology-05 .tech-text h2 {
+    font-size: 37px;
+  }
+  .about-05 .about-text h2 {
+    font-size: 37px;
+  }
+  .about-05 .about-image {
+    height: 350px;
+  }
+  .team-05 .exp-doctors {
+    gap: 20px;
+  }
+  .team-05 .exp-portrait {
+    height: 280px;
+  }
+  .team-05 .exp-doctor:first-child .exp-portrait {
+    height: 340px;
+  }
+  .team-05 .exp-doctor-caption h3 {
+    font-size: 20px;
+  }
+  .journey-05 li h3 {
+    font-size: 21px;
+  }
+  .feedback-05 .feedback-slide blockquote {
+    font-size: 33px;
+  }
+  .questions-05 .exp-section-title h2 {
+    font-size: 38px;
+  }
+  .booking-05 {
+    padding: 40px 28px;
+    gap: 30px;
+  }
+  .booking-05 .booking-intro h2 {
+    font-size: 38px;
+  }
+  .booking-05 .exp-form-shell {
+    padding: 22px;
+  }
+  .compare-05 .smile-study h2 {
+    font-size: 36px;
+  }
+  .compare-05 .comparison {
+    height: 290px;
+  }
+  .inner-05 .inner-title-group h1 {
+    font-size: 63px;
+  }
+  .gallery-05 .gallery-composition {
+    grid-template-rows: 230px 160px;
+  }
+  .gallery-05 .gallery-note p {
+    font-size: 26px;
+  }
+}
+@media (max-width: 600px) {
+  .theme-05 .exp-nav {
+    display: flex;
+    height: 75px;
+    padding: 0 20px;
+    gap: 12px;
+  }
+  .theme-05 .exp-brand {
+    font-size: 21px;
+    gap: 7px;
+  }
+  .theme-05 .exp-brand small {
+    font-size: 4px;
+    letter-spacing: 2.7px;
+  }
+  .theme-05 .exp-brand > svg {
+    width: 21px;
+    height: 21px;
+  }
+  .theme-05 .nav-cta {
+    margin-left: auto;
+    font-size: 7px;
+    padding: 10px 11px;
+    gap: 7px;
+    min-height: 36px;
+  }
+  .theme-05 .exp-links.open {
+    font-size: 13px;
+    gap: 18px;
+  }
+  .theme-05 .exp-links.open > a {
+    display: block;
+  }
+  .lifestyle-hero {
+    height: auto;
+    min-height: 760px;
+    max-height: none;
+    padding-bottom: 340px;
+  }
+  .lifestyle-photo {
+    inset: 320px -5px 0 0;
+  }
+  .lifestyle-photo > img {
+    object-position: 70% center;
+  }
+  .lifestyle-hero:before {
+    background:
+      linear-gradient(
+        180deg,
+        #fff6f7 0%,
+        #fff6f7 38%,
+        #fff6f799 50%,
+        transparent 64%
+      ),
+      linear-gradient(0deg, #fce6ee88, transparent 30%);
+  }
+  .lifestyle-hero-copy {
+    margin: 0;
+    padding: 40px 22px 0;
+    max-width: none;
+  }
+  .lifestyle-hero .exp-label {
+    font-size: 7px;
+    letter-spacing: 1.9px;
+    margin-bottom: 23px;
+    line-height: 1.9;
+  }
+  .lifestyle-hero h1 {
+    font-size: 55px;
+    letter-spacing: -2.9px;
+    line-height: 1.04;
+  }
+  .lifestyle-hero h1 em {
+    display: block;
+  }
+  .lifestyle-hero-copy > p {
+    font-size: 10px;
+    line-height: 1.9;
+    margin-top: 23px;
+  }
+  .lifestyle-hero .hero-buttons {
+    margin-top: 26px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .lifestyle-hero .hero-buttons .exp-button {
+    font-size: 8px;
+    padding: 12px 13px;
+    gap: 8px;
+  }
+  .lifestyle-note {
+    right: 20px;
+    top: auto;
+    bottom: 225px;
+    font-size: 13px;
+    padding: 12px 14px;
+    transform: rotate(7deg);
+    border-radius: 4px 15px 4px 15px;
+  }
+  .lifestyle-note em {
+    font-size: 18px;
+  }
+  .lifestyle-note svg {
+    width: 14px;
+    height: 14px;
+    margin-bottom: 6px;
+  }
+  .lifestyle-ribbon {
+    width: 430px;
+    height: 70px;
+    left: -80px;
+    bottom: 17px;
+  }
+  .lifestyle-hero .exp-image-note {
+    font-size: 5px;
+    color: #9a5877;
+    bottom: 12px;
+  }
+  .pillars-05 {
+    margin: 12px 15px 0;
+    padding: 0 12px;
+    border-radius: 15px;
+  }
+  .pillars-05 > div {
+    padding: 20px 4px;
+    flex-direction: row;
+    font-size: 8px;
+    gap: 9px;
+    justify-content: flex-start;
+  }
+  .pillars-05 > div:nth-child(2),
+  .pillars-05 > div:nth-child(4) {
+    padding-left: 14px;
+  }
+  .pillars-05 svg {
+    width: 19px;
+  }
+  .lifestyle-intro {
+    padding-top: 55px;
+    padding-bottom: 45px;
+  }
+  .lifestyle-intro h2 {
+    font-size: 47px;
+    letter-spacing: -1.8px;
+  }
+  .lifestyle-intro > p {
+    font-size: 11px;
+    max-width: 300px;
+    margin: 20px auto 23px;
+  }
+  .compare-05 {
+    margin: 0 15px;
+    border-radius: 20px;
+  }
+  .compare-05 .smile-study {
+    padding: 35px 18px;
+  }
+  .compare-05 .smile-study h2 {
+    font-size: 35px;
+  }
+  .compare-05 .comparison {
+    height: 240px;
+    margin-top: 25px;
+    border-radius: 11px;
+  }
+  .treatments-05 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+  }
+  .treatments-05 .exp-section-title h2 {
+    font-size: 37px;
+  }
+  .treatments-05 .exp-services {
+    gap: 16px 13px;
+  }
+  .treatments-05 .exp-service {
+    border-radius: 55px 10px 10px 10px;
+    display: block;
+  }
+  .treatments-05 .exp-service:nth-child(2),
+  .treatments-05 .exp-service:nth-child(4) {
+    transform: translateY(23px);
+    border-radius: 10px 55px 10px 10px;
+  }
+  .treatments-05 .exp-service:nth-child(2):hover,
+  .treatments-05 .exp-service:nth-child(4):hover {
+    transform: translateY(20px);
+  }
+  .treatments-05 .exp-service-art {
+    height: 145px;
+  }
+  .treatments-05 .exp-service-body {
+    padding: 0 13px 20px;
+  }
+  .treatments-05 .exp-service-body h3 {
+    font-size: 21px;
+    line-height: 1.1;
+  }
+  .treatments-05 .exp-service-body p {
+    font-size: 9px;
+    line-height: 1.8;
+    margin-top: 12px;
+  }
+  .treatments-05 .exp-service-body > span {
+    font-size: 8px;
+    margin-top: 16px;
+    gap: 5px;
+  }
+  .gallery-05 {
+    padding-top: 60px;
+    margin-top: 15px;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-bottom: 70px;
+  }
+  .gallery-05 .exp-section-title {
+    margin-bottom: 30px;
+  }
+  .gallery-05 .gallery-composition {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 280px 160px;
+    gap: 13px;
+  }
+  .gallery-05 .gallery-tile-1 {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    border-radius: 85px 85px 10px 10px;
+  }
+  .gallery-05 .gallery-tile-0 {
+    grid-column: 2;
+    grid-row: 1;
+    transform: translateY(22px);
+    border-radius: 12px;
+  }
+  .gallery-05 .gallery-note {
+    padding: 20px 7px;
+    transform: translateY(22px);
+  }
+  .gallery-05 .gallery-note p {
+    font-size: 25px;
+    line-height: 1.2;
+  }
+  .gallery-05 .gallery-note > svg {
+    width: 18px;
+    margin-bottom: 13px;
+  }
+  .gallery-05 .gallery-tile > span {
+    font-size: 8px;
+    padding: 22px 10px 12px;
+    line-height: 1.5;
+  }
+  .technology-05 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+    gap: 30px;
+  }
+  .technology-05 .tech-text {
+    order: 1;
+  }
+  .technology-05 .tech-model {
+    order: 2;
+    border-radius: 42% 42% 12px 12px;
+  }
+  .technology-05 .tech-text h2 {
+    font-size: 37px;
+  }
+  .about-05 {
+    padding-top: 0;
+  }
+  .about-05 .about-image {
+    height: 285px;
+    border-radius: 13px 85px 13px 13px;
+  }
+  .about-05 .about-text h2 {
+    font-size: 36px;
+  }
+  .team-05 {
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+  }
+  .team-05 .exp-section-title {
+    text-align: left;
+    margin-bottom: 30px;
+  }
+  .team-05 .exp-doctors {
+    gap: 20px;
+  }
+  .team-05 .exp-doctor {
+    flex-basis: 240px;
+    padding-top: 0 !important;
+  }
+  .team-05 .exp-portrait,
+  .team-05 .exp-doctor:first-child .exp-portrait {
+    height: 335px;
+    border-radius: 130px 130px 10px 10px;
+  }
+  .team-05 .exp-doctor-caption h3 {
+    font-size: 24px;
+  }
+  .journey-05 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+  }
+  .journey-05 li {
+    padding-top: 20px;
+  }
+  .journey-05 li > span {
+    font-size: 34px;
+  }
+  .journey-05 li h3 {
+    font-size: 23px;
+  }
+  .journey-05 li p {
+    font-size: 9px;
+  }
+  .feedback-05 {
+    padding-top: 55px;
+    padding-bottom: 55px;
+  }
+  .feedback-05 .feedback-slide blockquote {
+    font-size: 28px;
+  }
+  .questions-05 .exp-section-title h2 {
+    font-size: 36px;
+  }
+  .booking-05 {
+    margin: 15px 15px 30px;
+    padding: 35px 18px;
+    border-radius: 20px;
+  }
+  .booking-05 .booking-intro h2 {
+    font-size: 40px;
+  }
+  .booking-05 .booking-intro > img {
+    height: 150px;
+    object-position: 75% center;
+    border-radius: 80px;
+  }
+  .booking-05 .exp-form-shell {
+    padding: 23px 16px;
+    border-radius: 16px;
+  }
+  .closing-05 {
+    padding: 75px 22px;
+  }
+  .closing-05 h2 {
+    font-size: 53px;
+    line-height: 1.1;
+    letter-spacing: -2px;
+  }
+  .closing-05:before {
+    inset: 60px -100px;
+    transform: rotate(-13deg);
+  }
+  .theme-05 .footer-05 .exp-footer-brand h2 {
+    font-family: Georgia;
+    font-weight: 400;
+    font-size: 28px;
+  }
+  .footer-05 .exp-footer-invite > a {
+    font-size: 29px;
+  }
+  .inner-05 {
+    border-radius: 0 0 45px 0;
+  }
+  .inner-05 .inner-title-group h1 {
+    font-size: 48px;
+    letter-spacing: -2px;
+  }
+  .profile-05 .profile-photo {
+    border-radius: 150px 150px 12px 12px;
+  }
+}
+@media (max-width: 350px) {
+  .theme-05 .exp-nav {
+    padding: 0 15px;
+    gap: 9px;
+  }
+  .theme-05 .exp-brand {
+    font-size: 18px;
+  }
+  .theme-05 .exp-brand > svg {
+    width: 18px;
+  }
+  .theme-05 .nav-cta {
+    font-size: 6px;
+    padding: 9px 8px;
+    gap: 4px;
+  }
+  .lifestyle-hero-copy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .lifestyle-hero h1 {
+    font-size: 48px;
+    letter-spacing: -2.4px;
+  }
+  .lifestyle-hero {
+    min-height: 725px;
+    padding-bottom: 325px;
+  }
+  .lifestyle-hero .hero-buttons .exp-button {
+    font-size: 7px;
+    padding: 12px 10px;
+    gap: 5px;
+  }
+  .lifestyle-photo {
+    top: 305px;
+  }
+  .lifestyle-note {
+    bottom: 205px;
+    right: 15px;
+    font-size: 11px;
+    padding: 10px 12px;
+  }
+  .lifestyle-note em {
+    font-size: 16px;
+  }
+  .pillars-05 > div {
+    font-size: 7px;
+    gap: 7px;
+  }
+  .pillars-05 svg {
+    width: 17px;
+  }
+  .treatments-05 .exp-service-art {
+    height: 130px;
+  }
+  .treatments-05 .exp-service-body {
+    padding: 0 11px 17px;
+  }
+  .treatments-05 .exp-service-body h3 {
+    font-size: 19px;
+  }
+  .treatments-05 .exp-service-body p {
+    font-size: 8px;
+  }
+  .treatments-05 .exp-service-body > span {
+    font-size: 7px;
+  }
+  .gallery-05 {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .gallery-05 .gallery-composition {
+    grid-template-rows: 250px 145px;
+  }
+  .gallery-05 .gallery-note p {
+    font-size: 22px;
+  }
+  .booking-05 .booking-intro h2 {
+    font-size: 35px;
+  }
+  .lifestyle-intro h2 {
+    font-size: 41px;
+  }
+  .closing-05 h2 {
+    font-size: 47px;
+  }
+  .inner-05 .inner-title-group h1 {
+    font-size: 42px;
+  }
+}
+@media (max-width: 600px) {
+  .lifestyle-hero h1 {
+    font-size: 48px;
+    letter-spacing: -2.4px;
+  }
+  .lifestyle-hero h1 em {
+    display: inline;
+  }
+  .lifestyle-photo > img {
+    object-position: 80% center;
+  }
+  .lifestyle-note {
+    bottom: 65px;
+    left: 20px;
+    right: auto;
+  }
+  .lifestyle-hero-copy > p {
+    max-width: 300px;
+  }
+}
+@media (max-width: 350px) {
+  .lifestyle-hero h1 {
+    font-size: 42px;
+    letter-spacing: -2.1px;
+  }
+  .lifestyle-note {
+    bottom: 55px;
+    left: 15px;
+    right: auto;
+  }
+}

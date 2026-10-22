@@ -1,0 +1,67 @@
+[
+  {
+    "file": "01_Students_and_Parents.xlsx",
+    "dataTabs": 3,
+    "fields": 73
+  },
+  {
+    "file": "02_Courses_and_Subjects.xlsx",
+    "dataTabs": 3,
+    "fields": 49
+  },
+  {
+    "file": "03_Employees.xlsx",
+    "dataTabs": 1,
+    "fields": 39
+  },
+  {
+    "file": "04_Teachers.xlsx",
+    "dataTabs": 1,
+    "fields": 18
+  },
+  {
+    "file": "05_Staff.xlsx",
+    "dataTabs": 1,
+    "fields": 15
+  },
+  {
+    "file": "06_Student_Enrollments.xlsx",
+    "dataTabs": 1,
+    "fields": 21
+  },
+  {
+    "file": "07_Fee_Heads.xlsx",
+    "dataTabs": 1,
+    "fields": 14
+  },
+  {
+    "file": "08_Fee_Structures_and_Scholarships.xlsx",
+    "dataTabs": 3,
+    "fields": 51
+  },
+  {
+    "file": "09_Student_Charges_and_Payments.xlsx",
+    "dataTabs": 3,
+    "fields": 38
+  },
+  {
+    "file": "10_Bus_Transport.xlsx",
+    "dataTabs": 3,
+    "fields": 40
+  },
+  {
+    "file": "11_Hostel_Rooms_and_Allocations.xlsx",
+    "dataTabs": 2,
+    "fields": 32
+  },
+  {
+    "file": "12_Leave_Types.xlsx",
+    "dataTabs": 1,
+    "fields": 22
+  },
+  {
+    "file": "13_College_Calendar_and_Events.xlsx",
+    "dataTabs": 1,
+    "fields": 27
+  }
+]

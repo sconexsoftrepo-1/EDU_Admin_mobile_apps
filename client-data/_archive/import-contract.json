@@ -1,0 +1,2122 @@
+{
+  "version": "1.0",
+  "database": "PostgreSQL 16+",
+  "header_row": 1,
+  "first_data_row": 2,
+  "blank_rows": "ignore",
+  "identifiers": "text; preserve leading zeros",
+  "dates": "Excel dates or ISO YYYY-MM-DD",
+  "booleans": [
+    "Yes",
+    "No"
+  ],
+  "scope": "single institution, multiple campuses",
+  "import_implemented": false,
+  "sheets": [
+    {
+      "sheet": "Institutions",
+      "table": "institutions",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "phone",
+          "type": "phone",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "postal_code",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "website",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "affiliation",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Campuses",
+      "table": "campuses",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "institution_code",
+          "type": "code",
+          "required": true,
+          "reference": "institutions",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "postal_code",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Academic Years",
+      "table": "academic_years",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "end_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Departments",
+      "table": "departments",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Programs",
+      "table": "programs",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "department_code",
+          "type": "code",
+          "required": true,
+          "reference": "departments",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "qualification",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "duration_semesters",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "intake_capacity",
+          "type": "positive_int",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Batches",
+      "table": "batches",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "program_code",
+          "type": "code",
+          "required": true,
+          "reference": "programs",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "entry_year",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "graduation_year",
+          "type": "positive_int",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Semesters",
+      "table": "semesters",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "academic_year_code",
+          "type": "code",
+          "required": true,
+          "reference": "academic_years",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "semester_number",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "end_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Sections",
+      "table": "sections",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "batch_code",
+          "type": "code",
+          "required": true,
+          "reference": "batches",
+          "choices": []
+        },
+        {
+          "name": "semester_code",
+          "type": "code",
+          "required": true,
+          "reference": "semesters",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "capacity",
+          "type": "positive_int",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Subjects",
+      "table": "subjects",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "department_code",
+          "type": "code",
+          "required": true,
+          "reference": "departments",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "credits",
+          "type": "decimal",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "subject_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "theory",
+            "practical",
+            "project",
+            "elective"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Curriculum",
+      "table": "curriculum_subjects",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "program_code",
+          "type": "code",
+          "required": true,
+          "reference": "programs",
+          "choices": []
+        },
+        {
+          "name": "subject_code",
+          "type": "code",
+          "required": true,
+          "reference": "subjects",
+          "choices": []
+        },
+        {
+          "name": "semester_number",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "is_required",
+          "type": "bool",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Rooms",
+      "table": "rooms",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "room_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "classroom",
+            "laboratory",
+            "hall",
+            "office"
+          ]
+        },
+        {
+          "name": "capacity",
+          "type": "positive_int",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Employees",
+      "table": "employees",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "department_code",
+          "type": "code",
+          "required": true,
+          "reference": "departments",
+          "choices": []
+        },
+        {
+          "name": "first_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "last_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "employee_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "teacher",
+            "staff"
+          ]
+        },
+        {
+          "name": "designation",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "phone",
+          "type": "phone",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "date_of_birth",
+          "type": "date",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "gender",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": [
+            "female",
+            "male",
+            "other",
+            "prefer_not_to_say"
+          ]
+        },
+        {
+          "name": "join_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "employment_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "permanent",
+            "contract",
+            "part_time"
+          ]
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "postal_code",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "emergency_contact_name",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "emergency_contact_phone",
+          "type": "phone",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "active",
+            "on_leave",
+            "left"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Teachers",
+      "table": "teachers",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "employee_code",
+          "type": "code",
+          "required": true,
+          "reference": "employees",
+          "choices": []
+        },
+        {
+          "name": "qualification",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "specialization",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "experience_years",
+          "type": "decimal",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Staff",
+      "table": "staff_profiles",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "employee_code",
+          "type": "code",
+          "required": true,
+          "reference": "employees",
+          "choices": []
+        },
+        {
+          "name": "responsibility",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "shift",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Students",
+      "table": "students",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "admission_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "first_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "last_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "date_of_birth",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "gender",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "female",
+            "male",
+            "other",
+            "prefer_not_to_say"
+          ]
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "phone",
+          "type": "phone",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "admission_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "postal_code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "country",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "blood_group",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": [
+            "A+",
+            "A-",
+            "B+",
+            "B-",
+            "AB+",
+            "AB-",
+            "O+",
+            "O-",
+            "unknown"
+          ]
+        },
+        {
+          "name": "nationality",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "previous_institution",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "previous_qualification",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "previous_score",
+          "type": "decimal",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "emergency_contact_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "emergency_contact_phone",
+          "type": "phone",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "active",
+            "graduated",
+            "withdrawn",
+            "suspended"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Parents",
+      "table": "parents",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "first_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "last_name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "phone",
+          "type": "phone",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "alternate_phone",
+          "type": "phone",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "occupation",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "city",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "state",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "postal_code",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Student Parents",
+      "table": "student_parents",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "parent_code",
+          "type": "code",
+          "required": true,
+          "reference": "parents",
+          "choices": []
+        },
+        {
+          "name": "relationship",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "father",
+            "mother",
+            "guardian",
+            "other"
+          ]
+        },
+        {
+          "name": "is_primary",
+          "type": "bool",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "can_pickup",
+          "type": "bool",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "receives_notifications",
+          "type": "bool",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Enrollments",
+      "table": "student_enrollments",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "section_code",
+          "type": "code",
+          "required": true,
+          "reference": "sections",
+          "choices": []
+        },
+        {
+          "name": "roll_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "enrolled_on",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "active",
+            "completed",
+            "transferred",
+            "withdrawn"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Teaching Assignments",
+      "table": "subject_offerings",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "subject_code",
+          "type": "code",
+          "required": true,
+          "reference": "subjects",
+          "choices": []
+        },
+        {
+          "name": "section_code",
+          "type": "code",
+          "required": true,
+          "reference": "sections",
+          "choices": []
+        },
+        {
+          "name": "teacher_code",
+          "type": "code",
+          "required": true,
+          "reference": "teachers",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Student Subjects",
+      "table": "student_subjects",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "enrollment_code",
+          "type": "code",
+          "required": true,
+          "reference": "student_enrollments",
+          "choices": []
+        },
+        {
+          "name": "offering_code",
+          "type": "code",
+          "required": true,
+          "reference": "subject_offerings",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Leave Types",
+      "table": "leave_types",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "annual_days",
+          "type": "decimal",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Fee Heads",
+      "table": "fee_heads",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Fee Structures",
+      "table": "fee_structures",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "program_code",
+          "type": "code",
+          "required": true,
+          "reference": "programs",
+          "choices": []
+        },
+        {
+          "name": "academic_year_code",
+          "type": "code",
+          "required": true,
+          "reference": "academic_years",
+          "choices": []
+        },
+        {
+          "name": "fee_head_code",
+          "type": "code",
+          "required": true,
+          "reference": "fee_heads",
+          "choices": []
+        },
+        {
+          "name": "semester_number",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "amount",
+          "type": "money",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "currency",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Student Fee Charges",
+      "table": "student_fee_charges",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "fee_structure_code",
+          "type": "code",
+          "required": true,
+          "reference": "fee_structures",
+          "choices": []
+        },
+        {
+          "name": "amount",
+          "type": "money",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "due_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Scholarships",
+      "table": "scholarships",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "sponsor",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "academic_year_code",
+          "type": "code",
+          "required": true,
+          "reference": "academic_years",
+          "choices": []
+        },
+        {
+          "name": "maximum_amount",
+          "type": "money",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Student Scholarships",
+      "table": "student_scholarships",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "scholarship_code",
+          "type": "code",
+          "required": true,
+          "reference": "scholarships",
+          "choices": []
+        },
+        {
+          "name": "amount",
+          "type": "money",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "pending",
+            "approved",
+            "rejected",
+            "disbursed"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Vendors",
+      "table": "vendors",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "phone",
+          "type": "phone",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "tax_reference",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Salary Components",
+      "table": "employee_salary_components",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "employee_code",
+          "type": "code",
+          "required": true,
+          "reference": "employees",
+          "choices": []
+        },
+        {
+          "name": "component",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "component_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "earning",
+            "deduction"
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "money",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "effective_to",
+          "type": "date",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Hostels",
+      "table": "hostels",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "warden_employee_code",
+          "type": "code",
+          "required": false,
+          "reference": "employees",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Hostel Rooms",
+      "table": "hostel_rooms",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "hostel_code",
+          "type": "code",
+          "required": true,
+          "reference": "hostels",
+          "choices": []
+        },
+        {
+          "name": "room_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "capacity",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Hostel Beds",
+      "table": "hostel_beds",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "room_code",
+          "type": "code",
+          "required": true,
+          "reference": "hostel_rooms",
+          "choices": []
+        },
+        {
+          "name": "bed_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Hostel Allocations",
+      "table": "hostel_allocations",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "bed_code",
+          "type": "code",
+          "required": true,
+          "reference": "hostel_beds",
+          "choices": []
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "end_date",
+          "type": "date",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Vehicles",
+      "table": "vehicles",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "registration_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "capacity",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "driver_employee_code",
+          "type": "code",
+          "required": false,
+          "reference": "employees",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Transport Routes",
+      "table": "transport_routes",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "vehicle_code",
+          "type": "code",
+          "required": false,
+          "reference": "vehicles",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Transport Stops",
+      "table": "transport_stops",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "route_code",
+          "type": "code",
+          "required": true,
+          "reference": "transport_routes",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "sequence_number",
+          "type": "positive_int",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "pickup_time",
+          "type": "time",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "drop_time",
+          "type": "time",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Transport Allocations",
+      "table": "transport_allocations",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "student_code",
+          "type": "code",
+          "required": true,
+          "reference": "students",
+          "choices": []
+        },
+        {
+          "name": "stop_code",
+          "type": "code",
+          "required": true,
+          "reference": "transport_stops",
+          "choices": []
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "end_date",
+          "type": "date",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Library Books",
+      "table": "library_books",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "author",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "isbn",
+          "type": "code",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "publisher",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Library Copies",
+      "table": "library_copies",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "book_code",
+          "type": "code",
+          "required": true,
+          "reference": "library_books",
+          "choices": []
+        },
+        {
+          "name": "accession_number",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "available",
+            "issued",
+            "lost",
+            "damaged"
+          ]
+        }
+      ]
+    },
+    {
+      "sheet": "Inventory",
+      "table": "inventory_items",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "quantity",
+          "type": "decimal",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "room_code",
+          "type": "code",
+          "required": false,
+          "reference": "rooms",
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Certificate Types",
+      "table": "certificate_types",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "template_reference",
+          "type": "text",
+          "required": false,
+          "reference": null,
+          "choices": []
+        }
+      ]
+    },
+    {
+      "sheet": "Calendar Events",
+      "table": "calendar_events",
+      "key": "code",
+      "fields": [
+        {
+          "name": "code",
+          "type": "code",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "campus_code",
+          "type": "code",
+          "required": true,
+          "reference": "campuses",
+          "choices": []
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "ends_at",
+          "type": "timestamp",
+          "required": true,
+          "reference": null,
+          "choices": []
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "required": true,
+          "reference": null,
+          "choices": [
+            "holiday",
+            "academic",
+            "cultural",
+            "sports",
+            "meeting"
+          ]
+        }
+      ]
+    }
+  ]
+}

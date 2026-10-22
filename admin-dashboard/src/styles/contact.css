@@ -1,0 +1,230 @@
+.whatsapp-link.whatsapp-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  max-width: 100%;
+  padding: 13px 18px;
+  border: 1px solid #2f9962;
+  border-radius: 9px;
+  background: #12643d;
+  color: #fff;
+  text-decoration: none;
+  font:
+    500 12px/1.5 "DM Sans",
+    Arial,
+    sans-serif;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+  white-space: normal;
+}
+.whatsapp-link.whatsapp-link:hover {
+  background: #0d5030;
+  transform: translateY(-2px);
+}
+.whatsapp-link svg {
+  flex-shrink: 0;
+}
+.whatsapp-link span {
+  overflow-wrap: anywhere;
+}
+.whatsapp-link:focus-visible {
+  outline: 2px solid #67dba1;
+  outline-offset: 4px;
+}
+.whatsapp-contact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8%;
+  padding: 40px;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  color: inherit;
+  min-width: 0;
+}
+.whatsapp-contact h2 {
+  font:
+    400 clamp(28px, 3vw, 44px)/1.1 Georgia,
+    serif;
+  letter-spacing: -0.035em;
+  margin: 15px 0 20px;
+  color: inherit;
+}
+.whatsapp-contact p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: inherit;
+  max-width: 38ch;
+  opacity: 0.9;
+}
+.whatsapp-kicker {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.whatsapp-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.whatsapp-compose label {
+  font-size: 11px;
+  color: inherit;
+}
+.whatsapp-compose input,
+.whatsapp-compose textarea {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  min-height: 45px;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 5px;
+  padding: 11px 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.whatsapp-compose textarea {
+  margin-bottom: 8px;
+}
+.whatsapp-compose small {
+  font-size: 10px;
+  line-height: 1.7;
+  color: inherit;
+  opacity: 0.8;
+}
+.whatsapp-contact.is-compact {
+  grid-template-columns: 1fr;
+  padding: 25px;
+  gap: 25px;
+}
+.whatsapp-contact.is-compact h2 {
+  font-size: 30px;
+}
+.whatsapp-contact.is-compact p {
+  font-size: 12px;
+}
+.platform-contact-page {
+  min-height: 100vh;
+}
+.platform-contact-content {
+  width: min(1100px, 86%);
+  margin: auto;
+  padding: 160px 0 80px;
+}
+.platform-contact-content > h1 {
+  font-size: clamp(40px, 5vw, 76px);
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  margin-bottom: 50px;
+}
+.platform-contact-alternatives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  font-size: 12px;
+  color: #c9c0d8;
+  padding-top: 30px;
+}
+.platform-contact-alternatives a {
+  overflow-wrap: anywhere;
+}
+.creator-whatsapp-card {
+  grid-column: 1/-1;
+}
+.creator-whatsapp-card > svg:first-child {
+  color: #72d5a0;
+}
+.creator-contact-copy > .creator-whatsapp-compose {
+  margin-top: 22px;
+}
+.creator-whatsapp-compose summary {
+  font-size: 12px;
+  cursor: pointer;
+  padding: 12px 0;
+  color: #ddd0f5;
+}
+.creator-whatsapp-compose .whatsapp-contact {
+  margin-top: 12px;
+}
+.clinic-whatsapp-contact {
+  width: min(1164px, 86%);
+  margin: 0 auto 70px;
+}
+.experience .clinic-whatsapp-contact {
+  max-width: 1200px;
+}
+.clinic-whatsapp-contact > h2 {
+  font-family: inherit;
+}
+.hotel-contact form > .whatsapp-link {
+  margin-top: 5px;
+}
+.hotel-footer-whatsapp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  padding: 25px 0;
+  border-top: 1px solid #fff3;
+  font-size: 11px;
+}
+.catalogue-footer-contact > a.catalogue-whatsapp {
+  color: #e7fff1;
+}
+.catalogue-footer-contact > a.catalogue-whatsapp strong {
+  color: #b9f2d0;
+}
+@media (max-width: 700px) {
+  .whatsapp-contact {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 25px 20px;
+  }
+  .whatsapp-compose input,
+  .whatsapp-compose textarea {
+    font-size: 16px;
+  }
+  .whatsapp-contact h2 {
+    font-size: 34px;
+  }
+  .whatsapp-contact p {
+    font-size: 12px;
+  }
+  .platform-contact-content {
+    width: 88%;
+    padding-top: 125px;
+  }
+  .platform-contact-content > h1 {
+    font-size: 43px;
+    margin-bottom: 35px;
+  }
+  .platform-contact-alternatives {
+    display: grid;
+    gap: 20px;
+    font-size: 11px;
+  }
+  .creator-whatsapp-compose .whatsapp-contact {
+    padding: 20px 15px;
+  }
+  .hotel-footer-whatsapp {
+    align-items: start;
+    flex-direction: column;
+  }
+  .clinic-whatsapp-contact {
+    width: 88%;
+    margin-bottom: 50px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-link.whatsapp-link {
+    transition: none;
+    transform: none;
+  }
+}

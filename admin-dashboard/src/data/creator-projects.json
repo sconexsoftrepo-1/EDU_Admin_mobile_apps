@@ -1,0 +1,304 @@
+[
+  {
+    "id": 1,
+    "title": "AI Chatbot Assistant",
+    "description": "AI chatbot for farmers in 4 languages. Features speech-to-text and text-to-speech.",
+    "tags": [
+      "React Native",
+      "Node.js",
+      "NLP API"
+    ],
+    "category": "React Native"
+  },
+  {
+    "id": 2,
+    "title": "Task Management System",
+    "description": "Employee task assignment and attendance monitoring with 3 user roles.",
+    "tags": [
+      "Flutter",
+      "Firebase",
+      "Material Design"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 3,
+    "title": "Employee Tracking Platform",
+    "description": "Sales/Call center tracking app. Tracks logins and call history.",
+    "tags": [
+      "Flutter",
+      "TypeScript",
+      "Chart.js"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 4,
+    "title": "Diet Planner App",
+    "description": "Doctor/Patient app for diet plans, PDF downloads, and alarms.",
+    "tags": [
+      "Flutter",
+      "Redux",
+      "Nutrition API"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 5,
+    "title": "Navigation Application",
+    "description": "Live location tracking and navigation in 4 languages.",
+    "tags": [
+      "Flutter",
+      "Maps API",
+      "Geolocation"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 6,
+    "title": "Notification Service",
+    "description": "Analytics dashboard for sales and profits converted to mobile app.",
+    "tags": [
+      "Angular",
+      "Firebase",
+      "Analytics"
+    ],
+    "category": "Angular"
+  },
+  {
+    "id": 7,
+    "title": "SaleDesk E-Commerce",
+    "description": "Legacy e-commerce product with inventory and finance management.",
+    "tags": [
+      "Angular",
+      ".NET",
+      "SQL",
+      "Azure"
+    ],
+    "category": "Angular"
+  },
+  {
+    "id": 8,
+    "title": "CASA ERP",
+    "description": "Comprehensive ERP for Admin, Sales, HR, and Analytics.",
+    "tags": [
+      "Angular",
+      "SQL Server",
+      "Chart.js"
+    ],
+    "category": "Angular"
+  },
+  {
+    "id": 9,
+    "title": "Oneview App (PWA)",
+    "description": "Real-time sales notifications and OTP return processing.",
+    "tags": [
+      "Angular",
+      ".NET",
+      "jsPDF"
+    ],
+    "category": "Angular"
+  },
+  {
+    "id": 10,
+    "title": "SaleMax Tracking",
+    "description": "Enterprise sales force tracking and lead management.",
+    "tags": [
+      "Flutter",
+      "SQL Server",
+      "Firebase"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 11,
+    "title": "BevSnap AI Capture",
+    "description": "Gyro-stabilized image capture using AI object detection models.",
+    "tags": [
+      "Flutter",
+      "Python",
+      "YOLOv8x",
+      "SQLite"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 12,
+    "title": "FarmSenseAi",
+    "description": "Voice-driven multilingual AI chatbot for agriculture.",
+    "tags": [
+      "React Native",
+      "AWS Lambda",
+      "DynamoDB"
+    ],
+    "category": "React Native"
+  },
+  {
+    "id": 13,
+    "title": "Meet Street",
+    "description": "Comprehensive event management and social gathering app used vastly in the USA. Features financial tracking, bill splitting, and gamified 'ScoreBoard'. Available on iOS & Android.",
+    "tags": [
+      "React Native",
+      "Redux",
+      "Firebase",
+      "Google Places API"
+    ],
+    "category": "React Native"
+  },
+  {
+    "id": 14,
+    "title": "Railway KBC - Anchor App",
+    "description": "Real-time quiz control center for Indian Railways (Pune Division). Allows hosts to manage sessions, control timers, and view live polls with sub-second latency.",
+    "tags": [
+      "React",
+      "Socket.IO",
+      "Vite",
+      "Material UI"
+    ],
+    "category": "React"
+  },
+  {
+    "id": 15,
+    "title": "Railway KBC - Employee App",
+    "description": "Interactive player interface for railway employees. Features real-time question syncing, answer submission, and personal dashboards.",
+    "tags": [
+      "React",
+      "Socket.IO",
+      "Vite",
+      "Ag-Grid"
+    ],
+    "category": "React"
+  },
+  {
+    "id": 16,
+    "title": "Railway KBC - Admin Panel",
+    "description": "Comprehensive management dashboard for question banks, user stats, and analytics. Supports bulk uploads and detailed reporting.",
+    "tags": [
+      "React",
+      "Vite",
+      "Recharts",
+      "ExcelJS"
+    ],
+    "category": "React"
+  },
+  {
+    "id": 17,
+    "title": "Railway KBC - Audience App",
+    "description": "Mobile companion app for spectators to participate in live polls and view questions in passive mode.",
+    "tags": [
+      "Flutter",
+      "Socket.IO",
+      "Dart"
+    ],
+    "category": "Flutter"
+  },
+  {
+    "id": 18,
+    "title": "HRM",
+    "description": "A comprehensive Human Resource Management platform designed to streamline employee information, HR operations, and organizational workflows through a modern, scalable interface.",
+    "tags": [],
+    "category": "Enterprise Web Application",
+    "collection": [
+      "Web Applications",
+      "Enterprise",
+      "SaaS"
+    ],
+    "verification": "Project description supplied by Chaitanya. Technology stack, features, screenshots and links are awaiting verification."
+  },
+  {
+    "id": 19,
+    "title": "Smart Holiday Planner",
+    "description": "An intelligent travel planning application that helps users discover destinations, create personalized day-wise itineraries, explore routes, and enjoy self-guided travel experiences.",
+    "tags": [
+      "Flutter"
+    ],
+    "category": "Flutter",
+    "collection": [
+      "Mobile Applications",
+      "AI & Automation"
+    ],
+    "features": [
+      "AI-assisted itinerary planning",
+      "Day-wise trip scheduling",
+      "Destination discovery",
+      "Route and waypoint planning",
+      "Self-guided audio tours",
+      "Interactive trip experiences"
+    ],
+    "verification": "Description and Flutter stack supplied by Chaitanya. Additional technologies, screenshots and public links are awaiting verification."
+  },
+  {
+    "id": 20,
+    "title": "Service BOT",
+    "description": "A kiosk-based self-service application for AP Police, providing guided access to citizen services from a single touchpoint.",
+    "tags": [
+      "Kiosk UI",
+      "Self-Service"
+    ],
+    "category": "Mobile Application",
+    "collection": [
+      "Mobile Applications",
+      "Enterprise"
+    ],
+    "features": [
+      "Citizen self-service kiosks",
+      "Guided public-service interface"
+    ],
+    "verification": "Verified against the Mobile Applications presentation. Implementation stack and personal role are not specified."
+  },
+  {
+    "id": 21,
+    "title": "S-Pay",
+    "description": "Digital Wallet Application",
+    "tags": [],
+    "category": "Mobile Application",
+    "collection": [
+      "Mobile Applications"
+    ],
+    "verification": "Named by Chaitanya. Project description, technology stack, features and links await verification."
+  },
+  {
+    "id": 22,
+    "title": "Sconex Careers",
+    "description": "Online Examination Platform",
+    "tags": [],
+    "category": "Web Application",
+    "collection": [
+      "Web Applications"
+    ],
+    "verification": "Named by Chaitanya. Project description, technology stack, features and links await verification."
+  },
+  {
+    "id": 23,
+    "title": "FIN-Buddy",
+    "description": "Loan & EMI Tracking Application",
+    "tags": [],
+    "category": "Mobile Application",
+    "collection": [
+      "Mobile Applications"
+    ],
+    "verification": "Named by Chaitanya. Project description, technology stack, features and links await verification."
+  },
+  {
+    "id": 24,
+    "title": "SCONEX BMAD Agents",
+    "description": "Agentic SDLC",
+    "tags": [],
+    "category": "AI & Automation",
+    "collection": [
+      "AI & Automation"
+    ],
+    "verification": "Named by Chaitanya. Project description, technology stack, features and links await verification."
+  },
+  {
+    "id": 25,
+    "title": "Schools Quiz & Admin Platform",
+    "description": "Schools quiz and administration platform",
+    "tags": [],
+    "category": "Web Application",
+    "collection": [
+      "Web Applications"
+    ],
+    "verification": "Named by Chaitanya. Project description, technology stack, features and links await verification."
+  }
+]

@@ -1,0 +1,724 @@
+.academic-timetables {
+  min-width: 0;
+  max-width: 100%;
+}
+.academic-cohort-sheet {
+  margin: 20px 0 28px;
+  border: 1px solid var(--erp-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--erp-surface);
+}
+.academic-sheet-heading {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-sheet-heading > strong {
+  font:
+    600 19px/1.3 Georgia,
+    serif;
+  color: var(--erp-accent);
+}
+.academic-sheet-heading h3 {
+  font-size: 15px !important;
+  margin: 9px 0 !important;
+  letter-spacing: 0;
+}
+.academic-sheet-heading p {
+  margin: 6px 0;
+  font-size: 12px;
+}
+.academic-sheet-heading > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.academic-grid-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+.college-erp .academic-week-table {
+  width: 100%;
+  min-width: 1040px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 11px;
+}
+.college-erp .academic-week-table caption {
+  text-align: left;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--erp-muted);
+}
+.college-erp .academic-week-table :is(th, td) {
+  border: 1px solid var(--erp-border);
+  padding: 7px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.college-erp .academic-week-table thead th {
+  font-size: 10px;
+  padding: 10px 4px;
+  background: var(--erp-raised);
+  color: var(--erp-ink);
+  position: static;
+}
+.academic-week-table thead th span {
+  display: block;
+  margin-top: 5px;
+  color: var(--erp-muted);
+  font-weight: 400;
+}
+.academic-week-table th:first-child {
+  width: 64px;
+}
+.college-erp .academic-week-table tbody th {
+  background: var(--erp-raised);
+  font-size: 11px;
+}
+.college-erp .academic-week-table td {
+  height: 64px;
+  background: var(--erp-surface);
+}
+.college-erp .academic-week-table td[data-kind="Lab"],
+.college-erp .academic-week-table td[data-kind="Practical"] {
+  background: color-mix(in srgb, #6395e9 20%, var(--erp-surface));
+}
+.college-erp .academic-week-table td[data-kind="Sports"] {
+  background: color-mix(in srgb, #31ad76 20%, var(--erp-surface));
+}
+.college-erp
+  .academic-week-table
+  td:is([data-kind="Break"], [data-kind="Lunch"]) {
+  background: color-mix(in srgb, #d6b867 14%, var(--erp-surface));
+}
+.college-erp .academic-week-table td[data-conflict="true"] {
+  background: color-mix(in srgb, #ec6f7d 20%, var(--erp-surface));
+  outline: 1px solid #ec6f7d;
+  outline-offset: -2px;
+}
+.college-erp .academic-week-table button {
+  display: grid !important;
+  gap: 5px !important;
+  place-items: center;
+  width: 100%;
+  min-height: 42px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  color: var(--erp-ink);
+  font-size: 11px !important;
+  text-align: center;
+}
+.academic-week-table button strong {
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.academic-week-table button small {
+  font-size: 9px;
+  color: var(--erp-muted);
+}
+.academic-shared-pause > span {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+.academic-free {
+  color: var(--erp-muted);
+}
+.academic-conflict {
+  display: block;
+  color: #dc5365 !important;
+  font-size: 9px;
+}
+.academic-grid-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px;
+  font-size: 10px;
+}
+.academic-grid-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--erp-accent);
+  margin-right: 6px;
+}
+.academic-grid-legend [data-kind="Lab"]::before {
+  background: #6395e9;
+}
+.academic-grid-legend [data-kind="Sports"]::before {
+  background: #31ad76;
+}
+.academic-grid-legend [data-kind="Break"]::before {
+  background: #d6b867;
+}
+.academic-faculty-directory {
+  border-top: 1px solid var(--erp-border);
+  padding: 14px;
+}
+.academic-faculty-directory summary,
+.academic-session-management > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 0;
+}
+.college-erp .academic-faculty-directory table {
+  min-width: 600px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 12px;
+}
+.college-erp .academic-faculty-directory :is(th, td) {
+  border: 1px solid var(--erp-border);
+  padding: 9px;
+  text-align: left;
+  white-space: normal;
+}
+.academic-session-detail {
+  padding: 20px;
+  border: 1px solid var(--erp-accent);
+  background: var(--erp-raised);
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+.academic-session-detail > button {
+  float: right;
+}
+.academic-session-detail dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  font-size: 12px;
+}
+.academic-session-detail dd {
+  margin: 0;
+}
+.academic-grid-empty {
+  border: 1px dashed var(--erp-border);
+  padding: 24px;
+  border-radius: 14px;
+}
+.college-erp .mobile-redesign .academic-sheet-heading {
+  padding: 14px 10px;
+}
+.college-erp .mobile-redesign .academic-sheet-heading > strong {
+  font-size: 15px;
+}
+.college-erp .mobile-redesign .academic-sheet-heading h3 {
+  font-size: 13px !important;
+}
+.college-erp .mobile-redesign .academic-sheet-heading p,
+.college-erp .mobile-redesign .academic-sheet-heading > div {
+  font-size: 10px;
+}
+.college-erp .mobile-redesign .academic-week-table {
+  min-width: 1000px;
+  font-size: 10px;
+}
+.college-erp .mobile-redesign .academic-week-table td {
+  height: 60px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .academic-grid-scroll {
+    scroll-behavior: smooth;
+  }
+}
+.academic-session-sheet > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-session-sheet h2 {
+  margin: 8px 0;
+  font-size: 21px;
+}
+.academic-session-sheet dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+.academic-session-sheet dt {
+  color: var(--erp-muted);
+  font-size: 11px;
+  margin-top: 14px;
+}
+.academic-session-sheet dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.academic-session-sheet[open] {
+  display: flex;
+  flex-direction: column;
+}
+.academic-session-sheet .ops-sheet-body {
+  min-height: 0;
+}
+.academic-grid-hint {
+  padding: 10px 14px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--erp-muted);
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-calendar-drawer[open] {
+  display: flex;
+  flex-direction: column;
+}
+.academic-calendar-drawer > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-calendar-drawer header p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--erp-muted);
+}
+.academic-calendar-drawer .ops-sheet-body {
+  min-height: 0;
+}
+.academic-calendar-drawer .mobile-calendar {
+  max-width: none;
+}
+.academic-calendar-drawer .mobile-calendar :is(button, input, select) {
+  font: inherit;
+}
+.mobile-timeline-event time > small {
+  display: block;
+  font-size: 10px;
+}
+.mobile-event-scope {
+  display: block;
+  font-size: 10px;
+  color: var(--erp-muted);
+  line-height: 1.5;
+}
+/* Weekly orientation: times down the left, working days across the top. */
+.college-erp .academic-week-table {
+  min-width: 1000px;
+  table-layout: fixed;
+}
+.college-erp .academic-week-table th:first-child {
+  width: 90px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--erp-raised);
+}
+.college-erp .academic-week-table tbody th span {
+  display: block;
+  font-size: 10px;
+  color: var(--erp-muted);
+  margin-top: 6px;
+}
+.college-erp .academic-week-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.college-erp .academic-week-table td[data-kind="Class"] {
+  background: color-mix(in srgb, #3b82f6 6%, var(--erp-surface));
+}
+.college-erp .academic-week-table td[data-kind="Lab"] {
+  background: color-mix(in srgb, #8b5cf6 12%, var(--erp-surface));
+}
+.academic-shared-pause > span {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  letter-spacing: 0.5px;
+}
+.college-erp .academic-week-table button > span {
+  font-size: 10px;
+  line-height: 1.4;
+}
+.college-erp .academic-week-table button:hover {
+  outline: 1px solid var(--erp-accent);
+  background: color-mix(in srgb, var(--erp-accent) 5%, transparent) !important;
+}
+.academic-mobile-week {
+  display: none;
+}
+.academic-view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.academic-view-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.academic-view-toolbar button[aria-pressed="true"] {
+  background: var(--erp-accent) !important;
+  color: white !important;
+}
+@media (max-width: 600px) {
+  .academic-mobile-week {
+    display: grid;
+    gap: 14px;
+    padding: 14px;
+  }
+  .academic-mobile-days {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+  }
+  .college-erp .academic-mobile-days button {
+    padding: 8px 5px !important;
+    font-size: 10px !important;
+    min-width: 0 !important;
+  }
+  .academic-mobile-days [aria-pressed="true"] {
+    background: var(--erp-accent) !important;
+    color: white !important;
+  }
+  .academic-mobile-timeline {
+    display: grid;
+    gap: 8px;
+  }
+  .college-erp .academic-mobile-timeline > button {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px !important;
+    text-align: left;
+    background: var(--erp-surface);
+    border-left: 3px solid var(--erp-accent);
+  }
+  .academic-mobile-timeline time {
+    font-size: 11px;
+    min-width: 40px;
+  }
+  .academic-mobile-timeline small {
+    display: block;
+    font-size: 10px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .academic-mobile-timeline strong {
+    font-size: 12px;
+  }
+  .academic-primary-grid[data-mobile-full="false"] {
+    display: none;
+  }
+  .academic-faculty-directory {
+    padding: 10px;
+  }
+}
+@media print {
+  .erp-sidebar,
+  .erp-topbar,
+  .erp-demo-banner,
+  .erp-home-navigation,
+  .erp-floating-toggle,
+  .academic-view-toolbar,
+  .ops-toolbar,
+  .academic-mobile-week,
+  .erp-breadcrumb,
+  .ops-row-actions,
+  .erp-filter-toggle,
+  .erp-global-filters,
+  .floating-apps-launcher {
+    display: none !important;
+  }
+  .college-erp .erp-workspace {
+    margin-left: 0 !important;
+  }
+  .academic-grid-scroll {
+    overflow: visible !important;
+  }
+  .academic-primary-grid {
+    display: block !important;
+  }
+  .college-erp .academic-week-table {
+    min-width: 0;
+    font-size: 8px;
+  }
+  .academic-cohort-sheet {
+    break-inside: avoid;
+  }
+  .college-erp {
+    --erp-surface: white !important;
+    --erp-ink: #17243a !important;
+    --erp-muted: #556 !important;
+    --erp-border: #ccd !important;
+    background: white !important;
+  }
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
+.academic-editor[open] {
+  display: flex;
+  flex-direction: column;
+}
+.academic-editor > header {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-editor h2 {
+  font-size: 22px;
+  margin: 10px 0;
+}
+.academic-editor header p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.academic-editor .ops-sheet-body {
+  min-height: 0;
+}
+.academic-editor-steps {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+.academic-editor-steps button {
+  font-size: 11px !important;
+}
+.academic-editor-steps [aria-current="step"] {
+  background: var(--erp-accent) !important;
+  color: white !important;
+}
+.academic-editor-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin: 22px 0;
+}
+.academic-editor-fields label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.academic-editor-fields :is(input, select) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  font-size: 12px;
+}
+.academic-slot-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 22px 0;
+}
+.academic-slot-options button {
+  display: grid !important;
+  gap: 5px;
+  padding: 12px !important;
+}
+.academic-slot-options small {
+  font-size: 10px;
+}
+.academic-slot-config {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 6px;
+  margin: 10px 0;
+}
+.academic-slot-config :is(input, select) {
+  min-width: 0;
+  width: 100%;
+  padding: 8px;
+}
+.academic-day-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+.academic-day-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+.academic-editor-review {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.academic-editor-review > div {
+  padding: 12px;
+  background: var(--erp-raised);
+  border-radius: 8px;
+}
+.academic-editor-review dt {
+  text-transform: capitalize;
+  font-size: 11px;
+}
+.academic-editor-review dd {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+.academic-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  border-top: 1px solid var(--erp-border);
+  padding-top: 20px;
+}
+.academic-publication {
+  border: 1px solid var(--erp-border);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+.academic-publication p {
+  font-size: 12px;
+}
+.academic-publication details {
+  margin-top: 16px;
+}
+.academic-publication details > div {
+  padding: 12px 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--erp-border);
+}
+.academic-load-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .academic-editor-fields,
+  .academic-editor-review {
+    grid-template-columns: 1fr;
+  }
+  .academic-slot-options {
+    grid-template-columns: 1fr 1fr;
+  }
+  .academic-slot-config {
+    grid-template-columns: 1fr 1fr;
+  }
+  .academic-editor > header {
+    padding: 18px;
+  }
+  .academic-editor h2 {
+    font-size: 18px;
+  }
+}
+.academic-mobile-week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.academic-week-table td[data-drop-target="true"] {
+  outline: 1px dashed var(--erp-accent);
+  outline-offset: -4px;
+  background: color-mix(in srgb, var(--erp-accent) 8%, var(--erp-surface));
+}
+.academic-week-table button[draggable="true"] {
+  cursor: grab;
+}
+.academic-week-table button[draggable="true"]:active {
+  cursor: grabbing;
+}
+.college-erp .mobile-redesign .app-screen {
+  container-type: inline-size;
+}
+@container (max-width:600px) {
+  .academic-mobile-week {
+    display: grid;
+    gap: 14px;
+    padding: 12px;
+  }
+  .academic-mobile-days {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+  }
+  .academic-mobile-days button {
+    padding: 7px 5px !important;
+    font-size: 10px !important;
+    min-width: 0 !important;
+  }
+  .academic-mobile-days [aria-pressed="true"] {
+    background: var(--erp-accent) !important;
+    color: white !important;
+  }
+  .academic-mobile-timeline {
+    display: grid;
+    gap: 8px;
+  }
+  .academic-mobile-timeline > button {
+    display: flex !important;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px !important;
+    text-align: left;
+    border-left: 3px solid var(--erp-accent) !important;
+  }
+  .academic-mobile-timeline time {
+    font-size: 11px;
+    min-width: 40px;
+  }
+  .academic-mobile-timeline small {
+    display: block;
+    font-size: 10px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .academic-mobile-timeline strong {
+    font-size: 12px;
+  }
+  .academic-primary-grid[data-mobile-full="false"] {
+    display: none;
+  }
+}
+.academic-advanced-records {
+  margin-top: 24px;
+}
+.academic-advanced-records > summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 16px;
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  background: var(--erp-surface);
+}
+.academic-session-sheet .ops-sheet-body details {
+  margin: 20px 0;
+  line-height: 1.8;
+  font-size: 12px;
+}

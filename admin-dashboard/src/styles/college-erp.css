@@ -1,0 +1,2828 @@
+/* Campus ERP identities. Tokens apply only to authenticated workspaces. */
+.college-erp {
+  --erp-bg: #f5efe5;
+  --erp-surface: rgba(255, 255, 255, 0.91);
+  --erp-raised: #fcf9f3;
+  --erp-ink: #251e18;
+  --erp-muted: #756b60;
+  --erp-border: #e9dfcf;
+  --erp-accent: #a46a27;
+  --erp-glow: #c99445;
+  --erp-blue: #a46a27;
+  --erp-navy: #251e18;
+  --erp-sidebar: #302016;
+  --erp-danger: #b43540;
+  background: var(--erp-bg);
+  color: var(--erp-ink);
+  font-size: 12px;
+  color-scheme: light;
+}
+.college-erp.erp-skyline {
+  --erp-bg: #061325;
+  --erp-surface: rgba(9, 27, 51, 0.94);
+  --erp-raised: #102c4b;
+  --erp-ink: #f6faff;
+  --erp-muted: #a7bdd5;
+  --erp-border: rgba(125, 194, 255, 0.2);
+  --erp-accent: #28c8ff;
+  --erp-glow: #1769ff;
+  --erp-blue: #28c8ff;
+  --erp-navy: #f6faff;
+  --erp-sidebar: #041020;
+  --erp-danger: #ff8191;
+  color-scheme: dark;
+  background:
+    radial-gradient(ellipse at 90% 0, #12345b 0, transparent 50%), var(--erp-bg);
+}
+.college-erp :is(h1, h2, h3, strong, th) {
+  color: var(--erp-ink);
+}
+.college-erp :is(p, small, label, dt) {
+  color: var(--erp-muted);
+}
+.college-erp a {
+  color: var(--erp-accent);
+}
+.college-erp :is(button, input, select, textarea) {
+  border-color: var(--erp-border);
+  background: var(--erp-surface);
+  color: var(--erp-ink);
+  border-radius: 8px;
+}
+.college-erp :is(input, select, textarea) {
+  min-height: 38px;
+}
+.college-erp input[type="checkbox"] {
+  min-height: 0;
+  accent-color: var(--erp-accent);
+}
+.college-erp button {
+  min-height: 36px;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+.college-erp button:hover:not(:disabled) {
+  background: var(--erp-raised);
+  border-color: var(--erp-accent);
+}
+.college-erp
+  :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--erp-accent);
+  outline-offset: 3px;
+}
+.college-erp .erp-primary {
+  background: linear-gradient(125deg, #b27b35, #87511d);
+  border-color: #b27b35;
+  color: white;
+  box-shadow: 0 3px 10px #73441116;
+}
+.college-erp.erp-skyline .erp-primary {
+  background: linear-gradient(125deg, #1769ff, #0754be);
+  border-color: #278cff;
+  color: white;
+  box-shadow: 0 3px 16px #1769ff26;
+}
+.college-erp .erp-primary:hover:not(:disabled) {
+  filter: brightness(1.12);
+  color: var(--erp-ink);
+}
+.college-erp .erp-sidebar {
+  width: 258px;
+  background: linear-gradient(165deg, var(--erp-sidebar), #1e1510);
+  border-right: 1px solid #c994454d;
+  box-shadow: 8px 0 30px #30201612;
+  z-index: 70;
+  transition:
+    width 0.28s ease,
+    transform 0.28s ease;
+}
+.college-erp.erp-skyline .erp-sidebar {
+  background: linear-gradient(165deg, #091b33, #020b17);
+  border-color: #28c8ff40;
+  box-shadow: 5px 0 30px #001b3c60;
+}
+.college-erp .erp-sidebar-brand {
+  padding: 27px 22px 22px;
+  min-height: 90px;
+}
+.college-erp .erp-sidebar-brand strong {
+  color: #fff3da;
+  font:
+    600 24px/1.1 Georgia,
+    serif;
+  letter-spacing: -0.04em;
+}
+.college-erp.erp-skyline .erp-sidebar-brand strong {
+  color: white;
+}
+.college-erp .erp-sidebar-brand img {
+  width: 35px;
+  height: 42px;
+}
+.college-erp .erp-sidebar-label {
+  color: #c3ad91;
+  margin: 3px 23px 16px;
+  font-size: 10px;
+}
+.college-erp.erp-skyline .erp-sidebar-label {
+  color: #7f9bb8;
+}
+.college-erp .erp-sidebar nav {
+  padding: 0 12px 16px;
+  scrollbar-color: #ffffff30 transparent;
+}
+.erp-nav-group {
+  margin-bottom: 5px;
+}
+.college-erp .erp-nav-group summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #c8b9a5;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 11px;
+}
+.college-erp.erp-skyline .erp-nav-group summary {
+  color: #a7bdd5;
+}
+.erp-nav-group summary::-webkit-details-marker {
+  display: none;
+}
+.erp-nav-group summary svg:last-child {
+  margin-left: auto;
+  transition: transform 0.2s;
+}
+.erp-nav-group[open] summary svg:last-child {
+  transform: rotate(180deg);
+}
+.college-erp .erp-nav-group a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px 10px 25px;
+  margin: 2px 0;
+  min-height: 38px;
+  border-radius: 6px;
+  color: #f0e3d3;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.college-erp.erp-skyline .erp-nav-group a {
+  color: #d1e5fb;
+}
+.erp-nav-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.college-erp .erp-nav-group a.active {
+  background: linear-gradient(100deg, #8b5928, #bc884147);
+  box-shadow:
+    inset 2px 0 #e3b86b,
+    0 0 15px #c9944510;
+  color: white;
+}
+.college-erp.erp-skyline .erp-nav-group a.active {
+  background: linear-gradient(100deg, #1262ce, #1769ff30);
+  box-shadow:
+    inset 2px 0 #28c8ff,
+    0 0 15px #1769ff20;
+  color: white;
+}
+.college-erp .erp-nav-group a:hover {
+  background: #ffffff12;
+}
+.college-erp .erp-sidebar-foot {
+  padding: 17px 20px;
+  background: #0002;
+  flex-shrink: 0;
+}
+.college-erp .erp-sidebar-foot :is(a, button) {
+  color: #e2d5c4;
+}
+.college-erp .erp-sidebar-foot button {
+  background: transparent;
+}
+.college-erp .erp-workspace {
+  margin-left: 258px;
+  transition: margin 0.28s ease;
+}
+.college-erp .erp-home-navigation {
+  display: flex;
+  padding: 5px clamp(12px, 2vw, 25px);
+  background: var(--erp-surface);
+  border-bottom: 1px solid var(--erp-border);
+}
+.college-erp .erp-home-navigation a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  color: var(--erp-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.college-erp .erp-home-navigation a:hover {
+  background: var(--erp-raised);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.college-erp .erp-home-navigation a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.college-erp .erp-topbar {
+  height: 74px;
+  padding: 0 25px;
+  gap: 17px;
+  background: var(--erp-surface);
+  backdrop-filter: blur(18px);
+  border-color: var(--erp-border);
+}
+.college-erp .erp-desktop-toggle {
+  padding: 7px;
+  background: transparent;
+  border: 0;
+}
+.college-erp .erp-global-search {
+  max-width: 600px;
+  margin-right: auto;
+  gap: 8px;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  border-radius: 30px;
+  padding: 0 12px;
+}
+.college-erp .erp-global-search input {
+  width: 100%;
+  max-width: none;
+  background: transparent;
+  border: 0;
+  padding: 10px 2px;
+  font-size: 11px;
+  outline-offset: 0;
+}
+.erp-global-search kbd {
+  white-space: nowrap;
+  font: 10px Arial;
+  color: var(--erp-muted);
+  border: 1px solid var(--erp-border);
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+.college-erp .erp-search-results {
+  background: var(--erp-surface);
+  border-color: var(--erp-border);
+  top: 47px;
+  border-radius: 12px;
+  max-width: none;
+  max-height: 60vh;
+  overflow: auto;
+  box-shadow: 0 20px 60px #0003;
+}
+.college-erp .erp-search-results a {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--erp-border);
+}
+.erp-search-results :is(strong, small) {
+  display: block;
+}
+.erp-search-results small {
+  margin-top: 4px;
+}
+.college-erp .erp-search-results a:is(:hover, .is-selected) {
+  background: var(--erp-raised);
+}
+.college-erp .erp-search-results p {
+  padding: 16px;
+}
+.college-erp .erp-notification {
+  position: relative;
+  background: transparent;
+  border: 0;
+  flex-shrink: 0;
+  width: 36px;
+  padding: 6px;
+}
+.college-erp .erp-notification span {
+  background: #df4657;
+  color: white;
+  min-width: 16px;
+  height: 16px;
+  font-size: 8px;
+  top: 0;
+  right: -1px;
+  border: 2px solid var(--erp-surface);
+}
+.college-erp .erp-profile-menu {
+  margin: 0;
+}
+.college-erp .erp-profile-menu summary {
+  gap: 10px;
+  min-width: 140px;
+}
+.college-erp .erp-profile-menu strong {
+  font-size: 11px;
+}
+.college-erp .erp-profile-menu small {
+  font-size: 9px;
+  margin-top: 3px;
+}
+.college-erp .erp-avatar {
+  background: var(--erp-raised);
+  color: var(--erp-accent);
+  border: 1px solid var(--erp-border);
+  width: 34px;
+  height: 34px;
+}
+.college-erp
+  :is(.erp-profile-menu > div, .erp-columns > div, .erp-header-actions > div) {
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  color: var(--erp-ink);
+  box-shadow: 0 20px 50px #0003;
+  border-radius: 10px;
+}
+.erp-header-actions {
+  position: relative;
+  flex-shrink: 0;
+}
+.erp-header-actions summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  border-radius: 7px;
+  padding: 10px;
+  color: var(--erp-ink);
+  list-style: none;
+  font-size: 10px;
+}
+.erp-header-actions > div {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 195px;
+  padding: 7px;
+  display: grid;
+  gap: 3px;
+}
+.college-erp .erp-header-actions button,
+.erp-header-actions a {
+  text-align: left;
+  justify-content: start;
+  padding: 11px;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+}
+.erp-campus-banner {
+  height: 190px;
+  position: relative;
+  overflow: hidden;
+  background: var(--erp-sidebar);
+}
+.erp-campus-banner img {
+  object-fit: cover;
+  object-position: center 55%;
+}
+.erp-campus-banner:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #251708a6, transparent 80%);
+}
+.erp-skyline .erp-campus-banner:after {
+  background: linear-gradient(0deg, #061325d9, transparent 90%);
+}
+.erp-campus-banner > div {
+  position: absolute;
+  bottom: 24px;
+  left: 30px;
+  z-index: 1;
+  color: white;
+}
+.erp-campus-banner > div span {
+  display: block;
+  font:
+    28px Georgia,
+    serif;
+  margin-bottom: 7px;
+}
+.college-erp .erp-campus-banner strong {
+  color: white;
+  font-size: 12px;
+  font-weight: 400;
+}
+.erp-campus-live {
+  position: absolute;
+  bottom: 26px;
+  right: 28px;
+  z-index: 1;
+  color: white;
+  font-size: 10px;
+  padding: 8px 12px;
+  border: 1px solid #ffffff55;
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+}
+.college-erp .erp-demo-banner {
+  background: var(--erp-raised);
+  border-color: var(--erp-border);
+  color: var(--erp-muted);
+  padding: 8px 28px;
+  font-size: 9px;
+}
+.college-erp .erp-content {
+  padding: 20px 28px 32px;
+  max-width: 1720px;
+  margin: auto;
+  animation: erp-workspace-enter 0.4s ease-out;
+}
+.college-erp .erp-breadcrumb {
+  color: var(--erp-muted);
+  margin-bottom: 16px;
+}
+.college-erp .erp-filters {
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  margin-bottom: 24px;
+  gap: 12px;
+  box-shadow: 0 3px 12px #30201604;
+}
+.college-erp .erp-filters label {
+  font-size: 9px;
+  gap: 5px;
+}
+.college-erp .erp-filters :is(input, select) {
+  background: var(--erp-raised);
+  font-size: 10px;
+}
+.college-erp .erp-welcome {
+  margin: 0 0 23px;
+  align-items: center;
+  gap: 16px;
+}
+.college-erp .erp-welcome > div > span {
+  font-size: 10px;
+  color: var(--erp-muted);
+  margin-bottom: 6px;
+  display: block;
+}
+.college-erp .erp-welcome h1 {
+  font-size: 27px;
+  letter-spacing: -0.04em;
+  margin-bottom: 5px;
+}
+.college-erp .erp-welcome p {
+  font-size: 12px;
+  margin: 0;
+  color: var(--erp-muted);
+}
+.college-erp .erp-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin-bottom: 20px;
+}
+.college-erp .erp-metrics article {
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 18px #30201605;
+  padding: 17px 16px;
+  min-height: 124px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.college-erp .erp-metrics article:hover {
+  border-color: var(--erp-glow);
+  transform: translateY(-2px);
+}
+.college-erp .erp-metric-icon {
+  background: var(--erp-raised);
+  color: var(--erp-accent);
+  border: 1px solid var(--erp-border);
+  border-radius: 9px;
+  width: 33px;
+  height: 33px;
+}
+.college-erp .erp-metrics article:nth-child(4n + 2) .erp-metric-icon {
+  color: #17876a;
+  background: #17876a15;
+}
+.college-erp .erp-metrics article:nth-child(4n + 3) .erp-metric-icon {
+  color: var(--erp-danger);
+  background: #c94b5115;
+}
+.college-erp .erp-metrics article > span {
+  color: var(--erp-muted);
+  font-size: 10px;
+}
+.college-erp .erp-metrics article > strong {
+  color: var(--erp-ink);
+  font-size: 22px;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.college-erp .erp-metrics article a {
+  font-size: 9px;
+}
+.college-erp.erp-skyline .erp-metrics article {
+  background: linear-gradient(135deg, #103559, #07172c 75%);
+  box-shadow:
+    inset 0 1px #ffffff08,
+    0 6px 20px #0002;
+}
+.college-erp .erp-panel {
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 11px;
+  box-shadow: 0 5px 20px #30201604;
+  padding: 20px;
+  min-width: 0;
+}
+.college-erp .erp-panel-title {
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.college-erp .erp-panel-title h2 {
+  font-size: 13px;
+  color: var(--erp-ink);
+}
+.college-erp .erp-panel-title p {
+  font-size: 10px;
+  margin-top: 4px;
+  color: var(--erp-muted);
+}
+.college-erp .erp-panel-title > a {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.college-erp .erp-dashboard-grid {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 18px;
+}
+.college-erp .erp-collection-chart {
+  grid-column: auto;
+}
+.erp-chart-controls {
+  display: flex;
+  gap: 5px;
+}
+.college-erp .erp-chart-controls select {
+  font-size: 9px;
+  padding: 5px;
+  min-height: 28px;
+}
+.college-erp .erp-chart-toggle {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  min-height: 22px;
+  font-size: 9px;
+  color: var(--erp-accent);
+}
+.erp-interactive-chart {
+  color: var(--erp-accent);
+}
+.erp-interactive-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  min-height: 165px;
+  overflow: visible;
+}
+.erp-interactive-chart text {
+  font: 9px Arial;
+  fill: var(--erp-muted);
+}
+.erp-chart-gridline {
+  stroke: var(--erp-border);
+  stroke-width: 1;
+}
+.erp-interactive-chart g {
+  cursor: pointer;
+  outline-offset: 0;
+}
+.erp-interactive-chart g:focus {
+  outline: 1px solid var(--erp-accent);
+}
+.erp-chart-tooltip {
+  display: block;
+  color: var(--erp-muted);
+  font-size: 10px;
+  min-height: 20px;
+  text-align: center;
+}
+.college-erp .erp-donut {
+  width: 160px;
+  height: 160px;
+  box-shadow: 0 0 25px #1769ff0a;
+  margin: 12px auto;
+}
+.college-erp .erp-donut > div {
+  background: var(--erp-surface);
+  color: var(--erp-ink);
+}
+.college-erp .erp-donut strong {
+  color: var(--erp-ink);
+}
+.college-erp .erp-program-legend button {
+  border: 0;
+  border-bottom: 1px solid var(--erp-border);
+  background: transparent;
+  color: var(--erp-muted);
+  padding: 7px 0;
+  min-height: 28px;
+}
+.college-erp .erp-program-legend strong {
+  color: var(--erp-ink);
+}
+.erp-compact-records {
+  display: grid;
+}
+.erp-compact-records > a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--erp-border);
+  min-width: 0;
+}
+.erp-compact-records > a:last-child {
+  border: 0;
+}
+.erp-compact-records > a > div {
+  flex: 1;
+  min-width: 0;
+}
+.erp-compact-records strong {
+  font-size: 11px;
+  display: block;
+}
+.erp-compact-records small {
+  font-size: 9px;
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.erp-record-avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  color: var(--erp-accent);
+  font-size: 10px;
+}
+.erp-compact-records b {
+  font-size: 11px;
+  color: var(--erp-danger);
+  white-space: nowrap;
+}
+.college-erp .erp-activity {
+  color: var(--erp-ink);
+}
+.college-erp .erp-activity > div {
+  border-color: var(--erp-border);
+}
+.college-erp .erp-activity-dot {
+  background: var(--erp-accent);
+}
+.college-erp .erp-service-grid a {
+  background: var(--erp-raised);
+  border-color: var(--erp-border);
+  color: var(--erp-accent);
+}
+.college-erp .erp-service-grid :is(strong, span) {
+  color: var(--erp-ink);
+}
+.college-erp .erp-table-panel {
+  padding: 0;
+  overflow: visible;
+}
+.college-erp .erp-table-panel > .erp-panel-title {
+  padding: 19px 20px 0;
+}
+.college-erp .erp-table-tools {
+  padding: 14px 20px;
+  border-color: var(--erp-border);
+  background: var(--erp-raised);
+  gap: 9px;
+}
+.college-erp .erp-search input {
+  background: var(--erp-surface);
+}
+.college-erp table {
+  color: var(--erp-ink);
+  font-size: 11px;
+}
+.college-erp :is(th, td) {
+  border-color: var(--erp-border);
+}
+.college-erp thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.college-erp th {
+  background: var(--erp-raised);
+  color: var(--erp-muted);
+  padding: 13px 12px;
+}
+.college-erp th button {
+  background: transparent;
+  color: var(--erp-muted);
+  border: 0;
+}
+.college-erp td {
+  padding: 13px 12px;
+  color: var(--erp-ink);
+}
+.college-erp tbody tr:hover {
+  background: var(--erp-raised);
+}
+.college-erp .erp-table-scroll {
+  border-radius: 0;
+  max-height: 640px;
+}
+.college-erp .erp-status {
+  border-radius: 5px;
+  padding: 4px 7px;
+  font-size: 9px;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  color: var(--erp-ink);
+}
+.college-erp
+  :is(
+    .status-paid,
+    .status-approved,
+    .status-issued,
+    .status-enrolled,
+    .status-returned
+  ) {
+  background: #17876a18;
+  color: #16876b;
+  border-color: #17876a44;
+}
+.college-erp.erp-skyline
+  :is(
+    .status-paid,
+    .status-approved,
+    .status-issued,
+    .status-enrolled,
+    .status-returned
+  ) {
+  color: #4ce4be;
+  background: #22c7a417;
+}
+.college-erp :is(.status-pending, .status-under-review) {
+  background: #d68b3518;
+  color: #a26313;
+  border-color: #d68b3544;
+}
+.college-erp.erp-skyline :is(.status-pending, .status-under-review) {
+  color: #ffbd78;
+  background: #ffb35b17;
+}
+.college-erp :is(.status-rejected, .status-overdue) {
+  background: #c94b5118;
+  color: var(--erp-danger);
+}
+.college-erp .erp-pagination {
+  padding: 14px 20px;
+  border-color: var(--erp-border);
+  color: var(--erp-muted);
+  flex-wrap: wrap;
+}
+.college-erp .erp-modal {
+  background: var(--erp-surface);
+  color: var(--erp-ink);
+  border: 1px solid var(--erp-border);
+  border-radius: 15px;
+  box-shadow: 0 30px 90px #0006;
+  max-height: 85dvh;
+  animation: erp-dialog-enter 0.2s ease-out;
+}
+.college-erp dialog::backdrop {
+  background: #03101f88;
+  backdrop-filter: blur(7px);
+}
+body:has(.college-erp dialog[open]) {
+  overflow: hidden;
+}
+.college-erp .erp-modal :is(input, select, textarea) {
+  background: var(--erp-raised);
+}
+.college-erp .erp-modal label {
+  color: var(--erp-ink);
+}
+.college-erp .erp-modal form > p {
+  background: var(--erp-raised);
+  color: var(--erp-muted);
+}
+.college-erp .erp-notification-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(440px, 100%);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100%;
+  background: var(--erp-surface);
+  border: 0;
+  border-left: 1px solid var(--erp-border);
+  color: var(--erp-ink);
+  padding: 25px;
+  box-shadow: -20px 0 80px #0004;
+  animation: erp-drawer-enter 0.25s ease-out;
+}
+.erp-notification-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 16px 0;
+}
+.erp-notification-list article {
+  display: flex;
+  gap: 12px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--erp-border);
+}
+.erp-notification-list article > svg {
+  color: var(--erp-accent);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.erp-notification-list article.is-read > svg {
+  opacity: 0.4;
+}
+.erp-notification-list h3 {
+  font-size: 12px;
+  margin-top: 5px;
+}
+.erp-notification-list small {
+  font-size: 9px;
+}
+.erp-notification-list p {
+  font-size: 11px;
+  margin: 7px 0;
+}
+.erp-notification-list a {
+  margin-right: 12px;
+  font-size: 10px;
+}
+.college-erp .erp-notification-list button {
+  padding: 4px 7px;
+  font-size: 9px;
+  min-height: 27px;
+}
+.college-erp .erp-footer {
+  border-color: var(--erp-border);
+  color: var(--erp-muted);
+}
+.college-erp
+  :is(
+    .erp-profile-tabs,
+    .erp-finance-overview,
+    .erp-staff-overview,
+    .erp-leadership-note,
+    .erp-student-home,
+    .erp-profile-header,
+    .erp-detail-grid,
+    .erp-report-grid,
+    .erp-hostel-grid
+  ) {
+  border-color: var(--erp-border);
+  color: var(--erp-ink);
+}
+.college-erp
+  :is(
+    .erp-role-workspace,
+    .erp-profile-header,
+    .erp-student-summary,
+    .erp-detail-grid > div,
+    .erp-report-grid > div,
+    .erp-hostel-grid > div
+  ) {
+  background: var(--erp-surface);
+  border-color: var(--erp-border);
+}
+.college-erp .erp-profile-tabs button {
+  color: var(--erp-muted);
+  background: transparent;
+}
+.college-erp .erp-profile-tabs button.active {
+  color: var(--erp-accent);
+  border-color: var(--erp-accent);
+}
+.college-erp .erp-compact .erp-sidebar {
+  width: 80px;
+}
+.college-erp.erp-compact .erp-sidebar {
+  width: 80px;
+}
+.college-erp.erp-compact .erp-workspace {
+  margin-left: 80px;
+}
+.college-erp.erp-compact .erp-sidebar-brand {
+  padding: 24px 21px;
+}
+.college-erp.erp-compact .erp-nav-group summary {
+  justify-content: center;
+  padding: 12px 8px;
+}
+.college-erp.erp-compact .erp-nav-group summary svg:last-child {
+  display: none;
+}
+.college-erp.erp-compact .erp-nav-group a {
+  padding: 10px;
+  justify-content: center;
+  min-height: 30px;
+}
+.college-erp.erp-compact .erp-nav-group a .erp-nav-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+@keyframes erp-workspace-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes erp-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes erp-drawer-enter {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (min-width: 1550px) {
+  .college-erp .erp-content {
+    padding: 26px 38px 40px;
+  }
+  .college-erp .erp-campus-banner {
+    height: 210px;
+  }
+  .college-erp .erp-metrics article {
+    padding: 20px;
+  }
+}
+@media (max-width: 1180px) and (min-width: 651px) {
+  .college-erp .erp-sidebar {
+    width: 80px;
+  }
+  .college-erp .erp-workspace {
+    margin-left: 80px;
+  }
+  .college-erp .erp-sidebar-brand {
+    padding: 24px 21px;
+  }
+  .college-erp:not(.erp-rail-expanded)
+    .erp-sidebar
+    :is(strong, .erp-sidebar-label, nav span, .erp-sidebar-foot span) {
+    display: none;
+  }
+  .college-erp:not(.erp-rail-expanded) .erp-nav-group summary {
+    justify-content: center;
+    padding: 12px 5px;
+  }
+  .college-erp:not(.erp-rail-expanded) .erp-nav-group summary svg:last-child {
+    display: none;
+  }
+  .college-erp .erp-nav-group a {
+    justify-content: center;
+    padding: 10px;
+  }
+  .college-erp .erp-nav-group a .erp-nav-dot {
+    display: block;
+    width: 7px;
+    height: 7px;
+  }
+  .college-erp .erp-sidebar-brand > button {
+    display: none;
+  }
+  .college-erp .erp-topbar {
+    gap: 12px;
+    padding: 0 20px;
+  }
+  .college-erp .erp-profile-menu summary {
+    min-width: 0;
+  }
+  .college-erp .erp-profile-menu summary > span:nth-child(2) {
+    display: none;
+  }
+  .college-erp .erp-dashboard-grid {
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .college-erp .erp-metrics {
+    gap: 10px;
+  }
+  .college-erp .erp-metrics article {
+    padding: 13px 11px;
+  }
+  .college-erp .erp-metrics article > strong {
+    font-size: 18px;
+  }
+  .college-erp .erp-global-search kbd {
+    display: none;
+  }
+  .college-erp .erp-campus-banner {
+    height: 150px;
+  }
+}
+@media (max-width: 800px) {
+  .college-erp .erp-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .college-erp .erp-header-actions summary {
+    font-size: 0;
+    gap: 0;
+  }
+  .college-erp .erp-header-actions summary svg {
+    width: 17px;
+  }
+  .college-erp .erp-filters {
+    flex-wrap: wrap;
+  }
+  .college-erp .erp-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .college-erp .erp-panel {
+    padding: 18px;
+  }
+  .college-erp .erp-content {
+    padding: 18px;
+  }
+  .college-erp .erp-welcome h1 {
+    font-size: 24px;
+  }
+  .college-erp .erp-global-search input {
+    font-size: 10px;
+  }
+}
+@media (max-width: 650px) {
+  .college-erp .erp-sidebar,
+  .college-erp.erp-compact .erp-sidebar {
+    width: 270px;
+    transform: translateX(-100%);
+    visibility: hidden;
+  }
+  .college-erp .erp-sidebar.is-open {
+    transform: none;
+    visibility: visible;
+  }
+  .college-erp .erp-workspace,
+  .college-erp.erp-compact .erp-workspace {
+    margin-left: 0;
+  }
+  .college-erp .erp-sidebar-brand {
+    padding: 24px 20px;
+  }
+  .college-erp .erp-sidebar-brand > button {
+    display: flex;
+    color: white;
+    background: transparent;
+  }
+  .college-erp.erp-compact
+    .erp-sidebar
+    :is(strong, nav span, .erp-sidebar-foot span) {
+    display: block;
+  }
+  .college-erp .erp-sidebar .erp-nav-group a {
+    justify-content: start;
+    padding: 11px 16px;
+  }
+  .college-erp .erp-sidebar .erp-nav-group summary {
+    justify-content: start;
+  }
+  .college-erp .erp-sidebar .erp-nav-group summary svg:last-child {
+    display: block;
+  }
+  .college-erp .erp-sidebar-foot > button {
+    display: none;
+  }
+  .college-erp .erp-desktop-toggle {
+    display: none;
+  }
+  .college-erp .erp-topbar {
+    height: 63px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .college-erp .erp-global-search {
+    padding: 0 9px;
+    min-width: 0;
+  }
+  .college-erp .erp-global-search input {
+    padding: 7px 0;
+    min-height: 34px;
+    width: 100%;
+    font-size: 10px;
+  }
+  .college-erp .erp-global-search > svg {
+    width: 13px;
+    flex-shrink: 0;
+  }
+  .college-erp .erp-global-search kbd {
+    display: none;
+  }
+  .college-erp .erp-profile-menu summary {
+    min-width: 0;
+  }
+  .college-erp .erp-profile-menu summary > span:nth-child(2),
+  .college-erp .erp-profile-menu summary > svg {
+    display: none;
+  }
+  .college-erp .erp-profile-menu .erp-avatar {
+    width: 29px;
+    height: 29px;
+    font-size: 9px;
+  }
+  .college-erp .erp-header-actions {
+    display: none;
+  }
+  .college-erp .erp-notification {
+    width: 26px;
+  }
+  .college-erp .erp-notification span {
+    font-size: 7px;
+  }
+  .college-erp .erp-campus-banner {
+    height: 125px;
+  }
+  .erp-campus-banner > div {
+    left: 18px;
+    bottom: 18px;
+  }
+  .erp-campus-banner > div span {
+    font-size: 23px;
+  }
+  .erp-campus-banner strong {
+    font-size: 10px;
+  }
+  .erp-campus-live {
+    display: none;
+  }
+  .college-erp .erp-content {
+    padding: 17px 13px 25px;
+  }
+  .college-erp .erp-demo-banner {
+    padding: 8px 13px;
+    gap: 6px;
+    font-size: 8px;
+  }
+  .college-erp .erp-demo-banner > a {
+    display: none;
+  }
+  .college-erp .erp-filters {
+    padding: 12px;
+    gap: 9px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 19px;
+  }
+  .college-erp .erp-filters label {
+    min-width: 0;
+    width: auto;
+    max-width: none;
+  }
+  .college-erp .erp-filters :is(input, select) {
+    width: 100%;
+    font-size: 9px;
+    padding: 8px;
+  }
+  .college-erp .erp-filters > button {
+    grid-column: 1/-1;
+  }
+  .college-erp .erp-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 17px;
+  }
+  .college-erp .erp-welcome h1 {
+    font-size: 25px;
+  }
+  .college-erp .erp-welcome p {
+    font-size: 11px;
+  }
+  .college-erp .erp-quick-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+    display: flex;
+  }
+  .college-erp .erp-quick-actions button {
+    flex: 1;
+    font-size: 10px;
+  }
+  .college-erp .erp-metrics {
+    gap: 9px;
+  }
+  .college-erp .erp-metrics article {
+    padding: 13px 11px;
+    min-height: 125px;
+  }
+  .college-erp .erp-metrics article > strong {
+    font-size: 19px;
+  }
+  .college-erp .erp-metrics article > span {
+    font-size: 9px;
+  }
+  .college-erp .erp-metric-icon {
+    height: 27px;
+    width: 27px;
+  }
+  .college-erp .erp-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+  .college-erp .erp-panel {
+    padding: 16px;
+  }
+  .college-erp .erp-panel-title {
+    flex-wrap: wrap;
+    margin-bottom: 13px;
+  }
+  .college-erp .erp-panel-title h2 {
+    font-size: 12px;
+  }
+  .college-erp .erp-table-panel {
+    padding: 0;
+    overflow: hidden;
+  }
+  .college-erp .erp-table-panel > .erp-panel-title {
+    padding: 16px 13px 0;
+  }
+  .college-erp .erp-export-actions {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .college-erp .erp-export-actions button {
+    font-size: 9px;
+    padding: 7px;
+  }
+  .college-erp .erp-table-tools {
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+  .college-erp .erp-search {
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .college-erp .erp-search input {
+    width: 100%;
+  }
+  .college-erp .erp-table-scroll {
+    max-height: none;
+    overflow: visible;
+    padding: 0 12px;
+  }
+  .college-erp .erp-table-scroll table {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+  }
+  .college-erp .erp-table-scroll thead {
+    display: none;
+  }
+  .college-erp .erp-table-scroll tbody {
+    display: grid;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .college-erp .erp-table-scroll tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--erp-raised);
+    border: 1px solid var(--erp-border);
+    border-radius: 9px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .college-erp .erp-table-scroll td {
+    display: block;
+    border: 0;
+    padding: 0;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+  }
+  .college-erp .erp-table-scroll td:before {
+    content: attr(data-label);
+    display: block;
+    color: var(--erp-muted);
+    font-size: 9px;
+    margin-bottom: 4px;
+  }
+  .college-erp .erp-table-scroll td:first-child {
+    grid-column: 1/-1;
+  }
+  .college-erp .erp-table-scroll td[data-label="Actions"] {
+    grid-column: 1/-1;
+    border-top: 1px solid var(--erp-border);
+    padding-top: 10px;
+  }
+  .college-erp .erp-row-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .college-erp .erp-row-actions button {
+    font-size: 10px;
+    min-height: 36px;
+  }
+  .college-erp .erp-pagination {
+    padding: 12px;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .college-erp .erp-modal {
+    width: calc(100% - 20px);
+    max-width: none;
+    padding: 20px 16px;
+    max-height: 90dvh;
+  }
+  .college-erp .erp-notification-drawer {
+    padding: 22px 16px;
+  }
+  .college-erp .erp-footer {
+    padding: 15px;
+    font-size: 8px;
+    gap: 10px;
+  }
+  .erp-chart-controls {
+    margin-left: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .college-erp *,
+  .college-erp *:before,
+  .college-erp *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  .college-erp .erp-sidebar,
+  .college-erp .erp-topbar,
+  .erp-campus-banner,
+  .erp-demo-banner {
+    display: none !important;
+  }
+  .college-erp .erp-workspace {
+    margin: 0 !important;
+  }
+  .college-erp {
+    --erp-bg: white;
+    --erp-surface: white;
+    --erp-raised: #f6f6f6;
+    --erp-ink: #111;
+    --erp-muted: #555;
+    --erp-border: #ddd;
+    color: #111;
+    background: white;
+  }
+}
+.college-erp .erp-month-drilldown {
+  display: flex;
+  gap: 2px;
+  justify-content: space-between;
+  margin: 0 0 9px 43px;
+}
+.college-erp .erp-month-drilldown button {
+  background: transparent;
+  border: 0;
+  padding: 3px 0;
+  min-height: 26px;
+  font-size: 9px;
+  color: var(--erp-muted);
+  flex: 1;
+  min-width: 0;
+}
+.erp-insight-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 15px;
+}
+.college-erp .erp-insight-legend button {
+  display: flex;
+  justify-content: start;
+  background: transparent;
+  padding: 5px 0;
+  white-space: normal;
+  font-size: 9px;
+  border: 0;
+  border-bottom: 1px solid var(--erp-border);
+  min-height: 27px;
+  text-align: left;
+}
+.erp-insight-legend button[aria-pressed="false"] {
+  opacity: 0.4;
+}
+.erp-insight-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.erp-insight-legend b {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.erp-insight-link {
+  display: block;
+  text-align: right;
+  font-size: 10px;
+  margin-top: 14px;
+}
+.erp-report-charts {
+  margin-bottom: 20px;
+}
+.erp-recharts-monthly {
+  margin-top: 6px;
+}
+.erp-insights .recharts-tooltip-label {
+  color: var(--erp-ink);
+}
+.college-erp .erp-filter-toggle {
+  display: none;
+}
+.college-erp .erp-source-strip > span,
+.college-erp .erp-report-summary,
+.college-erp .erp-profile-summary,
+.college-erp .erp-detail-grid > section,
+.college-erp .erp-student-home,
+.college-erp .erp-finance-overview,
+.college-erp .erp-staff-overview {
+  background: var(--erp-surface);
+  border-color: var(--erp-border);
+  color: var(--erp-ink);
+}
+.college-erp .erp-leadership-note,
+.college-erp .erp-student-id,
+.college-erp .erp-finance-overview > div:first-child,
+.college-erp .erp-staff-overview > div:first-child {
+  background: linear-gradient(130deg, #50351f, #302016);
+}
+.college-erp.erp-skyline .erp-leadership-note,
+.college-erp.erp-skyline .erp-student-id,
+.college-erp.erp-skyline .erp-finance-overview > div:first-child,
+.college-erp.erp-skyline .erp-staff-overview > div:first-child {
+  background: linear-gradient(130deg, #103e6c, #081c35);
+}
+.college-erp
+  :is(
+    .erp-leadership-note,
+    .erp-student-id,
+    .erp-finance-overview > div:first-child,
+    .erp-staff-overview > div:first-child
+  )
+  :is(h2, strong, dd) {
+  color: white;
+}
+.college-erp
+  :is(
+    .erp-leadership-note,
+    .erp-student-id,
+    .erp-finance-overview > div:first-child,
+    .erp-staff-overview > div:first-child
+  )
+  :is(p, small, span, dt) {
+  color: #e3d2bd;
+}
+.college-erp.erp-skyline
+  :is(
+    .erp-leadership-note,
+    .erp-student-id,
+    .erp-finance-overview > div:first-child,
+    .erp-staff-overview > div:first-child
+  )
+  :is(p, small, span, dt) {
+  color: #b8d4ed;
+}
+@media (min-width: 651px) and (max-width: 1180px) {
+  .college-erp.erp-rail-expanded .erp-sidebar {
+    width: 258px;
+  }
+  .college-erp.erp-rail-expanded .erp-workspace {
+    margin-left: 258px;
+  }
+  .college-erp.erp-rail-expanded
+    .erp-sidebar
+    :is(strong, nav span, .erp-sidebar-label, .erp-sidebar-foot span) {
+    display: block;
+  }
+  .college-erp.erp-rail-expanded .erp-nav-group a {
+    justify-content: start;
+    padding-left: 25px;
+  }
+  .college-erp.erp-rail-expanded .erp-nav-group summary {
+    justify-content: start;
+  }
+  .college-erp.erp-rail-expanded .erp-sidebar-brand {
+    padding: 24px 21px;
+  }
+  .college-erp.erp-rail-expanded .erp-nav-group summary svg:last-child {
+    display: block;
+  }
+  .college-erp.erp-rail-expanded .erp-sidebar-foot > button {
+    display: flex;
+  }
+}
+@media (max-width: 650px) {
+  .college-erp .erp-filter-toggle {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 13px;
+    padding: 11px 13px;
+  }
+  .erp-filter-toggle span {
+    font-size: 9px;
+    color: var(--erp-muted);
+    margin-left: auto;
+    margin-right: 10px;
+  }
+  .college-erp .erp-filters:not(.is-open) {
+    display: none;
+  }
+  .college-erp .erp-filters.is-open {
+    display: grid;
+  }
+}
+.college-erp .erp-record-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(580px, 100%);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100%;
+  padding: 26px;
+  background: var(--erp-surface);
+  color: var(--erp-ink);
+  border: 0;
+  border-left: 1px solid var(--erp-border);
+  box-shadow: -20px 0 80px #0004;
+  animation: erp-drawer-enter 0.25s ease-out;
+}
+.erp-record-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 22px;
+  margin: 25px 0;
+}
+.erp-record-fields > div {
+  padding: 17px 0;
+  border-bottom: 1px solid var(--erp-border);
+  min-width: 0;
+}
+.erp-record-fields dt {
+  font-size: 10px;
+  margin-bottom: 8px;
+}
+.erp-record-fields dd {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.college-erp .erp-record-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 0;
+  background: var(--erp-surface);
+  border-top: 1px solid var(--erp-border);
+}
+@media (max-width: 650px) {
+  .college-erp .erp-record-drawer {
+    width: 100%;
+    padding: 22px 18px;
+  }
+  .erp-record-fields {
+    grid-template-columns: 1fr;
+  }
+}
+.college-erp .erp-footer {
+  background: var(--erp-bg);
+}
+.college-erp .erp-breadcrumb span {
+  color: var(--erp-muted);
+}
+.college-erp .erp-metrics article a {
+  color: var(--erp-accent);
+}
+.college-erp .erp-metrics article small {
+  color: var(--erp-muted);
+}
+.erp-secondary-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 13px;
+  margin: 20px 0;
+}
+.erp-secondary-metrics > a {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 18px 15px;
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 9px;
+}
+.erp-secondary-metrics > a > svg:first-child {
+  color: var(--erp-accent);
+  flex-shrink: 0;
+}
+.erp-secondary-metrics > a > svg:last-child {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.erp-secondary-metrics span {
+  font-size: 10px;
+  color: var(--erp-muted);
+}
+.erp-secondary-metrics strong {
+  display: block;
+  font-size: 20px;
+  margin: 8px 0;
+}
+.erp-secondary-metrics small {
+  font-size: 9px;
+  color: var(--erp-accent);
+}
+@media (max-width: 800px) {
+  .erp-secondary-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .erp-secondary-metrics > a {
+    padding: 14px 12px;
+  }
+  .erp-secondary-metrics strong {
+    font-size: 18px;
+  }
+}
+.college-erp .erp-columns > summary {
+  background: var(--erp-raised);
+  border-color: var(--erp-border);
+  color: var(--erp-ink);
+}
+.college-erp .erp-row-actions > a {
+  background: var(--erp-raised);
+  border-color: var(--erp-border);
+  color: var(--erp-accent);
+}
+.college-erp .erp-profile-tabs > button[aria-pressed="true"] {
+  background: var(--erp-glow);
+  color: white;
+  border-color: var(--erp-glow);
+}
+.college-erp .erp-principal-overview {
+  background: var(--erp-surface);
+  border-color: var(--erp-border);
+}
+.college-erp .erp-decision-queue > div {
+  border-color: var(--erp-border);
+}
+.college-erp .erp-staff-overview > div:last-child > a,
+.college-erp .erp-student-summary a {
+  border-color: var(--erp-border);
+  background: var(--erp-raised);
+}
+.college-erp .erp-source-strip > button {
+  display: block;
+  flex: 1;
+  text-align: left;
+  min-width: 95px;
+  padding: 15px 18px;
+  font-size: 10px;
+  white-space: normal;
+}
+.college-erp .erp-source-strip strong {
+  color: var(--erp-accent);
+}
+.erp-pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+.college-erp .erp-pipeline button {
+  display: block;
+  text-align: left;
+  padding: 15px;
+  background: var(--erp-surface);
+  border-top: 2px solid var(--erp-glow);
+}
+.erp-pipeline span {
+  font-size: 10px;
+  color: var(--erp-muted);
+}
+.erp-pipeline strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 10px;
+}
+.college-erp
+  :is(.erp-pipeline, .erp-source-strip, .erp-segmented, .erp-room-map)
+  button[aria-pressed="true"] {
+  border-color: var(--erp-accent);
+  background: var(--erp-raised);
+  box-shadow: 0 0 0 1px var(--erp-accent);
+}
+.erp-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0;
+}
+.erp-segmented b {
+  background: var(--erp-raised);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.erp-room-map {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+.college-erp .erp-room-map button {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  white-space: normal;
+  text-align: left;
+  padding: 12px;
+  background: var(--erp-raised);
+  gap: 8px;
+}
+.erp-room-map span {
+  font-size: 9px;
+  color: var(--erp-muted);
+}
+.erp-room-map strong {
+  font-size: 19px;
+}
+.erp-room-map small {
+  font-size: 9px;
+}
+.erp-room-map button > div {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+.erp-room-map i {
+  width: 9px;
+  height: 13px;
+  border: 1px solid var(--erp-border);
+  border-radius: 2px;
+}
+.erp-room-map i.is-occupied {
+  background: var(--erp-glow);
+  border-color: var(--erp-glow);
+}
+.erp-detail-note {
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  padding: 17px;
+  border-radius: 9px;
+  margin-bottom: 20px;
+}
+.erp-detail-note h3 {
+  font-size: 12px;
+}
+.erp-detail-note small {
+  font-size: 10px;
+}
+@media (max-width: 1180px) {
+  .erp-room-map {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .erp-pipeline {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .college-erp .erp-pipeline button {
+    padding: 11px;
+  }
+  .erp-pipeline strong {
+    font-size: 21px;
+  }
+  .erp-room-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .college-erp .erp-segmented button {
+    font-size: 10px;
+  }
+}
+.college-erp .erp-table-scroll td:nth-child(2) {
+  color: var(--erp-accent);
+}
+.college-erp .erp-dashboard-grid > .erp-secondary-metrics {
+  grid-column: 1/-1;
+  margin: 0;
+}
+.college-erp .erp-service-grid > a > svg {
+  color: var(--erp-accent);
+}
+.college-erp .erp-table-tools .erp-search {
+  border-color: var(--erp-border);
+  background: var(--erp-surface);
+}
+.college-erp .erp-table-tools .erp-search input {
+  background: transparent;
+}
+.college-erp .erp-panel-title h2 > span {
+  background: var(--erp-raised);
+  color: var(--erp-muted);
+}
+.college-erp.erp-skyline .erp-dashboard-grid {
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+}
+.college-erp.erp-skyline .erp-secondary-metrics > a {
+  background: linear-gradient(130deg, #103559, #07172c);
+  box-shadow: inset 0 1px #ffffff08;
+}
+@media (max-width: 800px) {
+  .college-erp.erp-skyline .erp-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Floating campus navigation: a detached dock in either institution's palette. */
+@media (min-width: 651px) {
+  .college-erp .erp-sidebar,
+  .college-erp.erp-rail-expanded .erp-sidebar {
+    inset: 14px auto 14px 14px;
+    width: 258px;
+    border: 1px solid #c9944555;
+    border-radius: 20px;
+    box-shadow:
+      0 18px 48px #24170f30,
+      0 2px 8px #24170f18;
+    max-height: calc(100dvh - 28px);
+  }
+  .college-erp.erp-skyline .erp-sidebar {
+    border-color: #28c8ff40;
+    box-shadow:
+      0 20px 55px #0007,
+      0 0 24px #1769ff0d;
+  }
+  .college-erp .erp-workspace,
+  .college-erp.erp-rail-expanded .erp-workspace {
+    margin-left: 286px;
+  }
+  .college-erp.erp-compact .erp-sidebar {
+    width: 76px;
+  }
+  .college-erp.erp-compact .erp-workspace {
+    margin-left: 104px;
+  }
+  .college-erp .erp-sidebar-brand {
+    padding: 24px 19px 18px;
+  }
+  .college-erp.erp-compact .erp-sidebar-brand {
+    padding: 22px 19px 16px;
+    min-height: 82px;
+  }
+  .college-erp .erp-sidebar-foot {
+    border-radius: 0 0 20px 20px;
+    padding: 17px 18px;
+  }
+  .college-erp.erp-compact .erp-sidebar nav {
+    padding: 0 10px 12px;
+  }
+  .college-erp.erp-compact .erp-nav-group {
+    margin: 0;
+  }
+  .college-erp.erp-compact .erp-nav-group > summary {
+    display: none;
+  }
+  .college-erp.erp-compact .erp-nav-group > a {
+    min-height: 42px;
+    margin: 4px 0;
+    padding: 10px;
+    border-radius: 11px;
+  }
+  .college-erp.erp-compact .erp-nav-group > a svg {
+    width: 18px;
+    height: 18px;
+  }
+  .college-erp.erp-compact .erp-sidebar-foot > a,
+  .college-erp.erp-compact .erp-sidebar-foot > button {
+    justify-content: center;
+    min-height: 30px;
+    display: flex;
+  }
+  .college-erp .erp-floating-toggle {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    right: -13px;
+    top: 31px;
+    width: 27px;
+    height: 27px;
+    min-height: 27px;
+    padding: 0;
+    background: var(--erp-sidebar);
+    border: 1px solid var(--erp-glow);
+    border-radius: 50%;
+    color: #f8eee0;
+    box-shadow: 0 3px 12px #0003;
+    z-index: 2;
+  }
+  .erp-floating-toggle svg {
+    transform: rotate(90deg);
+    transition: transform 0.25s;
+  }
+  .erp-compact .erp-floating-toggle svg {
+    transform: rotate(-90deg);
+  }
+}
+@media (max-width: 650px) {
+  .college-erp .erp-floating-toggle {
+    display: none;
+  }
+  .college-erp .erp-sidebar,
+  .college-erp.erp-compact .erp-sidebar {
+    inset: 10px auto 10px 10px;
+    width: min(286px, calc(100vw - 28px));
+    max-height: calc(100dvh - 20px);
+    border: 1px solid #c9944555;
+    border-radius: 18px;
+    box-shadow: 0 18px 60px #0005;
+    transform: translateX(calc(-100% - 12px));
+  }
+  .college-erp.erp-skyline .erp-sidebar {
+    border-color: #28c8ff40;
+  }
+  .college-erp .erp-sidebar.is-open {
+    transform: none;
+  }
+  .college-erp .erp-sidebar-foot {
+    border-radius: 0 0 18px 18px;
+  }
+  .college-erp .erp-sidebar-brand {
+    padding: 22px 18px;
+  }
+}
+@media print {
+  .college-erp .erp-workspace,
+  .college-erp.erp-compact .erp-workspace {
+    margin-left: 0;
+  }
+}
+.erp-academic-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.erp-academic-summary article {
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  gap: 8px;
+}
+.erp-academic-summary svg {
+  grid-row: 1/3;
+  color: var(--erp-accent);
+}
+.erp-academic-summary span {
+  color: var(--erp-muted);
+  font-size: 11px;
+}
+.erp-academic-summary strong {
+  font-size: 25px;
+}
+.erp-academic-programs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+.college-erp .erp-academic-programs .erp-panel {
+  margin: 0;
+}
+.college-erp .erp-academic-programs h2 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.erp-academic-programs p {
+  font-size: 11px;
+}
+.erp-academic-programs a {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 11px;
+}
+.erp-academic-programs svg {
+  color: var(--erp-accent);
+}
+@media (max-width: 1100px) {
+  .erp-academic-programs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .erp-academic-summary {
+    gap: 8px;
+  }
+  .erp-academic-summary article {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .erp-academic-summary span {
+    font-size: 9px;
+  }
+  .erp-academic-summary strong {
+    font-size: 22px;
+  }
+  .erp-academic-programs {
+    grid-template-columns: 1fr;
+  }
+}
+/* All ERP forms, confirmations, notifications and record details share a wide side sheet. */
+.college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: 64vw;
+  max-width: none;
+  min-width: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 20px 0 0 20px;
+  border: 0;
+  border-left: 1px solid var(--erp-border);
+  padding: 28px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  box-shadow: -24px 0 90px #0005;
+  animation: erp-wide-sheet-enter 0.28s ease-out;
+}
+.college-erp
+  :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer)
+  > .erp-panel-title {
+  position: sticky;
+  top: -28px;
+  z-index: 3;
+  margin: -28px -28px 24px;
+  padding: 23px 28px;
+  background: var(--erp-surface);
+  border-bottom: 1px solid var(--erp-border);
+  backdrop-filter: blur(16px);
+}
+.college-erp .erp-modal form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+}
+.college-erp .erp-modal form > label {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.college-erp .erp-modal form > p,
+.college-erp .erp-modal-actions {
+  grid-column: 1/-1;
+}
+.college-erp .erp-modal-actions {
+  position: sticky;
+  bottom: -28px;
+  z-index: 2;
+  margin: 12px -28px -28px;
+  padding: 20px 28px;
+  border-top: 1px solid var(--erp-border);
+  background: var(--erp-surface);
+  backdrop-filter: blur(16px);
+}
+.college-erp .erp-modal textarea {
+  min-height: 160px;
+}
+.college-erp .erp-confirmation-description {
+  font-size: 15px;
+  line-height: 1.9;
+  max-width: 65ch;
+  padding: 16px 0 30px;
+}
+.college-erp .erp-action-drawer > .erp-modal-actions {
+  margin-top: 30px;
+}
+@keyframes erp-wide-sheet-enter {
+  from {
+    transform: translateX(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (min-width: 651px) and (max-width: 1000px) {
+  .college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) {
+    width: 78vw;
+  }
+}
+@media (max-width: 650px) {
+  .college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    padding: 20px;
+  }
+  .college-erp
+    :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer)
+    > .erp-panel-title {
+    top: -20px;
+    margin: -20px -20px 20px;
+    padding: 20px;
+  }
+  .college-erp .erp-modal form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .college-erp .erp-modal-actions {
+    bottom: -20px;
+    margin: 10px -20px -20px;
+    padding: 18px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) {
+    animation: none;
+  }
+}
+/* Content-driven sheet widths: confirmations and short forms stay compact. */
+@media (min-width: 1001px) {
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="compact"] {
+    width: clamp(380px, 35vw, 560px);
+  }
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="medium"] {
+    width: clamp(580px, 54vw, 860px);
+  }
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="wide"] {
+    width: min(82vw, 1280px);
+  }
+}
+@media (min-width: 651px) and (max-width: 1000px) {
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="compact"] {
+    width: min(480px, 66vw);
+  }
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="medium"] {
+    width: 78vw;
+  }
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size="wide"] {
+    width: 92vw;
+  }
+}
+.college-erp .erp-modal[data-panel-size="compact"] form {
+  grid-template-columns: 1fr;
+}
+.erp-form-flow {
+  grid-column: 1/-1;
+  min-width: 0;
+}
+.erp-form-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 11px;
+  color: var(--erp-muted);
+  padding: 0 0 18px;
+}
+.erp-form-progress progress {
+  width: 130px;
+  height: 6px;
+  accent-color: var(--erp-accent);
+}
+.erp-form-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 12px;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  margin-bottom: 24px;
+}
+.college-erp .erp-form-steps button {
+  font-size: 10px;
+  padding: 7px 9px;
+  white-space: normal;
+  text-align: left;
+}
+.erp-form-steps button > span {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--erp-raised);
+  color: var(--erp-accent);
+  flex-shrink: 0;
+}
+.erp-form-section {
+  border: 1px solid var(--erp-border);
+  border-radius: 12px;
+  min-width: 0;
+  margin: 0 0 23px;
+  padding: 20px;
+  scroll-margin-top: 95px;
+}
+.erp-form-section legend {
+  padding: 0 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--erp-ink);
+}
+.erp-form-section legend span {
+  font-size: 10px;
+  color: var(--erp-accent);
+  margin-right: 9px;
+}
+.erp-form-section-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+}
+.erp-form-field {
+  min-width: 0;
+}
+.college-erp .erp-form-field > label {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 11px;
+  margin: 0 0 8px;
+}
+.erp-form-field label > small {
+  font-size: 9px;
+  margin-left: auto;
+  font-weight: 400;
+}
+.college-erp .erp-form-field :is(input, select, textarea) {
+  width: 100%;
+  font-size: 12px;
+  min-height: 43px;
+}
+.college-erp .erp-form-field > small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+  min-height: 0;
+  margin-top: 6px;
+}
+.erp-form-field.is-full,
+.erp-photo-field {
+  grid-column: 1/-1;
+}
+.college-erp .erp-form-field [aria-invalid="true"] {
+  border-color: var(--erp-danger);
+}
+.college-erp .erp-field-error {
+  color: var(--erp-danger);
+}
+.erp-selected-student {
+  display: flex;
+  align-items: start;
+  gap: 13px;
+  padding: 15px;
+  margin-top: 20px;
+  border: 1px solid var(--erp-border);
+  background: var(--erp-raised);
+  border-radius: 9px;
+  color: var(--erp-accent);
+}
+.erp-selected-student :is(strong, span, small) {
+  display: block;
+}
+.erp-selected-student span {
+  font-size: 10px;
+  color: var(--erp-muted);
+  margin: 6px 0;
+}
+.erp-selected-student small {
+  font-size: 11px;
+}
+.erp-photo-field {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: var(--erp-raised);
+  border: 1px dashed var(--erp-border);
+  border-radius: 10px;
+}
+.erp-photo-preview {
+  width: 88px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  background: var(--erp-surface);
+  border: 1px solid var(--erp-border);
+  border-radius: 9px;
+  overflow: hidden;
+  color: var(--erp-accent);
+  flex-shrink: 0;
+}
+.erp-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.erp-photo-field > div:last-child {
+  min-width: 0;
+}
+.college-erp .erp-photo-field input[type="file"] {
+  width: 100%;
+  font-size: 10px;
+  padding: 8px;
+  min-height: 35px;
+  margin: 8px 0;
+}
+.erp-photo-field small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.erp-photo-field button {
+  margin-top: 10px;
+}
+.erp-form-review {
+  padding: 16px;
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  background: var(--erp-raised);
+  margin-bottom: 10px;
+}
+.erp-form-review summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--erp-ink);
+}
+.erp-form-review dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
+}
+.erp-form-review dt {
+  font-size: 10px;
+}
+.erp-form-review dd {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  margin: 5px 0;
+}
+.erp-form-review p {
+  font-size: 10px;
+}
+.erp-modal[data-panel-size="compact"] .erp-form-section-fields {
+  grid-template-columns: 1fr;
+}
+.erp-profile-avatar {
+  overflow: hidden;
+}
+.erp-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.college-erp .erp-fee-editor form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.erp-fee-lines {
+  display: grid;
+  gap: 12px;
+}
+.erp-fee-line {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.8fr 1fr 34px;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  background: var(--erp-raised);
+  border: 1px solid var(--erp-border);
+  border-radius: 9px;
+}
+.college-erp .erp-fee-line label {
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.erp-fee-line > div {
+  min-width: 0;
+  padding-bottom: 10px;
+}
+.erp-fee-line small {
+  display: block;
+  font-size: 9px;
+  margin-bottom: 8px;
+}
+.erp-fee-line strong {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.erp-fee-totals {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--erp-border);
+  border-radius: 10px;
+  background: var(--erp-raised);
+}
+.erp-fee-totals > div {
+  padding: 16px;
+  border-right: 1px solid var(--erp-border);
+}
+.erp-fee-totals span {
+  display: block;
+  font-size: 10px;
+  color: var(--erp-muted);
+  margin-bottom: 8px;
+}
+.erp-fee-totals strong {
+  font-size: 15px;
+}
+.erp-fee-terms {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.erp-fee-preview > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--erp-border);
+}
+@media (max-width: 650px) {
+  .college-erp
+    :is(
+      .erp-modal,
+      .erp-record-drawer,
+      .erp-notification-drawer
+    )[data-panel-size] {
+    width: 100vw;
+    max-width: 100vw;
+  }
+  .erp-form-section {
+    padding: 14px;
+  }
+  .erp-form-section-fields {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  .erp-form-progress {
+    font-size: 9px;
+    gap: 10px;
+  }
+  .erp-form-progress progress {
+    width: 90px;
+  }
+  .erp-form-steps {
+    padding: 8px;
+    gap: 5px;
+  }
+  .college-erp .erp-form-steps button {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .erp-form-steps svg {
+    display: none;
+  }
+  .erp-photo-field {
+    flex-direction: column;
+    align-items: start;
+    gap: 12px;
+  }
+  .erp-form-review dl {
+    grid-template-columns: 1fr;
+  }
+  .erp-fee-line {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .erp-fee-line > label:first-child {
+    grid-column: 1/-1;
+  }
+  .erp-fee-line > button {
+    grid-column: 2;
+    justify-self: end;
+  }
+  .erp-fee-totals {
+    grid-template-columns: 1fr 1fr;
+  }
+  .erp-fee-totals > div:last-child {
+    grid-column: 1/-1;
+  }
+  .erp-fee-totals strong {
+    font-size: 15px;
+  }
+}
+.erp-student-name-photo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.erp-student-name-photo img {
+  border-radius: 5px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.college-erp .erp-form-flow label {
+  font-weight: 500;
+}
+.college-erp .erp-form-flow textarea {
+  min-height: 120px;
+}
+.erp-form-section-fields .erp-form-field > label > small {
+  color: var(--erp-muted);
+}
+.college-erp .erp-form-field > label {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
+  line-height: 1.6;
+}
+.college-erp .erp-form-field > label > span {
+  display: inline;
+}
+.college-erp .erp-form-field :is(input, select, textarea) {
+  font-size: 13px;
+}
+.erp-student-picker-search > small {
+  display: block;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--erp-muted);
+  margin: 5px 0 10px;
+}
+@media (max-width: 650px) {
+  .college-erp .erp-form-field :is(input, select, textarea) {
+    font-size: 16px;
+  }
+  .college-erp .erp-form-field > label {
+    font-size: 12px;
+  }
+  .erp-photo-field {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .erp-photo-preview {
+    width: 62px;
+    height: 80px;
+  }
+  .erp-photo-field > div:last-child {
+    flex: 1;
+  }
+  .erp-form-progress {
+    font-size: 10px;
+  }
+  .college-erp .erp-form-steps button {
+    font-size: 10px;
+  }
+}
+.college-erp .erp-modal {
+  transition: width 0.24s ease;
+}
+.college-erp .erp-modal > .erp-panel-title h2 {
+  font-size: 20px;
+  line-height: 1.35;
+}
+.college-erp
+  :is(.erp-record-drawer, .erp-notification-drawer)
+  > .erp-panel-title
+  h2 {
+  font-size: 18px;
+  line-height: 1.4;
+}
+@media (max-width: 650px) {
+  .college-erp .erp-modal > .erp-panel-title h2 {
+    font-size: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .college-erp .erp-modal {
+    transition: none;
+  }
+}
+/* The minimized dock represents sections, not every individual module. */
+.college-erp .erp-nav-rail {
+  display: none;
+}
+@media (min-width: 651px) {
+  .college-erp.erp-compact .erp-nav-sections {
+    display: none;
+  }
+  .college-erp.erp-compact .erp-nav-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+  }
+  .college-erp.erp-compact .erp-nav-rail > button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    width: 44px;
+    height: 42px;
+    min-height: 42px;
+    padding: 8px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #c8b9a5;
+    cursor: pointer;
+  }
+  .college-erp.erp-skyline.erp-compact .erp-nav-rail > button {
+    color: #9dbbd5;
+  }
+  .college-erp.erp-compact
+    .erp-nav-rail
+    > button:is(:hover, [aria-current="true"]) {
+    background: #c9944538;
+    color: #ffe4ae;
+  }
+  .college-erp.erp-skyline.erp-compact
+    .erp-nav-rail
+    > button:is(:hover, [aria-current="true"]) {
+    background: #1769ff45;
+    color: #55d4ff;
+  }
+  .college-erp.erp-compact .erp-sidebar-brand {
+    min-height: 62px;
+    padding: 14px 19px 10px;
+  }
+  .college-erp.erp-compact .erp-sidebar-foot {
+    padding: 8px 12px;
+  }
+  .college-erp.erp-compact .erp-sidebar nav {
+    padding-bottom: 4px;
+  }
+  .college-erp .erp-rail-tooltip {
+    position: fixed;
+    left: 96px;
+    display: none;
+    white-space: nowrap;
+    z-index: 240;
+    padding: 7px 11px;
+    border-radius: 9px;
+    background: var(--erp-sidebar);
+    color: white;
+    font-size: 11px;
+    box-shadow: 0 6px 16px #0003;
+    pointer-events: none;
+  }
+  .college-erp.erp-compact
+    .erp-nav-rail
+    > button:is(:hover, :focus-visible)
+    > .erp-rail-tooltip {
+    display: block !important;
+  }
+}
+@media (max-width: 650px) {
+  .college-erp .erp-nav-rail {
+    display: none;
+  }
+  .college-erp .erp-nav-sections {
+    display: block;
+  }
+}
+.erp-rail-flyout {
+  position: fixed;
+  left: 80px;
+  z-index: 120;
+  width: 230px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--erp-border);
+  border-radius: 12px;
+  background: var(--erp-surface);
+  box-shadow: 0 16px 45px #0003;
+  display: grid;
+  gap: 6px;
+  color: var(--erp-ink);
+}
+.erp-rail-flyout strong {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+.college-erp .erp-rail-flyout a {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 9px !important;
+  color: var(--erp-ink) !important;
+  font-size: 11px !important;
+  border-radius: 7px !important;
+}
+.erp-rail-flyout a:hover,
+.erp-rail-flyout a[aria-current="page"] {
+  background: var(--erp-raised);
+}
+.college-erp:not(.erp-skyline) .erp-rail-flyout {
+  left: 88px;
+}
+@media (max-width: 650px) {
+  .erp-rail-flyout {
+    display: none;
+  }
+}

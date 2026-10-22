@@ -1,0 +1,973 @@
+.theme-03 {
+  --exp-bg: #f5fbfc;
+  --exp-ink: #124c65;
+  --exp-accent: #007f91;
+  --exp-muted: #6d8790;
+  --exp-panel: #fff;
+  --exp-line: #96c4cd45;
+  --exp-soft: #d9f2f65e;
+}
+.theme-03 h1,
+.theme-03 h2 {
+  font-family: Georgia, serif;
+  font-weight: 600;
+}
+.theme-03 .exp-nav {
+  margin: 0 25px;
+  border-radius: 0 0 18px 18px;
+  background: #fff;
+  box-shadow: 0 5px 25px #3f7c8a08;
+  height: 85px;
+  padding: 0 30px;
+}
+.theme-03 .exp-brand > svg {
+  fill: #c3eef5;
+}
+.theme-03 .exp-button {
+  border-radius: 10px;
+  background: linear-gradient(110deg, #008da1, #00788b);
+  color: white;
+}
+.theme-03 .secondary {
+  background: white;
+  color: var(--exp-accent);
+  border-color: #d2e8ec;
+}
+.family-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  max-width: 1480px;
+  margin: 0 auto;
+  min-height: 625px;
+  background: linear-gradient(110deg, #f7fbfd, #e7f4f8);
+  overflow: hidden;
+}
+.family-hero-copy {
+  position: relative;
+  z-index: 2;
+  padding: 75px 0 65px 11%;
+}
+.family-hero h1 {
+  font-size: clamp(64px, 5.7vw, 86px);
+  letter-spacing: -3.5px;
+  line-height: 1.03;
+}
+.family-hero h1 > span {
+  color: #cb358c;
+}
+.family-hero-copy > p {
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 25px;
+}
+.family-hero-promise {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  color: #7b9eaa;
+  margin-top: 28px;
+}
+.family-hero-promise > svg {
+  color: #d77bb1;
+}
+.family-hero-portrait {
+  position: relative;
+  margin-left: -20%;
+  min-width: 0;
+}
+.family-hero-portrait > img {
+  object-fit: cover;
+  object-position: 72% center;
+  mask-image: linear-gradient(90deg, transparent, black 20%);
+}
+.family-hero-portrait:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #e4f4f980, transparent 25%);
+  pointer-events: none;
+}
+.family-heart {
+  position: absolute;
+  top: 40px;
+  left: 12%;
+  color: #65bfd0;
+  z-index: 2;
+  transform: rotate(-13deg);
+}
+.family-heart svg:last-child {
+  position: absolute;
+  right: -15px;
+  top: -8px;
+  color: #d2a4b6;
+}
+.family-handwriting {
+  position: absolute;
+  right: 25px;
+  bottom: 55px;
+  z-index: 2;
+  transform: rotate(-12deg);
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: #04849c;
+  line-height: 1.1;
+  font-size: 30px;
+  text-shadow: 0 0 15px white;
+}
+.family-mascot {
+  position: absolute;
+  left: 3%;
+  bottom: 25px;
+  width: 165px;
+  height: 190px;
+  z-index: 3;
+  background: #ffffffb3;
+  border: 1px solid #fff;
+  border-radius: 80px 80px 60px 60px;
+  backdrop-filter: blur(10px);
+  transform: rotate(-8deg);
+  box-shadow: 0 8px 35px #85baca28;
+}
+.family-mascot .viewer-fallback {
+  object-fit: cover;
+  object-position: 75% center;
+  border-radius: inherit;
+}
+.pillars-03 {
+  background: #fff;
+  border: 1px solid #d3e9ec;
+  border-radius: 18px;
+  padding: 27px 15px;
+  margin-top: -2px;
+  position: relative;
+  z-index: 4;
+  box-shadow: 0 6px 30px #4a92a90a;
+}
+.pillars-03 > div {
+  font-size: 11px;
+}
+.family-feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.family-feature .exp-section-title h2 {
+  font-size: 44px;
+}
+.family-feature-image {
+  height: 420px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 48% 48% 25px 25px;
+  background: #e2f4f5;
+}
+.family-feature-image img {
+  object-fit: cover;
+  object-position: 70% center;
+}
+.family-feature-image > svg {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  color: white;
+  filter: drop-shadow(0 2px 5px #17526e33);
+}
+.family-selector {
+  margin-top: 30px;
+}
+.age-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.age-tabs > button {
+  border: 1px solid #dcebee;
+  background: #fff;
+  color: #6b939e;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 10px;
+  border-radius: 15px;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.age-tabs > button[aria-selected="true"] {
+  background: #dff3f5;
+  border-color: #82c5d1;
+  color: #007b92;
+  transform: translateY(-3px);
+}
+.age-tabs strong {
+  font-size: 10px;
+  font-weight: 550;
+}
+.age-content {
+  padding: 23px 5px 0;
+  min-height: 155px;
+}
+.age-content > span {
+  font-size: 8px;
+  color: #7b9da8;
+}
+.age-content h3 {
+  font-size: 22px !important;
+  font-family: Georgia, serif;
+  margin: 9px 0;
+}
+.age-content p {
+  font-size: 11px;
+  line-height: 1.8;
+  max-width: 380px;
+}
+.treatments-03 {
+  max-width: none;
+  background: #eaf6f9;
+  padding-left: max(64px, calc((100vw - 1150px) / 2));
+  padding-right: max(64px, calc((100vw - 1150px) / 2));
+  border-radius: 35px 35px 0 0;
+}
+.treatments-03 .exp-section-title {
+  text-align: center;
+}
+.treatments-03 .exp-section-title > p {
+  margin-left: auto;
+  margin-right: auto;
+}
+.treatments-03 .exp-service {
+  border: 1px solid #dcebef;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 7px 20px #427a8e07;
+}
+.treatments-03 .exp-service-art {
+  background: linear-gradient(145deg, #eef9fb, #dcf1f6);
+  margin: 10px 10px 0;
+  border-radius: 13px;
+  height: 170px;
+}
+.treatments-03 .exp-service:nth-child(2) .exp-service-art {
+  background: linear-gradient(140deg, #fff7e9, #f7efe0);
+}
+.treatments-03 .exp-service:nth-child(3) .exp-service-art {
+  background: linear-gradient(140deg, #fbeef4, #f5e7f0);
+}
+.treatments-03 .exp-service:nth-child(4) .exp-service-art {
+  background: linear-gradient(140deg, #ecf5ee, #e1efe5);
+}
+.about-03 .about-image {
+  border-radius: 15px 100px 15px 15px;
+  height: 400px;
+}
+.about-03 .about-text {
+  background: #fff;
+  border: 1px solid #e2eff1;
+  border-radius: 20px;
+  padding: 35px;
+}
+.about-03 .exp-section-title h2 {
+  font-size: 40px;
+}
+.team-03 {
+  text-align: center;
+}
+.team-03 .exp-doctor {
+  text-align: left;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #e0edf0;
+  border-radius: 22px;
+  box-shadow: 0 5px 20px #27687905;
+}
+.team-03 .exp-portrait {
+  border-radius: 15px;
+  height: 330px;
+}
+.team-03 .exp-doctor-caption {
+  padding: 20px 12px 13px;
+}
+.team-03 .exp-doctor-caption > svg {
+  right: 12px;
+}
+.journey-03 {
+  max-width: none;
+  background: #f0f8fa;
+  text-align: center;
+  border-radius: 40px;
+}
+.journey-03 ol {
+  max-width: 1150px;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 22px;
+}
+.journey-03 li {
+  background: #fff;
+  padding: 30px 25px;
+  border: 1px solid #dcecef;
+  border-radius: 22px;
+  text-align: left;
+}
+.journey-03 li > span {
+  font-family: Manrope, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #e3f2f6;
+  color: #008296;
+  margin-bottom: 23px;
+}
+.journey-03 li:nth-child(2) > span {
+  background: #fff1e9;
+  color: #b8896f;
+}
+.journey-03 li:nth-child(3) > span {
+  background: #fce9f3;
+  color: #c47ca2;
+}
+.journey-03 li:nth-child(4) > span {
+  background: #edf4e9;
+  color: #83a47d;
+}
+.technology-03 {
+  grid-template-columns: 0.9fr 1.1fr;
+}
+.technology-03 .tech-model {
+  border-radius: 45% 45% 25px 25px;
+  background: radial-gradient(ellipse, #d7f0f6, #ebf6fa);
+  border-color: #d5eaf0;
+}
+.compare-03 {
+  background: #fff6f2;
+  border-radius: 40px 40px 0 0;
+}
+.gallery-03 .gallery-composition {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 300px 160px;
+}
+.gallery-03 .gallery-tile {
+  border-radius: 20px;
+}
+.gallery-03 .gallery-tile-0 {
+  grid-column: 1/-1;
+  grid-row: auto;
+}
+.gallery-03 .gallery-tile-1 {
+  grid-column: 1;
+}
+.gallery-03 .gallery-note {
+  border-radius: 20px;
+  background: #e8f6fa;
+  grid-column: 2;
+  grid-row: 2;
+}
+.feedback-03 .feedback-slide > span {
+  color: #7fc4d2;
+}
+.feedback-03 .feedback-slide blockquote {
+  font-weight: 600;
+  font-size: 33px;
+}
+.questions-03 .experience-faq > div {
+  background: white;
+  border: 1px solid #deecee;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  padding: 0 20px;
+}
+.questions-03 .experience-faq button {
+  font-size: 11px;
+  padding: 19px 0;
+}
+.booking-03 {
+  background: #e8f5f8;
+  border-radius: 30px;
+  max-width: 1160px;
+  padding: 55px 45px;
+  margin-bottom: 45px;
+}
+.booking-03 .exp-form-shell {
+  box-shadow: 0 10px 30px #2c6e7e06;
+  background: #fff;
+  border: 1px solid #d9ebef;
+  border-radius: 22px;
+}
+.booking-03 .booking-intro h2 {
+  font-size: 48px;
+}
+.booking-03 .booking-form input,
+.booking-03 .booking-form select,
+.booking-03 .booking-form textarea {
+  background: #f8fcfd;
+  border-color: #d7e8ed;
+}
+.booking-03 .booking-form .primary {
+  background: #007f91;
+  color: #fff;
+  border-radius: 9px;
+}
+.closing-03 {
+  background: #dff1f5;
+  position: relative;
+  overflow: hidden;
+  border-radius: 70px 70px 0 0;
+}
+.closing-03 > span {
+  color: #cf84ad;
+}
+.closing-03 h2 {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  max-width: 650px;
+}
+.closing-03:after {
+  content: "";
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 40px solid #ffffff47;
+  border-radius: 50%;
+  right: -100px;
+  top: 40px;
+  pointer-events: none;
+}
+.theme-03 .footer-03 {
+  background: #fff;
+}
+.footer-03 .exp-footer-brand > svg {
+  fill: #d4eef5;
+}
+.footer-03 .exp-footer-invite > a {
+  font-family: Georgia;
+  font-size: 25px;
+}
+.inner-03 {
+  border-radius: 0 0 45px 45px;
+  background: linear-gradient(120deg, #eaf7fb, #e5f5f5);
+}
+.inner-03 .inner-title-group h1 {
+  max-width: 700px;
+  font-weight: 600;
+}
+.profile-03 .profile-photo {
+  border-radius: 150px 150px 20px 20px;
+}
+.theme-03 .tech-explanation-grid > article {
+  border-radius: 22px;
+  background: #fff;
+}
+.theme-03 .clinical-note {
+  font-size: 9px;
+}
+.theme-03 .exp-mobile-book {
+  background: #f9fdff;
+}
+.theme-03 .exp-mobile-book > a {
+  background: #007f91;
+  color: white;
+  border-radius: 9px;
+}
+@media (max-width: 1100px) {
+  .family-hero-copy {
+    padding-left: 8%;
+    padding-top: 70px;
+  }
+  .family-hero h1 {
+    font-size: 74px;
+  }
+  .family-hero .hero-buttons {
+    gap: 10px;
+  }
+  .family-hero .hero-buttons .exp-button {
+    font-size: 9px;
+    padding: 13px 16px;
+    gap: 11px;
+  }
+  .family-feature {
+    gap: 40px;
+  }
+  .family-feature .exp-section-title h2 {
+    font-size: 40px;
+  }
+  .pillars-03 {
+    margin-left: 25px;
+    margin-right: 25px;
+    padding: 25px 10px;
+  }
+  .treatments-03 {
+    padding-left: 35px;
+    padding-right: 35px;
+  }
+  .family-mascot {
+    width: 140px;
+    height: 170px;
+    left: 6%;
+  }
+  .about-03 .about-text {
+    padding: 28px;
+  }
+  .about-03 .exp-section-title h2 {
+    font-size: 35px;
+  }
+  .team-03 .exp-portrait {
+    height: 290px;
+  }
+  .journey-03 li {
+    padding: 25px 20px;
+  }
+  .booking-03 {
+    margin-left: 25px;
+    margin-right: 25px;
+    padding: 45px 35px;
+  }
+  .booking-03 .booking-intro h2 {
+    font-size: 42px;
+  }
+}
+@media (max-width: 850px) {
+  .family-hero {
+    min-height: 580px;
+  }
+  .family-hero-copy {
+    padding-left: 7%;
+    padding-top: 60px;
+  }
+  .family-hero h1 {
+    font-size: 65px;
+  }
+  .family-hero .exp-label {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+  .family-hero-copy > p {
+    font-size: 11px;
+  }
+  .family-hero-promise {
+    font-size: 8px;
+  }
+  .family-hero .hero-buttons .exp-button {
+    font-size: 8px;
+    padding: 12px;
+    gap: 8px;
+  }
+  .family-handwriting {
+    font-size: 25px;
+    right: 15px;
+  }
+  .family-heart {
+    top: 30px;
+    left: 20%;
+  }
+  .family-mascot {
+    left: 10%;
+    width: 120px;
+    height: 145px;
+  }
+  .family-feature {
+    gap: 28px;
+  }
+  .family-feature-image {
+    height: 370px;
+  }
+  .family-feature .exp-section-title h2 {
+    font-size: 35px;
+  }
+  .age-tabs {
+    gap: 7px;
+  }
+  .age-tabs > button {
+    padding: 17px 7px;
+    gap: 9px;
+  }
+  .age-tabs strong {
+    font-size: 9px;
+  }
+  .age-content h3 {
+    font-size: 20px !important;
+  }
+  .age-content p {
+    font-size: 10px;
+  }
+  .about-03 .about-text {
+    padding: 23px;
+  }
+  .about-03 .about-image {
+    height: 370px;
+  }
+  .team-03 .exp-portrait {
+    height: 240px;
+  }
+  .journey-03 ol {
+    gap: 15px;
+  }
+  .journey-03 li {
+    padding: 22px 16px;
+  }
+  .journey-03 li > span {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .theme-03 .exp-nav {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 0 20px;
+  }
+  .booking-03 {
+    padding: 40px 28px;
+  }
+  .booking-03 .booking-intro h2 {
+    font-size: 38px;
+  }
+  .pillars-03 > div {
+    font-size: 9px;
+  }
+}
+@media (max-width: 600px) {
+  .theme-03 .exp-nav {
+    height: 73px;
+    margin: 0 10px;
+    padding: 0 12px;
+    border-radius: 0 0 12px 12px;
+    gap: 10px;
+  }
+  .theme-03 .nav-cta {
+    background: #007f91;
+    color: white;
+    padding: 10px 9px;
+    font-size: 7px;
+    border-radius: 7px;
+  }
+  .family-hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 0 0 25px 25px;
+  }
+  .family-hero-copy {
+    padding: 38px 23px 18px;
+  }
+  .family-hero .exp-label {
+    font-size: 7px;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+  }
+  .family-hero h1 {
+    font-size: 59px;
+    letter-spacing: -2.8px;
+    line-height: 1.01;
+  }
+  .family-hero h1 br:nth-of-type(2) {
+    display: none;
+  }
+  .family-hero h1 > span {
+    display: inline;
+  }
+  .family-hero-copy > p {
+    font-size: 11px;
+    line-height: 1.85;
+    margin-top: 21px;
+  }
+  .family-hero .hero-buttons {
+    margin-top: 24px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .family-hero .hero-buttons .exp-button {
+    font-size: 9px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .family-hero-promise {
+    font-size: 8px;
+    margin-top: 22px;
+    gap: 7px;
+  }
+  .family-hero-promise > svg {
+    width: 14px;
+  }
+  .family-hero-portrait {
+    height: 340px;
+    margin: 0;
+    overflow: hidden;
+  }
+  .family-hero-portrait > img {
+    mask-image: linear-gradient(180deg, transparent, black 13%);
+    object-position: 70% center;
+  }
+  .family-heart {
+    left: 17px;
+    top: 30px;
+  }
+  .family-heart svg:first-child {
+    width: 42px;
+  }
+  .family-handwriting {
+    font-size: 23px;
+    right: 20px;
+    bottom: 42px;
+  }
+  .family-mascot {
+    width: 105px;
+    height: 125px;
+    left: 17px;
+    bottom: 27px;
+    border-radius: 55px 55px 40px 40px;
+  }
+  .family-hero .exp-image-note {
+    font-size: 5px;
+  }
+  .pillars-03 {
+    margin: 12px 15px 0;
+    padding: 0 15px;
+    border-radius: 15px;
+    gap: 0;
+  }
+  .pillars-03 > div {
+    font-size: 8px;
+    padding: 18px 0;
+  }
+  .pillars-03 > div:nth-child(2),
+  .pillars-03 > div:nth-child(4) {
+    padding-left: 15px;
+  }
+  .pillars-03 svg {
+    width: 19px;
+  }
+  .family-feature {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  .family-feature .exp-section-title h2 {
+    font-size: 35px;
+  }
+  .family-feature-image {
+    height: 290px;
+    width: 100%;
+    border-radius: 45% 45% 18px 18px;
+  }
+  .age-tabs > button {
+    padding: 19px 10px;
+    border-radius: 12px;
+    gap: 12px;
+  }
+  .age-tabs strong {
+    font-size: 10px;
+  }
+  .age-content {
+    min-height: 145px;
+    padding-top: 20px;
+  }
+  .age-content h3 {
+    font-size: 22px !important;
+  }
+  .age-content p {
+    font-size: 11px;
+  }
+  .treatments-03 {
+    padding-left: 22px;
+    padding-right: 22px;
+    border-radius: 25px 25px 0 0;
+  }
+  .treatments-03 .exp-section-title {
+    text-align: left;
+  }
+  .treatments-03 .exp-section-title > p {
+    margin-left: 0;
+  }
+  .treatments-03 .exp-service {
+    border-radius: 14px;
+  }
+  .treatments-03 .exp-service-art {
+    height: 128px;
+    margin: 7px 7px 0;
+    border-radius: 10px;
+  }
+  .treatments-03 .exp-service-body {
+    padding: 14px 12px 17px;
+  }
+  .about-03 .about-image {
+    height: 270px;
+    border-radius: 14px 80px 14px 14px;
+  }
+  .about-03 .about-text {
+    padding: 25px 23px;
+    border-radius: 17px;
+  }
+  .about-03 .exp-section-title h2 {
+    font-size: 33px;
+  }
+  .team-03 {
+    text-align: left;
+  }
+  .team-03 .exp-doctor {
+    flex-basis: 245px;
+    border-radius: 18px;
+    padding: 8px;
+  }
+  .team-03 .exp-portrait {
+    height: 280px;
+    border-radius: 12px;
+  }
+  .team-03 .exp-doctor-caption {
+    padding: 18px 10px 10px;
+  }
+  .journey-03 {
+    border-radius: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .journey-03 ol {
+    gap: 13px;
+  }
+  .journey-03 li {
+    padding: 22px 17px;
+    border-radius: 17px;
+  }
+  .journey-03 li > span {
+    width: 39px;
+    height: 39px;
+    font-size: 20px;
+    margin-bottom: 19px;
+  }
+  .journey-03 li h3 {
+    font-size: 12px;
+  }
+  .journey-03 li p {
+    font-size: 9px;
+  }
+  .compare-03 {
+    border-radius: 25px 25px 0 0;
+  }
+  .gallery-03 .gallery-composition {
+    grid-template-rows: 230px 175px;
+  }
+  .gallery-03 .gallery-tile,
+  .gallery-03 .gallery-note {
+    border-radius: 15px;
+  }
+  .feedback-03 .feedback-slide blockquote {
+    font-size: 27px;
+  }
+  .questions-03 .experience-faq > div {
+    padding: 0 15px;
+  }
+  .questions-03 .experience-faq button {
+    font-size: 10px;
+  }
+  .booking-03 {
+    margin: 0 15px 30px;
+    border-radius: 22px;
+    padding: 35px 18px;
+  }
+  .booking-03 .booking-intro h2 {
+    font-size: 38px;
+  }
+  .booking-03 .exp-form-shell {
+    border-radius: 16px;
+    padding: 23px 15px;
+  }
+  .closing-03 {
+    border-radius: 40px 40px 0 0;
+  }
+  .closing-03 h2 {
+    font-size: 42px;
+    max-width: 330px;
+  }
+  .inner-03 {
+    border-radius: 0 0 30px 30px;
+  }
+  .inner-03 .inner-title-group h1 {
+    font-size: 43px;
+  }
+  .profile-03 .profile-photo {
+    border-radius: 130px 130px 18px 18px;
+  }
+  .theme-03 .exp-button.secondary {
+    background: white;
+    color: var(--exp-accent);
+  }
+}
+@media (max-width: 350px) {
+  .family-hero-copy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .family-hero h1 {
+    font-size: 51px;
+  }
+  .family-hero .exp-label {
+    font-size: 6px;
+    letter-spacing: 1.3px;
+  }
+  .family-hero .hero-buttons .exp-button {
+    font-size: 8px;
+    gap: 8px;
+    padding: 12px;
+  }
+  .family-hero-portrait {
+    height: 300px;
+  }
+  .family-handwriting {
+    font-size: 20px;
+    right: 15px;
+    bottom: 35px;
+  }
+  .family-mascot {
+    width: 90px;
+    height: 110px;
+  }
+  .theme-03 .nav-cta {
+    font-size: 6px;
+    padding: 9px 7px;
+  }
+  .pillars-03 > div {
+    font-size: 7px;
+    gap: 7px;
+  }
+  .pillars-03 svg {
+    width: 17px;
+  }
+  .treatments-03 {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .treatments-03 .exp-service-art {
+    height: 115px;
+  }
+  .booking-03 .booking-intro h2 {
+    font-size: 34px;
+  }
+  .age-tabs strong {
+    font-size: 9px;
+  }
+  .journey-03 li {
+    padding: 19px 13px;
+  }
+  .gallery-03 .gallery-composition {
+    grid-template-rows: 210px 170px;
+  }
+}
+@media (max-width: 600px) {
+  .family-hero h1 {
+    font-size: 54px;
+  }
+  .family-hero h1 br:nth-of-type(2) {
+    display: initial;
+  }
+}
+@media (max-width: 350px) {
+  .family-hero h1 {
+    font-size: 47px;
+  }
+}
