@@ -117,6 +117,7 @@ export const operationLabels: Record<string, string> = {
   fuel: "Fuel records",
   "transport-reports": "Transport reports",
   "mobile-apps": "Mobile apps emulator",
+  "admin-app": "Admin app preview",
   "parent-app": "Parent app preview",
   "student-app": "Student app preview",
   "teacher-app": "Teacher app preview",

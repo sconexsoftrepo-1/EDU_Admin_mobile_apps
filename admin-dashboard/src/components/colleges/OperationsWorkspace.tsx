@@ -956,19 +956,27 @@ export default function OperationsWorkspace({
   if (transportModules.includes(module))
     return <Transport college={college} module={module} />;
   if (
-    ["mobile-apps", "parent-app", "student-app", "teacher-app"].includes(module)
+    [
+      "mobile-apps",
+      "admin-app",
+      "parent-app",
+      "student-app",
+      "teacher-app",
+    ].includes(module)
   )
     return (
       <Mobile
         college={college}
         initialApp={
-          module === "parent-app"
-            ? "Parent"
-            : module === "student-app"
-              ? "Student"
-              : module === "teacher-app"
-                ? "Teacher"
-                : undefined
+          module === "admin-app"
+            ? "Admin"
+            : module === "parent-app"
+              ? "Parent"
+              : module === "student-app"
+                ? "Student"
+                : module === "teacher-app"
+                  ? "Teacher"
+                  : undefined
         }
       />
     );

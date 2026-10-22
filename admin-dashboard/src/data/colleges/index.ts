@@ -202,6 +202,7 @@ export const permissions: Record<Role, string[]> = {
   Driver: ["dashboard", "trips", "manifest", "transport-attendance"],
   Principal: [
     "dashboard",
+    "admin-app",
     "timetable",
     "students",
     "admissions",
@@ -215,6 +216,7 @@ export const permissions: Record<Role, string[]> = {
   ],
   "Accounts Manager": [
     "dashboard",
+    "admin-app",
     "fees",
     "fee-structures",
     "payments",

@@ -1,4 +1,5 @@
 "use client";
+import AdminFinanceMobile from "./AdminFinanceMobile";
 import { useRouter } from "next/navigation";
 import AcademicTimetableGrid from "./AcademicTimetableGrid";
 import {
@@ -58,11 +59,13 @@ export default function MobileAppsWorkspace({
     admin = role === "Super Admin";
   const initial =
     initialApp ||
-    (role === "Faculty"
-      ? "Teacher"
-      : role === "Student"
-        ? "Student"
-        : "Parent");
+    (["Principal", "Accounts Manager"].includes(role || "")
+      ? "Admin"
+      : role === "Faculty"
+        ? "Teacher"
+        : role === "Student"
+          ? "Student"
+          : "Parent");
   const [app, setApp] = useState(initial),
     [tab, setTab] = useState("Home"),
     [personId, setPersonId] = useState(""),
@@ -1641,6 +1644,25 @@ export default function MobileAppsWorkspace({
     default:
       screen = home();
   }
+  if (app === "Admin")
+    return (
+      <div>
+        <div className="en-admin-role-switch">
+          {(admin ? ["Admin", "Parent", "Student", "Teacher"] : ["Admin"]).map(
+            (a) => (
+              <button
+                key={a}
+                aria-pressed={a === app}
+                onClick={() => chooseApp(a)}
+              >
+                {a} app
+              </button>
+            ),
+          )}
+        </div>
+        <AdminFinanceMobile college={college} />
+      </div>
+    );
   return (
     <section
       className="ops-emulator mobile-redesign"
@@ -1706,16 +1728,18 @@ export default function MobileAppsWorkspace({
           role="tablist"
           aria-label="Choose mobile app"
         >
-          {(admin ? ["Parent", "Student", "Teacher"] : [initial]).map((a) => (
-            <button
-              key={a}
-              role="tab"
-              aria-selected={a === app}
-              onClick={() => chooseApp(a)}
-            >
-              {a} app
-            </button>
-          ))}
+          {(admin ? ["Admin", "Parent", "Student", "Teacher"] : [initial]).map(
+            (a) => (
+              <button
+                key={a}
+                role="tab"
+                aria-selected={a === app}
+                onClick={() => chooseApp(a)}
+              >
+                {a} app
+              </button>
+            ),
+          )}
         </div>
         {admin && (
           <label>

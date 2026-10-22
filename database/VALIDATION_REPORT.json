@@ -1,0 +1,11 @@
+{
+  "tables": 126,
+  "business_checks": 18,
+  "admission_end_to_end": "passed",
+  "document_gates": "passed",
+  "allocation_guards": "passed",
+  "scholarship_balance_reconciliation": "passed",
+  "fresh_schema": "passed",
+  "baseline_migration": "passed",
+  "engine": "PGlite local PostgreSQL-compatible engine; not a deployed production PostgreSQL server"
+}

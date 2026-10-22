@@ -25,7 +25,17 @@ export default function FloatingMobileApps({ college }: { college: College }) {
       trigger?.focus();
     };
   }, [open]);
-  if (!role || !["Super Admin", "Parent", "Student", "Faculty"].includes(role))
+  if (
+    !role ||
+    ![
+      "Super Admin",
+      "Principal",
+      "Accounts Manager",
+      "Parent",
+      "Student",
+      "Faculty",
+    ].includes(role)
+  )
     return null;
   return (
     <>
@@ -51,9 +61,7 @@ export default function FloatingMobileApps({ college }: { college: College }) {
             <div>
               <small>{college.name}</small>
               <h2 id="mobile-app-drawer-title">Mobile apps</h2>
-              <p>
-                Parent, Student and Teacher apps connected to campus records.
-              </p>
+              <p>Admin, Parent, Student and Teacher mobile previews.</p>
             </div>
             <button
               type="button"
