@@ -927,130 +927,6 @@
 .college-intro-refresh {
   animation-duration: 0.7s;
 }
-.college-skyline {
-  background: #f2f7fd;
-  --college-accent: #1769e0;
-}
-.college-skyline h1,
-.college-skyline h2,
-.college-skyline h3 {
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.055em;
-}
-.college-skyline .college-utility {
-  background: #081b35;
-}
-.college-skyline .college-nav {
-  padding-top: 23px;
-  padding-bottom: 23px;
-}
-.college-skyline .college-brand strong {
-  font-family: Georgia, serif;
-}
-.college-skyline .college-hero {
-  height: 700px;
-}
-.college-skyline .college-hero-shade {
-  background: linear-gradient(
-    90deg,
-    #04152eef,
-    #04152ec7 25%,
-    #04152e30 68%,
-    #04152e00
-  );
-}
-.college-skyline .college-hero-copy {
-  color: #fff;
-  padding-top: 120px;
-  width: 49%;
-}
-.college-skyline .college-hero h1 {
-  font-size: clamp(55px, 5.8vw, 88px);
-}
-.college-skyline .college-hero-label {
-  color: #84dcf5;
-}
-.college-skyline .college-avatars {
-  background: #144875;
-  border-color: #ffffff44;
-}
-.college-skyline .college-stats {
-  top: 16%;
-  background: #f5faffeb;
-}
-.college-skyline .college-values {
-  margin-top: -30px;
-  background: #f0f8ff;
-}
-.college-skyline .college-programs {
-  background: #e6effb;
-}
-.college-skyline .college-about {
-  grid-template-columns: 1.15fr 1fr;
-}
-.college-skyline .college-about-visual {
-  order: -1;
-}
-.college-skyline .college-timeline {
-  order: 3;
-}
-.college-skyline .college-leadership {
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: start;
-}
-.college-skyline .college-leadership .college-section-heading {
-  grid-column: auto;
-  display: block;
-}
-.college-skyline .college-leadership .college-section-heading h2 {
-  font-size: 39px;
-}
-.college-skyline .college-leadership blockquote {
-  font:
-    18px/1.7 Arial,
-    sans-serif;
-}
-.college-skyline .college-person-emblem {
-  float: none;
-  margin-bottom: 25px;
-}
-.college-skyline .college-life-grid {
-  grid-template-columns: repeat(4, 1fr);
-}
-.college-skyline .college-life-grid article > div {
-  height: 200px;
-}
-.college-skyline .college-life-grid h3 {
-  font-size: 25px;
-}
-.college-skyline .college-scholarship,
-.college-skyline .college-portal-promo,
-.college-skyline .college-inner-hero {
-  background: #dfebfb;
-}
-.college-skyline .college-campus {
-  background: #081b35;
-}
-.college-skyline .college-campus .college-overline {
-  color: #22c9f2;
-}
-.college-skyline .college-program-icon,
-.college-skyline .college-faculty-avatar {
-  background: #e7f1ff;
-}
-.college-skyline .college-intro {
-  background: #081b35;
-  color: #fff;
-  clip-path: inset(0);
-  animation-name: college-grid-out;
-}
-.college-skyline .college-timeline {
-  border-color: #b7cce9;
-}
-.college-skyline .college-footer {
-  background: #081b35;
-}
 .college-scene-loading {
   display: grid;
   place-items: center;
@@ -2461,9 +2337,6 @@
   .college-hero-copy {
     padding-top: 120px;
   }
-  .college-skyline .college-hero {
-    height: 780px;
-  }
 }
 @media (max-width: 1180px) {
   .college-nav {
@@ -2490,9 +2363,6 @@
   .college-hero h1 {
     font-size: 65px;
   }
-  .college-skyline .college-hero h1 {
-    font-size: 68px;
-  }
   .college-hero-copy > p {
     max-width: 350px;
   }
@@ -2517,15 +2387,6 @@
   }
   .college-faculty-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .college-skyline .college-leadership {
-    grid-template-columns: 1fr 1fr;
-  }
-  .college-skyline .college-leadership .college-section-heading {
-    grid-column: 1/-1;
-  }
-  .college-skyline .college-life-grid {
-    grid-template-columns: 1fr 1fr;
   }
 }
 @media (max-width: 960px) {
@@ -2558,17 +2419,12 @@
   .college-hero {
     height: 610px;
   }
-  .college-hero h1,
-  .college-skyline .college-hero h1 {
+  .college-hero h1 {
     font-size: 56px;
   }
   .college-hero-copy {
     padding-top: 70px;
     width: 62%;
-  }
-  .college-skyline .college-hero-copy {
-    padding-top: 90px;
-    width: 60%;
   }
   .college-stats {
     top: 14%;
@@ -2862,8 +2718,7 @@
   .college-portal-promo h2 {
     font-size: 36px;
   }
-  .college-about,
-  .college-skyline .college-about {
+  .college-about {
     grid-template-columns: 1fr;
     gap: 30px;
   }
@@ -2881,8 +2736,7 @@
   .college-timeline strong {
     font-size: 17px;
   }
-  .college-leadership,
-  .college-skyline .college-leadership {
+  .college-leadership {
     grid-template-columns: 1fr;
     gap: 20px;
   }
@@ -2946,8 +2800,7 @@
   .college-faculty-avatar {
     height: 90px;
   }
-  .college-life-grid,
-  .college-skyline .college-life-grid {
+  .college-life-grid {
     grid-template-columns: 1fr;
   }
   .college-life-grid article > div {
@@ -3025,41 +2878,6 @@
   }
   .college-contact p {
     font-size: 12px;
-  }
-  .college-skyline .college-nav {
-    padding: 15px 4%;
-  }
-  .college-skyline .college-hero {
-    height: 800px;
-  }
-  .college-skyline .college-hero-shade {
-    background: linear-gradient(
-      180deg,
-      #04152efa 0%,
-      #04152ee8 33%,
-      #04152e40 70%,
-      #04152e30
-    );
-  }
-  .college-skyline .college-hero-copy {
-    width: 100%;
-    padding: 45px 7% 0;
-  }
-  .college-skyline .college-hero h1 {
-    font-size: 54px;
-    max-width: 340px;
-  }
-  .college-skyline .college-stats {
-    top: auto;
-  }
-  .college-skyline .college-values {
-    margin-top: -5px;
-  }
-  .college-skyline .college-about-visual {
-    order: 0;
-  }
-  .college-skyline .college-leadership .college-section-heading h2 {
-    font-size: 36px;
   }
   .college-category > header {
     padding: 55px 6% 35px;
@@ -3433,9 +3251,6 @@
   .college-hero h1 {
     font-size: 47px;
   }
-  .college-skyline .college-hero h1 {
-    font-size: 48px;
-  }
   .college-stats {
     gap: 0;
     padding: 15px 6px;
@@ -3706,11 +3521,6 @@
   color: #7d8ca0;
   margin-top: 4px;
 }
-.erp-skyline .erp-leadership-note,
-.erp-skyline .erp-staff-overview > div:first-child,
-.erp-skyline .erp-finance-overview > div:first-child {
-  background: linear-gradient(120deg, #081b35, #123f77);
-}
 @media (max-width: 960px) {
   .erp-principal-overview,
   .erp-student-home,
@@ -3764,9 +3574,6 @@
 }
 .college-edunexa .college-intro-refresh > svg {
   animation: college-book-turn 0.7s ease both;
-}
-.college-skyline .college-intro-refresh > svg {
-  animation: college-digital-lock 0.65s steps(5) both;
 }
 .college-intro-refresh > span {
   animation: college-refresh-word 0.65s ease both;
@@ -3828,9 +3635,6 @@
   padding: 15px;
   font-size: 12px;
   border-radius: 4px;
-}
-.college-skyline .college-hero-copy > p {
-  color: #d8e5f6;
 }
 .college-category-admin-preview {
   display: block;

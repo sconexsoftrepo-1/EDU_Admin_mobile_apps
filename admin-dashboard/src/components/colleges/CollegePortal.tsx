@@ -1,7 +1,4 @@
 "use client";
-import EngineeringAcademics from "./EngineeringAcademics";
-import SkylineTheme from "./SkylineTheme";
-import SkylineDashboard from "./SkylineDashboard";
 import FloatingMobileApps from "./FloatingMobileApps";
 import PDFActions from "./PDFActions";
 import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
@@ -183,7 +180,7 @@ export default function CollegePortal({
       setCompact(
         localStorage.getItem(`kc-floating-sidebar-${c.slug}`)
           ? localStorage.getItem(`kc-floating-sidebar-${c.slug}`) !== "expanded"
-          : !(c.slug === "skyline-institute" && window.innerWidth >= 1100),
+          : !false,
       );
       const filters = JSON.parse(
         sessionStorage.getItem(`kc-filters-${c.slug}`) || "{}",
@@ -457,7 +454,7 @@ export default function CollegePortal({
   if (area === "login")
     return (
       <div
-        className={`college-login ${c.slug === "skyline-institute" ? "college-skyline" : ""}`}
+        className={`college-login ${""}`}
         style={{ "--college-accent": c.accent } as React.CSSProperties}
       >
         <div className="college-login-art">
@@ -483,11 +480,7 @@ export default function CollegePortal({
         </div>
         <div className="college-login-form">
           <Image
-            src={
-              c.slug === "skyline-institute"
-                ? "/assets/colleges/skyline/branding/symbol.svg"
-                : `/assets/colleges-institutions/${c.slug}/crest.svg`
-            }
+            src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
             alt="College crest"
             width={60}
             height={66}
@@ -749,7 +742,7 @@ export default function CollegePortal({
             {allowed("Super Admin", "Principal", "Accounts Manager") && (
               <ERPAnalytics
                 payments={payments}
-                skyline={c.slug === "skyline-institute"}
+                useAreaDefault={false}
                 onMonth={(month, selectedYear) => {
                   const last = new Date(
                     Number(selectedYear),
@@ -891,67 +884,38 @@ export default function CollegePortal({
             {allowed("Super Admin", "Principal", "Accounts Manager") && (
               <section className="erp-panel erp-due-alerts">
                 <div className="erp-panel-title">
-                  <h2>
-                    {c.slug === "skyline-institute"
-                      ? "Important notifications"
-                      : "Fee due alerts"}
-                  </h2>
-                  <Link
-                    href={nav(
-                      c.slug === "skyline-institute"
-                        ? "notifications"
-                        : canRead(role, "fees")
-                          ? "fees"
-                          : "reports",
-                    )}
-                  >
+                  <h2>{"Fee due alerts"}</h2>
+                  <Link href={nav(canRead(role, "fees") ? "fees" : "reports")}>
                     View all
                   </Link>
                 </div>
                 <div className="erp-compact-records">
-                  {c.slug === "skyline-institute"
-                    ? visibleNotices(s, role)
-                        .slice(0, 5)
-                        .map((n) => (
-                          <Link href={nav("notifications")} key={n.id}>
-                            <span className="erp-record-avatar">
-                              <Bell size={15} />
-                            </span>
-                            <div>
-                              <strong>{n.name}</strong>
-                              <small>
-                                {n.date.slice(0, 16).replace("T", " ")} ·{" "}
-                                {n.note}
-                              </small>
-                            </div>
-                          </Link>
-                        ))
-                    : studentRows
-                        .filter((st) => balance(s, st) > 0)
-                        .slice(0, 4)
-                        .map((st) => (
-                          <Link
-                            key={st.id}
-                            href={
-                              canRead(role, "students")
-                                ? `${nav("students")}/${st.id}`
-                                : nav("fees")
-                            }
-                          >
-                            <span className="erp-record-avatar">
-                              {st.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join("")}
-                            </span>
-                            <div>
-                              <strong>{st.name}</strong>
-                              <small>{st.program}</small>
-                            </div>
-                            <b>{money(balance(s, st))}</b>
-                          </Link>
-                        ))}
+                  {studentRows
+                    .filter((st) => balance(s, st) > 0)
+                    .slice(0, 4)
+                    .map((st) => (
+                      <Link
+                        key={st.id}
+                        href={
+                          canRead(role, "students")
+                            ? `${nav("students")}/${st.id}`
+                            : nav("fees")
+                        }
+                      >
+                        <span className="erp-record-avatar">
+                          {st.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("")}
+                        </span>
+                        <div>
+                          <strong>{st.name}</strong>
+                          <small>{st.program}</small>
+                        </div>
+                        <b>{money(balance(s, st))}</b>
+                      </Link>
+                    ))}
                 </div>
               </section>
             )}
@@ -1412,18 +1376,6 @@ export default function CollegePortal({
       return <OperationsWorkspace college={c} module={activeModule} />;
     if (activeModule === "dashboard" && role === "Parent")
       return <OperationsWorkspace college={c} module="parent-app" />;
-    if (
-      activeModule === "dashboard" &&
-      c.slug === "skyline-institute" &&
-      ["Super Admin", "Principal"].includes(role!)
-    )
-      return (
-        <SkylineDashboard
-          college={c}
-          nav={nav}
-          filters={{ year, department, from, to }}
-        />
-      );
     if (activeModule === "dashboard")
       return (
         <>
@@ -2594,8 +2546,6 @@ export default function CollegePortal({
           )}
         </>
       );
-    if (activeModule === "academics" && c.slug === "skyline-institute")
-      return <EngineeringAcademics />;
     if (activeModule === "academics") {
       const programs = c.programs.filter(
         (p) => department === "all" || p.department === department,
@@ -2780,7 +2730,7 @@ export default function CollegePortal({
           <div className="erp-dashboard-grid erp-report-charts">
             <ERPAnalytics
               payments={payments}
-              skyline={c.slug === "skyline-institute"}
+              useAreaDefault={false}
               onMonth={(month, selectedYear) => {
                 setFrom(`${selectedYear}-${String(month).padStart(2, "0")}-01`);
                 setTo(
@@ -2981,7 +2931,7 @@ export default function CollegePortal({
   }
   return (
     <div
-      className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${c.slug === "skyline-institute" ? "erp-skyline" : ""}`}
+      className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${""}`}
       style={{ "--college-accent": c.accent } as React.CSSProperties}
     >
       <a href="#erp-content" className="erp-skip">
@@ -3004,11 +2954,7 @@ export default function CollegePortal({
         <div className="erp-sidebar-brand">
           <Link href={root}>
             <Image
-              src={
-                c.slug === "skyline-institute"
-                  ? "/assets/colleges/skyline/branding/symbol.svg"
-                  : `/assets/colleges-institutions/${c.slug}/crest.svg`
-              }
+              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
               width={32}
               height={38}
               alt=""
@@ -3030,10 +2976,6 @@ export default function CollegePortal({
           expand={() => setCompact(false)}
         />
         <div className="erp-sidebar-foot">
-          <Link href="/colleges-institutions">
-            <ArrowUpRight size={17} />
-            <span>Back to showcase</span>
-          </Link>
           <button
             aria-label={compact ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!compact}
@@ -3054,12 +2996,6 @@ export default function CollegePortal({
         />
       )}
       <div className="erp-workspace">
-        <nav className="erp-home-navigation" aria-label="Main home navigation">
-          <Link href="/colleges-institutions">
-            <ArrowLeft size={15} aria-hidden="true" />
-            Back to main home
-          </Link>
-        </nav>
         <header className="erp-topbar">
           <button
             className="erp-mobile-menu"
@@ -3083,7 +3019,7 @@ export default function CollegePortal({
             slug={`${c.slug}-${role}`}
             href={nav("notifications")}
           />
-          {c.slug === "skyline-institute" && <SkylineTheme />}
+          {false}
           <details className="erp-header-actions">
             <summary>
               Quick actions <ChevronDown size={13} />
@@ -3157,11 +3093,7 @@ export default function CollegePortal({
             />
             <div>
               <span>{c.short}</span>
-              <strong>
-                {c.slug === "skyline-institute"
-                  ? "Knowledge. Innovation. Impact."
-                  : "Learn today. Lead tomorrow."}
-              </strong>
+              <strong>{"Learn today. Lead tomorrow."}</strong>
             </div>
             <span className="erp-campus-live">Campus workspace</span>
           </div>

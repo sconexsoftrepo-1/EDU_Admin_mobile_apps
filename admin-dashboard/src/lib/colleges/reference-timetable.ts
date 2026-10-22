@@ -1,4 +1,4 @@
-import { engineeringCourses } from "@/data/colleges/engineering";
+import { courseOfferings } from "@/data/colleges/subjects";
 import type { CollegeState } from "./store";
 import type { OperationRecord } from "./operations";
 import { studentScope, cohortKey, timetableDays } from "./academic-scope";
@@ -15,56 +15,33 @@ export function referenceTimetable(state: CollegeState): OperationRecord[] {
   const faculty = state.staff.filter(
     (t) => t.category === "Faculty" && t.status === "Active",
   );
-  const engineering = state.slug === "skyline-institute";
-  const defaultSubjects = engineering
-    ? [
-        "Software engineering",
-        "Programming with Java",
-        "Digital logic",
-        "Mathematical foundations",
-        "Human values",
-        "Environmental science",
-        "Web technologies",
-      ]
-    : [
-        "Core foundations",
-        "Applied mathematics",
-        "Communication",
-        "Research methods",
-        "Ethics & values",
-        "Environmental studies",
-        "Digital skills",
-      ];
-  const defaultCodes = engineering
-    ? ["SE", "JAVA", "DLCO", "MFCS", "UHV", "ES", "WT"]
-    : ["CF", "AM", "COM", "RM", "EV", "ES", "DS"];
-  const slots = engineering
-    ? [
-        ["09:20", "10:20"],
-        ["10:20", "11:10"],
-        ["11:30", "12:20"],
-        ["12:20", "13:10"],
-        ["14:00", "14:50"],
-        ["15:00", "15:40"],
-        ["15:40", "16:20"],
-      ]
-    : [
-        ["09:00", "10:00"],
-        ["10:00", "11:00"],
-        ["11:30", "12:30"],
-        ["13:30", "14:30"],
-        ["14:30", "15:30"],
-        ["15:30", "16:00"],
-      ];
-  const morningStart = engineering ? "09:20" : "09:00",
-    morningEnd = engineering ? "11:10" : "11:00";
-  const afternoonStart = engineering ? "14:00" : "13:30",
-    dayEnd = engineering ? "16:20" : "16:00";
+  const defaultSubjects = [
+    "Core foundations",
+    "Applied mathematics",
+    "Communication",
+    "Research methods",
+    "Ethics & values",
+    "Environmental studies",
+    "Digital skills",
+  ];
+  const defaultCodes = ["CF", "AM", "COM", "RM", "EV", "ES", "DS"];
+  const slots = [
+    ["09:00", "10:00"],
+    ["10:00", "11:00"],
+    ["11:30", "12:30"],
+    ["13:30", "14:30"],
+    ["14:30", "15:30"],
+    ["15:30", "16:00"],
+  ];
+  const morningStart = "09:00",
+    morningEnd = "11:00";
+  const afternoonStart = "13:30",
+    dayEnd = "16:00";
   const records: OperationRecord[] = [];
   for (const [ci, scope] of cohorts.entries())
     for (const [di, day] of timetableDays.entries()) {
       const teacher = faculty[ci % Math.max(1, faculty.length)];
-      const courses = engineeringCourses(scope.program, Number(scope.semester));
+      const courses = courseOfferings(scope.program, Number(scope.semester));
       const theory = courses.filter((c) => c.kind === "Class");
       const subjects = theory.length
         ? theory.map((c) => c.name)
@@ -98,20 +75,18 @@ export function referenceTimetable(state: CollegeState): OperationRecord[] {
         });
       if (di === 0)
         add(
-          engineering
-            ? laboratory?.name || "Programming laboratory"
-            : "Applied learning laboratory",
+          "Applied learning laboratory",
           morningStart,
           morningEnd,
           "Lab",
-          engineering ? "JAVA LAB" : "APPLIED LAB",
+          "APPLIED LAB",
           `Lab ${ci + 1}`,
         );
       for (const [si, [start, end]] of slots.entries()) {
         if (
           (di === 0 && si < 2) ||
-          (di === 2 && si >= (engineering ? 4 : 3)) ||
-          ([1, 4].includes(di) && si >= (engineering ? 5 : 4))
+          (di === 2 && si >= 3) ||
+          ([1, 4].includes(di) && si >= 4)
         )
           continue;
         const subject = (di + si + ci) % subjects.length;
@@ -125,19 +100,10 @@ export function referenceTimetable(state: CollegeState): OperationRecord[] {
         );
       }
       add("Morning break", morningEnd, "11:30", "Break", "BREAK", "Campus");
-      add(
-        "Lunch",
-        engineering ? "13:10" : "12:30",
-        afternoonStart,
-        "Lunch",
-        "LUNCH",
-        "Dining hall",
-      );
+      add("Lunch", "12:30", afternoonStart, "Lunch", "LUNCH", "Dining hall");
       if (di === 2)
         add(
-          engineering
-            ? laboratory?.name || "Computing tools laboratory"
-            : "Research & practical laboratory",
+          "Research & practical laboratory",
           afternoonStart,
           dayEnd,
           "Lab",
@@ -145,12 +111,10 @@ export function referenceTimetable(state: CollegeState): OperationRecord[] {
           `Lab ${ci + 1}`,
         );
       else {
-        if (engineering)
-          add("Afternoon break", "14:50", "15:00", "Break", "BREAK", "Campus");
         if ([1, 4].includes(di))
           add(
             "Sports & campus activities",
-            engineering ? "15:00" : "14:30",
+            "14:30",
             dayEnd,
             "Sports",
             "SPORTS",

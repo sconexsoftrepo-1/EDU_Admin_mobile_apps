@@ -13,13 +13,20 @@ export default function PDFPreview({
   slug: string;
   onDownload: (name: string) => boolean;
 }) {
-  const [file, setFile] = useState<{ name: string; url: string } | null>(null);
+  const [file, setFile] = useState<{
+    name: string;
+    url: string;
+  } | null>(null);
   const dialog = useRef<HTMLDialogElement>(null),
     trigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const open = (event: Event) => {
-      const detail = (event as CustomEvent<{ name: string; blob: Blob }>)
-        .detail;
+      const detail = (
+        event as CustomEvent<{
+          name: string;
+          blob: Blob;
+        }>
+      ).detail;
       if (!detail || !(detail.blob instanceof Blob)) return;
       trigger.current = document.activeElement as HTMLElement;
       setFile({ name: detail.name, url: URL.createObjectURL(detail.blob) });
@@ -44,7 +51,7 @@ export default function PDFPreview({
     <dialog
       ref={dialog}
       className="erp-pdf-preview"
-      data-theme={slug.startsWith("skyline") ? "skyline" : "edunexa"}
+      data-theme={"edunexa"}
       aria-labelledby="pdf-preview-heading"
       onCancel={() => setFile(null)}
     >

@@ -131,10 +131,14 @@ export default function CampusScene({
     </CampusBoundary>
   );
 }
-
 class CampusBoundary extends Component<
-  { blue: boolean; children: ReactNode },
-  { failed: boolean }
+  {
+    blue: boolean;
+    children: ReactNode;
+  },
+  {
+    failed: boolean;
+  }
 > {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -145,7 +149,7 @@ class CampusBoundary extends Component<
       return (
         <div className="college-campus-fallback">
           <Image
-            src={`/assets/colleges-institutions/${this.props.blue ? "skyline-institute" : "edunexa-college"}/campus.webp`}
+            src={`/assets/colleges-institutions/${"edunexa-college"}/campus.webp`}
             alt="Static campus alternative"
             fill
             sizes="60vw"
