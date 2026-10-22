@@ -113,11 +113,6 @@
   background: var(--erp-accent);
   color: #fff;
 }
-.erp-skyline
-  :is(.ops-workspace, .ops-transport, .ops-emulator, .ops-sheet)
-  .erp-primary {
-  background: #1769ff;
-}
 .college-erp
   :is(.ops-workspace, .ops-transport, .ops-emulator, .ops-sheet)
   button:disabled {
@@ -1083,12 +1078,6 @@
   box-shadow: -20px 0 70px #0005;
   overflow: hidden;
 }
-.erp-pdf-preview[data-theme="skyline"] {
-  --erp-ink: #f6faff;
-  --erp-surface: #091b33;
-  --erp-border: #224669;
-  --erp-accent: #28c8ff;
-}
 .erp-pdf-preview[open] {
   display: flex;
   flex-direction: column;
@@ -1282,9 +1271,6 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-}
-.college-erp.erp-skyline .erp-mobile-app-launcher {
-  background: #1769ff;
 }
 .college-erp:has(.erp-mobile-app-launcher) .erp-toast {
   bottom: 90px;

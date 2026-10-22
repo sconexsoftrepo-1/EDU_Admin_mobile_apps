@@ -12,7 +12,7 @@ import {
   type ScheduleConfiguration,
 } from "@/lib/colleges/academic-engine";
 import { studentScope, timetableDays } from "@/lib/colleges/academic-scope";
-import { engineeringCourses } from "@/data/colleges/engineering";
+import { courseOfferings } from "@/data/colleges/subjects";
 export default function TimetableEditor({
   college,
   session,
@@ -55,7 +55,7 @@ export default function TimetableEditor({
   const faculty = state.staff.filter(
     (f) => f.category === "Faculty" && f.status === "Active",
   );
-  const courses = engineeringCourses(data.program, Number(data.semester));
+  const courses = courseOfferings(data.program, Number(data.semester));
   const set = (key: string, value: string) => {
     setSaved("");
     setData((old) => {

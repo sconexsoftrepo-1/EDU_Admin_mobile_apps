@@ -20,8 +20,6 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
-import SkylineTheme from "./SkylineTheme";
-import EngineeringCatalog from "./EngineeringCatalog";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { collegeRoot, type College } from "@/data/colleges";
@@ -50,7 +48,7 @@ export default function CollegePublic({
   parts: string[];
 }) {
   const root = collegeRoot(c),
-    blue = c.slug === "skyline-institute",
+    blue = false,
     page = parts[0] || "",
     title =
       parts.length === 2 && page === "academics"
@@ -117,7 +115,7 @@ export default function CollegePublic({
   return (
     <div
       ref={region}
-      className={`college-site ${blue ? "college-skyline" : "college-edunexa"}`}
+      className={`college-site ${"college-edunexa"}`}
       style={{ "--college-accent": c.accent } as React.CSSProperties}
     >
       <div className="college-intro" aria-hidden="true">
@@ -125,12 +123,8 @@ export default function CollegePublic({
         <span>{c.short}</span>
       </div>
       <div className="college-utility">
-        <span>
-          {blue
-            ? "Engineering & Technology College · Fictional demo"
-            : "Welcome to a world of possibility"}
-        </span>
-        {blue && <SkylineTheme />}
+        <span>{"Welcome to a world of possibility"}</span>
+        {false}
         <div>
           <Link href={`${root}/portal/student`}>Student access</Link>
           <Link href={`${root}/contact`}>
@@ -141,17 +135,13 @@ export default function CollegePublic({
       <header className="college-nav">
         <Link href={root} className="college-brand">
           <Image
-            src={
-              blue
-                ? "/assets/colleges/skyline/branding/symbol.svg"
-                : `/assets/colleges-institutions/${c.slug}/crest.svg`
-            }
+            src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
             width={46}
             height={50}
             alt=""
           />
           <span>
-            <strong>{blue ? "Skyline Institute" : "EduNexa College"}</strong>
+            <strong>{"EduNexa College"}</strong>
             <small>{c.motto}</small>
           </span>
         </Link>
@@ -206,10 +196,7 @@ export default function CollegePublic({
               <div className="college-hero-shade" />
               <div className="college-hero-copy">
                 <span className="college-hero-label">
-                  <span />{" "}
-                  {blue
-                    ? "Ideas without boundaries"
-                    : "A modern approach to education"}
+                  <span /> {"A modern approach to education"}
                 </span>
                 <h1>{c.headline}</h1>
                 <p>{c.description}</p>
@@ -218,15 +205,13 @@ export default function CollegePublic({
                     className="college-button"
                     href={`${root}/admissions/apply`}
                   >
-                    {blue ? "Apply Now" : "Apply for Admission"}{" "}
-                    <ArrowUpRight size={17} />
+                    {"Apply for Admission"} <ArrowUpRight size={17} />
                   </Link>
                   <Link
                     className="college-button college-outline"
                     href={`${root}/campus`}
                   >
-                    <Play size={14} />{" "}
-                    {blue ? "Explore Campus" : "Take a Virtual Tour"}
+                    <Play size={14} /> {"Take a Virtual Tour"}
                   </Link>
                 </div>
                 <div className="college-hero-note">
@@ -240,7 +225,7 @@ export default function CollegePublic({
               </div>
               <aside className="college-stats">
                 {[
-                  [blue ? "1996" : "2001", "Our founding year"],
+                  ["2001", "Our founding year"],
                   [String(c.programs.length), "Academic programs"],
                   ["8", "Campus destinations"],
                   ["2026", "Admissions open"],
@@ -328,20 +313,16 @@ export default function CollegePublic({
               <span className="college-overline">
                 An education for the whole person
               </span>
-              <h2>
-                {blue
-                  ? "Built for what comes next."
-                  : "Rooted in purpose. Open to possibility."}
-              </h2>
+              <h2>{"Rooted in purpose. Open to possibility."}</h2>
               <p>
                 At {c.short}, education begins with a question: what could you
                 become? Small learning communities, thoughtful mentoring, and
                 hands-on exploration help you find your answer.
               </p>
               <p>
-                Founded in {blue ? "1996" : "2001"} in this fictional
-                institutional story, our campus brings the sciences, creative
-                thinking, and practical skills together.
+                Founded in {"2001"} in this fictional institutional story, our
+                campus brings the sciences, creative thinking, and practical
+                skills together.
               </p>
               <Link className="college-text-link" href={`${root}/leadership`}>
                 Meet the people shaping our future <ArrowUpRight />
@@ -368,9 +349,7 @@ export default function CollegePublic({
                 "Your chapter",
               ].map((t, i) => (
                 <div key={t}>
-                  <small>
-                    {[blue ? "1996" : "2001", "2010", "2020", "2026"][i]}
-                  </small>
+                  <small>{["2001", "2010", "2020", "2026"][i]}</small>
                   <strong>{t}</strong>
                 </div>
               ))}
@@ -408,64 +387,57 @@ export default function CollegePublic({
             ))}
           </section>
         )}
-        {blue &&
-          (!page || page === "academics" || page === "departments") &&
-          !parts[1] && <EngineeringCatalog />}
-        {(section("academics") || page === "departments") &&
-          (!blue || !!parts[1]) && (
-            <section className="college-section college-programs college-reveal">
-              <div className="college-section-heading">
-                <div>
-                  <span className="college-overline">Find your direction</span>
-                  <h2>
-                    {blue
-                      ? "Ideas into impact."
-                      : "Many paths. One bright future."}
-                  </h2>
-                </div>
-                <p>
-                  Explore disciplines that connect rigorous thinking with
-                  meaningful practice.
-                </p>
+        {false}
+        {(section("academics") || page === "departments") && (
+          <section className="college-section college-programs college-reveal">
+            <div className="college-section-heading">
+              <div>
+                <span className="college-overline">Find your direction</span>
+                <h2>{"Many paths. One bright future."}</h2>
               </div>
-              <div className="college-program-grid">
-                {c.programs
-                  .filter((p) => !parts[1] || p.slug === parts[1])
-                  .map((p, i) => (
-                    <article key={p.slug}>
-                      <span className="college-program-icon">
-                        {i % 2 ? <FlaskConical /> : <BookOpen />}
-                      </span>
-                      <small>
-                        {p.department} / {p.duration}
-                      </small>
-                      <h3>{p.name}</h3>
-                      <p>
-                        Foundational study, applied projects, collaborative
-                        seminars, and individual mentorship. Build a portfolio
-                        of work and a lifelong habit of inquiry.
-                      </p>
-                      <ul>
-                        <li>Classroom and practical learning</li>
-                        <li>Faculty-guided capstone project</li>
-                        <li>Career and postgraduate guidance</li>
-                      </ul>
-                      <Link href={`${root}/academics/${p.slug}`}>
-                        Program details <ArrowUpRight size={17} />
+              <p>
+                Explore disciplines that connect rigorous thinking with
+                meaningful practice.
+              </p>
+            </div>
+            <div className="college-program-grid">
+              {c.programs
+                .filter((p) => !parts[1] || p.slug === parts[1])
+                .map((p, i) => (
+                  <article key={p.slug}>
+                    <span className="college-program-icon">
+                      {i % 2 ? <FlaskConical /> : <BookOpen />}
+                    </span>
+                    <small>
+                      {p.department} / {p.duration}
+                    </small>
+                    <h3>{p.name}</h3>
+                    <p>
+                      Foundational study, applied projects, collaborative
+                      seminars, and individual mentorship. Build a portfolio of
+                      work and a lifelong habit of inquiry.
+                    </p>
+                    <ul>
+                      <li>Classroom and practical learning</li>
+                      <li>Faculty-guided capstone project</li>
+                      <li>Career and postgraduate guidance</li>
+                    </ul>
+                    <Link href={`${root}/academics/${p.slug}`}>
+                      Program details <ArrowUpRight size={17} />
+                    </Link>
+                    {parts[1] && (
+                      <Link
+                        className="college-button"
+                        href={`${root}/admissions/apply`}
+                      >
+                        Apply for this program
                       </Link>
-                      {parts[1] && (
-                        <Link
-                          className="college-button"
-                          href={`${root}/admissions/apply`}
-                        >
-                          Apply for this program
-                        </Link>
-                      )}
-                    </article>
-                  ))}
-              </div>
-            </section>
-          )}
+                    )}
+                  </article>
+                ))}
+            </div>
+          </section>
+        )}
         {(section("campus") || page === "facilities") && (
           <section className="college-campus college-reveal">
             <div className="college-section">
@@ -574,9 +546,7 @@ export default function CollegePublic({
                 <span className="college-overline">
                   Beyond the lecture hall
                 </span>
-                <h2>
-                  {blue ? "Make your mark." : "Belong. Discover. Become."}
-                </h2>
+                <h2>{"Belong. Discover. Become."}</h2>
               </div>
               <p>
                 Clubs, cultural exchange, sport, and service bring a richer
@@ -869,11 +839,7 @@ export default function CollegePublic({
         <div>
           <Link className="college-brand" href={root}>
             <Image
-              src={
-                blue
-                  ? "/assets/colleges/skyline/branding/symbol.svg"
-                  : `/assets/colleges-institutions/${c.slug}/crest.svg`
-              }
+              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
               alt=""
               width={44}
               height={50}

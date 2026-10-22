@@ -25,7 +25,7 @@ import {
   CalendarDays,
   BadgeIndianRupee,
 } from "lucide-react";
-import { engineeringCourses } from "@/data/colleges/engineering";
+import { courseOfferings } from "@/data/colleges/subjects";
 import { collegeBySlug, permissions, type Role } from "@/data/colleges";
 import type { CollegeState, RecordRow } from "@/lib/colleges/store";
 
@@ -387,7 +387,7 @@ export function WorkspaceSearch({
             context: `Program · ${p.department}`,
             url: nav("academics"),
           },
-          ...engineeringCourses(p.name, 1).map((c) => ({
+          ...courseOfferings(p.name, 1).map((c) => ({
             name: c.name,
             context: `Course · ${c.code}`,
             url: nav("academics"),
@@ -395,13 +395,11 @@ export function WorkspaceSearch({
         ])
       : []),
     ...(permissions[role].includes("timetable")
-      ? (state.operations?.records.timetable || [])
-          .slice(0, 500)
-          .map((p) => ({
-            name: p.name,
-            context: `Timetable · ${p.day} ${p.start} · ${p.room}`,
-            url: nav("timetable"),
-          }))
+      ? (state.operations?.records.timetable || []).slice(0, 500).map((p) => ({
+          name: p.name,
+          context: `Timetable · ${p.day} ${p.start} · ${p.room}`,
+          url: nav("timetable"),
+        }))
       : []),
     ...(permissions[role].includes("routes")
       ? (state.operations?.routes || []).map((r) => ({

@@ -1,4 +1,3 @@
-import { engineeringPrograms } from "./engineering";
 import { operationLabels } from "@/lib/colleges/operations";
 export type College = {
   slug: string;
@@ -48,18 +47,6 @@ export const colleges: College[] = [
       duration: "3 years",
       fee: 7500000,
     })),
-  },
-  {
-    slug: "skyline-institute",
-    number: "22",
-    name: "Skyline Institute of Engineering",
-    short: "Skyline",
-    motto: "Knowledge. Innovation. Impact.",
-    headline: "Engineer what comes next.",
-    description:
-      "Build practical expertise through fictional Diploma, B.Tech and M.Tech programs, engineering laboratories and collaborative research.",
-    accent: "#1769e0",
-    programs: engineeringPrograms,
   },
 ];
 export const collegeBySlug = (slug: string) =>
@@ -268,11 +255,7 @@ export function validCollegePath(c: College, parts: string[]) {
   const p = parts.join("/");
   if (publicRoutes.includes(p)) return true;
   if (parts[0] === "academics" && parts.length === 2)
-    return (
-      c.programs.some((x) => x.slug === parts[1]) ||
-      (c.slug === "skyline-institute" &&
-        ["robotics", "biotechnology", "management"].includes(parts[1]))
-    );
+    return c.programs.some((x) => x.slug === parts[1]);
   if (parts[0] === "verify-certificate")
     return parts.length === 2 && /^[A-Za-z0-9-]{1,80}$/.test(parts[1]);
   if (parts[0] !== "portal") return false;

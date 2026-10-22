@@ -157,27 +157,10 @@ function baseSeed(slug: string): CollegeState {
       department: p.department,
       profile: {
         academicYear: "2026-2027",
-        studyYear: String(
-          (Math.floor(i / (c.programs.length * 2)) %
-            (slug === "skyline-institute"
-              ? p.type === "B.Tech"
-                ? 2
-                : 1
-              : 3)) +
-            1,
-        ),
+        studyYear: String((Math.floor(i / (c.programs.length * 2)) % 3) + 1),
         branch: p.name,
         specialization: p.specialization || "General",
-        semester: String(
-          (Math.floor(i / (c.programs.length * 2)) %
-            (slug === "skyline-institute"
-              ? p.type === "B.Tech"
-                ? 2
-                : 1
-              : 3)) *
-            2 +
-            1,
-        ),
+        semester: String((Math.floor(i / (c.programs.length * 2)) % 3) * 2 + 1),
         section: Math.floor(i / c.programs.length) % 2 === 0 ? "A" : "B",
         batch: "Main",
       },
@@ -296,19 +279,12 @@ function baseSeed(slug: string): CollegeState {
         contact: "DEMO-CONTACT",
       },
     ],
-    staff: Array.from(
-      { length: slug === "skyline-institute" ? 240 : 128 },
-      (_, i) => ({
-        ...row(i, `Dr. ${first[i % 16]} ${last[i % 13]}`, "Active"),
-        note: c.programs[i % c.programs.length].department,
-        category:
-          i >= (slug === "skyline-institute" ? 232 : 120)
-            ? "Driver"
-            : i % 4 === 0
-              ? "Admission Officer"
-              : "Faculty",
-      }),
-    ),
+    staff: Array.from({ length: 128 }, (_, i) => ({
+      ...row(i, `Dr. ${first[i % 16]} ${last[i % 13]}`, "Active"),
+      note: c.programs[i % c.programs.length].department,
+      category:
+        i >= 120 ? "Driver" : i % 4 === 0 ? "Admission Officer" : "Faculty",
+    })),
     notifications: [
       {
         ...row(0, "Welcome to the campus portal", "Simulated"),
@@ -446,7 +422,6 @@ export function execute(s: CollegeState, cmd: Command): CollegeState {
         !collegeBySlug(s.slug)!.programs.some((p) => p.name === d.program)
       )
         throw Error("Choose a program offered by this institution.");
-
       if (cmd.id) {
         const st = student();
         Object.assign(st, {

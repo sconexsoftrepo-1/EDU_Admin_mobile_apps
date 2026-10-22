@@ -9,16 +9,6 @@
   --mobile-line: #e9e0d5;
   --mobile-success: #258b72;
 }
-.college-erp .mobile-redesign[data-institution="skyline-institute"] {
-  --mobile-bg: #061426;
-  --mobile-surface: #10243b;
-  --mobile-raised: #172f4a;
-  --mobile-ink: #f4f8fc;
-  --mobile-muted: #94abc4;
-  --mobile-accent: #25b9f5;
-  --mobile-line: #23415d;
-  --mobile-success: #31c6a2;
-}
 .college-erp .mobile-redesign .ops-phone {
   --erp-bg: var(--mobile-bg);
   --erp-surface: var(--mobile-surface);
@@ -275,19 +265,6 @@
   align-items: center;
   gap: 6px;
   font-size: 10px;
-}
-.college-erp
-  .mobile-redesign[data-institution="skyline-institute"]
-  .mobile-next-session {
-  background: linear-gradient(130deg, #173d68, #10416a) !important;
-  border: 1px solid #25b9f550 !important;
-  box-shadow: 0 10px 22px #0002;
-}
-.college-erp
-  .mobile-redesign[data-institution="skyline-institute"]
-  .mobile-attendance-summary {
-  background: linear-gradient(115deg, #10243b, #103347) !important;
-  border: 1px solid #25b9f526 !important;
 }
 .mobile-action-strip {
   display: grid;

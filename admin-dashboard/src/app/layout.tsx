@@ -10,7 +10,6 @@ import "@/styles/template-03.css";
 import "@/styles/template-04.css";
 import "@/styles/template-05.css";
 import "@/styles/template-06.css";
-import TemplateSwitcher from "@/components/TemplateSwitcher";
 import AnimationProvider from "@/components/animation-system/AnimationProvider";
 import "@/styles/animation-system.css";
 import "@/styles/showroom.css";
@@ -48,10 +47,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <AnimationProvider>
-          {children}
-          <TemplateSwitcher />
-        </AnimationProvider>
+        <AnimationProvider>{children}</AnimationProvider>
       </body>
     </html>
   );

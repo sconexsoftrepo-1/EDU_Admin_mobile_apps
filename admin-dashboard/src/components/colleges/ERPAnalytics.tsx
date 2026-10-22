@@ -29,15 +29,15 @@ const months = [
 ];
 export default function ERPAnalytics({
   payments,
-  skyline,
+  useAreaDefault,
   onMonth,
 }: {
   payments: RecordRow[];
-  skyline: boolean;
+  useAreaDefault: boolean;
   onMonth: (month: number, year: string) => void;
 }) {
   const [year, setYear] = useState("2026"),
-    [kind, setKind] = useState(skyline ? "area" : "bars"),
+    [kind, setKind] = useState(useAreaDefault ? "area" : "bars"),
     [visible, setVisible] = useState(true);
   const id = useId().replaceAll(":", "");
   const years = Array.from(

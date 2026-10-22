@@ -22,10 +22,8 @@ export async function createReport(report: PDFReport): Promise<Blob> {
     margin = 16,
     usable = width - margin * 2;
   const context = report.context || {},
-    skyline = context.college?.slug === "skyline-institute";
-  const accent: [number, number, number] = skyline
-    ? [23, 85, 171]
-    : [151, 101, 40];
+    useAreaDefault = false;
+  const accent: [number, number, number] = [151, 101, 40];
   const ink: [number, number, number] = [28, 38, 52],
     muted: [number, number, number] = [95, 107, 122];
   let crest: string | undefined;
@@ -66,7 +64,12 @@ export async function createReport(report: PDFReport): Promise<Blob> {
   const table = (
     head: string[] | undefined,
     body: string[][],
-    widths?: Record<number, { cellWidth: number }>,
+    widths?: Record<
+      number,
+      {
+        cellWidth: number;
+      }
+    >,
   ) => {
     autoTable(doc, {
       startY: y,
@@ -119,8 +122,13 @@ export async function createReport(report: PDFReport): Promise<Blob> {
       },
     });
     y =
-      (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable
-        ?.finalY || y;
+      (
+        doc as jsPDF & {
+          lastAutoTable?: {
+            finalY: number;
+          };
+        }
+      ).lastAutoTable?.finalY || y;
     y += 9;
   };
   if (context.institution) {

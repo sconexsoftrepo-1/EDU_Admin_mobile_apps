@@ -17,23 +17,6 @@
   font-size: 12px;
   color-scheme: light;
 }
-.college-erp.erp-skyline {
-  --erp-bg: #061325;
-  --erp-surface: rgba(9, 27, 51, 0.94);
-  --erp-raised: #102c4b;
-  --erp-ink: #f6faff;
-  --erp-muted: #a7bdd5;
-  --erp-border: rgba(125, 194, 255, 0.2);
-  --erp-accent: #28c8ff;
-  --erp-glow: #1769ff;
-  --erp-blue: #28c8ff;
-  --erp-navy: #f6faff;
-  --erp-sidebar: #041020;
-  --erp-danger: #ff8191;
-  color-scheme: dark;
-  background:
-    radial-gradient(ellipse at 90% 0, #12345b 0, transparent 50%), var(--erp-bg);
-}
 .college-erp :is(h1, h2, h3, strong, th) {
   color: var(--erp-ink);
 }
@@ -78,12 +61,6 @@
   color: white;
   box-shadow: 0 3px 10px #73441116;
 }
-.college-erp.erp-skyline .erp-primary {
-  background: linear-gradient(125deg, #1769ff, #0754be);
-  border-color: #278cff;
-  color: white;
-  box-shadow: 0 3px 16px #1769ff26;
-}
 .college-erp .erp-primary:hover:not(:disabled) {
   filter: brightness(1.12);
   color: var(--erp-ink);
@@ -98,11 +75,6 @@
     width 0.28s ease,
     transform 0.28s ease;
 }
-.college-erp.erp-skyline .erp-sidebar {
-  background: linear-gradient(165deg, #091b33, #020b17);
-  border-color: #28c8ff40;
-  box-shadow: 5px 0 30px #001b3c60;
-}
 .college-erp .erp-sidebar-brand {
   padding: 27px 22px 22px;
   min-height: 90px;
@@ -114,9 +86,6 @@
     serif;
   letter-spacing: -0.04em;
 }
-.college-erp.erp-skyline .erp-sidebar-brand strong {
-  color: white;
-}
 .college-erp .erp-sidebar-brand img {
   width: 35px;
   height: 42px;
@@ -125,9 +94,6 @@
   color: #c3ad91;
   margin: 3px 23px 16px;
   font-size: 10px;
-}
-.college-erp.erp-skyline .erp-sidebar-label {
-  color: #7f9bb8;
 }
 .college-erp .erp-sidebar nav {
   padding: 0 12px 16px;
@@ -146,9 +112,6 @@
   cursor: pointer;
   border-radius: 6px;
   font-size: 11px;
-}
-.college-erp.erp-skyline .erp-nav-group summary {
-  color: #a7bdd5;
 }
 .erp-nav-group summary::-webkit-details-marker {
   display: none;
@@ -172,9 +135,6 @@
   font-size: 11px;
   white-space: nowrap;
 }
-.college-erp.erp-skyline .erp-nav-group a {
-  color: #d1e5fb;
-}
 .erp-nav-dot {
   width: 5px;
   height: 5px;
@@ -188,13 +148,6 @@
   box-shadow:
     inset 2px 0 #e3b86b,
     0 0 15px #c9944510;
-  color: white;
-}
-.college-erp.erp-skyline .erp-nav-group a.active {
-  background: linear-gradient(100deg, #1262ce, #1769ff30);
-  box-shadow:
-    inset 2px 0 #28c8ff,
-    0 0 15px #1769ff20;
   color: white;
 }
 .college-erp .erp-nav-group a:hover {
@@ -214,33 +167,6 @@
 .college-erp .erp-workspace {
   margin-left: 258px;
   transition: margin 0.28s ease;
-}
-.college-erp .erp-home-navigation {
-  display: flex;
-  padding: 5px clamp(12px, 2vw, 25px);
-  background: var(--erp-surface);
-  border-bottom: 1px solid var(--erp-border);
-}
-.college-erp .erp-home-navigation a {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 4px 8px;
-  border-radius: 7px;
-  color: var(--erp-ink);
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-}
-.college-erp .erp-home-navigation a:hover {
-  background: var(--erp-raised);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.college-erp .erp-home-navigation a:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
 }
 .college-erp .erp-topbar {
   height: 74px;
@@ -405,9 +331,6 @@
   inset: 0;
   background: linear-gradient(0deg, #251708a6, transparent 80%);
 }
-.erp-skyline .erp-campus-banner:after {
-  background: linear-gradient(0deg, #061325d9, transparent 90%);
-}
 .erp-campus-banner > div {
   position: absolute;
   bottom: 24px;
@@ -544,12 +467,6 @@
 }
 .college-erp .erp-metrics article a {
   font-size: 9px;
-}
-.college-erp.erp-skyline .erp-metrics article {
-  background: linear-gradient(135deg, #103559, #07172c 75%);
-  box-shadow:
-    inset 0 1px #ffffff08,
-    0 6px 20px #0002;
 }
 .college-erp .erp-panel {
   background: var(--erp-surface);
@@ -789,25 +706,10 @@
   color: #16876b;
   border-color: #17876a44;
 }
-.college-erp.erp-skyline
-  :is(
-    .status-paid,
-    .status-approved,
-    .status-issued,
-    .status-enrolled,
-    .status-returned
-  ) {
-  color: #4ce4be;
-  background: #22c7a417;
-}
 .college-erp :is(.status-pending, .status-under-review) {
   background: #d68b3518;
   color: #a26313;
   border-color: #d68b3544;
-}
-.college-erp.erp-skyline :is(.status-pending, .status-under-review) {
-  color: #ffbd78;
-  background: #ffb35b17;
 }
 .college-erp :is(.status-rejected, .status-overdue) {
   background: #c94b5118;
@@ -1510,12 +1412,6 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-staff-overview > div:first-child {
   background: linear-gradient(130deg, #50351f, #302016);
 }
-.college-erp.erp-skyline .erp-leadership-note,
-.college-erp.erp-skyline .erp-student-id,
-.college-erp.erp-skyline .erp-finance-overview > div:first-child,
-.college-erp.erp-skyline .erp-staff-overview > div:first-child {
-  background: linear-gradient(130deg, #103e6c, #081c35);
-}
 .college-erp
   :is(
     .erp-leadership-note,
@@ -1535,16 +1431,6 @@ body:has(.college-erp dialog[open]) {
   )
   :is(p, small, span, dt) {
   color: #e3d2bd;
-}
-.college-erp.erp-skyline
-  :is(
-    .erp-leadership-note,
-    .erp-student-id,
-    .erp-finance-overview > div:first-child,
-    .erp-staff-overview > div:first-child
-  )
-  :is(p, small, span, dt) {
-  color: #b8d4ed;
 }
 @media (min-width: 651px) and (max-width: 1180px) {
   .college-erp.erp-rail-expanded .erp-sidebar {
@@ -1886,17 +1772,7 @@ body:has(.college-erp dialog[open]) {
   background: var(--erp-raised);
   color: var(--erp-muted);
 }
-.college-erp.erp-skyline .erp-dashboard-grid {
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-}
-.college-erp.erp-skyline .erp-secondary-metrics > a {
-  background: linear-gradient(130deg, #103559, #07172c);
-  box-shadow: inset 0 1px #ffffff08;
-}
 @media (max-width: 800px) {
-  .college-erp.erp-skyline .erp-dashboard-grid {
-    grid-template-columns: 1fr;
-  }
 }
 /* Floating campus navigation: a detached dock in either institution's palette. */
 @media (min-width: 651px) {
@@ -1910,12 +1786,6 @@ body:has(.college-erp dialog[open]) {
       0 18px 48px #24170f30,
       0 2px 8px #24170f18;
     max-height: calc(100dvh - 28px);
-  }
-  .college-erp.erp-skyline .erp-sidebar {
-    border-color: #28c8ff40;
-    box-shadow:
-      0 20px 55px #0007,
-      0 0 24px #1769ff0d;
   }
   .college-erp .erp-workspace,
   .college-erp.erp-rail-expanded .erp-workspace {
@@ -2001,9 +1871,6 @@ body:has(.college-erp dialog[open]) {
     border-radius: 18px;
     box-shadow: 0 18px 60px #0005;
     transform: translateX(calc(-100% - 12px));
-  }
-  .college-erp.erp-skyline .erp-sidebar {
-    border-color: #28c8ff40;
   }
   .college-erp .erp-sidebar.is-open {
     transform: none;
@@ -2731,20 +2598,11 @@ body:has(.college-erp dialog[open]) {
     color: #c8b9a5;
     cursor: pointer;
   }
-  .college-erp.erp-skyline.erp-compact .erp-nav-rail > button {
-    color: #9dbbd5;
-  }
   .college-erp.erp-compact
     .erp-nav-rail
     > button:is(:hover, [aria-current="true"]) {
     background: #c9944538;
     color: #ffe4ae;
-  }
-  .college-erp.erp-skyline.erp-compact
-    .erp-nav-rail
-    > button:is(:hover, [aria-current="true"]) {
-    background: #1769ff45;
-    color: #55d4ff;
   }
   .college-erp.erp-compact .erp-sidebar-brand {
     min-height: 62px;
@@ -2817,9 +2675,6 @@ body:has(.college-erp dialog[open]) {
 .erp-rail-flyout a:hover,
 .erp-rail-flyout a[aria-current="page"] {
   background: var(--erp-raised);
-}
-.college-erp:not(.erp-skyline) .erp-rail-flyout {
-  left: 88px;
 }
 @media (max-width: 650px) {
   .erp-rail-flyout {

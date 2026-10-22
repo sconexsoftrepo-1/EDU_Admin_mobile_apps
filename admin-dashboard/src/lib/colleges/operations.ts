@@ -1,16 +1,10 @@
-import {
-  engineeringCourses,
-  engineeringResources,
-} from "@/data/colleges/engineering";
 import { academicRooms, validateAcademicSession } from "./academic-engine";
 import { cohortKey, sessionScope } from "./academic-scope";
-import { migrateEngineering } from "./engineering-migration";
 import { upgradeLegacyTimetable } from "./timetable-migration";
 import { sessionForStudent } from "./academic-scope";
 import { referenceTimetable } from "./reference-timetable";
 import { validateTimetableSession } from "./timetable";
 import type { CollegeState, Command, RecordRow } from "./store";
-
 export type Seat = {
   id: string;
   row: number;
@@ -36,7 +30,11 @@ export type Route = {
   start: string;
   end: string;
   distance: number;
-  stops: { id: string; name: string; time: string }[];
+  stops: {
+    id: string;
+    name: string;
+    time: string;
+  }[];
 };
 export type Passenger = {
   id: string;
@@ -136,7 +134,6 @@ export const operationLabels: Record<string, string> = {
 };
 const day = "2026-10-19";
 export function ensureOperations(s: CollegeState): CollegeState {
-  s = migrateEngineering(s);
   if (s.operations?.version === 1) {
     const existing = s.operations.records.employees || [];
     const employees = s.staff.map((person, i) => {
@@ -157,18 +154,7 @@ export function ensureOperations(s: CollegeState): CollegeState {
         status: person.status,
         department: person.note || "General",
         category: person.category || "Staff",
-        ...(s.slug === "skyline-institute" && person.category === "Faculty"
-          ? {
-              designation: profile?.designation || "Assistant Professor",
-              qualifications:
-                profile?.qualifications || "M.Tech. · fictional qualification",
-              specialization:
-                profile?.specialization || person.note || "Engineering",
-              photo:
-                profile?.photo ||
-                "/assets/college-portals/shared/teacher-avatar.svg",
-            }
-          : {}),
+        ...{},
       };
     });
     return {
@@ -387,24 +373,12 @@ export function ensureOperations(s: CollegeState): CollegeState {
   );
   const teachers = s.staff.filter((e) => e.category === "Faculty");
   records.timetable = referenceTimetable(s);
-  if (s.slug === "skyline-institute")
-    records["engineering-upgrades"] = [
-      rec("ENGINEERING", 0, "Engineering catalog v2", { status: "Completed" }),
-    ];
   records.assignments = Array.from({ length: 100 }, (_, i) =>
     rec("ASSIGN", i, `Learning exercise ${i + 1}`, {
       status: "Published",
-      program:
-        s.students[i % (s.slug === "skyline-institute" ? 23 : 6)]?.program ||
-        "",
+      program: s.students[i % 6]?.program || "",
       employeeId: teachers[i % Math.max(1, teachers.length)]?.id || "",
-      subject:
-        s.slug === "skyline-institute"
-          ? engineeringCourses(
-              s.students[i % 23]?.program,
-              Number(s.students[i % 23]?.profile?.semester || 1),
-            )[i % 4]?.name || "Engineering design"
-          : ["Mathematics", "Computing", "Communication"][i % 3],
+      subject: ["Mathematics", "Computing", "Communication"][i % 3],
       due: "2026-11-15",
       description:
         "Prepare a short explanation with a worked example. Fictional classroom exercise.",
@@ -414,14 +388,8 @@ export function ensureOperations(s: CollegeState): CollegeState {
   records.assessments = Array.from({ length: 50 }, (_, i) =>
     rec("ASSESS", i, `Internal assessment ${i + 1}`, {
       status: "Scheduled",
-      program:
-        s.students[i % (s.slug === "skyline-institute" ? 23 : 6)]?.program ||
-        "",
-      subject:
-        s.slug === "skyline-institute"
-          ? engineeringCourses(s.students[i % 23]?.program, 1)[i % 4]?.name ||
-            "Engineering review"
-          : ["Mathematics", "Computing"][i % 2],
+      program: s.students[i % 6]?.program || "",
+      subject: ["Mathematics", "Computing"][i % 2],
       date: "2026-11-20",
       maxMarks: 100,
     }),
@@ -433,7 +401,6 @@ export function ensureOperations(s: CollegeState): CollegeState {
         "Unit 1: Principles. Unit 2: Worked examples. Unit 3: Independent practice. Learning objective: apply core concepts to a fictional case study.",
     }),
   ];
-  if (s.slug === "skyline-institute") records.syllabus = engineeringResources();
   records.calendar = [
     rec("EVENT", 0, "Campus open day", {
       date: "2026-11-06",
@@ -843,7 +810,6 @@ export function executeOperation(
       else rows("academic-rooms").push(room);
       break;
     }
-
     case "ops.bus.save": {
       allow(transport);
       const old = o.buses.find((b) => b.id === cmd.id);
@@ -2048,7 +2014,6 @@ export function executeOperation(
   });
   return s;
 }
-
 export const preciseMoney = (paise: number) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -2056,7 +2021,6 @@ export const preciseMoney = (paise: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(paise / 100);
-
 export function visibleNotices(s: CollegeState, role: string | null) {
   if (!role) return [];
   if (!["Parent", "Student", "Faculty"].includes(role)) return s.notifications;
