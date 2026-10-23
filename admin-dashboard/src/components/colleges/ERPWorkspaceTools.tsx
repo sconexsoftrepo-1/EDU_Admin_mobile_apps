@@ -62,6 +62,7 @@ const moduleIcons: Record<string, typeof BookOpen> = {
 };
 export function WorkspaceNavigation({
   role,
+  allowedModules,
   active,
   labels,
   nav,
@@ -70,6 +71,7 @@ export function WorkspaceNavigation({
   expand,
 }: {
   role: Role;
+  allowedModules?: string[];
   active: string;
   labels: Record<string, string>;
   nav: (m: string) => string;
@@ -98,11 +100,22 @@ export function WorkspaceNavigation({
     Reports: BarChart3,
     Administration: Shield,
   };
+  // Setup comes first: courses and batches, their fee structures, then student enrollment.
   const groups: [string, string[]][] = [
     ["Overview", ["dashboard", "campus-analytics"]],
     [
-      "Student operations",
-      ["students", "admissions", "attendance", "assessments"],
+      "Academics",
+      [
+        "academics",
+        "course-setup",
+        "teaching-staff",
+        "non-teaching-staff",
+        "staff",
+        "timetable",
+        "assignments",
+        "syllabus",
+        "calendar",
+      ],
     ],
     [
       "Finance",
@@ -118,14 +131,13 @@ export function WorkspaceNavigation({
       ],
     ],
     [
-      "Academics",
+      "Student operations",
       [
-        "academics",
-        "staff",
-        "timetable",
-        "assignments",
-        "syllabus",
-        "calendar",
+        "students",
+        "admissions",
+        "student-enrollment",
+        "attendance",
+        "assessments",
       ],
     ],
     [
@@ -181,7 +193,7 @@ export function WorkspaceNavigation({
     ],
     [
       "Mobile apps",
-      ["mobile-apps", "parent-app", "student-app", "teacher-app"],
+      ["mobile-apps", "admin-app", "parent-app", "student-app", "teacher-app"],
     ],
     ["Certificates", ["certificates", "certificate-requests"]],
     ["Hostel", ["hostels", "hostel-permissions"]],
@@ -196,7 +208,18 @@ export function WorkspaceNavigation({
       ],
     ],
     ["Reports", ["reports", "audit-logs"]],
-    ["Administration", ["accounts", "credentials", "roles", "settings"]],
+    [
+      "Administration",
+      [
+        "accounts",
+        "credentials",
+        "roles",
+        "forms",
+        "imports",
+        "documents",
+        "settings",
+      ],
+    ],
   ];
   return (
     <nav
@@ -230,7 +253,11 @@ export function WorkspaceNavigation({
       )}
       <div className="erp-nav-rail" aria-label="Campus sections">
         {groups.map(([name, modules]) => {
-          const visible = modules.filter((m) => permissions[role].includes(m));
+          const visible = modules.filter((m) =>
+            allowedModules
+              ? allowedModules.includes(m)
+              : permissions[role].includes(m),
+          );
           if (!visible.length) return null;
           const Icon = groupIcons[name];
           return (
@@ -275,7 +302,11 @@ export function WorkspaceNavigation({
       </div>
       <div className="erp-nav-sections">
         {groups.map(([name, modules]) => {
-          const visible = modules.filter((m) => permissions[role].includes(m));
+          const visible = modules.filter((m) =>
+            allowedModules
+              ? allowedModules.includes(m)
+              : permissions[role].includes(m),
+          );
           if (!visible.length) return null;
           const GroupIcon = groupIcons[name];
           if (visible.length === 1) {
@@ -346,14 +377,17 @@ export function WorkspaceNavigation({
 export function WorkspaceSearch({
   state,
   role,
+  allowedModules,
   labels,
   nav,
 }: {
   state: CollegeState;
   role: Role;
+  allowedModules?: string[];
   labels: Record<string, string>;
   nav: (m: string) => string;
 }) {
+  const permittedModules = allowedModules || permissions[role];
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const input = useRef<HTMLInputElement>(null);
@@ -380,7 +414,7 @@ export function WorkspaceSearch({
     };
   }, []);
   const sources = [
-    ...(permissions[role].includes("academics")
+    ...(permittedModules.includes("academics")
       ? (collegeBySlug(state.slug)?.programs || []).flatMap((p) => [
           {
             name: p.name,
@@ -394,21 +428,21 @@ export function WorkspaceSearch({
           })),
         ])
       : []),
-    ...(permissions[role].includes("timetable")
+    ...(permittedModules.includes("timetable")
       ? (state.operations?.records.timetable || []).slice(0, 500).map((p) => ({
           name: p.name,
           context: `Timetable · ${p.day} ${p.start} · ${p.room}`,
           url: nav("timetable"),
         }))
       : []),
-    ...(permissions[role].includes("routes")
+    ...(permittedModules.includes("routes")
       ? (state.operations?.routes || []).map((r) => ({
           name: r.name,
           context: "Transport route",
           url: nav("routes"),
         }))
       : []),
-    ...permissions[role].map((m) => ({
+    ...permittedModules.map((m) => ({
       name: labels[m],
       context: "Module",
       url: nav(m),
@@ -423,7 +457,7 @@ export function WorkspaceSearch({
         ["staff", state.staff],
       ] as const
     ).flatMap(([m, rows]) =>
-      permissions[role].includes(m) && role !== "Student"
+      permittedModules.includes(m) && role !== "Student"
         ? rows.map((r) => ({
             name: r.name,
             context: `${labels[m]} · ${r.id}`,

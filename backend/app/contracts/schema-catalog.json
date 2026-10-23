@@ -1,0 +1,8202 @@
+[
+  {
+    "name": "academic_years",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admin_mobile_preferences",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "default_campus_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "default_period",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "day",
+          "week",
+          "month",
+          "all"
+        ]
+      },
+      {
+        "name": "alerts_enabled",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "report_preferences",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_applications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "applied_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "submitted",
+          "documents_pending",
+          "reviewing",
+          "verified",
+          "offered",
+          "accepted",
+          "enrolled",
+          "rejected",
+          "withdrawn"
+        ]
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "enquiry_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "admission_enquiries",
+        "choices": []
+      },
+      {
+        "name": "cycle_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "admission_cycles",
+        "choices": []
+      },
+      {
+        "name": "source_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "admission_sources",
+        "choices": []
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "consent_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "submitted_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "assigned_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "submitted_by_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_cycles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "opens_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "closes_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_documents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "document_type_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "document_types",
+        "choices": []
+      },
+      {
+        "name": "revision",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_current",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "storage_key",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "original_filename",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "mime_type",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "size_bytes",
+        "type": "bigint",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sha256",
+        "type": "character",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "uploaded_by_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "received_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "received_by_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "received",
+          "pending_verification",
+          "verified",
+          "rejected",
+          "waived"
+        ]
+      },
+      {
+        "name": "original_sighted",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "original_sighted_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "original_sighted_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reviewed_by_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "reviewed_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "review_notes",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "waiver_reason",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_enquiries",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "source_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_sources",
+        "choices": []
+      },
+      {
+        "name": "cycle_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "admission_cycles",
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "parent_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "parent_phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "referrer_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campaign_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "assigned_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "new",
+          "contacted",
+          "counselling",
+          "applied",
+          "closed",
+          "not_interested"
+        ]
+      },
+      {
+        "name": "next_follow_up_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "communication_consent",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "consent_recorded_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_enrollment_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "enrollment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_enrollments",
+        "choices": []
+      },
+      {
+        "name": "authorized_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "enrolled_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_offers",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "offer_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offered_program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "issued_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "accept_by",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "issued",
+          "accepted",
+          "declined",
+          "expired",
+          "withdrawn"
+        ]
+      },
+      {
+        "name": "accepted_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "terms",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_reviews",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "reviewer_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "decision",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "eligible",
+          "ineligible",
+          "hold"
+        ]
+      },
+      {
+        "name": "eligibility_notes",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reviewed_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_sources",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "reference",
+          "social_media",
+          "walk_in",
+          "website",
+          "campaign",
+          "other"
+        ]
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "admission_status_history",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "old_status",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "new_status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "actor_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "announcement_recipients",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "announcement_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "announcements",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "read_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "announcements",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "author_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "application_guardians",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "relationship",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "father",
+          "mother",
+          "guardian",
+          "other"
+        ]
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occupation",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_primary",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "application_qualifications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "application_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "qualification",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "board_university",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "passing_year",
+        "type": "integer",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "registration_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "score",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "score_scale",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "percentage",
+          "cgpa_10",
+          "gpa_4",
+          "other"
+        ]
+      },
+      {
+        "name": "maximum_score",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "result_status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "passed",
+          "awaiting",
+          "failed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "assignment_submissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "assignment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "assignments",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "submitted_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_url",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "marks",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "feedback",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "assignments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "instructions",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "max_marks",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "attendance_sessions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "session_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "recorded_by_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "teachers",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "audit_logs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "actor_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "action",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_table",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "before_data",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "after_data",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ip_address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "batches",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entry_year",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "graduation_year",
+        "type": "integer",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "calendar_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "starts_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ends_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "event_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "holiday",
+          "academic",
+          "cultural",
+          "sports",
+          "meeting"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "campuses",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "certificate_download_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "certificate_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "certificates",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "downloaded_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "web",
+          "parent_app",
+          "student_app",
+          "admin_app"
+        ]
+      },
+      {
+        "name": "document_sha256",
+        "type": "character",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "request_id",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "certificate_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "type_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "certificate_types",
+        "choices": []
+      },
+      {
+        "name": "requested_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "issued"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "certificate_signatures",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "certificate_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "certificates",
+        "choices": []
+      },
+      {
+        "name": "signing_provider",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "key_reference",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "signature_algorithm",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "signed_document_storage_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_sha256",
+        "type": "character",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "signed_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "signed_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "revoked_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "certificate_types",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "template_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "certificates",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "request_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "certificate_requests",
+        "choices": []
+      },
+      {
+        "name": "certificate_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_by_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "verification_token",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_url",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "revoked_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "charge_scholarship_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "student_scholarship_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_scholarships",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "allocated_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "consents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "purpose",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "granted",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "recorded_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "withdrawn_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "contact_enquiries",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "new",
+          "responded",
+          "closed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "curriculum_subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "subject_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subjects",
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_required",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "departments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "device_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "platform",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "android",
+          "ios",
+          "web"
+        ]
+      },
+      {
+        "name": "last_seen_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "document_types",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "accepted_mime_types",
+        "type": "ARRAY",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "maximum_file_bytes",
+        "type": "bigint",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expiry_required",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "original_sighting_required",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "document_verification_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_document_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_documents",
+        "choices": []
+      },
+      {
+        "name": "actor_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "old_status",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "new_status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "documents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "document_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "storage_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "original_filename",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "mime_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "verified_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "verified_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "employee_attendance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "attendance_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "check_in",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "check_out",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "present",
+          "absent",
+          "leave",
+          "holiday",
+          "half_day"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "employee_salary_components",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "component",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "component_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "earning",
+          "deduction"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "effective_from",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "effective_to",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "employee_tax_documents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "financial_year",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "form_16",
+          "form_16a",
+          "other"
+        ]
+      },
+      {
+        "name": "revision",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "storage_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sha256",
+        "type": "character",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "published_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "employees",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "teacher",
+          "staff"
+        ]
+      },
+      {
+        "name": "designation",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "female",
+          "male",
+          "other",
+          "prefer_not_to_say"
+        ]
+      },
+      {
+        "name": "join_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employment_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "permanent",
+          "contract",
+          "part_time"
+        ]
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "on_leave",
+          "left"
+        ]
+      },
+      {
+        "name": "personal_email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "middle_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "contract_end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "confirmation_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "exit_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reporting_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "address_details",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "qualifications",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "appointment_document_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "enquiry_followups",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "enquiry_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_enquiries",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "call",
+          "sms",
+          "email",
+          "visit",
+          "other"
+        ]
+      },
+      {
+        "name": "outcome",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "next_follow_up_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "exam_papers",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "exam_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "exams",
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "rooms",
+        "choices": []
+      },
+      {
+        "name": "exam_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "max_marks",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pass_marks",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "exam_results",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paper_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "exam_papers",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "marks",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_absent",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "grade",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "exams",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semester_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "semesters",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "exam_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "internal",
+          "semester",
+          "practical",
+          "supplementary"
+        ]
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "expenses",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "vendor_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "vendors",
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expense_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approved_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "payment_status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paid_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "external_parties",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "party_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "university",
+          "examination_board",
+          "government",
+          "other"
+        ]
+      },
+      {
+        "name": "contact_email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ledger_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "external_remittances",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "party_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "external_parties",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paid_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "transaction_reference",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "paid",
+          "failed"
+        ]
+      },
+      {
+        "name": "expense_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "expenses",
+        "choices": []
+      },
+      {
+        "name": "approved_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "fee_adjustments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "adjustment_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "discount",
+          "waiver",
+          "fine"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approved_by_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "fee_heads",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "collection_ownership",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "external_party_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "external_parties",
+        "choices": []
+      },
+      {
+        "name": "scholarship_eligible",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "academic",
+          "hostel",
+          "transport",
+          "other"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "fee_reminder_jobs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "cutoff_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "scheduled_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "sms",
+          "push",
+          "email"
+        ]
+      },
+      {
+        "name": "message_template",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "consent_checked_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "queued",
+          "sent",
+          "failed",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "sent_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "fee_structures",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "fee_head_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "fee_heads",
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "installment_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "billing_frequency",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approval_reference",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "grievances",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "open",
+          "in_progress",
+          "resolved",
+          "closed"
+        ]
+      },
+      {
+        "name": "assigned_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostel_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "bed_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "hostel_beds",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostel_beds",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "hostel_rooms",
+        "choices": []
+      },
+      {
+        "name": "bed_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostel_permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "leave_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "return_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "departed",
+          "returned"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "pickup_person_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pickup_relationship",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pickup_contact",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "approved_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "departed_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "returned_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostel_provision_issues",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "hostel_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "hostels",
+        "choices": []
+      },
+      {
+        "name": "inventory_movement_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "inventory_movements",
+        "choices": []
+      },
+      {
+        "name": "issued_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "received_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "notes",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostel_rooms",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "hostel_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "hostels",
+        "choices": []
+      },
+      {
+        "name": "room_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "hostels",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "warden_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "import_jobs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "uploaded_by_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "filename",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "file_sha256",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "uploaded",
+          "validated",
+          "committed",
+          "failed"
+        ]
+      },
+      {
+        "name": "total_rows",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "successful_rows",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "failed_rows",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "finished_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "contract_version",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reviewed_by_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "approved_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "import_rows",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "job_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "import_jobs",
+        "choices": []
+      },
+      {
+        "name": "sheet_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "row_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "entity_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "valid",
+          "invalid",
+          "imported"
+        ]
+      },
+      {
+        "name": "error_details",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "raw_data",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "mapped_data",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "source_headers",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "institution_settings",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "setting_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "setting_value",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "institutions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "country",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "website",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "affiliation",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "inventory_items",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "quantity",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "unit",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "rooms",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "inventory_movements",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "item_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "inventory_items",
+        "choices": []
+      },
+      {
+        "name": "movement_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "received",
+          "issued",
+          "returned",
+          "disposed"
+        ]
+      },
+      {
+        "name": "quantity",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "movement_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "learning_resources",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "resource_url",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "resource_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "document",
+          "video",
+          "link",
+          "other"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "leave_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "leave_type_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "leave_types",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "leave_types",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "annual_days",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "library_books",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "author",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "isbn",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "publisher",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "library_copies",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "book_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "library_books",
+        "choices": []
+      },
+      {
+        "name": "accession_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "available",
+          "issued",
+          "lost",
+          "damaged"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "library_loans",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "copy_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "library_copies",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "returned_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "fine_amount",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "message_threads",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "created_by_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "messages",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "thread_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "message_threads",
+        "choices": []
+      },
+      {
+        "name": "sender_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sent_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "notification_delivery_attempts",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "notification_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "notifications",
+        "choices": []
+      },
+      {
+        "name": "reminder_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "fee_reminder_jobs",
+        "choices": []
+      },
+      {
+        "name": "provider",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "provider_message_id",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "attempt_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "queued",
+          "sent",
+          "delivered",
+          "failed"
+        ]
+      },
+      {
+        "name": "attempted_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "error_code",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "notifications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "in_app",
+          "email",
+          "sms",
+          "push"
+        ]
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "queued",
+          "sent",
+          "failed",
+          "read"
+        ]
+      },
+      {
+        "name": "sent_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "parents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "alternate_phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occupation",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "work_contact",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "preferred_language",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address_details",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "password_reset_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "used_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "payment_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "payment_gateway_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "order_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payment_gateway_orders",
+        "choices": []
+      },
+      {
+        "name": "provider",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "provider_event_id",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "signature_verified",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "received_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "processed_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payload_sha256",
+        "type": "character",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "received",
+          "processed",
+          "rejected",
+          "failed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "payment_gateway_orders",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "provider",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "provider_order_reference",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "idempotency_key",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "created",
+          "pending",
+          "paid",
+          "failed",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "payment_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "payments",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "payments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "currency",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paid_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "method",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "cash",
+          "bank_transfer",
+          "upi",
+          "card",
+          "cheque"
+        ]
+      },
+      {
+        "name": "transaction_reference",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "settled",
+          "failed",
+          "refunded"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "payroll_runs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "period_start",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "period_end",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "pending",
+          "calculated",
+          "published",
+          "approved",
+          "paid"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "payslip_lines",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payslip_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payslips",
+        "choices": []
+      },
+      {
+        "name": "component",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "component_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "earning",
+          "deduction"
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "payslips",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payroll_run_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payroll_runs",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "gross_amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "deduction_amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "net_amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "placement_applications",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drive_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "placement_drives",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "applied",
+          "shortlisted",
+          "selected",
+          "rejected",
+          "joined"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "placement_companies",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "contact_email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "website",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "placement_drives",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "company_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "placement_companies",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "job_title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drive_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "program_document_requirements",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "document_type_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "document_types",
+        "choices": []
+      },
+      {
+        "name": "admission_category",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "all",
+          "regular",
+          "lateral_entry",
+          "transfer",
+          "readmission"
+        ]
+      },
+      {
+        "name": "required_stage",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "submission",
+          "offer",
+          "enrollment"
+        ]
+      },
+      {
+        "name": "is_required",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "waiver_allowed",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "instructions",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "programs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "qualification",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "duration_semesters",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "intake_capacity",
+        "type": "integer",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "course_level",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "intermediate",
+          "degree"
+        ]
+      },
+      {
+        "name": "branch",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "category",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "Intermediate",
+          "Arts, Humanities and Social Sciences",
+          "Commerce, Finance and Management",
+          "Science and Computer Applications",
+          "Law and Legal Studies",
+          "Design, Architecture and Creative Arts",
+          "Agriculture and Related Non-Medical Fields",
+          "Hospitality, Tourism, Aviation and Logistics",
+          "Education and Teaching",
+          "Vocational and Industry-Oriented Degrees"
+        ]
+      },
+      {
+        "name": "duration_label",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semesters_label",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "career_opportunities",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subjects",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "receipts",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "receipt_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "issued_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "refresh_tokens",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "token_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "revoked_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "refund_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "refund_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "refunds",
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "refunds",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "payments",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "refunded_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reference",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "remittance_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "remittance_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "external_remittances",
+        "choices": []
+      },
+      {
+        "name": "charge_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_fee_charges",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "report_download_events",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "export_job_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "report_export_jobs",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "downloaded_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "request_id",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "report_export_jobs",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "requested_by_user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "report_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "collections",
+          "outstanding",
+          "cashbook",
+          "external_remittances",
+          "expenses",
+          "payroll",
+          "admissions"
+        ]
+      },
+      {
+        "name": "output_format",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pdf",
+          "csv",
+          "xlsx"
+        ]
+      },
+      {
+        "name": "filters",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "queued",
+          "processing",
+          "ready",
+          "failed",
+          "expired"
+        ]
+      },
+      {
+        "name": "storage_key",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sha256",
+        "type": "character",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "completed_at",
+        "type": "timestamp with time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "role_permissions",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "role_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "roles",
+        "choices": []
+      },
+      {
+        "name": "permission_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "permissions",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "roles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "rooms",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "room_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "classroom",
+          "laboratory",
+          "hall",
+          "office"
+        ]
+      },
+      {
+        "name": "capacity",
+        "type": "integer",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "scholarships",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sponsor",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "maximum_amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "award_method",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "award_percent",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "eligibility_rules",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "sections",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "batch_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "batches",
+        "choices": []
+      },
+      {
+        "name": "semester_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "semesters",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "integer",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "semesters",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semester_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "staff_profiles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "responsibility",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "shift",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_attendance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "session_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "attendance_sessions",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "present",
+          "absent",
+          "late",
+          "excused"
+        ]
+      },
+      {
+        "name": "remarks",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_document_links",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "admission_document_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "admission_documents",
+        "choices": []
+      },
+      {
+        "name": "transferred_by_employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_enrollments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "section_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "sections",
+        "choices": []
+      },
+      {
+        "name": "roll_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "enrolled_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "completed",
+          "transferred",
+          "withdrawn"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "student_fee_charges",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "fee_structure_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "fee_structures",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "tax_amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_leave_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "cancelled"
+        ]
+      },
+      {
+        "name": "approved_by_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_parents",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "relationship",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "father",
+          "mother",
+          "guardian",
+          "other"
+        ]
+      },
+      {
+        "name": "is_primary",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "can_pickup",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "receives_notifications",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_scholarships",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "scholarship_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "scholarships",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected",
+          "disbursed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "student_status_history",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "old_status",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "new_status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "actor_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "occurred_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "enrollment_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "student_enrollments",
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "students",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "admission_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "first_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "date_of_birth",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gender",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "female",
+          "male",
+          "other",
+          "prefer_not_to_say"
+        ]
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "city",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "state",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "postal_code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "country",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "blood_group",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "A+",
+          "A-",
+          "B+",
+          "B-",
+          "AB+",
+          "AB-",
+          "O+",
+          "O-",
+          "unknown"
+        ]
+      },
+      {
+        "name": "nationality",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_institution",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_qualification",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_score",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "emergency_contact_phone",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "active",
+          "graduated",
+          "withdrawn",
+          "suspended",
+          "relieved"
+        ]
+      },
+      {
+        "name": "middle_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "preferred_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "permanent_address",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "current_address_details",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "university_registration_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_category",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_education",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "profile_photo_storage_key",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "relieved_on",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "relieving_reason",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "admission_application_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "admission_applications",
+        "choices": []
+      },
+      {
+        "name": "aadhaar_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "current_year",
+        "type": "smallint",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "subject_offerings",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subjects",
+        "choices": []
+      },
+      {
+        "name": "section_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "sections",
+        "choices": []
+      },
+      {
+        "name": "teacher_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "teachers",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "subjects",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "department_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "departments",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "credits",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "theory",
+          "practical",
+          "project",
+          "elective"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "teachers",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "qualification",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "specialization",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "experience_years",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "thread_members",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "thread_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "message_threads",
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "timetable_slots",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "offering_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "subject_offerings",
+        "choices": []
+      },
+      {
+        "name": "room_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "rooms",
+        "choices": []
+      },
+      {
+        "name": "weekday",
+        "type": "smallint",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "start_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_time",
+        "type": "time without time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "transport_allocations",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "stop_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "transport_stops",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "transport_routes",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "vehicle_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "vehicles",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "transport_stops",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "route_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "transport_routes",
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "sequence_number",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pickup_time",
+        "type": "time without time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "drop_time",
+        "type": "time without time zone",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "user_roles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "user_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "role_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "roles",
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "users",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "password_hash",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "parent_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "parents",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "vehicles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "campus_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "campuses",
+        "choices": []
+      },
+      {
+        "name": "registration_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "capacity",
+        "type": "integer",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "driver_employee_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "vendors",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "email",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "phone",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "tax_reference",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "website_pages",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "institution_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "institutions",
+        "choices": []
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "content",
+        "type": "jsonb",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "published",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "purchase_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "text",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      {
+        "name": "requested_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "purchase_orders",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "request_code",
+        "type": "text",
+        "required": true,
+        "reference": "purchase_requests",
+        "choices": []
+      },
+      {
+        "name": "vendor_code",
+        "type": "text",
+        "required": true,
+        "reference": "vendors",
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "ordered",
+          "received",
+          "paid"
+        ]
+      },
+      {
+        "name": "ordered_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "asset_register",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "item_code",
+        "type": "text",
+        "required": true,
+        "reference": "inventory_items",
+        "choices": []
+      },
+      {
+        "name": "serial_number",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "assigned_employee_code",
+        "type": "text",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "available",
+          "assigned",
+          "maintenance",
+          "retired"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "vehicle_trips",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "route_code",
+        "type": "text",
+        "required": true,
+        "reference": "transport_routes",
+        "choices": []
+      },
+      {
+        "name": "trip_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "driver_employee_code",
+        "type": "text",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "scheduled",
+          "departed",
+          "completed",
+          "cancelled"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "vehicle_maintenance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "vehicle_code",
+        "type": "text",
+        "required": true,
+        "reference": "vehicles",
+        "choices": []
+      },
+      {
+        "name": "service_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "scheduled",
+          "completed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "vehicle_fuel",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "vehicle_code",
+        "type": "text",
+        "required": true,
+        "reference": "vehicles",
+        "choices": []
+      },
+      {
+        "name": "filled_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "litres",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "odometer",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "vehicle_seats",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "vehicle_code",
+        "type": "text",
+        "required": true,
+        "reference": "vehicles",
+        "choices": []
+      },
+      {
+        "name": "seat_number",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "available",
+          "reserved",
+          "unavailable"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "passenger_seats",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "seat_code",
+        "type": "text",
+        "required": true,
+        "reference": "vehicle_seats",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "text",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "text",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "route_code",
+        "type": "text",
+        "required": true,
+        "reference": "transport_routes",
+        "choices": []
+      },
+      {
+        "name": "start_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "end_date",
+        "type": "date",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "transport_attendance",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "trip_code",
+        "type": "text",
+        "required": true,
+        "reference": "vehicle_trips",
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "text",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "text",
+        "required": false,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "timetable_swap_requests",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "slot_code",
+        "type": "text",
+        "required": true,
+        "reference": "timetable_slots",
+        "choices": []
+      },
+      {
+        "name": "target_slot_code",
+        "type": "text",
+        "required": true,
+        "reference": "timetable_slots",
+        "choices": []
+      },
+      {
+        "name": "requested_by_user_code",
+        "type": "text",
+        "required": true,
+        "reference": "users",
+        "choices": []
+      },
+      {
+        "name": "reason",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      },
+      {
+        "name": "requested_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "payroll_adjustments",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "text",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "component",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "component_type",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "payroll_run_code",
+        "type": "text",
+        "required": false,
+        "reference": "payroll_runs",
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "pending",
+          "approved",
+          "rejected"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "college_invoices",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "text",
+        "required": false,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "vendor_code",
+        "type": "text",
+        "required": false,
+        "reference": "vendors",
+        "choices": []
+      },
+      {
+        "name": "invoice_number",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "due_date",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "issued",
+          "paid",
+          "void"
+        ]
+      },
+      {
+        "name": "description",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "notification_templates",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "channel",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "body",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "is_active",
+        "type": "boolean",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "notification_campaigns",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "template_code",
+        "type": "text",
+        "required": true,
+        "reference": "notification_templates",
+        "choices": []
+      },
+      {
+        "name": "scheduled_at",
+        "type": "timestamp with time zone",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "status",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "draft",
+          "queued",
+          "sent",
+          "failed"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "expense_payment_entries",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "expense_code",
+        "type": "text",
+        "required": true,
+        "reference": "expenses",
+        "choices": []
+      },
+      {
+        "name": "method",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "reference",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "paid_on",
+        "type": "date",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "amount",
+        "type": "numeric",
+        "required": true,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "student_admission_profiles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "student_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "students",
+        "choices": []
+      },
+      {
+        "name": "program_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "programs",
+        "choices": []
+      },
+      {
+        "name": "academic_year_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "academic_years",
+        "choices": []
+      },
+      {
+        "name": "batch_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "batches",
+        "choices": []
+      },
+      {
+        "name": "section_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "sections",
+        "choices": []
+      },
+      {
+        "name": "course_level",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "intermediate",
+          "degree"
+        ]
+      },
+      {
+        "name": "registration_number",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "last_qualification",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "referral",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "achievements",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "certifications",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_checklist",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "hostel_required",
+        "type": "boolean",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "transport_required",
+        "type": "boolean",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "scholarship_amount",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "scholarship_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "special_consideration_amount",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "special_consideration_reason",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gross_fee",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "net_fee",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "fee_summary",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "created_by_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  }
+]

@@ -15,7 +15,6 @@ import {
   Menu,
   X,
   Play,
-  Check,
   MapPin,
   Mail,
   Phone,
@@ -23,7 +22,14 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { collegeRoot, type College } from "@/data/colleges";
-import { useCollege } from "./CollegeStore";
+import {
+  api,
+  errorText,
+  type ApplicationPayload,
+  type ContactPayload,
+  type IntakeKind,
+  type PublicOptions,
+} from "@/services/api";
 const Scene = dynamic(() => import("./CampusScene"), {
   ssr: false,
   loading: () => (
@@ -58,7 +64,36 @@ export default function CollegePublic({
     [hotspot, setHotspot] = useState(0),
     [scene, setScene] = useState(false);
   const region = useRef<HTMLDivElement>(null);
-  const { state, run, message } = useCollege();
+  const [intakeNotice, setIntakeNotice] = useState("");
+  const [intakeOptions, setIntakeOptions] = useState<PublicOptions>({
+    programs: [],
+    sources: [],
+  });
+  useEffect(() => {
+    if (page === "admissions" && parts[1] === "apply")
+      void api.public
+        .options()
+        .then(setIntakeOptions)
+        .catch(() => setIntakeNotice("Admissions server is unavailable"));
+  }, [page, parts]);
+  async function intake(
+    kind: IntakeKind,
+    values: Record<string, unknown>,
+    form: HTMLFormElement,
+  ) {
+    setIntakeNotice("Submitting…");
+    try {
+      // Field names of the public forms are the payload keys of public/<kind>.
+      const result = await api.public.submit(
+        kind,
+        values as unknown as ApplicationPayload | ContactPayload,
+      );
+      setIntakeNotice("Received. Your reference is " + result.reference);
+      form.reset();
+    } catch (error) {
+      setIntakeNotice(errorText(error) || "Unable to submit");
+    }
+  }
   useEffect(() => {
     if (!menu) return;
     const escape = (e: KeyboardEvent) => {
@@ -600,7 +635,7 @@ export default function CollegePublic({
               </h2>
               <p>
                 Discover a program, prepare your documents, and submit your
-                application. Our demo admission team will guide your application
+                application. Our admissions team will guide your application
                 from inquiry to enrollment.
               </p>
               <Link
@@ -628,8 +663,8 @@ export default function CollegePublic({
               <h3>Potential deserves opportunity.</h3>
               <p>
                 Explore merit, need-based, sports, and institutional
-                scholarships. Eligibility and approvals are simulated in the
-                management portal.
+                scholarships. Eligibility is reviewed and approved by the
+                accounts office.
               </p>
             </div>
           </section>
@@ -643,20 +678,27 @@ export default function CollegePublic({
                 const data = Object.fromEntries(
                   new FormData(e.currentTarget),
                 ) as Record<string, string>;
-                if (run({ type: "admission.create", data }))
-                  e.currentTarget.reset();
+                void intake(
+                  "applications",
+                  {
+                    ...data,
+                    consent:
+                      new FormData(e.currentTarget).get("consent") === "on",
+                  },
+                  e.currentTarget,
+                );
               }}
             >
               <h2>Application for admission</h2>
               <p>
-                Use fictional information only. Submissions are saved in this
-                browser’s demo admissions register.
+                Submit your details to the college admissions team. Keep your
+                reference number for follow-up.
               </p>
               {[
                 ["name", "Student name"],
                 ["email", "Email"],
                 ["guardian", "Guardian name"],
-                ["contact", "Contact reference"],
+                ["contact", "Contact mobile number"],
               ].map(([key, label]) => (
                 <label key={key}>
                   {label}
@@ -670,23 +712,20 @@ export default function CollegePublic({
               <label>
                 Program
                 <select name="program">
-                  {c.programs.map((p) => (
-                    <option key={p.slug}>{p.name}</option>
+                  {intakeOptions.programs.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {p.name}
+                    </option>
                   ))}
                 </select>
               </label>
               <label>
                 Admission source
                 <select name="source">
-                  {[
-                    "Website",
-                    "Walk-in",
-                    "Social Media",
-                    "Referral",
-                    "Education Fair",
-                    "Other",
-                  ].map((s) => (
-                    <option key={s}>{s}</option>
+                  {intakeOptions.sources.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -707,10 +746,17 @@ export default function CollegePublic({
                   placeholder="List the fictional documents prepared for review"
                 />
               </label>
+              <label>
+                <span>
+                  <input type="checkbox" name="consent" required /> I consent to
+                  the college processing these details for my admission and
+                  contacting me about this application.
+                </span>
+              </label>
+              {intakeNotice && <p role="status">{intakeNotice}</p>}
               <button className="college-button">
-                Submit demo application <ArrowRight size={16} />
+                Submit application <ArrowRight size={16} />
               </button>
-              <p role="status">{message}</p>
             </form>
           </section>
         )}
@@ -720,19 +766,15 @@ export default function CollegePublic({
             {[
               [
                 "How do I apply?",
-                "Choose a program and complete the demo application. Follow its status in the admissions portal.",
+                "Choose a program and complete the online application. The admissions team reviews it and contacts you about the next steps.",
               ],
               [
                 "Are scholarships available?",
-                "The demo supports merit, need-based, sports, and institutional awards. Accounts staff can propose awards for approval.",
+                "Merit, need-based, sports, and institutional awards are available. The accounts office reviews and approves each award.",
               ],
               [
                 "Can I explore the campus?",
-                "Use our interactive 3D campus, or contact the fictional admissions team to simulate a visit.",
-              ],
-              [
-                "Is this a real institution?",
-                "This is a fictional college template with a browser-based ERP demonstration. No real admissions, payments, SMS messages or credentials are processed.",
+                "Use our interactive 3D campus, or request a visit and the admissions team will arrange it.",
               ],
             ].map(([q, a]) => (
               <details key={q}>
@@ -760,29 +802,30 @@ export default function CollegePublic({
               className="college-form"
               onSubmit={(e) => {
                 e.preventDefault();
-                alert(
-                  "Demo campus visit request received. No message was sent.",
+                const values = Object.fromEntries(
+                  new FormData(e.currentTarget),
                 );
-                e.currentTarget.reset();
+                void intake("contact", values, e.currentTarget);
               }}
             >
               <label>
                 Your name
-                <input required />
+                <input name="name" required />
               </label>
               <label>
                 Demo email
-                <input type="email" required />
+                <input name="email" type="email" required />
               </label>
               <label>
                 Preferred visit date
-                <input type="date" required />
+                <input name="visit_date" type="date" required />
               </label>
               <label>
                 Your question
-                <textarea required />
+                <textarea name="message" required />
               </label>
-              <button className="college-button">Request a demo visit</button>
+              {intakeNotice && <p role="status">{intakeNotice}</p>}
+              <button className="college-button">Request a visit</button>
             </form>
           </section>
         )}
@@ -802,35 +845,6 @@ export default function CollegePublic({
               <Link className="college-button" href={`${root}/portal/login`}>
                 Explore the management portal <ArrowUpRight size={17} />
               </Link>
-            </div>
-            <div className="college-dashboard-preview">
-              <div>
-                <span>{c.short} / Campus overview</span>
-                <span>Demo</span>
-              </div>
-              <h3>A good day to make progress.</h3>
-              <div className="college-preview-metrics">
-                <span>
-                  <Users /> Students<strong>{state.students.length}</strong>
-                </span>
-                <span>
-                  <BookOpen /> Programs<strong>{c.programs.length}</strong>
-                </span>
-                <span>
-                  <GraduationCap /> Campus beds
-                  <strong>
-                    {state.rooms.reduce((n, r) => n + (r.capacity || 0), 0)}
-                  </strong>
-                </span>
-              </div>
-              <div className="college-preview-chart">
-                {[45, 60, 43, 75, 65, 92, 74, 100, 84].map((h, i) => (
-                  <i key={i} style={{ height: h + "%" }} />
-                ))}
-              </div>
-              <p>
-                <Check size={14} /> A connected, fictional campus dataset
-              </p>
             </div>
           </section>
         )}

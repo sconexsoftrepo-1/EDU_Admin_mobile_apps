@@ -1,49 +1,59 @@
 "use client";
 import dynamic from "next/dynamic";
-import { CollegeStore, useCollege } from "./CollegeStore";
+import { useEffect, useState } from "react";
+import Portal from "./CollegePortal";
 import CollegePublic from "./CollegePublic";
 import { collegeRoot, type College } from "@/data/colleges";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-const Portal = dynamic(() => import("./CollegePortal"), {
-  loading: () => <div className="erp-loading">Loading campus workspace…</div>,
-});
+import { api, errorText, type CertificateVerification } from "@/services/api";
+const Login = dynamic(() => import("./ConnectedPortal"));
+
 function Verification({ college: c, id }: { college: College; id: string }) {
-  const { state: s, ready } = useCollege(),
-    r = s.certificates.find((x) => x.id === id && x.status === "Issued"),
-    st = s.students.find((x) => x.id === r?.studentId);
+  const [result, setResult] = useState<CertificateVerification | null>(null),
+    [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    void api.documents
+      .verifyCertificate(id)
+      .then((value) => {
+        if (active) setResult(value);
+      })
+      .catch((e) => {
+        if (active) setError(errorText(e));
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
   return (
     <main className="college-verification">
       <ShieldCheck size={50} />
-      <h1>Certificate verification demo</h1>
+      <h1>Certificate verification</h1>
       <p>{c.name}</p>
-      {!ready ? (
-        <p>Checking demo records…</p>
-      ) : r ? (
+      {error ? (
+        <h2>{error}</h2>
+      ) : !result ? (
+        <p>Checking the certificate signature…</p>
+      ) : (
         <>
-          <h2>Found in this browser’s demo records</h2>
+          <h2>
+            {result.valid
+              ? "Signature verified"
+              : result.revoked
+                ? "Certificate revoked"
+                : "Certificate could not be verified"}
+          </h2>
           <dl>
-            <dt>Reference</dt>
-            <dd>{r.id}</dd>
-            <dt>Certificate</dt>
-            <dd>{r.name}</dd>
-            <dt>Student</dt>
-            <dd>
-              {st?.name.slice(0, 1)}•••• / ••••{st?.id.slice(-3)}
-            </dd>
-            <dt>Issue date</dt>
-            <dd>{r.approvedAt?.slice(0, 10) || r.date}</dd>
-            <dt>Status</dt>
-            <dd>Issued (demonstration)</dd>
+            <dt>Certificate number</dt>
+            <dd>{result.certificate_number}</dd>
+            <dt>Issued on</dt>
+            <dd>{result.issued_on}</dd>
+            <dt>Signing mode</dt>
+            <dd>{result.signer_type}</dd>
           </dl>
         </>
-      ) : (
-        <h2>No issued demo certificate found</h2>
       )}
-      <p>
-        Records are stored in this browser only. This does not establish
-        real-world authenticity or cryptographic validity.
-      </p>
       <Link className="college-button" href={collegeRoot(c)}>
         Return to college
       </Link>
@@ -57,15 +67,10 @@ export default function CollegePage({
   college: College;
   parts: string[];
 }) {
-  return (
-    <CollegeStore key={college.slug} slug={college.slug}>
-      {parts[0] === "portal" ? (
-        <Portal college={college} parts={parts} />
-      ) : parts[0] === "verify-certificate" ? (
-        <Verification college={college} id={parts[1]} />
-      ) : (
-        <CollegePublic college={college} parts={parts} />
-      )}
-    </CollegeStore>
-  );
+  if (parts[0] === "portal" && parts[1] === "login")
+    return <Login college={college} parts={parts} loginRedirect />;
+  if (parts[0] === "portal") return <Portal college={college} parts={parts} />;
+  if (parts[0] === "verify-certificate")
+    return <Verification college={college} id={parts[1]} />;
+  return <CollegePublic college={college} parts={parts} />;
 }

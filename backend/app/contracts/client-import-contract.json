@@ -1,0 +1,5395 @@
+{
+  "version": "2.0",
+  "header_row": 6,
+  "first_data_row": 7,
+  "prepared_rows": 200,
+  "collection_only": true,
+  "backend_implemented": false,
+  "currency_units": "major units",
+  "percent_units": "whole percent; 25 means 25%",
+  "files": [
+    {
+      "file": "01_Students_and_Parents.xlsx",
+      "title": "Students and parents",
+      "purpose": "Admissions, student profiles and family contacts.",
+      "notes": [
+        "Enter a student once. Capture enrollment details in the separate Enrollments file.",
+        "Enter each parent or guardian once, including parents of siblings. Use Relationships to link the same parent to multiple students.",
+        "Record at most one primary contact per student. Parent access and notification preferences must be confirmed with the family.",
+        "Document references identify records held by the college; attach documents separately through the future portal."
+      ],
+      "sheets": [
+        {
+          "name": "Students",
+          "row_rule": "One row per student.",
+          "target": "students",
+          "fields": [
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique student code, reused in all other files.",
+              "example": "STU-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "admission_number",
+              "label": "Admission number",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Official college admission number; preserve leading zeros.",
+              "example": "ADM-2026-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "first_name",
+              "label": "First name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Student given name as shown in admission records.",
+              "example": "Ananya",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "middle_name",
+              "label": "Middle name",
+              "required": false,
+              "type": "text",
+              "group": "Identity",
+              "description": "Additional given names, if any.",
+              "example": "Kumar",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "last_name",
+              "label": "Last name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Family name as shown in admission records.",
+              "example": "Rao",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "preferred_name",
+              "label": "Preferred name",
+              "required": false,
+              "type": "text",
+              "group": "Identity",
+              "description": "Name the student uses for communication.",
+              "example": "Ananya",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "date_of_birth",
+              "label": "Date of birth",
+              "required": true,
+              "type": "date",
+              "group": "Identity",
+              "description": "Verified birth date, not the admission date.",
+              "example": "2008-06-15",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "gender",
+              "label": "Gender",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Use the student's recorded selection.",
+              "example": "female",
+              "reference": null,
+              "choices": [
+                "female",
+                "male",
+                "other",
+                "prefer_not_to_say"
+              ]
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Admission",
+              "description": "Use the campus code agreed with the college administrator.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "admission_date",
+              "label": "Admission date",
+              "required": true,
+              "type": "date",
+              "group": "Admission",
+              "description": "Date admission was confirmed.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "admission_category",
+              "label": "Admission category",
+              "required": false,
+              "type": "text",
+              "group": "Admission",
+              "description": "Mode through which the student joined.",
+              "example": "regular",
+              "reference": null,
+              "choices": [
+                "regular",
+                "lateral_entry",
+                "transfer",
+                "readmission"
+              ]
+            },
+            {
+              "key": "university_registration_number",
+              "label": "University registration number",
+              "required": false,
+              "type": "code",
+              "group": "Admission",
+              "description": "Affiliating university registration number if already issued.",
+              "example": "UNI-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Student status",
+              "required": true,
+              "type": "text",
+              "group": "Admission",
+              "description": "Current enrollment standing at the data collection date.",
+              "example": "active",
+              "reference": null,
+              "choices": [
+                "active",
+                "graduated",
+                "withdrawn",
+                "suspended"
+              ]
+            },
+            {
+              "key": "email",
+              "label": "Student email",
+              "required": false,
+              "type": "email",
+              "group": "Contact",
+              "description": "Student's own email; do not enter a parent email here.",
+              "example": "ananya@example.com",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "phone",
+              "label": "Student mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Student's own mobile including country code.",
+              "example": "+919000000001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "alternate_phone",
+              "label": "Alternate mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Additional student contact number if available.",
+              "example": "+919000000002",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_address_line_1",
+              "label": "Current address line 1",
+              "required": true,
+              "type": "text",
+              "group": "Current address",
+              "description": "House or flat number and street.",
+              "example": "12 Example Road",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_address_line_2",
+              "label": "Current address line 2",
+              "required": false,
+              "type": "text",
+              "group": "Current address",
+              "description": "Locality, area or landmark.",
+              "example": "Example Nagar",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_city",
+              "label": "Current city",
+              "required": true,
+              "type": "text",
+              "group": "Current address",
+              "description": "City or town of the current residence.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_district",
+              "label": "Current district",
+              "required": false,
+              "type": "text",
+              "group": "Current address",
+              "description": "Administrative district of the current residence.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_state",
+              "label": "Current state",
+              "required": true,
+              "type": "text",
+              "group": "Current address",
+              "description": "State or province of the current residence.",
+              "example": "Telangana",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_postal_code",
+              "label": "Current postal code",
+              "required": true,
+              "type": "code",
+              "group": "Current address",
+              "description": "Postal code as text; preserve leading zeros.",
+              "example": "500001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "current_country",
+              "label": "Current country",
+              "required": true,
+              "type": "text",
+              "group": "Current address",
+              "description": "Country of residence.",
+              "example": "India",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_same_as_current",
+              "label": "Permanent address same",
+              "required": true,
+              "type": "bool",
+              "group": "Permanent address",
+              "description": "Yes only when every permanent address component matches the current address.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_address_line_1",
+              "label": "Permanent address line 1",
+              "required": false,
+              "type": "text",
+              "group": "Permanent address",
+              "description": "Required when Permanent address same is No.",
+              "example": "12 Example Road",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_address_line_2",
+              "label": "Permanent address line 2",
+              "required": false,
+              "type": "text",
+              "group": "Permanent address",
+              "description": "Permanent locality or landmark, if different.",
+              "example": "Example Nagar",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_city",
+              "label": "Permanent city",
+              "required": false,
+              "type": "text",
+              "group": "Permanent address",
+              "description": "Required when the permanent address differs.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_state",
+              "label": "Permanent state",
+              "required": false,
+              "type": "text",
+              "group": "Permanent address",
+              "description": "Required when the permanent address differs.",
+              "example": "Telangana",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_postal_code",
+              "label": "Permanent postal code",
+              "required": false,
+              "type": "code",
+              "group": "Permanent address",
+              "description": "Required when the permanent address differs.",
+              "example": "500001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "permanent_country",
+              "label": "Permanent country",
+              "required": false,
+              "type": "text",
+              "group": "Permanent address",
+              "description": "Required when the permanent address differs.",
+              "example": "India",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "nationality",
+              "label": "Nationality",
+              "required": false,
+              "type": "text",
+              "group": "Background",
+              "description": "Nationality stated in admission records.",
+              "example": "Indian",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "preferred_language",
+              "label": "Preferred language",
+              "required": false,
+              "type": "text",
+              "group": "Background",
+              "description": "Preferred language for college communication.",
+              "example": "English",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "blood_group",
+              "label": "Blood group",
+              "required": false,
+              "type": "text",
+              "group": "Emergency",
+              "description": "Use unknown if no verified blood group is available.",
+              "example": "unknown",
+              "reference": null,
+              "choices": [
+                "A+",
+                "A-",
+                "B+",
+                "B-",
+                "AB+",
+                "AB-",
+                "O+",
+                "O-",
+                "unknown"
+              ]
+            },
+            {
+              "key": "emergency_contact_name",
+              "label": "Emergency contact name",
+              "required": true,
+              "type": "text",
+              "group": "Emergency",
+              "description": "Person to contact urgently if primary contacts are unavailable.",
+              "example": "Meera Rao",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "emergency_contact_relationship",
+              "label": "Emergency relationship",
+              "required": true,
+              "type": "text",
+              "group": "Emergency",
+              "description": "Relationship of emergency contact to student.",
+              "example": "Mother",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "emergency_contact_phone",
+              "label": "Emergency contact mobile",
+              "required": true,
+              "type": "phone",
+              "group": "Emergency",
+              "description": "Reachable emergency phone including country code.",
+              "example": "+919000000003",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "previous_institution",
+              "label": "Previous institution",
+              "required": false,
+              "type": "text",
+              "group": "Previous education",
+              "description": "Most recent school or college attended.",
+              "example": "Example Junior College",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "previous_board_university",
+              "label": "Previous board or university",
+              "required": false,
+              "type": "text",
+              "group": "Previous education",
+              "description": "Board or university awarding the qualifying result.",
+              "example": "Example Board",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "previous_qualification",
+              "label": "Previous qualification",
+              "required": false,
+              "type": "text",
+              "group": "Previous education",
+              "description": "Qualification used for admission.",
+              "example": "Class XII",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "qualifying_year",
+              "label": "Qualifying year",
+              "required": false,
+              "type": "year",
+              "group": "Previous education",
+              "description": "Year the qualifying course was completed.",
+              "example": "2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "previous_score",
+              "label": "Qualifying score",
+              "required": false,
+              "type": "decimal",
+              "group": "Previous education",
+              "description": "Numeric score; explain its scale in Score scale.",
+              "example": "88.50",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "score_scale",
+              "label": "Score scale",
+              "required": false,
+              "type": "text",
+              "group": "Previous education",
+              "description": "Scale for Qualifying score; do not mix percentage and GPA.",
+              "example": "percentage",
+              "reference": null,
+              "choices": [
+                "percentage",
+                "cgpa_10",
+                "gpa_4",
+                "other"
+              ]
+            },
+            {
+              "key": "transfer_certificate_reference",
+              "label": "Transfer certificate reference",
+              "required": false,
+              "type": "code",
+              "group": "Documents",
+              "description": "Reference of the transfer certificate already held by college.",
+              "example": "TC-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "photo_file_reference",
+              "label": "Photo file reference",
+              "required": false,
+              "type": "text",
+              "group": "Documents",
+              "description": "Filename or private document reference; not an embedded image.",
+              "example": "STU-0001-photo.jpg",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Admission notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant admission remarks only.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Parents",
+          "row_rule": "One row per distinct parent or guardian.",
+          "target": "parents",
+          "fields": [
+            {
+              "key": "parent_code",
+              "label": "Parent or guardian code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique parent code; reuse for siblings.",
+              "example": "PAR-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "first_name",
+              "label": "First name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Parent or guardian given name.",
+              "example": "Meera",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "last_name",
+              "label": "Last name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Parent or guardian family name.",
+              "example": "Rao",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "email",
+              "label": "Email",
+              "required": false,
+              "type": "email",
+              "group": "Contact",
+              "description": "Email used for college communication.",
+              "example": "meera@example.com",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "phone",
+              "label": "Primary mobile",
+              "required": true,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Primary contact number including country code.",
+              "example": "+919000000003",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "alternate_phone",
+              "label": "Alternate mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Secondary reachable number.",
+              "example": "+919000000004",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "preferred_language",
+              "label": "Preferred language",
+              "required": false,
+              "type": "text",
+              "group": "Contact",
+              "description": "Preferred language for parent communications.",
+              "example": "English",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "occupation",
+              "label": "Occupation",
+              "required": false,
+              "type": "text",
+              "group": "Employment",
+              "description": "Current occupation, if the parent provides it.",
+              "example": "Teacher",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "employer_name",
+              "label": "Employer or business",
+              "required": false,
+              "type": "text",
+              "group": "Employment",
+              "description": "Organization or business name, if provided.",
+              "example": "Example School",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "work_phone",
+              "label": "Work phone",
+              "required": false,
+              "type": "phone",
+              "group": "Employment",
+              "description": "Work contact only where the parent agrees it may be used.",
+              "example": "+919000000005",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "address_line_1",
+              "label": "Address line 1",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "House or flat number and street.",
+              "example": "12 Example Road",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "address_line_2",
+              "label": "Address line 2",
+              "required": false,
+              "type": "text",
+              "group": "Address",
+              "description": "Locality or landmark.",
+              "example": "Example Nagar",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "city",
+              "label": "City",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "City or town of residence.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "district",
+              "label": "District",
+              "required": false,
+              "type": "text",
+              "group": "Address",
+              "description": "Administrative district.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "state",
+              "label": "State",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "State or province.",
+              "example": "Telangana",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "postal_code",
+              "label": "Postal code",
+              "required": true,
+              "type": "code",
+              "group": "Address",
+              "description": "Postal code stored as text.",
+              "example": "500001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "country",
+              "label": "Country",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "Country of residence.",
+              "example": "India",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Contact notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant contact instructions or availability.",
+              "example": "Call after 5 PM",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Relationships",
+          "row_rule": "One row per student and parent relationship.",
+          "target": "student_parents",
+          "fields": [
+            {
+              "key": "relationship_code",
+              "label": "Relationship code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Unique code for this student-parent connection.",
+              "example": "REL-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Existing student code in the Students tab.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "parent_code",
+              "label": "Parent or guardian code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Existing parent code in the Parents tab.",
+              "example": "PAR-0001",
+              "reference": "Parents.parent_code",
+              "choices": []
+            },
+            {
+              "key": "relationship",
+              "label": "Relationship",
+              "required": true,
+              "type": "text",
+              "group": "Permissions",
+              "description": "Relationship of this adult to this student.",
+              "example": "mother",
+              "reference": null,
+              "choices": [
+                "father",
+                "mother",
+                "guardian",
+                "other"
+              ]
+            },
+            {
+              "key": "is_primary",
+              "label": "Primary contact",
+              "required": true,
+              "type": "bool",
+              "group": "Permissions",
+              "description": "Only one relationship per student may be marked Yes.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "can_pickup",
+              "label": "Authorized pickup",
+              "required": true,
+              "type": "bool",
+              "group": "Permissions",
+              "description": "Yes if the college has recorded pickup authorization.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "receives_notifications",
+              "label": "Receives notifications",
+              "required": true,
+              "type": "bool",
+              "group": "Permissions",
+              "description": "Whether routine student updates should be sent to this adult.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "portal_access_requested",
+              "label": "Parent portal requested",
+              "required": true,
+              "type": "bool",
+              "group": "Permissions",
+              "description": "Request access later through an invitation; no passwords in Excel.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Effective from",
+              "required": false,
+              "type": "date",
+              "group": "Permissions",
+              "description": "Start date for this relationship or authorization.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Relationship notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant guardianship or communication instructions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "02_Courses_and_Subjects.xlsx",
+      "title": "Courses and subjects",
+      "purpose": "Available courses, curriculum structure and subject requirements.",
+      "notes": [
+        "Use course codes consistently in enrollment, fee and timetable records. A course means a degree or program, not an individual subject.",
+        "Course Subjects links reusable subjects to a course, curriculum version, semester and elective group.",
+        "Use the college-approved curriculum and official fee policies. Do not infer credits or marks from examples."
+      ],
+      "sheets": [
+        {
+          "name": "Courses",
+          "row_rule": "One row per available course or program.",
+          "target": "programs",
+          "fields": [
+            {
+              "key": "course_code",
+              "label": "Course code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique course or program code.",
+              "example": "BCA",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "course_name",
+              "label": "Course name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Official full course name.",
+              "example": "Bachelor of Computer Applications",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "short_name",
+              "label": "Short name",
+              "required": false,
+              "type": "text",
+              "group": "Identity",
+              "description": "Common abbreviation used in the college.",
+              "example": "BCA",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Organization",
+              "description": "Campus offering this course.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "department_code",
+              "label": "Department code",
+              "required": true,
+              "type": "code",
+              "group": "Organization",
+              "description": "Department code agreed with the college administrator.",
+              "example": "DEPT-CS",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "department_name",
+              "label": "Department name",
+              "required": true,
+              "type": "text",
+              "group": "Organization",
+              "description": "Official department name for setup and verification.",
+              "example": "Computer Science",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "qualification",
+              "label": "Awarded qualification",
+              "required": true,
+              "type": "text",
+              "group": "Structure",
+              "description": "Degree, diploma or certificate awarded.",
+              "example": "Bachelor degree",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "course_level",
+              "label": "Course level",
+              "required": true,
+              "type": "text",
+              "group": "Structure",
+              "description": "Academic level of the qualification.",
+              "example": "undergraduate",
+              "reference": null,
+              "choices": [
+                "certificate",
+                "diploma",
+                "undergraduate",
+                "postgraduate",
+                "doctoral"
+              ]
+            },
+            {
+              "key": "study_mode",
+              "label": "Study mode",
+              "required": true,
+              "type": "text",
+              "group": "Structure",
+              "description": "Approved mode of delivery.",
+              "example": "full_time",
+              "reference": null,
+              "choices": [
+                "full_time",
+                "part_time",
+                "distance",
+                "online"
+              ]
+            },
+            {
+              "key": "duration_years",
+              "label": "Duration in years",
+              "required": true,
+              "type": "decimal",
+              "group": "Structure",
+              "description": "Normal course duration, allowing fractions where relevant.",
+              "example": "3",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "duration_semesters",
+              "label": "Number of semesters",
+              "required": true,
+              "type": "positive_int",
+              "group": "Structure",
+              "description": "Total semesters or academic terms in the course.",
+              "example": "6",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "intake_capacity",
+              "label": "Approved intake",
+              "required": true,
+              "type": "positive_int",
+              "group": "Structure",
+              "description": "Approved seats per entry batch.",
+              "example": "120",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "total_credits",
+              "label": "Total required credits",
+              "required": false,
+              "type": "decimal",
+              "group": "Structure",
+              "description": "Credits required for completion under the curriculum.",
+              "example": "120",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "medium_of_instruction",
+              "label": "Teaching language",
+              "required": false,
+              "type": "text",
+              "group": "Structure",
+              "description": "Primary language of instruction.",
+              "example": "English",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "affiliating_university",
+              "label": "Affiliating university",
+              "required": false,
+              "type": "text",
+              "group": "Approval",
+              "description": "University or awarding body.",
+              "example": "Example University",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Approval reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Approval, recognition or accreditation reference.",
+              "example": "APP-2026-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "eligibility_criteria",
+              "label": "Admission eligibility",
+              "required": true,
+              "type": "text",
+              "group": "Admission",
+              "description": "Approved entry qualifications and selection requirements.",
+              "example": "Class XII as per college policy",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "lateral_entry_allowed",
+              "label": "Lateral entry allowed",
+              "required": true,
+              "type": "bool",
+              "group": "Admission",
+              "description": "Whether this course accepts approved lateral entry.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Effective from",
+              "required": true,
+              "type": "date",
+              "group": "Validity",
+              "description": "Date this course offering becomes available.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_to",
+              "label": "Effective to",
+              "required": false,
+              "type": "date",
+              "group": "Validity",
+              "description": "Leave blank when no closure date is set.",
+              "example": "2029-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "is_active",
+              "label": "Currently available",
+              "required": true,
+              "type": "bool",
+              "group": "Validity",
+              "description": "Whether the course is open for current operations.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Course notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Additional academic structure details.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Subjects",
+          "row_rule": "One row per distinct subject.",
+          "target": "subjects",
+          "fields": [
+            {
+              "key": "subject_code",
+              "label": "Subject code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent official subject code.",
+              "example": "CS101",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "subject_name",
+              "label": "Subject name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Official subject title.",
+              "example": "Programming Fundamentals",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "department_code",
+              "label": "Department code",
+              "required": true,
+              "type": "code",
+              "group": "Organization",
+              "description": "Department that owns the subject.",
+              "example": "DEPT-CS",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "subject_type",
+              "label": "Subject type",
+              "required": true,
+              "type": "text",
+              "group": "Structure",
+              "description": "Primary form of learning or assessment.",
+              "example": "theory",
+              "reference": null,
+              "choices": [
+                "theory",
+                "practical",
+                "project",
+                "elective"
+              ]
+            },
+            {
+              "key": "credits",
+              "label": "Credits",
+              "required": true,
+              "type": "decimal",
+              "group": "Structure",
+              "description": "Approved credits for the subject.",
+              "example": "4",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "lecture_hours_week",
+              "label": "Lecture hours per week",
+              "required": false,
+              "type": "decimal",
+              "group": "Workload",
+              "description": "Scheduled weekly lecture hours.",
+              "example": "3",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "tutorial_hours_week",
+              "label": "Tutorial hours per week",
+              "required": false,
+              "type": "decimal",
+              "group": "Workload",
+              "description": "Scheduled weekly tutorial hours.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "practical_hours_week",
+              "label": "Practical hours per week",
+              "required": false,
+              "type": "decimal",
+              "group": "Workload",
+              "description": "Scheduled weekly laboratory hours.",
+              "example": "0",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "internal_max_marks",
+              "label": "Internal maximum marks",
+              "required": false,
+              "type": "decimal",
+              "group": "Assessment",
+              "description": "Maximum internal assessment marks.",
+              "example": "40",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "external_max_marks",
+              "label": "External maximum marks",
+              "required": false,
+              "type": "decimal",
+              "group": "Assessment",
+              "description": "Maximum external examination marks.",
+              "example": "60",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "overall_pass_marks",
+              "label": "Overall pass marks",
+              "required": false,
+              "type": "decimal",
+              "group": "Assessment",
+              "description": "Minimum total required, subject to component pass rules.",
+              "example": "40",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "internal_pass_marks",
+              "label": "Internal pass marks",
+              "required": false,
+              "type": "decimal",
+              "group": "Assessment",
+              "description": "Separate internal pass threshold, if applicable.",
+              "example": "16",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "external_pass_marks",
+              "label": "External pass marks",
+              "required": false,
+              "type": "decimal",
+              "group": "Assessment",
+              "description": "Separate external pass threshold, if applicable.",
+              "example": "24",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "syllabus_reference",
+              "label": "Syllabus reference",
+              "required": false,
+              "type": "text",
+              "group": "Resources",
+              "description": "Document filename or approved syllabus reference.",
+              "example": "CS101-syllabus.pdf",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "is_active",
+              "label": "Currently active",
+              "required": true,
+              "type": "bool",
+              "group": "Validity",
+              "description": "Whether the subject is currently used.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Subject notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Prerequisites and assessment exceptions can be explained here.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Course Subjects",
+          "row_rule": "One row per subject in a course curriculum and semester.",
+          "target": "curriculum_subjects",
+          "fields": [
+            {
+              "key": "curriculum_line_code",
+              "label": "Curriculum line code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Unique code for this course-subject curriculum line.",
+              "example": "CUR-BCA-2026-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "course_code",
+              "label": "Course code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Course in which the subject is offered.",
+              "example": "BCA",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "curriculum_version",
+              "label": "Curriculum version",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Approved regulation or curriculum version.",
+              "example": "REG-2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "semester_number",
+              "label": "Semester number",
+              "required": true,
+              "type": "positive_int",
+              "group": "Structure",
+              "description": "Semester in which the subject is normally taught.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "subject_code",
+              "label": "Subject code",
+              "required": true,
+              "type": "code",
+              "group": "Structure",
+              "description": "Subject from the Subjects tab.",
+              "example": "CS101",
+              "reference": "Subjects.subject_code",
+              "choices": []
+            },
+            {
+              "key": "requirement_type",
+              "label": "Requirement type",
+              "required": true,
+              "type": "text",
+              "group": "Structure",
+              "description": "Whether the subject is compulsory or selectable.",
+              "example": "core",
+              "reference": null,
+              "choices": [
+                "core",
+                "elective",
+                "audit",
+                "optional"
+              ]
+            },
+            {
+              "key": "elective_group",
+              "label": "Elective group",
+              "required": false,
+              "type": "code",
+              "group": "Structure",
+              "description": "Group code when students choose among related electives.",
+              "example": "ELEC-A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "minimum_group_choices",
+              "label": "Minimum group choices",
+              "required": false,
+              "type": "int",
+              "group": "Structure",
+              "description": "Required selections from this elective group; blank for core subjects.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "prerequisite_subject_codes",
+              "label": "Prerequisite subjects",
+              "required": false,
+              "type": "text",
+              "group": "Progression",
+              "description": "Comma-separated subject codes that must be completed first.",
+              "example": "CS100",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_academic_year",
+              "label": "Effective academic year",
+              "required": true,
+              "type": "code",
+              "group": "Validity",
+              "description": "First academic year using this curriculum version.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Curriculum notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Approved exceptions or progression rules.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "03_Employees.xlsx",
+      "title": "Employee register",
+      "purpose": "Common employment details for every teacher and non-teaching staff member.",
+      "notes": [
+        "Create one employee record per person. Then add the matching Teachers or Staff profile using the same employee code.",
+        "Store employment dates and status as of the collection date. Do not duplicate employees when their designation changes.",
+        "Salary components and bank credentials are outside this initial employee collection."
+      ],
+      "sheets": [
+        {
+          "name": "Employees",
+          "row_rule": "One row per employee, including teachers and staff.",
+          "target": "employees",
+          "fields": [
+            {
+              "key": "employee_code",
+              "label": "Employee code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique employee code used by teacher or staff profiles.",
+              "example": "EMP-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "first_name",
+              "label": "First name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Employee given name as recorded by HR.",
+              "example": "Arjun",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "middle_name",
+              "label": "Middle name",
+              "required": false,
+              "type": "text",
+              "group": "Identity",
+              "description": "Additional given names, if any.",
+              "example": "Kumar",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "last_name",
+              "label": "Last name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Employee family name.",
+              "example": "Sharma",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "date_of_birth",
+              "label": "Date of birth",
+              "required": false,
+              "type": "date",
+              "group": "Identity",
+              "description": "Verified birth date where held in HR records.",
+              "example": "1988-08-12",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "gender",
+              "label": "Gender",
+              "required": false,
+              "type": "text",
+              "group": "Identity",
+              "description": "Employee recorded gender selection.",
+              "example": "male",
+              "reference": null,
+              "choices": [
+                "female",
+                "male",
+                "other",
+                "prefer_not_to_say"
+              ]
+            },
+            {
+              "key": "employee_type",
+              "label": "Employee category",
+              "required": true,
+              "type": "text",
+              "group": "Employment",
+              "description": "Teacher or non-teaching staff category.",
+              "example": "teacher",
+              "reference": null,
+              "choices": [
+                "teacher",
+                "staff"
+              ]
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Employment",
+              "description": "Primary campus of employment.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "department_code",
+              "label": "Department code",
+              "required": true,
+              "type": "code",
+              "group": "Employment",
+              "description": "Official employing department code.",
+              "example": "DEPT-CS",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "designation",
+              "label": "Designation",
+              "required": true,
+              "type": "text",
+              "group": "Employment",
+              "description": "Current official job title.",
+              "example": "Assistant Professor",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "employment_type",
+              "label": "Employment type",
+              "required": true,
+              "type": "text",
+              "group": "Employment",
+              "description": "Contractual employment category.",
+              "example": "permanent",
+              "reference": null,
+              "choices": [
+                "permanent",
+                "contract",
+                "part_time"
+              ]
+            },
+            {
+              "key": "join_date",
+              "label": "Joining date",
+              "required": true,
+              "type": "date",
+              "group": "Employment",
+              "description": "Date the employee first joined the college.",
+              "example": "2024-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "confirmation_date",
+              "label": "Confirmation date",
+              "required": false,
+              "type": "date",
+              "group": "Employment",
+              "description": "Date probation ended, if confirmed.",
+              "example": "2024-12-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "contract_end_date",
+              "label": "Contract end date",
+              "required": false,
+              "type": "date",
+              "group": "Employment",
+              "description": "Contract expiry date for contract employees.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "exit_date",
+              "label": "Exit date",
+              "required": false,
+              "type": "date",
+              "group": "Employment",
+              "description": "Last working date if employment has ended.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "reporting_employee_code",
+              "label": "Reports to employee",
+              "required": false,
+              "type": "code",
+              "group": "Employment",
+              "description": "Employee code of the line manager; do not reference self.",
+              "example": "EMP-0010",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "work_location",
+              "label": "Work location",
+              "required": false,
+              "type": "text",
+              "group": "Employment",
+              "description": "Primary building, office or campus work location.",
+              "example": "Main campus",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Employment status",
+              "required": true,
+              "type": "text",
+              "group": "Employment",
+              "description": "Current HR status.",
+              "example": "active",
+              "reference": null,
+              "choices": [
+                "active",
+                "on_leave",
+                "left"
+              ]
+            },
+            {
+              "key": "official_email",
+              "label": "Official email",
+              "required": true,
+              "type": "email",
+              "group": "Contact",
+              "description": "College-issued work email, unique to the employee.",
+              "example": "arjun@example.com",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "personal_email",
+              "label": "Personal email",
+              "required": false,
+              "type": "email",
+              "group": "Contact",
+              "description": "Personal contact email, if provided.",
+              "example": "arjun.personal@example.com",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "phone",
+              "label": "Primary mobile",
+              "required": true,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Primary mobile including country code.",
+              "example": "+919000000011",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "alternate_phone",
+              "label": "Alternate mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Contact",
+              "description": "Additional reachable contact.",
+              "example": "+919000000012",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "address_line_1",
+              "label": "Address line 1",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "Current residence house or flat and street.",
+              "example": "24 Example Street",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "address_line_2",
+              "label": "Address line 2",
+              "required": false,
+              "type": "text",
+              "group": "Address",
+              "description": "Area or landmark.",
+              "example": "Central Layout",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "city",
+              "label": "City",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "City or town of residence.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "district",
+              "label": "District",
+              "required": false,
+              "type": "text",
+              "group": "Address",
+              "description": "Administrative district.",
+              "example": "Hyderabad",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "state",
+              "label": "State",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "State or province.",
+              "example": "Telangana",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "postal_code",
+              "label": "Postal code",
+              "required": true,
+              "type": "code",
+              "group": "Address",
+              "description": "Postal code as text.",
+              "example": "500001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "country",
+              "label": "Country",
+              "required": true,
+              "type": "text",
+              "group": "Address",
+              "description": "Country of residence.",
+              "example": "India",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "highest_qualification",
+              "label": "Highest qualification",
+              "required": false,
+              "type": "text",
+              "group": "Qualifications",
+              "description": "Highest completed academic or professional qualification.",
+              "example": "MCA",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "qualification_institution",
+              "label": "Qualification institution",
+              "required": false,
+              "type": "text",
+              "group": "Qualifications",
+              "description": "University or institution awarding that qualification.",
+              "example": "Example University",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "qualification_year",
+              "label": "Qualification year",
+              "required": false,
+              "type": "year",
+              "group": "Qualifications",
+              "description": "Year the highest qualification was completed.",
+              "example": "2012",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "prior_experience_years",
+              "label": "Prior experience in years",
+              "required": false,
+              "type": "decimal",
+              "group": "Qualifications",
+              "description": "Relevant experience before joining this college.",
+              "example": "10.5",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "emergency_contact_name",
+              "label": "Emergency contact name",
+              "required": true,
+              "type": "text",
+              "group": "Emergency",
+              "description": "Person to contact in an emergency.",
+              "example": "Priya Sharma",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "emergency_contact_relationship",
+              "label": "Emergency relationship",
+              "required": true,
+              "type": "text",
+              "group": "Emergency",
+              "description": "Relationship of emergency contact to employee.",
+              "example": "Spouse",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "emergency_contact_phone",
+              "label": "Emergency contact mobile",
+              "required": true,
+              "type": "phone",
+              "group": "Emergency",
+              "description": "Reachable emergency phone including country code.",
+              "example": "+919000000013",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "appointment_letter_reference",
+              "label": "Appointment letter reference",
+              "required": false,
+              "type": "code",
+              "group": "Documents",
+              "description": "Reference of the appointment document held by HR.",
+              "example": "APPT-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "photo_file_reference",
+              "label": "Photo file reference",
+              "required": false,
+              "type": "text",
+              "group": "Documents",
+              "description": "Private filename or document reference.",
+              "example": "EMP-0001-photo.jpg",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "HR notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant HR remarks for initial setup.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "04_Teachers.xlsx",
+      "title": "Teacher profiles",
+      "purpose": "Academic appointments and teaching responsibilities.",
+      "notes": [
+        "Every teacher must already appear in Employees with Employee category set to teacher.",
+        "Use one row per teacher. Comma-separated subject codes identify teaching competence, not timetable assignments."
+      ],
+      "sheets": [
+        {
+          "name": "Teachers",
+          "row_rule": "One row per teacher, linked to Employees.",
+          "target": "teachers",
+          "fields": [
+            {
+              "key": "teacher_code",
+              "label": "Teacher code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique faculty or teacher profile code.",
+              "example": "TCH-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "employee_code",
+              "label": "Employee code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Employee record with category teacher.",
+              "example": "EMP-0001",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "qualification",
+              "label": "Academic qualification",
+              "required": true,
+              "type": "text",
+              "group": "Academic profile",
+              "description": "Qualification relevant to the teaching role.",
+              "example": "MCA",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "specialization",
+              "label": "Specialization",
+              "required": true,
+              "type": "text",
+              "group": "Academic profile",
+              "description": "Primary teaching or research specialization.",
+              "example": "Computer applications",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "teaching_experience_years",
+              "label": "Teaching experience in years",
+              "required": true,
+              "type": "decimal",
+              "group": "Experience",
+              "description": "Total verified teaching experience at collection date.",
+              "example": "10.5",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "industry_experience_years",
+              "label": "Industry experience in years",
+              "required": false,
+              "type": "decimal",
+              "group": "Experience",
+              "description": "Relevant non-teaching industry experience.",
+              "example": "2",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "faculty_rank",
+              "label": "Faculty rank",
+              "required": false,
+              "type": "text",
+              "group": "Appointment",
+              "description": "Academic rank separate from HR designation if needed.",
+              "example": "Assistant Professor",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "appointment_date",
+              "label": "Academic appointment date",
+              "required": true,
+              "type": "date",
+              "group": "Appointment",
+              "description": "Date appointed to this faculty role.",
+              "example": "2024-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "professional_registration",
+              "label": "Registration reference",
+              "required": false,
+              "type": "code",
+              "group": "Credentials",
+              "description": "Professional or faculty registration reference, if applicable.",
+              "example": "REG-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "registration_valid_to",
+              "label": "Registration valid until",
+              "required": false,
+              "type": "date",
+              "group": "Credentials",
+              "description": "Expiry of the applicable professional registration.",
+              "example": "2028-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "eligible_course_codes",
+              "label": "Eligible course codes",
+              "required": false,
+              "type": "text",
+              "group": "Teaching",
+              "description": "Comma-separated course codes the teacher can serve.",
+              "example": "BCA,BSC-CS",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "eligible_subject_codes",
+              "label": "Eligible subject codes",
+              "required": false,
+              "type": "text",
+              "group": "Teaching",
+              "description": "Comma-separated subjects the teacher is qualified to teach.",
+              "example": "CS101,CS102",
+              "reference": "Subjects.subject_code",
+              "choices": []
+            },
+            {
+              "key": "maximum_weekly_teaching_hours",
+              "label": "Weekly teaching hour limit",
+              "required": false,
+              "type": "decimal",
+              "group": "Teaching",
+              "description": "Approved maximum weekly contact hours.",
+              "example": "18",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "mentor_section_codes",
+              "label": "Mentor sections",
+              "required": false,
+              "type": "text",
+              "group": "Teaching",
+              "description": "Comma-separated section codes for mentoring or class advising.",
+              "example": "BCA-2026-A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "office_room",
+              "label": "Office or cabin",
+              "required": false,
+              "type": "text",
+              "group": "Availability",
+              "description": "Staff office room reference.",
+              "example": "BLOCK-A-201",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "consultation_hours",
+              "label": "Consultation hours",
+              "required": false,
+              "type": "text",
+              "group": "Availability",
+              "description": "Normal student consultation schedule.",
+              "example": "Tuesday 14:00 to 16:00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "profile_summary",
+              "label": "Faculty profile summary",
+              "required": false,
+              "type": "text",
+              "group": "Profile",
+              "description": "Short approved biography for faculty records.",
+              "example": "Programming and software systems",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Faculty notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant academic appointment remarks.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "05_Staff.xlsx",
+      "title": "Non-teaching staff profiles",
+      "purpose": "Administrative, support and operational responsibilities.",
+      "notes": [
+        "Every staff member must already appear in Employees with Employee category set to staff.",
+        "Use this file for admissions, accounts, library, hostel, transport, laboratory and other non-teaching roles."
+      ],
+      "sheets": [
+        {
+          "name": "Staff",
+          "row_rule": "One row per non-teaching staff profile.",
+          "target": "staff_profiles",
+          "fields": [
+            {
+              "key": "staff_code",
+              "label": "Staff profile code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique non-teaching profile code.",
+              "example": "STAFF-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "employee_code",
+              "label": "Employee code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Employee record with category staff.",
+              "example": "EMP-0002",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "staff_function",
+              "label": "Staff function",
+              "required": true,
+              "type": "text",
+              "group": "Role",
+              "description": "Primary operational function.",
+              "example": "accounts",
+              "reference": null,
+              "choices": [
+                "administration",
+                "admissions",
+                "accounts",
+                "library",
+                "laboratory",
+                "hostel",
+                "transport",
+                "security",
+                "maintenance",
+                "other"
+              ]
+            },
+            {
+              "key": "responsibility",
+              "label": "Primary responsibilities",
+              "required": true,
+              "type": "text",
+              "group": "Role",
+              "description": "Summary of assigned duties.",
+              "example": "Fee collection and receipt reconciliation",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "additional_responsibilities",
+              "label": "Additional responsibilities",
+              "required": false,
+              "type": "text",
+              "group": "Role",
+              "description": "Other assigned duties, if any.",
+              "example": "Student helpdesk",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "shift_name",
+              "label": "Shift name",
+              "required": false,
+              "type": "text",
+              "group": "Schedule",
+              "description": "Official shift identifier or name.",
+              "example": "General",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "shift_start",
+              "label": "Shift start time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Usual daily shift start time.",
+              "example": "09:00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "shift_end",
+              "label": "Shift end time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Usual daily shift end; overnight shifts need a note.",
+              "example": "17:00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "weekly_off",
+              "label": "Weekly day off",
+              "required": false,
+              "type": "text",
+              "group": "Schedule",
+              "description": "Usual weekly rest day or rotational arrangement.",
+              "example": "sunday",
+              "reference": null,
+              "choices": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday",
+                "rotational"
+              ]
+            },
+            {
+              "key": "assigned_location",
+              "label": "Assigned location",
+              "required": false,
+              "type": "text",
+              "group": "Assignment",
+              "description": "Building, desk, library, hostel or other location.",
+              "example": "Accounts office",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "supervisor_employee_code",
+              "label": "Supervisor employee code",
+              "required": false,
+              "type": "code",
+              "group": "Assignment",
+              "description": "Supervisor already present in Employees.",
+              "example": "EMP-0010",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "role_effective_from",
+              "label": "Role effective from",
+              "required": true,
+              "type": "date",
+              "group": "Assignment",
+              "description": "Start date of this operational assignment.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "professional_license_reference",
+              "label": "License reference",
+              "required": false,
+              "type": "code",
+              "group": "Credentials",
+              "description": "Applicable role license, such as a driver license, if held.",
+              "example": "LIC-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "license_expiry",
+              "label": "License expiry date",
+              "required": false,
+              "type": "date",
+              "group": "Credentials",
+              "description": "Expiry of the recorded applicable license.",
+              "example": "2028-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Staff notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant role or shift exceptions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "06_Student_Enrollments.xlsx",
+      "title": "Student enrollments",
+      "purpose": "Course, batch, semester, section and roll-number placement.",
+      "notes": [
+        "Students and Courses must be completed first. Reuse campus, academic year, batch and section codes consistently.",
+        "Use one row per student per section and academic term. Do not overwrite prior terms with the latest section.",
+        "Section codes and semester definitions will be resolved or created during reviewed initial setup."
+      ],
+      "sheets": [
+        {
+          "name": "Enrollments",
+          "row_rule": "One row per student course enrollment in a section and term.",
+          "target": "student_enrollments; resolve batches, semesters and sections",
+          "fields": [
+            {
+              "key": "enrollment_code",
+              "label": "Enrollment code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique enrollment record code.",
+              "example": "ENR-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student already recorded in Students.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "course_code",
+              "label": "Course code",
+              "required": true,
+              "type": "code",
+              "group": "Course",
+              "description": "Approved course in the Courses file.",
+              "example": "BCA",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Course",
+              "description": "Campus where this enrollment is active.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Term",
+              "description": "Academic year identifier, consistently YYYY-YYYY.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year_start",
+              "label": "Academic year start",
+              "required": true,
+              "type": "date",
+              "group": "Term",
+              "description": "First day of this academic year.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year_end",
+              "label": "Academic year end",
+              "required": true,
+              "type": "date",
+              "group": "Term",
+              "description": "Last day of this academic year.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "batch_code",
+              "label": "Entry batch code",
+              "required": true,
+              "type": "code",
+              "group": "Batch",
+              "description": "Stable code for the course entry cohort.",
+              "example": "BCA-2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "batch_name",
+              "label": "Entry batch name",
+              "required": false,
+              "type": "text",
+              "group": "Batch",
+              "description": "Human-readable name of the entry cohort.",
+              "example": "BCA 2026 intake",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "entry_year",
+              "label": "Entry year",
+              "required": true,
+              "type": "year",
+              "group": "Batch",
+              "description": "Year the student entered this course cohort.",
+              "example": "2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "expected_graduation_year",
+              "label": "Expected graduation year",
+              "required": false,
+              "type": "year",
+              "group": "Batch",
+              "description": "Expected year of course completion.",
+              "example": "2029",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "curriculum_version",
+              "label": "Curriculum version",
+              "required": true,
+              "type": "code",
+              "group": "Term",
+              "description": "Regulation or curriculum version assigned to this enrollment.",
+              "example": "REG-2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "semester_number",
+              "label": "Semester number",
+              "required": true,
+              "type": "positive_int",
+              "group": "Term",
+              "description": "Current semester or term ordinal.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "semester_start",
+              "label": "Semester start",
+              "required": true,
+              "type": "date",
+              "group": "Term",
+              "description": "First date of the enrolled semester.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "semester_end",
+              "label": "Semester end",
+              "required": true,
+              "type": "date",
+              "group": "Term",
+              "description": "Last date of the enrolled semester.",
+              "example": "2026-11-30",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "section_code",
+              "label": "Section code",
+              "required": true,
+              "type": "code",
+              "group": "Section",
+              "description": "Stable unique section code for this cohort and term.",
+              "example": "BCA-2026-S1-A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "section_name",
+              "label": "Section name",
+              "required": true,
+              "type": "text",
+              "group": "Section",
+              "description": "Readable section label.",
+              "example": "Section A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "roll_number",
+              "label": "Roll number",
+              "required": true,
+              "type": "code",
+              "group": "Section",
+              "description": "Official roll number, unique within this section.",
+              "example": "001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "enrolled_on",
+              "label": "Enrollment date",
+              "required": true,
+              "type": "date",
+              "group": "Status",
+              "description": "Date the student joined this section and term.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Enrollment status",
+              "required": true,
+              "type": "text",
+              "group": "Status",
+              "description": "Current standing of this enrollment record.",
+              "example": "active",
+              "reference": null,
+              "choices": [
+                "active",
+                "completed",
+                "transferred",
+                "withdrawn"
+              ]
+            },
+            {
+              "key": "notes",
+              "label": "Enrollment notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Transfers, repeat semesters or other approved exceptions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "07_Fee_Heads.xlsx",
+      "title": "Fee heads",
+      "purpose": "Approved fee categories and accounting classification.",
+      "notes": [
+        "Define fee heads first, then enter course-wise rates in Fee Structures.",
+        "Create distinct heads for academic, tuition, bus, hostel, mess, admission, examination, laboratory, library and other charges as applicable.",
+        "Tax settings record the college-approved treatment. Confirm applicability and rates with the college accounts team."
+      ],
+      "sheets": [
+        {
+          "name": "Fee Heads",
+          "row_rule": "One row per distinct charge or fee head.",
+          "target": "fee_heads",
+          "fields": [
+            {
+              "key": "fee_head_code",
+              "label": "Fee head code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique fee head code.",
+              "example": "TUITION",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "fee_head_name",
+              "label": "Fee head name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Official label shown on statements and receipts.",
+              "example": "Tuition fee",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "charge_category",
+              "label": "Charge category",
+              "required": true,
+              "type": "text",
+              "group": "Classification",
+              "description": "Category used for itemized statements.",
+              "example": "tuition",
+              "reference": null,
+              "choices": [
+                "academic",
+                "tuition",
+                "bus",
+                "hostel",
+                "mess",
+                "admission",
+                "examination",
+                "laboratory",
+                "library",
+                "deposit",
+                "other"
+              ]
+            },
+            {
+              "key": "description",
+              "label": "Description",
+              "required": true,
+              "type": "text",
+              "group": "Classification",
+              "description": "What this charge covers.",
+              "example": "Scheduled classroom tuition",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "accounting_ledger_code",
+              "label": "Accounting ledger code",
+              "required": false,
+              "type": "code",
+              "group": "Accounting",
+              "description": "Ledger reference supplied by the accounts team.",
+              "example": "LED-4101",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "refundable",
+              "label": "Refundable",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether this fee head permits refunds under policy.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "scholarship_eligible",
+              "label": "Scholarship eligible",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether scholarship reductions may apply to this fee head.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "mandatory_by_default",
+              "label": "Mandatory by default",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether normally required for eligible enrollments.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "tax_treatment",
+              "label": "Tax treatment",
+              "required": true,
+              "type": "text",
+              "group": "Tax",
+              "description": "Approved accounting treatment for this fee head.",
+              "example": "exempt",
+              "reference": null,
+              "choices": [
+                "exempt",
+                "not_applicable",
+                "taxable"
+              ]
+            },
+            {
+              "key": "approved_tax_rate_percent",
+              "label": "Approved tax rate percent",
+              "required": false,
+              "type": "percent",
+              "group": "Tax",
+              "description": "Enter 18 for 18 percent, only when the treatment is taxable.",
+              "example": "0",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "receipt_label",
+              "label": "Receipt label",
+              "required": false,
+              "type": "text",
+              "group": "Display",
+              "description": "Preferred short label on receipts.",
+              "example": "Tuition",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "display_order",
+              "label": "Display order",
+              "required": false,
+              "type": "int",
+              "group": "Display",
+              "description": "Order on a student charge statement; lower appears first.",
+              "example": "10",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "is_active",
+              "label": "Currently active",
+              "required": true,
+              "type": "bool",
+              "group": "Validity",
+              "description": "Whether this head is used for new charges.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Fee head notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Policy details or exemptions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "08_Fee_Structures_and_Scholarships.xlsx",
+      "title": "Fee structures and scholarships",
+      "purpose": "Course-wise standard rates before scholarships, scheme rules and approved awards.",
+      "notes": [
+        "Fee Structure Lines records standard charges excluding scholarship reductions. Enter one line per head, installment and term.",
+        "Enter separate academic, tuition, bus, hostel and other charge lines; do not hide them in a combined total.",
+        "Scholarship Schemes defines eligibility and award method. Student Scholarships records approved or pending awards.",
+        "An approved award is not a payment. Apply only the actual allocated scholarship amount against a charge in Charges and Payments.",
+        "Percentage values use whole percent units: enter 25 for 25 percent. Fixed awards use the Amount field."
+      ],
+      "sheets": [
+        {
+          "name": "Fee Structure Lines",
+          "row_rule": "One row per course, fee head, term and installment rate.",
+          "target": "fee_structures",
+          "fields": [
+            {
+              "key": "fee_structure_line_code",
+              "label": "Fee structure line code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique code for this rate line.",
+              "example": "FEE-BCA-26-TUI-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "structure_name",
+              "label": "Fee structure name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Readable approved schedule name.",
+              "example": "BCA 2026 first year",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "course_code",
+              "label": "Course code",
+              "required": true,
+              "type": "code",
+              "group": "Eligibility",
+              "description": "Course charged under this schedule.",
+              "example": "BCA",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Eligibility",
+              "description": "Applicable campus.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Eligibility",
+              "description": "Year this fee schedule applies to.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "semester_number",
+              "label": "Semester number",
+              "required": true,
+              "type": "positive_int",
+              "group": "Eligibility",
+              "description": "Semester this rate applies to; use separate lines for each semester.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_category",
+              "label": "Student category",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Admission category eligible for this rate.",
+              "example": "all",
+              "reference": null,
+              "choices": [
+                "all",
+                "regular",
+                "lateral_entry",
+                "transfer",
+                "readmission"
+              ]
+            },
+            {
+              "key": "fee_head_code",
+              "label": "Fee head code",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Fee head defined in Fee Heads.",
+              "example": "TUITION",
+              "reference": "Fee Heads.fee_head_code",
+              "choices": []
+            },
+            {
+              "key": "billing_frequency",
+              "label": "Billing frequency",
+              "required": true,
+              "type": "text",
+              "group": "Rate",
+              "description": "Billing basis of this individual line amount.",
+              "example": "semester",
+              "reference": null,
+              "choices": [
+                "one_time",
+                "annual",
+                "semester",
+                "term",
+                "monthly",
+                "per_use"
+              ]
+            },
+            {
+              "key": "installment_number",
+              "label": "Installment number",
+              "required": true,
+              "type": "positive_int",
+              "group": "Rate",
+              "description": "Installment sequence within the fee head and semester.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "installment_label",
+              "label": "Installment label",
+              "required": false,
+              "type": "text",
+              "group": "Rate",
+              "description": "Label shown to students.",
+              "example": "Semester 1 installment",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "base_amount",
+              "label": "Amount excluding scholarships",
+              "required": true,
+              "type": "money",
+              "group": "Rate",
+              "description": "Standard charge for this line before discounts and scholarships.",
+              "example": "25000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Three-letter currency code; normally INR.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "due_date",
+              "label": "Due date",
+              "required": true,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Last payment date for this line.",
+              "example": "2026-07-15",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Effective from",
+              "required": true,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Date this rate becomes valid.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_to",
+              "label": "Effective to",
+              "required": false,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Last valid date if the rate is time-limited.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "scholarship_allowed",
+              "label": "Scholarship allowed",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Must also be permitted by the corresponding Fee Head.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "mandatory",
+              "label": "Mandatory charge",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether this line applies to all eligible students.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "refundable_deposit",
+              "label": "Refundable deposit",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether this line is a refundable security deposit.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Approval reference",
+              "required": true,
+              "type": "code",
+              "group": "Approval",
+              "description": "Approved fee circular, resolution or schedule reference.",
+              "example": "CIRC-FEE-2026-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Rate notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Bus route, room type or other conditions determining applicability.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Scholarship Schemes",
+          "row_rule": "One row per scholarship scheme and academic year.",
+          "target": "scholarships",
+          "fields": [
+            {
+              "key": "scholarship_code",
+              "label": "Scholarship scheme code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique scheme code, including year where rules change.",
+              "example": "SCH-MERIT-2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "scholarship_name",
+              "label": "Scholarship name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Official approved scheme name.",
+              "example": "Merit scholarship",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Eligibility",
+              "description": "Academic year covered by the scheme.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "sponsor",
+              "label": "Sponsor or funding source",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "College, government or external sponsoring body.",
+              "example": "College",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "eligible_course_codes",
+              "label": "Eligible course codes",
+              "required": false,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Comma-separated course codes; blank means all courses.",
+              "example": "BCA",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "eligible_fee_head_codes",
+              "label": "Eligible fee head codes",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Comma-separated heads to which this award may apply.",
+              "example": "TUITION",
+              "reference": "Fee Heads.fee_head_code",
+              "choices": []
+            },
+            {
+              "key": "eligibility_criteria",
+              "label": "Eligibility criteria",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Complete approved academic or other award criteria.",
+              "example": "As stated in merit circular",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "award_method",
+              "label": "Award method",
+              "required": true,
+              "type": "text",
+              "group": "Award",
+              "description": "Choose exactly one basis for calculating the award.",
+              "example": "percentage",
+              "reference": null,
+              "choices": [
+                "fixed_amount",
+                "percentage"
+              ]
+            },
+            {
+              "key": "fixed_award_amount",
+              "label": "Fixed award amount",
+              "required": false,
+              "type": "money",
+              "group": "Award",
+              "description": "Required for fixed_amount; leave blank for percentage.",
+              "example": "5000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "award_percent",
+              "label": "Award percent",
+              "required": false,
+              "type": "percent",
+              "group": "Award",
+              "description": "Required for percentage; enter 25 for 25 percent.",
+              "example": "25",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "maximum_award_amount",
+              "label": "Maximum award amount",
+              "required": true,
+              "type": "money",
+              "group": "Award",
+              "description": "Maximum monetary award for one student under this scheme.",
+              "example": "10000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Award",
+              "description": "Currency of fixed amounts and monetary caps.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "renewable",
+              "label": "Renewable",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether award renewal is permitted under approved rules.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "renewal_conditions",
+              "label": "Renewal conditions",
+              "required": false,
+              "type": "text",
+              "group": "Policy",
+              "description": "Attendance or academic conditions for renewal if applicable.",
+              "example": "As stated in the scholarship circular",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "can_combine_with_other_awards",
+              "label": "May combine with other awards",
+              "required": true,
+              "type": "bool",
+              "group": "Policy",
+              "description": "Whether other scholarships can be held at the same time.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "application_deadline",
+              "label": "Application deadline",
+              "required": false,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Last date for applications if applicable.",
+              "example": "2026-07-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Approval reference",
+              "required": true,
+              "type": "code",
+              "group": "Approval",
+              "description": "Document approving this scheme and its rules.",
+              "example": "SCH-CIRC-2026-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "is_active",
+              "label": "Currently active",
+              "required": true,
+              "type": "bool",
+              "group": "Validity",
+              "description": "Whether the scheme is currently available.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Scheme notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Additional eligibility or funding conditions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Student Scholarships",
+          "row_rule": "One row per student award under a scholarship scheme.",
+          "target": "student_scholarships",
+          "fields": [
+            {
+              "key": "award_code",
+              "label": "Student award code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique student scholarship award code.",
+              "example": "AWD-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student receiving or applying for the award.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "scholarship_code",
+              "label": "Scholarship scheme code",
+              "required": true,
+              "type": "code",
+              "group": "Award",
+              "description": "Scheme defined in Scholarship Schemes.",
+              "example": "SCH-MERIT-2026",
+              "reference": "Scholarship Schemes.scholarship_code",
+              "choices": []
+            },
+            {
+              "key": "approved_amount",
+              "label": "Approved or requested amount",
+              "required": true,
+              "type": "money",
+              "group": "Award",
+              "description": "Requested amount while pending; approved monetary award once approved.",
+              "example": "5000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Award",
+              "description": "Currency of this award.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Award status",
+              "required": true,
+              "type": "text",
+              "group": "Approval",
+              "description": "Award authorization status, separate from fee payment status.",
+              "example": "approved",
+              "reference": null,
+              "choices": [
+                "pending",
+                "approved",
+                "rejected",
+                "disbursed"
+              ]
+            },
+            {
+              "key": "application_reference",
+              "label": "Application reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Source application or request reference.",
+              "example": "APP-SCH-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approved_on",
+              "label": "Approval date",
+              "required": false,
+              "type": "date",
+              "group": "Approval",
+              "description": "Required when status is approved or disbursed.",
+              "example": "2026-07-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approved_by_employee_code",
+              "label": "Approved by employee",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Required for an approved or disbursed award.",
+              "example": "EMP-0010",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Award approval reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Letter or resolution authorizing this student award.",
+              "example": "AWARD-LETTER-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Award notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Renewal or conditional approval details.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "09_Student_Charges_and_Payments.xlsx",
+      "title": "Student charges and payments",
+      "purpose": "Itemized academic, tuition, bus, hostel and other dues, scholarships and received payments.",
+      "notes": [
+        "Charges has one row per student fee head and installment. Record academic, tuition, bus, hostel and other charges as separate rows.",
+        "Base amount is before reductions. Scholarship, discount, fine and tax are separate monetary amounts; blank optional amounts mean zero.",
+        "Calculated columns show gross charge before scholarship, net payable after scholarship, settled amount allocated and outstanding balance.",
+        "Only approved awards may reduce a charge. Use the Award code, not the scheme code, to link each scholarship application.",
+        "Record one row per received payment in Payments. Split a payment across fee heads using Allocations; never repeat the entire payment for each head.",
+        "Only allocations linked to settled payments count toward paid totals. A pending or failed payment does not reduce outstanding dues.",
+        "Historical receipts require both the payment and its allocations. Zero balances must reconcile with the college accounts records."
+      ],
+      "sheets": [
+        {
+          "name": "Charges",
+          "row_rule": "One row per student fee head and installment charge.",
+          "target": "student_fee_charges; fee_adjustments; student_scholarships",
+          "fields": [
+            {
+              "key": "charge_code",
+              "label": "Charge code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique charge reference used by payment allocations.",
+              "example": "CHG-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student who owes the charge.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "fee_structure_line_code",
+              "label": "Fee structure line code",
+              "required": true,
+              "type": "code",
+              "group": "Schedule",
+              "description": "Approved standard rate line for this charge.",
+              "example": "FEE-BCA-26-TUI-01",
+              "reference": "Fee Structure Lines.fee_structure_line_code",
+              "choices": []
+            },
+            {
+              "key": "fee_head_code",
+              "label": "Fee head code",
+              "required": true,
+              "type": "code",
+              "group": "Schedule",
+              "description": "Must match the head in the referenced structure line.",
+              "example": "TUITION",
+              "reference": "Fee Heads.fee_head_code",
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Schedule",
+              "description": "Academic year this charge relates to.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "installment_number",
+              "label": "Installment number",
+              "required": true,
+              "type": "positive_int",
+              "group": "Schedule",
+              "description": "Must match the referenced rate installment.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "due_date",
+              "label": "Due date",
+              "required": true,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Last payment date for this charge.",
+              "example": "2026-07-15",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "base_amount",
+              "label": "Base amount",
+              "required": true,
+              "type": "money",
+              "group": "Amounts",
+              "description": "Authorized charge before discounts, scholarship, fine and tax.",
+              "example": "25000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "discount_amount",
+              "label": "Discount or waiver",
+              "required": false,
+              "type": "money",
+              "group": "Amounts",
+              "description": "Approved non-scholarship reduction; blank means zero.",
+              "example": "1000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "scholarship_award_code",
+              "label": "Scholarship award code",
+              "required": false,
+              "type": "code",
+              "group": "Amounts",
+              "description": "Required when Scholarship applied is greater than zero.",
+              "example": "AWD-0001",
+              "reference": "Student Scholarships.award_code",
+              "choices": []
+            },
+            {
+              "key": "scholarship_applied",
+              "label": "Scholarship applied",
+              "required": false,
+              "type": "money",
+              "group": "Amounts",
+              "description": "Monetary portion of an approved award assigned to this charge.",
+              "example": "5000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "fine_amount",
+              "label": "Fine amount",
+              "required": false,
+              "type": "money",
+              "group": "Amounts",
+              "description": "Authorized fine added to this charge; blank means zero.",
+              "example": "0.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "tax_amount",
+              "label": "Tax amount",
+              "required": false,
+              "type": "money",
+              "group": "Amounts",
+              "description": "Approved tax amount in currency units; not a percentage.",
+              "example": "0.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Amounts",
+              "description": "Currency, consistent with the structure, award and payment.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Adjustment approval reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Required when discounts or fines are entered.",
+              "example": "ADJ-APP-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Charge notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Explain exceptional charge or adjustment details.",
+              "example": " ",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "gross_before_scholarship",
+              "label": "Gross before scholarship",
+              "required": false,
+              "type": "calculated_money",
+              "group": "Calculated",
+              "description": "Base minus discount plus fine and tax, excluding scholarship reduction.",
+              "example": "24000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "net_payable",
+              "label": "Net payable after scholarship",
+              "required": false,
+              "type": "calculated_money",
+              "group": "Calculated",
+              "description": "Gross before scholarship minus Scholarship applied.",
+              "example": "19000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "paid_allocated",
+              "label": "Settled payment allocated",
+              "required": false,
+              "type": "calculated_money",
+              "group": "Calculated",
+              "description": "Sum of allocations to this charge from settled payments only.",
+              "example": "10000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "outstanding",
+              "label": "Outstanding balance",
+              "required": false,
+              "type": "calculated_money",
+              "group": "Calculated",
+              "description": "Net payable minus settled payment allocations; negative means overpaid.",
+              "example": "9000.00",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Payments",
+          "row_rule": "One row per payment transaction or historical receipt.",
+          "target": "payments; receipts",
+          "fields": [
+            {
+              "key": "payment_code",
+              "label": "Payment code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique payment reference, reused by allocations.",
+              "example": "PAY-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student whose payment was received.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "paid_on",
+              "label": "Payment date",
+              "required": true,
+              "type": "date",
+              "group": "Payment",
+              "description": "Date funds were received or the transaction was initiated.",
+              "example": "2026-07-10",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "amount",
+              "label": "Payment amount",
+              "required": true,
+              "type": "money",
+              "group": "Payment",
+              "description": "Total transaction amount, not a per-head split.",
+              "example": "10000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Payment",
+              "description": "Currency, consistent with the charges paid.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "method",
+              "label": "Payment method",
+              "required": true,
+              "type": "text",
+              "group": "Payment",
+              "description": "How the payment was received.",
+              "example": "upi",
+              "reference": null,
+              "choices": [
+                "cash",
+                "bank_transfer",
+                "upi",
+                "card",
+                "cheque"
+              ]
+            },
+            {
+              "key": "transaction_reference",
+              "label": "Transaction reference",
+              "required": false,
+              "type": "code",
+              "group": "Payment",
+              "description": "Bank, UPI, card or cheque reference; required for non-cash.",
+              "example": "UTR-EXAMPLE-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Payment status",
+              "required": true,
+              "type": "text",
+              "group": "Payment",
+              "description": "Only settled payments count as received for balances.",
+              "example": "settled",
+              "reference": null,
+              "choices": [
+                "pending",
+                "settled",
+                "failed"
+              ]
+            },
+            {
+              "key": "receipt_number",
+              "label": "Receipt number",
+              "required": false,
+              "type": "code",
+              "group": "Receipt",
+              "description": "Official receipt number for settled payments; must be unique.",
+              "example": "RCT-2026-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "receipt_date",
+              "label": "Receipt date",
+              "required": false,
+              "type": "date",
+              "group": "Receipt",
+              "description": "Date the official receipt was issued.",
+              "example": "2026-07-10",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "received_by_employee_code",
+              "label": "Received by employee",
+              "required": false,
+              "type": "code",
+              "group": "Receipt",
+              "description": "College employee recording the transaction.",
+              "example": "EMP-0002",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Payment notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Reconciliation remarks or pending clearance details.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Allocations",
+          "row_rule": "One row per payment-to-charge allocation.",
+          "target": "payment_allocations",
+          "fields": [
+            {
+              "key": "allocation_code",
+              "label": "Allocation code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique allocation record code.",
+              "example": "ALLOC-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "payment_code",
+              "label": "Payment code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Payment record in the Payments tab.",
+              "example": "PAY-0001",
+              "reference": "Payments.payment_code",
+              "choices": []
+            },
+            {
+              "key": "charge_code",
+              "label": "Charge code",
+              "required": true,
+              "type": "code",
+              "group": "Link",
+              "description": "Charge record in the Charges tab.",
+              "example": "CHG-0001",
+              "reference": "Charges.charge_code",
+              "choices": []
+            },
+            {
+              "key": "allocated_amount",
+              "label": "Allocated amount",
+              "required": true,
+              "type": "money",
+              "group": "Amount",
+              "description": "Portion of this payment applied to this charge; must be positive.",
+              "example": "10000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Allocation notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Reason for a special split or allocation.",
+              "example": " ",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "settled_amount",
+              "label": "Settled allocated amount",
+              "required": false,
+              "type": "calculated_money",
+              "group": "Calculated",
+              "description": "Allocated amount when the payment is settled; otherwise zero.",
+              "example": "10000.00",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "10_Bus_Transport.xlsx",
+      "title": "Bus transport",
+      "purpose": "Routes, stop-wise bus charges and student transport allocation.",
+      "notes": [
+        "Use Routes to define vehicle and driver details, Stops for pickup times and applicable bus charges, and Student Transport for allocation.",
+        "Bus rates are reference amounts. Actual billed dues and received payments belong in Charges and Payments under the bus fee head.",
+        "Keep only one active regular bus allocation per student. The importer must check route capacity and overlapping dates."
+      ],
+      "sheets": [
+        {
+          "name": "Routes",
+          "row_rule": "One row per regular bus route.",
+          "target": "transport_routes; vehicles",
+          "fields": [
+            {
+              "key": "route_code",
+              "label": "Route code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Permanent unique route code.",
+              "example": "BUS-R01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "route_name",
+              "label": "Route name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Readable route name.",
+              "example": "North campus route",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Route",
+              "description": "Campus served by this route.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "start_location",
+              "label": "Starting location",
+              "required": true,
+              "type": "text",
+              "group": "Route",
+              "description": "Normal first pickup locality.",
+              "example": "Example Junction",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "end_location",
+              "label": "End location",
+              "required": true,
+              "type": "text",
+              "group": "Route",
+              "description": "Normal final destination.",
+              "example": "Main campus",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "vehicle_code",
+              "label": "Vehicle code",
+              "required": true,
+              "type": "code",
+              "group": "Vehicle",
+              "description": "College vehicle identifier.",
+              "example": "VEH-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "vehicle_registration",
+              "label": "Vehicle registration",
+              "required": true,
+              "type": "code",
+              "group": "Vehicle",
+              "description": "Official vehicle registration number.",
+              "example": "TS00EX0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "seating_capacity",
+              "label": "Seating capacity",
+              "required": true,
+              "type": "positive_int",
+              "group": "Vehicle",
+              "description": "Approved passenger capacity.",
+              "example": "40",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "driver_employee_code",
+              "label": "Driver employee code",
+              "required": false,
+              "type": "code",
+              "group": "Driver",
+              "description": "Driver profile if employed by the college.",
+              "example": "EMP-0020",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "driver_name",
+              "label": "Driver name",
+              "required": true,
+              "type": "text",
+              "group": "Driver",
+              "description": "Assigned driver name, including contractor drivers.",
+              "example": "Example Driver",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "driver_phone",
+              "label": "Driver mobile",
+              "required": true,
+              "type": "phone",
+              "group": "Driver",
+              "description": "Route contact number including country code.",
+              "example": "+919000000021",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "attendant_name",
+              "label": "Attendant name",
+              "required": false,
+              "type": "text",
+              "group": "Driver",
+              "description": "Assigned bus attendant where applicable.",
+              "example": "Example Attendant",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "attendant_phone",
+              "label": "Attendant mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Driver",
+              "description": "Attendant route contact.",
+              "example": "+919000000022",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "is_active",
+              "label": "Currently active",
+              "required": true,
+              "type": "bool",
+              "group": "Validity",
+              "description": "Whether the route is currently operated.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Route notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Operating days and special route conditions.",
+              "example": "Monday to Saturday",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Stops",
+          "row_rule": "One row per stop and applicable bus rate period.",
+          "target": "transport_stops; fee_structures",
+          "fields": [
+            {
+              "key": "stop_code",
+              "label": "Stop code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique stop code within this data set.",
+              "example": "STOP-R01-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "route_code",
+              "label": "Route code",
+              "required": true,
+              "type": "code",
+              "group": "Route",
+              "description": "Route defined in Routes.",
+              "example": "BUS-R01",
+              "reference": "Routes.route_code",
+              "choices": []
+            },
+            {
+              "key": "stop_name",
+              "label": "Stop name",
+              "required": true,
+              "type": "text",
+              "group": "Route",
+              "description": "Pickup or drop location label.",
+              "example": "Example Junction",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "sequence_number",
+              "label": "Stop sequence",
+              "required": true,
+              "type": "positive_int",
+              "group": "Route",
+              "description": "Travel order of this stop on the route.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "pickup_time",
+              "label": "Pickup time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Usual morning pickup time.",
+              "example": "07:30",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "drop_time",
+              "label": "Drop time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Usual return drop time.",
+              "example": "17:30",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Academic year for this stop rate.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "bus_fee_head_code",
+              "label": "Bus fee head code",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Fee Head whose category is bus.",
+              "example": "BUS",
+              "reference": "Fee Heads.fee_head_code",
+              "choices": []
+            },
+            {
+              "key": "billing_frequency",
+              "label": "Billing frequency",
+              "required": true,
+              "type": "text",
+              "group": "Rate",
+              "description": "Period represented by Standard bus charge.",
+              "example": "monthly",
+              "reference": null,
+              "choices": [
+                "annual",
+                "semester",
+                "term",
+                "monthly",
+                "per_use"
+              ]
+            },
+            {
+              "key": "standard_bus_charge",
+              "label": "Standard bus charge",
+              "required": true,
+              "type": "money",
+              "group": "Rate",
+              "description": "Approved standard amount before concessions for this stop and period.",
+              "example": "1500.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Currency of the bus charge.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Rate effective from",
+              "required": true,
+              "type": "date",
+              "group": "Validity",
+              "description": "First date on which this rate applies.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_to",
+              "label": "Rate effective to",
+              "required": false,
+              "type": "date",
+              "group": "Validity",
+              "description": "Last date if rate validity is time-limited.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Stop notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Pickup landmarks and approved rate conditions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Student Transport",
+          "row_rule": "One row per student bus allocation period.",
+          "target": "transport_allocations",
+          "fields": [
+            {
+              "key": "transport_allocation_code",
+              "label": "Transport allocation code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique student transport assignment.",
+              "example": "TRN-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student receiving bus service.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "stop_code",
+              "label": "Stop code",
+              "required": true,
+              "type": "code",
+              "group": "Service",
+              "description": "Selected stop in Stops; route is resolved through this stop.",
+              "example": "STOP-R01-01",
+              "reference": "Stops.stop_code",
+              "choices": []
+            },
+            {
+              "key": "service_type",
+              "label": "Service type",
+              "required": true,
+              "type": "text",
+              "group": "Service",
+              "description": "Approved directions of travel.",
+              "example": "two_way",
+              "reference": null,
+              "choices": [
+                "two_way",
+                "pickup_only",
+                "drop_only"
+              ]
+            },
+            {
+              "key": "start_date",
+              "label": "Service start date",
+              "required": true,
+              "type": "date",
+              "group": "Period",
+              "description": "First day of this bus allocation.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "end_date",
+              "label": "Service end date",
+              "required": false,
+              "type": "date",
+              "group": "Period",
+              "description": "Last day of the allocation; blank means ongoing.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approved_period_charge",
+              "label": "Approved period charge",
+              "required": false,
+              "type": "money",
+              "group": "Rate",
+              "description": "Only fill for a student-specific approved rate different from the standard.",
+              "example": "1200.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Currency of the student-specific rate if supplied.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "concession_reason",
+              "label": "Concession reason",
+              "required": false,
+              "type": "text",
+              "group": "Approval",
+              "description": "Required when a special student rate is supplied.",
+              "example": "Approved sibling concession",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Approval reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Document authorizing a student-specific rate.",
+              "example": "BUS-APP-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Transport notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Relevant route or service exceptions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "11_Hostel_Rooms_and_Allocations.xlsx",
+      "title": "Hostel rooms and allocations",
+      "purpose": "Accommodation inventory, room charges and student bed allocation.",
+      "notes": [
+        "Rooms has one row per hostel room. Use distinct room codes even when room numbers repeat across hostels.",
+        "Allocations records the student, room, bed and occupancy dates. A room and bed cannot have overlapping occupants.",
+        "Room and mess rates are reference amounts. Record billed hostel, mess and deposit lines separately in Charges and Payments.",
+        "The future importer must check room capacity, date overlaps and student enrollment before confirming allocation."
+      ],
+      "sheets": [
+        {
+          "name": "Rooms",
+          "row_rule": "One row per hostel room.",
+          "target": "hostels; hostel_rooms; hostel_beds",
+          "fields": [
+            {
+              "key": "room_code",
+              "label": "Hostel room code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique room code across all hostels.",
+              "example": "HST-A-101",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "hostel_code",
+              "label": "Hostel code",
+              "required": true,
+              "type": "code",
+              "group": "Hostel",
+              "description": "Stable code for the hostel building.",
+              "example": "HST-A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "hostel_name",
+              "label": "Hostel name",
+              "required": true,
+              "type": "text",
+              "group": "Hostel",
+              "description": "Official hostel building name.",
+              "example": "Hostel A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Hostel",
+              "description": "Campus hosting this accommodation.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "warden_employee_code",
+              "label": "Warden employee code",
+              "required": false,
+              "type": "code",
+              "group": "Hostel",
+              "description": "Employee supervising the hostel.",
+              "example": "EMP-0030",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "floor",
+              "label": "Floor",
+              "required": true,
+              "type": "text",
+              "group": "Room",
+              "description": "Floor or level designation.",
+              "example": "1",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "room_number",
+              "label": "Room number",
+              "required": true,
+              "type": "code",
+              "group": "Room",
+              "description": "Room label as displayed on the door.",
+              "example": "101",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "room_type",
+              "label": "Room type",
+              "required": true,
+              "type": "text",
+              "group": "Room",
+              "description": "Approved room configuration.",
+              "example": "twin",
+              "reference": null,
+              "choices": [
+                "single",
+                "twin",
+                "triple",
+                "dormitory",
+                "other"
+              ]
+            },
+            {
+              "key": "capacity",
+              "label": "Bed capacity",
+              "required": true,
+              "type": "positive_int",
+              "group": "Room",
+              "description": "Maximum approved occupants.",
+              "example": "2",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "bed_labels",
+              "label": "Bed labels",
+              "required": true,
+              "type": "text",
+              "group": "Room",
+              "description": "Comma-separated unique bed labels; count must equal capacity.",
+              "example": "A,B",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "facilities",
+              "label": "Facilities",
+              "required": false,
+              "type": "text",
+              "group": "Room",
+              "description": "Room facilities such as attached bathroom or air conditioning.",
+              "example": "Study desks and shared bathroom",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "room_status",
+              "label": "Room status",
+              "required": true,
+              "type": "text",
+              "group": "Availability",
+              "description": "Physical availability; occupancy is determined from allocations.",
+              "example": "available",
+              "reference": null,
+              "choices": [
+                "available",
+                "maintenance",
+                "closed"
+              ]
+            },
+            {
+              "key": "billing_frequency",
+              "label": "Rate frequency",
+              "required": true,
+              "type": "text",
+              "group": "Rate",
+              "description": "Period represented by each rate below.",
+              "example": "monthly",
+              "reference": null,
+              "choices": [
+                "annual",
+                "semester",
+                "term",
+                "monthly"
+              ]
+            },
+            {
+              "key": "standard_room_charge",
+              "label": "Standard room charge",
+              "required": true,
+              "type": "money",
+              "group": "Rate",
+              "description": "Accommodation rate before concessions for the stated frequency.",
+              "example": "4000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "standard_mess_charge",
+              "label": "Standard mess charge",
+              "required": false,
+              "type": "money",
+              "group": "Rate",
+              "description": "Separate meal-plan rate for the same frequency.",
+              "example": "2500.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "refundable_deposit",
+              "label": "Refundable deposit",
+              "required": false,
+              "type": "money",
+              "group": "Rate",
+              "description": "One-time room security deposit, not recurring rent.",
+              "example": "5000.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Currency of room, mess and deposit amounts.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Rate effective from",
+              "required": true,
+              "type": "date",
+              "group": "Validity",
+              "description": "Start date for the recorded accommodation rates.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Room notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Approved occupancy restrictions or accommodation details.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        },
+        {
+          "name": "Allocations",
+          "row_rule": "One row per student room and bed allocation period.",
+          "target": "hostel_allocations",
+          "fields": [
+            {
+              "key": "hostel_allocation_code",
+              "label": "Hostel allocation code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique accommodation assignment code.",
+              "example": "HALL-0001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "required": true,
+              "type": "code",
+              "group": "Student",
+              "description": "Student allocated this bed.",
+              "example": "STU-0001",
+              "reference": "Students.student_code",
+              "choices": []
+            },
+            {
+              "key": "room_code",
+              "label": "Hostel room code",
+              "required": true,
+              "type": "code",
+              "group": "Bed",
+              "description": "Room present in Rooms.",
+              "example": "HST-A-101",
+              "reference": "Rooms.room_code",
+              "choices": []
+            },
+            {
+              "key": "bed_label",
+              "label": "Bed label",
+              "required": true,
+              "type": "code",
+              "group": "Bed",
+              "description": "One of the room's defined bed labels.",
+              "example": "A",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Period",
+              "description": "Academic year for this allocation.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "start_date",
+              "label": "Occupancy start",
+              "required": true,
+              "type": "date",
+              "group": "Period",
+              "description": "First occupied or approved allocation date.",
+              "example": "2026-06-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "end_date",
+              "label": "Occupancy end",
+              "required": false,
+              "type": "date",
+              "group": "Period",
+              "description": "Last occupied date; blank means ongoing.",
+              "example": "2027-05-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "mess_required",
+              "label": "Mess required",
+              "required": true,
+              "type": "bool",
+              "group": "Service",
+              "description": "Whether the student uses the hostel meal plan.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approved_room_rate",
+              "label": "Approved room rate",
+              "required": false,
+              "type": "money",
+              "group": "Rate",
+              "description": "Only enter if different from the standard room rate.",
+              "example": "3800.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approved_mess_rate",
+              "label": "Approved mess rate",
+              "required": false,
+              "type": "money",
+              "group": "Rate",
+              "description": "Only enter if different from the standard mess rate.",
+              "example": "2500.00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "currency",
+              "label": "Currency",
+              "required": true,
+              "type": "code",
+              "group": "Rate",
+              "description": "Currency of student-specific accommodation rates.",
+              "example": "INR",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_reference",
+              "label": "Allocation approval reference",
+              "required": false,
+              "type": "code",
+              "group": "Approval",
+              "description": "Approval letter for allocation and any rate exception.",
+              "example": "HST-APP-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Allocation notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Transfer, accommodation or concession details.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "12_Leave_Types.xlsx",
+      "title": "Leave policies",
+      "purpose": "Approved leave types, eligibility and entitlement rules.",
+      "notes": [
+        "This file defines leave policy, not individual leave applications or historical leave balances.",
+        "Record employee and student policies as separate rows when their entitlements or approval rules differ.",
+        "Enter the approved policy values. A zero entitlement is different from an unknown blank field."
+      ],
+      "sheets": [
+        {
+          "name": "Leave Types",
+          "row_rule": "One row per leave type and applicability group.",
+          "target": "leave_types; policy extension required",
+          "fields": [
+            {
+              "key": "leave_type_code",
+              "label": "Leave type code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique leave type and applicability code.",
+              "example": "CL-EMP",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "leave_type_name",
+              "label": "Leave type name",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Official policy label.",
+              "example": "Casual leave",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "applies_to",
+              "label": "Applies to",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Group governed by this row; avoid overlapping duplicate rules.",
+              "example": "employee",
+              "reference": null,
+              "choices": [
+                "employee",
+                "teacher",
+                "staff",
+                "student"
+              ]
+            },
+            {
+              "key": "description",
+              "label": "Description",
+              "required": true,
+              "type": "text",
+              "group": "Eligibility",
+              "description": "Purpose and approved usage of this leave type.",
+              "example": "Short personal leave under HR policy",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "annual_entitlement_days",
+              "label": "Annual entitlement days",
+              "required": true,
+              "type": "decimal",
+              "group": "Entitlement",
+              "description": "Days granted per entitlement year; fractional days allowed.",
+              "example": "12",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "entitlement_year_basis",
+              "label": "Entitlement year basis",
+              "required": true,
+              "type": "text",
+              "group": "Entitlement",
+              "description": "Period over which leave is credited.",
+              "example": "calendar_year",
+              "reference": null,
+              "choices": [
+                "calendar_year",
+                "academic_year",
+                "joining_anniversary"
+              ]
+            },
+            {
+              "key": "paid_leave",
+              "label": "Paid leave",
+              "required": true,
+              "type": "text",
+              "group": "Entitlement",
+              "description": "Use not_applicable for student leave.",
+              "example": "yes",
+              "reference": null,
+              "choices": [
+                "yes",
+                "no",
+                "not_applicable"
+              ]
+            },
+            {
+              "key": "prorated_on_joining",
+              "label": "Prorate on joining",
+              "required": true,
+              "type": "bool",
+              "group": "Entitlement",
+              "description": "Whether entitlement is reduced for mid-year joining.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "carry_forward_allowed",
+              "label": "Carry forward allowed",
+              "required": true,
+              "type": "bool",
+              "group": "Carry forward",
+              "description": "Whether unused days may move to the next year.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "maximum_carry_forward_days",
+              "label": "Maximum carry forward days",
+              "required": false,
+              "type": "decimal",
+              "group": "Carry forward",
+              "description": "Required when carry forward is allowed; otherwise leave blank.",
+              "example": "0",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "encashment_allowed",
+              "label": "Encashment allowed",
+              "required": true,
+              "type": "bool",
+              "group": "Carry forward",
+              "description": "Whether payment for unused leave is allowed.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "minimum_days_per_request",
+              "label": "Minimum days per request",
+              "required": false,
+              "type": "decimal",
+              "group": "Request rules",
+              "description": "Minimum duration permitted in one request.",
+              "example": "0.5",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "maximum_consecutive_days",
+              "label": "Maximum consecutive days",
+              "required": false,
+              "type": "decimal",
+              "group": "Request rules",
+              "description": "Maximum continuous leave, if limited by policy.",
+              "example": "3",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "advance_notice_days",
+              "label": "Advance notice days",
+              "required": false,
+              "type": "int",
+              "group": "Request rules",
+              "description": "Normal minimum notice before the leave begins.",
+              "example": "2",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "half_day_allowed",
+              "label": "Half day allowed",
+              "required": true,
+              "type": "bool",
+              "group": "Request rules",
+              "description": "Whether half-day requests are permitted.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "documentation_required",
+              "label": "Supporting document required",
+              "required": true,
+              "type": "bool",
+              "group": "Request rules",
+              "description": "Whether a certificate or supporting document is required.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "probation_eligible",
+              "label": "Allowed during probation",
+              "required": true,
+              "type": "bool",
+              "group": "Eligibility",
+              "description": "Whether employees on probation may use this leave.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "approval_role",
+              "label": "Approving role",
+              "required": true,
+              "type": "text",
+              "group": "Approval",
+              "description": "Role authorized to approve this leave type.",
+              "example": "Department head",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_from",
+              "label": "Policy effective from",
+              "required": true,
+              "type": "date",
+              "group": "Validity",
+              "description": "First date this policy version applies.",
+              "example": "2026-01-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "effective_to",
+              "label": "Policy effective to",
+              "required": false,
+              "type": "date",
+              "group": "Validity",
+              "description": "Last date if superseded or time-limited.",
+              "example": "2026-12-31",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "policy_reference",
+              "label": "Policy reference",
+              "required": true,
+              "type": "code",
+              "group": "Approval",
+              "description": "Approved HR or student-policy document reference.",
+              "example": "HR-LEAVE-2026",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "notes",
+              "label": "Leave policy notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Accrual, holiday counting or other approved conditions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "13_College_Calendar_and_Events.xlsx",
+      "title": "College calendar and events",
+      "purpose": "Academic dates, holidays, examinations, activities and meetings.",
+      "notes": [
+        "Create one row per event occurrence. Expand recurring events into separate dated rows.",
+        "Use All day = Yes for date-only events. Otherwise supply start and end times and the event timezone.",
+        "Use comma-separated audience or course codes only where the relevant field allows them."
+      ],
+      "sheets": [
+        {
+          "name": "Calendar Events",
+          "row_rule": "One row per calendar event occurrence.",
+          "target": "calendar_events; event metadata extension required",
+          "fields": [
+            {
+              "key": "event_code",
+              "label": "Event code",
+              "required": true,
+              "type": "code",
+              "group": "Identity",
+              "description": "Unique event occurrence code.",
+              "example": "EVT-2026-001",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "event_title",
+              "label": "Event title",
+              "required": true,
+              "type": "text",
+              "group": "Identity",
+              "description": "Concise official event title.",
+              "example": "Semester 1 orientation",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "campus_code",
+              "label": "Campus code",
+              "required": true,
+              "type": "code",
+              "group": "Scope",
+              "description": "Campus hosting or affected by this event.",
+              "example": "CAMP-01",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "academic_year",
+              "label": "Academic year",
+              "required": true,
+              "type": "code",
+              "group": "Scope",
+              "description": "Academic year containing this event.",
+              "example": "2026-2027",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "event_type",
+              "label": "Event type",
+              "required": true,
+              "type": "text",
+              "group": "Scope",
+              "description": "Main calendar classification.",
+              "example": "academic",
+              "reference": null,
+              "choices": [
+                "holiday",
+                "academic",
+                "examination",
+                "cultural",
+                "sports",
+                "meeting",
+                "admission",
+                "other"
+              ]
+            },
+            {
+              "key": "description",
+              "label": "Description",
+              "required": true,
+              "type": "text",
+              "group": "Scope",
+              "description": "Purpose, schedule or instructions for attendees.",
+              "example": "Orientation for newly admitted students",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "audience",
+              "label": "Audience",
+              "required": true,
+              "type": "text",
+              "group": "Audience",
+              "description": "Primary intended audience.",
+              "example": "students",
+              "reference": null,
+              "choices": [
+                "all",
+                "students",
+                "parents",
+                "teachers",
+                "staff",
+                "employees",
+                "selected_courses"
+              ]
+            },
+            {
+              "key": "applicable_course_codes",
+              "label": "Applicable course codes",
+              "required": false,
+              "type": "text",
+              "group": "Audience",
+              "description": "Comma-separated course codes; required for selected_courses.",
+              "example": "BCA",
+              "reference": "Courses.course_code",
+              "choices": []
+            },
+            {
+              "key": "all_day",
+              "label": "All day",
+              "required": true,
+              "type": "bool",
+              "group": "Schedule",
+              "description": "Yes for date-only events; No when times must be specified.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "start_date",
+              "label": "Start date",
+              "required": true,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Local calendar date the event begins.",
+              "example": "2026-06-08",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "start_time",
+              "label": "Start time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Required when All day is No, in local event timezone.",
+              "example": "09:00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "end_date",
+              "label": "End date",
+              "required": true,
+              "type": "date",
+              "group": "Schedule",
+              "description": "Local calendar date the event finishes.",
+              "example": "2026-06-08",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "end_time",
+              "label": "End time",
+              "required": false,
+              "type": "time",
+              "group": "Schedule",
+              "description": "Required when All day is No.",
+              "example": "12:00",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "timezone",
+              "label": "Timezone",
+              "required": true,
+              "type": "text",
+              "group": "Schedule",
+              "description": "IANA timezone identifier, normally Asia/Kolkata.",
+              "example": "Asia/Kolkata",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "location",
+              "label": "Venue or location",
+              "required": true,
+              "type": "text",
+              "group": "Location",
+              "description": "Room, hall, campus space or online location.",
+              "example": "Main auditorium",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "online_meeting_url",
+              "label": "Online meeting link",
+              "required": false,
+              "type": "text",
+              "group": "Location",
+              "description": "Publicly shareable meeting link if applicable; no secret tokens.",
+              "example": "https://example.com/event",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "organizing_department",
+              "label": "Organizing department",
+              "required": false,
+              "type": "text",
+              "group": "Organizer",
+              "description": "Department responsible for the event.",
+              "example": "Admissions",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "coordinator_employee_code",
+              "label": "Coordinator employee code",
+              "required": false,
+              "type": "code",
+              "group": "Organizer",
+              "description": "Staff or faculty coordinator.",
+              "example": "EMP-0002",
+              "reference": "Employees.employee_code",
+              "choices": []
+            },
+            {
+              "key": "contact_phone",
+              "label": "Contact mobile",
+              "required": false,
+              "type": "phone",
+              "group": "Organizer",
+              "description": "Official event inquiry contact.",
+              "example": "+919000000011",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "non_teaching_day",
+              "label": "Non-teaching day",
+              "required": true,
+              "type": "bool",
+              "group": "Academic impact",
+              "description": "Whether normal teaching is suspended for this date or period.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "attendance_required",
+              "label": "Attendance required",
+              "required": true,
+              "type": "bool",
+              "group": "Academic impact",
+              "description": "Whether the named audience must attend.",
+              "example": "Yes",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "registration_required",
+              "label": "Registration required",
+              "required": true,
+              "type": "bool",
+              "group": "Registration",
+              "description": "Whether attendees must register in advance.",
+              "example": "No",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "registration_deadline",
+              "label": "Registration deadline",
+              "required": false,
+              "type": "date",
+              "group": "Registration",
+              "description": "Last date for registration if required.",
+              "example": "2026-06-07",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "capacity",
+              "label": "Attendee capacity",
+              "required": false,
+              "type": "positive_int",
+              "group": "Registration",
+              "description": "Maximum attendees if the event has a limit.",
+              "example": "200",
+              "reference": null,
+              "choices": []
+            },
+            {
+              "key": "status",
+              "label": "Event status",
+              "required": true,
+              "type": "text",
+              "group": "Status",
+              "description": "Current event state.",
+              "example": "confirmed",
+              "reference": null,
+              "choices": [
+                "planned",
+                "confirmed",
+                "cancelled",
+                "completed"
+              ]
+            },
+            {
+              "key": "publication_status",
+              "label": "Publication status",
+              "required": true,
+              "type": "text",
+              "group": "Status",
+              "description": "Whether the event is approved for calendar display.",
+              "example": "draft",
+              "reference": null,
+              "choices": [
+                "draft",
+                "published"
+              ]
+            },
+            {
+              "key": "notes",
+              "label": "Event notes",
+              "required": false,
+              "type": "text",
+              "group": "Notes",
+              "description": "Operational details or exceptions.",
+              "example": "",
+              "reference": null,
+              "choices": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schema_projection_status": "Expanded collection specification. Target names are planning hints, not implemented SQL column mappings.",
+  "baseline_sql_migration_required": true,
+  "validation_rules": [
+    "Import by filename and data-tab name. Match exact row-6 visible headers, including required-field asterisks, to field keys. Ignore rows 1-5 and the Guide tab.",
+    "Skip fully blank input rows, including rows containing only calculated formulas. Ignore calculated columns and recompute their results on the server. Reject formulas in user input columns.",
+    "Require every mandatory field on populated records, including conditional requirements stated in each field description. Preserve identifier leading zeros and validate dates, enums, numeric ranges and Yes/No values.",
+    "Validate unique primary codes within and across uploads, and resolve exact cross-file codes against the reviewed batch or existing database records. Reject unknown references and cross-campus inconsistencies.",
+    "Employee category must match the Teachers or Staff profile. Reject duplicate employee profiles and cyclic reporting lines.",
+    "Enrollment course, curriculum, batch, section, year and semester must agree. Do not allow conflicting definitions for the same master code. Check subject prerequisites and curriculum semester bounds.",
+    "For percentage scholarships require award_percent and forbid fixed_award_amount; for fixed awards require fixed_award_amount and forbid award_percent. Check percentages, caps, eligible heads and courses, approval status and combination policy.",
+    "Fee lines have separate fee head and installment codes. Charge references, student course and currency must match; approved discounts cannot exceed base charges. Scholarship allocations must not exceed an approved award or make net payable negative.",
+    "Payments and charge allocations must have the same student and currency. Non-cash transactions require a reference. Settled payments require unique receipts and receipt dates. Allocation totals must not exceed the received payment or charge balance.",
+    "Transport stop route, academic year and rate dates must be consistent. Validate route capacity, at most one active regular allocation per student and date overlaps.",
+    "Hostel bed labels must be unique within the room and their count must equal capacity. Validate date overlaps, at most one active allocation per bed and student, and approved rate exceptions.",
+    "Validate all start/end dates and numeric thresholds. Timed events require start/end times and a valid timezone; all-day events use date boundaries. Expand recurring events into explicit occurrences.",
+    "Show a dry-run preview and row/column errors. Commit only after review, in a transaction with explicit create or update mode and idempotency. Preserve all collected fields through approved staging and schema migrations; never silently drop expanded fields."
+  ]
+}

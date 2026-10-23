@@ -1,0 +1,800 @@
+/* Student enrollment wizard — same palette as the connected workspace (ink #18344b, accent #a77524). */
+.enw-backdrop {
+  --enw-ink: #18344b;
+  --enw-accent: #a77524;
+  --enw-line: #d6dde4;
+  --enw-soft: #f4f6f8;
+  --enw-muted: #627383;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(16, 30, 44, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: var(--enw-ink);
+}
+.enw-backdrop *,
+.enw-backdrop *::before,
+.enw-backdrop *::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.enw-shell {
+  width: min(1180px, 100%);
+  height: min(94vh, 980px);
+  background: var(--enw-soft);
+  border-radius: 10px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(10, 20, 30, 0.35);
+}
+.enw-backdrop button,
+.enw-backdrop input,
+.enw-backdrop select,
+.enw-backdrop textarea {
+  font: inherit;
+  color: var(--enw-ink);
+  border: 1px solid #cbd3db;
+  border-radius: 6px;
+  background: #fff;
+  padding: 9px 11px;
+}
+.enw-backdrop button {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.enw-backdrop button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.enw-backdrop :focus-visible {
+  outline: 3px solid #d8ae5e;
+  outline-offset: 2px;
+}
+.enw-backdrop .enw-primary {
+  background: var(--enw-ink);
+  border-color: var(--enw-ink);
+  color: #fff;
+}
+.enw-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 22px;
+  background: #fff;
+  border-bottom: 1px solid var(--enw-line);
+}
+.enw-top h2 {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+.enw-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--enw-accent);
+  font-weight: bold;
+}
+.enw-steps {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.enw-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--enw-muted);
+  font-size: 13px;
+  padding-right: 10px;
+}
+.enw-steps li + li::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: var(--enw-line);
+  margin-right: 2px;
+}
+.enw-steps li span {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--enw-line);
+  background: #fff;
+  font-weight: bold;
+}
+.enw-steps li.is-active {
+  color: var(--enw-ink);
+  font-weight: bold;
+}
+.enw-steps li.is-active span {
+  background: var(--enw-ink);
+  color: #fff;
+  border-color: var(--enw-ink);
+}
+.enw-steps li.is-done span {
+  background: var(--enw-accent);
+  border-color: var(--enw-accent);
+  color: #fff;
+}
+.enw-backdrop .enw-close {
+  border: 0;
+  background: transparent;
+  padding: 6px;
+}
+.enw-error {
+  margin: 0;
+  padding: 10px 22px;
+  background: #fdecea;
+  color: #8a1f17;
+  border-bottom: 1px solid #f3c4bf;
+}
+.enw-viewport {
+  overflow: hidden;
+  position: relative;
+}
+.enw-track {
+  display: flex;
+  width: 300%;
+  height: 100%;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.enw-panel {
+  width: calc(100% / 3);
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 22px 28px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.enw-body {
+  overflow-y: auto;
+  padding: 20px 22px 28px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.enw-card {
+  background: #fff;
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 16px 18px 18px;
+}
+.enw-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.enw-card h3 {
+  margin: 0;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.enw-card h3 svg {
+  color: var(--enw-accent);
+}
+.enw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px 14px;
+}
+.enw-field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.enw-field > span {
+  color: #3b4f61;
+}
+.enw-field small,
+.enw-muted {
+  color: var(--enw-muted);
+  font-weight: normal;
+  margin: 0;
+}
+.enw-wide {
+  grid-column: 1 / -1;
+}
+.enw-label {
+  margin: 14px 0 8px;
+  font-weight: bold;
+  font-size: 13px;
+}
+.enw-warn {
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: #fff6e5;
+  border: 1px solid #f0d9a8;
+  color: #6b4b10;
+}
+.enw-segmented {
+  display: inline-flex;
+  border: 1px solid #cbd3db;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 4px 0 14px;
+}
+.enw-backdrop .enw-segmented button {
+  border: 0;
+  border-radius: 0;
+  padding: 9px 18px;
+}
+.enw-backdrop .enw-segmented button.is-on {
+  background: var(--enw-ink);
+  color: #fff;
+}
+.enw-photo {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.enw-photo-frame {
+  width: 112px;
+  height: 136px;
+  border-radius: 8px;
+  background: #eef2f5;
+  border: 1px dashed #b8c4cf;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+  color: #8796a5;
+}
+.enw-photo-frame img,
+.enw-photo-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.enw-photo-actions {
+  display: grid;
+  gap: 6px;
+}
+.enw-photo-actions small {
+  color: var(--enw-muted);
+}
+.enw-photo-actions > span {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.enw-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-weight: normal;
+}
+.enw-file-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed #a9b6c2;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #fbfcfd;
+  cursor: pointer;
+  font-weight: 600;
+  position: relative;
+}
+.enw-file-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+.enw-file-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2f6b3b;
+}
+.enw-backdrop .enw-file-name button {
+  border: 0;
+  padding: 2px;
+  background: transparent;
+}
+.enw-file em,
+.enw-photo em {
+  color: #8a1f17;
+  font-style: normal;
+}
+.enw-docs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.enw-doc {
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+.enw-doc.is-on {
+  border-color: var(--enw-accent);
+  background: #fffaf2;
+}
+.enw-doc label,
+.enw-inline,
+.enw-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.enw-parents {
+  display: grid;
+  gap: 12px;
+}
+.enw-parent {
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 10px 14px 14px;
+  margin: 0;
+}
+.enw-parent legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 6px;
+}
+.enw-row {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1.3fr) minmax(0, 0.8fr) auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.enw-numbers-bar {
+  display: flex;
+  gap: 26px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--enw-ink);
+  color: #fff;
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+.enw-numbers-bar span {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+.enw-numbers-bar strong {
+  font-size: 18px;
+}
+.enw-numbers-bar small {
+  margin-left: auto;
+  opacity: 0.8;
+}
+.enw-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+.enw-backdrop .enw-choice {
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  padding: 12px 14px;
+  text-align: left;
+  border-radius: 8px;
+}
+.enw-choice small {
+  color: var(--enw-muted);
+}
+.enw-backdrop .enw-choice.is-on {
+  border: 2px solid var(--enw-accent);
+  background: #fffaf2;
+}
+.enw-facilities {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.enw-facility {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+.enw-facility.is-on {
+  border-color: var(--enw-accent);
+  background: #fffaf2;
+}
+.enw-facility span {
+  display: grid;
+}
+.enw-facility small {
+  color: var(--enw-muted);
+}
+.enw-fees,
+.enw-review-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.enw-fees td,
+.enw-review-card td,
+.enw-review-card th {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e6ebef;
+  text-align: left;
+}
+.enw-fees td:last-child,
+.enw-review-card td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.enw-fees td small {
+  margin-left: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--enw-accent);
+}
+.enw-total td {
+  font-weight: bold;
+  background: #f6f8fa;
+}
+.enw-concessions {
+  margin-top: 14px;
+}
+.enw-net {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #eef5ee;
+  border: 1px solid #cfe3cf;
+}
+.enw-net strong {
+  font-size: 22px;
+  color: #22562c;
+}
+.enw-net small {
+  color: var(--enw-muted);
+}
+.enw-summary {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.enw-summary dl,
+.enw-review-card dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px 18px;
+  margin: 0;
+  flex: 1;
+}
+.enw-summary dt,
+.enw-review-card dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--enw-muted);
+}
+.enw-summary dd,
+.enw-review-card dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.enw-review-photo {
+  width: 84px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eef2f5;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: #8796a5;
+}
+.enw-review-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.enw-confirm-bar,
+.enw-success {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+.enw-confirm-bar p {
+  flex: 1 1 360px;
+  margin: 0;
+  color: var(--enw-muted);
+}
+.enw-success svg {
+  color: #2f8a43;
+}
+.enw-success > div {
+  flex: 1 1 360px;
+}
+.enw-success h3 {
+  margin: 0 0 4px;
+}
+.enw-success p {
+  margin: 0;
+}
+.enw-exports {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.enw-review {
+  display: grid;
+  gap: 14px;
+}
+.enw-review-head {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid var(--enw-line);
+  border-top: 4px solid var(--enw-accent);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.enw-review-head h2 {
+  margin: 4px 0;
+  font-size: 22px;
+}
+.enw-review-head p {
+  margin: 0;
+  color: var(--enw-muted);
+}
+.enw-numbers {
+  margin: 0 0 0 auto;
+  display: flex;
+  gap: 18px;
+}
+.enw-numbers dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--enw-muted);
+}
+.enw-numbers dd {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+.enw-review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+.enw-review-card {
+  background: #fff;
+  border: 1px solid var(--enw-line);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.enw-review-card h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--enw-accent);
+}
+.enw-review-card th {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--enw-muted);
+  background: #f6f8fa;
+}
+.enw-review-card th:last-child {
+  text-align: right;
+}
+.enw-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 22px;
+  background: #fff;
+  border-top: 1px solid var(--enw-line);
+}
+.enw-footer button:only-child {
+  margin-left: auto;
+}
+@media (max-width: 760px) {
+  .enw-backdrop {
+    padding: 0;
+  }
+  .enw-shell {
+    height: 100vh;
+    border-radius: 0;
+  }
+  .enw-top {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .enw-steps {
+    order: 3;
+    margin: 0;
+    width: 100%;
+  }
+  .enw-steps li + li::before {
+    width: 10px;
+  }
+  .enw-panel,
+  .enw-body {
+    padding: 16px;
+  }
+  .enw-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .enw-photo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .enw-numbers {
+    margin: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enw-track {
+    transition: none;
+  }
+}
+/* Print only the review (application overview). */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .enw-print,
+  .enw-print * {
+    visibility: visible !important;
+  }
+  .enw-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .enw-backdrop {
+    position: static;
+    background: none;
+  }
+  .enw-review-card,
+  .enw-review-head {
+    break-inside: avoid;
+    border-color: #999;
+  }
+}
+/* Degree picker: search and course-family filters for the long degree list. */
+.enw-course-filter {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.enw-course-filter input {
+  max-width: 420px;
+}
+.enw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.enw-backdrop .enw-chips button {
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+.enw-backdrop .enw-chips button.is-on {
+  background: var(--enw-ink);
+  border-color: var(--enw-ink);
+  color: #fff;
+}
+.enw-choices {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.enw-choice em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--enw-accent);
+}
+
+/* Side screen: the wizard slides in from the right at full height (not a centred popup). */
+.enw-backdrop {
+  place-items: stretch end;
+  padding: 0;
+  animation: enw-fade 0.2s ease-out;
+}
+.enw-shell {
+  width: min(1120px, 94vw);
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0;
+  box-shadow: -18px 0 44px rgba(10, 20, 30, 0.3);
+  animation: enw-slide-in 0.34s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes enw-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes enw-fade {
+  from {
+    background: rgba(16, 30, 44, 0);
+  }
+}
+
+/* Phone number with country code (+91 default). */
+.enw-phone {
+  display: flex;
+}
+.enw-backdrop .enw-phone select {
+  flex: none;
+  width: 78px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+  background: #f4f6f8;
+}
+.enw-backdrop .enw-phone input {
+  flex: 1;
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Aadhaar number and Aadhaar copy on one row. */
+.enw-aadhaar {
+  grid-template-columns: minmax(200px, 1fr) minmax(260px, 1.4fr);
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .enw-shell {
+    width: 100vw;
+  }
+  .enw-aadhaar {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enw-shell,
+  .enw-backdrop {
+    animation: none;
+  }
+}

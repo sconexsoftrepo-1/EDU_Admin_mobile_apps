@@ -1,0 +1,19 @@
+name: edunexa_client
+description: Shared authenticated EduNexa mobile screens and API client.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ^3.12.0
+dependencies:
+  flutter:
+    sdk: flutter
+  url_launcher: ^6.3.0
+  http: ^1.2.0
+  flutter_secure_storage: ^10.0.0
+  share_plus: ^13.0.0
+  cross_file: ^0.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

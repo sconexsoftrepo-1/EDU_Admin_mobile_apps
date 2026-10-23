@@ -22,28 +22,35 @@ export default function RoleWorkspace({
   role: Role;
   nav: (module: string) => string;
 }) {
-  const { state: s, run } = useCollege();
-  const self = s.students.find((st) => st.id === `${c.number}-S0001`)!;
+  const { state: s, run, account } = useCollege();
+  const self = s.students.find((st) => st.id === account?.person_code);
+  if (role === "Student" && !self)
+    return (
+      <section className="erp-panel">
+        <h2>Your student profile</h2>
+        <p>Your student record is not available yet.</p>
+      </section>
+    );
   if (role === "Super Admin") return null;
   if (role === "Student") {
     const allocation = s.allocations.find(
-      (a) => a.studentId === self.id && a.status === "Allocated",
+      (a) => a.studentId === self!.id && a.status === "Allocated",
     );
     return (
       <section className="erp-student-home">
         <div className="erp-student-id">
           <GraduationCap size={36} />
           <span>Digital student profile</span>
-          <h2>{self.name}</h2>
-          <p>{self.program}</p>
+          <h2>{self!.name}</h2>
+          <p>{self!.program}</p>
           <dl>
             <div>
               <dt>Roll number</dt>
-              <dd>{self.id}</dd>
+              <dd>{self!.id}</dd>
             </div>
             <div>
               <dt>Academic year</dt>
-              <dd>{self.year}</dd>
+              <dd>{self!.year}</dd>
             </div>
             <div>
               <dt>Hostel</dt>
@@ -54,20 +61,20 @@ export default function RoleWorkspace({
               </dd>
             </div>
           </dl>
-          <small>Fictional identity / Demo only</small>
+          <small>College student profile</small>
         </div>
         <div className="erp-student-summary">
           <h2>Your academic essentials</h2>
           <p>A simple view of your fees, documents, and campus requests.</p>
           <div>
             {[
-              [Wallet, "Fee balance", money(balance(s, self)), "fees"],
+              [Wallet, "Fee balance", money(balance(s, self!)), "fees"],
               [
                 FileCheck,
                 "Your certificates",
                 String(
                   s.certificates.filter(
-                    (r) => r.studentId === self.id && r.status === "Issued",
+                    (r) => r.studentId === self!.id && r.status === "Issued",
                   ).length,
                 ) + " issued",
                 "certificates",
@@ -81,7 +88,7 @@ export default function RoleWorkspace({
               [
                 BookOpen,
                 "Payment history",
-                money(paid(s, self.id)) + " paid",
+                money(paid(s, self!.id)) + " paid",
                 "receipts",
               ],
             ].map(([I, label, value, path]) => {
@@ -234,7 +241,7 @@ export default function RoleWorkspace({
     "Certificate Officer": {
       title: "Document processing desk",
       description:
-        "Validate fictional enrollment records before issuing academic documents.",
+        "Validate enrollment records before issuing academic documents.",
       module: "certificates",
       items: s.certificates
         .filter((x) => !["Issued", "Rejected"].includes(x.status))
