@@ -3,7 +3,8 @@
 - `admin-dashboard/`: complete copied Next.js template source and assets, including the public EduNexa website, ERP/admin dashboard and existing mobile web previews. Root opens EduNexa. Other showcase source is retained for shared dependencies.
 - `backend/`: intentionally empty, reserved for Python development.
 - `mobile-apps/parent/`, `teacher/`, `student/`: Flutter starters. `mobile-apps/admin/`: a working local-data management demo with Overview, Dues, Reports and Activity. No native app is connected to the backend.
-- `database/edunexa_schema.sql`: PostgreSQL schema with 126 tables, keys, constraints, indexes and timestamp triggers.
+- `database/edunexa_schema_postgresql.sql`: the complete PostgreSQL schema (145 tables, keys, constraints, indexes, triggers and views) used by the backend on Supabase.
+- `database/edunexa_schema_mysql.sql`: the same schema for MySQL 8.
 - `client-data/initial-data-entry/`: 13 separate professional Excel collection files, with detailed fields, instructions and examples. A client-ready ZIP is in client-data/.
 - `client-data/initial-data-entry/import-contract-v2.json`: expanded collection field contract and validation rules for future Python import development. Schema migrations and explicit field projections are still required.
 

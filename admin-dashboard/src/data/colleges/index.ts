@@ -1,4 +1,3 @@
-import { operationLabels } from "@/lib/colleges/operations";
 export type College = {
   slug: string;
   number: string;
@@ -70,6 +69,63 @@ export const publicRoutes = [
   "contact",
   "faq",
 ];
+// Operational screens; keys match backend screen contracts.
+export const operationLabels: Record<string, string> = {
+  "campus-analytics": "Campus analytics",
+  employees: "Employee directory",
+  "employee-attendance": "Employee attendance",
+  "employee-leave": "Leave management",
+  "salary-structures": "Salary structures",
+  payroll: "Payroll processing",
+  payslips: "Payslips",
+  bonuses: "Bonuses & incentives",
+  reimbursements: "Reimbursements",
+  "payroll-reports": "Payroll reports",
+  "expense-dashboard": "Expense dashboard",
+  "purchase-requests": "Purchase requests",
+  "purchase-orders": "Purchase orders",
+  vendors: "Vendors",
+  equipment: "Equipment purchases",
+  utilities: "Utilities",
+  maintenance: "Maintenance",
+  travel: "Travel expenses",
+  "transport-expenses": "Transport expenses",
+  "additional-expenses": "Additional expenses",
+  inventory: "Inventory",
+  assets: "Asset register",
+  transport: "Transport dashboard",
+  buses: "Bus management",
+  routes: "Bus routes",
+  "route-stops": "Route stops",
+  drivers: "Driver management",
+  "driver-allocation": "Driver allocation",
+  "student-allocation": "Student allocation",
+  "faculty-allocation": "Faculty allocation",
+  "bus-seating": "3D bus seating",
+  trips: "Daily trips",
+  manifest: "Passenger manifest",
+  "transport-attendance": "Transport attendance",
+  "vehicle-maintenance": "Vehicle maintenance",
+  fuel: "Fuel records",
+  "transport-reports": "Transport reports",
+  "mobile-apps": "Mobile apps emulator",
+  "admin-app": "Admin app preview",
+  "parent-app": "Parent app preview",
+  "student-app": "Student app preview",
+  "teacher-app": "Teacher app preview",
+  accounts: "User accounts",
+  credentials: "Credential provisioning",
+  campaigns: "Notification campaigns",
+  "payment-reminders": "Payment reminders",
+  announcements: "Announcements",
+  "notification-templates": "Notification templates",
+  timetable: "Timetable",
+  assignments: "Assignments",
+  assessments: "Assessments",
+  attendance: "Student attendance",
+  syllabus: "Syllabus & resources",
+  calendar: "Academic calendar",
+};
 export const modules = [
   ...Object.keys(operationLabels),
   "dashboard",
@@ -94,8 +150,16 @@ export const modules = [
   "reports",
   "audit-logs",
   "settings",
+  "forms",
+  "imports",
+  "documents",
+  "student-enrollment",
+  "teaching-staff",
+  "non-teaching-staff",
+  "course-setup",
 ];
 export const roles = [
+  "Master Data Entry",
   "Super Admin",
   "Principal",
   "Accounts Manager",
@@ -114,6 +178,7 @@ export const roles = [
 ] as const;
 export type Role = (typeof roles)[number];
 export const roleHome: Record<Role, string> = {
+  "Master Data Entry": "master-data-entry",
   "Super Admin": "admin",
   Principal: "principal",
   "Accounts Manager": "accounts",
@@ -131,6 +196,14 @@ export const roleHome: Record<Role, string> = {
   Driver: "driver",
 };
 export const permissions: Record<Role, string[]> = {
+  "Master Data Entry": [
+    "course-setup",
+    "fee-structures",
+    "student-enrollment",
+    "teaching-staff",
+    "non-teaching-staff",
+    "imports",
+  ],
   "Super Admin": modules,
   Parent: ["dashboard", "parent-app", "timetable"],
   "HR Manager": [
@@ -257,27 +330,29 @@ export function validCollegePath(c: College, parts: string[]) {
   if (parts[0] === "academics" && parts.length === 2)
     return c.programs.some((x) => x.slug === parts[1]);
   if (parts[0] === "verify-certificate")
-    return parts.length === 2 && /^[A-Za-z0-9-]{1,80}$/.test(parts[1]);
+    return parts.length === 2 && /^[A-Za-z0-9_-]{1,100}$/.test(parts[1]);
   if (parts[0] !== "portal") return false;
+  const safeArea = (area: string) => /^[a-z0-9][a-z0-9-]{0,63}$/.test(area);
   if (parts.length === 2)
-    return [
-      ...Object.values(roleHome),
-      "login",
-      "admin",
-      "principal",
-      "accounts",
-      "staff",
-      "student",
-      "certificates",
-      "hostel",
-    ].includes(parts[1]);
-  if (parts.length === 3)
     return (
-      Object.values(roleHome).includes(parts[1]) && modules.includes(parts[2])
+      safeArea(parts[1]) ||
+      [
+        ...Object.values(roleHome),
+        "login",
+        "admin",
+        "principal",
+        "accounts",
+        "staff",
+        "student",
+        "certificates",
+        "hostel",
+      ].includes(parts[1])
     );
+  if (parts.length === 3)
+    return safeArea(parts[1]) && /^[a-z0-9][a-z0-9-]{0,79}$/.test(parts[2]);
   return (
     parts.length === 4 &&
-    Object.values(roleHome).includes(parts[1]) &&
+    safeArea(parts[1]) &&
     ["students", "admissions"].includes(parts[2]) &&
     /^[A-Za-z0-9-]{1,60}$/.test(parts[3])
   );

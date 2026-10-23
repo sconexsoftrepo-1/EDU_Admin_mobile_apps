@@ -1,0 +1,10 @@
+.venv/
+var/
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+.coverage
+*.pyc
+.ruff_cache/

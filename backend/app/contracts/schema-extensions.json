@@ -1,0 +1,20 @@
+{
+  "reason": "Template screen persistence gaps in the 126-table reference. Local-only additions; no database tables created.",
+  "resources": [
+    "purchase_requests",
+    "purchase_orders",
+    "asset_register",
+    "vehicle_trips",
+    "vehicle_maintenance",
+    "vehicle_fuel",
+    "vehicle_seats",
+    "passenger_seats",
+    "transport_attendance",
+    "timetable_swap_requests",
+    "payroll_adjustments",
+    "college_invoices",
+    "notification_templates",
+    "notification_campaigns",
+    "expense_payment_entries"
+  ]
+}

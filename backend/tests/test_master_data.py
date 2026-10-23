@@ -1,0 +1,390 @@
+import importlib.util
+from pathlib import Path
+
+from app.core.security import hasher
+
+TOOL = Path(__file__).resolve().parents[1] / "tools" / "create_master_data_role.py"
+spec = importlib.util.spec_from_file_location("create_master_data_role", TOOL)
+role_tool = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(role_tool)
+
+PASSWORD = "Strong-Entry-Password-245!"
+
+
+def master_data_user(app, client):
+    with app.state.store.transaction() as d:
+        d["roles"][role_tool.ROLE_CODE] = {
+            "code": role_tool.ROLE_CODE, "name": "Master Data Entry", "scope": "college",
+            "system_admin": False, "permissions": role_tool.PERMISSIONS,
+            "screens": role_tool.SCREENS, "import_files": role_tool.IMPORT_FILES,
+        }
+        d["accounts"]["MDE"] = {
+            "code": "MDE", "login_id": "entry.operator", "password_hash": hasher.hash(PASSWORD),
+            "active": True, "person_type": "system", "person_code": "master-data-entry",
+            "role_codes": [role_tool.ROLE_CODE], "clients": ["admin-web"],
+        }
+    with app.state.store.transaction() as d:
+        records = d["records"]
+        records.setdefault("institutions", {})["INST"] = {"code": "INST", "name": "College"}
+        records.setdefault("campuses", {})["CAMP"] = {"code": "CAMP", "institution_code": "INST", "name": "Main"}
+        records.setdefault("departments", {})["DEP"] = {"code": "DEP", "campus_code": "CAMP", "name": "Science"}
+        records.setdefault("academic_years", {})["AY"] = {"code": "AY", "name": "2026-27", "start_date": "2026-06-01", "end_date": "2027-05-31"}
+        records.setdefault("semesters", {})["SEM1"] = {"code": "SEM1", "academic_year_code": "AY", "name": "Semester 1",
+                                        "semester_number": 1, "start_date": "2026-06-01", "end_date": "2026-11-30"}
+    token = client.post("/api/v1/auth/login", json={"login_id": "entry.operator", "password": PASSWORD,
+                                                    "client": "admin-web"}).json()["access_token"]
+    return {"Authorization": "Bearer " + token}
+
+
+EMPLOYEE = {"campus_code": "CAMP", "department_code": "DEP", "first_name": "Asha", "last_name": "Rao",
+            "designation": "Lecturer", "email": "asha.rao@example.edu", "phone": "9876500001",
+            "join_date": "2026-06-01", "employment_type": "permanent", "status": "active"}
+STUDENT = {"campus_code": "CAMP", "admission_number": "ADM-001", "first_name": "Kiran", "last_name": "Patel",
+           "date_of_birth": "2008-04-12", "gender": "male", "admission_date": "2026-06-10",
+           "address": "12 MG Road", "city": "Hyderabad", "state": "Telangana", "postal_code": "500001",
+           "country": "India", "emergency_contact_name": "Meena Patel", "emergency_contact_phone": "9876500002",
+           "status": "active"}
+
+
+def test_role_sees_only_master_data_screens(client, app):
+    h = master_data_user(app, client)
+    keys = {s["key"] for s in client.get("/api/v1/workspace/screens", headers=h).json()["screens"]}
+    assert keys == set(role_tool.SCREENS)
+    assert client.get("/api/v1/workspace/screens/payments", headers=h).status_code == 403
+    assert client.get("/api/v1/workspace/screens/teaching-staff", headers=h).status_code == 200
+    files = [f["file"] for f in client.get("/api/v1/imports/excel/contract", headers=h).json()["files"]]
+    assert files == role_tool.IMPORT_FILES
+    actions = {a["key"] for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]}
+    assert {"onboard-teaching-staff", "onboard-non-teaching-staff", "create-course", "enroll-student"} <= actions
+
+
+def test_master_data_entry_flow(client, app):
+    h = master_data_user(app, client)
+    teaching = client.post("/api/v1/master-data/staff/teaching", headers=h, json={
+        "employee": EMPLOYEE, "teacher": {"qualification": "M.Sc. Physics", "specialization": "Optics"}})
+    assert teaching.status_code == 201, teaching.text
+    assert teaching.json()["employee"]["employee_type"] == "teacher"
+
+    staff = client.post("/api/v1/master-data/staff/non-teaching", headers=h, json={
+        "employee": {**EMPLOYEE, "first_name": "Ravi", "email": "ravi@example.edu", "designation": "Accountant"},
+        "staff_profile": {"responsibility": "Accounts office", "shift": "General"},
+        "salary_components": [
+            {"component": "Basic pay", "component_type": "earning", "amount": "25000.00"},
+            {"component": "Provident fund", "component_type": "deduction", "amount": "1800.00"},
+        ]})
+    assert staff.status_code == 201, staff.text
+    assert [c["component"] for c in staff.json()["salary_components"]] == ["Basic pay", "Provident fund"]
+    assert staff.json()["salary_components"][0]["effective_from"] == "2026-06-01"
+    listed = client.get("/api/v1/master-data/staff?kind=non-teaching", headers=h).json()["items"]
+    mine = [x for x in listed if x["employee"]["code"] == staff.json()["employee"]["code"]]
+    assert len(mine) == 1 and len(mine[0]["salary_components"]) == 2
+
+    course = client.post("/api/v1/master-data/courses", headers=h, json={
+        "program": {"code": "BSC", "department_code": "DEP", "name": "B.Sc. Physics", "qualification": "B.Sc.",
+                    "duration_semesters": 6},
+        "batches": [{"code": "BSC-2026", "name": "2026-29", "entry_year": 2026}]})
+    assert course.status_code == 201, course.text
+    batch = client.post("/api/v1/master-data/courses/BSC/batches", headers=h, json={
+        "batch": {"code": "BSC-2027", "name": "2027-30", "entry_year": 2027},
+        "sections": [{"code": "BSC-2027-A", "semester_code": "SEM1", "name": "A", "capacity": 60}]})
+    assert batch.status_code == 201, batch.text
+
+    student = client.post("/api/v1/master-data/students", headers=h, json={
+        "student": {**STUDENT, "code": "STU1"},
+        "parents": [{"parent": {"first_name": "Meena", "last_name": "Patel", "phone": "9876500002"},
+                     "relationship": "mother", "is_primary": True}]})
+    assert student.status_code == 201, student.text
+    more = client.post("/api/v1/master-data/students/STU1/parents", headers=h, json={
+        "parents": [{"parent": {"first_name": "Suresh", "last_name": "Patel", "phone": "9876500003"},
+                     "relationship": "father"}]})
+    assert more.status_code == 201, more.text
+    assert len(client.get("/api/v1/master-data/students/STU1/parents", headers=h).json()["items"]) == 2
+
+    enrolled = client.post("/api/v1/master-data/course-enrollments", headers=h, json={
+        "section_code": "BSC-2027-A", "students": [{"student_code": "STU1", "roll_number": "27BSC001"}]})
+    assert enrolled.status_code == 201, enrolled.text
+    summary = client.get("/api/v1/master-data/courses/BSC", headers=h).json()
+    assert [s["enrolled"] for b in summary["batches"] for s in b["sections"]] == [1]
+
+    form = client.post("/api/v1/master-data/admission-forms", headers=h, json={
+        "application": {"program_code": "BSC", "academic_year_code": "AY", "first_name": "Nisha", "last_name": "Rao",
+                        "email": "nisha@example.com", "phone": "9876500004", "address": "4 Park Street"},
+        "guardians": [{"relationship": "father", "first_name": "Mohan", "last_name": "Rao", "phone": "9876500005"}],
+        "qualifications": [{"qualification": "Intermediate (MPC)", "institution": "City Junior College",
+                            "result_status": "passed"}]})
+    assert form.status_code == 201, form.text
+    assert form.json()["application"]["status"] == "submitted"
+    assert form.json()["guardians"][0]["is_primary"] is True
+
+    action = client.post("/api/v1/master-data/actions/onboard-teaching-staff", headers=h, json={"values": {
+        **{f"employee.{k}": v for k, v in EMPLOYEE.items()}, "employee.email": "third@example.edu",
+        "teacher.qualification": "M.A. English"}})
+    assert action.status_code == 201, action.text
+
+
+def test_master_data_requires_permissions(client, headers, app):
+    # The protected administrator is unrestricted; an account without the role is not.
+    assert client.get("/api/v1/master-data/actions", headers=headers).status_code == 200
+    with app.state.store.transaction() as d:
+        d["roles"]["VIEWER"] = {"code": "VIEWER", "name": "Viewer", "scope": "college", "system_admin": False,
+                                "permissions": {"employees": ["view"]}}
+        d["accounts"]["V"] = {"code": "V", "login_id": "viewer.only", "password_hash": hasher.hash(PASSWORD),
+                              "active": True, "person_type": "system", "person_code": "viewer",
+                              "role_codes": ["VIEWER"], "clients": ["admin-web"]}
+    token = client.post("/api/v1/auth/login", json={"login_id": "viewer.only", "password": PASSWORD,
+                                                    "client": "admin-web"}).json()["access_token"]
+    response = client.post("/api/v1/master-data/staff/teaching", headers={"Authorization": "Bearer " + token},
+                           json={"employee": EMPLOYEE, "teacher": {"qualification": "M.Sc."}})
+    assert response.status_code == 403
+
+
+def test_student_enrollment_form_with_one_guardian(client, app):
+    h = master_data_user(app, client)
+    form = next(a for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]
+                if a["key"] == "enroll-student")
+    guardian = [f["key"] for f in form["fields"] if not f["key"].startswith("student.")]
+    assert guardian == ["guardian.relationship", "guardian.first_name", "guardian.last_name", "guardian.phone",
+                        "guardian.alternate_phone"]
+    values = {**{f"student.{k}": v for k, v in STUDENT.items()}, "student.admission_number": "ADM-777",
+              "guardian.relationship": "mother", "guardian.first_name": "Meena", "guardian.last_name": "Patel",
+              "guardian.phone": "9876500012"}
+    result = client.post("/api/v1/master-data/actions/enroll-student", headers=h, json={"values": values})
+    assert result.status_code == 201, result.text
+    [link] = result.json()["parents"]
+    assert link["relationship"]["relationship"] == "mother" and link["relationship"]["is_primary"] is True
+    assert link["parent"]["phone"] == "9876500012"
+    # Guardian details are optional in this quick form: a student alone is enrolled too.
+    alone = client.post("/api/v1/master-data/actions/enroll-student", headers=h, json={"values": {
+        **{f"student.{k}": v for k, v in STUDENT.items()}, "student.admission_number": "ADM-778"}})
+    assert alone.status_code == 201, alone.text
+    assert alone.json()["parents"] == []
+
+
+PDF = "JVBERi0xLjQKJcOkw7zDtsOfCjEgMCBvYmoKPDw+PgplbmRvYmoKdHJhaWxlcgo8PD4+CiUlRU9GCg=="  # tiny PDF
+
+
+def wizard_student(**extra):
+    return {
+        "student": {"first_name": "Ravi", "last_name": "Kumar", "date_of_birth": "2009-05-01", "gender": "male",
+                    "email": "ravi@example.com", "phone": "9876500100", "aadhaar_number": "123456789012",
+                    "address": "1 Main Road", "city": "Hyderabad", "state": "Telangana", "postal_code": "500001",
+                    "campus_code": "CAMP"},
+        "last_qualification": {"level": "ssc", "institution": "City High School", "board": "SSC", "grade": "9.8"},
+        "guardian": {"relationship": "father", "first_name": "Raju", "last_name": "Kumar", "phone": "9876500101",
+                     "alternate_phone": "9876500102"},
+        "documents": {"transfer_certificate": True, "study_conduct_certificate": False},
+        "referral": {"name": "A. Teacher", "relation": "Staff member", "mobile": "9876500104"},
+        "achievements": [{"title": "District science fair winner", "level": "district", "year": 2025}],
+        "certifications": [{"name": "NCC 'A' certificate", "year": 2025}],
+        "course": {"course_level": "intermediate", "program_code": "INT-MPC", "academic_year_code": "AY"},
+        **extra,
+    }
+
+
+def test_enrollment_wizard_end_to_end(client, app):
+    h = master_data_user(app, client)
+    run = lambda key, values: client.post(f"/api/v1/master-data/actions/{key}", headers=h, json={"values": values})
+    course = run("create-course", {"program.code": "INT-MPC", "program.department_code": "DEP",
+                                   "program.name": "Intermediate MPC", "program.qualification": "Intermediate",
+                                   "program.duration_semesters": 4, "program.course_level": "intermediate",
+                                   "program.branch": "MPC", "batch.code": "INT-MPC-2026", "batch.name": "2026-28",
+                                   "batch.entry_year": 2026})
+    assert course.status_code == 201, course.text
+    section = run("create-batch", {"program_code": "INT-MPC", "batch.code": "INT-MPC-2027", "batch.name": "2027-29",
+                                   "batch.entry_year": 2027})
+    assert section.status_code == 201, section.text
+    fees = run("course-fee-structure", {"program_code": "INT-MPC", "academic_year_code": "AY", "year_of_study": 1,
+                                        "due_date": "2026-07-15", "amount.tuition": "40000", "amount.exam": "2000",
+                                        "amount.hostel": "60000", "amount.transport": "15000"})
+    assert fees.status_code == 201, fees.text
+    assert len(fees.json()["fee_structures"]) == 4
+
+    options = client.get("/api/v1/master-data/enrollment/options?academic_year_code=AY&program_code=INT-MPC&hostel=true",
+                         headers=h).json()
+    assert [c["branch"] for c in options["courses"]["intermediate"]] == ["MPC"]
+    assert options["admission_number"] == "ADM-2026-0001"
+    assert options["registration_number"] == "INT-MPC-2026-001"
+    assert {f["category"] for f in options["fees"]} == {"academic", "hostel"}
+
+    bad = client.post("/api/v1/master-data/enrollment", headers=h, json=wizard_student(
+        special_consideration={"amount": "500"}))
+    assert bad.status_code == 422  # a special consideration needs a reason
+
+    result = client.post("/api/v1/master-data/enrollment", headers=h, json=wizard_student(
+        hostel_required=True, scholarship={"amount": "5000", "name": "Merit scholarship"},
+        special_consideration={"amount": "1000", "reason": "Sibling studying in the college"}))
+    assert result.status_code == 201, result.text
+    body = result.json()
+    student = body["student"]
+    assert student["admission_number"] == "ADM-2026-0001" and student["current_year"] == 1
+    assert body["profile"]["registration_number"] == "INT-MPC-2026-001"
+    assert body["profile"]["gross_fee"] == "102000.00" and body["profile"]["net_fee"] == "96000.00"
+    assert [(p["relationship"]["relationship"], p["relationship"]["is_primary"]) for p in body["parents"]] == [("father", True)]
+    # The master data user is not an employee: concessions wait for finance approval.
+    assert {c["status"] for c in body["profile"]["fee_summary"] if c["category"] == "concession"} == {"pending_approval"}
+
+    duplicate = client.post("/api/v1/master-data/enrollment", headers=h, json=wizard_student())
+    assert duplicate.status_code == 409  # same Aadhaar number
+
+    upload = client.post("/api/v1/documents/upload", headers=h, json={
+        "kind": "student_document", "person_code": student["code"], "filename": "aadhaar.pdf",
+        "content_base64": PDF, "document_label": "aadhaar_copy"})
+    assert upload.status_code == 201, upload.text
+    review = client.get(f"/api/v1/master-data/enrollment/{student['code']}", headers=h).json()
+    assert review["profile"]["document_checklist"]["aadhaar_copy"]["uploaded"] is True
+    assert review["profile"]["document_checklist"]["transfer_certificate"] == {
+        "label": "TC (transfer certificate)", "submitted": True, "uploaded": False}
+    assert review["program"]["branch"] == "MPC" and len(review["parents"]) == 1
+    assert review["student"]["emergency_contact_phone"] == "9876500101"
+
+    insights = client.get("/api/v1/master-data/enrollment/courses/INT-MPC/insights", headers=h).json()
+    assert [b["code"] for b in insights["batches"]] == ["INT-MPC-2027", "INT-MPC-2026"]
+    first = insights["batches"][1]
+    assert first["students"] == 1 and first["hostel"] == 1 and first["net_fee"] == "96000.00"
+    assert insights["totals"]["students"] == 1 and insights["totals"]["batches"] == 2 and insights["years"] == 2
+    assert insights["semester_labels"] == ["1-1", "1-2", "2-1", "2-2"]
+
+    promoted = run("promote-batch", {"batch_code": "INT-MPC-2026", "to_year": 2})
+    assert promoted.status_code == 201, promoted.text
+    assert promoted.json()["students"] == 1
+    assert client.get(f"/api/v1/master-data/enrollment/{student['code']}", headers=h).json()["student"]["current_year"] == 2
+
+
+def test_create_course_registers_a_typed_department(client, app):
+    h = master_data_user(app, client)
+    form = next(a for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]
+                if a["key"] == "create-course")
+    department = next(f for f in form["fields"] if f["key"] == "program.department_code")
+    assert department["reference"] is None and department["type"] == "text"
+    result = client.post("/api/v1/master-data/actions/create-course", headers=h, json={"values": {
+        "program.code": "BSC-CS", "program.department_code": "Computer Science", "program.name": "B.Sc. Computers",
+        "program.qualification": "B.Sc.", "program.duration_semesters": 6, "program.course_level": "degree",
+        "program.branch": "Computer Science"}})
+    assert result.status_code == 201, result.text
+    code = result.json()["program"]["department_code"]
+    assert code == "DEP-COMPUTER-SCIENCE"
+    with app.state.store.transaction() as d:
+        assert d["records"]["departments"][code]["name"] == "Computer Science"
+        assert d["records"]["departments"][code]["campus_code"] == "CAMP"
+    again = client.post("/api/v1/master-data/actions/create-course", headers=h, json={"values": {
+        "program.code": "BSC-DS", "program.department_code": "computer science", "program.name": "B.Sc. Data Science",
+        "program.qualification": "B.Sc.", "program.duration_semesters": 6}})
+    assert again.status_code == 201 and again.json()["program"]["department_code"] == code  # reused
+
+
+def test_course_catalog_seed_creates_campus_departments_and_courses(app, monkeypatch):
+    import importlib.util as util
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "tools"))
+    spec = util.spec_from_file_location("seed_course_catalog", Path(__file__).resolve().parents[1] / "tools/seed_course_catalog.py")
+    seed = util.module_from_spec(spec)
+    spec.loader.exec_module(seed)
+    with app.state.store.transaction() as d:
+        campus = seed.ensure_campus(d, "Pragathi", "Main Campus", "system")
+        for department, values in seed.catalog():
+            seed.create(d, "programs", {**values, "department_code": seed.ensure_department(d, department, campus, "system")},
+                        "system")
+    with app.state.store.transaction() as d:
+        programs = d["records"]["programs"]
+        assert d["records"]["institutions"]["INST-PRAGATHI"]["name"] == "Pragathi"
+        assert programs["INT-MPC"]["branch"] == "MPC" and programs["INT-MPC"]["course_level"] == "intermediate"
+        assert programs["DEG-BA-ENGLISH"]["qualification"] == "BA" and programs["DEG-BA-ENGLISH"]["branch"] == "English"
+        assert programs["DEG-BA-LLB"]["duration_semesters"] == 10
+        assert len([p for p in programs.values() if p["course_level"] == "degree"]) == 124
+        assert len({p["department_code"] for p in programs.values()}) == 10
+
+
+def test_batch_section_uses_first_semester_of_start_year(client, app):
+    h = master_data_user(app, client)
+    with app.state.store.transaction() as d:
+        d["records"].setdefault("programs", {})["BSC-AUTO"] = {
+            "code": "BSC-AUTO", "department_code": "DEP", "name": "B.Sc",
+            "qualification": "B.Sc", "duration_semesters": 6,
+        }
+    result = client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": {
+        "program_code": "BSC-AUTO", "batch.name": "2026–2029", "batch.entry_year": 2026,
+        "batch.graduation_year": 2029, "section.name": "A", "section.capacity": 60,
+    }})
+    assert result.status_code == 201, result.text
+    assert result.json()["sections"][0]["semester_code"] == "SEM1"
+    assert result.json()["batch"]["graduation_year"] == 2029
+
+
+def test_batch_section_can_be_created_before_calendar_setup(client, app):
+    h = master_data_user(app, client)
+    with app.state.store.transaction() as d:
+        d["records"].setdefault("programs", {})["BSC-AUTO"] = {
+            "code": "BSC-AUTO", "department_code": "DEP", "name": "B.Sc",
+            "qualification": "B.Sc", "duration_semesters": 6,
+        }
+    result = client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": {
+        "program_code": "BSC-AUTO", "batch.name": "2028–2031", "batch.entry_year": 2028,
+        "batch.graduation_year": 2031, "section.name": "A",
+    }})
+    assert result.status_code == 201, result.text
+    assert result.json()["sections"][0].get("semester_code") is None
+    assert result.json()["batch"]["entry_year"] == 2028
+
+
+def test_course_insights_section_counts_deduplicate_active_enrollments(client, app):
+    h = master_data_user(app, client)
+    with app.state.store.transaction() as d:
+        r = d['records']
+        r.setdefault('programs', {})['COUNT-COURSE'] = {'code': 'COUNT-COURSE', 'name': 'Count course', 'department_code': 'DEP', 'qualification': 'Degree', 'duration_semesters': 6}
+        r.setdefault('batches', {})['COUNT-BATCH'] = {'code': 'COUNT-BATCH', 'program_code': 'COUNT-COURSE', 'name': '2026–2029', 'entry_year': 2026, 'graduation_year': 2029}
+        r.setdefault('sections', {})['COUNT-A'] = {'code': 'COUNT-A', 'batch_code': 'COUNT-BATCH', 'name': 'A', 'capacity': 40}
+        r['sections']['COUNT-B'] = {'code': 'COUNT-B', 'batch_code': 'COUNT-BATCH', 'name': 'B', 'capacity': 30}
+        r.setdefault('students', {})['COUNT-STUDENT'] = {**STUDENT, 'code': 'COUNT-STUDENT', 'status': 'active'}
+        r.setdefault('student_enrollments', {}).update({
+            'COUNT-E1': {'code': 'COUNT-E1', 'section_code': 'COUNT-A', 'student_code': 'COUNT-STUDENT', 'status': 'active'},
+            'COUNT-E2': {'code': 'COUNT-E2', 'section_code': 'COUNT-A', 'student_code': 'COUNT-STUDENT', 'status': 'active'},
+            'COUNT-OLD': {'code': 'COUNT-OLD', 'section_code': 'COUNT-B', 'student_code': 'COUNT-STUDENT', 'status': 'inactive'},
+        })
+    response = client.get('/api/v1/master-data/enrollment/courses/COUNT-COURSE/insights', headers=h)
+    assert response.status_code == 200, response.text
+    batch = response.json()['batches'][0]
+    assert batch['students'] == 1
+    assert {s['name']: s['students'] for s in batch['sections']} == {'A': 1, 'B': 0}
+    assert batch['sections'][0]['capacity'] == 40
+    edited = client.patch('/api/v1/workspace/resources/batches/COUNT-BATCH', headers=h,
+                          json={'values': {'graduation_year': 2030, 'name': '2026–2030'}})
+    assert edited.status_code == 200, edited.text
+    assert edited.json()['graduation_year'] == 2030
+    retained = client.delete('/api/v1/academics/batches/COUNT-BATCH', headers=h)
+    assert retained.status_code == 409  # linked sections must not be orphaned
+    with app.state.store.transaction() as d:
+        d['records']['batches']['EMPTY-BATCH'] = {'code': 'EMPTY-BATCH', 'program_code': 'COUNT-COURSE',
+                                               'name': '2028–2031', 'entry_year': 2028, 'graduation_year': 2031}
+    deleted = client.delete('/api/v1/academics/batches/EMPTY-BATCH', headers=h)
+    assert deleted.status_code == 204, deleted.text
+
+
+def test_batch_overview_and_atomic_section_rename(client, app):
+    h = master_data_user(app, client)
+    with app.state.store.transaction() as d:
+        r = d['records']
+        r.setdefault('programs', {})['VIEW-P'] = {'code': 'VIEW-P', 'name': 'Course One', 'department_code': 'DEP', 'qualification': 'Degree', 'duration_semesters': 6}
+        r['programs']['VIEW-Q'] = {'code': 'VIEW-Q', 'name': 'Course Two', 'department_code': 'DEP', 'qualification': 'Degree', 'duration_semesters': 6}
+        r.setdefault('batches', {})['VIEW-B'] = {'code': 'VIEW-B', 'program_code': 'VIEW-P', 'name': '2026–2029', 'entry_year': 2026, 'graduation_year': 2029}
+        r['batches']['VIEW-C'] = {'code': 'VIEW-C', 'program_code': 'VIEW-Q', 'name': '2027–2030', 'entry_year': 2027, 'graduation_year': 2030}
+        r.setdefault('sections', {})['VIEW-A'] = {'code': 'VIEW-A', 'batch_code': 'VIEW-B', 'name': 'Alha', 'capacity': 60}
+    overview = client.get('/api/v1/master-data/enrollment/batches/overview', headers=h)
+    assert overview.status_code == 200, overview.text
+    assert overview.json()['totals']['batches'] == 2
+    assert {b['course_name'] for b in overview.json()['batches']} == {'Course One', 'Course Two'}
+    filtered = client.get('/api/v1/master-data/enrollment/batches/overview?program_code=VIEW-P', headers=h)
+    assert len(filtered.json()['batches']) == 1
+    payload = {'entry_year': 2026, 'graduation_year': 2030, 'sections': [{'code': 'VIEW-A', 'name': ' Alpha '}]}
+    saved = client.patch('/api/v1/master-data/enrollment/batches/VIEW-B', headers=h, json=payload)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()['sections_updated'] == 1
+    snapshot = app.state.store.snapshot()
+    assert snapshot['records']['sections']['VIEW-A']['name'] == 'Alpha'
+    assert snapshot['records']['batches']['VIEW-B']['graduation_year'] == 2030
+    wrong = client.patch('/api/v1/master-data/enrollment/batches/VIEW-C', headers=h, json=payload)
+    assert wrong.status_code == 422
+    assert app.state.store.snapshot()['records']['batches']['VIEW-C']['entry_year'] == 2027
+    invalid = client.patch('/api/v1/master-data/enrollment/batches/VIEW-B', headers=h,
+                           json={**payload, 'sections': [{'code': 'VIEW-A', 'name': '   '}]})
+    assert invalid.status_code == 422
+    assert app.state.store.snapshot()['records']['sections']['VIEW-A']['name'] == 'Alpha'
