@@ -1,11 +1,11 @@
 -- =============================================================================================
 -- EduNexa College database schema — PostgreSQL 16+ (Supabase)
 --
--- The complete schema: all 146 tables with keys, foreign keys, CHECK rules, indexes, triggers,
+-- The complete schema: all 147 tables with keys, foreign keys, CHECK rules, indexes, triggers,
 -- finance views and row level security. The backend installs it with
 -- backend/tools/apply_schema.py (fresh database only); edunexa_schema_mysql.sql is the MySQL 8
 -- edition of the same schema. Sections marked "BEGIN EDUNEXA Vn" are the schema versions it
--- includes (V2-V8). It ends with the college's reference data: the institution, campus,
+-- includes (V2-V10; V9 made sections.semester_code optional). It ends with the college's reference data: the institution, campus,
 -- departments and the course catalog (refresh with backend/tools/export_seed_sql.py).
 --
 --     psql -v ON_ERROR_STOP=1 -d <database> -f edunexa_schema_postgresql.sql
@@ -2805,6 +2805,50 @@ ALTER TABLE programs
   ADD COLUMN career_opportunities TEXT,
   ADD COLUMN subjects TEXT;
 CREATE INDEX ix_programs_category ON programs(category);
+
+-- BEGIN EDUNEXA V10: staff onboarding (teaching, non-teaching, daily labour) with employee profiles.
+
+-- 1. Daily labour joins teaching and non-teaching staff; labourers may have no email or phone.
+ALTER TABLE employees DROP CONSTRAINT employees_employee_type_check;
+ALTER TABLE employees ADD CONSTRAINT employees_employee_type_check CHECK (employee_type IN ('teacher','staff','labour'));
+ALTER TABLE employees DROP CONSTRAINT employees_employment_type_check;
+ALTER TABLE employees ADD CONSTRAINT employees_employment_type_check CHECK (employment_type IN ('permanent','contract','part_time','daily_wage'));
+ALTER TABLE employees ALTER COLUMN email DROP NOT NULL, ALTER COLUMN phone DROP NOT NULL;
+
+-- 2. Everything captured when a staff member joins (one profile per employee).
+CREATE TABLE employee_profiles (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  employee_code VARCHAR(100) NOT NULL UNIQUE REFERENCES employees(code) ON UPDATE CASCADE ON DELETE RESTRICT,
+  staff_kind TEXT NOT NULL CHECK (staff_kind IN ('teaching','non_teaching','labour')),
+  qualification_level TEXT CHECK (qualification_level IN ('graduation','post_graduation','doctorate','diploma','school','other')),
+  specialization TEXT,
+  aadhaar_number VARCHAR(12) UNIQUE CHECK (aadhaar_number ~ '^[0-9]{12}$'),
+  pan_number VARCHAR(10) UNIQUE CHECK (pan_number ~ '^[A-Z]{5}[0-9]{4}[A-Z]$'),
+  bank_account_holder TEXT,
+  bank_account_number VARCHAR(34) CHECK (bank_account_number ~ '^[0-9]{6,34}$'),
+  bank_name TEXT,
+  bank_ifsc VARCHAR(11) CHECK (bank_ifsc ~ '^[A-Z]{4}0[A-Z0-9]{6}$'),
+  bank_branch TEXT,
+  qualification_certificates JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(qualification_certificates) = 'array'),
+  previous_experience JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(previous_experience) = 'array'),
+  employment_history JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(employment_history) = 'array'),
+  achievements JSONB NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(achievements) = 'array'),
+  document_checklist JSONB NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(document_checklist) = 'object'),
+  salary_basis TEXT NOT NULL DEFAULT 'monthly' CHECK (salary_basis IN ('monthly','yearly','daily')),
+  salary_amount NUMERIC(14,2) CHECK (salary_amount >= 0),
+  ctc_annual NUMERIC(14,2) CHECK (ctc_annual >= 0),
+  gross_monthly NUMERIC(14,2) CHECK (gross_monthly >= 0),
+  deductions_monthly NUMERIC(14,2) CHECK (deductions_monthly >= 0),
+  net_monthly NUMERIC(14,2) CHECK (net_monthly >= 0),
+  in_hand_monthly NUMERIC(14,2) CHECK (in_hand_monthly >= 0),
+  created_by_user_code VARCHAR(100),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX ix_employee_profiles_staff_kind ON employee_profiles(staff_kind);
+CREATE TRIGGER touch_employee_profiles BEFORE UPDATE ON employee_profiles FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+ALTER TABLE employee_profiles ENABLE ROW LEVEL SECURITY;
 
 -- BEGIN EDUNEXA SEED DATA
 -- Reference data of the college: institution, campus, departments (one per course family)

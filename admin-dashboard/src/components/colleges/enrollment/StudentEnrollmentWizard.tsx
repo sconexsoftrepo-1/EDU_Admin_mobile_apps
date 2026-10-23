@@ -73,7 +73,10 @@ const fullName = (p: {
 }) => [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ");
 
 /** Re-encode large photos as JPEG so they fit the upload limit. */
-async function fitImage(file: File | Blob, name = "photo.jpg"): Promise<File> {
+export async function fitImage(
+  file: File | Blob,
+  name = "photo.jpg",
+): Promise<File> {
   if (file.size <= MAX_FILE && file instanceof File) return file;
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, 900 / Math.max(bitmap.width, bitmap.height));
@@ -89,7 +92,7 @@ async function fitImage(file: File | Blob, name = "photo.jpg"): Promise<File> {
   });
 }
 
-function toBase64(file: File): Promise<string> {
+export function toBase64(file: File): Promise<string> {
   return file.arrayBuffer().then((buffer) => {
     let raw = "";
     new Uint8Array(buffer).forEach((b) => (raw += String.fromCharCode(b)));
@@ -106,7 +109,7 @@ function dataUrl(file: File): Promise<string> {
   });
 }
 
-function Card({
+export function Card({
   title,
   icon,
   children,
@@ -131,7 +134,7 @@ function Card({
   );
 }
 
-function Field({
+export function Field({
   label,
   children,
   wide,
@@ -151,7 +154,7 @@ function Field({
   );
 }
 
-function FilePick({
+export function FilePick({
   file,
   onChange,
   required,
@@ -318,7 +321,7 @@ const COUNTRY_CODES = [
 ];
 
 /** Phone number with its country code (India +91 by default). */
-function PhoneInput({
+export function PhoneInput({
   code,
   onCode,
   value,

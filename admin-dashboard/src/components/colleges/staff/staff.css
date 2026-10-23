@@ -1,0 +1,254 @@
+/* Staff onboarding form (extends the enrollment side screen) and staff tables. */
+.stf-id {
+  margin-left: auto;
+  display: grid;
+  justify-items: end;
+  line-height: 1.2;
+}
+.stf-id span {
+  font-size: 11px;
+  color: #627383;
+}
+.stf-id strong {
+  font-size: 18px;
+  color: #18344b;
+  font-variant-numeric: tabular-nums;
+}
+.stf-id small {
+  font-size: 11px;
+  color: #8796a5;
+}
+.stf-add {
+  display: flex;
+  gap: 8px;
+  max-width: 620px;
+}
+.stf-add input {
+  flex: 1;
+}
+.stf-docs {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.stf-docs li {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #d6dde4;
+  border-left: 3px solid #a77524;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fffdf9;
+}
+.stf-docs li > span {
+  font-weight: bold;
+}
+.enw-backdrop .stf-remove {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #9b2c22;
+  padding: 6px;
+}
+.enw-backdrop .stf-remove:hover {
+  border-color: #e4b3ad;
+  background: #fbefed;
+}
+.stf-entry {
+  border: 1px solid #d6dde4;
+  border-radius: 8px;
+  padding: 8px 14px 14px;
+  margin: 0 0 12px;
+}
+.stf-entry legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  padding: 0 6px;
+}
+.stf-row {
+  display: grid;
+  grid-template-columns: 2fr 1.4fr 1fr 1fr 1.6fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.stf-row-3 {
+  grid-template-columns: 2.4fr 0.8fr 2fr auto;
+}
+.stf-salary {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 6px 0 8px;
+}
+.stf-salary th {
+  text-align: left;
+  font-size: 11px;
+  color: #627383;
+  font-weight: normal;
+  padding: 4px 6px;
+}
+.stf-salary td {
+  padding: 4px 6px;
+}
+.stf-salary td input,
+.stf-salary td select {
+  width: 100%;
+}
+.stf-salary tr.deduction td:first-child input {
+  border-left: 3px solid #c0584e;
+}
+.stf-salary tr.earning td:first-child input {
+  border-left: 3px solid #3d8a55;
+}
+.stf-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+.stf-totals div {
+  flex: 1 1 150px;
+  border: 1px solid #d6dde4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #fff;
+}
+.stf-totals dt {
+  font-size: 12px;
+  color: #627383;
+}
+.stf-totals dd {
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+.stf-totals .stf-net {
+  background: #eef5ee;
+  border-color: #cfe3cf;
+}
+.stf-totals .stf-net dd {
+  color: #22562c;
+}
+.stf-estimate {
+  align-self: end;
+  display: grid;
+  padding-bottom: 8px;
+  color: #22562c;
+  font-weight: bold;
+}
+.stf-estimate small {
+  color: #627383;
+  font-weight: normal;
+}
+
+/* Staff tables ------------------------------------------------------------------------- */
+.stf-dir {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+.stf-dir-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.stf-dir-bar p {
+  margin: 0;
+  color: #627383;
+}
+.stf-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #cbd3db;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: #fff;
+  min-width: min(320px, 100%);
+}
+.edu-connected .stf-search input {
+  border: 0;
+  padding: 9px 0;
+  flex: 1;
+  outline: none;
+}
+.stf-search:focus-within {
+  outline: 3px solid #d8ae5e;
+  outline-offset: 1px;
+}
+.stf-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #d6dde4;
+  border-radius: 8px;
+}
+.stf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.stf-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b4f61;
+  background: #f1f4f7;
+  padding: 10px 12px;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.stf-table td {
+  padding: 10px 12px;
+  border-top: 1px solid #edf1f4;
+  white-space: nowrap;
+}
+.stf-table tbody tr:hover {
+  background: #fafbfc;
+}
+.stf-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.stf-code {
+  font-size: 12px;
+  font-weight: bold;
+  color: #18344b;
+  background: #eef2f6;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.stf-docs-badge {
+  font-size: 12px;
+  border-radius: 999px;
+  padding: 2px 9px;
+  background: #fff4e0;
+  color: #7a5414;
+}
+.stf-docs-badge.done {
+  background: #e7f3ea;
+  color: #22562c;
+}
+.stf-empty {
+  margin: 0;
+  padding: 18px;
+  color: #627383;
+}
+@media (max-width: 760px) {
+  .stf-row,
+  .stf-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stf-docs li {
+    grid-template-columns: 1fr auto;
+  }
+  .stf-docs li > span {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,5 +1,6 @@
 """Write docs/API_REFERENCE.txt: every API grouped by module and by dashboard screen, with URL,
-method, permission, sample payload and sample response.
+method, permission, sample payload and sample response; and app/contracts/openapi-examples.json,
+the same samples for the interactive documentation at /docs.
 
 Samples are real where possible: the test suite runs (local JSON store, temporary data) with a
 recorder that keeps the first successful request/response per endpoint; tokens and passwords are
@@ -17,6 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 OUT = ROOT / "docs" / "API_REFERENCE.txt"
+# The same samples feed the interactive docs (/docs): app.main merges them into the OpenAPI schema.
+EXAMPLES = ROOT / "app" / "contracts" / "openapi-examples.json"
 SECRET_KEYS = {"access_token", "refresh_token", "password", "new_password", "current_password", "password_hash",
                "token", "content_base64", "signature"}
 MAX_LINES = 40
@@ -152,7 +155,14 @@ def pretty(value):
     return "\n".join("      " + line for line in lines)
 
 
+EXAMPLE_DATA = {}
+
+
 def entry(method, path, purpose, permission=None, query=None, payload=None, status=200, response=None, note=None):
+    if payload is not None or response is not None:
+        EXAMPLE_DATA[f"{method} {path}"] = {"status": status, "request": payload,
+                                            "response": response if isinstance(response, (dict, list)) else None,
+                                            "query": query}
     out = [f"  {method:<6} {path}", f"      Purpose: {purpose}"]
     if permission:
         out.append(f"      Permission: {permission}")
@@ -265,8 +275,11 @@ def main():
             payload = (got["request"] if got and got["request"] else None) or (schema_example(spec, body) if body else None)
             status = got["status"] if got else int(next((s for s in op.get("responses", {}) if s.startswith("2")), "200"))
             purpose = (op.get("description") or op.get("summary") or "").strip().splitlines()[0] if (op.get("description") or op.get("summary")) else ""
+            response_schema = (op.get("responses", {}).get(str(status), {}).get("content", {})
+                               .get("application/json", {}).get("schema"))
+            response = got["response"] if got else (schema_example(spec, response_schema) if response_schema else None)
             lines.append(entry(method, path, (purpose or path) + (" [captured]" if got else ""), query=got["query"] if got and got["query"] else None,
-                               payload=payload, status=status, response=got["response"] if got else None,
+                               payload=payload, status=status, response=response,
                                note=None if got else "Response shape: see /docs for this endpoint"))
         lines.append("")
 
@@ -300,6 +313,7 @@ def main():
 
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text("\n".join(lines) + "\n")
+    EXAMPLES.write_text(json.dumps(EXAMPLE_DATA, indent=1, ensure_ascii=False, default=str) + "\n")
     endpoints = sum(len(m) for m in spec["paths"].values())
     print(f"Wrote {OUT.relative_to(ROOT)}: {endpoints} endpoints, {len(samples)} captured samples, {len(screens)} screens")
 

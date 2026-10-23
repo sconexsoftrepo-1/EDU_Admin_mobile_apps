@@ -40,7 +40,9 @@ def connect(settings: DatabaseSettings | None = None, schema: str | None = None)
         sslmode=settings.sslmode,
         connect_timeout=settings.connect_timeout,
         application_name="edunexa-backend",
-        options=f"-c search_path={schema}",
+        # Supabase's transaction pooler (used from serverless hosts) does not pass startup options
+        # on, and "public" is on the default search_path anyway; other schemas (tests) set it.
+        **({} if schema == "public" else {"options": f"-c search_path={schema}"}),
         cursor_factory=psycopg.ClientCursor,
     )
 

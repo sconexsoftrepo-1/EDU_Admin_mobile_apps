@@ -182,13 +182,31 @@ def create_course(data, body: CourseInput, actor, campus_code=None):
     program = dict(body.program)
     program["department_code"] = department_for(data, program.get("department_code"), campus_code, actor)
     program = create(data, "programs", program, actor)
-    batches = [create(data, "batches", {**clean(b), "program_code": program["code"]}, actor) for b in body.batches]
+    batches = [create(data, "batches", {**batch_record(b), "program_code": program["code"]}, actor) for b in body.batches]
     return {"program": program, "batches": batches}
+
+
+def batch_record(values):
+    """A year-based batch needs its start and end year; the name is derived ("2026-28")."""
+    b = clean(values)
+    try:
+        start, end = int(b.get("entry_year")), int(b.get("graduation_year"))
+    except (TypeError, ValueError):
+        raise HTTPException(422, "Enter the batch start year and end year") from None
+    if not 1990 <= start < end <= start + 10:
+        raise HTTPException(422, "The batch end year must be after the start year (at most 10 years)")
+    return {**b, "entry_year": start, "graduation_year": end, "name": b.get("name") or f"{start}-{end % 100:02d}"}
+
+
+BATCH_FIELDS = lambda required: [  # noqa: E731 - used by two forms
+    field("batch.entry_year", "Batch: start year", "number", required),
+    field("batch.graduation_year", "Batch: end year", "number", required),
+]
 
 
 def create_batch(data, program_code, body: BatchInput, actor):
     table_service("programs").repo.get(data, program_code)
-    batch = create(data, "batches", {**clean(body.batch), "program_code": program_code}, actor)
+    batch = create(data, "batches", {**batch_record(body.batch), "program_code": program_code}, actor)
     section_values = [clean(s) for s in body.sections]
     if any(not s.get("semester_code") for s in section_values):
         # The simplified batch form binds new sections to the first semester of its entry year.
@@ -533,14 +551,15 @@ ACTIONS = {
         + fields("programs", "program", skip=("department_code",))
         + [field("campus_code", "Campus of a new department (only if there are several)", required=False,
                  reference="campuses")]
-        + fields("batches", "batch", skip=("program_code",), optional=True),
+        + BATCH_FIELDS(False),
+        # The first batch is optional here; when a start year is given the end year is required too.
         lambda d, v, a: create_course(d, CourseInput(program=v.get("program", {}),
-                                                     batches=[v["batch"]] if v.get("batch", {}).get("name") else []), a,
+                                                     batches=[v["batch"]] if v.get("batch", {}).get("entry_year") else []), a,
                                       campus_code=v.get("campus_code") or None),
     ),
     "create-batch": (
         "Year-based batch", "batches", [("batches", "create")],
-        lambda: [field("program_code", "Course", reference="programs")] + fields("batches", "batch", skip=("program_code",))
+        lambda: [field("program_code", "Course", reference="programs")] + BATCH_FIELDS(True)
         + fields("sections", "section", skip=("batch_code",), optional=True),
         lambda d, v, a: create_batch(d, v.get("program_code", ""), BatchInput(
             batch=v.get("batch", {}), sections=[v["section"]] if v.get("section", {}).get("name") else []), a),

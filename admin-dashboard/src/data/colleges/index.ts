@@ -156,6 +156,7 @@ export const modules = [
   "student-enrollment",
   "teaching-staff",
   "non-teaching-staff",
+  "daily-labour",
   "course-setup",
 ];
 export const roles = [
@@ -202,6 +203,7 @@ export const permissions: Record<Role, string[]> = {
     "student-enrollment",
     "teaching-staff",
     "non-teaching-staff",
+    "daily-labour",
     "imports",
   ],
   "Super Admin": modules,

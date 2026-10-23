@@ -81,6 +81,18 @@ def mark_admission_document(data, student_code, label, record, key):
         data["records"]["students"][student_code]["profile_photo_storage_key"] = key
 
 
+def mark_employee_document(data, employee_code, label, record):
+    """Tick the staff onboarding checklist entry for this document."""
+    profiles = data["records"].get("employee_profiles", {})
+    profile = next((p for p in profiles.values() if p["employee_code"] == employee_code), None)
+    if profile is not None:
+        checklist = dict(profile.get("document_checklist") or {})
+        entry = dict(checklist.get(label) or {"label": label.replace("_", " ").capitalize()})
+        entry.update(uploaded=True, document_code=record["code"])
+        checklist[label] = entry
+        profile["document_checklist"] = checklist
+
+
 def permitted_person(data, user, kind, code):
     if kind == "employee":
         return user["person_type"] == "employee" and user["person_code"] == code
@@ -92,12 +104,9 @@ def permitted_person(data, user, kind, code):
     )
 
 
-def private_path(request, key):
-    root = request.app.state.settings.data_dir / "files"
-    root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    if not key or Path(key).name != key:
-        raise HTTPException(404, "File unavailable")
-    return root / key
+def file_store(request):
+    """Private file storage (local folder or Supabase Storage; see app/core/files.py)."""
+    return request.app.state.files
 
 
 class UploadInput(StrictModel):
@@ -155,7 +164,6 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
         )
     key = new_code("FILE")
     sha = hashlib.sha256(raw).hexdigest()
-    path = private_path(request, key)
     with request.app.state.store.transaction() as data:
         if table == "employee_tax_documents":
             query_get(data, "employees", body.person_code)
@@ -228,10 +236,10 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
             }
             if person == "students" and body.document_label:
                 mark_admission_document(data, body.person_code, body.document_label, record, key)
-        # File key is server generated; user filenames never become filesystem paths.
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        with os.fdopen(fd, "wb") as out:
-            out.write(raw)
+            if person == "employees" and body.document_label:
+                mark_employee_document(data, body.person_code, body.document_label, record)
+        # File key is server generated; user filenames never become storage paths.
+        file_store(request).put(key, raw, mime)
         query_save(data, table, record)
         audit(data, user["code"], "upload", table, record["code"])
         return {k: v for k, v in record.items() if k != "storage_key"}
@@ -242,7 +250,11 @@ class CertificateInput(StrictModel):
 
 
 def signing_key(request):
+    configured = request.app.state.settings.certificate_signing_key
+    if configured is not None:  # deployments: the key comes from the environment
+        return Ed25519PrivateKey.from_private_bytes(base64.b64decode(configured.get_secret_value()))
     path = request.app.state.settings.data_dir / "certificate-ed25519.key"
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     if not path.exists():
         raw = Ed25519PrivateKey.generate().private_bytes(
             serialization.Encoding.Raw,
@@ -306,9 +318,7 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
             )
         ).decode()
         storage = new_code("CERT-FILE")
-        path = private_path(request, storage)
-        path.write_bytes(raw)
-        os.chmod(path, 0o600)
+        file_store(request).put(storage, raw, "application/pdf")
         record = query_save(
             data,
             "certificates",
@@ -377,7 +387,9 @@ def verify(token: str, request: Request):
     valid = False
     if signature and not record.get("revoked_on") and not signature.get("revoked_at"):
         try:
-            raw = private_path(request, record.get("storage_key")).read_bytes()
+            raw = file_store(request).get(record.get("storage_key"))
+            if raw is None:
+                raise ValueError("certificate file missing")
             Ed25519PublicKey.from_public_bytes(
                 base64.b64decode(signature["public_key"])
             ).verify(base64.b64decode(signature["signature"]), raw)
@@ -446,10 +458,9 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user))
                 and has_permission(data, user, table, "view")
             ):
                 raise HTTPException(404, "Document not found")
-            path = private_path(request, record.get("storage_key"))
-            if not path.exists():
+            raw = file_store(request).get(record.get("storage_key"))
+            if raw is None:
                 raise HTTPException(404, "Document bytes are not available")
-            raw = path.read_bytes()
             mime = record.get("mime_type", "application/pdf")
             if kind == "certificate":
                 query_save(
