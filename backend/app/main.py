@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 from pathlib import Path
 from uuid import uuid4
 
@@ -126,7 +127,13 @@ def create_app(settings=None):
 
     @app.get("/health", tags=["Health"])
     def health():
-        return {"status": "ok", "storage": settings.storage_backend}
+        return {
+            "status": "ok",
+            "storage": settings.storage_backend,
+            "files": type(app.state.files).__name__.replace("Files", "").lower() or "local",
+            "certificate_signing": "configured" if settings.certificate_signing_key else "local key file"
+            if not os.environ.get("VERCEL") else "not configured",
+        }
 
     @app.get("/api/v1/manifest", tags=["API manifest"])
     def manifest():

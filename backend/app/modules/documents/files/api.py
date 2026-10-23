@@ -253,6 +253,8 @@ def signing_key(request):
     configured = request.app.state.settings.certificate_signing_key
     if configured is not None:  # deployments: the key comes from the environment
         return Ed25519PrivateKey.from_private_bytes(base64.b64decode(configured.get_secret_value()))
+    if os.environ.get("VERCEL"):  # a key file on serverless disk would change on every restart
+        raise HTTPException(503, "Certificate signing is not configured: set EDUNEXA_CERTIFICATE_SIGNING_KEY")
     path = request.app.state.settings.data_dir / "certificate-ed25519.key"
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     if not path.exists():
