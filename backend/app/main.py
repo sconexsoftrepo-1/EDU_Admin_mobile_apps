@@ -1,14 +1,17 @@
 import importlib
 import json
+import os
 from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
+from fastapi.openapi.utils import get_openapi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core import integrations_api, mobile_api
 from app.core.resources import CATALOG
+from app.core.files import files_for
 from app.core.settings import Settings
 from app.core.storage import Store
 from app.modules.access_control.authentication import api as auth_api
@@ -22,10 +25,52 @@ from app.modules.finance.transactions.api import router as finance_router
 from app.modules.hostel.permissions_workflow.api import router as hostel_router
 from app.modules.imports.excel.api import router as completion_router_4
 from app.modules.master_data.enrollment.api import router as enrollment_router
+from app.modules.master_data.staff.api import router as staff_onboarding_router
 from app.modules.master_data.onboarding.api import router as master_data_router
 from app.modules.mobile.workspace.api import router as completion_router_0
 from app.modules.operations.workflows.api import router as completion_router_2
 from app.modules.reports.downloads.api import router as reports_router
+
+
+EXAMPLES = Path(__file__).parent / "contracts" / "openapi-examples.json"
+
+
+def with_examples(app):
+    """Show sample payloads and responses in /docs.
+
+    The samples (real request/response pairs from the test suite, or records built from the table
+    contracts) are written by tools/generate_api_reference.py, the same source as
+    docs/API_REFERENCE.txt. Swagger shows them as each endpoint's request and response examples.
+    """
+    examples = json.loads(EXAMPLES.read_text()) if EXAMPLES.exists() else {}
+
+    def openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        schema = get_openapi(title=app.title, version=app.version, description=app.description, routes=app.routes)
+        for path, methods in schema.get("paths", {}).items():
+            for method, op in methods.items():
+                sample = examples.get(f"{method.upper()} {path}")
+                if not sample:
+                    continue
+                if sample.get("request") is not None:
+                    body = op.setdefault("requestBody", {"required": True})
+                    media = body.setdefault("content", {}).setdefault("application/json", {})
+                    media.setdefault("schema", {"type": "object"})
+                    media["example"] = sample["request"]
+                if sample.get("response") is not None:
+                    status = str(sample.get("status") or 200)
+                    response = op.setdefault("responses", {}).setdefault(status, {"description": "Successful Response"})
+                    media = response.setdefault("content", {}).setdefault("application/json", {})
+                    media.setdefault("schema", {})
+                    media["example"] = sample["response"]
+                if sample.get("query"):
+                    op["description"] = (op.get("description") or op.get("summary") or "").rstrip() + \
+                        f"\n\nExample query: `?{sample['query']}`"
+        app.openapi_schema = schema
+        return schema
+
+    app.openapi = openapi
 
 
 def create_app(settings=None):
@@ -43,6 +88,7 @@ def create_app(settings=None):
     else:
         app.state.store = Store(settings.data_dir)
     app.state.catalog = CATALOG
+    app.state.files = files_for(settings)
     if hasattr(app.state.store, "request_scope"):
 
         @app.middleware("http")
@@ -81,7 +127,13 @@ def create_app(settings=None):
 
     @app.get("/health", tags=["Health"])
     def health():
-        return {"status": "ok", "storage": settings.storage_backend}
+        return {
+            "status": "ok",
+            "storage": settings.storage_backend,
+            "files": type(app.state.files).__name__.replace("Files", "").lower() or "local",
+            "certificate_signing": "configured" if settings.certificate_signing_key else "local key file"
+            if not os.environ.get("VERCEL") else "not configured",
+        }
 
     @app.get("/api/v1/manifest", tags=["API manifest"])
     def manifest():
@@ -105,6 +157,7 @@ def create_app(settings=None):
         completion_router_3,
         completion_router_4,
         enrollment_router,
+        staff_onboarding_router,
         master_data_router,
     ]:
         app.include_router(router, prefix="/api/v1")
@@ -119,4 +172,5 @@ def create_app(settings=None):
                 module.router, prefix="/api/v1/" + entry["module"].replace("_", "-")
             )
     app.include_router(reports_router, prefix="/api/v1")
+    with_examples(app)
     return app

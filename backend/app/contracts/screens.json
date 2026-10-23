@@ -888,5 +888,13 @@
       "staff_profiles",
       "employee_salary_components"
     ]
+  },
+  {
+    "key": "daily-labour",
+    "title": "Daily labour",
+    "resources": [
+      "employees",
+      "employee_salary_components"
+    ]
   }
 ]

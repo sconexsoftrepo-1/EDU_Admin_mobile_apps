@@ -47,7 +47,8 @@ PERMISSIONS = {
     "admission_sources": ["view"], "admission_cycles": ["view"],
 }
 # Setup first: courses and batches, then their fee structures, then student and staff entry.
-SCREENS = ["course-setup", "fee-structures", "student-enrollment", "teaching-staff", "non-teaching-staff", "imports"]
+SCREENS = ["course-setup", "fee-structures", "student-enrollment", "teaching-staff", "non-teaching-staff",
+           "daily-labour", "imports"]
 IMPORT_FILES = ["01_Students_and_Parents.xlsx", "02_Courses_and_Subjects.xlsx", "03_Employees.xlsx",
                 "04_Teachers.xlsx", "05_Staff.xlsx", "06_Student_Enrollments.xlsx"]
 

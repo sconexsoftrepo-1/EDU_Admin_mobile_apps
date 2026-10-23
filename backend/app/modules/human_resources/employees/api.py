@@ -217,6 +217,7 @@ SELECT CASE
     WHEN EXISTS (SELECT 1 FROM documents WHERE employee_code = %(code)s) THEN 'documents'
     WHEN EXISTS (SELECT 1 FROM documents WHERE verified_by_code = %(code)s) THEN 'documents'
     WHEN EXISTS (SELECT 1 FROM employee_attendance WHERE employee_code = %(code)s) THEN 'employee_attendance'
+    WHEN EXISTS (SELECT 1 FROM employee_profiles WHERE employee_code = %(code)s) THEN 'employee_profiles'
     WHEN EXISTS (SELECT 1 FROM employee_salary_components WHERE employee_code = %(code)s) THEN 'employee_salary_components'
     WHEN EXISTS (SELECT 1 FROM employee_tax_documents WHERE employee_code = %(code)s) THEN 'employee_tax_documents'
     WHEN EXISTS (SELECT 1 FROM employee_tax_documents WHERE published_by_employee_code = %(code)s) THEN 'employee_tax_documents'

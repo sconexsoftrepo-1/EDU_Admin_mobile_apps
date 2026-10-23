@@ -1,7 +1,7 @@
 """Apply pending PostgreSQL migrations from ../database/migrations in version order.
 
 For a schema change to an existing database, add ../database/migrations/NNN_name.sql (next
-version after 008), run this tool, then fold the change into ../database/edunexa_schema_postgresql.sql
+version after 010), run this tool, then fold the change into ../database/edunexa_schema_postgresql.sql
 (and edunexa_schema_mysql.sql), add the version to INCLUDED_VERSIONS in tools/apply_schema.py,
 and delete the migration file. Each file runs in its own transaction and is recorded in
 schema_migrations with its checksum. Use --dry-run to roll back.

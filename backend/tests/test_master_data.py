@@ -82,10 +82,10 @@ def test_master_data_entry_flow(client, app):
     course = client.post("/api/v1/master-data/courses", headers=h, json={
         "program": {"code": "BSC", "department_code": "DEP", "name": "B.Sc. Physics", "qualification": "B.Sc.",
                     "duration_semesters": 6},
-        "batches": [{"code": "BSC-2026", "name": "2026-29", "entry_year": 2026}]})
+        "batches": [{"code": "BSC-2026", "name": "2026-29", "entry_year": 2026, "graduation_year": 2029}]})
     assert course.status_code == 201, course.text
     batch = client.post("/api/v1/master-data/courses/BSC/batches", headers=h, json={
-        "batch": {"code": "BSC-2027", "name": "2027-30", "entry_year": 2027},
+        "batch": {"code": "BSC-2027", "name": "2027-30", "entry_year": 2027, "graduation_year": 2030},
         "sections": [{"code": "BSC-2027-A", "semester_code": "SEM1", "name": "A", "capacity": 60}]})
     assert batch.status_code == 201, batch.text
 
@@ -188,10 +188,10 @@ def test_enrollment_wizard_end_to_end(client, app):
                                    "program.name": "Intermediate MPC", "program.qualification": "Intermediate",
                                    "program.duration_semesters": 4, "program.course_level": "intermediate",
                                    "program.branch": "MPC", "batch.code": "INT-MPC-2026", "batch.name": "2026-28",
-                                   "batch.entry_year": 2026})
+                                   "batch.entry_year": 2026, "batch.graduation_year": 2028})
     assert course.status_code == 201, course.text
     section = run("create-batch", {"program_code": "INT-MPC", "batch.code": "INT-MPC-2027", "batch.name": "2027-29",
-                                   "batch.entry_year": 2027})
+                                   "batch.entry_year": 2027, "batch.graduation_year": 2029})
     assert section.status_code == 201, section.text
     fees = run("course-fee-structure", {"program_code": "INT-MPC", "academic_year_code": "AY", "year_of_study": 1,
                                         "due_date": "2026-07-15", "amount.tuition": "40000", "amount.exam": "2000",
@@ -388,3 +388,100 @@ def test_batch_overview_and_atomic_section_rename(client, app):
                            json={**payload, 'sections': [{'code': 'VIEW-A', 'name': '   '}]})
     assert invalid.status_code == 422
     assert app.state.store.snapshot()['records']['sections']['VIEW-A']['name'] == 'Alpha'
+
+
+def test_year_based_batch_needs_start_and_end_year_and_names_itself(client, app):
+    h = master_data_user(app, client)
+    form = next(a for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]
+                if a["key"] == "create-batch")
+    batch = {f["key"]: f for f in form["fields"] if f["key"].startswith("batch.")}
+    assert list(batch) == ["batch.entry_year", "batch.graduation_year"]  # no name field
+    assert all(f["required"] for f in batch.values())
+    with app.state.store.transaction() as d:
+        d["records"].setdefault("programs", {})["BCOM"] = {
+            "code": "BCOM", "department_code": "DEP", "name": "B.Com", "qualification": "B.Com", "duration_semesters": 6}
+    run = lambda values: client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": values})
+    assert run({"program_code": "BCOM", "batch.entry_year": 2026}).status_code == 422
+    assert run({"program_code": "BCOM", "batch.entry_year": 2026, "batch.graduation_year": 2025}).status_code == 422
+    made = run({"program_code": "BCOM", "batch.entry_year": 2026, "batch.graduation_year": 2029})
+    assert made.status_code == 201, made.text
+    assert made.json()["batch"]["name"] == "2026-29"
+
+
+def staff_payload(kind, aadhaar, **extra):
+    base = {
+        "kind": kind,
+        "personal": {"first_name": "Asha", "last_name": "Rao", "email": f"{aadhaar}@example.edu", "phone": "9876500200",
+                     "address": "5 College Road", "city": "Hyderabad"},
+        "job": {"designation": "Lecturer", "department": "Physics", "join_date": "2026-06-01"},
+        "qualification": {"level": "post_graduation", "specialization": "M.Sc Physics"},
+        "certificates": ["M.Sc marks memo", "B.Ed certificate"],
+        "aadhaar_number": aadhaar,
+        "pan_number": "ABCDE1234F",
+        "previous_experience": [{"organization": "City College", "role": "Lecturer", "from_date": "2020-06-01",
+                                 "to_date": "2026-05-31"}],
+        "employment_history": [{"organization": "City College", "designation": "Lecturer"}],
+        "achievements": [{"title": "Best teacher award", "year": 2024}],
+        "bank": {"account_holder": "Asha Rao", "account_number": "123456789012", "bank_name": "SBI",
+                 "ifsc": "SBIN0001234"},
+        "salary": {"components": [
+            {"component": "Basic pay", "component_type": "earning", "amount": "40000"},
+            {"component": "HRA", "component_type": "earning", "amount": "10000"},
+            {"component": "Provident fund", "component_type": "deduction", "amount": "4800"}],
+            "in_hand_monthly": "45000"},
+    }
+    return {**base, **extra}
+
+
+def test_staff_onboarding_ids_profiles_and_tables(client, app):
+    h = master_data_user(app, client)
+    options = client.get("/api/v1/master-data/staff-onboarding/options", headers=h).json()
+    assert options["employee_id"] == "EMP-COL-001"  # institution "College"
+
+    teacher = client.post("/api/v1/master-data/staff-onboarding", headers=h, json=staff_payload("teaching", "111122223333"))
+    assert teacher.status_code == 201, teacher.text
+    body = teacher.json()
+    assert body["employee"]["code"] == "EMP-COL-001" and body["employee"]["employee_type"] == "teacher"
+    assert int(body["role"]["experience_years"]) == 6
+    profile = body["profile"]
+    assert (profile["gross_monthly"], profile["deductions_monthly"], profile["net_monthly"], profile["in_hand_monthly"]) == \
+        ("50000.00", "4800.00", "45200.00", "45000.00")
+    assert profile["ctc_annual"] == "600000.00"
+    assert set(profile["document_checklist"]) == {"aadhaar_copy", "pan_copy", "certificate_m_sc_marks_memo",
+                                                  "certificate_b_ed_certificate", "experience_1", "bank_proof"}
+
+    duplicate = client.post("/api/v1/master-data/staff-onboarding", headers=h,
+                            json=staff_payload("non_teaching", "111122223333", pan_number=None))
+    assert duplicate.status_code == 409
+
+    staff = client.post("/api/v1/master-data/staff-onboarding", headers=h, json=staff_payload(
+        "non_teaching", "444455556666", pan_number="PQRST6789K",
+        job={"designation": "Accountant", "join_date": "2026-06-01"}))
+    assert staff.status_code == 201, staff.text
+    assert staff.json()["employee"]["code"] == "EMP-COL-002"
+
+    labour = client.post("/api/v1/master-data/staff-onboarding", headers=h, json={
+        "kind": "labour", "personal": {"first_name": "Ramu", "last_name": "K"},
+        "job": {"designation": "Gardener", "join_date": "2026-06-01"},
+        "aadhaar_number": "777788889999",
+        "bank": {"account_holder": "Ramu K", "account_number": "998877665544", "bank_name": "Canara Bank",
+                 "ifsc": "CNRB0004321"},
+        "salary": {"basis": "daily", "amount": "600"}})
+    assert labour.status_code == 201, labour.text
+    labour_body = labour.json()
+    assert labour_body["employee"]["code"] == "EMP-COL-003"
+    assert labour_body["employee"]["employment_type"] == "daily_wage"
+    assert labour_body["profile"]["net_monthly"] == "15600.00"  # 26 working days
+
+    table = client.get("/api/v1/master-data/staff-onboarding?kind=teaching", headers=h).json()["items"]
+    assert [r["employee_id"] for r in table] == ["EMP-COL-001"]
+    assert table[0]["aadhaar"] == "••••••••3333" and table[0]["bank"] == "SBI ••••••••9012"
+    assert table[0]["documents_uploaded"] == 0 and table[0]["documents_expected"] == 6
+
+    upload = client.post("/api/v1/documents/upload", headers=h, json={
+        "kind": "employee_document", "person_code": "EMP-COL-001", "filename": "aadhaar.pdf",
+        "content_base64": PDF, "document_label": "aadhaar_copy"})
+    assert upload.status_code == 201, upload.text
+    detail = client.get("/api/v1/master-data/staff-onboarding/EMP-COL-001", headers=h).json()
+    assert detail["profile"]["document_checklist"]["aadhaar_copy"]["uploaded"] is True
+    assert len(detail["salary_components"]) == 3

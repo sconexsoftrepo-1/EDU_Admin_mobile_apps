@@ -18,6 +18,8 @@ import {
   api,
   ApiError,
   SCREEN_CATALOG,
+  STAFF_KIND_LABEL,
+  STAFF_SCREENS,
   errorText,
   fileToBase64,
   type Account,
@@ -53,6 +55,8 @@ import BatchManager from "./BatchManager";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
+import StaffOnboardingForm from "./staff/StaffOnboardingForm";
+import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
 export type { Field };
 const pretty = (key: string) => key.replaceAll("_", " ").replaceAll("-", " ");
@@ -86,8 +90,6 @@ const PRIMARY_FORMS: Record<string, string> = {
   "student-enrollment": "enroll-student",
   "course-setup": "create-course",
   "fee-structures": "course-fee-structure",
-  "teaching-staff": "onboard-teaching-staff",
-  "non-teaching-staff": "onboard-non-teaching-staff",
 };
 /** Page size per table: the course catalog shows every course at once. */
 const pageSize = (table?: string) => (table === "programs" ? 200 : undefined);
@@ -528,6 +530,13 @@ export default function ConnectedPortal({
         });
   // Opened from "Manage …": student enrollment shows the wizard until it is closed once.
   const [wizardDismissed, setWizardDismissed] = useState(false);
+  /** Teaching staff, non-teaching staff and daily labour use the staff onboarding form. */
+  const staffKind = STAFF_SCREENS[selected];
+  const [staffForm, setStaffForm] = useState(false);
+  const [staffDismissed, setStaffDismissed] = useState(false);
+  const [staffReload, setStaffReload] = useState(0);
+  const staffFormOpen =
+    !!staffKind && (staffForm || (openPrimaryForm && !staffDismissed));
   const wizardOpen =
     wizard ||
     (openPrimaryForm &&
@@ -808,6 +817,15 @@ export default function ConnectedPortal({
             )}
           </div>
           <div className="edu-row-actions">
+            {staffKind && (
+              <button
+                className="edu-primary"
+                onClick={() => setStaffForm(true)}
+              >
+                <Plus size={15} aria-hidden="true" /> Add{" "}
+                {STAFF_KIND_LABEL[staffKind]}
+              </button>
+            )}
             {HEADER_ACTIONS.has(selected) && (
               <>
                 {primaryForm && (
@@ -936,7 +954,7 @@ export default function ConnectedPortal({
           </section>
         )}
         <div className="edu-toolbar">
-          {resource && !HEADER_ACTIONS.has(selected) && (
+          {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
             <>
               <select
                 aria-label="Screen resource"
@@ -978,6 +996,7 @@ export default function ConnectedPortal({
             </>
           )}
           {!HEADER_ACTIONS.has(selected) &&
+            !staffKind &&
             screenActions.map((a) => (
               <button key={a.key} onClick={() => runAction(a)}>
                 {a.label}
@@ -1047,7 +1066,10 @@ export default function ConnectedPortal({
             </button>
           )}
         </div>
-        {resource && (
+        {staffKind && (
+          <StaffDirectory kind={staffKind} reloadKey={staffReload} />
+        )}
+        {resource && !staffKind && (
           <>
             {cards && (
               <CourseCards
@@ -1311,6 +1333,16 @@ export default function ConnectedPortal({
               : undefined
           }
           onClose={() => setDialog(null)}
+        />
+      )}
+      {staffFormOpen && staffKind && (
+        <StaffOnboardingForm
+          kind={staffKind}
+          onClose={() => {
+            setStaffForm(false);
+            setStaffDismissed(true);
+          }}
+          onSaved={() => setStaffReload((n) => n + 1)}
         />
       )}
       {wizardOpen && (

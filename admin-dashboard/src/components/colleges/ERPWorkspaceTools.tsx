@@ -110,6 +110,7 @@ export function WorkspaceNavigation({
         "course-setup",
         "teaching-staff",
         "non-teaching-staff",
+        "daily-labour",
         "staff",
         "timetable",
         "assignments",
