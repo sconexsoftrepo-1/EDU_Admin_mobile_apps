@@ -44,11 +44,9 @@ class Settings(BaseSettings):
         if self.file_storage == "supabase" and not (self.supabase_url and self.supabase_service_role_key):
             raise ValueError("EDUNEXA_FILE_STORAGE=supabase needs EDUNEXA_SUPABASE_URL and EDUNEXA_SUPABASE_SERVICE_ROLE_KEY")
         if os.environ.get("VERCEL"):
-            # Serverless: nothing on local disk survives, so data, files and keys must live elsewhere.
-            missing = [name for name, ok in (
-                ("EDUNEXA_STORAGE_BACKEND=postgres", self.storage_backend == "postgres"),
-                ("EDUNEXA_FILE_STORAGE=supabase", self.file_storage == "supabase"),
-                ("EDUNEXA_CERTIFICATE_SIGNING_KEY", self.certificate_signing_key is not None),
-            ) if not ok]
-            if missing:
-                raise ValueError("Vercel deployment needs " + ", ".join(missing))
+            # Serverless: nothing on local disk survives. Records must be in PostgreSQL; files and
+            # the signing key are optional at start-up (their endpoints answer 503 until configured).
+            if self.storage_backend != "postgres":
+                raise ValueError("Vercel deployment needs EDUNEXA_STORAGE_BACKEND=postgres")
+            if not str(self.data_dir).startswith("/tmp"):
+                self.data_dir = Path("/tmp/edunexa")  # e.g. a local path copied from .env

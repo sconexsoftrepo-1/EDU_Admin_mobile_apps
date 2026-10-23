@@ -30,12 +30,17 @@ def test_supabase_files_put_and_get(monkeypatch):
         store.get("../secrets")  # keys are server generated; paths are refused
 
 
-def test_vercel_requires_database_file_storage_and_signing_key(monkeypatch):
+def test_vercel_needs_postgres_and_starts_without_file_storage(monkeypatch):
     monkeypatch.setenv("VERCEL", "1")
     secret = secrets.token_urlsafe(64)
-    with pytest.raises(ValueError, match="Vercel deployment needs"):
-        Settings(_env_file=None, jwt_secret=secret, storage_backend="postgres")
-    settings = Settings(_env_file=None, jwt_secret=secret, storage_backend="postgres", file_storage="supabase",
-                        supabase_url="https://demo.supabase.co", supabase_service_role_key="k",
-                        certificate_signing_key="A" * 44)
+    with pytest.raises(ValueError, match="EDUNEXA_STORAGE_BACKEND=postgres"):
+        Settings(_env_file=None, jwt_secret=secret)
+    # A local data folder copied from .env is replaced by /tmp; files are optional at start-up.
+    settings = Settings(_env_file=None, jwt_secret=secret, storage_backend="postgres", data_dir="/Users/me/var")
     assert str(settings.data_dir) == "/tmp/edunexa"
+    store = files_module.files_for(settings)
+    with pytest.raises(Exception, match="File storage is not configured"):
+        store.put("FILE-1", b"x", "application/pdf")
+    configured = Settings(_env_file=None, jwt_secret=secret, storage_backend="postgres", file_storage="supabase",
+                          supabase_url="https://demo.supabase.co", supabase_service_role_key="k")
+    assert isinstance(files_module.files_for(configured), SupabaseFiles)
