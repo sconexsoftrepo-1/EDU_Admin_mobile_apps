@@ -604,14 +604,19 @@ export default function ConnectedPortal({
           </div>
         </div>
         <div className="college-login-form">
-          <Image
-            src={`/assets/colleges-institutions/${college.slug}/crest.svg`}
-            alt="College crest"
-            width={60}
-            height={66}
-          />
-          <h2>Welcome to {college.short}.</h2>
-          <p>Sign in to your campus workspace.</p>
+          <div className="college-login-heading">
+            <Image
+              src="/assets/pragathilogo.jpg"
+              alt="Pragathi College logo"
+              width={60}
+              height={66}
+            />
+            <div>
+              {/* <h2>Welcome to {college.short}.</h2> */}
+                  <h2>Welcome to Pragathi College.</h2>
+              <p>Sign in to your campus workspace.</p>
+            </div>
+          </div>
           <form onSubmit={login}>
             <label>
               Role
