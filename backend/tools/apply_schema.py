@@ -1,6 +1,6 @@
 """Create the EduNexa schema on an empty PostgreSQL database (or an empty schema in it).
 
-Runs ../database/edunexa_schema_postgresql.sql (the complete schema, versions 001-008) inside one
+Runs ../database/edunexa_schema_postgresql.sql (the complete schema, versions 001-010) inside one
 transaction, so any failure leaves nothing behind, and records those versions in
 schema_migrations. Later changes are applied incrementally with tools/migrate.py. Use --dry-run
 to apply and roll back.
@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.core.database import SCHEMA_FILE, DatabaseSettings, connect, sha256
 
 # Schema versions contained in the schema file (its "BEGIN EDUNEXA Vn" sections).
-INCLUDED_VERSIONS = ["001", "002", "003", "004", "005", "006", "007", "008"]
+INCLUDED_VERSIONS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 MIGRATIONS_TABLE = """
 CREATE TABLE schema_migrations (
   version VARCHAR(50) PRIMARY KEY,

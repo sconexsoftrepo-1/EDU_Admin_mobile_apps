@@ -190,6 +190,7 @@ export function CollegeStore({
         "student-enrollment",
         "teaching-staff",
         "non-teaching-staff",
+        "daily-labour",
         "course-setup",
         "roles",
         "accounts",

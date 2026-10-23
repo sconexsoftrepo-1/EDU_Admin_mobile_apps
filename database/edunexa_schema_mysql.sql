@@ -1,7 +1,7 @@
 -- =============================================================================================
 -- EduNexa College database schema — MySQL 8.0.16+ (InnoDB, utf8mb4)
 --
--- MySQL edition of edunexa_schema_postgresql.sql: the same 146 tables, columns, keys, foreign
+-- MySQL edition of edunexa_schema_postgresql.sql: the same 147 tables, columns, keys, foreign
 -- keys, CHECK rules, indexes, validation triggers and finance views. The application backend runs
 -- on PostgreSQL (Supabase); this file is for MySQL deployments and tooling.
 --
@@ -237,8 +237,8 @@ CREATE TABLE employees (
   last_name TEXT NOT NULL,
   employee_type VARCHAR(50) NOT NULL,
   designation TEXT NOT NULL,
-  email VARCHAR(254) NOT NULL,
-  phone VARCHAR(40) NOT NULL,
+  email VARCHAR(254) NULL,
+  phone VARCHAR(40) NULL,
   date_of_birth DATE NULL,
   gender VARCHAR(50) NULL,
   join_date DATE NOT NULL,
@@ -267,8 +267,8 @@ CREATE TABLE employees (
   KEY ix_employees_department_code (department_code),
   CONSTRAINT ck_employee_dates CHECK ((((contract_end_date IS NULL) OR (contract_end_date >= join_date)) AND ((exit_date IS NULL) OR (exit_date >= join_date)))),
   CONSTRAINT ck_no_self_reporting CHECK (((reporting_employee_code IS NULL) OR ((reporting_employee_code) <> (code)))),
-  CONSTRAINT employees_employee_type_check CHECK ((employee_type IN ('teacher', 'staff'))),
-  CONSTRAINT employees_employment_type_check CHECK ((employment_type IN ('permanent', 'contract', 'part_time'))),
+  CONSTRAINT employees_employee_type_check CHECK ((employee_type IN ('teacher', 'staff', 'labour'))),
+  CONSTRAINT employees_employment_type_check CHECK ((employment_type IN ('permanent', 'contract', 'part_time', 'daily_wage'))),
   CONSTRAINT employees_gender_check CHECK ((gender IN ('female', 'male', 'other', 'prefer_not_to_say'))),
   CONSTRAINT employees_status_check CHECK ((status IN ('active', 'on_leave', 'left'))),
   CONSTRAINT employees_campus_code_fkey FOREIGN KEY (campus_code) REFERENCES campuses (code) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -3067,6 +3067,63 @@ CREATE TABLE student_admission_profiles (
   CONSTRAINT student_admission_profiles_academic_year_code_fkey FOREIGN KEY (academic_year_code) REFERENCES academic_years (code) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT student_admission_profiles_batch_code_fkey FOREIGN KEY (batch_code) REFERENCES batches (code) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT student_admission_profiles_section_code_fkey FOREIGN KEY (section_code) REFERENCES sections (code) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_cs;
+
+-- Staff onboarding: the profile of each employee (schema version V10).
+CREATE TABLE employee_profiles (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  code VARCHAR(100) NOT NULL,
+  employee_code VARCHAR(100) NOT NULL,
+  staff_kind VARCHAR(50) NOT NULL,
+  qualification_level VARCHAR(50) NULL,
+  specialization TEXT NULL,
+  aadhaar_number VARCHAR(12) NULL,
+  pan_number VARCHAR(10) NULL,
+  bank_account_holder TEXT NULL,
+  bank_account_number VARCHAR(34) NULL,
+  bank_name TEXT NULL,
+  bank_ifsc VARCHAR(11) NULL,
+  bank_branch TEXT NULL,
+  qualification_certificates JSON NOT NULL DEFAULT (JSON_ARRAY()),
+  previous_experience JSON NOT NULL DEFAULT (JSON_ARRAY()),
+  employment_history JSON NOT NULL DEFAULT (JSON_ARRAY()),
+  achievements JSON NOT NULL DEFAULT (JSON_ARRAY()),
+  document_checklist JSON NOT NULL DEFAULT (JSON_OBJECT()),
+  salary_basis VARCHAR(50) NOT NULL DEFAULT 'monthly',
+  salary_amount DECIMAL(14,2) NULL,
+  ctc_annual DECIMAL(14,2) NULL,
+  gross_monthly DECIMAL(14,2) NULL,
+  deductions_monthly DECIMAL(14,2) NULL,
+  net_monthly DECIMAL(14,2) NULL,
+  in_hand_monthly DECIMAL(14,2) NULL,
+  created_by_user_code VARCHAR(100) NULL,
+  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (id),
+  UNIQUE KEY employee_profiles_code_key (code),
+  UNIQUE KEY employee_profiles_employee_code_key (employee_code),
+  UNIQUE KEY employee_profiles_aadhaar_number_key (aadhaar_number),
+  UNIQUE KEY employee_profiles_pan_number_key (pan_number),
+  KEY ix_employee_profiles_staff_kind (staff_kind),
+  CONSTRAINT employee_profiles_staff_kind_check CHECK ((staff_kind IN ('teaching', 'non_teaching', 'labour'))),
+  CONSTRAINT employee_profiles_qualification_level_check CHECK ((qualification_level IN ('graduation', 'post_graduation', 'doctorate', 'diploma', 'school', 'other'))),
+  CONSTRAINT employee_profiles_aadhaar_number_check CHECK (REGEXP_LIKE(aadhaar_number, '^[0-9]{12}$', 'c')),
+  CONSTRAINT employee_profiles_pan_number_check CHECK (REGEXP_LIKE(pan_number, '^[A-Z]{5}[0-9]{4}[A-Z]$', 'c')),
+  CONSTRAINT employee_profiles_bank_account_number_check CHECK (REGEXP_LIKE(bank_account_number, '^[0-9]{6,34}$', 'c')),
+  CONSTRAINT employee_profiles_bank_ifsc_check CHECK (REGEXP_LIKE(bank_ifsc, '^[A-Z]{4}0[A-Z0-9]{6}$', 'c')),
+  CONSTRAINT employee_profiles_qualification_certificates_check CHECK ((JSON_TYPE(qualification_certificates) = 'ARRAY')),
+  CONSTRAINT employee_profiles_previous_experience_check CHECK ((JSON_TYPE(previous_experience) = 'ARRAY')),
+  CONSTRAINT employee_profiles_employment_history_check CHECK ((JSON_TYPE(employment_history) = 'ARRAY')),
+  CONSTRAINT employee_profiles_achievements_check CHECK ((JSON_TYPE(achievements) = 'ARRAY')),
+  CONSTRAINT employee_profiles_document_checklist_check CHECK ((JSON_TYPE(document_checklist) = 'OBJECT')),
+  CONSTRAINT employee_profiles_salary_basis_check CHECK ((salary_basis IN ('monthly', 'yearly', 'daily'))),
+  CONSTRAINT employee_profiles_salary_amount_check CHECK ((salary_amount >= 0)),
+  CONSTRAINT employee_profiles_ctc_annual_check CHECK ((ctc_annual >= 0)),
+  CONSTRAINT employee_profiles_gross_monthly_check CHECK ((gross_monthly >= 0)),
+  CONSTRAINT employee_profiles_deductions_monthly_check CHECK ((deductions_monthly >= 0)),
+  CONSTRAINT employee_profiles_net_monthly_check CHECK ((net_monthly >= 0)),
+  CONSTRAINT employee_profiles_in_hand_monthly_check CHECK ((in_hand_monthly >= 0)),
+  CONSTRAINT employee_profiles_employee_code_fkey FOREIGN KEY (employee_code) REFERENCES employees (code) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_cs;
 
 SET FOREIGN_KEY_CHECKS = 1;

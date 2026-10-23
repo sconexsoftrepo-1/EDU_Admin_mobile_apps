@@ -100,6 +100,7 @@ const entryScreens = [
   "admission-forms",
   "teaching-staff",
   "non-teaching-staff",
+  "daily-labour",
   "course-setup",
   "course-enrollment",
 ];
@@ -130,6 +131,7 @@ const labels: Record<string, string> = {
   "course-setup": "Courses & enrollment",
   "teaching-staff": "Teaching staff",
   "non-teaching-staff": "Non-teaching staff",
+  "daily-labour": "Daily labour",
   settings: "Settings",
   forms: "Form builder",
   imports: "Excel imports",

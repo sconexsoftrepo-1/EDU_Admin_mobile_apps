@@ -97,3 +97,45 @@ python tools/create_master_data_role.py --login <login-id>   # password prompted
 - [Token authentication and app integration](docs/AUTHENTICATION.md)
 - [Module and workflow guide](docs/MODULES_AND_WORKFLOWS.md)
 - [Verification results](docs/VALIDATION.md)
+
+## Deploying to Vercel
+
+The backend deploys as one Python function (`api/index.py` serves the FastAPI app for every path;
+see `vercel.json`). It runs in Sydney (`syd1`), next to the Supabase database, and keeps nothing
+on local disk: data in PostgreSQL, files in a private Supabase Storage bucket, the certificate
+signing key in an environment variable. It refuses to start on Vercel without them.
+
+1. **File storage.** In Supabase, copy the project URL and the `service_role` key (Project
+   Settings → API). Put them in `backend/.env` as `EDUNEXA_SUPABASE_URL` and
+   `EDUNEXA_SUPABASE_SERVICE_ROLE_KEY`, then run `python tools/setup_file_storage.py` once to create
+   the private bucket `edunexa-private`.
+2. **Signing key.** Run `python tools/generate_signing_key.py` once and keep the value; it signs
+   every certificate and must not change later.
+3. **Vercel project.** Import the repository, set **Root Directory** to `backend` (the framework
+   preset comes from `vercel.json`), add the environment variables below, and deploy. With the CLI:
+   `cd backend && vercel deploy --prod`.
+4. **Dashboard.** In the admin dashboard's deployment set `EDUNEXA_API_URL` to the backend URL
+   (e.g. `https://edunexa-backend.vercel.app`); the dashboard's proxy calls it server to server.
+5. **Check.** `https://<backend>.vercel.app/health` returns `{"status": "ok", "storage": "postgres"}`.
+
+| Variable | Value |
+| --- | --- |
+| `EDUNEXA_JWT_SECRET` | a new random secret, 64+ characters |
+| `EDUNEXA_STORAGE_BACKEND` | `postgres` |
+| `EDUNEXA_DB_HOST` | `aws-0-ap-southeast-2.pooler.supabase.com` (transaction pooler; Vercel has no IPv6) |
+| `EDUNEXA_DB_PORT` | `6543` |
+| `EDUNEXA_DB_NAME` | `postgres` |
+| `EDUNEXA_DB_USER` | `postgres.<project-ref>` |
+| `EDUNEXA_DB_PASSWORD` | the database password |
+| `EDUNEXA_DB_SSLMODE` | `require` |
+| `EDUNEXA_FILE_STORAGE` | `supabase` |
+| `EDUNEXA_SUPABASE_URL` | `https://<project-ref>.supabase.co` |
+| `EDUNEXA_SUPABASE_SERVICE_ROLE_KEY` | the `service_role` key (secret) |
+| `EDUNEXA_SUPABASE_BUCKET` | `edunexa-private` |
+| `EDUNEXA_CERTIFICATE_SIGNING_KEY` | output of `tools/generate_signing_key.py` (secret) |
+| `EDUNEXA_CORS_ORIGINS` | `["https://<dashboard>.vercel.app"]` |
+| `EDUNEXA_PUBLIC_API_URL` / `EDUNEXA_PUBLIC_PORTAL_URL` | the backend and dashboard URLs |
+
+Limits to know: request and response bodies are capped at 4.5 MB by Vercel (uploads here are at
+most 650 KB), and each request may run up to 60 s (`maxDuration` in `vercel.json`).
+

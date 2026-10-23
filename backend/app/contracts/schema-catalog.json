@@ -2458,7 +2458,8 @@
         "reference": null,
         "choices": [
           "teacher",
-          "staff"
+          "staff",
+          "labour"
         ]
       },
       {
@@ -2471,14 +2472,14 @@
       {
         "name": "email",
         "type": "character varying",
-        "required": true,
+        "required": false,
         "reference": null,
         "choices": []
       },
       {
         "name": "phone",
         "type": "character varying",
-        "required": true,
+        "required": false,
         "reference": null,
         "choices": []
       },
@@ -2516,7 +2517,8 @@
         "choices": [
           "permanent",
           "contract",
-          "part_time"
+          "part_time",
+          "daily_wage"
         ]
       },
       {
@@ -8186,6 +8188,201 @@
       {
         "name": "fee_summary",
         "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "created_by_user_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      }
+    ]
+  },
+  {
+    "name": "employee_profiles",
+    "fields": [
+      {
+        "name": "code",
+        "type": "character varying",
+        "required": true,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employee_code",
+        "type": "character varying",
+        "required": true,
+        "reference": "employees",
+        "choices": []
+      },
+      {
+        "name": "staff_kind",
+        "type": "text",
+        "required": true,
+        "reference": null,
+        "choices": [
+          "teaching",
+          "non_teaching",
+          "labour"
+        ]
+      },
+      {
+        "name": "qualification_level",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "graduation",
+          "post_graduation",
+          "doctorate",
+          "diploma",
+          "school",
+          "other"
+        ]
+      },
+      {
+        "name": "specialization",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "aadhaar_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "pan_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "bank_account_holder",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "bank_account_number",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "bank_name",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "bank_ifsc",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "bank_branch",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "qualification_certificates",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "previous_experience",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "employment_history",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "achievements",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "document_checklist",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "salary_basis",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": [
+          "monthly",
+          "yearly",
+          "daily"
+        ]
+      },
+      {
+        "name": "salary_amount",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "ctc_annual",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "gross_monthly",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "deductions_monthly",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "net_monthly",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "in_hand_monthly",
+        "type": "numeric",
         "required": false,
         "reference": null,
         "choices": []

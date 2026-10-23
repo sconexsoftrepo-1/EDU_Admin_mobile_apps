@@ -1,0 +1,15 @@
+# Not needed at runtime on Vercel (and never upload secrets or local data).
+.venv/
+var/
+tests/
+tools/
+docs/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+requirements-dev.txt
+requirements.lock

@@ -20,6 +20,7 @@ import { masterDataService } from "./modules/master-data/service";
 import { mobileWorkspaceService } from "./modules/mobile/service";
 import { publicService } from "./modules/public/service";
 import { reportService } from "./modules/reports/service";
+import { staffService } from "./modules/staff/service";
 import { workflowService } from "./modules/workflows/service";
 import { workspaceService } from "./modules/workspace/service";
 
@@ -36,6 +37,7 @@ export const api = {
   imports: importService,
   mobile: mobileWorkspaceService,
   public: publicService,
+  staff: staffService,
 } as const;
 
 export { API_CONFIG, apiUrl, backendApiUrl, stripPrefix } from "./config";
@@ -59,5 +61,6 @@ export * from "./modules/master-data/consts";
 export * from "./modules/mobile/consts";
 export * from "./modules/public/consts";
 export * from "./modules/reports/consts";
+export * from "./modules/staff/consts";
 export * from "./modules/workflows/consts";
 export * from "./modules/workspace/consts";
