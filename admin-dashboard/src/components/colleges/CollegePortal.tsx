@@ -95,6 +95,7 @@ import {
 import { csv, professionalPdf } from "@/lib/colleges/download";
 import ERPTable, { type TableRecord } from "./ERPTable";
 import DateInput from "./DateInput";
+import IconAction from "./IconAction";
 type Field = FormField;
 const entryScreens = [
   "student-enrollment",
@@ -1576,13 +1577,13 @@ export default function CollegePortal({
                 <Link href={`${nav("students")}/${r.id}`}>View profile</Link>
                 {allowed("Super Admin", "Admission Officer") && (
                   <>
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label={`Edit ${String(r.name ?? r.id)}`}
                       onClick={() =>
                         studentForm(s.students.find((st) => st.id === r.id))
                       }
-                    >
-                      Edit
-                    </button>
+                    />
                     <button
                       disabled={r.status === "Relieved"}
                       onClick={() => {
@@ -1692,7 +1693,9 @@ export default function CollegePortal({
                 <Link href={`${nav("admissions")}/${r.id}`}>Details</Link>
                 {allowed("Super Admin", "Admission Officer") &&
                   r.status !== "Enrolled" && (
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label="Edit application"
                       onClick={() =>
                         form(
                           "Edit application",
@@ -1754,9 +1757,7 @@ export default function CollegePortal({
                           r.id,
                         )
                       }
-                    >
-                      Edit application
-                    </button>
+                    />
                   )}
                 {allowed("Super Admin", "Principal", "Admission Officer") &&
                   r.status !== "Enrolled" &&
@@ -2038,7 +2039,9 @@ export default function CollegePortal({
               <>
                 {r.status === "Draft" &&
                   allowed("Super Admin", "Accounts Manager") && (
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label="Edit draft"
                       onClick={() =>
                         form(
                           "Edit draft",
@@ -2069,9 +2072,7 @@ export default function CollegePortal({
                           r.id,
                         )
                       }
-                    >
-                      Edit draft
-                    </button>
+                    />
                   )}
                 {r.status === "Draft" || r.status === "Pending" ? (
                   <button

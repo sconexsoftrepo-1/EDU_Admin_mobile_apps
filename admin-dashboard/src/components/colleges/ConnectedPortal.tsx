@@ -13,13 +13,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight,
+  Download,
   Eye,
   EyeOff,
+  FileText,
   RefreshCw,
   Shield,
   Plus,
   Search,
 } from "lucide-react";
+import { excel, professionalPdf } from "@/lib/colleges/download";
 import {
   DOWNLOAD_KIND_BY_TABLE,
   FINANCE_SUMMARY_SCREENS,
@@ -68,6 +71,7 @@ import CourseCards from "./CourseCards";
 import { toast, useErrorToast } from "./toast";
 import RoleSelect from "./RoleSelect";
 import UploadBox from "./UploadBox";
+import IconAction from "./IconAction";
 import { formatDate } from "./DateInput";
 import { alignClass } from "./table-align";
 export type { Field };
@@ -761,6 +765,39 @@ export default function ConnectedPortal({
   const visibleRows = rows.filter((row) =>
     JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()),
   );
+  /** Excel / PDF of the table as shown (current search applied). */
+  const exportTitle = resource?.title || pretty(selected);
+  const exportFile = `${selected}-${new Date().toISOString().slice(0, 10)}`;
+  const exportColumns = columns.map((k) =>
+    pretty(k).replace(/^\w/, (c) => c.toUpperCase()),
+  );
+  const exportRows = () =>
+    visibleRows.map((row) =>
+      columns.map((k) =>
+        row[k] !== null && typeof row[k] === "object"
+          ? JSON.stringify(row[k])
+          : text(row[k]),
+      ),
+    );
+  const exportExcel = () =>
+    excel(exportFile, exportTitle, exportColumns, exportRows());
+  const exportPdf = async () => {
+    try {
+      await professionalPdf(exportFile, {
+        title: exportTitle,
+        landscape: true,
+        sections: [
+          {
+            title: `${visibleRows.length} of ${total} records`,
+            columns: exportColumns,
+            rows: exportRows(),
+          },
+        ],
+      });
+    } catch (e) {
+      setError(errorText(e));
+    }
+  };
   return (
     <main
       className={`edu-connected edu-workspace ${selected === "course-setup" ? "edu-course-workspace" : ""} ${embedded ? "edu-embedded" : ""}`}
@@ -1013,6 +1050,26 @@ export default function ConnectedPortal({
                     </button>
                   )
                 )}
+                {selected === "student-enrollment" && (
+                  <>
+                    <button
+                      type="button"
+                      className="edu-export"
+                      onClick={exportExcel}
+                      disabled={!visibleRows.length}
+                    >
+                      <Download size={14} aria-hidden="true" /> Excel
+                    </button>
+                    <button
+                      type="button"
+                      className="edu-export"
+                      onClick={() => void exportPdf()}
+                      disabled={!visibleRows.length}
+                    >
+                      <FileText size={14} aria-hidden="true" /> PDF
+                    </button>
+                  </>
+                )}
               </>
             )}
             {!HEADER_ACTIONS.has(selected) &&
@@ -1136,10 +1193,16 @@ export default function ConnectedPortal({
                           <td>
                             <div className="edu-row-actions">
                               {resource.actions.includes("edit") && (
-                                <button onClick={() => edit(row)}>Edit</button>
+                                <IconAction
+                                  kind="edit"
+                                  label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                  onClick={() => edit(row)}
+                                />
                               )}
                               {resource.actions.includes("delete") && (
-                                <button
+                                <IconAction
+                                  kind="delete"
+                                  label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
                                   onClick={async () => {
                                     if (!confirm("Delete this record?")) return;
                                     try {
@@ -1155,9 +1218,7 @@ export default function ConnectedPortal({
                                       setError(errorText(e));
                                     }
                                   }}
-                                >
-                                  Delete
-                                </button>
+                                />
                               )}
                               {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
                                 <button
@@ -1247,15 +1308,23 @@ export default function ConnectedPortal({
             <pre>{JSON.stringify(row, null, 2)}</pre>
             {selected === "roles" && !row.system_admin && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit role"
                   onClick={() =>
                     setConfiguration({ kind: "role", initial: row })
                   }
-                >
-                  Edit role
-                </button>
-                <button
+                />
+                <IconAction
+                  kind="delete"
+                  label="Delete role"
                   onClick={async () => {
+                    if (
+                      !confirm(
+                        `Delete the role ${String(row.name ?? row.code)}?`,
+                      )
+                    )
+                      return;
                     try {
                       await api.administration.deleteRole(String(row.code));
                       toast.success("Role deleted successfully");
@@ -1264,20 +1333,18 @@ export default function ConnectedPortal({
                       setError(errorText(e));
                     }
                   }}
-                >
-                  Delete role
-                </button>
+                />
               </div>
             )}
             {["accounts", "credentials"].includes(selected) && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit access"
                   onClick={() =>
                     setConfiguration({ kind: "account", initial: row })
                   }
-                >
-                  Edit access
-                </button>
+                />
                 <button
                   onClick={() =>
                     setDialog({
@@ -1305,15 +1372,23 @@ export default function ConnectedPortal({
             )}
             {selected === "forms" && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit form"
                   onClick={() =>
                     setConfiguration({ kind: "form", initial: row })
                   }
-                >
-                  Edit form
-                </button>
-                <button
+                />
+                <IconAction
+                  kind="delete"
+                  label="Delete form"
                   onClick={async () => {
+                    if (
+                      !confirm(
+                        `Delete the form ${String(row.name ?? row.code)}?`,
+                      )
+                    )
+                      return;
                     try {
                       await api.forms.remove(String(row.code));
                       toast.success("Form deleted successfully");
@@ -1322,9 +1397,7 @@ export default function ConnectedPortal({
                       setError(errorText(e));
                     }
                   }}
-                >
-                  Delete form
-                </button>
+                />
               </div>
             )}
           </article>
