@@ -10,7 +10,7 @@ import {
   type StaffKind,
   type StaffRow,
 } from "@/services/api";
-import { excel, professionalPdf } from "@/lib/colleges/download";
+import { excelTable, pdfTable } from "@/lib/colleges/export-table";
 import { formatDate } from "../DateInput";
 import "./staff.css";
 
@@ -119,26 +119,18 @@ export default function StaffDirectory({
       ? []
       : [`${row.documents_uploaded} of ${row.documents_expected}`]),
   ]);
+  const exportName = `${kind.replaceAll("_", "-")}-staff`;
   const exportExcel = () =>
-    excel(
-      `${kind.replaceAll("_", "-")}-staff`,
-      "Staff",
-      exportColumns,
-      exportRows,
-    );
+    excelTable(exportName, "Staff", exportColumns, exportRows);
   const exportPdf = async () => {
     try {
-      await professionalPdf(`${kind.replaceAll("_", "-")}-staff`, {
-        title: `${STAFF_KIND_LABEL[kind]} directory`,
-        landscape: true,
-        sections: [
-          {
-            title: `${visible.length} ${STAFF_KIND_LABEL[kind]}`,
-            columns: exportColumns,
-            rows: exportRows,
-          },
-        ],
-      });
+      await pdfTable(
+        exportName,
+        `${STAFF_KIND_LABEL[kind]} directory`,
+        `${visible.length} ${STAFF_KIND_LABEL[kind]}`,
+        exportColumns,
+        exportRows,
+      );
     } catch (e) {
       setError(errorText(e));
     }
