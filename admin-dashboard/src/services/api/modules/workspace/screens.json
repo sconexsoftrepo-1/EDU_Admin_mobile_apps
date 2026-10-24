@@ -1,0 +1,715 @@
+[
+  {
+    "key": "campus-analytics",
+    "title": "Campus analytics",
+    "resources": ["students", "employees", "student_attendance"]
+  },
+  {
+    "key": "employees",
+    "title": "Employee directory",
+    "resources": ["employees", "teachers", "staff_profiles"]
+  },
+  {
+    "key": "employee-attendance",
+    "title": "Employee attendance",
+    "resources": ["employee_attendance"]
+  },
+  {
+    "key": "employee-leave",
+    "title": "Leave management",
+    "resources": ["leave_types", "leave_requests"]
+  },
+  {
+    "key": "salary-structures",
+    "title": "Salary structures",
+    "resources": ["employee_salary_components"]
+  },
+  {
+    "key": "payroll",
+    "title": "Payroll processing",
+    "resources": ["payroll_runs", "payslips", "payslip_lines"]
+  },
+  {
+    "key": "payslips",
+    "title": "Payslips",
+    "resources": ["payslips", "payslip_lines", "employee_tax_documents"]
+  },
+  {
+    "key": "bonuses",
+    "title": "Bonuses & incentives",
+    "resources": ["payroll_adjustments"]
+  },
+  {
+    "key": "reimbursements",
+    "title": "Reimbursements",
+    "resources": ["payroll_adjustments"]
+  },
+  {
+    "key": "payroll-reports",
+    "title": "Payroll reports",
+    "resources": ["payroll_runs", "payslips"]
+  },
+  {
+    "key": "expense-dashboard",
+    "title": "Expense dashboard",
+    "resources": ["expenses", "college_invoices"]
+  },
+  {
+    "key": "purchase-requests",
+    "title": "Purchase requests",
+    "resources": ["purchase_requests"]
+  },
+  {
+    "key": "purchase-orders",
+    "title": "Purchase orders",
+    "resources": ["purchase_orders"]
+  },
+  {
+    "key": "vendors",
+    "title": "Vendors",
+    "resources": ["vendors"]
+  },
+  {
+    "key": "equipment",
+    "title": "Equipment purchases",
+    "resources": ["expenses", "inventory_items"]
+  },
+  {
+    "key": "utilities",
+    "title": "Utilities",
+    "resources": ["expenses"]
+  },
+  {
+    "key": "maintenance",
+    "title": "Maintenance",
+    "resources": ["expenses"]
+  },
+  {
+    "key": "travel",
+    "title": "Travel expenses",
+    "resources": ["expenses"]
+  },
+  {
+    "key": "transport-expenses",
+    "title": "Transport expenses",
+    "resources": ["expenses"]
+  },
+  {
+    "key": "additional-expenses",
+    "title": "Additional expenses",
+    "resources": ["expenses"]
+  },
+  {
+    "key": "inventory",
+    "title": "Inventory",
+    "resources": ["inventory_items", "inventory_movements"]
+  },
+  {
+    "key": "assets",
+    "title": "Asset register",
+    "resources": ["asset_register"]
+  },
+  {
+    "key": "transport",
+    "title": "Transport dashboard",
+    "resources": ["vehicles", "transport_routes", "transport_allocations"]
+  },
+  {
+    "key": "buses",
+    "title": "Bus management",
+    "resources": ["vehicles", "vehicle_seats"]
+  },
+  {
+    "key": "routes",
+    "title": "Bus routes",
+    "resources": ["transport_routes"]
+  },
+  {
+    "key": "route-stops",
+    "title": "Route stops",
+    "resources": ["transport_stops"]
+  },
+  {
+    "key": "drivers",
+    "title": "Driver management",
+    "resources": ["employees"]
+  },
+  {
+    "key": "driver-allocation",
+    "title": "Driver allocation",
+    "resources": ["vehicles"]
+  },
+  {
+    "key": "student-allocation",
+    "title": "Student allocation",
+    "resources": ["transport_allocations", "passenger_seats"]
+  },
+  {
+    "key": "faculty-allocation",
+    "title": "Faculty allocation",
+    "resources": ["passenger_seats"]
+  },
+  {
+    "key": "bus-seating",
+    "title": "3D bus seating",
+    "resources": ["vehicle_seats", "passenger_seats"]
+  },
+  {
+    "key": "trips",
+    "title": "Daily trips",
+    "resources": ["vehicle_trips"]
+  },
+  {
+    "key": "manifest",
+    "title": "Passenger manifest",
+    "resources": ["passenger_seats", "transport_allocations"]
+  },
+  {
+    "key": "transport-attendance",
+    "title": "Transport attendance",
+    "resources": ["transport_attendance"]
+  },
+  {
+    "key": "vehicle-maintenance",
+    "title": "Vehicle maintenance",
+    "resources": ["vehicle_maintenance"]
+  },
+  {
+    "key": "fuel",
+    "title": "Fuel records",
+    "resources": ["vehicle_fuel"]
+  },
+  {
+    "key": "transport-reports",
+    "title": "Transport reports",
+    "resources": ["vehicle_trips", "vehicle_fuel", "vehicle_maintenance"]
+  },
+  {
+    "key": "mobile-apps",
+    "title": "Mobile apps emulator",
+    "resources": []
+  },
+  {
+    "key": "admin-app",
+    "title": "Admin app preview",
+    "resources": []
+  },
+  {
+    "key": "parent-app",
+    "title": "Parent app preview",
+    "resources": []
+  },
+  {
+    "key": "student-app",
+    "title": "Student app preview",
+    "resources": []
+  },
+  {
+    "key": "teacher-app",
+    "title": "Teacher app preview",
+    "resources": []
+  },
+  {
+    "key": "accounts",
+    "title": "User accounts",
+    "resources": []
+  },
+  {
+    "key": "credentials",
+    "title": "Credential provisioning",
+    "resources": []
+  },
+  {
+    "key": "campaigns",
+    "title": "Notification campaigns",
+    "resources": ["notification_campaigns"]
+  },
+  {
+    "key": "payment-reminders",
+    "title": "Payment reminders",
+    "resources": ["fee_reminder_jobs"]
+  },
+  {
+    "key": "announcements",
+    "title": "Announcements",
+    "resources": ["announcements", "announcement_recipients"]
+  },
+  {
+    "key": "notification-templates",
+    "title": "Notification templates",
+    "resources": ["notification_templates"]
+  },
+  {
+    "key": "timetable",
+    "title": "Timetable",
+    "resources": ["timetable_slots", "timetable_swap_requests", "rooms"]
+  },
+  {
+    "key": "assignments",
+    "title": "Assignments",
+    "resources": ["assignments", "assignment_submissions"]
+  },
+  {
+    "key": "assessments",
+    "title": "Assessments",
+    "resources": ["exams", "exam_papers", "exam_results"]
+  },
+  {
+    "key": "attendance",
+    "title": "Student attendance",
+    "resources": ["attendance_sessions", "student_attendance"]
+  },
+  {
+    "key": "syllabus",
+    "title": "Syllabus & resources",
+    "resources": ["curriculum_subjects", "learning_resources"]
+  },
+  {
+    "key": "calendar",
+    "title": "Academic calendar",
+    "resources": ["calendar_events"]
+  },
+  {
+    "key": "dashboard",
+    "title": "Dashboard",
+    "resources": [
+      "students",
+      "admission_applications",
+      "payments",
+      "student_fee_charges"
+    ]
+  },
+  {
+    "key": "students",
+    "title": "Students",
+    "resources": [
+      "students",
+      "parents",
+      "student_parents",
+      "student_enrollments",
+      "student_subjects",
+      "consents",
+      "student_status_history"
+    ]
+  },
+  {
+    "key": "admissions",
+    "title": "Admissions",
+    "resources": [
+      "admission_enquiries",
+      "admission_sources",
+      "enquiry_followups",
+      "admission_cycles",
+      "admission_applications",
+      "application_guardians",
+      "application_qualifications",
+      "program_document_requirements",
+      "document_types",
+      "admission_documents",
+      "admission_offers",
+      "admission_reviews",
+      "admission_status_history",
+      "admission_enrollment_events"
+    ]
+  },
+  {
+    "key": "fees",
+    "title": "Fees and finance",
+    "resources": [
+      "student_fee_charges",
+      "fee_heads",
+      "fee_structures",
+      "fee_adjustments",
+      "student_scholarships",
+      "charge_scholarship_allocations"
+    ]
+  },
+  {
+    "key": "fee-structures",
+    "title": "Fee structures",
+    "resources": ["fee_heads", "fee_structures", "external_parties"]
+  },
+  {
+    "key": "payments",
+    "title": "Payments",
+    "resources": [
+      "payments",
+      "payment_allocations",
+      "refunds",
+      "refund_allocations",
+      "payment_gateway_orders",
+      "payment_gateway_events"
+    ]
+  },
+  {
+    "key": "receipts",
+    "title": "Receipts",
+    "resources": ["receipts"]
+  },
+  {
+    "key": "cashbook",
+    "title": "Cash book",
+    "resources": ["payments", "expense_payment_entries", "external_remittances"]
+  },
+  {
+    "key": "expenses",
+    "title": "Expenses",
+    "resources": ["expenses", "expense_payment_entries"]
+  },
+  {
+    "key": "invoices",
+    "title": "Invoices",
+    "resources": ["college_invoices"]
+  },
+  {
+    "key": "scholarships",
+    "title": "Scholarships",
+    "resources": [
+      "scholarships",
+      "student_scholarships",
+      "charge_scholarship_allocations"
+    ]
+  },
+  {
+    "key": "certificates",
+    "title": "Certificates",
+    "resources": [
+      "certificates",
+      "certificate_signatures",
+      "certificate_download_events",
+      "certificate_types"
+    ]
+  },
+  {
+    "key": "certificate-requests",
+    "title": "Certificate requests",
+    "resources": ["certificate_requests"]
+  },
+  {
+    "key": "hostels",
+    "title": "Hostels",
+    "resources": [
+      "hostels",
+      "hostel_rooms",
+      "hostel_beds",
+      "hostel_allocations",
+      "hostel_provision_issues"
+    ]
+  },
+  {
+    "key": "hostel-permissions",
+    "title": "Hostel permissions",
+    "resources": ["hostel_permissions"]
+  },
+  {
+    "key": "academics",
+    "title": "Academic setup",
+    "resources": [
+      "academic_years",
+      "departments",
+      "programs",
+      "batches",
+      "semesters",
+      "sections",
+      "subjects",
+      "curriculum_subjects",
+      "subject_offerings",
+      "rooms"
+    ]
+  },
+  {
+    "key": "staff",
+    "title": "Staff",
+    "resources": ["employees", "teachers", "staff_profiles"]
+  },
+  {
+    "key": "roles",
+    "title": "Roles and screen permissions",
+    "resources": []
+  },
+  {
+    "key": "notifications",
+    "title": "Notifications",
+    "resources": ["notifications", "notification_delivery_attempts"]
+  },
+  {
+    "key": "reports",
+    "title": "Reports",
+    "resources": ["report_export_jobs", "report_download_events"]
+  },
+  {
+    "key": "audit-logs",
+    "title": "Audit trail",
+    "resources": []
+  },
+  {
+    "key": "settings",
+    "title": "College settings",
+    "resources": ["institutions", "campuses", "institution_settings"]
+  },
+  {
+    "key": "forms",
+    "title": "Form builder",
+    "resources": []
+  },
+  {
+    "key": "imports",
+    "title": "Excel imports",
+    "resources": ["import_jobs", "import_rows"]
+  },
+  {
+    "key": "documents",
+    "title": "Documents and Form 16",
+    "resources": ["documents", "admission_documents", "employee_tax_documents"]
+  },
+  {
+    "key": "module-academics",
+    "title": "Academics setup",
+    "resources": [
+      "academic_years",
+      "assignment_submissions",
+      "assignments",
+      "attendance_sessions",
+      "batches",
+      "calendar_events",
+      "campuses",
+      "curriculum_subjects",
+      "departments",
+      "exam_papers",
+      "exam_results",
+      "exams",
+      "institution_settings",
+      "institutions",
+      "learning_resources",
+      "programs",
+      "rooms",
+      "sections",
+      "semesters",
+      "subject_offerings",
+      "subjects",
+      "timetable_slots",
+      "website_pages",
+      "timetable_swap_requests"
+    ]
+  },
+  {
+    "key": "module-access_control",
+    "title": "Access Control setup",
+    "resources": []
+  },
+  {
+    "key": "module-admissions",
+    "title": "Admissions setup",
+    "resources": [
+      "admission_applications",
+      "admission_cycles",
+      "admission_documents",
+      "admission_enquiries",
+      "admission_enrollment_events",
+      "admission_offers",
+      "admission_reviews",
+      "admission_sources",
+      "admission_status_history",
+      "application_guardians",
+      "application_qualifications",
+      "document_types",
+      "document_verification_events",
+      "enquiry_followups",
+      "program_document_requirements",
+      "student_document_links"
+    ]
+  },
+  {
+    "key": "module-certificates",
+    "title": "Certificates setup",
+    "resources": [
+      "certificate_download_events",
+      "certificate_requests",
+      "certificate_signatures",
+      "certificate_types",
+      "certificates"
+    ]
+  },
+  {
+    "key": "module-communications",
+    "title": "Communications setup",
+    "resources": [
+      "announcement_recipients",
+      "announcements",
+      "contact_enquiries",
+      "device_tokens",
+      "grievances",
+      "message_threads",
+      "messages",
+      "notification_delivery_attempts",
+      "notifications",
+      "thread_members",
+      "notification_templates",
+      "notification_campaigns"
+    ]
+  },
+  {
+    "key": "module-finance",
+    "title": "Finance setup",
+    "resources": [
+      "charge_scholarship_allocations",
+      "expenses",
+      "external_parties",
+      "external_remittances",
+      "fee_adjustments",
+      "fee_heads",
+      "fee_reminder_jobs",
+      "fee_structures",
+      "payment_allocations",
+      "payment_gateway_events",
+      "payment_gateway_orders",
+      "payments",
+      "receipts",
+      "refund_allocations",
+      "refunds",
+      "remittance_allocations",
+      "scholarships",
+      "student_fee_charges",
+      "student_scholarships",
+      "vendors",
+      "college_invoices",
+      "expense_payment_entries"
+    ]
+  },
+  {
+    "key": "module-hostel",
+    "title": "Hostel setup",
+    "resources": [
+      "hostel_allocations",
+      "hostel_beds",
+      "hostel_permissions",
+      "hostel_provision_issues",
+      "hostel_rooms",
+      "hostels"
+    ]
+  },
+  {
+    "key": "module-human_resources",
+    "title": "Human Resources setup",
+    "resources": [
+      "employee_attendance",
+      "employee_salary_components",
+      "employee_tax_documents",
+      "employees",
+      "leave_requests",
+      "leave_types",
+      "payroll_runs",
+      "payslip_lines",
+      "payslips",
+      "staff_profiles",
+      "teachers",
+      "payroll_adjustments"
+    ]
+  },
+  {
+    "key": "module-imports",
+    "title": "Imports setup",
+    "resources": ["import_jobs", "import_rows"]
+  },
+  {
+    "key": "module-inventory",
+    "title": "Inventory setup",
+    "resources": [
+      "inventory_items",
+      "inventory_movements",
+      "purchase_requests",
+      "purchase_orders",
+      "asset_register"
+    ]
+  },
+  {
+    "key": "module-library",
+    "title": "Library setup",
+    "resources": ["library_books", "library_copies", "library_loans"]
+  },
+  {
+    "key": "module-placements",
+    "title": "Placements setup",
+    "resources": [
+      "placement_applications",
+      "placement_companies",
+      "placement_drives"
+    ]
+  },
+  {
+    "key": "module-reports",
+    "title": "Reports setup",
+    "resources": [
+      "admin_mobile_preferences",
+      "report_download_events",
+      "report_export_jobs"
+    ]
+  },
+  {
+    "key": "module-student_management",
+    "title": "Student Management setup",
+    "resources": [
+      "consents",
+      "documents",
+      "parents",
+      "student_attendance",
+      "student_enrollments",
+      "student_leave_requests",
+      "student_parents",
+      "student_status_history",
+      "student_subjects",
+      "students"
+    ]
+  },
+  {
+    "key": "module-transport",
+    "title": "Transport setup",
+    "resources": [
+      "transport_allocations",
+      "transport_routes",
+      "transport_stops",
+      "vehicles",
+      "vehicle_trips",
+      "vehicle_maintenance",
+      "vehicle_fuel",
+      "vehicle_seats",
+      "passenger_seats",
+      "transport_attendance"
+    ]
+  },
+  {
+    "key": "course-setup",
+    "title": "Courses & enrollment",
+    "resources": [
+      "programs",
+      "batches",
+      "sections",
+      "student_enrollments",
+      "academic_years",
+      "departments",
+      "semesters",
+      "subjects",
+      "curriculum_subjects"
+    ]
+  },
+  {
+    "key": "student-enrollment",
+    "title": "Student enrollment",
+    "resources": ["students", "parents", "student_parents", "documents"]
+  },
+  {
+    "key": "teaching-staff",
+    "title": "Teaching staff onboarding",
+    "resources": ["employees", "teachers"]
+  },
+  {
+    "key": "non-teaching-staff",
+    "title": "Non-teaching staff onboarding",
+    "resources": ["employees", "staff_profiles", "employee_salary_components"]
+  },
+  {
+    "key": "daily-labour",
+    "title": "Daily labour",
+    "resources": ["employees", "employee_salary_components"]
+  }
+]

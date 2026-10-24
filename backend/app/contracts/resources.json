@@ -1,0 +1,848 @@
+[
+  {
+    "module": "academics",
+    "screen": "academic_years",
+    "path": "/api/v1/academics/academic-years",
+    "generic_api": true
+  },
+  {
+    "module": "reports",
+    "screen": "admin_mobile_preferences",
+    "path": "/api/v1/reports/admin-mobile-preferences",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_applications",
+    "path": "/api/v1/admissions/admission-applications",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_cycles",
+    "path": "/api/v1/admissions/admission-cycles",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_documents",
+    "path": "/api/v1/admissions/admission-documents",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_enquiries",
+    "path": "/api/v1/admissions/admission-enquiries",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_enrollment_events",
+    "path": "/api/v1/admissions/admission-enrollment-events",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_offers",
+    "path": "/api/v1/admissions/admission-offers",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_reviews",
+    "path": "/api/v1/admissions/admission-reviews",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_sources",
+    "path": "/api/v1/admissions/admission-sources",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "admission_status_history",
+    "path": "/api/v1/admissions/admission-status-history",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "announcement_recipients",
+    "path": "/api/v1/communications/announcement-recipients",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "announcements",
+    "path": "/api/v1/communications/announcements",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "application_guardians",
+    "path": "/api/v1/admissions/application-guardians",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "application_qualifications",
+    "path": "/api/v1/admissions/application-qualifications",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "assignment_submissions",
+    "path": "/api/v1/academics/assignment-submissions",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "assignments",
+    "path": "/api/v1/academics/assignments",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "attendance_sessions",
+    "path": "/api/v1/academics/attendance-sessions",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "audit_logs",
+    "path": "/api/v1/access-control/audit-logs",
+    "generic_api": false
+  },
+  {
+    "module": "academics",
+    "screen": "batches",
+    "path": "/api/v1/academics/batches",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "calendar_events",
+    "path": "/api/v1/academics/calendar-events",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "campuses",
+    "path": "/api/v1/academics/campuses",
+    "generic_api": true
+  },
+  {
+    "module": "certificates",
+    "screen": "certificate_download_events",
+    "path": "/api/v1/certificates/certificate-download-events",
+    "generic_api": true
+  },
+  {
+    "module": "certificates",
+    "screen": "certificate_requests",
+    "path": "/api/v1/certificates/certificate-requests",
+    "generic_api": true
+  },
+  {
+    "module": "certificates",
+    "screen": "certificate_signatures",
+    "path": "/api/v1/certificates/certificate-signatures",
+    "generic_api": true
+  },
+  {
+    "module": "certificates",
+    "screen": "certificate_types",
+    "path": "/api/v1/certificates/certificate-types",
+    "generic_api": true
+  },
+  {
+    "module": "certificates",
+    "screen": "certificates",
+    "path": "/api/v1/certificates/certificates",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "charge_scholarship_allocations",
+    "path": "/api/v1/finance/charge-scholarship-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "consents",
+    "path": "/api/v1/student-management/consents",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "contact_enquiries",
+    "path": "/api/v1/communications/contact-enquiries",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "curriculum_subjects",
+    "path": "/api/v1/academics/curriculum-subjects",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "departments",
+    "path": "/api/v1/academics/departments",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "device_tokens",
+    "path": "/api/v1/communications/device-tokens",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "document_types",
+    "path": "/api/v1/admissions/document-types",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "document_verification_events",
+    "path": "/api/v1/admissions/document-verification-events",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "documents",
+    "path": "/api/v1/student-management/documents",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "employee_attendance",
+    "path": "/api/v1/human-resources/employee-attendance",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "employee_salary_components",
+    "path": "/api/v1/human-resources/employee-salary-components",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "employee_tax_documents",
+    "path": "/api/v1/human-resources/employee-tax-documents",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "employees",
+    "path": "/api/v1/human-resources/employees",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "enquiry_followups",
+    "path": "/api/v1/admissions/enquiry-followups",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "exam_papers",
+    "path": "/api/v1/academics/exam-papers",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "exam_results",
+    "path": "/api/v1/academics/exam-results",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "exams",
+    "path": "/api/v1/academics/exams",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "expenses",
+    "path": "/api/v1/finance/expenses",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "external_parties",
+    "path": "/api/v1/finance/external-parties",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "external_remittances",
+    "path": "/api/v1/finance/external-remittances",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "fee_adjustments",
+    "path": "/api/v1/finance/fee-adjustments",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "fee_heads",
+    "path": "/api/v1/finance/fee-heads",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "fee_reminder_jobs",
+    "path": "/api/v1/finance/fee-reminder-jobs",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "fee_structures",
+    "path": "/api/v1/finance/fee-structures",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "grievances",
+    "path": "/api/v1/communications/grievances",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostel_allocations",
+    "path": "/api/v1/hostel/hostel-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostel_beds",
+    "path": "/api/v1/hostel/hostel-beds",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostel_permissions",
+    "path": "/api/v1/hostel/hostel-permissions",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostel_provision_issues",
+    "path": "/api/v1/hostel/hostel-provision-issues",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostel_rooms",
+    "path": "/api/v1/hostel/hostel-rooms",
+    "generic_api": true
+  },
+  {
+    "module": "hostel",
+    "screen": "hostels",
+    "path": "/api/v1/hostel/hostels",
+    "generic_api": true
+  },
+  {
+    "module": "imports",
+    "screen": "import_jobs",
+    "path": "/api/v1/imports/import-jobs",
+    "generic_api": true
+  },
+  {
+    "module": "imports",
+    "screen": "import_rows",
+    "path": "/api/v1/imports/import-rows",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "institution_settings",
+    "path": "/api/v1/academics/institution-settings",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "institutions",
+    "path": "/api/v1/academics/institutions",
+    "generic_api": true
+  },
+  {
+    "module": "inventory",
+    "screen": "inventory_items",
+    "path": "/api/v1/inventory/inventory-items",
+    "generic_api": true
+  },
+  {
+    "module": "inventory",
+    "screen": "inventory_movements",
+    "path": "/api/v1/inventory/inventory-movements",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "learning_resources",
+    "path": "/api/v1/academics/learning-resources",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "leave_requests",
+    "path": "/api/v1/human-resources/leave-requests",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "leave_types",
+    "path": "/api/v1/human-resources/leave-types",
+    "generic_api": true
+  },
+  {
+    "module": "library",
+    "screen": "library_books",
+    "path": "/api/v1/library/library-books",
+    "generic_api": true
+  },
+  {
+    "module": "library",
+    "screen": "library_copies",
+    "path": "/api/v1/library/library-copies",
+    "generic_api": true
+  },
+  {
+    "module": "library",
+    "screen": "library_loans",
+    "path": "/api/v1/library/library-loans",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "message_threads",
+    "path": "/api/v1/communications/message-threads",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "messages",
+    "path": "/api/v1/communications/messages",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "notification_delivery_attempts",
+    "path": "/api/v1/communications/notification-delivery-attempts",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "notifications",
+    "path": "/api/v1/communications/notifications",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "parents",
+    "path": "/api/v1/student-management/parents",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "password_reset_tokens",
+    "path": "/api/v1/access-control/password-reset-tokens",
+    "generic_api": false
+  },
+  {
+    "module": "finance",
+    "screen": "payment_allocations",
+    "path": "/api/v1/finance/payment-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "payment_gateway_events",
+    "path": "/api/v1/finance/payment-gateway-events",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "payment_gateway_orders",
+    "path": "/api/v1/finance/payment-gateway-orders",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "payments",
+    "path": "/api/v1/finance/payments",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "payroll_runs",
+    "path": "/api/v1/human-resources/payroll-runs",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "payslip_lines",
+    "path": "/api/v1/human-resources/payslip-lines",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "payslips",
+    "path": "/api/v1/human-resources/payslips",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "permissions",
+    "path": "/api/v1/access-control/permissions",
+    "generic_api": false
+  },
+  {
+    "module": "placements",
+    "screen": "placement_applications",
+    "path": "/api/v1/placements/placement-applications",
+    "generic_api": true
+  },
+  {
+    "module": "placements",
+    "screen": "placement_companies",
+    "path": "/api/v1/placements/placement-companies",
+    "generic_api": true
+  },
+  {
+    "module": "placements",
+    "screen": "placement_drives",
+    "path": "/api/v1/placements/placement-drives",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "program_document_requirements",
+    "path": "/api/v1/admissions/program-document-requirements",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "programs",
+    "path": "/api/v1/academics/programs",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "receipts",
+    "path": "/api/v1/finance/receipts",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "refresh_tokens",
+    "path": "/api/v1/access-control/refresh-tokens",
+    "generic_api": false
+  },
+  {
+    "module": "finance",
+    "screen": "refund_allocations",
+    "path": "/api/v1/finance/refund-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "refunds",
+    "path": "/api/v1/finance/refunds",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "remittance_allocations",
+    "path": "/api/v1/finance/remittance-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "reports",
+    "screen": "report_download_events",
+    "path": "/api/v1/reports/report-download-events",
+    "generic_api": true
+  },
+  {
+    "module": "reports",
+    "screen": "report_export_jobs",
+    "path": "/api/v1/reports/report-export-jobs",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "role_permissions",
+    "path": "/api/v1/access-control/role-permissions",
+    "generic_api": false
+  },
+  {
+    "module": "access_control",
+    "screen": "roles",
+    "path": "/api/v1/access-control/roles",
+    "generic_api": false
+  },
+  {
+    "module": "academics",
+    "screen": "rooms",
+    "path": "/api/v1/academics/rooms",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "scholarships",
+    "path": "/api/v1/finance/scholarships",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "sections",
+    "path": "/api/v1/academics/sections",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "semesters",
+    "path": "/api/v1/academics/semesters",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "staff_profiles",
+    "path": "/api/v1/human-resources/staff-profiles",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_attendance",
+    "path": "/api/v1/student-management/student-attendance",
+    "generic_api": true
+  },
+  {
+    "module": "admissions",
+    "screen": "student_document_links",
+    "path": "/api/v1/admissions/student-document-links",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_enrollments",
+    "path": "/api/v1/student-management/student-enrollments",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "student_fee_charges",
+    "path": "/api/v1/finance/student-fee-charges",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_leave_requests",
+    "path": "/api/v1/student-management/student-leave-requests",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_parents",
+    "path": "/api/v1/student-management/student-parents",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "student_scholarships",
+    "path": "/api/v1/finance/student-scholarships",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_status_history",
+    "path": "/api/v1/student-management/student-status-history",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "student_subjects",
+    "path": "/api/v1/student-management/student-subjects",
+    "generic_api": true
+  },
+  {
+    "module": "student_management",
+    "screen": "students",
+    "path": "/api/v1/student-management/students",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "subject_offerings",
+    "path": "/api/v1/academics/subject-offerings",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "subjects",
+    "path": "/api/v1/academics/subjects",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "teachers",
+    "path": "/api/v1/human-resources/teachers",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "thread_members",
+    "path": "/api/v1/communications/thread-members",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "timetable_slots",
+    "path": "/api/v1/academics/timetable-slots",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "transport_allocations",
+    "path": "/api/v1/transport/transport-allocations",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "transport_routes",
+    "path": "/api/v1/transport/transport-routes",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "transport_stops",
+    "path": "/api/v1/transport/transport-stops",
+    "generic_api": true
+  },
+  {
+    "module": "access_control",
+    "screen": "user_roles",
+    "path": "/api/v1/access-control/user-roles",
+    "generic_api": false
+  },
+  {
+    "module": "access_control",
+    "screen": "users",
+    "path": "/api/v1/access-control/users",
+    "generic_api": false
+  },
+  {
+    "module": "transport",
+    "screen": "vehicles",
+    "path": "/api/v1/transport/vehicles",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "vendors",
+    "path": "/api/v1/finance/vendors",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "website_pages",
+    "path": "/api/v1/academics/website-pages",
+    "generic_api": true
+  },
+  {
+    "module": "inventory",
+    "screen": "purchase_requests",
+    "path": "/api/v1/inventory/purchase-requests",
+    "generic_api": true
+  },
+  {
+    "module": "inventory",
+    "screen": "purchase_orders",
+    "path": "/api/v1/inventory/purchase-orders",
+    "generic_api": true
+  },
+  {
+    "module": "inventory",
+    "screen": "asset_register",
+    "path": "/api/v1/inventory/asset-register",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "vehicle_trips",
+    "path": "/api/v1/transport/vehicle-trips",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "vehicle_maintenance",
+    "path": "/api/v1/transport/vehicle-maintenance",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "vehicle_fuel",
+    "path": "/api/v1/transport/vehicle-fuel",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "vehicle_seats",
+    "path": "/api/v1/transport/vehicle-seats",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "passenger_seats",
+    "path": "/api/v1/transport/passenger-seats",
+    "generic_api": true
+  },
+  {
+    "module": "transport",
+    "screen": "transport_attendance",
+    "path": "/api/v1/transport/transport-attendance",
+    "generic_api": true
+  },
+  {
+    "module": "academics",
+    "screen": "timetable_swap_requests",
+    "path": "/api/v1/academics/timetable-swap-requests",
+    "generic_api": true
+  },
+  {
+    "module": "human_resources",
+    "screen": "payroll_adjustments",
+    "path": "/api/v1/human-resources/payroll-adjustments",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "college_invoices",
+    "path": "/api/v1/finance/college-invoices",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "notification_templates",
+    "path": "/api/v1/communications/notification-templates",
+    "generic_api": true
+  },
+  {
+    "module": "communications",
+    "screen": "notification_campaigns",
+    "path": "/api/v1/communications/notification-campaigns",
+    "generic_api": true
+  },
+  {
+    "module": "finance",
+    "screen": "expense_payment_entries",
+    "path": "/api/v1/finance/expense-payment-entries",
+    "generic_api": true
+  }
+]

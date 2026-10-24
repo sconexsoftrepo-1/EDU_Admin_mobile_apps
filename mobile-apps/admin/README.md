@@ -1,7 +1,7 @@
-# EduNexa Admin mobile app
+# EduNexa Admin & Teachers
 
-Native Flutter management demo. Four working screens: Overview, Dues, Reports and Activity. Shows collections, scholarships, remaining student balances, expenditure, external remittances and net cash movement. Period filters affect receipts and expenses, not lifetime student balances. Reports can be viewed and copied as CSV through the device clipboard. Uses fictional in-memory records in major INR units, not the web portal's paise. The snapshot is explicitly dated 22 October 2026. It is not synchronized with the web preview.
+One Flutter app for admin & teachers. Select your role on the login screen, then sign in with your college account. The app opens a role-specific dashboard with the modules authorized by the server. The selected role is remembered for secure session restoration. Sign out to use another role.
 
-Run `flutter pub get`, `flutter analyze`, `flutter test`, then `flutter run` on your configured Android/iOS device. No production login, backend, live alerts or bank integration has been implemented. Configure your own iOS signing team. Python backend remains intentionally empty.
+Uses the shared `../shared/edunexa_client` package. The login selector uses the existing `admin-mobile` and `teacher-mobile` API client policies; permissions and account access remain enforced by the backend.
 
-Matching web preview: /colleges-institutions/edunexa-college/portal/admin/admin-app . Log in as Super Admin first, or open the floating Mobile apps panel and select Admin. Principal and Accounts Manager also have a management preview with their demo role.
+Run `flutter pub get`, `flutter analyze`, `flutter test`, then `flutter run --dart-define=API_BASE_URL=https://your-college-server`. For an Android emulator use `http://10.0.2.2:8010` during development. The default development URL is `http://127.0.0.1:8010`. Release builds require HTTPS. Configure iOS signing for your team before distribution.

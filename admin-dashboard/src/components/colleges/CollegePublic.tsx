@@ -15,17 +15,21 @@ import {
   Menu,
   X,
   Play,
-  Check,
   MapPin,
   Mail,
   Phone,
 } from "lucide-react";
-import SkylineTheme from "./SkylineTheme";
-import EngineeringCatalog from "./EngineeringCatalog";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { collegeRoot, type College } from "@/data/colleges";
-import { useCollege } from "./CollegeStore";
+import {
+  api,
+  errorText,
+  type ApplicationPayload,
+  type ContactPayload,
+  type IntakeKind,
+  type PublicOptions,
+} from "@/services/api";
 const Scene = dynamic(() => import("./CampusScene"), {
   ssr: false,
   loading: () => (
@@ -50,7 +54,7 @@ export default function CollegePublic({
   parts: string[];
 }) {
   const root = collegeRoot(c),
-    blue = c.slug === "skyline-institute",
+    blue = false,
     page = parts[0] || "",
     title =
       parts.length === 2 && page === "academics"
@@ -60,7 +64,36 @@ export default function CollegePublic({
     [hotspot, setHotspot] = useState(0),
     [scene, setScene] = useState(false);
   const region = useRef<HTMLDivElement>(null);
-  const { state, run, message } = useCollege();
+  const [intakeNotice, setIntakeNotice] = useState("");
+  const [intakeOptions, setIntakeOptions] = useState<PublicOptions>({
+    programs: [],
+    sources: [],
+  });
+  useEffect(() => {
+    if (page === "admissions" && parts[1] === "apply")
+      void api.public
+        .options()
+        .then(setIntakeOptions)
+        .catch(() => setIntakeNotice("Admissions server is unavailable"));
+  }, [page, parts]);
+  async function intake(
+    kind: IntakeKind,
+    values: Record<string, unknown>,
+    form: HTMLFormElement,
+  ) {
+    setIntakeNotice("Submitting…");
+    try {
+      // Field names of the public forms are the payload keys of public/<kind>.
+      const result = await api.public.submit(
+        kind,
+        values as unknown as ApplicationPayload | ContactPayload,
+      );
+      setIntakeNotice("Received. Your reference is " + result.reference);
+      form.reset();
+    } catch (error) {
+      setIntakeNotice(errorText(error) || "Unable to submit");
+    }
+  }
   useEffect(() => {
     if (!menu) return;
     const escape = (e: KeyboardEvent) => {
@@ -117,7 +150,7 @@ export default function CollegePublic({
   return (
     <div
       ref={region}
-      className={`college-site ${blue ? "college-skyline" : "college-edunexa"}`}
+      className={`college-site ${"college-edunexa"}`}
       style={{ "--college-accent": c.accent } as React.CSSProperties}
     >
       <div className="college-intro" aria-hidden="true">
@@ -125,12 +158,8 @@ export default function CollegePublic({
         <span>{c.short}</span>
       </div>
       <div className="college-utility">
-        <span>
-          {blue
-            ? "Engineering & Technology College · Fictional demo"
-            : "Welcome to a world of possibility"}
-        </span>
-        {blue && <SkylineTheme />}
+        <span>{"Welcome to a world of possibility"}</span>
+        {false}
         <div>
           <Link href={`${root}/portal/student`}>Student access</Link>
           <Link href={`${root}/contact`}>
@@ -141,17 +170,13 @@ export default function CollegePublic({
       <header className="college-nav">
         <Link href={root} className="college-brand">
           <Image
-            src={
-              blue
-                ? "/assets/colleges/skyline/branding/symbol.svg"
-                : `/assets/colleges-institutions/${c.slug}/crest.svg`
-            }
+            src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
             width={46}
             height={50}
             alt=""
           />
           <span>
-            <strong>{blue ? "Skyline Institute" : "EduNexa College"}</strong>
+            <strong>{"EduNexa College"}</strong>
             <small>{c.motto}</small>
           </span>
         </Link>
@@ -206,10 +231,7 @@ export default function CollegePublic({
               <div className="college-hero-shade" />
               <div className="college-hero-copy">
                 <span className="college-hero-label">
-                  <span />{" "}
-                  {blue
-                    ? "Ideas without boundaries"
-                    : "A modern approach to education"}
+                  <span /> {"A modern approach to education"}
                 </span>
                 <h1>{c.headline}</h1>
                 <p>{c.description}</p>
@@ -218,15 +240,13 @@ export default function CollegePublic({
                     className="college-button"
                     href={`${root}/admissions/apply`}
                   >
-                    {blue ? "Apply Now" : "Apply for Admission"}{" "}
-                    <ArrowUpRight size={17} />
+                    {"Apply for Admission"} <ArrowUpRight size={17} />
                   </Link>
                   <Link
                     className="college-button college-outline"
                     href={`${root}/campus`}
                   >
-                    <Play size={14} />{" "}
-                    {blue ? "Explore Campus" : "Take a Virtual Tour"}
+                    <Play size={14} /> {"Take a Virtual Tour"}
                   </Link>
                 </div>
                 <div className="college-hero-note">
@@ -240,7 +260,7 @@ export default function CollegePublic({
               </div>
               <aside className="college-stats">
                 {[
-                  [blue ? "1996" : "2001", "Our founding year"],
+                  ["2001", "Our founding year"],
                   [String(c.programs.length), "Academic programs"],
                   ["8", "Campus destinations"],
                   ["2026", "Admissions open"],
@@ -328,20 +348,16 @@ export default function CollegePublic({
               <span className="college-overline">
                 An education for the whole person
               </span>
-              <h2>
-                {blue
-                  ? "Built for what comes next."
-                  : "Rooted in purpose. Open to possibility."}
-              </h2>
+              <h2>{"Rooted in purpose. Open to possibility."}</h2>
               <p>
                 At {c.short}, education begins with a question: what could you
                 become? Small learning communities, thoughtful mentoring, and
                 hands-on exploration help you find your answer.
               </p>
               <p>
-                Founded in {blue ? "1996" : "2001"} in this fictional
-                institutional story, our campus brings the sciences, creative
-                thinking, and practical skills together.
+                Founded in {"2001"} in this fictional institutional story, our
+                campus brings the sciences, creative thinking, and practical
+                skills together.
               </p>
               <Link className="college-text-link" href={`${root}/leadership`}>
                 Meet the people shaping our future <ArrowUpRight />
@@ -368,9 +384,7 @@ export default function CollegePublic({
                 "Your chapter",
               ].map((t, i) => (
                 <div key={t}>
-                  <small>
-                    {[blue ? "1996" : "2001", "2010", "2020", "2026"][i]}
-                  </small>
+                  <small>{["2001", "2010", "2020", "2026"][i]}</small>
                   <strong>{t}</strong>
                 </div>
               ))}
@@ -408,64 +422,57 @@ export default function CollegePublic({
             ))}
           </section>
         )}
-        {blue &&
-          (!page || page === "academics" || page === "departments") &&
-          !parts[1] && <EngineeringCatalog />}
-        {(section("academics") || page === "departments") &&
-          (!blue || !!parts[1]) && (
-            <section className="college-section college-programs college-reveal">
-              <div className="college-section-heading">
-                <div>
-                  <span className="college-overline">Find your direction</span>
-                  <h2>
-                    {blue
-                      ? "Ideas into impact."
-                      : "Many paths. One bright future."}
-                  </h2>
-                </div>
-                <p>
-                  Explore disciplines that connect rigorous thinking with
-                  meaningful practice.
-                </p>
+        {false}
+        {(section("academics") || page === "departments") && (
+          <section className="college-section college-programs college-reveal">
+            <div className="college-section-heading">
+              <div>
+                <span className="college-overline">Find your direction</span>
+                <h2>{"Many paths. One bright future."}</h2>
               </div>
-              <div className="college-program-grid">
-                {c.programs
-                  .filter((p) => !parts[1] || p.slug === parts[1])
-                  .map((p, i) => (
-                    <article key={p.slug}>
-                      <span className="college-program-icon">
-                        {i % 2 ? <FlaskConical /> : <BookOpen />}
-                      </span>
-                      <small>
-                        {p.department} / {p.duration}
-                      </small>
-                      <h3>{p.name}</h3>
-                      <p>
-                        Foundational study, applied projects, collaborative
-                        seminars, and individual mentorship. Build a portfolio
-                        of work and a lifelong habit of inquiry.
-                      </p>
-                      <ul>
-                        <li>Classroom and practical learning</li>
-                        <li>Faculty-guided capstone project</li>
-                        <li>Career and postgraduate guidance</li>
-                      </ul>
-                      <Link href={`${root}/academics/${p.slug}`}>
-                        Program details <ArrowUpRight size={17} />
+              <p>
+                Explore disciplines that connect rigorous thinking with
+                meaningful practice.
+              </p>
+            </div>
+            <div className="college-program-grid">
+              {c.programs
+                .filter((p) => !parts[1] || p.slug === parts[1])
+                .map((p, i) => (
+                  <article key={p.slug}>
+                    <span className="college-program-icon">
+                      {i % 2 ? <FlaskConical /> : <BookOpen />}
+                    </span>
+                    <small>
+                      {p.department} / {p.duration}
+                    </small>
+                    <h3>{p.name}</h3>
+                    <p>
+                      Foundational study, applied projects, collaborative
+                      seminars, and individual mentorship. Build a portfolio of
+                      work and a lifelong habit of inquiry.
+                    </p>
+                    <ul>
+                      <li>Classroom and practical learning</li>
+                      <li>Faculty-guided capstone project</li>
+                      <li>Career and postgraduate guidance</li>
+                    </ul>
+                    <Link href={`${root}/academics/${p.slug}`}>
+                      Program details <ArrowUpRight size={17} />
+                    </Link>
+                    {parts[1] && (
+                      <Link
+                        className="college-button"
+                        href={`${root}/admissions/apply`}
+                      >
+                        Apply for this program
                       </Link>
-                      {parts[1] && (
-                        <Link
-                          className="college-button"
-                          href={`${root}/admissions/apply`}
-                        >
-                          Apply for this program
-                        </Link>
-                      )}
-                    </article>
-                  ))}
-              </div>
-            </section>
-          )}
+                    )}
+                  </article>
+                ))}
+            </div>
+          </section>
+        )}
         {(section("campus") || page === "facilities") && (
           <section className="college-campus college-reveal">
             <div className="college-section">
@@ -574,9 +581,7 @@ export default function CollegePublic({
                 <span className="college-overline">
                   Beyond the lecture hall
                 </span>
-                <h2>
-                  {blue ? "Make your mark." : "Belong. Discover. Become."}
-                </h2>
+                <h2>{"Belong. Discover. Become."}</h2>
               </div>
               <p>
                 Clubs, cultural exchange, sport, and service bring a richer
@@ -630,7 +635,7 @@ export default function CollegePublic({
               </h2>
               <p>
                 Discover a program, prepare your documents, and submit your
-                application. Our demo admission team will guide your application
+                application. Our admissions team will guide your application
                 from inquiry to enrollment.
               </p>
               <Link
@@ -658,8 +663,8 @@ export default function CollegePublic({
               <h3>Potential deserves opportunity.</h3>
               <p>
                 Explore merit, need-based, sports, and institutional
-                scholarships. Eligibility and approvals are simulated in the
-                management portal.
+                scholarships. Eligibility is reviewed and approved by the
+                accounts office.
               </p>
             </div>
           </section>
@@ -673,20 +678,27 @@ export default function CollegePublic({
                 const data = Object.fromEntries(
                   new FormData(e.currentTarget),
                 ) as Record<string, string>;
-                if (run({ type: "admission.create", data }))
-                  e.currentTarget.reset();
+                void intake(
+                  "applications",
+                  {
+                    ...data,
+                    consent:
+                      new FormData(e.currentTarget).get("consent") === "on",
+                  },
+                  e.currentTarget,
+                );
               }}
             >
               <h2>Application for admission</h2>
               <p>
-                Use fictional information only. Submissions are saved in this
-                browser’s demo admissions register.
+                Submit your details to the college admissions team. Keep your
+                reference number for follow-up.
               </p>
               {[
                 ["name", "Student name"],
                 ["email", "Email"],
                 ["guardian", "Guardian name"],
-                ["contact", "Contact reference"],
+                ["contact", "Contact mobile number"],
               ].map(([key, label]) => (
                 <label key={key}>
                   {label}
@@ -700,23 +712,20 @@ export default function CollegePublic({
               <label>
                 Program
                 <select name="program">
-                  {c.programs.map((p) => (
-                    <option key={p.slug}>{p.name}</option>
+                  {intakeOptions.programs.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {p.name}
+                    </option>
                   ))}
                 </select>
               </label>
               <label>
                 Admission source
                 <select name="source">
-                  {[
-                    "Website",
-                    "Walk-in",
-                    "Social Media",
-                    "Referral",
-                    "Education Fair",
-                    "Other",
-                  ].map((s) => (
-                    <option key={s}>{s}</option>
+                  {intakeOptions.sources.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -737,10 +746,17 @@ export default function CollegePublic({
                   placeholder="List the fictional documents prepared for review"
                 />
               </label>
+              <label>
+                <span>
+                  <input type="checkbox" name="consent" required /> I consent to
+                  the college processing these details for my admission and
+                  contacting me about this application.
+                </span>
+              </label>
+              {intakeNotice && <p role="status">{intakeNotice}</p>}
               <button className="college-button">
-                Submit demo application <ArrowRight size={16} />
+                Submit application <ArrowRight size={16} />
               </button>
-              <p role="status">{message}</p>
             </form>
           </section>
         )}
@@ -750,19 +766,15 @@ export default function CollegePublic({
             {[
               [
                 "How do I apply?",
-                "Choose a program and complete the demo application. Follow its status in the admissions portal.",
+                "Choose a program and complete the online application. The admissions team reviews it and contacts you about the next steps.",
               ],
               [
                 "Are scholarships available?",
-                "The demo supports merit, need-based, sports, and institutional awards. Accounts staff can propose awards for approval.",
+                "Merit, need-based, sports, and institutional awards are available. The accounts office reviews and approves each award.",
               ],
               [
                 "Can I explore the campus?",
-                "Use our interactive 3D campus, or contact the fictional admissions team to simulate a visit.",
-              ],
-              [
-                "Is this a real institution?",
-                "This is a fictional college template with a browser-based ERP demonstration. No real admissions, payments, SMS messages or credentials are processed.",
+                "Use our interactive 3D campus, or request a visit and the admissions team will arrange it.",
               ],
             ].map(([q, a]) => (
               <details key={q}>
@@ -790,29 +802,30 @@ export default function CollegePublic({
               className="college-form"
               onSubmit={(e) => {
                 e.preventDefault();
-                alert(
-                  "Demo campus visit request received. No message was sent.",
+                const values = Object.fromEntries(
+                  new FormData(e.currentTarget),
                 );
-                e.currentTarget.reset();
+                void intake("contact", values, e.currentTarget);
               }}
             >
               <label>
                 Your name
-                <input required />
+                <input name="name" required />
               </label>
               <label>
                 Demo email
-                <input type="email" required />
+                <input name="email" type="email" required />
               </label>
               <label>
                 Preferred visit date
-                <input type="date" required />
+                <input name="visit_date" type="date" required />
               </label>
               <label>
                 Your question
-                <textarea required />
+                <textarea name="message" required />
               </label>
-              <button className="college-button">Request a demo visit</button>
+              {intakeNotice && <p role="status">{intakeNotice}</p>}
+              <button className="college-button">Request a visit</button>
             </form>
           </section>
         )}
@@ -833,35 +846,6 @@ export default function CollegePublic({
                 Explore the management portal <ArrowUpRight size={17} />
               </Link>
             </div>
-            <div className="college-dashboard-preview">
-              <div>
-                <span>{c.short} / Campus overview</span>
-                <span>Demo</span>
-              </div>
-              <h3>A good day to make progress.</h3>
-              <div className="college-preview-metrics">
-                <span>
-                  <Users /> Students<strong>{state.students.length}</strong>
-                </span>
-                <span>
-                  <BookOpen /> Programs<strong>{c.programs.length}</strong>
-                </span>
-                <span>
-                  <GraduationCap /> Campus beds
-                  <strong>
-                    {state.rooms.reduce((n, r) => n + (r.capacity || 0), 0)}
-                  </strong>
-                </span>
-              </div>
-              <div className="college-preview-chart">
-                {[45, 60, 43, 75, 65, 92, 74, 100, 84].map((h, i) => (
-                  <i key={i} style={{ height: h + "%" }} />
-                ))}
-              </div>
-              <p>
-                <Check size={14} /> A connected, fictional campus dataset
-              </p>
-            </div>
           </section>
         )}
       </main>
@@ -869,11 +853,7 @@ export default function CollegePublic({
         <div>
           <Link className="college-brand" href={root}>
             <Image
-              src={
-                blue
-                  ? "/assets/colleges/skyline/branding/symbol.svg"
-                  : `/assets/colleges-institutions/${c.slug}/crest.svg`
-              }
+              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
               alt=""
               width={44}
               height={50}

@@ -1,7 +1,7 @@
-# EduNexa Parent Flutter app
+# EduNexa Parents & Students
 
-Generated Android and iOS project, with a role-specific module outline. This is a starter, not the complete native implementation of the existing mobile web screens.
+One Flutter app for parents & students. Select your role on the login screen, then sign in with your college account. The app opens a role-specific dashboard with the modules authorized by the server. The selected role is remembered for secure session restoration. Sign out to use another role.
 
-Run `flutter pub get`, `flutter analyze`, then `flutter run`. Android requires an Android SDK/emulator. iOS builds require Xcode, signing and an Apple developer setup. Configure signing for your own team before distribution.
+Uses the shared `../shared/edunexa_client` package. The login selector uses the existing `parent-mobile` and `student-mobile` API client policies; permissions and account access remain enforced by the backend.
 
-Planned modules: Linked children, Attendance and leave requests, Fees and receipts, Results and timetable, Announcements and teacher messages. No login, API calls, push notifications, payment integration, or local production storage are configured. The backend folder is intentionally empty. Use database/schema-catalog.json and client-data/initial-data-entry/import-contract-v2.json when designing the future Python API. Do not access SQL directly from Flutter.
+Run `flutter pub get`, `flutter analyze`, `flutter test`, then `flutter run --dart-define=API_BASE_URL=https://your-college-server`. For an Android emulator use `http://10.0.2.2:8010` during development. The default development URL is `http://127.0.0.1:8010`. Release builds require HTTPS. Configure iOS signing for your team before distribution.

@@ -1,7 +1,8 @@
 "use client";
-import EngineeringAcademics from "./EngineeringAcademics";
-import SkylineTheme from "./SkylineTheme";
-import SkylineDashboard from "./SkylineDashboard";
+import { api } from "@/services/api";
+import PortalShellSkeleton from "./PortalShellSkeleton";
+import RolesAccess from "./RolesAccess";
+import ConnectedPortal from "./ConnectedPortal";
 import FloatingMobileApps from "./FloatingMobileApps";
 import PDFActions from "./PDFActions";
 import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
@@ -93,6 +94,16 @@ import {
 import { csv, professionalPdf } from "@/lib/colleges/download";
 import ERPTable, { type TableRecord } from "./ERPTable";
 type Field = FormField;
+const entryScreens = [
+  "student-enrollment",
+  "parent-enrollment",
+  "admission-forms",
+  "teaching-staff",
+  "non-teaching-staff",
+  "daily-labour",
+  "course-setup",
+  "course-enrollment",
+];
 const labels: Record<string, string> = {
   ...operationLabels,
   dashboard: "Dashboard",
@@ -116,7 +127,15 @@ const labels: Record<string, string> = {
   reports: "Reports & analytics",
   "audit-logs": "Audit logs",
   roles: "Roles & access",
+  "student-enrollment": "Student enrollment",
+  "course-setup": "Courses & enrollment",
+  "teaching-staff": "Teaching staff",
+  "non-teaching-staff": "Non-teaching staff",
+  "daily-labour": "Daily labour",
   settings: "Settings",
+  forms: "Form builder",
+  imports: "Excel imports",
+  documents: "Documents",
 };
 const cols = (...names: string[]) =>
   names.map((key) => ({
@@ -147,9 +166,38 @@ export default function CollegePortal({
       reset,
       message,
       clear,
+      account,
+      roleName,
+      workspaceArea,
+      sessionError,
+      modules,
     } = useCollege(),
     router = useRouter(),
     root = collegeRoot(c);
+  const [apiOpen, setApiOpen] = useState(false);
+  const [manageModule, setManageModule] = useState<string | null>(null);
+  useEffect(() => {
+    const show = (event: Event) => {
+      const command = (event as CustomEvent).detail?.type || "";
+      const target = command.startsWith("payment")
+        ? "payments"
+        : command.startsWith("certificate")
+          ? "certificates"
+          : command.startsWith("admission")
+            ? "admissions"
+            : command.startsWith("student")
+              ? "students"
+              : command.startsWith("room")
+                ? "hostels"
+                : command.startsWith("leave")
+                  ? "hostel-permissions"
+                  : null;
+      setManageModule(target);
+      setApiOpen(true);
+    };
+    window.addEventListener("edunexa:manage-records", show);
+    return () => window.removeEventListener("edunexa:manage-records", show);
+  }, []);
   const [selectedRole, setSelectedRole] = useState<Role>("Super Admin"),
     [showPassword, setShowPassword] = useState(false),
     [formBusy, setFormBusy] = useState(false),
@@ -183,7 +231,7 @@ export default function CollegePortal({
       setCompact(
         localStorage.getItem(`kc-floating-sidebar-${c.slug}`)
           ? localStorage.getItem(`kc-floating-sidebar-${c.slug}`) !== "expanded"
-          : !(c.slug === "skyline-institute" && window.innerWidth >= 1100),
+          : !false,
       );
       const filters = JSON.parse(
         sessionStorage.getItem(`kc-filters-${c.slug}`) || "{}",
@@ -252,7 +300,20 @@ export default function CollegePortal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
-  const selfStudent = s.students.find((st) => st.id === `${c.number}-S0001`)!;
+  const selfStudent = s.students.find((st) => st.id === account?.person_code) ||
+    s.students[0] || {
+      id: "",
+      name: "Student",
+      program: "",
+      year: "",
+      fee: 0,
+      scholarship: 0,
+      status: "",
+      email: "",
+      guardian: "",
+      date: "",
+      department: "",
+    };
   const field = (
     key: string,
     label: string,
@@ -268,29 +329,16 @@ export default function CollegePortal({
       role === "Student" ? [selfStudent.id] : s.students.map((x) => x.id),
     );
   function form(title: string, type: string, fields: Field[], id?: string) {
+    void title;
+    void type;
+    void fields;
+    void id;
     clear();
-    setFormBusy(false);
-    const sections: Record<string, string> = {
-      name: "Student identity",
-      email: "Contact & address",
-      guardian: "Guardian & emergency contact",
-      program: "Academic information",
-      source: "Academic information",
-      status: "Academic information",
-      year: "Academic information",
-      note: "Additional information",
-    };
-    setModal({
-      title,
-      type,
-      fields: ["student.save", "admission.create", "admission.edit"].includes(
-        type,
-      )
-        ? fields.map((f) => ({ ...f, section: f.section || sections[f.key] }))
-        : fields,
-      id,
-    });
+    window.dispatchEvent(
+      new CustomEvent("edunexa:manage-records", { detail: { type } }),
+    );
   }
+
   useEffect(() => {
     if (modal) dialog.current?.showModal();
   }, [modal]);
@@ -321,7 +369,7 @@ export default function CollegePortal({
       : rows;
   const nav = (m: string) => `${root}/portal/${area}/${m}`;
   function collect(st?: Student) {
-    form("Record demo payment", "payment", [
+    form("Record payment", "payment", [
       field(
         "studentId",
         "Student",
@@ -420,25 +468,23 @@ export default function CollegePortal({
         "Guardian",
         "Authorized Relative",
       ]),
-      field("contact", "Fictional contact reference"),
+      field("contact", "Contact number"),
     ]);
   }
   function downloadCertificate(
     row: RecordRow,
     mode: "view" | "download" = "download",
   ) {
-    const st = s.students.find((st) => st.id === row.studentId);
-    if (!st) return;
-    const url = location.origin + root + "/verify-certificate/" + row.id;
-    if (mode === "view" || run({ type: "certificate.download", id: row.id }))
-      return professionalPdf(
-        row.id,
-        certificateReport(c, s, row, st, url, role),
-        mode,
-      );
+    void mode;
+    void api.documents
+      .download("certificate", row.id)
+      .catch((e) => alert(e.message));
   }
   function receipt(row: RecordRow, mode: "view" | "download" = "download") {
-    return professionalPdf(row.id, receiptReport(c, s, row, role), mode);
+    void mode;
+    void api.documents
+      .download("receipt", row.reference || row.id)
+      .catch((e) => alert(e.message));
   }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -452,128 +498,23 @@ export default function CollegePortal({
       setModal(null);
     }
   }
-  if (!ready || !preferencesReady)
-    return <div className="erp-loading">Loading your campus workspace…</div>;
-  if (area === "login")
+  if (!ready) return <PortalShellSkeleton college={c} />;
+  if (!account && sessionError)
     return (
-      <div
-        className={`college-login ${c.slug === "skyline-institute" ? "college-skyline" : ""}`}
-        style={{ "--college-accent": c.accent } as React.CSSProperties}
-      >
-        <div className="college-login-art">
-          <Image
-            src={`/assets/colleges-institutions/${c.slug}/campus.webp`}
-            alt="Fictional campus"
-            fill
-            sizes="55vw"
-          />
-          <div>
-            <Link href={root}>Back to website</Link>
-            <h1>
-              Your campus.
-              <br />
-              Connected.
-            </h1>
-            <p>
-              One place for the people, learning, and everyday work that make{" "}
-              {c.short}.
-            </p>
-            <span>Fictional college · Interactive ERP demonstration</span>
-          </div>
-        </div>
-        <div className="college-login-form">
-          <Image
-            src={
-              c.slug === "skyline-institute"
-                ? "/assets/colleges/skyline/branding/symbol.svg"
-                : `/assets/colleges-institutions/${c.slug}/crest.svg`
-            }
-            alt="College crest"
-            width={60}
-            height={66}
-          />
-          <h2>Welcome to {c.short}.</h2>
-          <p>Sign in to your campus workspace.</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              login(
-                selectedRole,
-                new FormData(e.currentTarget).get("remember") === "on",
-              );
-              router.push(`${root}/portal/${roleHome[selectedRole]}`);
-            }}
-          >
-            <label>
-              Demo role
-              <select
-                aria-label="Demo role"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as Role)}
-              >
-                {roles.map((r) => (
-                  <option key={r}>{r}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Demo username
-              <input
-                key={selectedRole}
-                required
-                defaultValue={
-                  selectedRole.toLowerCase().replaceAll(" ", "-") +
-                  "@demo.example"
-                }
-              />
-            </label>
-            <label>
-              Password
-              <div className="erp-password">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  defaultValue="CampusDemo2026"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </label>
-            <div className="erp-login-options">
-              <label>
-                <input type="checkbox" name="remember" /> Remember demo session
-              </label>
-              <button
-                type="button"
-                onClick={() =>
-                  alert(
-                    "Demo password: CampusDemo2026. This role selector simulates login; no real authentication takes place.",
-                  )
-                }
-              >
-                Forgot password?
-              </button>
-            </div>
-            <button className="college-button">
-              Enter demo portal <ArrowRight size={17} />
-            </button>
-          </form>
-          <div className="college-demo-note">
-            <Shield size={20} />
-            <p>
-              Select any role and use the prefilled fictional credentials. This
-              is a client-side role simulation, with browser-local fictional
-              data. No production authentication.
-            </p>
-          </div>
-        </div>
+      <div className="erp-access">
+        <Shield size={40} />
+        <h1>Your session could not be loaded</h1>
+        <p>{sessionError}</p>
+        <button
+          className="college-button"
+          onClick={() => window.location.reload()}
+        >
+          Retry session
+        </button>
       </div>
     );
+  if (area === "login" || !account)
+    return <ConnectedPortal college={c} parts={parts} loginRedirect />;
   if (!role)
     return (
       <div className="erp-access">
@@ -585,17 +526,21 @@ export default function CollegePortal({
         </Link>
       </div>
     );
-  const homeArea = roleHome[role];
-  const areaAllowed =
-    area === homeArea ||
-    role === "Super Admin" ||
-    (role === "Principal" && area === "admin");
-  if (!areaAllowed || !canRead(role, activeModule))
+  if (
+    ["student", "parent"].includes(account.person_type) ||
+    ["teaching", "self"].includes(account.workspace_scope || "")
+  )
+    return <ConnectedPortal college={c} parts={parts} />;
+  const homeArea = workspaceArea || roleHome[role];
+  const areaAllowed = area === homeArea;
+  if (!areaAllowed && modules.length)
+    return <PortalShellSkeleton college={c} />;
+  if (!areaAllowed || !modules.includes(activeModule))
     return (
       <div className="erp-access">
         <Shield size={40} />
         <h1>Access denied</h1>
-        <p>{role} does not have access to this demo workspace.</p>
+        <p>{roleName || role} does not have access to this campus workspace.</p>
         <Link className="college-button" href={`${root}/portal/${homeArea}`}>
           Return to your workspace
         </Link>
@@ -606,7 +551,7 @@ export default function CollegePortal({
       <div className="erp-welcome">
         <div>
           <span>
-            {new Date("2026-10-18").toLocaleDateString("en-IN", {
+            {new Date().toLocaleDateString("en-IN", {
               weekday: "long",
               day: "numeric",
               month: "long",
@@ -749,7 +694,7 @@ export default function CollegePortal({
             {allowed("Super Admin", "Principal", "Accounts Manager") && (
               <ERPAnalytics
                 payments={payments}
-                skyline={c.slug === "skyline-institute"}
+                useAreaDefault={false}
                 onMonth={(month, selectedYear) => {
                   const last = new Date(
                     Number(selectedYear),
@@ -891,67 +836,38 @@ export default function CollegePortal({
             {allowed("Super Admin", "Principal", "Accounts Manager") && (
               <section className="erp-panel erp-due-alerts">
                 <div className="erp-panel-title">
-                  <h2>
-                    {c.slug === "skyline-institute"
-                      ? "Important notifications"
-                      : "Fee due alerts"}
-                  </h2>
-                  <Link
-                    href={nav(
-                      c.slug === "skyline-institute"
-                        ? "notifications"
-                        : canRead(role, "fees")
-                          ? "fees"
-                          : "reports",
-                    )}
-                  >
+                  <h2>{"Fee due alerts"}</h2>
+                  <Link href={nav(canRead(role, "fees") ? "fees" : "reports")}>
                     View all
                   </Link>
                 </div>
                 <div className="erp-compact-records">
-                  {c.slug === "skyline-institute"
-                    ? visibleNotices(s, role)
-                        .slice(0, 5)
-                        .map((n) => (
-                          <Link href={nav("notifications")} key={n.id}>
-                            <span className="erp-record-avatar">
-                              <Bell size={15} />
-                            </span>
-                            <div>
-                              <strong>{n.name}</strong>
-                              <small>
-                                {n.date.slice(0, 16).replace("T", " ")} ·{" "}
-                                {n.note}
-                              </small>
-                            </div>
-                          </Link>
-                        ))
-                    : studentRows
-                        .filter((st) => balance(s, st) > 0)
-                        .slice(0, 4)
-                        .map((st) => (
-                          <Link
-                            key={st.id}
-                            href={
-                              canRead(role, "students")
-                                ? `${nav("students")}/${st.id}`
-                                : nav("fees")
-                            }
-                          >
-                            <span className="erp-record-avatar">
-                              {st.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join("")}
-                            </span>
-                            <div>
-                              <strong>{st.name}</strong>
-                              <small>{st.program}</small>
-                            </div>
-                            <b>{money(balance(s, st))}</b>
-                          </Link>
-                        ))}
+                  {studentRows
+                    .filter((st) => balance(s, st) > 0)
+                    .slice(0, 4)
+                    .map((st) => (
+                      <Link
+                        key={st.id}
+                        href={
+                          canRead(role, "students")
+                            ? `${nav("students")}/${st.id}`
+                            : nav("fees")
+                        }
+                      >
+                        <span className="erp-record-avatar">
+                          {st.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("")}
+                        </span>
+                        <div>
+                          <strong>{st.name}</strong>
+                          <small>{st.program}</small>
+                        </div>
+                        <b>{money(balance(s, st))}</b>
+                      </Link>
+                    ))}
                 </div>
               </section>
             )}
@@ -1408,22 +1324,11 @@ export default function CollegePortal({
       ),
     );
   function content() {
+    if (activeModule === "roles") return <RolesAccess />;
     if (operationLabels[activeModule])
       return <OperationsWorkspace college={c} module={activeModule} />;
     if (activeModule === "dashboard" && role === "Parent")
       return <OperationsWorkspace college={c} module="parent-app" />;
-    if (
-      activeModule === "dashboard" &&
-      c.slug === "skyline-institute" &&
-      ["Super Admin", "Principal"].includes(role!)
-    )
-      return (
-        <SkylineDashboard
-          college={c}
-          nav={nav}
-          filters={{ year, department, from, to }}
-        />
-      );
     if (activeModule === "dashboard")
       return (
         <>
@@ -2543,7 +2448,7 @@ export default function CollegePortal({
         <>
           {heading(
             "Faculty & staff",
-            "Assigned responsibilities and demo role management.",
+            "Assigned responsibilities and role management.",
             role === "Super Admin"
               ? button("Add staff", () =>
                   form("Add staff member", "staff.save", [
@@ -2594,8 +2499,6 @@ export default function CollegePortal({
           )}
         </>
       );
-    if (activeModule === "academics" && c.slug === "skyline-institute")
-      return <EngineeringAcademics />;
     if (activeModule === "academics") {
       const programs = c.programs.filter(
         (p) => department === "all" || p.department === department,
@@ -2780,7 +2683,7 @@ export default function CollegePortal({
           <div className="erp-dashboard-grid erp-report-charts">
             <ERPAnalytics
               payments={payments}
-              skyline={c.slug === "skyline-institute"}
+              useAreaDefault={false}
               onMonth={(month, selectedYear) => {
                 setFrom(`${selectedYear}-${String(month).padStart(2, "0")}-01`);
                 setTo(
@@ -2898,6 +2801,8 @@ export default function CollegePortal({
         </>
       );
     if (activeModule === "settings")
+      return <ConnectedPortal college={c} parts={parts} embedded />;
+    if (activeModule === "__legacy-settings")
       return (
         <>
           {heading(
@@ -2977,11 +2882,11 @@ export default function CollegePortal({
           </section>
         </>
       );
-    return heading("Module unavailable", "Return to the dashboard.");
+    return <ConnectedPortal college={c} parts={parts} embedded />;
   }
   return (
     <div
-      className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${c.slug === "skyline-institute" ? "erp-skyline" : ""}`}
+      className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${""}`}
       style={{ "--college-accent": c.accent } as React.CSSProperties}
     >
       <a href="#erp-content" className="erp-skip">
@@ -3004,11 +2909,7 @@ export default function CollegePortal({
         <div className="erp-sidebar-brand">
           <Link href={root}>
             <Image
-              src={
-                c.slug === "skyline-institute"
-                  ? "/assets/colleges/skyline/branding/symbol.svg"
-                  : `/assets/colleges-institutions/${c.slug}/crest.svg`
-              }
+              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
               width={32}
               height={38}
               alt=""
@@ -3022,6 +2923,7 @@ export default function CollegePortal({
         <small className="erp-sidebar-label">Campus workspace</small>
         <WorkspaceNavigation
           role={role!}
+          allowedModules={modules}
           active={activeModule}
           labels={labels}
           nav={nav}
@@ -3030,10 +2932,6 @@ export default function CollegePortal({
           expand={() => setCompact(false)}
         />
         <div className="erp-sidebar-foot">
-          <Link href="/colleges-institutions">
-            <ArrowUpRight size={17} />
-            <span>Back to showcase</span>
-          </Link>
           <button
             aria-label={compact ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!compact}
@@ -3054,12 +2952,6 @@ export default function CollegePortal({
         />
       )}
       <div className="erp-workspace">
-        <nav className="erp-home-navigation" aria-label="Main home navigation">
-          <Link href="/colleges-institutions">
-            <ArrowLeft size={15} aria-hidden="true" />
-            Back to main home
-          </Link>
-        </nav>
         <header className="erp-topbar">
           <button
             className="erp-mobile-menu"
@@ -3077,13 +2969,21 @@ export default function CollegePortal({
           >
             <Menu size={18} />
           </button>
-          <WorkspaceSearch state={s} role={role!} labels={labels} nav={nav} />
-          <NotificationCenter
-            rows={visibleNotices(s, role)}
-            slug={`${c.slug}-${role}`}
-            href={nav("notifications")}
+          <WorkspaceSearch
+            state={s}
+            role={role!}
+            allowedModules={modules}
+            labels={labels}
+            nav={nav}
           />
-          {c.slug === "skyline-institute" && <SkylineTheme />}
+          {modules.includes("notifications") && (
+            <NotificationCenter
+              rows={visibleNotices(s, role)}
+              slug={`${c.slug}-${role}`}
+              href={nav("notifications")}
+            />
+          )}
+          {false}
           <details className="erp-header-actions">
             <summary>
               Quick actions <ChevronDown size={13} />
@@ -3127,18 +3027,17 @@ export default function CollegePortal({
                 {role === "Student" ? "AS" : role === "Principal" ? "RS" : "AD"}
               </span>
               <span>
-                <strong>{role}</strong>
+                <strong>{roleName || role}</strong>
                 <small>{c.short}</small>
               </span>
               <ChevronDown size={14} />
             </summary>
             <div>
-              <p>Frontend demo session</p>
-              <Link href={`${root}/portal/login`}>Switch demo role</Link>
+              <p>{String(account.login_id)}</p>
+              <span>{roleName}</span>
               <button
                 onClick={() => {
                   logout();
-                  router.push(`${root}/portal/login`);
                 }}
               >
                 <LogOut size={14} /> Log out
@@ -3157,24 +3056,11 @@ export default function CollegePortal({
             />
             <div>
               <span>{c.short}</span>
-              <strong>
-                {c.slug === "skyline-institute"
-                  ? "Knowledge. Innovation. Impact."
-                  : "Learn today. Lead tomorrow."}
-              </strong>
+              <strong>{"Learn today. Lead tomorrow."}</strong>
             </div>
             <span className="erp-campus-live">Campus workspace</span>
           </div>
         )}
-        <div className="erp-demo-banner">
-          <Shield size={13} />
-          <span>
-            Interactive demo · Fictional data · Payments and SMS are simulated
-          </span>
-          <Link href={root}>
-            College website <ArrowUpRight size={12} />
-          </Link>
-        </div>
         <main id="erp-content" className="erp-content">
           <div className="erp-breadcrumb">
             <Link href={`${root}/portal/${area}`}>{c.short}</Link>
@@ -3187,94 +3073,155 @@ export default function CollegePortal({
               </>
             )}
           </div>
-          {activeModule !== "timetable" && (
-            <>
-              <button
-                className="erp-filter-toggle"
-                aria-expanded={filtersOpen}
-                aria-controls="erp-global-filters"
-                onClick={() => setFiltersOpen(!filtersOpen)}
-              >
-                Filters{" "}
-                <span>
-                  {
-                    [year !== "all", department !== "all", !!from, !!to].filter(
-                      Boolean,
-                    ).length
-                  }{" "}
-                  active
-                </span>
-                <ChevronDown size={14} />
-              </button>
-              <div
-                id="erp-global-filters"
-                className={`erp-filters ${filtersOpen ? "is-open" : ""}`}
-              >
-                <label>
-                  Academic year
-                  <select
-                    aria-label="Academic year filter"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                  >
-                    <option value="all">All academic years</option>
-                    {["2024-2025", "2025-2026", "2026-2027"].map((y) => (
-                      <option key={y}>{y}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Department
-                  <select
-                    aria-label="Department filter"
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                  >
-                    <option value="all">All departments</option>
-                    {Array.from(
-                      new Set(c.programs.map((p) => p.department)),
-                    ).map((d) => (
-                      <option key={d}>{d}</option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  From
-                  <input
-                    type="date"
-                    value={from}
-                    onChange={(e) => setFrom(e.target.value)}
-                  />
-                </label>
-                <label>
-                  To
-                  <input
-                    type="date"
-                    value={to}
-                    onChange={(e) => setTo(e.target.value)}
-                  />
-                </label>
+          {activeModule !== "timetable" &&
+            !entryScreens.includes(activeModule) && (
+              <>
                 <button
-                  onClick={() => {
-                    setYear("all");
-                    setDepartment("all");
-                    setFrom("");
-                    setTo("");
-                  }}
+                  className="erp-filter-toggle"
+                  aria-expanded={filtersOpen}
+                  aria-controls="erp-global-filters"
+                  onClick={() => setFiltersOpen(!filtersOpen)}
                 >
-                  Reset filters
+                  Filters{" "}
+                  <span>
+                    {
+                      [
+                        year !== "all",
+                        department !== "all",
+                        !!from,
+                        !!to,
+                      ].filter(Boolean).length
+                    }{" "}
+                    active
+                  </span>
+                  <ChevronDown size={14} />
                 </button>
-              </div>
-            </>
+                <div
+                  id="erp-global-filters"
+                  className={`erp-filters ${filtersOpen ? "is-open" : ""}`}
+                >
+                  <label>
+                    Academic year
+                    <select
+                      aria-label="Academic year filter"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
+                    >
+                      <option value="all">All academic years</option>
+                      {["2024-2025", "2025-2026", "2026-2027"].map((y) => (
+                        <option key={y}>{y}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Department
+                    <select
+                      aria-label="Department filter"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                    >
+                      <option value="all">All departments</option>
+                      {Array.from(
+                        new Set(c.programs.map((p) => p.department)),
+                      ).map((d) => (
+                        <option key={d}>{d}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    From
+                    <input
+                      type="date"
+                      value={from}
+                      onChange={(e) => setFrom(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    To
+                    <input
+                      type="date"
+                      value={to}
+                      onChange={(e) => setTo(e.target.value)}
+                    />
+                  </label>
+                  <button
+                    onClick={() => {
+                      setYear("all");
+                      setDepartment("all");
+                      setFrom("");
+                      setTo("");
+                    }}
+                  >
+                    Reset filters
+                  </button>
+                </div>
+              </>
+            )}
+          {message && (
+            <p className="erp-api-warning" role="status">
+              {message}
+            </p>
           )}
-          {content()}
+          {activeModule !== "roles" && !entryScreens.includes(activeModule) && (
+            <div className="erp-api-controls">
+              <span>College records</span>
+              <button
+                className="erp-primary"
+                onClick={() => {
+                  setManageModule(null);
+                  setApiOpen(true);
+                }}
+              >
+                Manage {labels[activeModule] || activeModule} <Plus size={15} />
+              </button>
+            </div>
+          )}
+
+          {[
+            "accounts",
+            "credentials",
+            "forms",
+            "imports",
+            "documents",
+          ].includes(activeModule) ? (
+            <ConnectedPortal college={c} parts={parts} embedded />
+          ) : (
+            content()
+          )}
         </main>
         <footer className="erp-footer">
-          {c.name} / Campus management demo{" "}
-          <span>Powered by KC Web Universe</span>
+          {c.name} / Campus management <span>EduNexa College</span>
         </footer>
       </div>
-      <FloatingMobileApps college={c} />
+      {apiOpen && (
+        <div
+          className="erp-api-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Manage college records"
+        >
+          <div className="erp-api-drawer">
+            <header>
+              <h2>{labels[activeModule] || activeModule}</h2>
+              <button
+                onClick={() => {
+                  setApiOpen(false);
+                  window.dispatchEvent(new Event("edunexa:records-changed"));
+                }}
+                aria-label="Close record management"
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <ConnectedPortal
+              college={c}
+              parts={["portal", area, manageModule || activeModule]}
+              embedded
+              openPrimaryForm
+            />
+          </div>
+        </div>
+      )}
       {message && (
         <div role="status" className="erp-toast">
           <span>{message}</span>

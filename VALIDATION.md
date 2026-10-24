@@ -20,3 +20,7 @@
 - Backend folder remains completely empty. Native device/release builds, real identity, gateway, SMS/push and backend data synchronization have not been implemented or verified.
 
 - Final dashboard production build passed (2,574 generated routes). New finance component/selector lint check completed.
+
+## EduNexa-only dashboard cleanup
+
+Removed the second college definition, dedicated routes/assets/components/theme, inactive engineering catalog and migration. Removed the logged-in home-navigation strip, sidebar showcase link and global template switcher. Production build and TypeScript passed (1,456 generated routes). Browser checks confirmed the college entry redirects to EduNexa, the removed institute returns HTTP 404, mobile institution selection contains only EduNexa, the removed navigation is absent, and no browser page errors occurred. Existing EduNexa browser data was preserved.

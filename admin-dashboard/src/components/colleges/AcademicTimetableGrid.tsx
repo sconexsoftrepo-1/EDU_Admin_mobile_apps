@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { engineeringCourses } from "@/data/colleges/engineering";
+import { courseOfferings } from "@/data/colleges/subjects";
 import { sessionForStudent } from "@/lib/colleges/academic-scope";
 import Image from "next/image";
 import { localDate } from "@/lib/colleges/mobile-schedule";
@@ -63,11 +63,7 @@ export default function AcademicTimetableGrid({
     return (
       <div className="academic-grid-empty">
         <Image
-          src={
-            college.slug === "skyline-institute"
-              ? "/assets/colleges/skyline/dashboard/timetable.svg"
-              : "/assets/college-portals/shared/schedule-empty.svg"
-          }
+          src={"/assets/college-portals/shared/schedule-empty.svg"}
           width={120}
           height={90}
           alt=""
@@ -496,7 +492,6 @@ export default function AcademicTimetableGrid({
     </div>
   );
 }
-
 function TimetableSessionDetails({
   session,
   faculty,
@@ -509,7 +504,7 @@ function TimetableSessionDetails({
   close: () => void;
 }) {
   const { state, role } = useCollege();
-  const course = engineeringCourses(
+  const course = courseOfferings(
     String(session.program),
     Number(session.semester || 1),
   ).find((c) => c.name === session.name || c.code === session.subjectCode);

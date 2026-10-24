@@ -46,32 +46,17 @@ export function scheduleConfiguration(
       return JSON.parse(String(saved.configuration));
     } catch {}
   }
-  const engineering = state.slug === "skyline-institute";
-  const hours = engineering
-    ? [
-        "09:20",
-        "10:20",
-        "11:10",
-        "11:30",
-        "12:20",
-        "13:10",
-        "14:00",
-        "14:50",
-        "15:00",
-        "15:40",
-        "16:20",
-      ]
-    : [
-        "09:00",
-        "10:00",
-        "11:00",
-        "11:30",
-        "12:30",
-        "13:30",
-        "14:30",
-        "15:30",
-        "16:00",
-      ];
+  const hours = [
+    "09:00",
+    "10:00",
+    "11:00",
+    "11:30",
+    "12:30",
+    "13:30",
+    "14:30",
+    "15:30",
+    "16:00",
+  ];
   return {
     workingDays: [
       "Monday",
@@ -83,22 +68,16 @@ export function scheduleConfiguration(
     ],
     open: "08:00",
     close: "18:00",
-    slots: hours
-      .slice(0, -1)
-      .map((start, i) => ({
-        start,
-        end: hours[i + 1],
-        label: (engineering ? [2, 7] : [2]).includes(i)
-          ? "Morning / short break"
-          : i === (engineering ? 5 : 4)
-            ? "Lunch"
-            : "Teaching period",
-        kind: (engineering ? [2, 7] : [2]).includes(i)
-          ? "Break"
-          : i === (engineering ? 5 : 4)
-            ? "Lunch"
-            : "Teaching",
-      })),
+    slots: hours.slice(0, -1).map((start, i) => ({
+      start,
+      end: hours[i + 1],
+      label: [2].includes(i)
+        ? "Morning / short break"
+        : i === 4
+          ? "Lunch"
+          : "Teaching period",
+      kind: [2].includes(i) ? "Break" : i === 4 ? "Lunch" : "Teaching",
+    })),
   };
 }
 export function academicRooms(state: CollegeState): AcademicRoom[] {

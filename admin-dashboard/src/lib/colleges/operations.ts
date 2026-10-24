@@ -1,16 +1,10 @@
-import {
-  engineeringCourses,
-  engineeringResources,
-} from "@/data/colleges/engineering";
 import { academicRooms, validateAcademicSession } from "./academic-engine";
 import { cohortKey, sessionScope } from "./academic-scope";
-import { migrateEngineering } from "./engineering-migration";
 import { upgradeLegacyTimetable } from "./timetable-migration";
 import { sessionForStudent } from "./academic-scope";
 import { referenceTimetable } from "./reference-timetable";
 import { validateTimetableSession } from "./timetable";
 import type { CollegeState, Command, RecordRow } from "./store";
-
 export type Seat = {
   id: string;
   row: number;
@@ -36,7 +30,11 @@ export type Route = {
   start: string;
   end: string;
   distance: number;
-  stops: { id: string; name: string; time: string }[];
+  stops: {
+    id: string;
+    name: string;
+    time: string;
+  }[];
 };
 export type Passenger = {
   id: string;
@@ -136,355 +134,22 @@ export const operationLabels: Record<string, string> = {
 };
 const day = "2026-10-19";
 export function ensureOperations(s: CollegeState): CollegeState {
-  s = migrateEngineering(s);
-  if (s.operations?.version === 1) {
-    const existing = s.operations.records.employees || [];
-    const employees = s.staff.map((person, i) => {
-      const profile = existing.find((e) => e.personId === person.id);
-      return {
-        ...(profile || {
-          id: person.id + "-PROFILE",
-          date: person.date,
-          personId: person.id,
-          basic: 3000000,
-          allowances: 0,
-          deductions: 0,
-          unpaidRate: 0,
-          joining: person.date,
-          email: `employee${i + 1}@${s.slug}.example`,
-        }),
-        name: person.name,
-        status: person.status,
-        department: person.note || "General",
-        category: person.category || "Staff",
-        ...(s.slug === "skyline-institute" && person.category === "Faculty"
-          ? {
-              designation: profile?.designation || "Assistant Professor",
-              qualifications:
-                profile?.qualifications || "M.Tech. · fictional qualification",
-              specialization:
-                profile?.specialization || person.note || "Engineering",
-              photo:
-                profile?.photo ||
-                "/assets/college-portals/shared/teacher-avatar.svg",
-            }
-          : {}),
-      };
-    });
-    return {
-      ...s,
-      operations: {
-        ...s.operations,
-        records: { ...upgradeLegacyTimetable(s), employees },
-      },
-    };
-  }
-  const prefix = s.slug.startsWith("edu") ? "21" : "22";
-  const id = (tag: string, i: number) => `${prefix}-${tag}${i + 1}`;
-  const routes: Route[] = Array.from({ length: 8 }, (_, i) => ({
-    id: id("ROUTE", i),
-    name:
-      ["Main City", "East Zone", "West Zone", "North Zone"][i % 4] +
-      ` ${i + 1}`,
-    start: "06:30",
-    end: "08:00",
-    distance: 12 + i * 3,
-    stops: ["Main Gate", "City Centre", "Railway Station", "College"].map(
-      (name, j) => ({
-        id: id(`STOP${i}-`, j),
-        name,
-        time: ["06:30", "06:50", "07:10", "07:40"][j],
-      }),
-    ),
-  }));
-  const drivers = s.staff.filter((e) => e.category === "Driver");
-  const buses: Vehicle[] = Array.from({ length: 8 }, (_, i) => ({
-    id: id("BUS", i),
-    name: `Campus Bus ${i + 1}`,
-    registration: `DEMO-${prefix}-${String(i + 1).padStart(3, "0")}`,
-    status: i === 7 ? "Maintenance" : "Active",
-    seats: seatLayout(i === 6 ? 40 : 60),
-    routeId: routes[i].id,
-    driverId: drivers[i]?.id || "",
-    assistantId: "",
-    insurance: "2027-12-31",
-    fitness: "2027-12-31",
-    permit: "2027-12-31",
-  }));
-  const passengers: Passenger[] = buses
-    .filter((b) => b.status === "Active")
-    .flatMap((bus, i) =>
-      Array.from(
-        { length: i === 2 ? 38 : Math.min(26 + i * 3, bus.seats.length) },
-        (_, j) => {
-          const faculty = i === 2 && j >= 32;
-          const person = faculty
-            ? s.staff.filter((e) => e.category === "Faculty")[
-                (j - 32 + i) %
-                  Math.max(
-                    1,
-                    s.staff.filter((e) => e.category === "Faculty").length,
-                  )
-              ]
-            : s.students[i * 65 + j];
-          return person
-            ? {
-                id: id(`P${i}-`, j),
-                personId: person.id,
-                kind: faculty ? ("Faculty" as const) : ("Student" as const),
-                busId: bus.id,
-                routeId: bus.routeId,
-                seatId: bus.seats[j].id,
-                pickup: routes[i].stops[j % 3].id,
-                drop: routes[i].stops[3].id,
-                date: day,
-              }
-            : null;
-        },
-      ).filter((p) => p !== null),
-    );
-  const records: Operations["records"] = {};
-  const rec = (
-    tag: string,
-    i: number,
-    name: string,
-    extra: Partial<OperationRecord> = {},
-  ): OperationRecord => ({
-    id: id(tag, i),
-    name,
-    status: "Active",
-    date: day,
-    ...extra,
-  });
-  records.employees = s.staff.map((e, i) =>
-    rec("EMP", i, e.name, {
-      personId: e.id,
-      department: e.note || "Administration",
-      designation: e.category || "Staff",
-      category: e.category || "Staff",
-      basic: (30000 + i * 1000) * 100,
-      allowances: 800000,
-      deductions: 200000,
-      unpaidRate: 100000,
-      joining: "2024-06-01",
-      email: `employee${i + 1}@${s.slug}.example`,
-      phone: "DEMO-CONTACT",
-    }),
-  );
-  records.payroll = records.employees.map((e, i) =>
-    rec("PAYROLL", i, e.name, {
-      status: "Calculated",
-      employeeId: e.personId,
-      department: e.department,
-      period: "2026-10",
-      basic: e.basic,
-      allowances: e.allowances,
-      bonus: 0,
-      deductions: e.deductions,
-      gross: Number(e.basic) + Number(e.allowances),
-      net: Number(e.basic) + Number(e.allowances) - Number(e.deductions),
-      unpaidDays: 0,
-      extraIds: "[]",
-    }),
-  );
-  records["salary-structures"] = [
-    rec("SAL", 0, "Teaching standard", {
-      basic: 5000000,
-      allowances: 1200000,
-      deductions: 500000,
-      unpaidRate: 150000,
-    }),
-    rec("SAL", 1, "Administrative standard", {
-      basic: 3500000,
-      allowances: 800000,
-      deductions: 300000,
-      unpaidRate: 100000,
-    }),
-  ];
-  records.guardians = s.students.reduce<OperationRecord[]>((rows, st, i) => {
-    if (i % 2 === 0)
-      rows.push(
-        rec("GUARD", i, st.guardian, {
-          studentIds: JSON.stringify(
-            s.students.slice(i, i + 2).map((x) => x.id),
+  return s.operations?.version === 1
+    ? s
+    : {
+        ...s,
+        operations: {
+          version: 1,
+          buses: [],
+          routes: [],
+          passengers: [],
+          records: Object.fromEntries(
+            Object.keys(operationLabels).map((key) => [key, []]),
           ),
-        }),
-      );
-    return rows;
-  }, []);
-  records.accounts = [
-    ...records.guardians.map((g, i) =>
-      rec("ACC-P", i, g.name, {
-        personId: g.id,
-        role: "Parent",
-        username: `parent${i + 1}@${s.slug}.example`,
-        studentIds: g.studentIds,
-        resetRequired: "Yes",
-      }),
-    ),
-    ...s.students.slice(0, 30).map((st, i) =>
-      rec("ACC-S", i, st.name, {
-        personId: st.id,
-        role: "Student",
-        username: st.email,
-        resetRequired: "Yes",
-      }),
-    ),
-    ...s.staff
-      .filter((e) => e.category === "Faculty")
-      .map((e, i) =>
-        rec("ACC-T", i, e.name, {
-          personId: e.id,
-          role: "Faculty",
-          username: `teacher${i + 1}@${s.slug}.example`,
-          resetRequired: "Yes",
-        }),
-      ),
-  ];
-  records.inventory = Array.from({ length: 100 }, (_, i) =>
-    rec(
-      "ITEM",
-      i,
-      [
-        "Laboratory consumables",
-        "A4 paper",
-        "Computer accessories",
-        "Cleaning supplies",
-      ][i % 4] + ` ${i + 1}`,
-      {
-        category: ["Laboratory", "Stationery", "IT", "Facilities"][i % 4],
-        quantity: i % 9 === 0 ? 2 : 20 + i,
-        minimum: 5,
-        unit: "units",
-        unitCost: 25000,
-        location: `Store ${(i % 4) + 1}`,
-      },
-    ),
-  );
-  records.assets = Array.from({ length: 100 }, (_, i) =>
-    rec(
-      "ASSET",
-      i,
-      ["Computer", "Projector", "Lab equipment", "Library furniture"][i % 4] +
-        ` ${i + 1}`,
-      {
-        category: ["IT", "Classroom", "Laboratory", "Furniture"][i % 4],
-        amount: 4500000,
-        department: s.students[i]?.department || "General",
-        location: `Room ${i + 100}`,
-        assignedTo: "Unassigned",
-        warranty: "2028-06-01",
-        condition: "Good",
-      },
-    ),
-  );
-  records.vendors = Array.from({ length: 8 }, (_, i) =>
-    rec("VENDOR", i, `Fictional Campus Supplier ${i + 1}`, {
-      email: `supplier${i + 1}@example.invalid`,
-      contact: "DEMO-CONTACT",
-      category: "Equipment",
-    }),
-  );
-  const teachers = s.staff.filter((e) => e.category === "Faculty");
-  records.timetable = referenceTimetable(s);
-  if (s.slug === "skyline-institute")
-    records["engineering-upgrades"] = [
-      rec("ENGINEERING", 0, "Engineering catalog v2", { status: "Completed" }),
-    ];
-  records.assignments = Array.from({ length: 100 }, (_, i) =>
-    rec("ASSIGN", i, `Learning exercise ${i + 1}`, {
-      status: "Published",
-      program:
-        s.students[i % (s.slug === "skyline-institute" ? 23 : 6)]?.program ||
-        "",
-      employeeId: teachers[i % Math.max(1, teachers.length)]?.id || "",
-      subject:
-        s.slug === "skyline-institute"
-          ? engineeringCourses(
-              s.students[i % 23]?.program,
-              Number(s.students[i % 23]?.profile?.semester || 1),
-            )[i % 4]?.name || "Engineering design"
-          : ["Mathematics", "Computing", "Communication"][i % 3],
-      due: "2026-11-15",
-      description:
-        "Prepare a short explanation with a worked example. Fictional classroom exercise.",
-      maxMarks: 100,
-    }),
-  );
-  records.assessments = Array.from({ length: 50 }, (_, i) =>
-    rec("ASSESS", i, `Internal assessment ${i + 1}`, {
-      status: "Scheduled",
-      program:
-        s.students[i % (s.slug === "skyline-institute" ? 23 : 6)]?.program ||
-        "",
-      subject:
-        s.slug === "skyline-institute"
-          ? engineeringCourses(s.students[i % 23]?.program, 1)[i % 4]?.name ||
-            "Engineering review"
-          : ["Mathematics", "Computing"][i % 2],
-      date: "2026-11-20",
-      maxMarks: 100,
-    }),
-  );
-  records.syllabus = [
-    rec("DOC", 0, "Foundations learning guide", {
-      program: s.students[0]?.program || "",
-      description:
-        "Unit 1: Principles. Unit 2: Worked examples. Unit 3: Independent practice. Learning objective: apply core concepts to a fictional case study.",
-    }),
-  ];
-  if (s.slug === "skyline-institute") records.syllabus = engineeringResources();
-  records.calendar = [
-    rec("EVENT", 0, "Campus open day", {
-      date: "2026-11-06",
-      description: "Fictional campus academic event.",
-    }),
-  ];
-  records.trips = buses
-    .filter((b) => b.status === "Active")
-    .map((b, i) =>
-      rec("TRIP", i, `${routes[i].name} morning`, {
-        status: "Scheduled",
-        busId: b.id,
-        routeId: b.routeId,
-        driverId: b.driverId,
-        start: "06:30",
-        end: "08:00",
-      }),
-    );
-  records["notification-templates"] = [
-    rec("TPL", 0, "Fee reminder", {
-      message:
-        "Please review the outstanding fee balance in the college portal.",
-      category: "Fee Reminder",
-    }),
-  ];
-  records["purchase-requests"] = [
-    rec("PR", 0, "Laboratory microscopes", {
-      status: "Submitted",
-      quantity: 4,
-      unitCost: 2500000,
-      department: "Science",
-      vendorId: records.vendors[0].id,
-      itemId: records.inventory[0].id,
-      reason: "Teaching laboratory replenishment",
-    }),
-  ];
-  records["employee-leave"] = [
-    rec("EL", 0, "Personal leave", {
-      status: "Requested",
-      employeeId: s.staff[0]?.id || "",
-      start: "2026-10-20",
-      end: "2026-10-21",
-      kind: "Unpaid",
-      reason: "Fictional leave request",
-    }),
-  ];
-  return {
-    ...s,
-    operations: { version: 1, buses, routes, passengers, records },
-  };
+        },
+      };
 }
+
 export const opRows = (s: CollegeState, key: string) =>
   s.operations?.records[key] || [];
 export const due = (s: CollegeState, id: string) => {
@@ -843,7 +508,6 @@ export function executeOperation(
       else rows("academic-rooms").push(room);
       break;
     }
-
     case "ops.bus.save": {
       allow(transport);
       const old = o.buses.find((b) => b.id === cmd.id);
@@ -2048,7 +1712,6 @@ export function executeOperation(
   });
   return s;
 }
-
 export const preciseMoney = (paise: number) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -2056,7 +1719,6 @@ export const preciseMoney = (paise: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(paise / 100);
-
 export function visibleNotices(s: CollegeState, role: string | null) {
   if (!role) return [];
   if (!["Parent", "Student", "Faculty"].includes(role)) return s.notifications;
