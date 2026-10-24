@@ -14,7 +14,7 @@ from app.core.storage import audit, new_code, now
 from app.modules.finance.transactions.api import calculate_ledger, calculate_summary
 
 router = APIRouter(prefix="/mobile/workspace", tags=["Mobile screen workflows"])
-# Shared descriptors are consumed by all four Flutter applications.
+# Shared role descriptors are consumed by the two combined Flutter applications.
 SCREENS = {
     "admin-mobile": [
         ("overview", "Overview", "summary"),

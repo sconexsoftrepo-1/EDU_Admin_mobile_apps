@@ -9,7 +9,9 @@ void main(){
    tester.view.physicalSize=Size(width,844);tester.view.devicePixelRatio=1;
    addTearDown(tester.view.resetPhysicalSize);addTearDown(tester.view.resetDevicePixelRatio);
    await tester.pumpWidget(const EduNexaApp());await tester.pumpAndSettle();
-   expect(find.text('EduNexa Parent'),findsOneWidget);
+   expect(find.text('EduNexa Parents & Students'),findsOneWidget);
+   expect(find.text('Parent'),findsOneWidget);expect(find.text('Student'),findsOneWidget);
+   await tester.tap(find.text('Student'));await tester.pumpAndSettle();
    expect(find.text('Login ID'),findsOneWidget);expect(find.text('Password'),findsOneWidget);
    expect(find.textContaining('Planned module'),findsNothing);
    await tester.tap(find.text('Sign in'));await tester.pumpAndSettle();
