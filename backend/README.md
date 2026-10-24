@@ -1,5 +1,18 @@
 # EduNexa College Python backend
 
+## Running on Windows Server
+
+Use the updated backend source and install `requirements.txt` in the server’s active virtual environment. Local development file locking uses `filelock`, which supports Windows; the server no longer imports Unix-only `fcntl` directly. The SQL Server backend continues to use database transactions and application locks.
+
+From `C:\edu_admin_backend\backend` with the virtual environment activated:
+
+```bat
+python -m pip install -r requirements.txt
+python -m uvicorn app.asgi:app --host 0.0.0.0 --port 8010
+```
+
+In a second terminal, check `curl.exe http://127.0.0.1:8010/health`. The configured SQL Server runtime should report `"storage":"sqlserver"`. Then check `curl.exe http://127.0.0.1:8010/api/v1/auth/roles` for the migrated roles.
+
 ## Current SQL Server configuration
 
 The runtime `.env` now selects `EDUNEXA_STORAGE_BACKEND=sqlserver` and uses `EDUNEXA_MSSQL_*` settings for the `edu-admin-portal` database on `185.193.19.156:1433`, with encrypted SQL Server authentication. No PostgreSQL connection settings remain in the runtime `.env`.
