@@ -10,7 +10,7 @@ import {
   type StaffKind,
   type StaffRow,
 } from "@/services/api";
-import { download, professionalPdf } from "@/lib/colleges/download";
+import { excel, professionalPdf } from "@/lib/colleges/download";
 import { formatDate } from "../DateInput";
 import "./staff.css";
 
@@ -119,26 +119,13 @@ export default function StaffDirectory({
       ? []
       : [`${row.documents_uploaded} of ${row.documents_expected}`]),
   ]);
-  const xml = (value: string) =>
-    value
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&apos;");
-  const exportExcel = () => {
-    const workbook = `<?xml version="1.0" encoding="UTF-8"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
-  <Worksheet ss:Name="Staff">
-    <Table>
-      <Row>${exportColumns.map((column) => `<Cell><Data ss:Type="String">${xml(column)}</Data></Cell>`).join("")}</Row>
-      ${exportRows.map((row) => `<Row>${row.map((value) => `<Cell><Data ss:Type="String">${xml(value)}</Data></Cell>`).join("")}</Row>`).join("\n      ")}
-    </Table>
-  </Worksheet>
-</Workbook>`;
-    const filename = kind.replaceAll("_", "-");
-    download(`${filename}-staff.xls`, workbook, "application/vnd.ms-excel");
-  };
+  const exportExcel = () =>
+    excel(
+      `${kind.replaceAll("_", "-")}-staff`,
+      "Staff",
+      exportColumns,
+      exportRows,
+    );
   const exportPdf = async () => {
     try {
       await professionalPdf(`${kind.replaceAll("_", "-")}-staff`, {

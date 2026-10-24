@@ -131,3 +131,52 @@
 .combo .combo-toggle {
   top: 20px;
 }
+/* Edit / delete icon buttons in table rows and record cards (IconAction). */
+button.icon-action {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #e0d6c7 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+button.icon-action-edit {
+  color: #8a5520 !important;
+}
+button.icon-action-edit:hover:not(:disabled) {
+  border-color: #a46a27 !important;
+  background: #fbf6ef !important;
+}
+button.icon-action-delete {
+  color: #c62828 !important;
+}
+button.icon-action-delete:hover:not(:disabled) {
+  border-color: #d93636 !important;
+  background: #fdeeee !important;
+}
+button.icon-action:focus-visible {
+  outline: 2px solid #a46a27;
+  outline-offset: 2px;
+}
+button.icon-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Row action groups: one line, vertically centred. */
+:is(.edu-row-actions, .erp-row-actions, .ops-row-actions, .edu-batch-actions):has(
+    .icon-action
+  ) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+td:has(> :is(.edu-row-actions, .erp-row-actions, .ops-row-actions) .icon-action) {
+  white-space: nowrap;
+}

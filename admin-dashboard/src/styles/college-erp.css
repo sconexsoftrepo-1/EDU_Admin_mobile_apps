@@ -3396,15 +3396,7 @@ body:has(.college-erp dialog[open]) {
   border: 0;
   border-radius: 0;
 }
-.college-erp .edu-embedded .edu-enroll .edu-table thead tr {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
-}
-.college-erp .edu-embedded .edu-enroll .edu-table th {
-  background: transparent;
-  color: #fff;
-  font-size: 12px;
-  border-color: transparent;
-}
+
 .college-erp .edu-embedded .edu-enroll .edu-table + p,
 .college-erp .edu-embedded .edu-enroll .edu-empty {
   border: 0;
@@ -3440,4 +3432,36 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .erp-sidebar-brand strong {
   font-size: 20px;
+}
+
+/* Student enrollment toolbar: Excel / PDF beside "+ Enroll student" (same as Teaching staff). */
+.college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 0;
+  padding: 0 12px;
+  border: 1px solid #e0d6c7;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f2a36;
+  font-size: 12px;
+  font-weight: 600;
+}
+.college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-export:hover:not(:disabled) {
+  border-color: #a46a27;
+  background: #fbf6ef;
+}
+.college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-export:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Actions column: icons side by side, column only as wide as it needs. */
+.college-erp .edu-embedded .edu-table td:has(> .edu-row-actions) {
+  width: 1%;
+  white-space: nowrap;
+}
+.college-erp .edu-embedded .edu-table .edu-row-actions {
+  flex-wrap: nowrap;
 }
