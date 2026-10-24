@@ -29,6 +29,7 @@ const backendUrl = (
   process.env.EDUNEXA_API_URL || "https://edu-admin-mobile-apps.vercel.app"
 ).replace(/\/+$/, "");
 
+
 export const API_CONFIG = {
   /** Same-origin path every browser request goes to; the proxy forwards it. */
   proxyBaseUrl: "/api/college",
