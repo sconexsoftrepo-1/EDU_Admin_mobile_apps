@@ -11,6 +11,7 @@ import importlib
 import re
 import json
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -26,6 +27,7 @@ from .schemas import (
     BatchInput,
     CourseEnrollmentInput,
     CourseInput,
+    CourseFeeScheduleInput,
     NonTeachingStaffInput,
     ParentEnrollmentInput,
     ParentLink,
@@ -457,9 +459,65 @@ FEE_HEADS = [
 ]
 
 
+def inline_course_fee_schedule(data, values, actor):
+    """Save a course's inline fee-head rows together; charged amounts remain immutable."""
+    payload = CourseFeeScheduleInput.model_validate(values)
+    table_service("programs").repo.get(data, payload.program_code)
+    table_service("academic_years").repo.get(data, payload.academic_year_code)
+    heads = data["records"].setdefault("fee_heads", {})
+    structures = data["records"].setdefault("fee_structures", {})
+    charged = {r["fee_structure_code"] for r in data["records"].get("student_fee_charges", {}).values()}
+    seen, saved = set(), []
+    for line in payload.lines:
+        if line.fee_head_code:
+            head = table_service("fee_heads").repo.get(data, line.fee_head_code)
+        else:
+            label = (line.name or "").strip()
+            if not label:
+                raise HTTPException(422, "Give a name or choose an existing fee head for every row")
+            head = next((h for h in heads.values() if h["name"].casefold() == label.casefold()
+                         and h.get("category", "academic") == line.category), None)
+            if head is None:
+                head = create(data, "fee_heads", {"name": label, "category": line.category,
+                    "collection_ownership": "internal", "scholarship_eligible": line.category == "academic"}, actor)
+        head_code = head["code"]
+        if head_code in seen:
+            raise HTTPException(422, "Each fee head may appear only once in a course schedule")
+        seen.add(head_code)
+        def matches(row):
+            return (row["program_code"] == payload.program_code
+                and row["academic_year_code"] == payload.academic_year_code
+                and int(row["semester_number"]) == payload.year_of_study
+                and int(row.get("installment_number") or 1) == payload.installment_number
+                and row.get("billing_frequency", "annual") == payload.billing_frequency
+                and row.get("currency", "INR") == payload.currency)
+        existing = structures.get(line.code) if line.code else next(
+            (r for r in structures.values() if matches(r) and r["fee_head_code"] == head_code), None)
+        if line.code and (not existing or not matches(existing) or existing["fee_head_code"] != head_code):
+            raise HTTPException(409, "This fee row does not belong to the selected course schedule")
+        if existing:
+            need(data, {"code": actor}, ("fee_structures", "edit"))
+            if existing["code"] in charged and Decimal(str(existing["amount"])) != line.amount:
+                raise HTTPException(409, f"{head['name']} is already charged to students; its amount cannot be changed")
+            existing.update(amount=str(line.amount), due_date=(line.due_date or payload.due_date).isoformat())
+            audit(data, actor, "edit", "fee_structures", existing["code"])
+            saved.append(existing)
+        else:
+            saved.append(create(data, "fee_structures", {
+                "program_code": payload.program_code, "academic_year_code": payload.academic_year_code,
+                "semester_number": payload.year_of_study, "installment_number": payload.installment_number,
+                "billing_frequency": payload.billing_frequency, "currency": payload.currency,
+                "fee_head_code": head_code, "amount": str(line.amount),
+                "due_date": (line.due_date or payload.due_date).isoformat()}, actor))
+    return {"program_code": payload.program_code, "academic_year_code": payload.academic_year_code,
+        "year_of_study": payload.year_of_study, "fee_structures": saved}
+
+
 def course_fee_structure(data, v, actor):
     """Annual fee structure of a course for one academic year and year of study (semester_number
     holds the year of study). Hostel and bus fees are charged only to students who choose them."""
+    if "lines" in v:
+        return inline_course_fee_schedule(data, v, actor)
     program_code, year_code = v.get("program_code"), v.get("academic_year_code")
     table_service("programs").repo.get(data, program_code)
     table_service("academic_years").repo.get(data, year_code)

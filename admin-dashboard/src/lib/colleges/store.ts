@@ -50,6 +50,7 @@ export type Student = {
   guardian: string;
 };
 export type RecordRow = {
+  feeSchedule?: import("./program-fee-schedules").FeeScheduleScope;
   profile?: StudentProfile;
   email?: string;
   guardian?: string;
