@@ -1,0 +1,265 @@
+/*
+ * One table design for every data table in the college app (ERP modules, API screens, staff,
+ * courses, roles, configuration, enrollment fees, salary breakdown, faculty directory):
+ * brown header, white / light-beige rows, subtle borders, consistent padding and alignment.
+ * The weekly timetable grid (.academic-week-table) is a schedule, not a data table, and keeps
+ * its own colour-coded design.
+ */
+:root {
+  --tbl-head: #92591f;
+  --tbl-head-line: #7d4b18;
+  --tbl-row: #ffffff;
+  --tbl-row-alt: #f8f3ea;
+  --tbl-row-hover: #f1e5d3;
+  --tbl-line: #e7d8c5;
+  --tbl-ink: #29231d;
+  --tbl-muted: #7a6a58;
+}
+
+/* ---- Scroll container: rounded, bordered, horizontal scroll on narrow screens ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  :is(
+    .erp-table-scroll,
+    .edu-table,
+    .stf-table-wrap,
+    .crs-table-wrap,
+    .erp-role-table,
+    .academic-faculty-directory
+  ) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--tbl-line) !important;
+  border-radius: 10px !important;
+  background: var(--tbl-row) !important;
+}
+/* Already framed by a card: the table fills it edge to edge. */
+:is(.stf-card, .edu-card) :is(.stf-table-wrap, .edu-table) {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* ---- Table ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table) {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0;
+  background: var(--tbl-row);
+  color: var(--tbl-ink);
+  font-size: 13px;
+}
+
+/* ---- Header: brown, white medium-bold text ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > thead
+  > tr {
+  background: var(--tbl-head) !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > thead
+  > tr
+  > th {
+  padding: 11px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--tbl-head-line) !important;
+  border-right: 1px solid #a56a2e !important;
+  background: var(--tbl-head) !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  text-align: left;
+  text-transform: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > thead
+  > tr
+  > th:last-child {
+  border-right: 0 !important;
+}
+/* Sortable header buttons (ERP tables) read as header text. */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > thead
+  th
+  button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > thead
+  th
+  input[type="checkbox"] {
+  accent-color: #fff;
+}
+
+/* ---- Body: white rows, light-beige alternate rows, warm hover ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr
+  > :is(td, th) {
+  padding: 10px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--tbl-line) !important;
+  border-right: 1px solid #efe4d5 !important;
+  background: var(--tbl-row) !important;
+  color: var(--tbl-ink) !important;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr
+  > :is(td, th):last-child {
+  border-right: 0 !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr:nth-child(even)
+  > :is(td, th) {
+  background: var(--tbl-row-alt) !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr:hover
+  > :is(td, th) {
+  background: var(--tbl-row-hover) !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr:last-child
+  > :is(td, th) {
+  border-bottom: 0 !important;
+}
+/* Row labels inside the body (e.g. enrollment review) stay readable, not header-brown. */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  > tbody
+  > tr
+  > th {
+  font-weight: 600;
+}
+/* Totals rows read as a summary line. */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  :is(tfoot > tr, tr.enw-total)
+  > :is(td, th) {
+  background: #f3e7d6 !important;
+  font-weight: 700;
+}
+
+/* ---- Alignment ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  :is(th, td).num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  :is(th, td).cell-center,
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  :is(th, td):has(> input[type="checkbox"]:only-child),
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  td:has(> .erp-status:only-child) {
+  text-align: center !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  :is(th, td):has(> input[type="checkbox"]:only-child) {
+  width: 44px;
+}
+/* Short values (codes, dates, phones) don't break mid-value on wide screens. */
+@media (min-width: 900px) {
+  :is(.college-erp, .edu-connected, .enw-backdrop)
+    table:not(.academic-week-table)
+    > tbody
+    td:is(.num, .cell-center, .nowrap) {
+    white-space: nowrap;
+  }
+}
+
+/* ---- Empty states inside / under tables ---- */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  table:not(.academic-week-table)
+  td[colspan] {
+  padding: 26px 16px !important;
+  background: var(--tbl-row) !important;
+  color: var(--tbl-muted) !important;
+  text-align: center !important;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop) :is(.stf-empty, .edu-empty),
+.college-erp .edu-embedded .edu-table + p {
+  margin: 0;
+  padding: 22px 16px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--tbl-row) !important;
+  color: var(--tbl-muted) !important;
+  font-size: 13px !important;
+  text-align: center !important;
+}
+
+/* ---- Phones: ERP tables turn into stacked cards (college-erp.css) — keep that layout ---- */
+@media (max-width: 650px) {
+  .college-erp .erp-table-scroll {
+    border: 0 !important;
+    background: transparent !important;
+  }
+  .college-erp .erp-table-scroll table {
+    background: transparent;
+  }
+  .college-erp .erp-table-scroll tbody > tr {
+    background: var(--tbl-row) !important;
+    border-color: var(--tbl-line) !important;
+  }
+  .college-erp .erp-table-scroll tbody > tr:nth-child(even) {
+    background: var(--tbl-row-alt) !important;
+  }
+  .college-erp .erp-table-scroll tbody > tr > :is(td, th),
+  .college-erp .erp-table-scroll tbody > tr:nth-child(even) > :is(td, th),
+  .college-erp .erp-table-scroll tbody > tr:hover > :is(td, th) {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left !important;
+  }
+  .college-erp .erp-table-scroll td[data-label="Actions"] {
+    padding-top: 10px !important;
+    border-top: 1px solid var(--tbl-line) !important;
+  }
+}
+@media print {
+  :is(.college-erp, .edu-connected, .enw-backdrop)
+    table:not(.academic-week-table)
+    > thead
+    > tr
+    > th {
+    background: #e9dcc8 !important;
+    color: #000 !important;
+  }
+}

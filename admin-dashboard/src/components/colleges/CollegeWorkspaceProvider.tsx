@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { CollegeStore } from "./CollegeStore";
 import { Toaster } from "./toast";
 import "./brand-buttons.css";
+import "./data-tables.css";
 export default function CollegeWorkspaceProvider({
   slug,
   children,
