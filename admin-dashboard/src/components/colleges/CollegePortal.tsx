@@ -1,5 +1,6 @@
 "use client";
-import { api } from "@/services/api";
+import { api, errorText } from "@/services/api";
+import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
@@ -9,6 +10,8 @@ import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
 import { operationLabels, visibleNotices } from "@/lib/colleges/operations";
 import RoleWorkspace from "./RoleWorkspace";
 import FeeStructures from "./FeeStructures";
+import FeeStructureManager from "./FeeStructureManager";
+import StudentFeeSchedule from "./StudentFeeSchedule";
 import ERPFormFields, { type FormField } from "./ERPFormFields";
 import {
   receiptReport,
@@ -93,6 +96,8 @@ import {
 } from "@/lib/colleges/store";
 import { csv, professionalPdf } from "@/lib/colleges/download";
 import ERPTable, { type TableRecord } from "./ERPTable";
+import DateInput from "./DateInput";
+import IconAction from "./IconAction";
 type Field = FormField;
 const entryScreens = [
   "student-enrollment",
@@ -175,6 +180,7 @@ export default function CollegePortal({
     router = useRouter(),
     root = collegeRoot(c);
   const [apiOpen, setApiOpen] = useState(false);
+  const [feeStructureId, setFeeStructureId] = useState<string | null>(null);
   const [manageModule, setManageModule] = useState<string | null>(null);
   useEffect(() => {
     const show = (event: Event) => {
@@ -192,7 +198,14 @@ export default function CollegePortal({
                 : command.startsWith("leave")
                   ? "hostel-permissions"
                   : null;
-      setManageModule(target);
+      setManageModule(
+        command.startsWith("structure") ? "fee-structures" : target,
+      );
+      setFeeStructureId(
+        command.startsWith("structure")
+          ? (event as CustomEvent).detail?.id || null
+          : null,
+      );
       setApiOpen(true);
     };
     window.addEventListener("edunexa:manage-records", show);
@@ -478,13 +491,15 @@ export default function CollegePortal({
     void mode;
     void api.documents
       .download("certificate", row.id)
-      .catch((e) => alert(e.message));
+      .catch((e) =>
+        toast.error("Could not download certificate", errorText(e)),
+      );
   }
   function receipt(row: RecordRow, mode: "view" | "download" = "download") {
     void mode;
     void api.documents
       .download("receipt", row.reference || row.id)
-      .catch((e) => alert(e.message));
+      .catch((e) => toast.error("Could not download receipt", errorText(e)));
   }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -517,14 +532,12 @@ export default function CollegePortal({
     return <ConnectedPortal college={c} parts={parts} loginRedirect />;
   if (!role)
     return (
-      <div className="erp-access">
-        <Shield size={40} />
-        <h1>Enter your campus workspace</h1>
-        <p>Select a demo role to continue.</p>
-        <Link className="college-button" href={`${root}/portal/login`}>
-          Choose demo role
-        </Link>
-      </div>
+      <ConnectedPortal
+        college={c}
+        parts={parts}
+        loginRedirect
+        loginError="No role has been assigned to this account. Contact your college administrator or sign in with another account."
+      />
     );
   if (
     ["student", "parent"].includes(account.person_type) ||
@@ -537,14 +550,12 @@ export default function CollegePortal({
     return <PortalShellSkeleton college={c} />;
   if (!areaAllowed || !modules.includes(activeModule))
     return (
-      <div className="erp-access">
-        <Shield size={40} />
-        <h1>Access denied</h1>
-        <p>{roleName || role} does not have access to this campus workspace.</p>
-        <Link className="college-button" href={`${root}/portal/${homeArea}`}>
-          Return to your workspace
-        </Link>
-      </div>
+      <ConnectedPortal
+        college={c}
+        parts={parts}
+        loginRedirect
+        loginError="Your account or selected role does not have access to this workspace. Choose your assigned role and sign in again."
+      />
     );
   const dashboard = () => (
     <>
@@ -1386,6 +1397,10 @@ export default function CollegePortal({
                 </button>
               ))}
           </div>
+          {role !== "Faculty" &&
+            ["Overview", "Fee Ledger"].includes(visibleTab) && (
+              <StudentFeeSchedule studentCode={st.id} />
+            )}
           {[
             "Overview",
             "Personal Information",
@@ -1572,13 +1587,13 @@ export default function CollegePortal({
                 <Link href={`${nav("students")}/${r.id}`}>View profile</Link>
                 {allowed("Super Admin", "Admission Officer") && (
                   <>
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label={`Edit ${String(r.name ?? r.id)}`}
                       onClick={() =>
                         studentForm(s.students.find((st) => st.id === r.id))
                       }
-                    >
-                      Edit
-                    </button>
+                    />
                     <button
                       disabled={r.status === "Relieved"}
                       onClick={() => {
@@ -1688,7 +1703,9 @@ export default function CollegePortal({
                 <Link href={`${nav("admissions")}/${r.id}`}>Details</Link>
                 {allowed("Super Admin", "Admission Officer") &&
                   r.status !== "Enrolled" && (
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label="Edit application"
                       onClick={() =>
                         form(
                           "Edit application",
@@ -1750,9 +1767,7 @@ export default function CollegePortal({
                           r.id,
                         )
                       }
-                    >
-                      Edit application
-                    </button>
+                    />
                   )}
                 {allowed("Super Admin", "Principal", "Admission Officer") &&
                   r.status !== "Enrolled" &&
@@ -2034,7 +2049,9 @@ export default function CollegePortal({
               <>
                 {r.status === "Draft" &&
                   allowed("Super Admin", "Accounts Manager") && (
-                    <button
+                    <IconAction
+                      kind="edit"
+                      label="Edit draft"
                       onClick={() =>
                         form(
                           "Edit draft",
@@ -2065,9 +2082,7 @@ export default function CollegePortal({
                           r.id,
                         )
                       }
-                    >
-                      Edit draft
-                    </button>
+                    />
                   )}
                 {r.status === "Draft" || r.status === "Pending" ? (
                   <button
@@ -2909,12 +2924,13 @@ export default function CollegePortal({
         <div className="erp-sidebar-brand">
           <Link href={root}>
             <Image
-              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
-              width={32}
-              height={38}
+              className="erp-brand-logo"
+              src="/assets/pragathilogo.jpg"
+              width={40}
+              height={40}
               alt=""
             />
-            <strong>{c.short}</strong>
+            <strong>{c.name}</strong>
           </Link>
           <button aria-label="Close sidebar" onClick={() => setOpen(false)}>
             <X size={17} />
@@ -2953,6 +2969,17 @@ export default function CollegePortal({
       )}
       <div className="erp-workspace">
         <header className="erp-topbar">
+          <div className="erp-topbar-breadcrumb" aria-label="Breadcrumb">
+            <Link href={`${root}/portal/${area}`}>{c.short}</Link>
+            <span aria-hidden="true">/</span>
+            <span>{labels[activeModule] || activeModule}</span>
+            {detail && (
+              <>
+                <span aria-hidden="true">/</span>
+                <span>{detail}</span>
+              </>
+            )}
+          </div>
           <button
             className="erp-mobile-menu"
             aria-label="Open portal navigation"
@@ -3062,17 +3089,6 @@ export default function CollegePortal({
           </div>
         )}
         <main id="erp-content" className="erp-content">
-          <div className="erp-breadcrumb">
-            <Link href={`${root}/portal/${area}`}>{c.short}</Link>
-            <span>/</span>
-            <span>{labels[activeModule]}</span>
-            {detail && (
-              <>
-                <span>/</span>
-                <span>{detail}</span>
-              </>
-            )}
-          </div>
           {activeModule !== "timetable" &&
             !entryScreens.includes(activeModule) && (
               <>
@@ -3130,16 +3146,14 @@ export default function CollegePortal({
                   </label>
                   <label>
                     From
-                    <input
-                      type="date"
+                    <DateInput
                       value={from}
                       onChange={(e) => setFrom(e.target.value)}
                     />
                   </label>
                   <label>
                     To
-                    <input
-                      type="date"
+                    <DateInput
                       value={to}
                       onChange={(e) => setTo(e.target.value)}
                     />
@@ -3169,6 +3183,7 @@ export default function CollegePortal({
                 className="erp-primary"
                 onClick={() => {
                   setManageModule(null);
+                  setFeeStructureId(null);
                   setApiOpen(true);
                 }}
               >
@@ -3190,7 +3205,7 @@ export default function CollegePortal({
           )}
         </main>
         <footer className="erp-footer">
-          {c.name} / Campus management <span>EduNexa College</span>
+          {c.name} / Campus management <span>{c.name}</span>
         </footer>
       </div>
       {apiOpen && (
@@ -3213,21 +3228,17 @@ export default function CollegePortal({
                 <X size={20} />
               </button>
             </header>
-            <ConnectedPortal
-              college={c}
-              parts={["portal", area, manageModule || activeModule]}
-              embedded
-              openPrimaryForm
-            />
+            {(manageModule || activeModule) === "fee-structures" ? (
+              <FeeStructureManager initialId={feeStructureId} />
+            ) : (
+              <ConnectedPortal
+                college={c}
+                parts={["portal", area, manageModule || activeModule]}
+                embedded
+                openPrimaryForm
+              />
+            )}
           </div>
-        </div>
-      )}
-      {message && (
-        <div role="status" className="erp-toast">
-          <span>{message}</span>
-          <button aria-label="Dismiss message" onClick={clear}>
-            <X size={16} />
-          </button>
         </div>
       )}
       <ERPActionDrawer

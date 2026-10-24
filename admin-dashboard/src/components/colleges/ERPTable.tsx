@@ -7,6 +7,8 @@ import { csv, professionalPdf } from "@/lib/colleges/download";
 import { useCollege } from "./CollegeStore";
 import { collegeBySlug } from "@/data/colleges";
 import { tableReport } from "@/lib/colleges/reports";
+import { formatDate } from "./DateInput";
+import { alignClass } from "./table-align";
 export type TableRecord = { id: string; [key: string]: unknown };
 export default function ERPTable({
   title,
@@ -184,6 +186,7 @@ export default function ERPTable({
                 .map((c) => (
                   <th
                     key={c.key}
+                    className={alignClass(c.key) || undefined}
                     aria-sort={
                       sort === c.key
                         ? asc
@@ -228,7 +231,11 @@ export default function ERPTable({
                 {columns
                   .filter((c) => !hidden.includes(c.key))
                   .map((c) => (
-                    <td key={c.key} data-label={c.label}>
+                    <td
+                      key={c.key}
+                      data-label={c.label}
+                      className={alignClass(c.key) || undefined}
+                    >
                       {c.render ? (
                         c.render(r)
                       ) : c.key === "status" ? (
@@ -254,7 +261,7 @@ export default function ERPTable({
                           {String(r[c.key])}
                         </span>
                       ) : (
-                        String(r[c.key] ?? "—")
+                        formatDate(String(r[c.key] ?? "—"))
                       )}
                     </td>
                   ))}
@@ -322,7 +329,9 @@ export default function ERPTable({
                 <div key={c.key}>
                   <dt>{c.label}</dt>
                   <dd>
-                    {c.render ? c.render(detail) : String(detail[c.key] ?? "—")}
+                    {c.render
+                      ? c.render(detail)
+                      : formatDate(String(detail[c.key] ?? "—"))}
                   </dd>
                 </div>
               ))}

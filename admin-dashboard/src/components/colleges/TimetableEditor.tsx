@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useEffect, useRef, useState } from "react";
 import type { College } from "@/data/colleges";
 import type { OperationRecord } from "@/lib/colleges/operations";
@@ -13,6 +14,7 @@ import {
 } from "@/lib/colleges/academic-engine";
 import { studentScope, timetableDays } from "@/lib/colleges/academic-scope";
 import { courseOfferings } from "@/data/colleges/subjects";
+import DateInput from "./DateInput";
 export default function TimetableEditor({
   college,
   session,
@@ -47,6 +49,7 @@ export default function TimetableEditor({
   const [stage, setStage] = useState(0);
   const [saved, setSaved] = useState("");
   const [error, setError] = useState("");
+  useErrorToast(error);
   const [config, setConfig] = useState<ScheduleConfiguration>(() =>
     scheduleConfiguration(state),
   );
@@ -138,6 +141,13 @@ export default function TimetableEditor({
             </option>
           ))}
         </select>
+      ) : type === "date" ? (
+        <DateInput
+          aria-label={label}
+          required
+          value={data[key] || ""}
+          onChange={(e) => set(key, e.target.value)}
+        />
       ) : (
         <input
           aria-label={label}
@@ -385,7 +395,9 @@ export default function TimetableEditor({
                       Equipment
                       <input name="equipment" />
                     </label>
-                    <button type="submit">Save resource</button>
+                    <button type="submit" className="erp-primary">
+                      Save resource
+                    </button>
                   </form>
                 )}
               </section>

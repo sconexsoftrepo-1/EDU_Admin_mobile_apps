@@ -23,6 +23,35 @@ export function csv(name: string, rows: Record<string, unknown>[]) {
     "text/csv;charset=utf-8",
   );
 }
+/** Excel (SpreadsheetML .xls) download of a header row plus text rows. */
+export function excel(
+  name: string,
+  sheet: string,
+  columns: string[],
+  rows: string[][],
+) {
+  const xml = (value: string) =>
+    value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&apos;");
+  const row = (values: string[]) =>
+    `<Row>${values.map((v) => `<Cell><Data ss:Type="String">${xml(v)}</Data></Cell>`).join("")}</Row>`;
+  download(
+    `${name}.xls`,
+    `<?xml version="1.0" encoding="UTF-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="${xml(sheet.slice(0, 31))}">
+    <Table>
+      ${[row(columns), ...rows.map(row)].join("\n      ")}
+    </Table>
+  </Worksheet>
+</Workbook>`,
+    "application/vnd.ms-excel",
+  );
+}
 
 export type PDFMode = "view" | "download";
 export async function professionalPdf(

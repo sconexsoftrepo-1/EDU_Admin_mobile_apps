@@ -25,6 +25,7 @@ import {
   type College,
 } from "@/data/colleges";
 import { professionalPdf, download } from "@/lib/colleges/download";
+import IconAction from "./IconAction";
 const Transport = dynamic(() => import("./TransportWorkspace"));
 const Mobile = dynamic(() => import("./MobileAppsWorkspace"));
 const Charts = dynamic(() => import("./OperationsCharts"));
@@ -580,7 +581,11 @@ export default function OperationsWorkspace({
         return (
           <div className="ops-row-actions">
             {actions && schema[key] && (
-              <button onClick={() => edit(key, r)}>Edit details</button>
+              <IconAction
+                kind="edit"
+                label="Edit details"
+                onClick={() => edit(key, r)}
+              />
             )}
             {key === "employees" && (
               <button

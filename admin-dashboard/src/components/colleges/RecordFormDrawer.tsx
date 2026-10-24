@@ -10,11 +10,15 @@ import {
 import { Check, ChevronRight, LoaderCircle, X } from "lucide-react";
 import { api, type Field, type LookupOption, type Row } from "@/services/api";
 import { useOptionalCollege } from "./CollegeStore";
+import { successText, toast } from "./toast";
 import {
   readWorkspaceCache,
   refreshWorkspaceCache,
   workspaceCacheKey,
 } from "@/lib/colleges/workspace-cache";
+import Select from "./SearchSelect";
+import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
+import DateInput from "./DateInput";
 const pretty = (key: string) =>
   key
     .replaceAll("_", " ")
@@ -202,8 +206,11 @@ export default function RecordFormDrawer({
       }
       await onSave(row);
       dialog.current?.close();
+      toast.success(successText(title));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to save");
+      const text = e instanceof Error ? e.message : "Unable to save";
+      setError(text);
+      toast.error("Could not save", text);
     } finally {
       setBusy(false);
     }
@@ -374,7 +381,7 @@ export default function RecordFormDrawer({
                       ) : f.reference ||
                         f.choices?.length ||
                         f.options?.length ? (
-                        <select
+                        <Select
                           name={f.key}
                           required={f.required}
                           defaultValue={String(value ?? "")}
@@ -411,7 +418,7 @@ export default function RecordFormDrawer({
                               : f.options || []
                             ).map((o) => <option key={o}>{o}</option>)
                           )}
-                        </select>
+                        </Select>
                       ) : multiline ? (
                         <textarea
                           name={f.key}
@@ -423,6 +430,28 @@ export default function RecordFormDrawer({
                               : f.type === "json"
                                 ? JSON.stringify(value, null, 2)
                                 : String(value)
+                          }
+                        />
+                      ) : f.type === "date" ? (
+                        <DateInput
+                          name={f.key}
+                          aria-label={label}
+                          required={f.required}
+                          defaultValue={
+                            value === undefined || value === null
+                              ? ""
+                              : String(value)
+                          }
+                        />
+                      ) : isPhoneField(f.key, f.type) ? (
+                        <FormPhoneInput
+                          name={f.key}
+                          label={label}
+                          required={f.required}
+                          defaultValue={
+                            value === undefined || value === null
+                              ? ""
+                              : String(value)
                           }
                         />
                       ) : (

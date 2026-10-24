@@ -5,6 +5,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
+from app.core.fee_plans import semester_ledger
 from app.core.resources import staff_only
 from app.core.security import require
 from app.core.storage import audit, new_code
@@ -102,6 +103,7 @@ def calculate_ledger(data, student_code):
         "currency": "INR",
         "charges": result,
         "totals": {k: str(v) for k, v in totals.items()},
+        "course_plans": semester_ledger(result, query_rows(data, "fee_structures")),
     }
 
 

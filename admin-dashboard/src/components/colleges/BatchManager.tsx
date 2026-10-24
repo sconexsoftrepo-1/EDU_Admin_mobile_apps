@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarRange,
@@ -17,6 +18,7 @@ import {
   type LookupOption,
   type Resource,
 } from "@/services/api";
+import IconAction from "./IconAction";
 
 type Batch = BatchOverview["batches"][number];
 export default function BatchManager({
@@ -33,6 +35,7 @@ export default function BatchManager({
   const [data, setData] = useState<BatchOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState("");
   const [confirming, setConfirming] = useState("");
@@ -429,8 +432,9 @@ export default function BatchManager({
                 ) : (
                   <div className="edu-batch-actions">
                     {resource?.actions.includes("edit") && (
-                      <button
-                        type="button"
+                      <IconAction
+                        kind="edit"
+                        label={`Edit batch ${batch.name ?? ""}`.trim()}
                         onClick={() => {
                           setSectionNames(
                             Object.fromEntries(
@@ -446,22 +450,18 @@ export default function BatchManager({
                           setConfirming("");
                           setError("");
                         }}
-                      >
-                        <Pencil size={14} /> Edit batch
-                      </button>
+                      />
                     )}
                     {resource?.actions.includes("delete") && (
-                      <button
-                        type="button"
-                        className="edu-batch-delete"
+                      <IconAction
+                        kind="delete"
+                        label={`Delete batch ${batch.name ?? ""}`.trim()}
                         onClick={() => {
                           setConfirming(batch.code);
                           setEditing("");
                           setError("");
                         }}
-                      >
-                        <Trash2 size={14} /> Delete batch
-                      </button>
+                      />
                     )}
                   </div>
                 )}

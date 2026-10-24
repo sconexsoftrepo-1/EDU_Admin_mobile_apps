@@ -44,6 +44,7 @@ import { professionalPdf } from "@/lib/colleges/download";
 import { feeComponents, feeTotals, taxLabel } from "@/lib/colleges/fees";
 import { receiptReport, structureReport } from "@/lib/colleges/reports";
 import { OpsSheet, type OpsField } from "./OperationsUI";
+import IconAction from "./IconAction";
 export default function MobileAppsWorkspace({
   college,
   initialApp,
@@ -585,7 +586,9 @@ export default function MobileAppsWorkspace({
               {teacher && (
                 <>
                   <small>{a.status}</small>
-                  <button
+                  <IconAction
+                    kind="edit"
+                    label="Edit assignment"
                     onClick={() =>
                       setSheet({
                         title: "Edit class assignment",
@@ -616,9 +619,7 @@ export default function MobileAppsWorkspace({
                           }),
                       })
                     }
-                  >
-                    Edit assignment
-                  </button>
+                  />
                   {a.status === "Draft" && (
                     <button
                       onClick={() =>

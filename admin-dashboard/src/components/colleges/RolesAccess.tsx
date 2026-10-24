@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
   KeyRound,
@@ -89,6 +90,7 @@ export default function RolesAccess() {
   const [busy, setBusy] = useState(!cachedRoles);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const [accountCode, setAccountCode] = useState("");
   const [editor, setEditor] = useState<{
     kind: "role" | "account";

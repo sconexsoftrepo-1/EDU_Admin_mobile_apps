@@ -22,6 +22,7 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { collegeRoot, type College } from "@/data/colleges";
+import { FormPhoneInput } from "./CountryCodePicker";
 import {
   api,
   errorText,
@@ -30,6 +31,7 @@ import {
   type IntakeKind,
   type PublicOptions,
 } from "@/services/api";
+import DateInput from "./DateInput";
 const Scene = dynamic(() => import("./CampusScene"), {
   ssr: false,
   loading: () => (
@@ -702,11 +704,15 @@ export default function CollegePublic({
               ].map(([key, label]) => (
                 <label key={key}>
                   {label}
-                  <input
-                    name={key}
-                    required
-                    type={key === "email" ? "email" : "text"}
-                  />
+                  {key === "contact" ? (
+                    <FormPhoneInput name={key} label={label} required />
+                  ) : (
+                    <input
+                      name={key}
+                      required
+                      type={key === "email" ? "email" : "text"}
+                    />
+                  )}
                 </label>
               ))}
               <label>
@@ -818,7 +824,7 @@ export default function CollegePublic({
               </label>
               <label>
                 Preferred visit date
-                <input name="visit_date" type="date" required />
+                <DateInput name="visit_date" required />
               </label>
               <label>
                 Your question

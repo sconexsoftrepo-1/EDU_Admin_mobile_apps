@@ -20,7 +20,10 @@ import {
   CheckCircle2,
   FileDown,
   FileSpreadsheet,
+  FileText,
   GraduationCap,
+  IdCard,
+  Paperclip,
   Plus,
   Printer,
   Trash2,
@@ -43,6 +46,11 @@ import {
 import type { College } from "@/data/colleges";
 import { csv, professionalPdf } from "@/lib/colleges/download";
 import "./enrollment-wizard.css";
+import { toast } from "../toast";
+import Select from "../SearchSelect";
+import { PhoneInput } from "../CountryCodePicker";
+import { UploadButton } from "../UploadBox";
+import DateInput, { formatDate } from "../DateInput";
 
 const MAX_FILE = 650_000; // backend upload limit (bytes)
 const BOARDS = ["SSC (State board)", "CBSE", "ICSE", "Other"];
@@ -114,15 +122,18 @@ export function Card({
   icon,
   children,
   aside,
+  asideInline,
 }: {
   title: string;
   icon?: ReactNode;
   children: ReactNode;
   aside?: ReactNode;
+  /** Show `aside` right beside the title instead of at the far right. */
+  asideInline?: boolean;
 }) {
   return (
     <section className="enw-card">
-      <header>
+      <header className={asideInline ? "enw-card-head-inline" : undefined}>
         <h3>
           {icon}
           {title}
@@ -154,6 +165,90 @@ export function Field({
   );
 }
 
+/** Shrinks images and enforces the upload limit; returns the file or an error message. */
+async function checkUpload(picked: File): Promise<File | string> {
+  const fitted = picked.type.startsWith("image/")
+    ? await fitImage(picked, picked.name)
+    : picked;
+  return fitted.size > MAX_FILE
+    ? "Maximum 650 KB; scan at a lower resolution"
+    : fitted;
+}
+
+/** ID number field with its document upload inside the same box (Aadhaar, PAN). */
+export function IdWithUpload({
+  value,
+  onValue,
+  file,
+  onFile,
+  fileRequired,
+  fileLabel,
+  accept = ".pdf,.png,.jpg,.jpeg",
+  ...input
+}: {
+  value: string;
+  onValue: (value: string) => void;
+  file?: File;
+  onFile: (file?: File) => void;
+  fileRequired?: boolean;
+  fileLabel: string;
+  accept?: string;
+  required?: boolean;
+  inputMode?: "numeric" | "text";
+  pattern?: string;
+  placeholder?: string;
+  maxLength?: number;
+  title?: string;
+}) {
+  const [error, setError] = useState("");
+  return (
+    <span className="enw-file enw-idfile">
+      <span className="upl-box">
+        <input
+          {...input}
+          className="upl-input"
+          value={value}
+          onChange={(e) => onValue(e.target.value)}
+        />
+        <UploadButton
+          label={fileLabel}
+          hasFile={!!file}
+          accept={accept}
+          required={fileRequired && !file}
+          onChange={async (e) => {
+            const picked = e.target.files?.[0];
+            e.target.value = "";
+            setError("");
+            if (!picked) return;
+            const checked = await checkUpload(picked);
+            if (typeof checked === "string") setError(checked);
+            else onFile(checked);
+          }}
+        />
+      </span>
+      {file && (
+        <span className="enw-idfile-chip">
+          <FileText size={13} aria-hidden="true" />
+          <span>
+            {file.name} · {Math.round(file.size / 1024)} KB
+          </span>
+          <button
+            type="button"
+            aria-label={`Remove ${fileLabel}`}
+            onClick={(e) => {
+              e.preventDefault();
+              onFile(undefined);
+            }}
+          >
+            <X size={13} />
+          </button>
+        </span>
+      )}
+      {error && <em role="alert">{error}</em>}
+    </span>
+  );
+}
+
 export function FilePick({
   file,
   onChange,
@@ -170,39 +265,41 @@ export function FilePick({
   const [error, setError] = useState("");
   return (
     <span className="enw-file">
-      <label className="enw-file-button">
-        <Upload size={15} /> {file ? "Replace file" : label}
-        <input
-          type="file"
+      <span className="upl-box">
+        <span className={file ? "upl-text" : "upl-text is-empty"}>
+          {file
+            ? `${file.name} · ${Math.round(file.size / 1024)} KB`
+            : "No file chosen"}
+        </span>
+        {file && (
+          <button
+            type="button"
+            className="upl-remove"
+            aria-label="Remove file"
+            onClick={(e) => {
+              e.preventDefault();
+              onChange(undefined);
+            }}
+          >
+            <X size={14} />
+          </button>
+        )}
+        <UploadButton
+          label={label}
+          hasFile={!!file}
           accept={accept}
           required={required && !file}
           onChange={async (e) => {
             const picked = e.target.files?.[0];
+            e.target.value = "";
             setError("");
             if (!picked) return;
-            const fitted = picked.type.startsWith("image/")
-              ? await fitImage(picked, picked.name)
-              : picked;
-            if (fitted.size > MAX_FILE) {
-              setError("Maximum 650 KB; scan at a lower resolution");
-              return;
-            }
-            onChange(fitted);
+            const checked = await checkUpload(picked);
+            if (typeof checked === "string") setError(checked);
+            else onChange(checked);
           }}
         />
-      </label>
-      {file && (
-        <span className="enw-file-name">
-          {file.name} · {Math.round(file.size / 1024)} KB
-          <button
-            type="button"
-            aria-label="Remove file"
-            onClick={() => onChange(undefined)}
-          >
-            <X size={14} />
-          </button>
-        </span>
-      )}
+      </span>
       {error && <em role="alert">{error}</em>}
     </span>
   );
@@ -309,57 +406,7 @@ function PhotoCapture({
   );
 }
 
-const COUNTRY_CODES = [
-  "+91",
-  "+1",
-  "+44",
-  "+61",
-  "+65",
-  "+971",
-  "+974",
-  "+966",
-];
-
-/** Phone number with its country code (India +91 by default). */
-export function PhoneInput({
-  code,
-  onCode,
-  value,
-  onChange,
-  required,
-  label,
-}: {
-  code: string;
-  onCode: (code: string) => void;
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  label: string;
-}) {
-  return (
-    <span className="enw-phone">
-      <select
-        aria-label={`${label} country code`}
-        value={code}
-        onChange={(e) => onCode(e.target.value)}
-      >
-        {COUNTRY_CODES.map((c) => (
-          <option key={c}>{c}</option>
-        ))}
-      </select>
-      <input
-        type="tel"
-        inputMode="numeric"
-        aria-label={label}
-        required={required}
-        pattern={code === "+91" ? "[6-9][0-9]{9}" : "[0-9 ]{6,15}"}
-        title={code === "+91" ? "10-digit mobile number" : "Phone number"}
-        value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[^0-9 ]/g, ""))}
-      />
-    </span>
-  );
-}
+export { PhoneInput } from "../CountryCodePicker";
 
 export default function StudentEnrollmentWizard({
   college,
@@ -400,7 +447,7 @@ export default function StudentEnrollmentWizard({
     blood_group: "",
     address: "",
     city: "",
-    state: "Telangana",
+    state: "",
     postal_code: "",
     country: "India",
     campus_code: "",
@@ -416,8 +463,13 @@ export default function StudentEnrollmentWizard({
     passed_year: "",
   });
   const [documents, setDocuments] = useState<Record<string, boolean>>({});
-  // Country codes of the guardian's numbers; saved with the number ("+91 9876543210").
-  const [codes, setCodes] = useState({ phone: "+91", alternate: "+91" });
+  // Country codes of the phone numbers; saved with the number ("+91 9876543210").
+  const [codes, setCodes] = useState({
+    student: "+91",
+    phone: "+91",
+    alternate: "+91",
+    referral: "+91",
+  });
   const withCode = (code: string, number?: string) =>
     number?.trim() ? `${code} ${number.trim()}` : "";
   const [guardian, setGuardian] = useState<Guardian>({
@@ -462,13 +514,14 @@ export default function StudentEnrollmentWizard({
         if (value.campuses.length === 1)
           setStudent((s) => ({ ...s, campus_code: value.campuses[0].code }));
       })
-      .catch((e) =>
-        setError(
+      .catch((e) => {
+        const text =
           e instanceof ApiError && e.status === 404
-            ? "The backend does not serve the enrollment wizard yet: redeploy the latest backend and open the form again."
-            : errorText(e),
-        ),
-      );
+            ? "The backend does not serve the enrollment wizard yet: restart it (uvicorn app.asgi:app --host 127.0.0.1 --port 8010) and open the form again."
+            : errorText(e);
+        setError(text);
+        toast.error("Could not load enrollment options", text);
+      });
   }, []);
   useEffect(() => {
     if (!course.academic_year_code) return;
@@ -481,7 +534,11 @@ export default function StudentEnrollmentWizard({
       .then((value) => {
         if (active) setQuote(value);
       })
-      .catch((e) => active && setError(errorText(e)));
+      .catch((e) => {
+        if (!active) return;
+        setError(errorText(e));
+        toast.error("Could not load fee details", errorText(e));
+      });
     return () => {
       active = false;
     };
@@ -518,6 +575,11 @@ export default function StudentEnrollmentWizard({
       ),
     [quote, course.program_code, hostel, transport],
   );
+  const fullCourseFees =
+    fees.length > 0 && fees.every((f) => f.fee_basis === "full_course");
+  const termCount = fullCourseFees
+    ? Number(fees[0]?.term_count || program?.duration_semesters || 4)
+    : 0;
   const hostelFee = (quote?.fees_available || [])
     .filter((f) => f.category === "hostel")
     .reduce((n, f) => n + num(f.amount), 0);
@@ -541,7 +603,7 @@ export default function StudentEnrollmentWizard({
         date_of_birth: s.date_of_birth,
         gender: s.gender as EnrollmentPayload["student"]["gender"],
         email: s.email.trim() || undefined,
-        phone: s.phone.trim(),
+        phone: withCode(codes.student, s.phone),
         aadhaar_number: s.aadhaar_number.replace(/\s/g, ""),
         blood_group: s.blood_group || undefined,
         address: s.address.trim(),
@@ -579,7 +641,9 @@ export default function StudentEnrollmentWizard({
           withCode(codes.alternate, guardian.alternate_phone) || undefined,
       },
       documents,
-      referral: referred ? { ...referral } : null,
+      referral: referred
+        ? { ...referral, mobile: withCode(codes.referral, referral.mobile) }
+        : null,
       achievements: achievements
         .filter((a) => a.title.trim())
         .map((a) => ({
@@ -616,20 +680,24 @@ export default function StudentEnrollmentWizard({
 
   function next() {
     setError("");
+    const warn = (text: string) => {
+      setError(text);
+      toast.warning(text);
+    };
     if (step === 0) {
       if (!stepOne.current?.reportValidity()) return;
       if (!files.aadhaar_copy)
-        return setError("Upload the Aadhaar copy (mandatory).");
+        return warn("Upload the Aadhaar copy (mandatory).");
     }
     if (step === 1) {
       if (!stepTwo.current?.reportValidity()) return;
-      if (!program) return setError("Choose the course and specialization.");
+      if (!program) return warn("Choose the course and specialization.");
       if (!batch)
-        return setError(
+        return warn(
           `The ${startYear} batch of ${program.name} does not exist yet; create it in Courses & enrollment.`,
         );
       if (concession > academicFee)
-        return setError(
+        return warn(
           "Scholarship and special consideration cannot exceed the academic fee.",
         );
     }
@@ -665,8 +733,15 @@ export default function StudentEnrollmentWizard({
       setUploadIssues(issues);
       setResult(done);
       onEnrolled?.(code);
+      if (issues.length)
+        toast.warning(
+          "Student added, but some documents did not upload",
+          issues.join("; "),
+        );
+      else toast.success("Student added successfully!", `Student ID ${code}`);
     } catch (e) {
       setError(errorText(e));
+      toast.error("Failed to add student. Please try again.", errorText(e));
     } finally {
       setBusy(false);
     }
@@ -714,9 +789,9 @@ export default function StudentEnrollmentWizard({
       title: "Student",
       fields: [
         ["Name", fullName(student)],
-        ["Date of birth", student.date_of_birth],
+        ["Date of birth", formatDate(student.date_of_birth)],
         ["Gender", student.gender.replaceAll("_", " ")],
-        ["Contact number", student.phone],
+        ["Contact number", withCode(codes.student, student.phone)],
         ["Email", student.email || "—"],
         [
           "Aadhaar number",
@@ -788,7 +863,7 @@ export default function StudentEnrollmentWizard({
             fields: [
               ["Name", referral.name],
               ["Relation to organization", referral.relation],
-              ["Mobile", referral.mobile],
+              ["Mobile", withCode(codes.referral, referral.mobile)],
             ] as [string, string][],
           },
         ]
@@ -816,7 +891,9 @@ export default function StudentEnrollmentWizard({
         ]
       : []),
     {
-      title: "Fee breakdown (first year)",
+      title: fullCourseFees
+        ? "Fee breakdown (full course)"
+        : "Fee breakdown (first year)",
       columns: ["Fee", "Category", "Due date", "Amount"],
       rows: [
         ...fees.map((f) => [
@@ -1106,8 +1183,7 @@ export default function StudentEnrollmentWizard({
                       />
                     </Field>
                     <Field label="Date of birth *">
-                      <input
-                        type="date"
+                      <DateInput
                         required
                         value={student.date_of_birth}
                         onChange={(e) =>
@@ -1119,7 +1195,7 @@ export default function StudentEnrollmentWizard({
                       />
                     </Field>
                     <Field label="Gender *">
-                      <select
+                      <Select
                         required
                         value={student.gender}
                         onChange={(e) =>
@@ -1133,10 +1209,10 @@ export default function StudentEnrollmentWizard({
                         <option value="prefer_not_to_say">
                           Prefer not to say
                         </option>
-                      </select>
+                      </Select>
                     </Field>
                     <Field label="Blood group">
-                      <select
+                      <Select
                         value={student.blood_group}
                         onChange={(e) =>
                           setStudent({
@@ -1151,17 +1227,16 @@ export default function StudentEnrollmentWizard({
                             <option key={g}>{g}</option>
                           ),
                         )}
-                      </select>
+                      </Select>
                     </Field>
                     <Field label="Contact number *">
-                      <input
-                        type="tel"
+                      <PhoneInput
+                        label="Contact number"
                         required
-                        pattern="[0-9+ ]{7,20}"
+                        code={codes.student}
+                        onCode={(student) => setCodes({ ...codes, student })}
                         value={student.phone}
-                        onChange={(e) =>
-                          setStudent({ ...student, phone: e.target.value })
-                        }
+                        onChange={(phone) => setStudent({ ...student, phone })}
                       />
                     </Field>
                     <Field label="Email">
@@ -1175,7 +1250,7 @@ export default function StudentEnrollmentWizard({
                     </Field>
                     {options && options.campuses.length > 1 && (
                       <Field label="Campus *">
-                        <select
+                        <Select
                           required
                           value={student.campus_code}
                           onChange={(e) =>
@@ -1191,7 +1266,7 @@ export default function StudentEnrollmentWizard({
                               {c.name}
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </Field>
                     )}
                     <Field label="Address *" wide>
@@ -1237,33 +1312,30 @@ export default function StudentEnrollmentWizard({
                   </div>
                 </Card>
 
-                <Card title="Aadhaar" icon={<CheckCircle2 size={17} />}>
-                  <div className="enw-grid enw-aadhaar">
-                    <Field label="Student Aadhaar number *" hint="12 digits">
-                      <input
+                <Card title="Identity" icon={<IdCard size={17} />}>
+                  <div className="enw-grid">
+                    <Field
+                      label="Student Aadhaar number *"
+                      hint="12 digits, and upload the Aadhaar copy (PDF, JPG or PNG up to 650 KB)."
+                    >
+                      <IdWithUpload
                         required
                         inputMode="numeric"
-                        pattern="[0-9]{4} ?[0-9]{4} ?[0-9]{4}"
+                        pattern="[0-9]{12}"
+                        maxLength={12}
+                        title="Aadhaar number must be exactly 12 digits"
+                        placeholder="Enter Aadhaar number"
                         value={student.aadhaar_number}
-                        onChange={(e) =>
+                        onValue={(v) =>
                           setStudent({
                             ...student,
-                            aadhaar_number: e.target.value,
+                            aadhaar_number: v.replace(/\D/g, "").slice(0, 12),
                           })
                         }
-                      />
-                    </Field>
-                    <Field
-                      label="Aadhaar copy *"
-                      hint="PDF, JPG or PNG up to 650 KB."
-                    >
-                      <FilePick
-                        label="Upload Aadhaar copy"
-                        required
+                        fileLabel="Aadhaar copy"
+                        fileRequired
                         file={files.aadhaar_copy}
-                        onChange={(f) =>
-                          setFiles({ ...files, aadhaar_copy: f })
-                        }
+                        onFile={(f) => setFiles({ ...files, aadhaar_copy: f })}
                       />
                     </Field>
                   </div>
@@ -1322,7 +1394,7 @@ export default function StudentEnrollmentWizard({
                     {qualification.level === "ssc" ? (
                       <>
                         <Field label="Board *">
-                          <select
+                          <Select
                             value={qualification.board}
                             onChange={(e) =>
                               setQualification({
@@ -1334,7 +1406,7 @@ export default function StudentEnrollmentWizard({
                             {BOARDS.map((b) => (
                               <option key={b}>{b}</option>
                             ))}
-                          </select>
+                          </Select>
                         </Field>
                         <Field label="Grade / GPA *">
                           <input
@@ -1352,7 +1424,7 @@ export default function StudentEnrollmentWizard({
                     ) : (
                       <>
                         <Field label="Group *">
-                          <select
+                          <Select
                             value={qualification.group}
                             onChange={(e) =>
                               setQualification({
@@ -1364,7 +1436,7 @@ export default function StudentEnrollmentWizard({
                             {GROUPS.map((g) => (
                               <option key={g}>{g}</option>
                             ))}
-                          </select>
+                          </Select>
                         </Field>
                         <Field label="1st year % / grade *">
                           <input
@@ -1448,9 +1520,9 @@ export default function StudentEnrollmentWizard({
                 </Card>
 
                 <Card title="Guardian details" icon={<UserRound size={17} />}>
-                  <div className="enw-grid">
+                  <div className="enw-grid enw-grid-3">
                     <Field label="Relationship with the student *">
-                      <select
+                      <Select
                         required
                         value={guardian.relationship}
                         onChange={(e) =>
@@ -1465,7 +1537,7 @@ export default function StudentEnrollmentWizard({
                         <option value="mother">Mother</option>
                         <option value="guardian">Guardian</option>
                         <option value="other">Other</option>
-                      </select>
+                      </Select>
                     </Field>
                     <Field label="Guardian first name *">
                       <input
@@ -1524,6 +1596,7 @@ export default function StudentEnrollmentWizard({
 
                 <Card
                   title="Referral"
+                  asideInline
                   aside={
                     <label className="enw-switch">
                       <input
@@ -1562,13 +1635,16 @@ export default function StudentEnrollmentWizard({
                         />
                       </Field>
                       <Field label="Referral mobile number *">
-                        <input
-                          type="tel"
+                        <PhoneInput
+                          label="Referral mobile number"
                           required
-                          pattern="[0-9+ ]{7,20}"
+                          code={codes.referral}
+                          onCode={(referral) =>
+                            setCodes({ ...codes, referral })
+                          }
                           value={referral.mobile}
-                          onChange={(e) =>
-                            setReferral({ ...referral, mobile: e.target.value })
+                          onChange={(mobile) =>
+                            setReferral({ ...referral, mobile })
                           }
                         />
                       </Field>
@@ -1611,7 +1687,7 @@ export default function StudentEnrollmentWizard({
                           )
                         }
                       />
-                      <select
+                      <Select
                         aria-label="Level"
                         value={a.level}
                         onChange={(e) =>
@@ -1632,7 +1708,7 @@ export default function StudentEnrollmentWizard({
                         ].map((l) => (
                           <option key={l}>{l}</option>
                         ))}
-                      </select>
+                      </Select>
                       <input
                         aria-label="Year"
                         placeholder="Year"
@@ -1766,7 +1842,7 @@ export default function StudentEnrollmentWizard({
                 >
                   <div className="enw-grid">
                     <Field label="Academic year *">
-                      <select
+                      <Select
                         required
                         value={course.academic_year_code}
                         onChange={(e) =>
@@ -1781,7 +1857,7 @@ export default function StudentEnrollmentWizard({
                             {y.name}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </Field>
                   </div>
                   <div
@@ -1911,7 +1987,8 @@ export default function StudentEnrollmentWizard({
                         <strong>Hostel</strong>
                         <small>
                           {hostelFee
-                            ? inr(hostelFee) + " per year"
+                            ? inr(hostelFee) +
+                              (fullCourseFees ? " full course" : " per year")
                             : "No hostel fee set for this course"}
                         </small>
                       </span>
@@ -1931,7 +2008,8 @@ export default function StudentEnrollmentWizard({
                         <strong>College bus</strong>
                         <small>
                           {busFee
-                            ? inr(busFee) + " per year"
+                            ? inr(busFee) +
+                              (fullCourseFees ? " full course" : " per year")
                             : "No bus fee set for this course"}
                         </small>
                       </span>
@@ -1939,7 +2017,13 @@ export default function StudentEnrollmentWizard({
                   </div>
                 </Card>
 
-                <Card title="Fee structure (first year)">
+                <Card
+                  title={
+                    fullCourseFees
+                      ? `Full course fee · ${Math.ceil(termCount / 2)} years · ${termCount} semesters`
+                      : "Fee structure (first year)"
+                  }
+                >
                   {!course.program_code ? (
                     <p className="enw-muted">
                       Choose a course to see its fee structure.
@@ -1960,7 +2044,11 @@ export default function StudentEnrollmentWizard({
                                 {f.category === "academic" ? "" : f.category}
                               </small>
                             </td>
-                            <td>{f.due_date}</td>
+                            <td>
+                              {f.fee_basis === "full_course"
+                                ? "Full course"
+                                : f.due_date}
+                            </td>
                             <td>{inr(num(f.amount))}</td>
                           </tr>
                         ))}
@@ -2051,7 +2139,7 @@ export default function StudentEnrollmentWizard({
                       </div>
                       <div>
                         <dt>Contact</dt>
-                        <dd>{student.phone || "—"}</dd>
+                        <dd>{withCode(codes.student, student.phone) || "—"}</dd>
                       </div>
                       <div>
                         <dt>Last qualification</dt>
@@ -2084,7 +2172,9 @@ export default function StudentEnrollmentWizard({
                   <p>
                     Check every detail with the student and parent. Confirming
                     reserves the admission and registration numbers and raises
-                    the first-year fee.
+                    {fullCourseFees
+                      ? "the full-course fee, payable by semester."
+                      : "the first-year fee."}
                   </p>
                   {exports}
                 </div>

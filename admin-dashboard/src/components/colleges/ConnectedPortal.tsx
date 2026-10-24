@@ -11,14 +11,24 @@ import "./connected-portal.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Eye, EyeOff, RefreshCw, Shield, Plus } from "lucide-react";
+import {
+  ArrowRight,
+  Download,
+  Eye,
+  EyeOff,
+  FileText,
+  RefreshCw,
+  Shield,
+  Plus,
+  Search,
+} from "lucide-react";
+import { excel, professionalPdf } from "@/lib/colleges/download";
 import {
   DOWNLOAD_KIND_BY_TABLE,
   FINANCE_SUMMARY_SCREENS,
   api,
   ApiError,
   SCREEN_CATALOG,
-  STAFF_KIND_LABEL,
   STAFF_SCREENS,
   errorText,
   fileToBase64,
@@ -58,6 +68,12 @@ import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
+import { toast, useErrorToast } from "./toast";
+import RoleSelect from "./RoleSelect";
+import UploadBox from "./UploadBox";
+import IconAction from "./IconAction";
+import { formatDate } from "./DateInput";
+import { alignClass } from "./table-align";
 export type { Field };
 const pretty = (key: string) => key.replaceAll("_", " ").replaceAll("-", " ");
 const text = (value: unknown): string =>
@@ -65,7 +81,7 @@ const text = (value: unknown): string =>
     ? "—"
     : typeof value === "object"
       ? JSON.stringify(value, null, 2)
-      : String(value);
+      : formatDate(String(value));
 /** Administration screens whose content is a list from their own endpoint. */
 function specialRows(screen: string): Promise<Row[]> {
   if (screen === "roles") return api.administration.roles();
@@ -102,19 +118,22 @@ export default function ConnectedPortal({
   parts,
   embedded = false,
   loginRedirect = false,
+  loginError,
   openPrimaryForm = false,
 }: {
   college: College;
   parts: string[];
   embedded?: boolean;
   loginRedirect?: boolean;
+  /** Show access failures in the sign-in form without restoring the rejected workspace. */
+  loginError?: string;
   /** Open the screen's data-entry form as soon as it is available (e.g. from "Manage …"). */
   openPrimaryForm?: boolean;
 }) {
   const shared = useOptionalCollege();
-  const sessionAccount = shared?.account || null;
-  const sessionRole = shared?.activeRole || null;
-  const sessionScreens = shared?.assignedScreens;
+  const sessionAccount = loginError ? null : shared?.account || null;
+  const sessionRole = loginError ? null : shared?.activeRole || null;
+  const sessionScreens = loginError ? undefined : shared?.assignedScreens;
   const router = useRouter();
   const initialSelection =
     parts.length > 2 ? parts.at(-1) || "dashboard" : "dashboard";
@@ -143,8 +162,8 @@ export default function ConnectedPortal({
     [total, setTotal] = useState(cachedInitial?.records.total || 0),
     [actions, setActions] = useState<Action[]>([]),
     [summary, setSummary] = useState<Row | null>(cachedInitial?.totals || null),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(!cachedInitial),
+    [error, setError] = useState(loginError || ""),
+    [busy, setBusy] = useState(!loginError && !cachedInitial),
     [filter, setFilter] = useState(""),
     [dialog, setDialog] = useState<{
       title: string;
@@ -152,10 +171,12 @@ export default function ConnectedPortal({
       initial?: Row;
       save: (r: Row) => Promise<void>;
     } | null>(null);
+  useErrorToast(loginRedirect ? "" : error);
   const [special, setSpecial] = useState<Row[]>(cachedInitial?.extra || []);
   const [signInRoles, setSignInRoles] = useState<SignInRole[]>([]),
     [signInRole, setSignInRole] = useState(""),
-    [showPassword, setShowPassword] = useState(false);
+    [showPassword, setShowPassword] = useState(false),
+    [signingIn, setSigningIn] = useState(false);
   const [configuration, setConfiguration] = useState<{
     kind: "role" | "form" | "account";
     initial?: Row;
@@ -235,6 +256,22 @@ export default function ConnectedPortal({
   }, []);
   const initialize = useCallback(
     async (person: Account, preferred: string) => {
+      const active = activeRoleRef.current;
+      const personal =
+        ["student", "parent"].includes(String(person.person_type)) ||
+        ["teaching", "self"].includes(String(person.workspace_scope));
+      const availableScreens = roleScreens(
+        sessionScreens || SCREEN_CATALOG,
+        active,
+      );
+      if (!active)
+        throw Error(
+          "No role has been assigned to this account. Contact your college administrator.",
+        );
+      if (!personal && availableScreens.length === 0)
+        throw Error(
+          "This role has no workspace access. Contact your college administrator or choose another assigned role.",
+        );
       identityRef.current = person.code;
       setDisplayRole(activeRoleRef.current);
       setAccount(person);
@@ -259,9 +296,7 @@ export default function ConnectedPortal({
       }
       // The screen catalog ships with the dashboard; the role decides which screens appear.
       const navigation = {
-        screens: sessionScreens
-          ? roleScreens(sessionScreens, activeRoleRef.current)
-          : roleScreens(SCREEN_CATALOG, activeRoleRef.current),
+        screens: availableScreens,
       };
       setScreens(navigation.screens);
       if (loginRedirect && activeRoleRef.current) {
@@ -295,9 +330,18 @@ export default function ConnectedPortal({
     [load, loginRedirect, college, sessionScreens],
   );
   /** Enter the workspace; `known` is the account and roles the login response already gave. */
-  async function start(known?: MeResponse) {
+  async function start(known?: MeResponse, requestedRole?: string) {
     const me = known || (await api.auth.me());
-    const active = selectedRole(me);
+    const active = requestedRole
+      ? me.roles.find((role) => role.code === requestedRole) || null
+      : selectedRole(me);
+    if (!active)
+      throw Error(
+        requestedRole
+          ? "Your account is not assigned to the selected role. Choose your assigned role and try again."
+          : "No role has been assigned to this account. Contact your college administrator.",
+      );
+    rememberRole(me.account.code, active.code);
     activeRoleRef.current = active;
     await initialize(
       {
@@ -308,6 +352,7 @@ export default function ConnectedPortal({
     );
   }
   useEffect(() => {
+    if (loginError) return;
     let active = true;
     const initializeSession = async () => {
       if (sessionAccount && sessionRole) {
@@ -331,14 +376,18 @@ export default function ConnectedPortal({
       .then(initializeSession)
       .catch((e) => {
         if (active) {
+          setAccount(null);
+          setLanding("");
           setBusy(false);
-          setError(errorText(e));
+          // No session yet is the normal state of the sign-in page, not an error.
+          if (!(e instanceof ApiError && e.status === 401))
+            setError(errorText(e));
         }
       });
     return () => {
       active = false;
     };
-  }, [initialize, initialSelection, sessionAccount, sessionRole]);
+  }, [initialize, initialSelection, sessionAccount, sessionRole, loginError]);
   useEffect(() => {
     if (!account || loginRedirect) return;
     const revalidate = () => {
@@ -368,24 +417,35 @@ export default function ConnectedPortal({
   }, [account]);
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
+    if (signingIn) return;
+    setSigningIn(true);
     setError("");
     const form = new FormData(event.currentTarget);
     try {
       const signedIn = await api.auth.login({
-        login_id: String(form.get("login")),
+        login_id: String(form.get("login")).trim(),
         password: String(form.get("password")),
         ...(signInRole ? { role_code: signInRole } : {}),
       });
-      if (signInRole) rememberRole(signedIn.account.code, signInRole);
       await start(
         signedIn.roles
           ? { account: signedIn.account, roles: signedIn.roles }
           : undefined,
+        signInRole || undefined,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sign in failed");
+      setAccount(null);
+      setLanding("");
+      setError(
+        e instanceof ApiError && e.status === 401
+          ? "Login ID or password is incorrect. Please try again."
+          : e instanceof ApiError && e.status === 403
+            ? "Your account does not have access to the selected role. Choose your assigned role and try again."
+            : errorText(e),
+      );
       setBusy(false);
+    } finally {
+      setSigningIn(false);
     }
   }
   async function refreshResource(r: Resource, offset = 0) {
@@ -596,7 +656,7 @@ export default function ConnectedPortal({
             src={`/assets/colleges-institutions/${college.slug}/campus.webp`}
             alt="Campus"
             fill
-            sizes="55vw"
+            sizes="(max-width: 960px) 100vw, 55vw"
           />
           <div>
             <Link href={collegeRoot(college)}>Back to website</Link>
@@ -613,42 +673,49 @@ export default function ConnectedPortal({
           </div>
         </div>
         <div className="college-login-form">
-          <Image
-            src={`/assets/colleges-institutions/${college.slug}/crest.svg`}
-            alt="College crest"
-            width={60}
-            height={66}
-          />
-          <h2>Welcome to {college.short}.</h2>
-          <p>Sign in to your campus workspace.</p>
-          <form onSubmit={login}>
-            <label>
-              Role
-              <select
-                aria-label="Role"
+          <div className="college-login-heading">
+            <Image
+              src="/assets/pragathilogo.jpg"
+              alt="Pragathi College logo"
+              width={60}
+              height={66}
+            />
+            <div>
+              {/* <h2>Welcome to {college.short}.</h2> */}
+              <h2>Welcome to Pragathi College.</h2>
+              <p>Sign in to your campus workspace.</p>
+            </div>
+          </div>
+          <form onSubmit={login} aria-busy={signingIn}>
+            <div className="role-select-field">
+              <span>Role</span>
+              <RoleSelect
+                options={signInRoles}
                 value={signInRole}
-                onChange={(e) => setSignInRole(e.target.value)}
-                required={signInRoles.length > 0}
-              >
-                {signInRoles.length === 0 && (
-                  <option value="">Loading roles…</option>
-                )}
-                {signInRoles.map((r) => (
-                  <option key={r.code} value={r.code}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                disabled={signingIn}
+                onChange={(value) => {
+                  setSignInRole(value);
+                  setError("");
+                }}
+              />
+            </div>
             <label>
               Login ID
-              <input name="login" autoComplete="username" required />
+              <input
+                name="login"
+                autoComplete="username"
+                required
+                disabled={signingIn}
+                aria-describedby={error ? "sign-in-error" : undefined}
+              />
             </label>
             <label>
               Password
               <div className="erp-password">
                 <input
                   name="password"
+                  disabled={signingIn}
+                  aria-describedby={error ? "sign-in-error" : undefined}
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
@@ -663,12 +730,12 @@ export default function ConnectedPortal({
               </div>
             </label>
             {error && (
-              <p role="alert" className="edu-error">
+              <p id="sign-in-error" role="alert" className="edu-error">
                 {error}
               </p>
             )}
-            <button className="college-button" disabled={busy}>
-              {busy ? "Connecting…" : "Sign in"} <ArrowRight size={17} />
+            <button className="college-button" disabled={signingIn}>
+              {signingIn ? "Signing in…" : "Sign in"} <ArrowRight size={17} />
             </button>
           </form>
           <div className="college-demo-note">
@@ -733,6 +800,7 @@ export default function ConnectedPortal({
       return;
     try {
       await api.workspace.remove(resource.path, String(row.code));
+      toast.success(`${String(row.name ?? row.code)} deleted successfully`);
       await refreshResource(resource);
     } catch (e) {
       setError(errorText(e));
@@ -750,6 +818,39 @@ export default function ConnectedPortal({
   const visibleRows = rows.filter((row) =>
     JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()),
   );
+  /** Excel / PDF of the table as shown (current search applied). */
+  const exportTitle = resource?.title || pretty(selected);
+  const exportFile = `${selected}-${new Date().toISOString().slice(0, 10)}`;
+  const exportColumns = columns.map((k) =>
+    pretty(k).replace(/^\w/, (c) => c.toUpperCase()),
+  );
+  const exportRows = () =>
+    visibleRows.map((row) =>
+      columns.map((k) =>
+        row[k] !== null && typeof row[k] === "object"
+          ? JSON.stringify(row[k])
+          : text(row[k]),
+      ),
+    );
+  const exportExcel = () =>
+    excel(exportFile, exportTitle, exportColumns, exportRows());
+  const exportPdf = async () => {
+    try {
+      await professionalPdf(exportFile, {
+        title: exportTitle,
+        landscape: true,
+        sections: [
+          {
+            title: `${visibleRows.length} of ${total} records`,
+            columns: exportColumns,
+            rows: exportRows(),
+          },
+        ],
+      });
+    } catch (e) {
+      setError(errorText(e));
+    }
+  };
   return (
     <main
       className={`edu-connected edu-workspace ${selected === "course-setup" ? "edu-course-workspace" : ""} ${embedded ? "edu-embedded" : ""}`}
@@ -795,8 +896,12 @@ export default function ConnectedPortal({
           </button>
         </aside>
       )}
-      <section className="edu-content">
-        <header className="edu-heading">
+      <section
+        className={`edu-content ${selected === "student-enrollment" ? "edu-enroll" : ""}`}
+      >
+        <header
+          className={`edu-heading ${staffKind ? "edu-staff-heading-hidden" : ""}`}
+        >
           <div>
             <p>College administration</p>
             <h1>
@@ -812,15 +917,6 @@ export default function ConnectedPortal({
             )}
           </div>
           <div className="edu-row-actions">
-            {staffKind && (
-              <button
-                className="edu-primary"
-                onClick={() => setStaffForm(true)}
-              >
-                <Plus size={15} aria-hidden="true" /> Add{" "}
-                {STAFF_KIND_LABEL[staffKind]}
-              </button>
-            )}
             {HEADER_ACTIONS.has(selected) && (
               <>
                 {primaryForm && (
@@ -948,284 +1044,360 @@ export default function ConnectedPortal({
             ))}
           </section>
         )}
-        <div className="edu-toolbar">
-          {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
-            <>
-              <select
-                aria-label="Screen resource"
-                value={resource.name}
-                onChange={(e) => {
-                  const r = screen?.resources.find(
-                    (r) => r.name === e.target.value,
-                  );
-                  if (r) void refreshResource(r);
-                }}
-              >
-                {screen?.resources.map((r) => (
-                  <option key={r.name} value={r.name}>
-                    {r.title}
-                  </option>
-                ))}
-              </select>
-              <input
-                aria-label="Search records"
-                placeholder="Search this page"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-              {primaryForm ? (
-                <button
-                  className="edu-primary"
-                  onClick={() => runAction(primaryForm)}
+        <div className="edu-card">
+          <div className="edu-toolbar" hidden={!!staffKind}>
+            {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
+              <>
+                <select
+                  aria-label="Screen resource"
+                  value={resource.name}
+                  onChange={(e) => {
+                    const r = screen?.resources.find(
+                      (r) => r.name === e.target.value,
+                    );
+                    if (r) void refreshResource(r);
+                  }}
                 >
-                  <Plus size={15} aria-hidden="true" /> {primaryForm.label}
-                </button>
-              ) : (
-                selected !== "student-enrollment" &&
-                resource.actions.includes("create") && (
-                  <button className="edu-primary" onClick={() => edit()}>
-                    <Plus size={15} aria-hidden="true" /> Create record
+                  {screen?.resources.map((r) => (
+                    <option key={r.name} value={r.name}>
+                      {r.title}
+                    </option>
+                  ))}
+                </select>
+                {selected === "student-enrollment" ? (
+                  <>
+                    <label className="stf-search">
+                      <Search size={15} aria-hidden="true" />
+                      <input
+                        type="search"
+                        aria-label="Search records"
+                        placeholder="Search by name, admission no. or email"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                      />
+                    </label>
+                    <p className="edu-count">
+                      {rows.length} of {total} records
+                    </p>
+                  </>
+                ) : (
+                  <input
+                    aria-label="Search records"
+                    placeholder="Search this page"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                  />
+                )}
+                {primaryForm ? (
+                  <button
+                    className="edu-primary"
+                    onClick={() => runAction(primaryForm)}
+                  >
+                    <Plus size={15} aria-hidden="true" /> {primaryForm.label}
                   </button>
-                )
-              )}
-            </>
-          )}
-          {!HEADER_ACTIONS.has(selected) &&
-            !staffKind &&
-            screenActions.map((a) => (
-              <button key={a.key} onClick={() => runAction(a)}>
-                {a.label}
-              </button>
-            ))}
-          {selected === "reports" && (
-            <>
-              <button
-                onClick={() => download(() => api.finance.downloadLedger())}
-              >
-                Download student ledger
-              </button>
-              <button
-                onClick={() =>
-                  download(() => api.reports.downloadFinanceReport())
-                }
-              >
-                Download finance PDF
-              </button>
-            </>
-          )}
-          {selected === "imports" && (
-            <label className="edu-file">
-              Validate client workbook
-              <input
-                type="file"
-                accept=".xlsx"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    const result = await api.imports.validate({
-                      filename: file.name,
-                      content_base64: await fileToBase64(file),
-                    });
-                    setSpecial([result]);
-                    if (resource) await refreshResource(resource);
-                  } catch (err) {
-                    setError(errorText(err));
-                  }
-                }}
-              />
-            </label>
-          )}
-          {selected === "forms" && (
-            <button
-              className="edu-primary"
-              onClick={() => setConfiguration({ kind: "form" })}
-            >
-              Create form
-            </button>
-          )}
-          {selected === "roles" && (
-            <button
-              className="edu-primary"
-              onClick={() => setConfiguration({ kind: "role" })}
-            >
-              Create role
-            </button>
-          )}
-          {["accounts", "credentials"].includes(selected) && (
-            <button
-              className="edu-primary"
-              onClick={() => setConfiguration({ kind: "account" })}
-            >
-              Create login
-            </button>
-          )}
-        </div>
-        {staffKind && (
-          <StaffDirectory kind={staffKind} reloadKey={staffReload} />
-        )}
-        {resource && !staffKind && (
-          <>
-            {cards && (
-              <CourseCards
-                rows={rows}
-                canEdit={resource.actions.includes("edit")}
-                canDelete={resource.actions.includes("delete")}
-                onEdit={(row) => void edit(row)}
-                onDelete={(row) => removeRow(row, true)}
-              />
+                ) : (
+                  selected !== "student-enrollment" &&
+                  resource.actions.includes("create") && (
+                    <button className="edu-primary" onClick={() => edit()}>
+                      <Plus size={15} aria-hidden="true" /> Create record
+                    </button>
+                  )
+                )}
+                {selected === "student-enrollment" && (
+                  <>
+                    <button
+                      type="button"
+                      className="edu-export"
+                      onClick={exportExcel}
+                      disabled={!visibleRows.length}
+                    >
+                      <Download size={14} aria-hidden="true" /> Excel
+                    </button>
+                    <button
+                      type="button"
+                      className="edu-export"
+                      onClick={() => void exportPdf()}
+                      disabled={!visibleRows.length}
+                    >
+                      <FileText size={14} aria-hidden="true" /> PDF
+                    </button>
+                  </>
+                )}
+              </>
             )}
-            {!cards && (
-              <div className="edu-table">
-                <table>
-                  <thead>
-                    <tr>
-                      {columns.map((k) => (
-                        <th key={k}>{pretty(k)}</th>
-                      ))}
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visibleRows.map((row) => (
-                      <tr key={String(row.code)}>
+            {!HEADER_ACTIONS.has(selected) &&
+              !staffKind &&
+              screenActions.map((a) => (
+                <button key={a.key} onClick={() => runAction(a)}>
+                  {a.label}
+                </button>
+              ))}
+            {selected === "reports" && (
+              <>
+                <button
+                  onClick={() => download(() => api.finance.downloadLedger())}
+                >
+                  Download student ledger
+                </button>
+                <button
+                  onClick={() =>
+                    download(() => api.reports.downloadFinanceReport())
+                  }
+                >
+                  Download finance PDF
+                </button>
+              </>
+            )}
+            {selected === "imports" && (
+              <div className="edu-file">
+                <span>Validate client workbook</span>
+                <UploadBox
+                  label="Client workbook (.xlsx)"
+                  accept=".xlsx"
+                  placeholder="No workbook chosen"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const result = await api.imports.validate({
+                        filename: file.name,
+                        content_base64: await fileToBase64(file),
+                      });
+                      setSpecial([result]);
+                      toast.success(`${file.name} validated`);
+                      if (resource) await refreshResource(resource);
+                    } catch (err) {
+                      setError(errorText(err));
+                    }
+                  }}
+                />
+              </div>
+            )}
+            {selected === "forms" && (
+              <button
+                className="edu-primary"
+                onClick={() => setConfiguration({ kind: "form" })}
+              >
+                Create form
+              </button>
+            )}
+            {selected === "roles" && (
+              <button
+                className="edu-primary"
+                onClick={() => setConfiguration({ kind: "role" })}
+              >
+                Create role
+              </button>
+            )}
+            {["accounts", "credentials"].includes(selected) && (
+              <button
+                className="edu-primary"
+                onClick={() => setConfiguration({ kind: "account" })}
+              >
+                Create login
+              </button>
+            )}
+          </div>
+          {staffKind && (
+            <StaffDirectory
+              kind={staffKind}
+              reloadKey={staffReload}
+              title={
+                screen?.title ||
+                sessionScreens?.find((s) => s.key === selected)?.title ||
+                pretty(selected)
+              }
+              onRefresh={() => load(selected)}
+              onAdd={() => setStaffForm(true)}
+            />
+          )}
+          {resource && !staffKind && (
+            <>
+              {cards && (
+                <CourseCards
+                  rows={rows}
+                  canEdit={resource.actions.includes("edit")}
+                  canDelete={resource.actions.includes("delete")}
+                  onEdit={(row) => void edit(row)}
+                  onDelete={(row) => removeRow(row, true)}
+                />
+              )}
+              {!cards && (
+                <div className="edu-table">
+                  <table>
+                    <thead>
+                      <tr>
                         {columns.map((k) => (
-                          <td key={k}>{text(row[k])}</td>
+                          <th key={k} className={alignClass(k) || undefined}>
+                            {pretty(k)}
+                          </th>
                         ))}
-                        <td>
-                          <div className="edu-row-actions">
-                            {resource.actions.includes("edit") && (
-                              <button onClick={() => edit(row)}>Edit</button>
-                            )}
-                            {resource.actions.includes("delete") && (
-                              <button
-                                onClick={async () => {
-                                  if (!confirm("Delete this record?")) return;
-                                  try {
-                                    await api.workspace.remove(
-                                      resource.path,
-                                      String(row.code),
-                                    );
-                                    await refreshResource(resource);
-                                  } catch (e) {
-                                    setError(errorText(e));
-                                  }
-                                }}
-                              >
-                                Delete
-                              </button>
-                            )}
-                            {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
-                              <button
-                                onClick={() =>
-                                  download(() =>
-                                    api.documents.download(
-                                      DOWNLOAD_KIND_BY_TABLE[resource.name],
-                                      String(row.code),
-                                    ),
-                                  )
-                                }
-                              >
-                                Download
-                              </button>
-                            )}
-                            {resource.name === "import_jobs" &&
-                              row.status === "validated" && (
-                                <button
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleRows.map((row) => (
+                        <tr key={String(row.code)}>
+                          {columns.map((k) => (
+                            <td key={k} className={alignClass(k) || undefined}>
+                              {text(row[k])}
+                            </td>
+                          ))}
+                          <td>
+                            <div className="edu-row-actions">
+                              {resource.actions.includes("edit") && (
+                                <IconAction
+                                  kind="edit"
+                                  label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                  onClick={() => edit(row)}
+                                />
+                              )}
+                              {resource.actions.includes("delete") && (
+                                <IconAction
+                                  kind="delete"
+                                  label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
                                   onClick={async () => {
+                                    if (!confirm("Delete this record?")) return;
                                     try {
-                                      await api.imports.commit(
+                                      await api.workspace.remove(
+                                        resource.path,
                                         String(row.code),
+                                      );
+                                      toast.success(
+                                        `${String(row.name ?? row.code)} deleted successfully`,
                                       );
                                       await refreshResource(resource);
                                     } catch (e) {
                                       setError(errorText(e));
                                     }
                                   }}
-                                >
-                                  Commit import
-                                </button>
+                                />
                               )}
-                            {resource.name === "certificate_requests" &&
-                              row.status === "pending" && (
+                              {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
                                 <button
-                                  onClick={async () => {
-                                    try {
-                                      await api.documents.issueCertificate({
-                                        request_code: String(row.code),
-                                      });
-                                      await refreshResource(resource);
-                                    } catch (e) {
-                                      setError(errorText(e));
-                                    }
-                                  }}
+                                  onClick={() =>
+                                    download(() =>
+                                      api.documents.download(
+                                        DOWNLOAD_KIND_BY_TABLE[resource.name],
+                                        String(row.code),
+                                      ),
+                                    )
+                                  }
                                 >
-                                  Authorize and issue
+                                  Download
                                 </button>
                               )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {!cards && !busy && rows.length === 0 && (
-              <p>
-                {selected === "student-enrollment"
-                  ? "No students enrolled yet. Use Student enrollment to add a student."
-                  : "No records yet. Use Create record or complete the preceding setup steps."}
-              </p>
-            )}
-            {!cards && (
-              <p>
-                {rows.length} of {total} records
-              </p>
-            )}
-            {total > rows.length && (
-              <button onClick={() => refreshResource(resource, rows.length)}>
-                Next page
-              </button>
-            )}
-          </>
-        )}
+                              {resource.name === "import_jobs" &&
+                                row.status === "validated" && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await api.imports.commit(
+                                          String(row.code),
+                                        );
+                                        toast.success(
+                                          "Import committed successfully",
+                                        );
+                                        await refreshResource(resource);
+                                      } catch (e) {
+                                        setError(errorText(e));
+                                      }
+                                    }}
+                                  >
+                                    Commit import
+                                  </button>
+                                )}
+                              {resource.name === "certificate_requests" &&
+                                row.status === "pending" && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await api.documents.issueCertificate({
+                                          request_code: String(row.code),
+                                        });
+                                        toast.success(
+                                          "Certificate issued successfully",
+                                        );
+                                        await refreshResource(resource);
+                                      } catch (e) {
+                                        setError(errorText(e));
+                                      }
+                                    }}
+                                  >
+                                    Authorize and issue
+                                  </button>
+                                )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {!cards && !busy && rows.length === 0 && (
+                <p className="edu-empty">
+                  {selected === "student-enrollment"
+                    ? "No students enrolled yet. Use Student enrollment to add a student."
+                    : "No records yet. Use Create record or complete the preceding setup steps."}
+                </p>
+              )}
+              {!cards && selected !== "student-enrollment" && (
+                <p>
+                  {rows.length} of {total} records
+                </p>
+              )}
+              {total > rows.length && (
+                <button onClick={() => refreshResource(resource, rows.length)}>
+                  Next page
+                </button>
+              )}
+            </>
+          )}
+        </div>
         {special.map((row, i) => (
           <article className="edu-special" key={String(row.code ?? i)}>
             <h2>{String(row.name ?? row.login_id ?? row.code ?? "Details")}</h2>
             <pre>{JSON.stringify(row, null, 2)}</pre>
             {selected === "roles" && !row.system_admin && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit role"
                   onClick={() =>
                     setConfiguration({ kind: "role", initial: row })
                   }
-                >
-                  Edit role
-                </button>
-                <button
+                />
+                <IconAction
+                  kind="delete"
+                  label="Delete role"
                   onClick={async () => {
+                    if (
+                      !confirm(
+                        `Delete the role ${String(row.name ?? row.code)}?`,
+                      )
+                    )
+                      return;
                     try {
                       await api.administration.deleteRole(String(row.code));
+                      toast.success("Role deleted successfully");
                       await load(selected);
                     } catch (e) {
                       setError(errorText(e));
                     }
                   }}
-                >
-                  Delete role
-                </button>
+                />
               </div>
             )}
             {["accounts", "credentials"].includes(selected) && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit access"
                   onClick={() =>
                     setConfiguration({ kind: "account", initial: row })
                   }
-                >
-                  Edit access
-                </button>
+                />
                 <button
                   onClick={() =>
                     setDialog({
@@ -1253,25 +1425,32 @@ export default function ConnectedPortal({
             )}
             {selected === "forms" && (
               <div className="edu-row-actions">
-                <button
+                <IconAction
+                  kind="edit"
+                  label="Edit form"
                   onClick={() =>
                     setConfiguration({ kind: "form", initial: row })
                   }
-                >
-                  Edit form
-                </button>
-                <button
+                />
+                <IconAction
+                  kind="delete"
+                  label="Delete form"
                   onClick={async () => {
+                    if (
+                      !confirm(
+                        `Delete the form ${String(row.name ?? row.code)}?`,
+                      )
+                    )
+                      return;
                     try {
                       await api.forms.remove(String(row.code));
+                      toast.success("Form deleted successfully");
                       await load(selected);
                     } catch (e) {
                       setError(errorText(e));
                     }
                   }}
-                >
-                  Delete form
-                </button>
+                />
               </div>
             )}
           </article>

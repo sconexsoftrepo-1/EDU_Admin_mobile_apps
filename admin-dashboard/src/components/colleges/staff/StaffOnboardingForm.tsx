@@ -36,11 +36,17 @@ import {
   Card,
   Field,
   FilePick,
+  IdWithUpload,
   PhoneInput,
   toBase64,
 } from "../enrollment/StudentEnrollmentWizard";
 import "../enrollment/enrollment-wizard.css";
 import "./staff.css";
+import { toast } from "../toast";
+import ComboInput from "../ComboInput";
+import AutoTextarea from "../AutoTextarea";
+import Select from "../SearchSelect";
+import DateInput from "../DateInput";
 
 type Experience = {
   organization: string;
@@ -121,7 +127,7 @@ export default function StaffOnboardingForm({
     phone: "",
     address: "",
     city: "",
-    state: "Telangana",
+    state: "",
     postal_code: "",
   });
   const [phoneCode, setPhoneCode] = useState("+91");
@@ -170,7 +176,10 @@ export default function StaffOnboardingForm({
     void api.staff
       .options()
       .then(setOptions)
-      .catch((e) => setError(errorText(e)));
+      .catch((e) => {
+        setError(errorText(e));
+        toast.error("Could not load form options", errorText(e));
+      });
   }, []);
 
   const totals = useMemo(() => {
@@ -293,12 +302,16 @@ export default function StaffOnboardingForm({
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const warn = (text: string) => {
+      setError(text);
+      toast.warning(text);
+    };
     if (!event.currentTarget.reportValidity()) return;
-    if (!aadhaar.file) return setError("Upload the Aadhaar copy.");
+    if (!aadhaar.file) return warn("Upload the Aadhaar copy.");
     if (!labour && totals.earnings <= 0)
-      return setError("Add the salary breakdown: at least one earning.");
+      return warn("Add the salary breakdown: at least one earning.");
     if (!labour && totals.deductions > totals.earnings)
-      return setError("Deductions cannot exceed earnings.");
+      return warn("Deductions cannot exceed earnings.");
     setBusy(true);
     setError("");
     try {
@@ -335,8 +348,19 @@ export default function StaffOnboardingForm({
       setIssues(failed);
       setResult(done);
       onSaved?.(code);
+      const added = `${STAFF_KIND_LABEL[kind][0].toUpperCase()}${STAFF_KIND_LABEL[kind].slice(1)} added successfully`;
+      if (failed.length)
+        toast.warning(
+          `${added}, but some documents did not upload`,
+          failed.join("; "),
+        );
+      else toast.success(added, `Employee ID ${code}`);
     } catch (e) {
       setError(errorText(e));
+      toast.error(
+        `Failed to add ${STAFF_KIND_LABEL[kind]}. Please try again.`,
+        errorText(e),
+      );
     } finally {
       setBusy(false);
     }
@@ -429,7 +453,7 @@ export default function StaffOnboardingForm({
                   {!labour && (
                     <>
                       <Field label="Gender">
-                        <select
+                        <Select
                           value={person.gender}
                           onChange={(e) =>
                             setPerson({ ...person, gender: e.target.value })
@@ -439,11 +463,10 @@ export default function StaffOnboardingForm({
                           <option value="female">Female</option>
                           <option value="male">Male</option>
                           <option value="other">Other</option>
-                        </select>
+                        </Select>
                       </Field>
                       <Field label="Date of birth">
-                        <input
-                          type="date"
+                        <DateInput
                           value={person.date_of_birth}
                           onChange={(e) =>
                             setPerson({
@@ -505,23 +528,18 @@ export default function StaffOnboardingForm({
                   </Field>
                   {!labour && (
                     <Field label="Department" hint="Pick or type a new one">
-                      <input
-                        list="stf-departments"
+                      <ComboInput
+                        ariaLabel="Department"
                         value={job.department}
-                        onChange={(e) =>
-                          setJob({ ...job, department: e.target.value })
+                        options={options?.departments ?? []}
+                        onChange={(department) =>
+                          setJob({ ...job, department })
                         }
                       />
-                      <datalist id="stf-departments">
-                        {options?.departments.map((d) => (
-                          <option key={d} value={d} />
-                        ))}
-                      </datalist>
                     </Field>
                   )}
                   <Field label="Joining date *">
-                    <input
-                      type="date"
+                    <DateInput
                       required
                       value={job.join_date}
                       onChange={(e) =>
@@ -531,7 +549,7 @@ export default function StaffOnboardingForm({
                   </Field>
                   {!labour && (
                     <Field label="Employment type *">
-                      <select
+                      <Select
                         value={job.employment_type}
                         onChange={(e) =>
                           setJob({ ...job, employment_type: e.target.value })
@@ -540,7 +558,7 @@ export default function StaffOnboardingForm({
                         <option value="permanent">Permanent</option>
                         <option value="contract">Contract</option>
                         <option value="part_time">Part time</option>
-                      </select>
+                      </Select>
                     </Field>
                   )}
                 </div>
@@ -550,7 +568,7 @@ export default function StaffOnboardingForm({
                 <Card title="Qualification" icon={<GraduationCap size={17} />}>
                   <div className="enw-grid">
                     <Field label="Highest qualification *">
-                      <select
+                      <Select
                         required
                         value={qualification.level}
                         onChange={(e) =>
@@ -566,7 +584,7 @@ export default function StaffOnboardingForm({
                             {q.label}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </Field>
                     <Field
                       label="Branch of specialization"
@@ -636,51 +654,48 @@ export default function StaffOnboardingForm({
               )}
 
               <Card title="Identity" icon={<IdCard size={17} />}>
-                <div className="enw-grid enw-aadhaar">
-                  <Field label="Aadhaar number *" hint="12 digits">
-                    <input
+                <div className="enw-grid">
+                  <Field
+                    label="Aadhaar number *"
+                    hint="12 digits, and upload the Aadhaar copy (PDF, JPG or PNG up to 650 KB)"
+                  >
+                    <IdWithUpload
                       required
                       inputMode="numeric"
-                      pattern="[0-9]{4} ?[0-9]{4} ?[0-9]{4}"
+                      pattern="[0-9]{12}"
+                      maxLength={12}
+                      title="Aadhaar number must be exactly 12 digits"
+                      placeholder="Enter Aadhaar number"
                       value={aadhaar.number}
-                      onChange={(e) =>
-                        setAadhaar({ ...aadhaar, number: e.target.value })
+                      onValue={(v) =>
+                        setAadhaar({
+                          ...aadhaar,
+                          number: v.replace(/\D/g, "").slice(0, 12),
+                        })
                       }
-                    />
-                  </Field>
-                  <Field
-                    label="Aadhaar copy *"
-                    hint="PDF, JPG or PNG up to 650 KB"
-                  >
-                    <FilePick
-                      label="Upload Aadhaar copy"
-                      required
+                      fileLabel="Aadhaar copy"
+                      fileRequired
                       file={aadhaar.file}
-                      onChange={(file) => setAadhaar({ ...aadhaar, file })}
+                      onFile={(file) => setAadhaar({ ...aadhaar, file })}
                     />
                   </Field>
                   {!labour && (
-                    <>
-                      <Field label="PAN" hint="e.g. ABCDE1234F">
-                        <input
-                          pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]"
-                          value={pan.number}
-                          onChange={(e) =>
-                            setPan({
-                              ...pan,
-                              number: e.target.value.toUpperCase(),
-                            })
-                          }
-                        />
-                      </Field>
-                      <Field label="PAN card copy">
-                        <FilePick
-                          label="Upload PAN copy"
-                          file={pan.file}
-                          onChange={(file) => setPan({ ...pan, file })}
-                        />
-                      </Field>
-                    </>
+                    <Field
+                      label="PAN"
+                      hint="e.g. ABCDE1234F, and upload the PAN card copy"
+                    >
+                      <IdWithUpload
+                        pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]"
+                        placeholder="Enter PAN number"
+                        value={pan.number}
+                        onValue={(number) =>
+                          setPan({ ...pan, number: number.toUpperCase() })
+                        }
+                        fileLabel="PAN card copy"
+                        file={pan.file}
+                        onFile={(file) => setPan({ ...pan, file })}
+                      />
+                    </Field>
                   )}
                 </div>
               </Card>
@@ -793,8 +808,7 @@ export default function StaffOnboardingForm({
                             />
                           </Field>
                           <Field label="From">
-                            <input
-                              type="date"
+                            <DateInput
                               value={x.from_date}
                               onChange={(e) =>
                                 set({ from_date: e.target.value })
@@ -802,19 +816,18 @@ export default function StaffOnboardingForm({
                             />
                           </Field>
                           <Field label="To">
-                            <input
-                              type="date"
+                            <DateInput
                               value={x.to_date}
                               onChange={(e) => set({ to_date: e.target.value })}
                             />
                           </Field>
                           <Field label="Details" wide>
-                            <input
+                            <AutoTextarea
                               value={x.details}
                               onChange={(e) => set({ details: e.target.value })}
                             />
                           </Field>
-                          <Field label="Experience certificate" wide>
+                          <Field label="Experience certificate">
                             <FilePick
                               label="Upload certificate"
                               file={x.file}
@@ -877,15 +890,13 @@ export default function StaffOnboardingForm({
                           value={x.designation}
                           onChange={(e) => set({ designation: e.target.value })}
                         />
-                        <input
+                        <DateInput
                           aria-label="From"
-                          type="date"
                           value={x.from_date}
                           onChange={(e) => set({ from_date: e.target.value })}
                         />
-                        <input
+                        <DateInput
                           aria-label="To"
-                          type="date"
                           value={x.to_date}
                           onChange={(e) => set({ to_date: e.target.value })}
                         />
@@ -1049,7 +1060,7 @@ export default function StaffOnboardingForm({
                 {labour ? (
                   <div className="enw-grid">
                     <Field label="Paid *">
-                      <select
+                      <Select
                         value={wage.basis}
                         onChange={(e) =>
                           setWage({
@@ -1062,7 +1073,7 @@ export default function StaffOnboardingForm({
                         <option value="daily">Daily</option>
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
-                      </select>
+                      </Select>
                     </Field>
                     <Field
                       label={`Wage per ${wage.basis === "daily" ? "day" : wage.basis === "monthly" ? "month" : "year"} *`}
@@ -1245,7 +1256,7 @@ export default function StaffOnboardingForm({
                 Cancel
               </button>
               <button className="enw-primary" disabled={busy || !options}>
-                {busy ? "Saving…" : `Save ${STAFF_KIND_LABEL[kind]}`}
+                {busy ? "Submitting…" : "Submit"}
               </button>
             </>
           )}

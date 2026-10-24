@@ -5,6 +5,9 @@ import { Camera, CheckCircle2, ArrowDown } from "lucide-react";
 import { useCollege } from "./CollegeStore";
 import { money } from "@/data/colleges";
 import { balance } from "@/lib/colleges/store";
+import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
+import UploadBox from "./UploadBox";
+import DateInput from "./DateInput";
 export type FormField = {
   key: string;
   label: string;
@@ -205,13 +208,13 @@ export default function ERPFormFields({
                         )}
                       </div>
                       <div>
-                        <label htmlFor="erp-student-photo">{f.label}</label>
-                        <input
-                          id="erp-student-photo"
-                          type="file"
+                        <span className="erp-photo-label">{f.label}</span>
+                        <UploadBox
+                          label={f.label}
                           accept="image/png,image/jpeg,image/webp"
                           onChange={upload}
                           disabled={uploading}
+                          placeholder="No photo chosen"
                         />
                         <input type="hidden" name={f.key} value={photo} />
                         <small>
@@ -316,6 +319,24 @@ export default function ERPFormFields({
                       </select>
                     ) : f.type === "textarea" ? (
                       <textarea {...props} rows={4} />
+                    ) : f.type === "date" ? (
+                      <DateInput
+                        id={props.id}
+                        name={f.key}
+                        aria-label={f.label}
+                        required={f.required}
+                        defaultValue={f.value}
+                        onChange={(e) => change(f.key, e.target.value)}
+                      />
+                    ) : isPhoneField(f.key, f.type) ? (
+                      <FormPhoneInput
+                        id={props.id}
+                        name={f.key}
+                        label={f.label}
+                        required={f.required}
+                        defaultValue={f.value}
+                        onValue={(v) => change(f.key, v)}
+                      />
                     ) : (
                       <input
                         {...props}
