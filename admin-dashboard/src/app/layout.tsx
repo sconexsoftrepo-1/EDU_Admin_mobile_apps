@@ -20,8 +20,12 @@ import { brandConfig } from "@/components/brand/config/brandConfig";
 export const metadata: Metadata = {
   title: `${brandConfig.wordmark} — Design × Code × Create`,
   icons: {
-    icon: "/assets/brand/logos/favicon.webp",
-    apple: "/assets/brand/logos/app-icon.webp",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
   },
   description: brandConfig.description,
 };

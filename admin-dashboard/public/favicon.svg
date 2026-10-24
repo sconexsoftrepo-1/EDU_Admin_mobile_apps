@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>EduNexa</title>
+  <rect width="64" height="64" rx="14" fill="#18384b"/>
+  <path d="M32 8 51 15v17c0 12-10 21-19 25-9-4-19-13-19-25V15Z" fill="#f8f5ef" stroke="#c49a51" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="m20 29 12-7 12 7-12 7-12-7Zm4 4v9l8 5 8-5v-9M32 36v11" stroke="#886022" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
