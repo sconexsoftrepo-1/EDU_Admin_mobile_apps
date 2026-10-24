@@ -575,6 +575,11 @@ export default function StudentEnrollmentWizard({
       ),
     [quote, course.program_code, hostel, transport],
   );
+  const fullCourseFees =
+    fees.length > 0 && fees.every((f) => f.fee_basis === "full_course");
+  const termCount = fullCourseFees
+    ? Number(fees[0]?.term_count || program?.duration_semesters || 4)
+    : 0;
   const hostelFee = (quote?.fees_available || [])
     .filter((f) => f.category === "hostel")
     .reduce((n, f) => n + num(f.amount), 0);
@@ -886,7 +891,9 @@ export default function StudentEnrollmentWizard({
         ]
       : []),
     {
-      title: "Fee breakdown (first year)",
+      title: fullCourseFees
+        ? "Fee breakdown (full course)"
+        : "Fee breakdown (first year)",
       columns: ["Fee", "Category", "Due date", "Amount"],
       rows: [
         ...fees.map((f) => [
@@ -1980,7 +1987,8 @@ export default function StudentEnrollmentWizard({
                         <strong>Hostel</strong>
                         <small>
                           {hostelFee
-                            ? inr(hostelFee) + " per year"
+                            ? inr(hostelFee) +
+                              (fullCourseFees ? " full course" : " per year")
                             : "No hostel fee set for this course"}
                         </small>
                       </span>
@@ -2000,7 +2008,8 @@ export default function StudentEnrollmentWizard({
                         <strong>College bus</strong>
                         <small>
                           {busFee
-                            ? inr(busFee) + " per year"
+                            ? inr(busFee) +
+                              (fullCourseFees ? " full course" : " per year")
                             : "No bus fee set for this course"}
                         </small>
                       </span>
@@ -2008,7 +2017,13 @@ export default function StudentEnrollmentWizard({
                   </div>
                 </Card>
 
-                <Card title="Fee structure (first year)">
+                <Card
+                  title={
+                    fullCourseFees
+                      ? `Full course fee · ${Math.ceil(termCount / 2)} years · ${termCount} semesters`
+                      : "Fee structure (first year)"
+                  }
+                >
                   {!course.program_code ? (
                     <p className="enw-muted">
                       Choose a course to see its fee structure.
@@ -2029,7 +2044,11 @@ export default function StudentEnrollmentWizard({
                                 {f.category === "academic" ? "" : f.category}
                               </small>
                             </td>
-                            <td>{f.due_date}</td>
+                            <td>
+                              {f.fee_basis === "full_course"
+                                ? "Full course"
+                                : f.due_date}
+                            </td>
                             <td>{inr(num(f.amount))}</td>
                           </tr>
                         ))}
@@ -2153,7 +2172,9 @@ export default function StudentEnrollmentWizard({
                   <p>
                     Check every detail with the student and parent. Confirming
                     reserves the admission and registration numbers and raises
-                    the first-year fee.
+                    {fullCourseFees
+                      ? "the full-course fee, payable by semester."
+                      : "the first-year fee."}
                   </p>
                   {exports}
                 </div>

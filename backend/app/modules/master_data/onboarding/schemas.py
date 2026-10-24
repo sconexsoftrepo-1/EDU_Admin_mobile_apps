@@ -2,6 +2,7 @@
 (see GET /api/v1/manifest and the screen field lists); the table services validate them."""
 
 from datetime import date
+from decimal import Decimal
 
 from pydantic import Field
 
@@ -74,3 +75,26 @@ class CourseEnrollmentInput(StrictModel):
 
 class ActionInput(StrictModel):
     values: dict = Field(default_factory=dict)
+
+
+class CourseFeeLineInput(StrictModel):
+    code: str | None = None
+    fee_head_code: str | None = None
+    name: str | None = Field(default=None, max_length=100)
+    category: str = Field(default="academic", pattern=r"^(academic|hostel|transport|other)$")
+    amount: Decimal = Field(ge=0, max_digits=14, decimal_places=2)
+    due_date: date | None = None
+
+
+class CourseFeeScheduleInput(StrictModel):
+    fee_basis: str = Field(default="annual", pattern=r"^(annual|full_course)$")
+    term_count: int = Field(default=4, ge=1, le=40)
+    term_due_dates: list[date | None] = Field(default_factory=list, max_length=40)
+    program_code: str
+    academic_year_code: str
+    year_of_study: int = Field(default=1, ge=1, le=20)
+    installment_number: int = Field(default=1, ge=1)
+    billing_frequency: str = Field(default="annual", pattern=r"^(one_time|annual|semester|term|monthly|per_use)$")
+    currency: str = Field(default="INR", pattern=r"^[A-Z]{3}$")
+    due_date: date
+    lines: list[CourseFeeLineInput] = Field(min_length=1, max_length=40)

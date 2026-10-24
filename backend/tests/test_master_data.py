@@ -485,3 +485,73 @@ def test_staff_onboarding_ids_profiles_and_tables(client, app):
     detail = client.get("/api/v1/master-data/staff-onboarding/EMP-COL-001", headers=h).json()
     assert detail["profile"]["document_checklist"]["aadhaar_copy"]["uploaded"] is True
     assert len(detail["salary_components"]) == 3
+
+
+def fee_schedule_setup(app, client):
+    headers = master_data_user(app, client)
+    with app.state.store.transaction() as data:
+        data['records'].setdefault('programs', {})['INT-MPC'] = {
+            'code': 'INT-MPC', 'department_code': 'DEP', 'name': 'Inter MPC',
+            'qualification': 'Intermediate', 'duration_semesters': 4,
+        }
+    return headers
+
+
+def test_inline_course_fee_edit_and_add_rows(client, app):
+    h = fee_schedule_setup(app, client)
+    values = {'program_code': 'INT-MPC', 'academic_year_code': 'AY', 'year_of_study': 1,
+        'due_date': '2026-06-15', 'lines': [
+            {'name': 'Tuition fee', 'category': 'academic', 'amount': '3500.00'},
+            {'name': 'Library fee', 'category': 'academic', 'amount': '100.00'},
+        ]}
+    created = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
+    assert created.status_code == 201, created.text
+    tuition, library = created.json()['fee_structures']
+    values['lines'] = [
+        {'code': tuition['code'], 'fee_head_code': tuition['fee_head_code'], 'amount': '4000.00'},
+        {'code': library['code'], 'fee_head_code': library['fee_head_code'], 'amount': '100.00'},
+        {'name': 'Sports fee', 'category': 'other', 'amount': '250.00'},
+    ]
+    edited = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
+    assert edited.status_code == 201, edited.text
+    rows = edited.json()['fee_structures']
+    assert len(rows) == 3
+    assert rows[0]['code'] == tuition['code']
+    assert str(rows[0]['amount']) == '4000.00'
+    state = app.state.store.snapshot()
+    assert len(state['records']['fee_structures']) == 3
+    assert state['records']['fee_heads'][rows[2]['fee_head_code']]['name'] == 'Sports fee'
+
+
+def test_inline_fee_rows_validate_course_and_rollback(client, app):
+    h = fee_schedule_setup(app, client)
+    values = {'program_code': 'INT-MPC', 'academic_year_code': 'AY', 'due_date': '2026-06-15',
+        'lines': [{'name': 'Tuition fee', 'amount': '3500.00'}]}
+    created = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
+    assert created.status_code == 201, created.text
+    row = created.json()['fee_structures'][0]
+    duplicate = {**values, 'lines': [
+        {'code': row['code'], 'fee_head_code': row['fee_head_code'], 'amount': '4500.00'},
+        {'fee_head_code': row['fee_head_code'], 'amount': '10'},
+    ]}
+    assert client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': duplicate}).status_code == 422
+    assert str(app.state.store.snapshot()['records']['fee_structures'][row['code']]['amount']) == '3500.00'
+    invalid_scope = {**values, 'year_of_study': 2, 'lines': [
+        {'code': row['code'], 'fee_head_code': row['fee_head_code'], 'amount': '3500.00'}]}
+    assert client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': invalid_scope}).status_code == 409
+
+
+def test_inline_fees_cannot_change_already_charged_amounts(client, app):
+    h = fee_schedule_setup(app, client)
+    values = {'program_code': 'INT-MPC', 'academic_year_code': 'AY', 'due_date': '2026-06-15',
+        'lines': [{'name': 'Tuition fee', 'amount': '3500.00'}]}
+    created = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
+    assert created.status_code == 201, created.text
+    row = created.json()['fee_structures'][0]
+    with app.state.store.transaction() as data:
+        data['records'].setdefault('student_fee_charges', {})['CHARGED'] = {
+            'code': 'CHARGED', 'fee_structure_code': row['code'], 'student_code': 'S', 'amount': '3500.00'}
+    values['lines'] = [{'code': row['code'], 'fee_head_code': row['fee_head_code'], 'amount': '4500.00'}]
+    denied = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
+    assert denied.status_code == 409, denied.text
+    assert str(app.state.store.snapshot()['records']['fee_structures'][row['code']]['amount']) == '3500.00'
