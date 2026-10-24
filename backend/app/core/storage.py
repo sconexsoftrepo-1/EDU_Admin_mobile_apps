@@ -1,7 +1,6 @@
 """Atomic local development store; no SQL connections, migrations or table creation."""
 
 import copy
-import fcntl
 import json
 import os
 import tempfile
@@ -9,6 +8,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
+
+from filelock import FileLock
 
 
 def now():
@@ -28,11 +29,10 @@ class Store:
 
     @contextmanager
     def transaction(self):
-        fd = os.open(self.lock, os.O_CREAT | os.O_RDWR, 0o600)
-        with os.fdopen(fd, "a+") as lock:
-            fcntl.flock(lock, fcntl.LOCK_EX)
+        # FileLock selects native Windows or Unix locking for the same sidecar path.
+        with FileLock(str(self.lock), mode=0o600):
             data = (
-                json.loads(self.path.read_text())
+                json.loads(self.path.read_text(encoding="utf-8"))
                 if self.path.exists()
                 else {
                     "records": {},
@@ -45,20 +45,18 @@ class Store:
                     "login_attempts": {},
                 }
             )
+            yield data
+            tmpfd, name = tempfile.mkstemp(dir=self.directory)
             try:
-                yield data
-                tmpfd, name = tempfile.mkstemp(dir=self.directory)
-                try:
-                    with os.fdopen(tmpfd, "w") as out:
-                        json.dump(data, out, ensure_ascii=False, allow_nan=False)
-                        out.flush()
-                        os.fsync(out.fileno())
-                    os.replace(name, self.path)
-                finally:
-                    if os.path.exists(name):
-                        os.unlink(name)
+                # Close the temporary file before os.replace: Windows forbids replacing an open file.
+                with os.fdopen(tmpfd, "w", encoding="utf-8") as out:
+                    json.dump(data, out, ensure_ascii=False, allow_nan=False)
+                    out.flush()
+                    os.fsync(out.fileno())
+                os.replace(name, self.path)
             finally:
-                fcntl.flock(lock, fcntl.LOCK_UN)
+                if os.path.exists(name):
+                    os.unlink(name)
 
     def snapshot(self):
         with self.transaction() as data:

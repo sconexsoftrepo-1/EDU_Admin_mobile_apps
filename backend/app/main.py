@@ -78,13 +78,17 @@ def create_app(settings=None):
     app = FastAPI(
         title="EduNexa College API",
         version="0.1.0",
-        description="EduNexa College backend. PostgreSQL (Supabase) persistence (or local JSON for development).",
+        description="EduNexa College backend. PostgreSQL or Microsoft SQL Server persistence (local JSON for development).",
     )
     app.state.settings = settings
     if settings.storage_backend == "postgres":
         from app.core.sql_store import PostgresStore
 
         app.state.store = PostgresStore()
+    elif settings.storage_backend == "sqlserver":
+        from app.core.sqlserver import SqlServerStore
+
+        app.state.store = SqlServerStore()
     else:
         app.state.store = Store(settings.data_dir)
     app.state.catalog = CATALOG

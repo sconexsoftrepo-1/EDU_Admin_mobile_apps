@@ -40,7 +40,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       slug.join("/") === "admissions/apply",
     url = collegeRoot(c) + (slug.length ? "/" + slug.join("/") : "");
   return {
-    icons: undefined,
     title: `${slug.length ? slug.at(-1)!.replaceAll("-", " ") + " | " : ""}${c.name} — College Demo`,
     description:
       c.description +

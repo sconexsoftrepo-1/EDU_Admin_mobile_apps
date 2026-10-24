@@ -1,0 +1,24 @@
+name: edunexa_parent
+description: "EduNexa Parents & Students mobile app."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  url_launcher: ^6.3.0
+  http: ^1.2.0
+  flutter_secure_storage: ^10.0.0
+  share_plus: ^13.0.0
+  cross_file: ^0.3.4
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

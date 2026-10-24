@@ -673,6 +673,11 @@ class Roles(Mapped):
     def preload(self):
         # One compact row per role instead of every role_permissions row: listing roles over a
         # distant link is dominated by the bytes transferred.
+        if getattr(self.s.meta, "dialect", "postgres") == "sqlserver":
+            self.compact = {}
+            for link in self.s.table("role_permissions").load().values():
+                self.compact.setdefault(link["role_code"], []).append(link["permission_code"])
+            return
         cur = self.s.cursor()
         cur.execute("SELECT role_code, array_agg(permission_code ORDER BY permission_code)"
                     " FROM role_permissions GROUP BY role_code")
@@ -917,7 +922,8 @@ class LoginAttempts(MutableMapping):
                     ("LA-" + uuid4().hex, key, datetime.fromtimestamp(t, timezone.utc).isoformat()),
                 )
         if self.orig:  # keep the table small: windows are 15 minutes
-            cur.execute("DELETE FROM login_attempts WHERE attempted_at < now() - interval '1 day'")
+            cutoff = "DATEADD(day,-1,SYSUTCDATETIME())" if getattr(self.s.meta, "dialect", "postgres") == "sqlserver" else "now() - interval '1 day'"
+            cur.execute(f"DELETE FROM login_attempts WHERE attempted_at < {cutoff}")
 
 
 class ImportMetadata(MutableMapping):
