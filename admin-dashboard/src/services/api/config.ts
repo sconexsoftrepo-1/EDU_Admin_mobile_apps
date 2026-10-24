@@ -10,7 +10,7 @@
  *     -> Next.js proxy route                     (src/app/api/college/[...path]/route.ts)
  *          keeps the access/refresh tokens in httpOnly cookies and refreshes them
  *     -> {API_CONFIG.backendUrl}{API_CONFIG.backendPrefix}/<path>
- *                                                e.g. https://edu-admin-mobile-apps.vercel.app/api/v1/auth/login
+ *                                                e.g. http://185.193.19.156:8010/api/v1/auth/login
  *     -> FastAPI backend (backend/), PostgreSQL on Supabase
  *
  * Endpoint paths in the module services are written WITHOUT the /api/v1 prefix
@@ -20,13 +20,13 @@
  * Environment
  * -----------
  *   EDUNEXA_API_URL   Backend origin used by the server-side proxy (never sent to the browser).
- *                     Default https://edu-admin-mobile-apps.vercel.app (the deployed backend);
+ *                     Default http://185.193.19.156:8010 (the deployed backend);
  *                     set EDUNEXA_API_URL=http://127.0.0.1:8010 in .env.local to use a local backend.
  */
 
 /** Origin of the FastAPI backend, read on the server only (proxy route). */
 const backendUrl = (
-  process.env.EDUNEXA_API_URL || "https://edu-admin-mobile-apps.vercel.app"
+  process.env.EDUNEXA_API_URL || "http://185.193.19.156:8010"
 ).replace(/\/+$/, "");
 
 export const API_CONFIG = {

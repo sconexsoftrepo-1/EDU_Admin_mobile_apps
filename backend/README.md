@@ -1,5 +1,18 @@
 # EduNexa College Python backend
 
+## Current SQL Server configuration
+
+The runtime `.env` now selects `EDUNEXA_STORAGE_BACKEND=sqlserver` and uses `EDUNEXA_MSSQL_*` settings for the `edu-admin-portal` database on `185.193.19.156:1433`, with encrypted SQL Server authentication. No PostgreSQL connection settings remain in the runtime `.env`.
+
+Install dependencies with `pip install -r requirements.txt` (or `uv sync --locked`) and restart the backend after deploying these changes. `/health` should report `storage: sqlserver`; `/api/v1/public/options` should contain the 130 migrated courses. A local `.env` is excluded from Vercel uploads, so Vercel deployments must receive the same SQL Server settings through hosting environment variables. Keep the existing JWT secret stable.
+
+The PostgreSQL-to-SQL Server transfer is implemented in `tools/transfer_to_sqlserver.py`. It defaults to a rollback rehearsal; `--merge-login postgres --apply` commits an explicitly requested account merge and the data copy. The applied schema additions are recorded in `../database/sqlserver/011_postgres_alignment.sql`. The transfer preserves unrelated target records, remaps stable account/link references, keeps the PostgreSQL password hash for the single `Pragathi` account, verifies copied fields, and preserves SQL Server’s own migration ledger. PostgreSQL migration history is archived with the encrypted source backup rather than copied into a different engine’s ledger.
+
+Encrypted pre-transfer backups, their separate local encryption key, migration reports, and the archived PostgreSQL connection settings are under the ignored `.migration-target/` directory. `.vercelignore` and Vercel function exclusions prevent those files from being deployed. Keep the backups and key together in private storage until cutover and rollback needs have ended.
+
+Run `pytest` for local backend tests. `EDUNEXA_TEST_SQLSERVER=1 pytest tests/test_sqlserver_integration.py` additionally checks login, course creation/listing, token refresh, and logout against a temporary SQL Server schema that it removes afterward.
+
+
 FastAPI backend for the admin portal and Admin, Teacher, Parent and Student mobile clients. All source files are in this `backend/` folder.
 
 ## Run locally

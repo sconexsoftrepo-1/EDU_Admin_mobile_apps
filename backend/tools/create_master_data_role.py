@@ -58,6 +58,10 @@ def store_for(settings):
         from app.core.sql_store import PostgresStore
 
         return PostgresStore()
+    if settings.storage_backend == "sqlserver":
+        from app.core.sqlserver import SqlServerStore
+
+        return SqlServerStore()
     return Store(settings.data_dir)
 
 

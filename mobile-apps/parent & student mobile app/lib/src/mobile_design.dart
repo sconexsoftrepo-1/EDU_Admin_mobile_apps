@@ -1,30 +1,38 @@
 import 'package:flutter/material.dart';
 
-const collegeNavy = Color(0xff18384b);
-const collegeBronze = Color(0xff886022);
-const collegeCanvas = Color(0xfff3f6f8);
-const collegeMuted = Color(0xff5e707e);
-const collegeLine = Color(0xffdfe6eb);
+const collegeCaramel = Color(0xff9e5e24);
+const collegePine = Color(0xff1b755d);
+const collegeEspresso = Color(0xff1f1a17);
+const collegeCanvas = Color(0xfffaf7f2);
+const collegeMuted = Color(0xff766e65);
+const collegeLine = Color(0xffe6dfd5);
+const collegeCard = Color(0xfff5f0e6);
+const collegeFieldFill = Color(0xfff7f3eb);
+const collegeGold = Color(0xffebd2a6);
+
+// Backward-compatibility aliases
+const collegeNavy = collegeEspresso;
+const collegeBronze = collegeCaramel;
 
 ThemeData collegeTheme(Color accent) {
   final scheme = ColorScheme.fromSeed(seedColor: accent).copyWith(
     primary: accent,
     onPrimary: Colors.white,
     surface: Colors.white,
-    onSurface: collegeNavy,
+    onSurface: collegeEspresso,
     onSurfaceVariant: collegeMuted,
-    outline: const Color(0xff7b8b96),
+    outline: const Color(0xff8c8479),
     outlineVariant: collegeLine,
   );
   final base = ThemeData(useMaterial3: true, colorScheme: scheme);
   return base.copyWith(
     scaffoldBackgroundColor: collegeCanvas,
     textTheme: base.textTheme
-        .apply(bodyColor: collegeNavy, displayColor: collegeNavy)
+        .apply(bodyColor: collegeEspresso, displayColor: collegeEspresso)
         .copyWith(
           headlineMedium: const TextStyle(
             fontFamily: 'Roboto',
-            color: collegeNavy,
+            color: collegeEspresso,
             fontSize: 28,
             height: 1.18,
             fontWeight: FontWeight.w700,
@@ -32,7 +40,7 @@ ThemeData collegeTheme(Color accent) {
           ),
           headlineSmall: const TextStyle(
             fontFamily: 'Roboto',
-            color: collegeNavy,
+            color: collegeEspresso,
             fontSize: 24,
             height: 1.22,
             fontWeight: FontWeight.w700,
@@ -40,14 +48,14 @@ ThemeData collegeTheme(Color accent) {
           ),
           titleLarge: const TextStyle(
             fontFamily: 'Roboto',
-            color: collegeNavy,
+            color: collegeEspresso,
             fontSize: 20,
             height: 1.3,
             fontWeight: FontWeight.w700,
           ),
           titleMedium: const TextStyle(
             fontFamily: 'Roboto',
-            color: collegeNavy,
+            color: collegeEspresso,
             fontSize: 16,
             height: 1.35,
             fontWeight: FontWeight.w600,
@@ -56,7 +64,7 @@ ThemeData collegeTheme(Color accent) {
             fontFamily: 'Roboto',
             fontSize: 14,
             height: 1.5,
-            color: collegeNavy,
+            color: collegeEspresso,
           ),
           bodySmall: const TextStyle(
             fontFamily: 'Roboto',
@@ -75,7 +83,7 @@ ThemeData collegeTheme(Color accent) {
         .apply(fontFamily: 'Roboto'),
     appBarTheme: const AppBarTheme(
       backgroundColor: collegeCanvas,
-      foregroundColor: collegeNavy,
+      foregroundColor: collegeEspresso,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -84,12 +92,12 @@ ThemeData collegeTheme(Color accent) {
         fontFamily: 'Roboto',
         fontSize: 17,
         fontWeight: FontWeight.w700,
-        color: collegeNavy,
+        color: collegeEspresso,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xfff8fafb),
+      fillColor: collegeFieldFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       labelStyle: const TextStyle(fontFamily: 'Roboto', color: collegeMuted),
       prefixIconColor: collegeMuted,
@@ -216,6 +224,7 @@ class CollegeBrand extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.8,
                 height: 1.15,
+                color: collegeEspresso,
               ),
             ),
             const SizedBox(height: 3),
@@ -321,7 +330,7 @@ class WorkspaceWelcome extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(
-      color: collegeNavy,
+      color: Theme.of(context).colorScheme.primary,
       borderRadius: BorderRadius.circular(24),
     ),
     child: Column(
@@ -350,7 +359,7 @@ class WorkspaceWelcome extends StatelessWidget {
           description,
           style: const TextStyle(
             fontFamily: 'Roboto',
-            color: Color(0xffd2e0e8),
+            color: Color(0xfff5ead8),
             height: 1.5,
             fontSize: 14,
           ),

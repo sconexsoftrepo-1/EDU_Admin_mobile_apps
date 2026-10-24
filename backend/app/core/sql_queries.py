@@ -17,7 +17,7 @@ EXTRAS_ALIAS = "extras"
 
 
 def is_sql(data):
-    return isinstance(data, Session)
+    return isinstance(data, Session) and getattr(data.meta, "dialect", "postgres") == "postgres"
 
 
 def _execute(data, sql, params):

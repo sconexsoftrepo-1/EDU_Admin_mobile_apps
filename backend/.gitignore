@@ -8,3 +8,5 @@ __pycache__/
 .coverage
 *.pyc
 .ruff_cache/
+
+.migration-target/

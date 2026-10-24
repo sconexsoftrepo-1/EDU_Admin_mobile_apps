@@ -191,10 +191,10 @@ enum MobileRole {
 
 extension MobileRoleStyle on MobileRole {
   Color get accent => switch (this) {
-    MobileRole.admin => collegeNavy,
-    MobileRole.teacher => const Color(0xff1b7066),
-    MobileRole.parent => collegeBronze,
-    MobileRole.student => const Color(0xff4a56a1),
+    MobileRole.admin => collegeCaramel,
+    MobileRole.teacher => collegePine,
+    MobileRole.parent => collegeCaramel,
+    MobileRole.student => const Color(0xff5e64d0),
   };
   IconData get icon => switch (this) {
     MobileRole.admin => Icons.admin_panel_settings_outlined,
@@ -232,7 +232,7 @@ class _EdunexaAppState extends State<EdunexaApp> {
       CollegeApi(
         baseUrl: const String.fromEnvironment(
           'API_BASE_URL',
-          defaultValue: 'http://127.0.0.1:8010',
+          defaultValue: 'http://185.193.19.156:8010',
         ),
         clientId: value.clientId,
       );
@@ -392,7 +392,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: collegeNavy,
+                        color: widget.role.accent,
                         borderRadius: BorderRadius.circular(22),
                       ),
                       child: Column(
@@ -401,7 +401,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Container(
                             width: 32,
                             height: 3,
-                            color: const Color(0xffd9b975),
+                            color: collegeGold,
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -418,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const Text(
                             'Sign in with your college account.',
                             style: TextStyle(
-                              color: Color(0xffd2e0e8),
+                              color: Color(0xfff5ead8),
                               height: 1.5,
                             ),
                           ),
