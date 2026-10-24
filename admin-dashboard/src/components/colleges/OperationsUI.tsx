@@ -1,7 +1,11 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { X, ArrowRight } from "lucide-react";
 import { useCollege } from "./CollegeStore";
+import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
+import UploadBox from "./UploadBox";
+import DateInput from "./DateInput";
 export type OpsField = {
   key: string;
   label: string;
@@ -26,6 +30,7 @@ export function OpsSheet({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const { message } = useCollege();
   useEffect(() => {
     const d = dialog.current;
@@ -135,6 +140,27 @@ export function OpsSheet({
                     defaultValue={f.value || ""}
                     required={f.required !== false}
                     rows={4}
+                  />
+                ) : f.type === "date" ? (
+                  <DateInput
+                    name={f.key}
+                    aria-label={f.label}
+                    required={f.required !== false}
+                    defaultValue={f.value || ""}
+                  />
+                ) : f.type === "file" ? (
+                  <UploadBox
+                    name={f.key}
+                    label={f.label}
+                    accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
+                    required={f.required !== false}
+                  />
+                ) : isPhoneField(f.key, f.type) ? (
+                  <FormPhoneInput
+                    name={f.key}
+                    label={f.label}
+                    required={f.required !== false}
+                    defaultValue={f.value}
                   />
                 ) : (
                   <input

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
 import type { OperationRecord } from "@/lib/colleges/operations";
 import { localDate, scheduleForDate } from "@/lib/colleges/mobile-schedule";
+import DateInput from "./DateInput";
 export default function MobileAcademicCalendar({
   periods,
   events,
@@ -90,18 +91,16 @@ export default function MobileAcademicCalendar({
         <div className="mobile-term-range">
           <label>
             Term starts
-            <input
+            <DateInput
               aria-label="Academic term starts"
-              type="date"
               value={termStart}
               onChange={(e) => setTermStart(e.target.value)}
             />
           </label>
           <label>
             Term ends
-            <input
+            <DateInput
               aria-label="Academic term ends"
-              type="date"
               value={termEnd}
               onChange={(e) => setTermEnd(e.target.value)}
             />
@@ -120,9 +119,8 @@ export default function MobileAcademicCalendar({
         </button>
         <label>
           <CalendarDays size={16} />
-          <input
+          <DateInput
             aria-label="Academic calendar date"
-            type="date"
             value={date}
             onChange={(e) => e.target.value && setDate(e.target.value)}
           />

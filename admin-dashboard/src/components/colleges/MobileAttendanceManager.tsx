@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useCollege } from "./CollegeStore";
 import { opRows } from "@/lib/colleges/operations";
 import { localDate } from "@/lib/colleges/mobile-schedule";
+import DateInput from "./DateInput";
 export default function MobileAttendanceManager({
   employeeId,
   programs,
@@ -71,8 +72,7 @@ export default function MobileAttendanceManager({
       </label>
       <label>
         Attendance date
-        <input
-          type="date"
+        <DateInput
           value={date}
           onChange={(e) => {
             setDate(e.target.value);

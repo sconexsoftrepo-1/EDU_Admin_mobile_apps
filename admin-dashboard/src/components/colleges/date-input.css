@@ -1,0 +1,48 @@
+/* dd/mm/yyyy date field: text box with a calendar button; the native picker is hidden behind it. */
+.date-input {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.date-input > input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 36px !important;
+  font-variant-numeric: tabular-nums;
+}
+.date-input .date-input-open {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #74849b;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.date-input .date-input-open:hover {
+  background: #f5ecdf;
+  color: #8a5520;
+}
+/* Kept in the layout (so the browser can anchor its picker) but invisible and unclickable. */
+.date-input > input.date-input-native {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px !important;
+  height: 1px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}

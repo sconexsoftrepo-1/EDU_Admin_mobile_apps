@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useState, type ReactNode } from "react";
 import { Eye } from "lucide-react";
 import type { PDFMode } from "@/lib/colleges/download";
@@ -13,6 +14,7 @@ export default function PDFActions({
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  useErrorToast(error);
   async function act(mode: PDFMode) {
     if (busy) return;
     setBusy(true);

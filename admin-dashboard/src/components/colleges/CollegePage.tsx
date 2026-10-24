@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Portal from "./CollegePortal";
@@ -12,6 +13,7 @@ const Login = dynamic(() => import("./ConnectedPortal"));
 function Verification({ college: c, id }: { college: College; id: string }) {
   const [result, setResult] = useState<CertificateVerification | null>(null),
     [error, setError] = useState("");
+  useErrorToast(error);
   useEffect(() => {
     let active = true;
     void api.documents

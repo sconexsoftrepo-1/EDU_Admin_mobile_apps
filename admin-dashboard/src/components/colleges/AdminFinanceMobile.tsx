@@ -17,6 +17,7 @@ import { money } from "@/data/colleges";
 import { adminFinance, type AdminPeriod } from "@/lib/colleges/admin-finance";
 import { professionalPdf } from "@/lib/colleges/download";
 import { useCollege } from "./CollegeStore";
+import DateInput from "./DateInput";
 import "@/styles/college-admin-mobile.css";
 
 type Tab = "Overview" | "Outstanding" | "Reports" | "Activity";
@@ -170,8 +171,7 @@ export default function AdminFinanceMobile({ college }: { college: College }) {
           </label>
           <label>
             As of
-            <input
-              type="date"
+            <DateInput
               value={asOf}
               onChange={(e) => {
                 if (e.target.value) setAsOf(e.target.value);

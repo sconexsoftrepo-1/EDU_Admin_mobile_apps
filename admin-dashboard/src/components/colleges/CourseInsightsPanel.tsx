@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 /**
  * Side panel of a course: its details and year-wise batches with student counts — total, by year
  * of study, hostel and bus users, gender split and fees raised.
@@ -29,6 +30,7 @@ export default function CourseInsightsPanel({
 }) {
   const [data, setData] = useState<CourseInsights | null>(null);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const close = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();

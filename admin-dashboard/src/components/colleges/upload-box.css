@@ -1,0 +1,118 @@
+/* Upload field: text (or an ID number input) on the left, "📎 Upload" on the right. */
+.upl-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 0 0 11px;
+  overflow: hidden;
+  border: 1px solid #e9dfcf;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: normal;
+}
+.upl-box:focus-within {
+  border-color: #a46a27;
+  box-shadow: 0 0 0 3px #a46a2718;
+}
+.upl-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1f2a36;
+  font-size: 13px;
+}
+.upl-text.is-empty {
+  color: #8a96a3;
+}
+/* ID number typed inside the box (Aadhaar, PAN): no border of its own. */
+.upl-box > input.upl-input,
+.upl-box > input.upl-input:focus,
+.upl-box > input.upl-input:focus-visible {
+  flex: 1;
+  min-width: 0;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 0 0 -11px;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #1f2a36;
+  font-size: 13px;
+}
+/* `label.` beats the app-wide `.edu-connected label { display: grid }`. */
+.upl-box label.upl-btn {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  align-self: stretch;
+  height: auto;
+  margin: 0;
+  padding: 0 14px;
+  border-left: 1px solid #e9dfcf;
+  border-radius: 0;
+  background: #f3f4f6;
+  color: #1f2a36;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.upl-box label.upl-btn:hover,
+.upl-box label.upl-btn:focus-within {
+  background: #e9ebef;
+}
+.upl-icon {
+  display: inline-flex;
+  color: #4b5563;
+}
+.upl-btn input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.upl-box .upl-remove {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b7785;
+  cursor: pointer;
+}
+.upl-box .upl-remove:hover {
+  background: #f1f3f5;
+  color: #c62828;
+}
+/* Missing mandatory number or file: red like the other required fields. */
+.is-validated .upl-box:has(input:invalid) {
+  border-color: #d93636;
+  background: #fff7f7;
+  box-shadow: 0 0 0 3px #d9363618;
+}
+.is-validated .upl-box:has(input[type="file"]:invalid) .upl-btn,
+.is-validated .upl-box:has(input[type="file"]:invalid) .upl-icon {
+  color: #c62828;
+}

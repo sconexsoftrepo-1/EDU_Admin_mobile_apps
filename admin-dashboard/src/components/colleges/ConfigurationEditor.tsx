@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   API_CLIENTS as clients,
@@ -94,6 +95,7 @@ export default function ConfigurationEditor({
         },
       ],
     );
+  useErrorToast(error);
   useEffect(() => {
     void api.administration
       .screens()
