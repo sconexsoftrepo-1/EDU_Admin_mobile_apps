@@ -226,6 +226,8 @@ export default function CollegePortal({
   const area = parts[1] || "admin",
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
+  /** Student directory list: its filters live inside the table card (Teaching staff layout). */
+  const studentDirectory = activeModule === "students" && !detail;
   const [confirmation, setConfirmation] = useState<DrawerAction | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const [preferencesReady, setPreferencesReady] = useState(false);
@@ -1213,6 +1215,7 @@ export default function CollegePortal({
     columns: ReturnType<typeof cols>,
     actions?: (r: TableRecord) => ReactNode,
     detailsExtra?: (r: TableRecord) => ReactNode,
+    filters?: ReactNode,
   ) => (
     <ERPTable
       title={title}
@@ -1220,6 +1223,7 @@ export default function CollegePortal({
       columns={columns}
       actions={actions}
       detailsExtra={detailsExtra}
+      filters={filters}
     />
   );
   const heading = (title: string, description: string, button?: ReactNode) => (
@@ -1533,9 +1537,19 @@ export default function CollegePortal({
           {heading(
             "Student directory",
             "Manage the complete student lifecycle, while preserving financial history.",
-            allowed("Super Admin", "Admission Officer")
-              ? button("Add student", () => studentForm())
-              : undefined,
+            <div className="erp-quick-actions erp-heading-actions">
+              <button
+                className="erp-primary"
+                onClick={() => {
+                  setManageModule(null);
+                  setApiOpen(true);
+                }}
+              >
+                Manage {labels.students || "Students"} <Plus size={15} />
+              </button>
+              {allowed("Super Admin", "Admission Officer") &&
+                button("Add student", () => studentForm())}
+            </div>,
           )}
           {table(
             "Students",
@@ -1599,6 +1613,8 @@ export default function CollegePortal({
                 )}
               </>
             ),
+            undefined,
+            <div className="erp-filters erp-card-filters">{filterFields}</div>,
           )}
         </>
       );
@@ -2885,6 +2901,55 @@ export default function CollegePortal({
       );
     return <ConnectedPortal college={c} parts={parts} embedded />;
   }
+  /** Academic year / department / date filters (top bar, or inside the Student directory card). */
+  const filterFields = (
+    <>
+      <label>
+        Academic year
+        <select
+          aria-label="Academic year filter"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+        >
+          <option value="all">All academic years</option>
+          {["2024-2025", "2025-2026", "2026-2027"].map((y) => (
+            <option key={y}>{y}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Department
+        <select
+          aria-label="Department filter"
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
+        >
+          <option value="all">All departments</option>
+          {Array.from(new Set(c.programs.map((p) => p.department))).map((d) => (
+            <option key={d}>{d}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        From
+        <DateInput value={from} onChange={(e) => setFrom(e.target.value)} />
+      </label>
+      <label>
+        To
+        <DateInput value={to} onChange={(e) => setTo(e.target.value)} />
+      </label>
+      <button
+        onClick={() => {
+          setYear("all");
+          setDepartment("all");
+          setFrom("");
+          setTo("");
+        }}
+      >
+        Reset filters
+      </button>
+    </>
+  );
   return (
     <div
       className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${""}`}
@@ -3076,7 +3141,8 @@ export default function CollegePortal({
         )}
         <main id="erp-content" className="erp-content">
           {activeModule !== "timetable" &&
-            !entryScreens.includes(activeModule) && (
+            !entryScreens.includes(activeModule) &&
+            !studentDirectory && (
               <>
                 <button
                   className="erp-filter-toggle"
@@ -3102,58 +3168,7 @@ export default function CollegePortal({
                   id="erp-global-filters"
                   className={`erp-filters ${filtersOpen ? "is-open" : ""}`}
                 >
-                  <label>
-                    Academic year
-                    <select
-                      aria-label="Academic year filter"
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                    >
-                      <option value="all">All academic years</option>
-                      {["2024-2025", "2025-2026", "2026-2027"].map((y) => (
-                        <option key={y}>{y}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Department
-                    <select
-                      aria-label="Department filter"
-                      value={department}
-                      onChange={(e) => setDepartment(e.target.value)}
-                    >
-                      <option value="all">All departments</option>
-                      {Array.from(
-                        new Set(c.programs.map((p) => p.department)),
-                      ).map((d) => (
-                        <option key={d}>{d}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    From
-                    <DateInput
-                      value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                    />
-                  </label>
-                  <label>
-                    To
-                    <DateInput
-                      value={to}
-                      onChange={(e) => setTo(e.target.value)}
-                    />
-                  </label>
-                  <button
-                    onClick={() => {
-                      setYear("all");
-                      setDepartment("all");
-                      setFrom("");
-                      setTo("");
-                    }}
-                  >
-                    Reset filters
-                  </button>
+                  {filterFields}
                 </div>
               </>
             )}
@@ -3165,15 +3180,19 @@ export default function CollegePortal({
           {activeModule !== "roles" && !entryScreens.includes(activeModule) && (
             <div className="erp-api-controls">
               <span>College records</span>
-              <button
-                className="erp-primary"
-                onClick={() => {
-                  setManageModule(null);
-                  setApiOpen(true);
-                }}
-              >
-                Manage {labels[activeModule] || activeModule} <Plus size={15} />
-              </button>
+              {/* The Student directory shows Manage beside "Add student" instead. */}
+              {!studentDirectory && (
+                <button
+                  className="erp-primary"
+                  onClick={() => {
+                    setManageModule(null);
+                    setApiOpen(true);
+                  }}
+                >
+                  Manage {labels[activeModule] || activeModule}{" "}
+                  <Plus size={15} />
+                </button>
+              )}
             </div>
           )}
 

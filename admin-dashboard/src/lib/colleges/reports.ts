@@ -8,6 +8,7 @@ import {
 } from "./store";
 import { feeComponents, feeTotals, taxLabel } from "./fees";
 import type { PDFContext, PDFReport, PDFSection } from "./report-types";
+import { totalsRow } from "./export-table";
 export const inr = (n: number) =>
   `INR ${(n / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 export const reportContext = (
@@ -359,6 +360,10 @@ export function tableReport(
       ),
     },
   ];
+  // "Grand total" row under the table for its currency columns.
+  const main = sections[1];
+  const grand = totalsRow(main.columns || [], main.rows || []);
+  if (grand) main.rows = [...(main.rows || []), grand];
   const taxRows = rows
     .filter((r) => r.paymentTax && typeof r.paymentTax === "object")
     .map((r) => r as unknown as RecordRow);

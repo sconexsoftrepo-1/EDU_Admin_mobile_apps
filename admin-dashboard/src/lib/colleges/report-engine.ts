@@ -26,16 +26,26 @@ export async function createReport(report: PDFReport): Promise<Blob> {
   const accent: [number, number, number] = [151, 101, 40];
   const ink: [number, number, number] = [28, 38, 52],
     muted: [number, number, number] = [95, 107, 122];
+  // Pragathi College logo in the report header (fitted into the 16 x 19 mm box, centred).
   let crest: string | undefined;
-  if (context.college && typeof document !== "undefined")
+  if (typeof document !== "undefined")
     try {
       const img = new Image();
-      img.src = `/assets/colleges-institutions/${context.college.slug}/crest.svg`;
+      img.src = "/assets/pragathilogo.jpg";
       await img.decode();
       const canvas = document.createElement("canvas");
-      canvas.width = 160;
-      canvas.height = 190;
-      canvas.getContext("2d")!.drawImage(img, 0, 0, 160, 190);
+      canvas.width = 320;
+      canvas.height = 380;
+      const ctx = canvas.getContext("2d")!;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const scale = Math.min(
+        canvas.width / img.naturalWidth,
+        canvas.height / img.naturalHeight,
+      );
+      const w = img.naturalWidth * scale,
+        h = img.naturalHeight * scale;
+      ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
       crest = canvas.toDataURL("image/png");
     } catch {
       /* The vector book below is the local fallback. */
@@ -43,7 +53,7 @@ export async function createReport(report: PDFReport): Promise<Blob> {
   let y = 88;
   doc.setProperties({
     title: clean(report.title),
-    author: context.college?.name || "KC Web Universe",
+    author: context.college?.name || "Pragathi College",
     subject: "Fictional campus demonstration report",
     creator: "KC Web Universe ERP",
   });
@@ -262,7 +272,7 @@ export async function createReport(report: PDFReport): Promise<Blob> {
       doc.setTextColor(...ink);
       doc.text(
         doc.splitTextToSize(
-          clean(context.college?.name || "Campus management"),
+          clean(context.college?.name || "Pragathi College"),
           usable - 25,
         ),
         margin + 23,
@@ -323,7 +333,7 @@ export async function createReport(report: PDFReport): Promise<Blob> {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(...ink);
-      doc.text(clean(context.college?.name || "Campus management"), margin, 14);
+      doc.text(clean(context.college?.name || "Pragathi College"), margin, 14);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(...muted);
