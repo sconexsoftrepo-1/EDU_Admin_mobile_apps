@@ -69,6 +69,7 @@ import { toast, useErrorToast } from "./toast";
 import RoleSelect from "./RoleSelect";
 import UploadBox from "./UploadBox";
 import { formatDate } from "./DateInput";
+import { alignClass } from "./table-align";
 export type { Field };
 const pretty = (key: string) => key.replaceAll("_", " ").replaceAll("-", " ");
 const text = (value: unknown): string =>
@@ -1117,7 +1118,9 @@ export default function ConnectedPortal({
                     <thead>
                       <tr>
                         {columns.map((k) => (
-                          <th key={k}>{pretty(k)}</th>
+                          <th key={k} className={alignClass(k) || undefined}>
+                            {pretty(k)}
+                          </th>
                         ))}
                         <th>Actions</th>
                       </tr>
@@ -1126,7 +1129,9 @@ export default function ConnectedPortal({
                       {visibleRows.map((row) => (
                         <tr key={String(row.code)}>
                           {columns.map((k) => (
-                            <td key={k}>{text(row[k])}</td>
+                            <td key={k} className={alignClass(k) || undefined}>
+                              {text(row[k])}
+                            </td>
                           ))}
                           <td>
                             <div className="edu-row-actions">

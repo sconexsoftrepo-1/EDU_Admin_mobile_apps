@@ -3396,15 +3396,7 @@ body:has(.college-erp dialog[open]) {
   border: 0;
   border-radius: 0;
 }
-.college-erp .edu-embedded .edu-enroll .edu-table thead tr {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
-}
-.college-erp .edu-embedded .edu-enroll .edu-table th {
-  background: transparent;
-  color: #fff;
-  font-size: 12px;
-  border-color: transparent;
-}
+
 .college-erp .edu-embedded .edu-enroll .edu-table + p,
 .college-erp .edu-embedded .edu-enroll .edu-empty {
   border: 0;
