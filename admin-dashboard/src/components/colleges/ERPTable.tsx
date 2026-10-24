@@ -3,7 +3,8 @@ import PDFActions from "./PDFActions";
 import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
 import { Download, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { csv, professionalPdf } from "@/lib/colleges/download";
+import { professionalPdf } from "@/lib/colleges/download";
+import { excelTable } from "@/lib/colleges/export-table";
 import { useCollege } from "./CollegeStore";
 import { collegeBySlug } from "@/data/colleges";
 import { tableReport } from "@/lib/colleges/reports";
@@ -16,6 +17,7 @@ export default function ERPTable({
   columns,
   actions,
   detailsExtra,
+  filters,
 }: {
   title: string;
   rows: TableRecord[];
@@ -26,6 +28,8 @@ export default function ERPTable({
   }[];
   actions?: (row: TableRecord) => ReactNode;
   detailsExtra?: (row: TableRecord) => ReactNode;
+  /** Filters shown inside the card; switches to the single-card toolbar layout. */
+  filters?: ReactNode;
 }) {
   const { state, role } = useCollege();
   const college = collegeBySlug(state.slug)!;
@@ -60,48 +64,87 @@ export default function ERPTable({
       Math.max(0, Math.ceil(filtered.length / size) - 1),
     ),
     shown = filtered.slice(safePage * size, (safePage + 1) * size);
+  /** Excel with the same columns and amounts as the PDF report (totals added by excelTable). */
+  const exportExcel = (name: string, list: typeof filtered) => {
+    const visibleColumns = columns.filter((c) => !hidden.includes(c.key));
+    const section = tableReport(
+      college,
+      state,
+      title,
+      list,
+      visibleColumns,
+      role,
+      "",
+    ).sections.find((s) => s.columns?.length && s.rows);
+    if (section?.columns && section.rows)
+      excelTable(
+        name,
+        title,
+        section.columns,
+        section.rows.filter((r) => r[0] !== "Grand total"),
+      );
+    else
+      excelTable(
+        name,
+        title,
+        visibleColumns.map((c) => c.label),
+        list.map((r) =>
+          visibleColumns.map((c) => formatDate(String(r[c.key] ?? ""))),
+        ),
+      );
+  };
+  const exportActions = (
+    <div className="erp-export-actions">
+      <button onClick={() => exportExcel(title, filtered)}>
+        <Download size={14} /> Excel
+      </button>
+      <PDFActions
+        onAction={(mode) =>
+          professionalPdf(
+            title,
+            tableReport(
+              college,
+              state,
+              title,
+              filtered,
+              columns.filter((c) => !hidden.includes(c.key)),
+              role,
+              `Search: ${query || "all"}; Status: ${status || "all"}; ${(() => {
+                try {
+                  const filters = JSON.parse(
+                    sessionStorage.getItem(`kc-filters-${state.slug}`) || "{}",
+                  );
+                  return `Academic year: ${filters.year || "all"}; Department: ${filters.department || "all"}; Dates: ${filters.from || "all"} to ${filters.to || "all"}`;
+                } catch {
+                  return "Current selection";
+                }
+              })()}`,
+            ),
+            mode,
+          )
+        }
+      >
+        PDF report
+      </PDFActions>
+      <button onClick={() => window.print()}>Print</button>
+    </div>
+  );
+  const single = !!filters;
   return (
-    <section className="erp-panel erp-table-panel">
-      <div className="erp-panel-title">
-        <h2>
-          {title} <span>{filtered.length}</span>
-        </h2>
-        <div className="erp-export-actions">
-          <button onClick={() => csv(title, filtered)}>
-            <Download size={14} /> Export CSV
-          </button>
-          <PDFActions
-            onAction={(mode) =>
-              professionalPdf(
-                title,
-                tableReport(
-                  college,
-                  state,
-                  title,
-                  filtered,
-                  columns.filter((c) => !hidden.includes(c.key)),
-                  role,
-                  `Search: ${query || "all"}; Status: ${status || "all"}; ${(() => {
-                    try {
-                      const filters = JSON.parse(
-                        sessionStorage.getItem(`kc-filters-${state.slug}`) ||
-                          "{}",
-                      );
-                      return `Academic year: ${filters.year || "all"}; Department: ${filters.department || "all"}; Dates: ${filters.from || "all"} to ${filters.to || "all"}`;
-                    } catch {
-                      return "Current selection";
-                    }
-                  })()}`,
-                ),
-                mode,
-              )
-            }
-          >
-            PDF report
-          </PDFActions>
-          <button onClick={() => window.print()}>Print</button>
+    <section
+      className={`erp-panel erp-table-panel${single ? " is-single-card" : ""}`}
+      aria-label={single ? title : undefined}
+    >
+      {single ? (
+        filters
+      ) : (
+        <div className="erp-panel-title">
+          <h2>
+            {title} <span>{filtered.length}</span>
+          </h2>
+          {exportActions}
         </div>
-      </div>
+      )}
       <div className="erp-table-tools">
         <label className="erp-search">
           <Search size={16} />
@@ -154,7 +197,7 @@ export default function ERPTable({
         {selected.length > 0 && (
           <button
             onClick={() =>
-              csv(
+              exportExcel(
                 title + "-selected",
                 filtered.filter((r) => selected.includes(r.id)),
               )
@@ -162,6 +205,14 @@ export default function ERPTable({
           >
             Export {selected.length} selected
           </button>
+        )}
+        {single && (
+          <>
+            <p className="erp-table-count">
+              <strong>{filtered.length}</strong> {title.toLowerCase()}
+            </p>
+            {exportActions}
+          </>
         )}
       </div>
       <div className="erp-table-scroll">
