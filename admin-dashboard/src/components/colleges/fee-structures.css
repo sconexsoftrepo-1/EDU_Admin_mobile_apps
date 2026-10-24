@@ -289,3 +289,49 @@
     grid-template-columns: 1fr;
   }
 }
+
+.erp-fee-term-preview {
+  border-top: 1px solid var(--erp-border, #e2e8f0);
+  padding-top: 10px;
+  font-size: 12px;
+  display: grid;
+  gap: 6px;
+}
+.erp-fee-term-preview > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.erp-fee-term-preview > strong {
+  font-size: 12px;
+}
+.erp-fee-student {
+  margin: 16px 0;
+}
+.erp-fee-student h3 {
+  margin: 20px 0 8px;
+}
+.erp-fee-year-total {
+  background: var(--erp-soft, #f1f5f9);
+  font-weight: 650;
+}
+
+.erp-fee-term-heads {
+  font-size: 12px;
+  font-weight: 400;
+  min-width: 220px;
+  white-space: normal;
+}
+.erp-fee-term-heads > div {
+  margin: 8px 0;
+}
+.erp-fee-term-heads dd {
+  margin: 3px 0;
+  color: #64748b;
+}
+.erp-fee-student summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}

@@ -462,11 +462,19 @@ FEE_HEADS = [
 def inline_course_fee_schedule(data, values, actor):
     """Save a course's inline fee-head rows together; charged amounts remain immutable."""
     payload = CourseFeeScheduleInput.model_validate(values)
-    table_service("programs").repo.get(data, payload.program_code)
+    program = table_service("programs").repo.get(data, payload.program_code)
     table_service("academic_years").repo.get(data, payload.academic_year_code)
     heads = data["records"].setdefault("fee_heads", {})
     structures = data["records"].setdefault("fee_structures", {})
     charged = {r["fee_structure_code"] for r in data["records"].get("student_fee_charges", {}).values()}
+    if payload.fee_basis == "full_course":
+        if program.get("duration_semesters") and payload.term_count != int(program["duration_semesters"]):
+            raise HTTPException(422, "Semester count must match the course duration")
+        if len(payload.term_due_dates) not in (0, payload.term_count):
+            raise HTTPException(422, "Provide one due date entry per semester")
+        dates = [d for d in payload.term_due_dates if d]
+        if dates != sorted(dates):
+            raise HTTPException(422, "Semester due dates must be chronological")
     seen, saved = set(), []
     for line in payload.lines:
         if line.fee_head_code:
@@ -509,6 +517,9 @@ def inline_course_fee_schedule(data, values, actor):
                 "billing_frequency": payload.billing_frequency, "currency": payload.currency,
                 "fee_head_code": head_code, "amount": str(line.amount),
                 "due_date": (line.due_date or payload.due_date).isoformat()}, actor))
+    for row in saved:
+        row.update(fee_basis=payload.fee_basis, term_count=payload.term_count,
+            term_due_dates=[d.isoformat() if d else None for d in payload.term_due_dates])
     return {"program_code": payload.program_code, "academic_year_code": payload.academic_year_code,
         "year_of_study": payload.year_of_study, "fee_structures": saved}
 

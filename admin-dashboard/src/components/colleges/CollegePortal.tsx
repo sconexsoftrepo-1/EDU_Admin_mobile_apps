@@ -11,6 +11,7 @@ import { operationLabels, visibleNotices } from "@/lib/colleges/operations";
 import RoleWorkspace from "./RoleWorkspace";
 import FeeStructures from "./FeeStructures";
 import FeeStructureManager from "./FeeStructureManager";
+import StudentFeeSchedule from "./StudentFeeSchedule";
 import ERPFormFields, { type FormField } from "./ERPFormFields";
 import {
   receiptReport,
@@ -1396,6 +1397,10 @@ export default function CollegePortal({
                 </button>
               ))}
           </div>
+          {role !== "Faculty" &&
+            ["Overview", "Fee Ledger"].includes(visibleTab) && (
+              <StudentFeeSchedule studentCode={st.id} />
+            )}
           {[
             "Overview",
             "Personal Information",

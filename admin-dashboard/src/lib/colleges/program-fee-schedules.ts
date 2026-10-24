@@ -3,6 +3,9 @@ import type { RecordRow } from "./store";
 import type { TaxMode } from "./fees";
 
 export type FeeScheduleScope = {
+  basis: string;
+  termCount: number;
+  termDueDates: (string | null)[];
   academicYear: string;
   studyYear: number;
   installment: number;
@@ -46,6 +49,8 @@ export function programFeeSchedules(
       frequency,
       currency,
       taxMode,
+      record.fee_basis || "annual",
+      record.term_count || 0,
     ]);
     let schedule = groups.get(key);
     if (!schedule) {
@@ -59,6 +64,9 @@ export function programFeeSchedules(
         components: [],
         taxMode,
         feeSchedule: {
+          basis: String(record.fee_basis || "annual"),
+          termCount: Number(record.term_count || 0),
+          termDueDates: (record.term_due_dates || []) as (string | null)[],
           academicYear: yearNames.get(academicYear) || academicYear,
           studyYear,
           installment,
@@ -92,5 +100,17 @@ export function programFeeSchedules(
       a.feeSchedule!.academicYear.localeCompare(b.feeSchedule!.academicYear) ||
       a.feeSchedule!.studyYear - b.feeSchedule!.studyYear ||
       a.feeSchedule!.installment - b.feeSchedule!.installment,
+  );
+}
+
+/** Divide each saved head in paise, assigning remaining paise to earliest semesters. */
+export function semesterAmounts(amounts: number[], count: number): number[] {
+  if (!Number.isInteger(count) || count < 1 || count > 40) return [];
+  return Array.from({ length: count }, (_, i) =>
+    amounts.reduce(
+      (sum, amount) =>
+        sum + Math.floor(amount / count) + (i < amount % count ? 1 : 0),
+      0,
+    ),
   );
 }

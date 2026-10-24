@@ -1,4 +1,5 @@
 "use client";
+import { semesterAmounts } from "@/lib/colleges/program-fee-schedules";
 import PDFActions from "./PDFActions";
 import { Pencil, Download } from "lucide-react";
 import { type College, money } from "@/data/colleges";
@@ -82,7 +83,9 @@ export default function FeeStructures({ college: c }: { college: College }) {
                         <p>
                           {[
                             scope.academicYear,
-                            `${scope.frequency === "annual" ? "Year" : "Semester"} ${scope.studyYear}`,
+                            scope.basis === "full_course"
+                              ? `${Math.ceil(scope.termCount / 2)} years · ${scope.termCount} semesters`
+                              : `${scope.frequency === "annual" ? "Year" : "Semester"} ${scope.studyYear}`,
                             scope.installment > 1
                               ? `Installment ${scope.installment}`
                               : "",
@@ -122,13 +125,33 @@ export default function FeeStructures({ college: c }: { college: College }) {
                     </div>
                     <div className="erp-fee-card-grand-total">
                       <dt>
-                        {!scope || scope.frequency === "annual"
-                          ? "Annual total"
-                          : "Schedule total"}
+                        {scope?.basis === "full_course"
+                          ? "Full course total"
+                          : !scope || scope.frequency === "annual"
+                            ? "Annual total"
+                            : "Schedule total"}
                       </dt>
                       <dd>{money(total.total)}</dd>
                     </div>
                   </dl>
+                  {scope?.basis === "full_course" && (
+                    <div className="erp-fee-term-preview">
+                      <strong>Semester payments</strong>
+                      {semesterAmounts(
+                        total.lines.map((line) => line.total),
+                        scope.termCount,
+                      ).map((amount, i) => {
+                        return (
+                          <div key={i}>
+                            <span>
+                              Year {Math.floor(i / 2) + 1} · Semester {i + 1}
+                            </span>
+                            <b>{money(amount)}</b>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                   <p className="erp-fee-card-tax">
                     {taxLabel(row.taxMode || "not-configured")}
                   </p>

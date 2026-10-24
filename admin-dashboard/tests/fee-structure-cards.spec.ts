@@ -83,7 +83,11 @@ for (const width of [390, 1440]) {
               semester_number: 1,
               installment_number: 1,
               billing_frequency: "annual",
+              fee_basis: "full_course",
+              term_count: 4,
+              term_due_dates: [null, null, null, null],
               amount,
+              due_date: "2026-12-24",
               currency: "INR",
             })),
             total: heads.length,
@@ -108,8 +112,10 @@ for (const width of [390, 1440]) {
       `${origin}/colleges-institutions/edunexa-college/portal/admin/fee-structures`,
     );
     const card = page.getByRole("article", { name: "Inter MPC fee structure" });
-    await expect(card).toBeVisible();
+    await expect(card).toBeVisible({ timeout: 20000 });
     await expect(page.locator(".erp-fee-card")).toHaveCount(1);
+    await expect(card).toContainText("2 years · 4 semesters");
+    await expect(card).toContainText("Full course total");
     await expect(card.locator(".erp-fee-card-breakdown dl > div")).toHaveCount(
       8,
     );
@@ -122,7 +128,7 @@ for (const width of [390, 1440]) {
       "₹8,150",
     );
     await expect(card.getByText("University", { exact: true })).toHaveCount(0);
-    expect((await card.boundingBox())!.height).toBeLessThan(550);
+    expect((await card.boundingBox())!.height).toBeLessThan(700);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -133,15 +139,23 @@ for (const width of [390, 1440]) {
         path: `/private/tmp/edunexa-compact-fees-${width}.png`,
         fullPage: true,
       });
-    await card.getByRole("button", { name: "Breakdown & GST" }).click();
+    await card
+      .getByRole("button", { name: "Edit Inter MPC fee breakdown" })
+      .click();
+    const manager = page.getByRole("dialog", {
+      name: "Manage college records",
+    });
+    await expect(manager).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
     await expect(
-      page.getByRole("dialog", { name: "Program fee breakdown" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("textbox", { name: "Fee head 1", exact: true }),
-    ).toHaveValue("Tuition fee");
-    await expect(
-      page.getByRole("spinbutton", { name: "Base amount 1", exact: true }),
+      manager.getByRole("spinbutton", { name: "Amount 1", exact: true }),
     ).toHaveValue("3500.00");
+    await expect(
+      manager.getByRole("combobox", { name: "Course", exact: true }),
+    ).toHaveValue("MPC");
+    await manager.getByRole("button", { name: "Add fee row" }).click();
+    await expect(
+      manager.getByRole("combobox", { name: "Fee head 9", exact: true }),
+    ).toBeVisible();
   });
 }

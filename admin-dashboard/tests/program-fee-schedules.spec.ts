@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { programFeeSchedules } from "../src/lib/colleges/program-fee-schedules";
+import {
+  programFeeSchedules,
+  semesterAmounts,
+} from "../src/lib/colleges/program-fee-schedules";
 import { feeComponents, feeTotals } from "../src/lib/colleges/fees";
 import { loadTemplateState } from "../src/lib/colleges/template-api";
 import { api } from "../src/services/api";
@@ -137,4 +140,23 @@ test("the fee screen resolves missing course/year labels and groups the API rows
   } finally {
     Object.assign(api.workspace, original);
   }
+});
+
+test("full course keeps its basis and divides saved heads with exact paise", () => {
+  const rows = records.map((row) => ({
+    ...row,
+    fee_basis: "full_course",
+    term_count: 4,
+    term_due_dates: [null, null, null, null],
+  }));
+  const [schedule] = programFeeSchedules(rows, programs, heads, years);
+  expect(schedule.feeSchedule?.basis).toBe("full_course");
+  expect(schedule.feeSchedule?.termCount).toBe(4);
+  expect(
+    semesterAmounts(
+      [2000000, 500000, 350000, 250000, 100000, 200000, 1500000, 1800000],
+      4,
+    ),
+  ).toEqual([1675000, 1675000, 1675000, 1675000]);
+  expect(semesterAmounts([101, 101], 4)).toEqual([52, 50, 50, 50]);
 });

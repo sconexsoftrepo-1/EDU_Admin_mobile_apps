@@ -25,6 +25,9 @@ type Line = {
   dueDate?: string;
 };
 type Draft = {
+  basis: string;
+  termCount: number;
+  termDueDates: (string | null)[];
   existing: boolean;
   program: string;
   year: string;
@@ -83,6 +86,9 @@ function fromSchedule(schedule: RecordRow, data: Snapshot): Draft {
   );
   const first = rows[0];
   return {
+    basis: String(first.fee_basis || "annual"),
+    termCount: Number(first.term_count || 4),
+    termDueDates: (first.term_due_dates || []) as (string | null)[],
     existing: true,
     program: String(first.program_code),
     year: String(first.academic_year_code),
@@ -159,6 +165,15 @@ export default function FeeStructureManager({
     setSuccess("");
     try {
       const result = await api.masterData.runAction("course-fee-structure", {
+        fee_basis: draft.basis,
+        term_count: draft.termCount,
+        term_due_dates:
+          draft.basis === "full_course"
+            ? Array.from(
+                { length: draft.termCount },
+                (_, i) => draft.termDueDates[i] || null,
+              )
+            : [],
         program_code: draft.program,
         academic_year_code: draft.year,
         year_of_study: draft.studyYear,
@@ -225,6 +240,9 @@ export default function FeeStructureManager({
               setError("");
               setSuccess("");
               setDraft({
+                basis: "full_course",
+                termCount: 4,
+                termDueDates: [],
                 existing: false,
                 program: "",
                 year: "",
@@ -276,7 +294,11 @@ export default function FeeStructureManager({
                     <strong>{schedule.name}</strong>
                   </td>
                   <td>{schedule.feeSchedule?.academicYear}</td>
-                  <td>{schedule.feeSchedule?.studyYear}</td>
+                  <td>
+                    {schedule.feeSchedule?.basis === "full_course"
+                      ? `Full course · ${schedule.feeSchedule.termCount} semesters`
+                      : schedule.feeSchedule?.studyYear}
+                  </td>
                   <td>{schedule.components?.length}</td>
                   <td>{money(schedule.amount || 0)}</td>
                   <td>
@@ -346,6 +368,34 @@ export default function FeeStructureManager({
                 </select>
               </label>
               <label>
+                Fee basis
+                <select
+                  value={draft.basis}
+                  disabled={draft.existing}
+                  onChange={(e) =>
+                    setDraft({ ...draft, basis: e.target.value })
+                  }
+                >
+                  <option value="full_course">Full course total</option>
+                  <option value="annual">Annual / study year</option>
+                </select>
+              </label>
+              {draft.basis === "full_course" && (
+                <label>
+                  Number of semesters
+                  <input
+                    type="number"
+                    min={1}
+                    max={40}
+                    required
+                    value={draft.termCount}
+                    onChange={(e) =>
+                      setDraft({ ...draft, termCount: Number(e.target.value) })
+                    }
+                  />
+                </label>
+              )}
+              <label>
                 Year of study
                 <input
                   type="number"
@@ -380,6 +430,33 @@ export default function FeeStructureManager({
                 />
               </label>
             </div>
+            {draft.basis === "full_course" && (
+              <div className="erp-fee-manager-fields">
+                {Array.from(
+                  { length: Math.min(40, Math.max(0, draft.termCount)) },
+                  (_, i) => (
+                    <label key={i}>
+                      Year {Math.floor(i / 2) + 1} · Semester {i + 1} due date
+                      <DateInput
+                        value={draft.termDueDates[i] || ""}
+                        onChange={(e) => {
+                          const dates = [...draft.termDueDates];
+                          dates[i] = e.target.value || null;
+                          setDraft({ ...draft, termDueDates: dates });
+                        }}
+                      />
+                    </label>
+                  ),
+                )}
+              </div>
+            )}
+            {draft.basis === "full_course" && (
+              <p className="erp-help">
+                Amounts below cover the entire course and are divided equally
+                across semesters. Unscheduled semesters do not count as overdue.
+                Payments are attributed to the earliest semester balances first.
+              </p>
+            )}
             <p className="erp-help">
               Edit amounts directly in the table. Add a row to include another
               fee head in this course schedule. Amounts already assigned to

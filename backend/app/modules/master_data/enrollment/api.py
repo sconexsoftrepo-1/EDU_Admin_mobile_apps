@@ -84,7 +84,9 @@ def fee_lines(data, program_code, academic_year_code, hostel, transport, year_of
     for s in rows(data, "fee_structures"):
         if s["program_code"] != program_code or s["academic_year_code"] != academic_year_code:
             continue
-        if int(s["semester_number"]) != year_of_study:
+        if s.get("fee_basis") == "full_course" and year_of_study != FIRST_YEAR:
+            continue
+        if s.get("fee_basis") != "full_course" and int(s["semester_number"]) != year_of_study:
             continue
         head = heads.get(s["fee_head_code"], {})
         category = head.get("category") or "academic"
@@ -93,7 +95,8 @@ def fee_lines(data, program_code, academic_year_code, hostel, transport, year_of
                           "name": head.get("name", s["fee_head_code"]), "category": category,
                           "installment_number": int(s.get("installment_number") or 1),
                           "amount": str(money(s["amount"])), "due_date": s["due_date"],
-                          "currency": s.get("currency", "INR")})
+                          "currency": s.get("currency", "INR"), "fee_basis": s.get("fee_basis", "annual"),
+                          "term_count": s.get("term_count"), "term_due_dates": s.get("term_due_dates", [])})
     order = {"academic": 0, "other": 1, "hostel": 2, "transport": 3}
     return sorted(lines, key=lambda l: (order[l["category"]], l["name"], l["installment_number"]))
 
