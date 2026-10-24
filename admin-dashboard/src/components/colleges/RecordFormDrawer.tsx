@@ -89,6 +89,10 @@ export default function RecordFormDrawer({
   const dialog = useRef<HTMLDialogElement>(null);
   const formId = useId();
   const normalized = standard(fields);
+  const isFeeHead = normalized.some((f) => f.key === "collection_ownership");
+  const [ownership, setOwnership] = useState(
+    String(initial.collection_ownership || "internal"),
+  );
   const hasParentDetails = normalized.some((field) =>
     field.key.startsWith("parent."),
   );
@@ -182,6 +186,14 @@ export default function RecordFormDrawer({
       const data = new FormData(event.currentTarget),
         row: Row = {};
       for (const field of normalized) {
+        if (
+          isFeeHead &&
+          field.key === "external_party_code" &&
+          ownership === "internal"
+        ) {
+          row[field.key] = null;
+          continue;
+        }
         const value = data.get(field.key);
         if (field.type === "boolean") {
           row[field.key] = value === "on";
@@ -220,7 +232,10 @@ export default function RecordFormDrawer({
   };
   const pending = normalized.some(
     (f) =>
-      f.required &&
+      (f.required ||
+        (isFeeHead &&
+          f.key === "external_party_code" &&
+          ownership === "external")) &&
       f.reference &&
       lookups[f.reference] === undefined &&
       !initial[f.key],
@@ -341,7 +356,17 @@ export default function RecordFormDrawer({
                 {items.every((f) => !f.required) && <span>Optional</span>}
               </div>
               <div className="edu-field-grid">
-                {items.map((f) => {
+                {items.map((original) => {
+                  if (
+                    isFeeHead &&
+                    original.key === "external_party_code" &&
+                    ownership === "internal"
+                  )
+                    return null;
+                  const f =
+                    isFeeHead && original.key === "external_party_code"
+                      ? { ...original, required: true }
+                      : original;
                   const options = f.reference
                     ? lookups[f.reference]
                     : undefined;
@@ -372,7 +397,24 @@ export default function RecordFormDrawer({
                           </small>
                         )}
                       </span>
-                      {f.type === "boolean" ? (
+                      {f.type === "fee-category" ? (
+                        <>
+                          <input
+                            name={f.key}
+                            aria-label={label}
+                            required={f.required}
+                            defaultValue={String(value || "")}
+                            list={`${formId}-fee-categories`}
+                            maxLength={80}
+                            placeholder="Choose or type a category"
+                          />
+                          <datalist id={`${formId}-fee-categories`}>
+                            {(f.choices || []).map((category) => (
+                              <option key={category} value={category} />
+                            ))}
+                          </datalist>
+                        </>
+                      ) : f.type === "boolean" ? (
                         <input
                           type="checkbox"
                           name={f.key}
@@ -382,7 +424,13 @@ export default function RecordFormDrawer({
                         f.choices?.length ||
                         f.options?.length ? (
                         <Select
+                          aria-label={label}
                           name={f.key}
+                          onChange={
+                            isFeeHead && f.key === "collection_ownership"
+                              ? (event) => setOwnership(event.target.value)
+                              : undefined
+                          }
                           required={f.required}
                           defaultValue={String(value ?? "")}
                           disabled={
@@ -416,7 +464,22 @@ export default function RecordFormDrawer({
                             (f.choices?.length
                               ? f.choices
                               : f.options || []
-                            ).map((o) => <option key={o}>{o}</option>)
+                            ).map((o) => (
+                              <option key={o} value={o}>
+                                {isFeeHead && f.key === "collection_ownership"
+                                  ? o === "internal"
+                                    ? "Internal — college income"
+                                    : "External — collected for another organization"
+                                  : isFeeHead && f.key === "category"
+                                    ? {
+                                        academic: "Academic — all students",
+                                        hostel: "Hostel — residents only",
+                                        transport: "Transport — bus users only",
+                                        other: "Other — all students",
+                                      }[o] || o
+                                    : o}
+                              </option>
+                            ))
                           )}
                         </Select>
                       ) : multiline ? (
