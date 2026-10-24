@@ -6,6 +6,7 @@ import {
   paid,
   balance,
 } from "./store";
+import { semesterAmounts } from "./program-fee-schedules";
 import { feeComponents, feeTotals, taxLabel } from "./fees";
 import type { PDFContext, PDFReport, PDFSection } from "./report-types";
 import { totalsRow } from "./export-table";
@@ -104,14 +105,38 @@ export function structureSections(row: RecordRow): PDFSection[] {
         ["SGST", inr(totals.sgst)],
         ["IGST", inr(totals.igst)],
         ["Total GST", inr(totals.gst)],
-        ["Grand total / annual fee", inr(totals.total)],
+        [
+          row.feeSchedule?.basis === "full_course"
+            ? "Full course total"
+            : "Grand total / annual fee",
+          inr(totals.total),
+        ],
       ],
     },
+    ...(row.feeSchedule?.basis === "full_course"
+      ? [
+          {
+            title: "Semester payment schedule",
+            columns: ["Year", "Semester", "Payable (INR)", "Due date"],
+            rows: semesterAmounts(
+              totals.lines.map((line) => line.total),
+              row.feeSchedule.termCount,
+            ).map((amount, i) => [
+              String(Math.floor(i / 2) + 1),
+              String(i + 1),
+              inr(amount),
+              row.feeSchedule!.termDueDates[i] || "Not scheduled",
+            ]),
+          },
+        ]
+      : []),
     {
       title: "Terms & scope",
       paragraphs: [
         row.terms ||
-          "Annual program schedule. Existing student assignments are not changed by editing this structure.",
+          (row.feeSchedule?.basis === "full_course"
+            ? "Full course fee divided across semesters. Existing student charges are preserved."
+            : "Annual program schedule. Existing student assignments are not changed by editing this structure."),
         row.note || "No additional notes.",
         row.taxMode === "not-configured" || !row.taxMode
           ? "Tax treatment has not been configured. Zero displayed tax is not a statement of tax exemption."

@@ -2,6 +2,7 @@
 import { api, type Row, type ScreenSummary } from "@/services/api";
 import type { CollegeState, RecordRow, Student } from "./store";
 import { operationLabels, type OperationRecord } from "./operations";
+import { programFeeSchedules } from "./program-fee-schedules";
 export function emptyTemplateState(slug: string): CollegeState {
   return {
     version: 1,
@@ -107,6 +108,33 @@ export async function loadTemplateState(
     }),
   );
   const rows = (key: string) => tables[key] || [];
+  // These labels may not be resources on the fee-structures screen itself.
+  if (rows("fee_structures").length) {
+    await Promise.all(
+      [
+        ["programs", "program_code"],
+        ["academic_years", "academic_year_code"],
+        ["fee_heads", "fee_head_code"],
+      ].map(async ([table, reference]) => {
+        const present = new Set(rows(table).map((row) => row.code));
+        if (rows("fee_structures").every((row) => present.has(row[reference])))
+          return;
+        try {
+          const options = await api.workspace.lookup(table);
+          const merged = new Map(rows(table).map((row) => [row.code, row]));
+          for (const option of options)
+            if (!merged.has(option.value))
+              merged.set(option.value, {
+                code: option.value,
+                name: option.label,
+              });
+          tables[table] = [...merged.values()];
+        } catch {
+          errors.push(`${table.replaceAll("_", " ")} labels`);
+        }
+      }),
+    );
+  }
   const by = (key: string, code: unknown) =>
     rows(key).find((r) => r.code === code);
   const normalize = (r: Row): RecordRow => ({
@@ -188,7 +216,6 @@ export async function loadTemplateState(
     leaves: "hostel_permissions",
     staff: "employees",
     notifications: "notifications",
-    structures: "fee_structures",
   };
   for (const [key, table] of Object.entries(fields))
     (state as unknown as Record<string, unknown>)[key] = rows(table).map(
@@ -202,6 +229,12 @@ export async function loadTemplateState(
         downloads: Number(r.download_count || 0),
       }),
     );
+  state.structures = programFeeSchedules(
+    rows("fee_structures"),
+    rows("programs"),
+    rows("fee_heads"),
+    rows("academic_years"),
+  );
   state.payments = state.payments.map((r) => ({
     ...r,
     status: ["Settled", "Posted", "Completed", "Success", "Paid"].includes(

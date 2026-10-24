@@ -10,6 +10,8 @@ import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
 import { operationLabels, visibleNotices } from "@/lib/colleges/operations";
 import RoleWorkspace from "./RoleWorkspace";
 import FeeStructures from "./FeeStructures";
+import FeeStructureManager from "./FeeStructureManager";
+import StudentFeeSchedule from "./StudentFeeSchedule";
 import ERPFormFields, { type FormField } from "./ERPFormFields";
 import {
   receiptReport,
@@ -178,6 +180,7 @@ export default function CollegePortal({
     router = useRouter(),
     root = collegeRoot(c);
   const [apiOpen, setApiOpen] = useState(false);
+  const [feeStructureId, setFeeStructureId] = useState<string | null>(null);
   const [manageModule, setManageModule] = useState<string | null>(null);
   useEffect(() => {
     const show = (event: Event) => {
@@ -195,7 +198,14 @@ export default function CollegePortal({
                 : command.startsWith("leave")
                   ? "hostel-permissions"
                   : null;
-      setManageModule(target);
+      setManageModule(
+        command.startsWith("structure") ? "fee-structures" : target,
+      );
+      setFeeStructureId(
+        command.startsWith("structure")
+          ? (event as CustomEvent).detail?.id || null
+          : null,
+      );
       setApiOpen(true);
     };
     window.addEventListener("edunexa:manage-records", show);
@@ -1391,6 +1401,10 @@ export default function CollegePortal({
                 </button>
               ))}
           </div>
+          {role !== "Faculty" &&
+            ["Overview", "Fee Ledger"].includes(visibleTab) && (
+              <StudentFeeSchedule studentCode={st.id} />
+            )}
           {[
             "Overview",
             "Personal Information",
@@ -3180,19 +3194,16 @@ export default function CollegePortal({
           {activeModule !== "roles" && !entryScreens.includes(activeModule) && (
             <div className="erp-api-controls">
               <span>College records</span>
-              {/* The Student directory shows Manage beside "Add student" instead. */}
-              {!studentDirectory && (
-                <button
-                  className="erp-primary"
-                  onClick={() => {
-                    setManageModule(null);
-                    setApiOpen(true);
-                  }}
-                >
-                  Manage {labels[activeModule] || activeModule}{" "}
-                  <Plus size={15} />
-                </button>
-              )}
+              <button
+                className="erp-primary"
+                onClick={() => {
+                  setManageModule(null);
+                  setFeeStructureId(null);
+                  setApiOpen(true);
+                }}
+              >
+                Manage {labels[activeModule] || activeModule} <Plus size={15} />
+              </button>
             </div>
           )}
 
@@ -3232,12 +3243,16 @@ export default function CollegePortal({
                 <X size={20} />
               </button>
             </header>
-            <ConnectedPortal
-              college={c}
-              parts={["portal", area, manageModule || activeModule]}
-              embedded
-              openPrimaryForm
-            />
+            {(manageModule || activeModule) === "fee-structures" ? (
+              <FeeStructureManager initialId={feeStructureId} />
+            ) : (
+              <ConnectedPortal
+                college={c}
+                parts={["portal", area, manageModule || activeModule]}
+                embedded
+                openPrimaryForm
+              />
+            )}
           </div>
         </div>
       )}

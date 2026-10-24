@@ -41,6 +41,9 @@ export interface WizardCourse {
 
 /** One fee of the first year: academic/other always, hostel or transport when chosen. */
 export interface FeeLine {
+  fee_basis?: "annual" | "full_course";
+  term_count?: number;
+  term_due_dates?: (string | null)[];
   fee_structure_code: string;
   fee_head_code: string;
   name: string;
