@@ -521,14 +521,12 @@ export default function CollegePortal({
     return <ConnectedPortal college={c} parts={parts} loginRedirect />;
   if (!role)
     return (
-      <div className="erp-access">
-        <Shield size={40} />
-        <h1>Enter your campus workspace</h1>
-        <p>Select a demo role to continue.</p>
-        <Link className="college-button" href={`${root}/portal/login`}>
-          Choose demo role
-        </Link>
-      </div>
+      <ConnectedPortal
+        college={c}
+        parts={parts}
+        loginRedirect
+        loginError="No role has been assigned to this account. Contact your college administrator or sign in with another account."
+      />
     );
   if (
     ["student", "parent"].includes(account.person_type) ||
@@ -541,14 +539,12 @@ export default function CollegePortal({
     return <PortalShellSkeleton college={c} />;
   if (!areaAllowed || !modules.includes(activeModule))
     return (
-      <div className="erp-access">
-        <Shield size={40} />
-        <h1>Access denied</h1>
-        <p>{roleName || role} does not have access to this campus workspace.</p>
-        <Link className="college-button" href={`${root}/portal/${homeArea}`}>
-          Return to your workspace
-        </Link>
-      </div>
+      <ConnectedPortal
+        college={c}
+        parts={parts}
+        loginRedirect
+        loginError="Your account or selected role does not have access to this workspace. Choose your assigned role and sign in again."
+      />
     );
   const dashboard = () => (
     <>
