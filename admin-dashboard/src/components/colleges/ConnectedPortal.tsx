@@ -61,6 +61,7 @@ import {
   clearWorkspaceCache,
 } from "@/lib/colleges/workspace-cache";
 import EntryForm from "./RecordFormDrawer";
+import { feeHeadForm } from "@/lib/colleges/fee-head-form";
 import BatchManager from "./BatchManager";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
@@ -512,10 +513,24 @@ export default function ConnectedPortal({
       for (const field of customFields)
         if (!fields.some((f) => f.name === field.key))
           fields.push({ ...field, name: field.key, choices: field.options });
+      let configured = { fields, initial: { ...row, ...bound.values } };
+      if (current.name === "fee_heads") {
+        const existing: Row[] = [];
+        for (;;) {
+          const page = await api.workspace.list(
+            current.path,
+            existing.length,
+            100,
+          );
+          existing.push(...page.items);
+          if (!page.items.length || existing.length >= page.total) break;
+        }
+        configured = feeHeadForm(fields, configured.initial, existing);
+      }
       setDialog({
         title: (row ? "Edit " : "Create ") + current.title,
-        fields,
-        initial: { ...row, ...bound.values },
+        fields: configured.fields,
+        initial: configured.initial,
         save: async (values) => {
           const payload = {
             values,
