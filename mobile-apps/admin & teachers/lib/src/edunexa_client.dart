@@ -52,8 +52,9 @@ class CollegeApi {
   }
 
   Future<bool> restore() async {
-    if (kIsWeb)
+    if (kIsWeb) {
       return false; // Never persist refresh tokens in browser localStorage.
+    }
     if (await storage.read(key: _key) == null) return false;
     try {
       await refresh();
@@ -108,8 +109,9 @@ class CollegeApi {
   }) async {
     if (auth && _access == null) await refresh();
     final uri = Uri.parse('$baseUrl/api/v1$path');
-    if (uri.scheme != 'https' && !kDebugMode)
+    if (uri.scheme != 'https' && !kDebugMode) {
       throw ApiException('A secure HTTPS server is required.', 0);
+    }
     try {
       final request = http.Request(method, uri)
         ..headers['Content-Type'] = 'application/json';
@@ -585,12 +587,13 @@ class _MobileWorkspaceState extends State<MobileWorkspace> {
   Future<void> loadScreens() async {
     try {
       final result = await widget.api.get('/mobile/workspace/screens') as Json;
-      if (mounted)
+      if (mounted) {
         setState(() {
           screens = (result['screens'] as List).cast<Json>();
           busy = false;
           error = null;
         });
+      }
     } catch (e) {
       fail(e);
     }
@@ -621,12 +624,13 @@ class _MobileWorkspaceState extends State<MobileWorkspace> {
                 '/mobile/workspace/$selected${student == null ? '' : '?student_code=${Uri.encodeComponent(student!)}'}',
               )
               as Json;
-      if (mounted)
+      if (mounted) {
         setState(() {
           data = result;
           student ??= result['selected_student_code'] as String?;
           busy = false;
         });
+      }
     } catch (e) {
       fail(e);
     }
@@ -651,10 +655,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace> {
           });
       if (response['checkout_url'] != null) {
         final uri = Uri.parse(response['checkout_url'] as String);
-        if (uri.scheme != 'https')
+        if (uri.scheme != 'https') {
           throw ApiException('Invalid checkout address', 0);
-        if (!await launchUrl(uri, mode: LaunchMode.externalApplication))
+        }
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
           throw ApiException('Unable to open checkout', 0);
+        }
       }
       if (response['reauthenticate'] == true) {
         await widget.api.clear();
@@ -1014,13 +1020,14 @@ class _MobileWorkspaceState extends State<MobileWorkspace> {
                                     '/mobile/workspace/$selected?offset=${items.length}${student == null ? '' : '&student_code=$student'}',
                                   )
                                   as Json;
-                          if (mounted)
+                          if (mounted) {
                             setState(
                               () => data = {
                                 ...data!,
                                 'items': [...items, ...result['items']],
                               },
                             );
+                          }
                         } catch (e) {
                           fail(e);
                         }
@@ -1060,10 +1067,11 @@ String label(String key) => key
     .join(' ');
 String display(dynamic value) {
   if (value == null) return '—';
-  if (value is Map)
+  if (value is Map) {
     return value.entries
         .map((e) => '${label(e.key.toString())}: ${display(e.value)}')
         .join('\n');
+  }
   if (value is List) return value.map(display).join('\n');
   return value.toString();
 }
@@ -1150,16 +1158,18 @@ class _ActionDialogState extends State<ActionDialog> {
                   'type_code': 'certificate_types',
                   'recipient_user_code': 'contacts',
                 }[key];
-                if (ref != null)
+                if (ref != null) {
                   choices = ((widget.lookups[ref] as List?) ?? []).cast<Json>();
-                if (type == 'boolean')
+                }
+                if (type == 'boolean') {
                   return CheckboxListTile(
                     title: Text(f['label'] as String),
                     value: values[key] == true,
                     onChanged: (v) => setState(() => values[key] = v),
                   );
+                }
                 final options = (f['options'] as List? ?? []);
-                if (choices.isNotEmpty || options.isNotEmpty)
+                if (choices.isNotEmpty || options.isNotEmpty) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 14),
                     child: DropdownButtonFormField<String>(
@@ -1193,6 +1203,7 @@ class _ActionDialogState extends State<ActionDialog> {
                           : null,
                     ),
                   );
+                }
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: TextFormField(
@@ -1212,13 +1223,15 @@ class _ActionDialogState extends State<ActionDialog> {
                     onChanged: (v) => values[key] = v,
                     validator: (v) {
                       if (f['required'] == true &&
-                          (v == null || v.trim().isEmpty))
+                          (v == null || v.trim().isEmpty)) {
                         return 'Required';
+                      }
                       if (type == 'number' &&
                           v != null &&
                           v.isNotEmpty &&
-                          num.tryParse(v) == null)
+                          num.tryParse(v) == null) {
                         return 'Enter a number';
+                      }
                       return null;
                     },
                   ),
@@ -1238,8 +1251,9 @@ class _ActionDialogState extends State<ActionDialog> {
         onPressed: () {
           if (form.currentState!.validate()) {
             for (final raw in widget.action['fields'] as List) {
-              if (raw['type'] == 'boolean')
+              if (raw['type'] == 'boolean') {
                 values.putIfAbsent(raw['key'] as String, () => false);
+              }
             }
             Navigator.pop(context, values);
           }

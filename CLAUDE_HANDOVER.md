@@ -78,10 +78,11 @@ edunexa-college/
     tools/                              Local setup/bootstrap/demo plus deferred SQL tools
     docs/                               Existing generated docs; refresh required
   mobile-apps/
-    admin/ parent/ student/ teacher/     Four Flutter shells/platform projects
-    shared/edunexa_client/
-      lib/edunexa_client.dart            Shared authenticated client and screen renderer
-      test/                             Shared client auth tests
+    admin & teachers/                   Self-contained Admin / Teacher Flutter app
+    parent & student mobile app/        Self-contained Parent / Student Flutter app
+      lib/src/edunexa_client.dart        App-local authenticated client and screens
+      lib/src/mobile_design.dart        App-local theme and styled components
+      test/                             App, client, role and layout tests
   database/edunexa_schema_postgresql.sql Complete PostgreSQL schema (live on Supabase)
   database/edunexa_schema_mysql.sql      Same schema for MySQL 8
   client-data/                          Existing client data-entry assets
@@ -175,7 +176,7 @@ The old portal component source remains as a legacy named component; default exp
 
 ## 7. Flutter implementation
 
-All four apps now launch shared authenticated UI from `shared/edunexa_client` rather than independent sample lists. Implemented: login, session restoration, native secure refresh-token storage, serialized refresh, role-based server screens, error/empty states, parent child selection, dynamic action forms, downloads/share, and HTTPS payment launch.
+Two self-contained apps provide role toggles at login: `admin & teachers/` (Admin / Teacher) and `parent & student mobile app/` (Parent / Student). Each app owns its client, screens, styling and tests in its own project. There is no shared package. Implemented: login, session restoration, native secure refresh-token storage, serialized refresh, role-based server screens, error/empty states, parent child selection, dynamic action forms, downloads/share, and HTTPS payment launch.
 
 Native refresh storage uses platform Keychain/Keystore through flutter_secure_storage. Browser sessions use memory rather than persistent browser token storage. Release clients reject insecure HTTP; debug local networking is configured. Android emulator must use `10.0.2.2` instead of host `127.0.0.1`.
 

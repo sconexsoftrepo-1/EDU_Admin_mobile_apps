@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:edunexa_client/edunexa_client.dart';
+import 'src/edunexa_client.dart';
 
 void main() => runApp(const EduNexaAdminApp());
 
