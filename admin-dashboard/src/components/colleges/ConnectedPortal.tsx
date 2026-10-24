@@ -22,7 +22,18 @@ import {
   Plus,
   Search,
 } from "lucide-react";
-import { excel, professionalPdf } from "@/lib/colleges/download";
+import { excelTable, headerLabel, pdfTable } from "@/lib/colleges/export-table";
+/** Admin / configuration screens: no Excel or PDF export (not record registers). */
+const NO_EXPORT_SCREENS = new Set([
+  "roles",
+  "forms",
+  "imports",
+  "accounts",
+  "credentials",
+  "documents",
+  "settings",
+  "course-setup",
+]);
 import {
   DOWNLOAD_KIND_BY_TABLE,
   FINANCE_SUMMARY_SCREENS,
@@ -76,12 +87,45 @@ import { formatDate } from "./DateInput";
 import { alignClass } from "./table-align";
 export type { Field };
 const pretty = (key: string) => key.replaceAll("_", " ").replaceAll("-", " ");
+/** Nested values (e.g. previous education) as "Board: SSC; Grade: 9.5" instead of raw JSON. */
+const readable = (value: unknown): string =>
+  Array.isArray(value)
+    ? Array.from(new Set(value.map(readable).filter(Boolean))).join(", ")
+    : typeof value === "boolean"
+      ? value
+        ? "Yes"
+        : "No"
+      : value !== null && typeof value === "object"
+        ? Object.entries(value)
+            .filter(([, v]) => v !== null && v !== undefined && v !== "")
+            .map(([k, v]) => `${headerLabel(k)}: ${readable(v)}`)
+            .join("; ")
+        : formatDate(String(value ?? ""));
 const text = (value: unknown): string =>
-  value === null || value === undefined
-    ? "—"
-    : typeof value === "object"
-      ? JSON.stringify(value, null, 2)
-      : formatDate(String(value));
+  value === null || value === undefined ? "—" : readable(value) || "—";
+/** A nested record (e.g. previous education) shown as a label / value list in its cell. */
+const isDetails = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+const ACRONYMS = /^(ssc|cbse|icse|mpc|bpc|mec|cec|gpa|cgpa)$/i;
+function Details({ value }: { value: Record<string, unknown> }) {
+  const entries = Object.entries(value).filter(
+    ([, v]) => v !== null && v !== undefined && v !== "",
+  );
+  if (!entries.length) return <>—</>;
+  return (
+    <dl className="edu-kv">
+      {entries.map(([k, v]) => {
+        const shown = readable(v);
+        return (
+          <div key={k}>
+            <dt>{headerLabel(k)}</dt>
+            <dd>{ACRONYMS.test(shown) ? shown.toUpperCase() : shown}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
 /** Administration screens whose content is a list from their own endpoint. */
 function specialRows(screen: string): Promise<Row[]> {
   if (screen === "roles") return api.administration.roles();
@@ -818,35 +862,29 @@ export default function ConnectedPortal({
   const visibleRows = rows.filter((row) =>
     JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()),
   );
-  /** Excel / PDF of the table as shown (current search applied). */
-  const exportTitle = resource?.title || pretty(selected);
+  /** Excel / PDF of the table as shown (current search applied), on record screens only. */
+  const canExport =
+    !!resource &&
+    !cards &&
+    !staffKind &&
+    visibleRows.length > 0 &&
+    !NO_EXPORT_SCREENS.has(selected);
+  const exportTitle = resource?.title || headerLabel(selected);
   const exportFile = `${selected}-${new Date().toISOString().slice(0, 10)}`;
-  const exportColumns = columns.map((k) =>
-    pretty(k).replace(/^\w/, (c) => c.toUpperCase()),
-  );
+  const exportColumns = columns.map(headerLabel);
   const exportRows = () =>
-    visibleRows.map((row) =>
-      columns.map((k) =>
-        row[k] !== null && typeof row[k] === "object"
-          ? JSON.stringify(row[k])
-          : text(row[k]),
-      ),
-    );
+    visibleRows.map((row) => columns.map((k) => text(row[k])));
   const exportExcel = () =>
-    excel(exportFile, exportTitle, exportColumns, exportRows());
+    excelTable(exportFile, exportTitle, exportColumns, exportRows());
   const exportPdf = async () => {
     try {
-      await professionalPdf(exportFile, {
-        title: exportTitle,
-        landscape: true,
-        sections: [
-          {
-            title: `${visibleRows.length} of ${total} records`,
-            columns: exportColumns,
-            rows: exportRows(),
-          },
-        ],
-      });
+      await pdfTable(
+        exportFile,
+        exportTitle,
+        `${visibleRows.length} of ${total} records`,
+        exportColumns,
+        exportRows(),
+      );
     } catch (e) {
       setError(errorText(e));
     }
@@ -1103,7 +1141,7 @@ export default function ConnectedPortal({
                     </button>
                   )
                 )}
-                {selected === "student-enrollment" && (
+                {canExport && (
                   <>
                     <button
                       type="button"
@@ -1229,7 +1267,7 @@ export default function ConnectedPortal({
                       <tr>
                         {columns.map((k) => (
                           <th key={k} className={alignClass(k) || undefined}>
-                            {pretty(k)}
+                            {headerLabel(k)}
                           </th>
                         ))}
                         <th>Actions</th>
@@ -1239,8 +1277,19 @@ export default function ConnectedPortal({
                       {visibleRows.map((row) => (
                         <tr key={String(row.code)}>
                           {columns.map((k) => (
-                            <td key={k} className={alignClass(k) || undefined}>
-                              {text(row[k])}
+                            <td
+                              key={k}
+                              className={
+                                isDetails(row[k])
+                                  ? "edu-kv-cell"
+                                  : alignClass(k) || undefined
+                              }
+                            >
+                              {isDetails(row[k]) ? (
+                                <Details value={row[k]} />
+                              ) : (
+                                text(row[k])
+                              )}
                             </td>
                           ))}
                           <td>
@@ -1358,7 +1407,7 @@ export default function ConnectedPortal({
         {special.map((row, i) => (
           <article className="edu-special" key={String(row.code ?? i)}>
             <h2>{String(row.name ?? row.login_id ?? row.code ?? "Details")}</h2>
-            <pre>{JSON.stringify(row, null, 2)}</pre>
+            <Details value={row} />
             {selected === "roles" && !row.system_admin && (
               <div className="edu-row-actions">
                 <IconAction
