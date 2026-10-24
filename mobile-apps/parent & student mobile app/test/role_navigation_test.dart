@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:edunexa_client/edunexa_client.dart';
+import 'package:edunexa_parent/src/edunexa_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -185,11 +185,12 @@ void main() {
             baseUrl: 'http://localhost:8010',
             clientId: r.clientId,
             httpClient: MockClient((req) async {
-              if (req.url.path.endsWith('/login'))
+              if (req.url.path.endsWith('/login')) {
                 return http.Response(
                   '{"access_token":"token","refresh_token":"refresh"}',
                   200,
                 );
+              }
               return http.Response(
                 '{"screens":[{"key":"timetable","title":"Timetable and period swap"},{"key":"assignments","title":"Assignments and submissions"}]}',
                 200,
