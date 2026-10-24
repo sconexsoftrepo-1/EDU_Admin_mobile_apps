@@ -465,7 +465,7 @@ export default function StudentEnrollmentWizard({
       .catch((e) =>
         setError(
           e instanceof ApiError && e.status === 404
-            ? "The backend does not serve the enrollment wizard yet: restart it (uvicorn app.asgi:app --host 127.0.0.1 --port 8010) and open the form again."
+            ? "The backend does not serve the enrollment wizard yet: redeploy the latest backend and open the form again."
             : errorText(e),
         ),
       );
