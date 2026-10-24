@@ -532,7 +532,11 @@ export default function FeeStructureManager({
                           String(
                             data.heads.find(
                               (head) => head.code === line.feeHead,
-                            )?.category || line.category,
+                            )?.category_label ||
+                              data.heads.find(
+                                (head) => head.code === line.feeHead,
+                              )?.category ||
+                              line.category,
                           )
                         )}
                       </td>

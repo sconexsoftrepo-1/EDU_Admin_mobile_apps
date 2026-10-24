@@ -444,7 +444,8 @@
       "fee_structures",
       "fee_adjustments",
       "student_scholarships",
-      "charge_scholarship_allocations"
+      "charge_scholarship_allocations",
+      "external_parties"
     ]
   },
   {

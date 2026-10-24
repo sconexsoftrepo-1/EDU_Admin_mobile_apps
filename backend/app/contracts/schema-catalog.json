@@ -3200,6 +3200,13 @@
           "transport",
           "other"
         ]
+      },
+      {
+        "name": "category_label",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
       }
     ]
   },

@@ -94,6 +94,8 @@ def make_model(table, partial=False):
             kind = Literal[tuple(field["choices"])]
         required = field["required"] and name != "code" and not partial
         constraint = {"max_length": 20000} if kind is str else {}
+        if table == "fee_heads" and name == "category_label":
+            constraint = {"min_length": 1, "max_length": 80}
         if name == "code":
             constraint = {"pattern": r"^[a-zA-Z0-9_-]{1,100}$"}
         annotation = kind if required else kind | None if kind is not Any else Any
@@ -308,6 +310,12 @@ class ResourceService:
         }:
             raise HTTPException(422, "New payroll run must start in draft status")
         if self.table == "fee_heads":
+            if record.get("category_label") is not None:
+                record["category_label"] = record["category_label"].strip()
+                if not record["category_label"]:
+                    raise HTTPException(422, "Give the fee category a name")
+            if record.get("collection_ownership") == "internal":
+                record["external_party_code"] = None
             if record["collection_ownership"] not in {"internal", "external"}:
                 raise HTTPException(422, "Invalid collection ownership")
             if record["collection_ownership"] == "external" and not record.get(
