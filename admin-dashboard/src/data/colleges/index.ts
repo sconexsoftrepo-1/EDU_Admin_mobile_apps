@@ -25,8 +25,8 @@ export const colleges: College[] = [
   {
     slug: "edunexa-college",
     number: "21",
-    name: "EduNexa College",
-    short: "EduNexa",
+    name: "Pragathi College",
+    short: "Pragathi",
     motto: "Learn Today. Lead Tomorrow.",
     headline: "Shaping Brighter Futures.",
     description:

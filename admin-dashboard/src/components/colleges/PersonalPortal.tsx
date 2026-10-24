@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
   api,
@@ -28,6 +29,7 @@ export default function PersonalPortal({
     [data, setData] = useState<PersonalScreenData | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(true);
+  useErrorToast(error);
   const load = useCallback(async () => {
     setBusy(true);
     setError("");

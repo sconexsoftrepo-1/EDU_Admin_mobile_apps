@@ -1,7 +1,8 @@
 "use client";
+import { useErrorToast } from "../toast";
 /** Staff table of one kind (teaching, non-teaching or daily labour) with search. */
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
+import { Download, FileText, Plus, RefreshCw, Search } from "lucide-react";
 import {
   STAFF_KIND_LABEL,
   api,
@@ -9,6 +10,8 @@ import {
   type StaffKind,
   type StaffRow,
 } from "@/services/api";
+import { download, professionalPdf } from "@/lib/colleges/download";
+import { formatDate } from "../DateInput";
 import "./staff.css";
 
 const inr = (v?: string | null) =>
@@ -19,14 +22,7 @@ const inr = (v?: string | null) =>
         maximumFractionDigits: 0,
       }).format(Number(v))
     : "—";
-const date = (v?: string | null) =>
-  v
-    ? new Date(v).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
+const date = (v?: string | null) => (v ? formatDate(v.slice(0, 10)) : "—");
 
 type Column = {
   label: string;
@@ -77,12 +73,19 @@ const COLUMNS: Record<StaffKind, Column[]> = {
 export default function StaffDirectory({
   kind,
   reloadKey,
+  title,
+  onRefresh,
+  onAdd,
 }: {
   kind: StaffKind;
   reloadKey: number;
+  title: string;
+  onRefresh: () => void;
+  onAdd: () => void;
 }) {
   const [rows, setRows] = useState<StaffRow[] | null>(null);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const [query, setQuery] = useState("");
   useEffect(() => {
     let active = true;
@@ -100,81 +103,167 @@ export default function StaffDirectory({
       .includes(query.trim().toLowerCase()),
   );
   const columns = COLUMNS[kind];
+  const exportColumns = [
+    "Employee ID",
+    "Name",
+    kind === "labour" ? "Role" : "Designation",
+    ...columns.map((column) => column.label),
+    ...(kind === "labour" ? [] : ["Documents"]),
+  ];
+  const exportRows = visible.map((row) => [
+    row.employee_id,
+    row.name,
+    row.designation,
+    ...columns.map((column) => String(column.cell(row))),
+    ...(kind === "labour"
+      ? []
+      : [`${row.documents_uploaded} of ${row.documents_expected}`]),
+  ]);
+  const xml = (value: string) =>
+    value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&apos;");
+  const exportExcel = () => {
+    const workbook = `<?xml version="1.0" encoding="UTF-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Worksheet ss:Name="Staff">
+    <Table>
+      <Row>${exportColumns.map((column) => `<Cell><Data ss:Type="String">${xml(column)}</Data></Cell>`).join("")}</Row>
+      ${exportRows.map((row) => `<Row>${row.map((value) => `<Cell><Data ss:Type="String">${xml(value)}</Data></Cell>`).join("")}</Row>`).join("\n      ")}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+    const filename = kind.replaceAll("_", "-");
+    download(`${filename}-staff.xls`, workbook, "application/vnd.ms-excel");
+  };
+  const exportPdf = async () => {
+    try {
+      await professionalPdf(`${kind.replaceAll("_", "-")}-staff`, {
+        title: `${STAFF_KIND_LABEL[kind]} directory`,
+        landscape: true,
+        sections: [
+          {
+            title: `${visible.length} ${STAFF_KIND_LABEL[kind]}`,
+            columns: exportColumns,
+            rows: exportRows,
+          },
+        ],
+      });
+    } catch (e) {
+      setError(errorText(e));
+    }
+  };
   return (
     <section className="stf-dir" aria-label={STAFF_KIND_LABEL[kind]}>
-      <div className="stf-dir-bar">
-        <p>{rows ? `${rows.length} ${STAFF_KIND_LABEL[kind]}` : "Loading…"}</p>
-        <label className="stf-search">
-          <Search size={15} aria-hidden="true" />
-          <input
-            type="search"
-            aria-label="Search staff"
-            placeholder="Search by name, ID, role or phone"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
-      </div>
-      {error && (
-        <p className="edu-error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="stf-table-wrap">
-        <table className="stf-table">
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>{kind === "labour" ? "Role" : "Designation"}</th>
-              {columns.map((c) => (
-                <th key={c.label} className={c.numeric ? "num" : ""}>
-                  {c.label}
-                </th>
-              ))}
-              {kind !== "labour" && <th>Documents</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((r) => (
-              <tr key={r.employee_id}>
-                <td>
-                  <code className="stf-code">{r.employee_id}</code>
-                </td>
-                <td>
-                  <strong>{r.name}</strong>
-                </td>
-                <td>{r.designation}</td>
-                {columns.map((c) => (
-                  <td key={c.label} className={c.numeric ? "num" : ""}>
-                    {c.cell(r)}
-                  </td>
-                ))}
-                {kind !== "labour" && (
-                  <td>
-                    <span
-                      className={
-                        r.documents_uploaded >= r.documents_expected &&
-                        r.documents_expected
-                          ? "stf-docs-badge done"
-                          : "stf-docs-badge"
-                      }
-                    >
-                      {r.documents_uploaded} of {r.documents_expected}
-                    </span>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {rows && visible.length === 0 && (
-          <p className="stf-empty">
-            {rows.length
-              ? "No one matches the search."
-              : `No ${STAFF_KIND_LABEL[kind]} yet. Use the Add button to onboard the first one.`}
+      <header className="stf-dir-heading">
+        <div>
+          <p>College administration</p>
+          <h1>{title}</h1>
+        </div>
+        <button
+          className="stf-refresh"
+          type="button"
+          onClick={onRefresh}
+          aria-label="Refresh staff"
+          title="Refresh"
+        >
+          <RefreshCw size={16} aria-hidden="true" />
+        </button>
+      </header>
+      <div className="stf-card">
+        <div className="stf-dir-bar">
+          <label className="stf-search">
+            <Search size={15} aria-hidden="true" />
+            <input
+              type="search"
+              aria-label="Search staff"
+              placeholder="Search by name, ID, role or phone"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          <p>
+            {rows ? `${rows.length} ${STAFF_KIND_LABEL[kind]}` : "Loading…"}
+          </p>
+          <div className="stf-directory-actions">
+            <button type="button" className="stf-directory-add" onClick={onAdd}>
+              <Plus size={14} aria-hidden="true" />
+              Add {STAFF_KIND_LABEL[kind]}
+            </button>
+            <button type="button" onClick={exportExcel}>
+              <Download size={14} aria-hidden="true" />
+              Excel
+            </button>
+            <button type="button" onClick={() => void exportPdf()}>
+              <FileText size={14} aria-hidden="true" />
+              PDF
+            </button>
+          </div>
+        </div>
+        {error && (
+          <p className="edu-error" role="alert">
+            {error}
           </p>
         )}
+        <div className="stf-table-wrap">
+          <table className="stf-table">
+            <thead>
+              <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>{kind === "labour" ? "Role" : "Designation"}</th>
+                {columns.map((c) => (
+                  <th key={c.label} className={c.numeric ? "num" : ""}>
+                    {c.label}
+                  </th>
+                ))}
+                {kind !== "labour" && <th>Documents</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((r) => (
+                <tr key={r.employee_id}>
+                  <td>
+                    <code className="stf-code">{r.employee_id}</code>
+                  </td>
+                  <td>
+                    <strong>{r.name}</strong>
+                  </td>
+                  <td>{r.designation}</td>
+                  {columns.map((c) => (
+                    <td key={c.label} className={c.numeric ? "num" : ""}>
+                      {c.cell(r)}
+                    </td>
+                  ))}
+                  {kind !== "labour" && (
+                    <td>
+                      <span
+                        className={
+                          r.documents_uploaded >= r.documents_expected &&
+                          r.documents_expected
+                            ? "stf-docs-badge done"
+                            : "stf-docs-badge"
+                        }
+                      >
+                        {r.documents_uploaded} of {r.documents_expected}
+                      </span>
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {rows && visible.length === 0 && (
+            <p className="stf-empty">
+              {rows.length
+                ? "No one matches the search."
+                : `No ${STAFF_KIND_LABEL[kind]} yet. Use the Add button to onboard the first one.`}
+            </p>
+          )}
+        </div>
       </div>
     </section>
   );

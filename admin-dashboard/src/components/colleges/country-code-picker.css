@@ -1,0 +1,177 @@
+/* Phone number: flag country-code picker joined to the number input. */
+.enw-phone {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+.enw-phone > input {
+  flex: 1;
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.cc-picker {
+  position: static;
+  flex: 0 0 auto;
+  display: flex;
+}
+.cc-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 8px 0 10px;
+  border: 1px solid #e9dfcf;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: #f6f7f9;
+  color: #1f2a36;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.cc-trigger:hover {
+  background: #eef0f3;
+}
+.cc-trigger:focus-visible,
+.cc-trigger[aria-expanded="true"] {
+  outline: 0;
+  border-color: #a46a27;
+  box-shadow: 0 0 0 3px #a46a2720;
+}
+.cc-trigger svg {
+  color: #74849b;
+  transition: transform 0.15s;
+}
+.cc-trigger[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.cc-flag {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 15px;
+  overflow: hidden;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #0000001a;
+}
+.cc-flag svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.cc-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: min(320px, 100%);
+  min-width: 260px;
+  border: 1px solid #e0d6c7;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 28px #3b2a1424;
+  font-weight: normal;
+}
+.cc-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px;
+  padding: 0 8px;
+  border: 1px solid #e0d6c7;
+  border-radius: 6px;
+  color: #74849b;
+}
+.cc-search input {
+  flex: 1;
+  min-width: 0;
+  height: 32px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent;
+  box-shadow: none !important;
+  outline: none;
+  font-size: 13px;
+}
+.cc-list {
+  max-height: 240px;
+  margin: 0;
+  padding: 0 4px 4px;
+  overflow-y: auto;
+  list-style: none;
+}
+.cc-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 5px;
+  color: #14253b;
+  font-size: 13px;
+  cursor: pointer;
+}
+.cc-list li.is-active {
+  background: #f5ecdf;
+}
+.cc-list li[aria-selected="true"] {
+  color: #8a5520;
+  font-weight: 600;
+}
+.cc-list li > svg {
+  color: #a46a27;
+}
+.cc-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cc-code {
+  color: #6b7785;
+  font-variant-numeric: tabular-nums;
+}
+.cc-list li.combo-empty {
+  color: #8a96a3;
+  cursor: default;
+}
+.is-validated .enw-phone:has(input:invalid) .cc-trigger {
+  border-color: #d93636;
+  background: #fff7f7;
+}
+
+/* Search box at the top of the country list: one clean border, no inner focus ring. */
+.cc-search:focus-within {
+  border-color: #a46a27;
+  box-shadow: 0 0 0 2px #a46a2718;
+}
+.cc-panel .cc-search input,
+.cc-panel .cc-search input:focus,
+.cc-panel .cc-search input:focus-visible {
+  flex: 1;
+  min-width: 0;
+  height: 30px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: 13px;
+}
+.cc-panel .cc-search {
+  margin: 6px 6px 4px;
+  height: 32px;
+}
+.enw-phone > input[type="tel"] {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}

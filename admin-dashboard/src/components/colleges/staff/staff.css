@@ -148,45 +148,140 @@
 /* Staff tables ------------------------------------------------------------------------- */
 .stf-dir {
   display: grid;
-  gap: 12px;
+  gap: 0;
   margin-top: 6px;
+}
+.stf-dir-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 2px 14px;
+}
+.stf-dir-heading > div {
+  min-width: 0;
+}
+.edu-connected .stf-dir-heading p {
+  margin: 0 0 3px;
+  color: #627383;
+  font-size: 11px;
+}
+.edu-connected .stf-dir-heading h1 {
+  margin: 0;
+  font-size: 25px;
+}
+.edu-connected .stf-dir-heading .stf-refresh {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  background: #fff;
 }
 .stf-dir-bar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  padding: 14px 16px;
+  border: 1px solid #d6dde4;
+  border-radius: 8px;
+  background: #fff;
 }
 .stf-dir-bar p {
-  margin: 0;
+  flex: 0 0 auto;
+  margin: 0 auto 0 0;
   color: #627383;
+  font-size: 12px;
 }
-.stf-search {
+.edu-connected label.stf-search {
   display: flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #cbd3db;
+  height: 32px;
+  border: 1px solid #a46a27;
   border-radius: 6px;
   padding: 0 10px;
   background: #fff;
-  min-width: min(320px, 100%);
+  color: #a46a27;
+  flex: 0 1 260px;
+  width: min(260px, 100%);
+  max-width: 260px;
+  min-width: min(200px, 100%);
 }
-.edu-connected .stf-search input {
+.edu-connected label.stf-search svg {
+  flex: 0 0 auto;
+}
+.stf-directory-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+.edu-connected .stf-directory-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  min-height: 0;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.edu-connected .stf-directory-actions .stf-directory-add {
+  gap: 8px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
   border: 0;
-  padding: 9px 0;
-  flex: 1;
-  outline: none;
+  color: #fff;
+  box-shadow: 0 1px 2px #5a361333;
 }
-.stf-search:focus-within {
-  outline: 3px solid #d8ae5e;
-  outline-offset: 1px;
+.edu-connected .stf-directory-actions .stf-directory-add:hover {
+  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  color: #fff;
+  filter: brightness(0.94);
+}
+.edu-connected .stf-search input,
+.edu-connected .stf-search input:focus-visible {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  font-size: 13px;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
+.edu-connected label.stf-search:focus-within {
+  border-color: #8a5520;
+  box-shadow: 0 0 0 3px #a46a2726;
+}
+.stf-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #d6dde4;
+  border-radius: 8px;
+}
+.stf-card .stf-dir-bar {
+  border: 0;
+  border-radius: 0;
+}
+.stf-card > .edu-error {
+  margin: 0 16px 12px;
 }
 .stf-table-wrap {
   overflow-x: auto;
   background: #fff;
-  border: 1px solid #d6dde4;
-  border-radius: 8px;
+}
+.stf-dir > .edu-error {
+  margin: 12px 0;
 }
 .stf-table {
   width: 100%;
@@ -197,12 +292,15 @@
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color: #3b4f61;
-  background: #f1f4f7;
+  color: #fff;
+  background: transparent;
   padding: 10px 12px;
   white-space: nowrap;
   position: sticky;
   top: 0;
+}
+.stf-table thead tr {
+  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
 }
 .stf-table td {
   padding: 10px 12px;
@@ -241,6 +339,34 @@
   color: #627383;
 }
 @media (max-width: 760px) {
+  .stf-dir-bar {
+    align-items: stretch;
+  }
+  .stf-dir-heading {
+    padding: 0 2px 10px;
+  }
+  .edu-connected .stf-dir-heading h1 {
+    font-size: 21px;
+  }
+  .stf-dir-bar {
+    padding: 12px;
+  }
+  .edu-connected label.stf-search {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+  }
+  .stf-dir-bar p {
+    flex: 1 1 auto;
+    align-self: center;
+  }
+  .stf-directory-actions {
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+  }
+  .edu-connected .stf-directory-actions button {
+    flex: 1 1 auto;
+  }
   .stf-row,
   .stf-row-3 {
     grid-template-columns: 1fr 1fr;

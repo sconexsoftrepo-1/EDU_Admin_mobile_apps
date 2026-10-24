@@ -2199,14 +2199,17 @@
 .college-login {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
   min-height: 100vh;
+  min-height: 100svh;
+  overflow-x: clip;
   background: #fff;
 }
 .college-login-art {
   position: relative;
   background: #14253b;
   isolation: isolate;
-  min-height: 800px;
+  min-height: 0;
 }
 .college-login-art > img {
   object-fit: cover;
@@ -2251,22 +2254,46 @@
   color: #ced9e6;
 }
 .college-login-form {
-  padding: 60px max(10%, calc((100% - 440px) / 2));
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
+  padding: 14px clamp(24px, 6vw, 72px);
   align-self: center;
+}
+.college-login-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.college-login-heading > img {
+  flex: 0 0 auto;
+  width: 60px;
+  height: 66px;
+  object-fit: contain;
+}
+.college-login-heading > div {
+  min-width: 0;
 }
 .college-login-form h2 {
   font:
     35px Georgia,
     serif;
   letter-spacing: -0.035em;
-  margin: 20px 0 12px;
+  margin: 0 0 8px;
 }
-.college-login-form > p {
+.college-login-heading p {
   font-size: 13px;
   color: #74849b;
 }
 .college-login-form form {
-  margin-top: 30px;
+  margin-top: 18px;
+}
+.college-login-form label {
+  margin: 10px 0;
+}
+.college-login-form input,
+.college-login-form select {
+  padding: 10px 12px;
 }
 .erp-password {
   display: flex;
@@ -2316,8 +2343,8 @@
   gap: 12px;
   background: #f2f6fc;
   border: 1px solid #dfe7f2;
-  padding: 16px;
-  margin-top: 30px;
+  padding: 10px 12px;
+  margin-top: 16px;
   color: #718299;
 }
 .college-demo-note svg {
@@ -2329,6 +2356,46 @@
   font-size: 10px;
   line-height: 1.8;
   margin: 0;
+}
+@media (min-width: 961px) and (max-height: 700px) {
+  .college-login-art > div {
+    padding: 36px;
+  }
+  .college-login-art a {
+    top: 24px;
+    left: 30px;
+  }
+  .college-login-art h1 {
+    font-size: clamp(44px, 5.5vw, 60px);
+    margin-bottom: 14px;
+  }
+  .college-login-art p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .college-login-art span {
+    margin-top: 14px;
+  }
+  .college-login-form {
+    padding-block: 8px;
+  }
+  .college-login-form h2 {
+    font-size: 30px;
+  }
+  .college-login-form form {
+    margin-top: 12px;
+  }
+  .college-login-form label {
+    margin: 7px 0;
+  }
+  .college-login-form input,
+  .college-login-form select {
+    padding-block: 8px;
+  }
+  .college-demo-note {
+    margin-top: 10px;
+    padding-block: 8px;
+  }
 }
 @media (min-width: 1550px) {
   .college-hero {
@@ -2552,14 +2619,24 @@
   .erp-role-grid {
     grid-template-columns: 1fr 1fr;
   }
-  .college-login-art h1 {
-    font-size: 60px;
+  .college-login {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  .college-login-art {
+    min-height: 260px;
   }
   .college-login-art > div {
     padding: 35px;
   }
-  .college-login-art {
-    min-height: 700px;
+  .college-login-art h1 {
+    font-size: clamp(36px, 7vw, 56px);
+    margin: 40px 0 12px;
+  }
+  .college-login-form {
+    align-self: start;
+    max-width: 560px;
+    padding: 32px 6% 40px;
   }
   .college-category-grid {
     gap: 25px;
@@ -3170,23 +3247,20 @@
     right: 15px;
     font-size: 11px;
   }
-  .college-login {
-    grid-template-columns: 1fr;
-  }
   .college-login-art {
-    min-height: 270px;
+    min-height: 200px;
   }
   .college-login-art > div {
-    padding: 35px;
+    padding: 24px 7%;
   }
   .college-login-art a {
-    top: 20px;
-    left: 25px;
+    top: 18px;
+    left: 7%;
     font-size: 10px;
   }
   .college-login-art h1 {
-    font-size: 45px;
-    margin: 45px 0 10px;
+    font-size: 36px;
+    margin: 36px 0 8px;
   }
   .college-login-art p {
     font-size: 12px;
@@ -3198,12 +3272,15 @@
     margin-top: 15px;
   }
   .college-login-form {
-    padding: 40px 7%;
+    padding: 22px 7% 28px;
   }
   .college-login-form h2 {
-    font-size: 32px;
+    font-size: 27px;
   }
-  .college-login-form > img {
+  .college-login-heading {
+    gap: 12px;
+  }
+  .college-login-heading > img {
     width: 48px;
     height: 53px;
   }
@@ -3682,4 +3759,129 @@
 }
 .college-login-art p {
   color: #d8e4f4;
+}
+
+/* Sign-in: form on a white card over a cream panel, crest centred above the welcome text. */
+.college-login {
+  background: #f4efe7;
+}
+.college-login .college-login-form {
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  margin: 24px auto;
+  padding: clamp(24px, 4vw, 36px);
+  border: 1px solid #e6dccd;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow:
+    0 18px 40px #3b2a1414,
+    0 2px 6px #3b2a140d;
+}
+.college-login .college-login-heading {
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.college-login .college-login-heading > img {
+  width: 76px;
+  height: 84px;
+  object-fit: contain;
+}
+.college-login .college-login-form h2 {
+  font-size: clamp(24px, 3vw, 30px);
+  margin: 0 0 4px;
+}
+.college-login .college-login-heading p {
+  margin: 0;
+}
+@media (max-width: 560px) {
+  .college-login .college-login-heading > img {
+    width: 60px;
+    height: 66px;
+  }
+}
+
+/* Sign-in role picker: list always opens below the field. */
+.role-select-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 10px 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.role-select {
+  position: relative;
+}
+.college-login-form .role-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #ccd4df;
+  border-radius: 5px;
+  background: #fff;
+  color: #14253b;
+  font: 14px Arial, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.college-login-form .role-select-trigger:disabled {
+  color: #74849b;
+  cursor: wait;
+}
+.college-login-form .role-select-trigger[aria-expanded="true"],
+.college-login-form .role-select-trigger:focus-visible {
+  border-color: #a46a27;
+  outline: 0;
+  box-shadow: 0 0 0 3px #a46a2720;
+}
+.role-select-trigger svg {
+  flex: 0 0 auto;
+  color: #74849b;
+  transition: transform 0.15s;
+}
+.role-select-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.role-select-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 240px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid #e0d6c7;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 28px #3b2a1424;
+}
+.role-select-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 5px;
+  color: #14253b;
+  font: 400 14px Arial, sans-serif;
+  cursor: pointer;
+}
+.role-select-list li.is-active {
+  background: #f5ecdf;
+}
+.role-select-list li[aria-selected="true"] {
+  color: #8a5520;
+  font-weight: 600;
+}
+.role-select-list li svg {
+  color: #a46a27;
 }

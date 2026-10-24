@@ -119,6 +119,9 @@
   padding-bottom: 20px;
   margin-bottom: 24px;
 }
+.edu-staff-heading-hidden {
+  display: none;
+}
 .edu-heading p {
   margin: 0;
   color: #627383;
@@ -481,6 +484,14 @@
     border-color 0.15s,
     box-shadow 0.15s;
 }
+.edu-form-drawer
+  .edu-field-grid
+  :is(input:not([type="checkbox"], [type="radio"], [type="file"]), select) {
+  box-sizing: border-box;
+  height: 41px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 .edu-form-drawer .edu-field-grid :is(input, select, textarea):focus {
   border-color: #a46a27;
   outline: 0;
@@ -709,6 +720,9 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
+}
+.edu-connected .edu-toolbar[hidden] {
+  display: none;
 }
 .edu-form-drawer .edu-checkbox-description {
   display: block;

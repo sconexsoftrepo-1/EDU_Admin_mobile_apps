@@ -1,0 +1,133 @@
+/* Primary (save / submit / add) buttons across the college app share the Pragathi gold gradient. */
+:is(.edu-primary, .enw-primary, .erp-primary):not(.enw-close) {
+  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%) !important;
+  border: 0 !important;
+  color: #fff !important;
+  box-shadow: 0 1px 2px #5a361333;
+  font-weight: 600;
+}
+:is(.edu-primary, .enw-primary, .erp-primary):is(:hover, :focus-visible, :active):not(
+    :disabled
+  ) {
+  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%) !important;
+  color: #fff !important;
+  filter: brightness(0.93);
+}
+:is(.edu-primary, .enw-primary, .erp-primary):focus-visible {
+  outline: 2px solid #a46a27 !important;
+  outline-offset: 2px;
+}
+:is(.edu-primary, .enw-primary, .erp-primary) svg {
+  color: currentColor;
+}
+:is(.edu-primary, .enw-primary, .erp-primary):disabled {
+  filter: grayscale(0.25);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Plain file inputs (imports, photos) in the same box style as the form upload fields. */
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  input[type="file"]:not(.enw-file-button input) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 6px 0 0;
+  overflow: hidden;
+  border: 1px solid #e9dfcf;
+  border-radius: 6px;
+  background: #fff;
+  color: #6b7785;
+  font-size: 13px;
+  cursor: pointer;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  input[type="file"]:not(.enw-file-button input)::file-selector-button {
+  height: 100%;
+  margin: 0 10px 0 0;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid #e9dfcf;
+  border-radius: 0;
+  background: #e9ecef;
+  color: #212529;
+  font: 400 13px system-ui, sans-serif;
+  cursor: pointer;
+}
+:is(.college-erp, .edu-connected, .enw-backdrop)
+  input[type="file"]:not(.enw-file-button input):hover::file-selector-button {
+  background: #dde0e3;
+}
+
+/* Type-or-pick field (ComboInput): list opens below, same look as the sign-in role picker. */
+.combo {
+  position: relative;
+  width: 100%;
+}
+.combo > :is(input, textarea) {
+  width: 100%;
+  padding-right: 34px !important;
+}
+.combo .combo-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #74849b;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.combo .combo-toggle svg {
+  transition: transform 0.15s;
+}
+.combo:has([aria-expanded="true"]) .combo-toggle svg {
+  transform: rotate(180deg);
+}
+.combo:has([aria-expanded="true"]) > :is(input, textarea) {
+  border-color: #a46a27 !important;
+  box-shadow: 0 0 0 3px #a46a2720;
+}
+.combo .role-select-list {
+  z-index: 60;
+}
+.role-select-list li.combo-empty {
+  color: #8a96a3;
+  cursor: default;
+}
+/* Outside the enrollment/staff drawers (ERP forms) the number input still joins the flag picker. */
+.enw-phone > input[type="tel"] {
+  flex: 1;
+  min-width: 0;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+/* Dropdown text box: one line normally, wraps to show the whole selected text. */
+.combo > textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px !important;
+  height: 40px;
+  padding: 10px 34px 10px 11px !important;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.combo .combo-toggle {
+  top: 20px;
+}

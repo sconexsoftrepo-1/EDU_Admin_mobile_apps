@@ -1,5 +1,6 @@
 "use client";
-import { api } from "@/services/api";
+import { api, errorText } from "@/services/api";
+import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
@@ -93,6 +94,7 @@ import {
 } from "@/lib/colleges/store";
 import { csv, professionalPdf } from "@/lib/colleges/download";
 import ERPTable, { type TableRecord } from "./ERPTable";
+import DateInput from "./DateInput";
 type Field = FormField;
 const entryScreens = [
   "student-enrollment",
@@ -478,13 +480,15 @@ export default function CollegePortal({
     void mode;
     void api.documents
       .download("certificate", row.id)
-      .catch((e) => alert(e.message));
+      .catch((e) =>
+        toast.error("Could not download certificate", errorText(e)),
+      );
   }
   function receipt(row: RecordRow, mode: "view" | "download" = "download") {
     void mode;
     void api.documents
       .download("receipt", row.reference || row.id)
-      .catch((e) => alert(e.message));
+      .catch((e) => toast.error("Could not download receipt", errorText(e)));
   }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -2909,12 +2913,13 @@ export default function CollegePortal({
         <div className="erp-sidebar-brand">
           <Link href={root}>
             <Image
-              src={`/assets/colleges-institutions/${c.slug}/crest.svg`}
-              width={32}
-              height={38}
+              className="erp-brand-logo"
+              src="/assets/pragathilogo.jpg"
+              width={40}
+              height={40}
               alt=""
             />
-            <strong>{c.short}</strong>
+            <strong>{c.name}</strong>
           </Link>
           <button aria-label="Close sidebar" onClick={() => setOpen(false)}>
             <X size={17} />
@@ -2953,6 +2958,17 @@ export default function CollegePortal({
       )}
       <div className="erp-workspace">
         <header className="erp-topbar">
+          <div className="erp-topbar-breadcrumb" aria-label="Breadcrumb">
+            <Link href={`${root}/portal/${area}`}>{c.short}</Link>
+            <span aria-hidden="true">/</span>
+            <span>{labels[activeModule] || activeModule}</span>
+            {detail && (
+              <>
+                <span aria-hidden="true">/</span>
+                <span>{detail}</span>
+              </>
+            )}
+          </div>
           <button
             className="erp-mobile-menu"
             aria-label="Open portal navigation"
@@ -3062,17 +3078,6 @@ export default function CollegePortal({
           </div>
         )}
         <main id="erp-content" className="erp-content">
-          <div className="erp-breadcrumb">
-            <Link href={`${root}/portal/${area}`}>{c.short}</Link>
-            <span>/</span>
-            <span>{labels[activeModule]}</span>
-            {detail && (
-              <>
-                <span>/</span>
-                <span>{detail}</span>
-              </>
-            )}
-          </div>
           {activeModule !== "timetable" &&
             !entryScreens.includes(activeModule) && (
               <>
@@ -3130,16 +3135,14 @@ export default function CollegePortal({
                   </label>
                   <label>
                     From
-                    <input
-                      type="date"
+                    <DateInput
                       value={from}
                       onChange={(e) => setFrom(e.target.value)}
                     />
                   </label>
                   <label>
                     To
-                    <input
-                      type="date"
+                    <DateInput
                       value={to}
                       onChange={(e) => setTo(e.target.value)}
                     />
@@ -3190,7 +3193,7 @@ export default function CollegePortal({
           )}
         </main>
         <footer className="erp-footer">
-          {c.name} / Campus management <span>EduNexa College</span>
+          {c.name} / Campus management <span>{c.name}</span>
         </footer>
       </div>
       {apiOpen && (
@@ -3220,14 +3223,6 @@ export default function CollegePortal({
               openPrimaryForm
             />
           </div>
-        </div>
-      )}
-      {message && (
-        <div role="status" className="erp-toast">
-          <span>{message}</span>
-          <button aria-label="Dismiss message" onClick={clear}>
-            <X size={16} />
-          </button>
         </div>
       )}
       <ERPActionDrawer

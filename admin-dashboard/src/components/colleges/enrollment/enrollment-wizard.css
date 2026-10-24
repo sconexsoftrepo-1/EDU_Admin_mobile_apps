@@ -2,7 +2,7 @@
 .enw-backdrop {
   --enw-ink: #18344b;
   --enw-accent: #a77524;
-  --enw-line: #d6dde4;
+  --enw-line: #e9dfcf;
   --enw-soft: #f4f6f8;
   --enw-muted: #627383;
   position: fixed;
@@ -38,7 +38,7 @@
 .enw-backdrop textarea {
   font: inherit;
   color: var(--enw-ink);
-  border: 1px solid #cbd3db;
+  border: 1px solid #e9dfcf;
   border-radius: 6px;
   background: #fff;
   padding: 9px 11px;
@@ -196,9 +196,27 @@
 }
 .enw-field {
   display: grid;
+  align-content: start;
   gap: 5px;
   font-size: 12px;
   font-weight: 600;
+}
+/* One control height everywhere, so fields in a row line up whether or not they carry a hint. */
+.enw-backdrop
+  :is(
+    input:not([type="checkbox"], [type="radio"], [type="file"]),
+    select
+  ) {
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: normal;
+}
+.enw-backdrop .stf-add button {
+  height: 40px;
+  min-height: 40px;
 }
 .enw-field > span {
   color: #3b4f61;
@@ -227,7 +245,7 @@
 }
 .enw-segmented {
   display: inline-flex;
-  border: 1px solid #cbd3db;
+  border: 1px solid #e9dfcf;
   border-radius: 8px;
   overflow: hidden;
   margin: 4px 0 14px;
@@ -280,42 +298,101 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+/* File upload: bordered box, grey "Choose File" button, then the file name or "No file chosen". */
 .enw-file {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  font-weight: normal;
+}
+.enw-file-box {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
-  font-weight: normal;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 6px 0 0;
+  overflow: hidden;
+  border: 1px solid #e9dfcf;
+  border-radius: 6px;
+  background: #fff;
+}
+.enw-file-box:focus-within {
+  border-color: #a46a27;
+  box-shadow: 0 0 0 3px #a46a2718;
 }
 .enw-file-button {
+  position: relative;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border: 1px dashed #a9b6c2;
-  border-radius: 6px;
-  padding: 8px 12px;
-  background: #fbfcfd;
+  align-self: stretch;
+  height: auto;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid #e9dfcf;
+  border-radius: 0;
+  background: #e9ecef;
+  color: #212529;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
   cursor: pointer;
-  font-weight: 600;
-  position: relative;
+}
+.enw-file-button:hover {
+  background: #dde0e3;
+}
+/* Standalone photo "Upload" button (not inside a file box). */
+.enw-photo .enw-file-button {
+  gap: 6px;
+  height: 36px;
+  border: 1px solid #e9dfcf;
+  border-radius: 6px;
 }
 .enw-file-button input {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   cursor: pointer;
-  width: 100%;
 }
 .enw-file-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #2f6b3b;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1f2a36;
+  font-size: 13px;
 }
-.enw-backdrop .enw-file-name button {
+.enw-file-name.is-empty {
+  color: #6b7785;
+}
+.enw-backdrop .enw-file-remove {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  min-height: 0;
+  padding: 0;
   border: 0;
-  padding: 2px;
+  border-radius: 4px;
   background: transparent;
+  color: #6b7785;
+}
+.enw-backdrop .enw-file-remove:hover {
+  background: #f1f3f5;
+  color: #c62828;
+}
+/* Missing mandatory upload turns red with the other required fields. */
+.is-validated .enw-file-box:has(input:invalid) {
+  border-color: #d93636;
+  background: #fff7f7;
+  box-shadow: 0 0 0 3px #d9363618;
 }
 .enw-file em,
 .enw-photo em {
@@ -797,4 +874,188 @@
   .enw-backdrop {
     animation: none;
   }
+}
+
+/* ID number + its document upload in one box (Aadhaar, PAN). */
+.enw-backdrop .enw-idfile-box {
+  padding: 0 4px 0 0;
+}
+.enw-backdrop .enw-idfile-box > input:not([type="file"]) {
+  flex: 1;
+  min-width: 0;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none;
+}
+.enw-idfile-upload {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 5px;
+  color: #8a5520;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.enw-idfile-upload:hover,
+.enw-idfile-upload:focus-within {
+  background: #f5ecdf;
+}
+.enw-idfile-upload input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.enw-idfile-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  max-width: 100%;
+  padding: 3px 4px 3px 8px;
+  border: 1px solid #e3d6c3;
+  border-radius: 14px;
+  background: #fbf6ef;
+  color: #5a3d1c;
+  font-size: 12px;
+}
+.enw-idfile-chip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.enw-backdrop .enw-idfile-chip button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8a5520;
+}
+.enw-backdrop .enw-idfile-chip button:hover {
+  background: #f0e2cf;
+  color: #c62828;
+}
+/* Red when the number or a mandatory copy is missing. */
+.is-validated .enw-idfile-box:has(input:invalid) {
+  border-color: #d93636;
+  background: #fff7f7;
+  box-shadow: 0 0 0 3px #d9363618;
+}
+.is-validated .enw-idfile-box:has(input[type="file"]:invalid) .enw-idfile-upload {
+  color: #c62828;
+}
+
+/* Upload button inside the Aadhaar/PAN box: icon and text on one line (beats `.edu-connected label`). */
+.enw-backdrop label.enw-idfile-upload {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+
+/* Student photo "Upload": same look and height as the "Capture" button beside it. */
+.enw-backdrop .enw-photo label.enw-file-button {
+  position: relative;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: auto;
+  height: 36px;
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid #e9dfcf;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f2a36;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.enw-backdrop .enw-photo label.enw-file-button:hover,
+.enw-backdrop .enw-photo label.enw-file-button:focus-within {
+  background: #fbf6ef;
+  border-color: #a46a27;
+}
+.enw-photo-actions > span {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.enw-backdrop .enw-photo-actions > span > button {
+  height: 36px;
+  min-height: 0;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+/* Guardian details: three fields per row. */
+.enw-grid.enw-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 760px) {
+  .enw-grid.enw-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+/* Card title with its control right beside it (e.g. "Referral  ☐ Joined through a referral"). */
+.enw-card > header.enw-card-head-inline {
+  justify-content: flex-start;
+  gap: 18px;
+}
+.enw-backdrop label.enw-switch {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #3b4f61;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.enw-backdrop label.enw-switch input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  margin: 0;
+  accent-color: #a46a27;
+}
+
+/* Auto-growing text area (e.g. experience Details): one line tall to start, like the inputs. */
+.enw-backdrop textarea.auto-textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  height: 40px;
+  padding: 10px 11px;
+  resize: none;
+  overflow: hidden;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarRange,
@@ -33,6 +34,7 @@ export default function BatchManager({
   const [data, setData] = useState<BatchOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  useErrorToast(error);
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState("");
   const [confirming, setConfirming] = useState("");

@@ -43,6 +43,7 @@ import {
   roleScreens,
   firstScreen,
 } from "@/lib/colleges/role-navigation";
+import { toast } from "./toast";
 
 type Context = {
   activeRole: AccountRole | null;
@@ -222,6 +223,11 @@ export function CollegeStore({
         ? "Some records could not be loaded: " + result.errors.join("; ")
         : "",
     );
+    if (result.errors.length)
+      toast.warning(
+        "Some records could not be loaded",
+        result.errors.join("; "),
+      );
   }, [slug, activeModule, pathname, router]);
   // A reload restores this tab's signed-in navigation before the first refresh, so the sidebar
   // shows at once; the session is then revalidated in the background.
@@ -244,7 +250,10 @@ export function CollegeStore({
         clearWorkspaceCache();
         sessionCache.current = null;
         sessionPending.current = null;
-        void refresh().catch((e) => setMessage(errorText(e)));
+        void refresh().catch((e) => {
+          setMessage(errorText(e));
+          toast.error("Could not refresh records", errorText(e));
+        });
       })
       .catch((e) => {
         if (e instanceof ApiError && e.status === 401) {
@@ -263,8 +272,10 @@ export function CollegeStore({
       .catch((e) => {
         if (active) {
           setMessage(errorText(e));
-          if (!(e instanceof ApiError && e.status === 401))
+          if (!(e instanceof ApiError && e.status === 401)) {
             setSessionError(errorText(e));
+            toast.error("Could not load the workspace", errorText(e));
+          }
         }
       })
       .finally(() => {
@@ -281,7 +292,10 @@ export function CollegeStore({
         sessionCache.current = null;
         sessionPending.current = null;
       }
-      void refresh().catch((e) => setMessage(errorText(e)));
+      void refresh().catch((e) => {
+        setMessage(errorText(e));
+        toast.error("Could not refresh records", errorText(e));
+      });
     };
     window.addEventListener("edunexa:records-changed", reload);
     return () => window.removeEventListener("edunexa:records-changed", reload);
@@ -310,6 +324,7 @@ export function CollegeStore({
         refresh,
         login: () => {
           setMessage("Sign in with your college account.");
+          toast.info("Sign in with your college account.");
         },
         logout: () => {
           void api.auth.logout().finally(() => {
@@ -324,8 +339,12 @@ export function CollegeStore({
           });
         },
         run: manage,
-        reset: () =>
-          setMessage("Live college records cannot be reset from the template."),
+        reset: () => {
+          const text =
+            "Live college records cannot be reset from the template.";
+          setMessage(text);
+          toast.warning(text);
+        },
         importDataset: () => manage(),
       }}
     >
