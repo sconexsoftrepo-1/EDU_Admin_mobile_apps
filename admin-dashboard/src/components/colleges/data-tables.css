@@ -263,3 +263,51 @@
     color: #000 !important;
   }
 }
+
+/* Nested record in a table cell (e.g. previous education): label / value rows. */
+.edu-table td.edu-kv-cell {
+  min-width: 240px;
+  vertical-align: top !important;
+}
+.edu-table .edu-kv,
+.edu-special .edu-kv {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 3px 10px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.edu-table .edu-kv > div,
+.edu-special .edu-kv > div {
+  display: contents;
+}
+.edu-table .edu-kv dt,
+.edu-special .edu-kv dt {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  color: #7a6a58;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* "Board       : SSC" — the colons line up because every label cell has the same width. */
+.edu-table .edu-kv dt::after,
+.edu-special .edu-kv dt::after {
+  content: ":";
+  color: #7a6a58;
+}
+.edu-table .edu-kv dd,
+.edu-special .edu-kv dd {
+  margin: 0;
+  color: #29231d;
+  overflow-wrap: anywhere;
+}
+
+/* Account / role / form cards: the detail list sits under the title, above the actions. */
+.edu-special .edu-kv {
+  margin: 10px 0 14px;
+  font-size: 13px;
+  gap: 5px 12px;
+}
