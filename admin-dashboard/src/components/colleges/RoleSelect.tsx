@@ -10,11 +10,13 @@ export default function RoleSelect({
   value,
   onChange,
   placeholder = "Loading roles…",
+  disabled = false,
 }: {
   options: Option[];
   value: string;
   onChange: (code: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -40,7 +42,7 @@ export default function RoleSelect({
   }, [open, active]);
 
   const show = () => {
-    if (!options.length) return;
+    if (disabled || !options.length) return;
     setActive(
       Math.max(
         0,
@@ -65,7 +67,7 @@ export default function RoleSelect({
         aria-expanded={open}
         aria-controls={id}
         aria-activedescendant={open ? `${id}-${active}` : undefined}
-        disabled={!options.length}
+        disabled={disabled || !options.length}
         onClick={() => (open ? setOpen(false) : show())}
         onKeyDown={(e) => {
           if (!open) {

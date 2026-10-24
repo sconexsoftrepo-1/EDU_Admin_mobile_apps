@@ -118,19 +118,22 @@ export default function ConnectedPortal({
   parts,
   embedded = false,
   loginRedirect = false,
+  loginError,
   openPrimaryForm = false,
 }: {
   college: College;
   parts: string[];
   embedded?: boolean;
   loginRedirect?: boolean;
+  /** Show access failures in the sign-in form without restoring the rejected workspace. */
+  loginError?: string;
   /** Open the screen's data-entry form as soon as it is available (e.g. from "Manage …"). */
   openPrimaryForm?: boolean;
 }) {
   const shared = useOptionalCollege();
-  const sessionAccount = shared?.account || null;
-  const sessionRole = shared?.activeRole || null;
-  const sessionScreens = shared?.assignedScreens;
+  const sessionAccount = loginError ? null : shared?.account || null;
+  const sessionRole = loginError ? null : shared?.activeRole || null;
+  const sessionScreens = loginError ? undefined : shared?.assignedScreens;
   const router = useRouter();
   const initialSelection =
     parts.length > 2 ? parts.at(-1) || "dashboard" : "dashboard";
@@ -159,8 +162,8 @@ export default function ConnectedPortal({
     [total, setTotal] = useState(cachedInitial?.records.total || 0),
     [actions, setActions] = useState<Action[]>([]),
     [summary, setSummary] = useState<Row | null>(cachedInitial?.totals || null),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(!cachedInitial),
+    [error, setError] = useState(loginError || ""),
+    [busy, setBusy] = useState(!loginError && !cachedInitial),
     [filter, setFilter] = useState(""),
     [dialog, setDialog] = useState<{
       title: string;
@@ -168,11 +171,12 @@ export default function ConnectedPortal({
       initial?: Row;
       save: (r: Row) => Promise<void>;
     } | null>(null);
-  useErrorToast(error);
+  useErrorToast(loginRedirect ? "" : error);
   const [special, setSpecial] = useState<Row[]>(cachedInitial?.extra || []);
   const [signInRoles, setSignInRoles] = useState<SignInRole[]>([]),
     [signInRole, setSignInRole] = useState(""),
-    [showPassword, setShowPassword] = useState(false);
+    [showPassword, setShowPassword] = useState(false),
+    [signingIn, setSigningIn] = useState(false);
   const [configuration, setConfiguration] = useState<{
     kind: "role" | "form" | "account";
     initial?: Row;
@@ -252,6 +256,22 @@ export default function ConnectedPortal({
   }, []);
   const initialize = useCallback(
     async (person: Account, preferred: string) => {
+      const active = activeRoleRef.current;
+      const personal =
+        ["student", "parent"].includes(String(person.person_type)) ||
+        ["teaching", "self"].includes(String(person.workspace_scope));
+      const availableScreens = roleScreens(
+        sessionScreens || SCREEN_CATALOG,
+        active,
+      );
+      if (!active)
+        throw Error(
+          "No role has been assigned to this account. Contact your college administrator.",
+        );
+      if (!personal && availableScreens.length === 0)
+        throw Error(
+          "This role has no workspace access. Contact your college administrator or choose another assigned role.",
+        );
       identityRef.current = person.code;
       setDisplayRole(activeRoleRef.current);
       setAccount(person);
@@ -276,9 +296,7 @@ export default function ConnectedPortal({
       }
       // The screen catalog ships with the dashboard; the role decides which screens appear.
       const navigation = {
-        screens: sessionScreens
-          ? roleScreens(sessionScreens, activeRoleRef.current)
-          : roleScreens(SCREEN_CATALOG, activeRoleRef.current),
+        screens: availableScreens,
       };
       setScreens(navigation.screens);
       if (loginRedirect && activeRoleRef.current) {
@@ -312,9 +330,18 @@ export default function ConnectedPortal({
     [load, loginRedirect, college, sessionScreens],
   );
   /** Enter the workspace; `known` is the account and roles the login response already gave. */
-  async function start(known?: MeResponse) {
+  async function start(known?: MeResponse, requestedRole?: string) {
     const me = known || (await api.auth.me());
-    const active = selectedRole(me);
+    const active = requestedRole
+      ? me.roles.find((role) => role.code === requestedRole) || null
+      : selectedRole(me);
+    if (!active)
+      throw Error(
+        requestedRole
+          ? "Your account is not assigned to the selected role. Choose your assigned role and try again."
+          : "No role has been assigned to this account. Contact your college administrator.",
+      );
+    rememberRole(me.account.code, active.code);
     activeRoleRef.current = active;
     await initialize(
       {
@@ -325,6 +352,7 @@ export default function ConnectedPortal({
     );
   }
   useEffect(() => {
+    if (loginError) return;
     let active = true;
     const initializeSession = async () => {
       if (sessionAccount && sessionRole) {
@@ -348,6 +376,8 @@ export default function ConnectedPortal({
       .then(initializeSession)
       .catch((e) => {
         if (active) {
+          setAccount(null);
+          setLanding("");
           setBusy(false);
           // No session yet is the normal state of the sign-in page, not an error.
           if (!(e instanceof ApiError && e.status === 401))
@@ -357,7 +387,7 @@ export default function ConnectedPortal({
     return () => {
       active = false;
     };
-  }, [initialize, initialSelection, sessionAccount, sessionRole]);
+  }, [initialize, initialSelection, sessionAccount, sessionRole, loginError]);
   useEffect(() => {
     if (!account || loginRedirect) return;
     const revalidate = () => {
@@ -387,24 +417,35 @@ export default function ConnectedPortal({
   }, [account]);
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setBusy(true);
+    if (signingIn) return;
+    setSigningIn(true);
     setError("");
     const form = new FormData(event.currentTarget);
     try {
       const signedIn = await api.auth.login({
-        login_id: String(form.get("login")),
+        login_id: String(form.get("login")).trim(),
         password: String(form.get("password")),
         ...(signInRole ? { role_code: signInRole } : {}),
       });
-      if (signInRole) rememberRole(signedIn.account.code, signInRole);
       await start(
         signedIn.roles
           ? { account: signedIn.account, roles: signedIn.roles }
           : undefined,
+        signInRole || undefined,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Sign in failed");
+      setAccount(null);
+      setLanding("");
+      setError(
+        e instanceof ApiError && e.status === 401
+          ? "Login ID or password is incorrect. Please try again."
+          : e instanceof ApiError && e.status === 403
+            ? "Your account does not have access to the selected role. Choose your assigned role and try again."
+            : errorText(e),
+      );
       setBusy(false);
+    } finally {
+      setSigningIn(false);
     }
   }
   async function refreshResource(r: Resource, offset = 0) {
@@ -645,24 +686,36 @@ export default function ConnectedPortal({
               <p>Sign in to your campus workspace.</p>
             </div>
           </div>
-          <form onSubmit={login}>
+          <form onSubmit={login} aria-busy={signingIn}>
             <div className="role-select-field">
               <span>Role</span>
               <RoleSelect
                 options={signInRoles}
                 value={signInRole}
-                onChange={setSignInRole}
+                disabled={signingIn}
+                onChange={(value) => {
+                  setSignInRole(value);
+                  setError("");
+                }}
               />
             </div>
             <label>
               Login ID
-              <input name="login" autoComplete="username" required />
+              <input
+                name="login"
+                autoComplete="username"
+                required
+                disabled={signingIn}
+                aria-describedby={error ? "sign-in-error" : undefined}
+              />
             </label>
             <label>
               Password
               <div className="erp-password">
                 <input
                   name="password"
+                  disabled={signingIn}
+                  aria-describedby={error ? "sign-in-error" : undefined}
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
@@ -677,12 +730,12 @@ export default function ConnectedPortal({
               </div>
             </label>
             {error && (
-              <p role="alert" className="edu-error">
+              <p id="sign-in-error" role="alert" className="edu-error">
                 {error}
               </p>
             )}
-            <button className="college-button" disabled={busy}>
-              {busy ? "Connecting…" : "Sign in"} <ArrowRight size={17} />
+            <button className="college-button" disabled={signingIn}>
+              {signingIn ? "Signing in…" : "Sign in"} <ArrowRight size={17} />
             </button>
           </form>
           <div className="college-demo-note">
