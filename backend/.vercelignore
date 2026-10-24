@@ -13,3 +13,6 @@ __pycache__/
 .ruff_cache/
 requirements-dev.txt
 requirements.lock
+
+# Source credentials, migration snapshots and encryption keys stay local.
+.migration-target/

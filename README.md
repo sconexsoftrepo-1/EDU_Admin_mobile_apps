@@ -1,9 +1,9 @@
 # EduNexa College development package
 
 - `admin-dashboard/`: complete copied Next.js template source and assets, including the public EduNexa website, ERP/admin dashboard and existing mobile web previews. Root opens EduNexa. Other showcase source is retained for shared dependencies.
-- `backend/`: intentionally empty, reserved for Python development.
+- `backend/`: FastAPI backend with SQL Server persistence selected by its local `.env`. See `backend/README.md` for runtime and migration details.
 - `mobile-apps/admin & teachers/`: Admin & Teachers Flutter app. `mobile-apps/parent & student mobile app/`: Parents & Students Flutter app. Both use role toggles at login, role-specific dashboards and their own authenticated API clients. See `mobile-apps/README.md`.
-- `database/edunexa_schema_postgresql.sql`: the complete PostgreSQL schema (145 tables, keys, constraints, indexes, triggers and views) used by the backend on Supabase.
+- `database/edunexa_schema_postgresql.sql`: the complete PostgreSQL schema (145 tables, keys, constraints, indexes, triggers and views) retained as the PostgreSQL migration source schema.
 - `database/edunexa_schema_mysql.sql`: the same schema for MySQL 8.
 - `client-data/initial-data-entry/`: 13 separate professional Excel collection files, with detailed fields, instructions and examples. A client-ready ZIP is in client-data/.
 - `client-data/initial-data-entry/import-contract-v2.json`: expanded collection field contract and validation rules for future Python import development. Schema migrations and explicit field projections are still required.

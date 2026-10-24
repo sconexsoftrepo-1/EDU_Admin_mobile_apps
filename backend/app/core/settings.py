@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     access_minutes: int = Field(default=10, ge=1, le=30)
     refresh_days: int = Field(default=7, ge=1, le=30)
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3012"]
-    # "postgres" uses EDUNEXA_DB_* (see app/core/database.py); "local-json" keeps data in data_dir.
-    storage_backend: Literal["local-json", "postgres"] = "local-json"
+    # postgres uses EDUNEXA_DB_*; sqlserver uses EDUNEXA_MSSQL_*; local-json is offline storage.
+    storage_backend: Literal["local-json", "postgres", "sqlserver"] = "local-json"
     public_portal_url: str = "http://localhost:3000"
     # Private files: "local" = <data_dir>/files; "supabase" = a private Supabase Storage bucket.
     file_storage: Literal["local", "supabase"] = "local"
@@ -44,9 +44,9 @@ class Settings(BaseSettings):
         if self.file_storage == "supabase" and not (self.supabase_url and self.supabase_service_role_key):
             raise ValueError("EDUNEXA_FILE_STORAGE=supabase needs EDUNEXA_SUPABASE_URL and EDUNEXA_SUPABASE_SERVICE_ROLE_KEY")
         if os.environ.get("VERCEL"):
-            # Serverless: nothing on local disk survives. Records must be in PostgreSQL; files and
+            # Serverless: nothing on local disk survives. Records must be in remote SQL storage; files and
             # the signing key are optional at start-up (their endpoints answer 503 until configured).
-            if self.storage_backend != "postgres":
-                raise ValueError("Vercel deployment needs EDUNEXA_STORAGE_BACKEND=postgres")
+            if self.storage_backend not in {"postgres", "sqlserver"}:
+                raise ValueError("Vercel deployment needs EDUNEXA_STORAGE_BACKEND=postgres or sqlserver")
             if not str(self.data_dir).startswith("/tmp"):
                 self.data_dir = Path("/tmp/edunexa")  # e.g. a local path copied from .env
