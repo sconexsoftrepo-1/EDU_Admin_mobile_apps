@@ -108,7 +108,7 @@ REFERENCED_BY_SQL = None
 
 
 def query_list(data):
-    return sql.fetch_all(data, TABLE, LIST_SQL)
+    return [row for row in sql.fetch_all(data, TABLE, LIST_SQL) if not row.get("deleted_at")]
 
 
 def query_get(data, code):
@@ -194,5 +194,5 @@ def update_record(
 @router.delete("/{code}", status_code=204)
 def delete_record(code: str, request: Request, user=Depends(require(TABLE, "delete"))):
     staff_only(user)
-    with request.app.state.store.transaction() as data:
-        service.delete(data, code, user["code"])
+    from app.modules.documents.files.api import delete_file
+    delete_file("document", code, request, user)

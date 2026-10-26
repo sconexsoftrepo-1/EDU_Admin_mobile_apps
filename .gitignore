@@ -9,3 +9,4 @@
 **/*.tsbuildinfo
 **/.env
 **/.env.local
+/mock_logins.txt

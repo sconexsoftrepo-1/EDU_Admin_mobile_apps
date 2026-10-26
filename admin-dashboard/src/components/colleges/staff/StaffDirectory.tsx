@@ -1,4 +1,5 @@
 "use client";
+import PersonFiles from "../PersonFiles";
 import { useErrorToast } from "../toast";
 /** Staff table of one kind (teaching, non-teaching or daily labour) with search. */
 import { useEffect, useState } from "react";
@@ -83,6 +84,7 @@ export default function StaffDirectory({
   onRefresh: () => void;
   onAdd: () => void;
 }) {
+  const [fileOwner, setFileOwner] = useState<string | null>(null);
   const [rows, setRows] = useState<StaffRow[] | null>(null);
   const [error, setError] = useState("");
   useErrorToast(error);
@@ -200,6 +202,7 @@ export default function StaffDirectory({
                   </th>
                 ))}
                 {kind !== "labour" && <th>Documents</th>}
+                <th>Files</th>
               </tr>
             </thead>
             <tbody>
@@ -231,6 +234,14 @@ export default function StaffDirectory({
                       </span>
                     </td>
                   )}
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => setFileOwner(r.employee_id)}
+                    >
+                      Files
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -244,6 +255,13 @@ export default function StaffDirectory({
           )}
         </div>
       </div>
+      {fileOwner && (
+        <PersonFiles
+          personKind="employee"
+          personCode={fileOwner}
+          onClose={() => setFileOwner(null)}
+        />
+      )}
     </section>
   );
 }

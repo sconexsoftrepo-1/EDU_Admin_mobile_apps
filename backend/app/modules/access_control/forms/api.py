@@ -1,4 +1,4 @@
-from app.modules.mobile.workspace.api import ACTION_FIELDS
+from app.modules.mobile.workspace.api import FORM_ACTIONS
 
 
 class Repository:
@@ -142,7 +142,7 @@ def detail(code: str, request: Request, user=Depends(require("forms", "view"))):
 @router.post("", status_code=201)
 def create(body: FormInput, request: Request, user=Depends(require("forms", "create"))):
     if body.screen not in request.app.state.catalog and body.screen not in {
-        "mobile." + a for a in ACTION_FIELDS
+        "mobile." + a for a in FORM_ACTIONS
     }:
         raise HTTPException(422, "Unknown screen binding")
     with request.app.state.store.transaction() as data:
@@ -154,7 +154,7 @@ def update(
     code: str, body: FormInput, request: Request, user=Depends(require("forms", "edit"))
 ):
     if body.screen not in request.app.state.catalog and body.screen not in {
-        "mobile." + a for a in ACTION_FIELDS
+        "mobile." + a for a in FORM_ACTIONS
     }:
         raise HTTPException(422, "Unknown screen binding")
     with request.app.state.store.transaction() as data:

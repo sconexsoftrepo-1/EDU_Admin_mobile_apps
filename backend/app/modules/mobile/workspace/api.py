@@ -28,6 +28,7 @@ SCREENS = {
         ("employees", "Employees", "employees"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
+        ("announcements", "Announcements", "announcements"),
         ("notifications", "Notifications", "notifications"),
         ("profile", "My profile", "profile"),
     ],
@@ -256,6 +257,16 @@ def contacts(data, user, context):
 
 
 ACTION_FIELDS = {
+    "send_alert": [field("recipient_user_code", "Recipient"), field("title", "Title"),
+                   field("body", "Alert message", "textarea"), field("push", "Also send a push notification", "boolean", False)],
+    "create_event": [
+        field("campus_code", "Campus"), field("title", "Event title"),
+        field("starts_at", "Starts", "datetime-local"), field("ends_at", "Ends", "datetime-local"),
+        field("event_type", "Event type", "select", True, ["holiday", "academic", "cultural", "sports", "meeting"]),
+    ],
+    "publish_announcement": [
+        field("campus_code", "Campus"), field("title", "Title"), field("body", "Announcement", "textarea"),
+    ],
     "make_payment": [
         field("charge_code", "Fee charge code"),
         field("amount", "Amount to pay", "number"),
@@ -365,6 +376,11 @@ ACTION_FIELDS = {
 }
 
 
+# Provider/security actions have fixed contracts; custom data belongs to business forms.
+FIXED_ACTIONS = {"make_payment", "change_password", "send_alert", "create_event", "publish_announcement", "read_notification"}
+FORM_ACTIONS = set(ACTION_FIELDS) - FIXED_ACTIONS
+
+
 def allowed_actions(screen, user):
     if screen == "profile":
         return ["change_password"]
@@ -392,7 +408,8 @@ def allowed_actions(screen, user):
         if screen == "assignments" and effective_client(user) == "student-mobile":
             result = ["submit_assignment"]
         return result
-    return []
+    return {"notifications": ["read_notification", "send_alert"], "calendar": ["create_event"],
+            "announcements": ["publish_announcement"]}.get(screen, [])
 
 
 @router.get("/screens")
@@ -425,6 +442,8 @@ def screen_data(
     screen: str,
     request: Request,
     student_code: str | None = None,
+    from_date: date | None = None,
+    to_date: date | None = None,
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     user=Depends(current_user),
@@ -459,7 +478,9 @@ def screen_data(
         elif table == "audit":
             items = data["audit"][::-1]
         elif table == "profile":
-            items = [{k: v for k, v in user.items() if k != "session_code"}]
+            items = [data["records"].get("employees", {}).get(user["person_code"], {})]
+        elif table == "notifications":
+            items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
         elif screen == "dues":
             for student in query_rows(data, "students"):
                 ledger = calculate_ledger(data, student["code"])
@@ -645,18 +666,34 @@ def screen_data(
             }
             for item in items
         ]
+    if table == "calendar_events":
+        if from_date and to_date and (to_date < from_date or (to_date - from_date).days > 366):
+            raise HTTPException(422, "Choose a calendar range of up to one year")
+        items = [r for r in items
+                 if (not from_date or datetime.fromisoformat(r["ends_at"]).date() >= from_date)
+                 and (not to_date or datetime.fromisoformat(r["starts_at"]).date() <= to_date)]
+        items.sort(key=lambda r: r["starts_at"])
+    elif table in {"notifications", "announcements", "messages", "payments", "student_leave_requests", "leave_requests"}:
+        items.sort(key=lambda r: str(r.get("sent_at") or r.get("published_at") or r.get("paid_on") or r.get("requested_at") or r.get("start_date") or ""), reverse=True)
     for index, item in enumerate(items):
-        offering = (
-            data["records"].get("subject_offerings", {}).get(item.get("offering_code"))
-        )
+        offering_code = item.get("offering_code")
+        if table == "subject_offerings":
+            offering_code = item["code"]
+        if item.get("session_code"):
+            session = data["records"].get("attendance_sessions", {}).get(item["session_code"], {})
+            offering_code = session.get("offering_code")
+            item = {**item, "session_date": session.get("session_date")}
+        if item.get("paper_code"):
+            paper = data["records"].get("exam_papers", {}).get(item["paper_code"], {})
+            offering_code = paper.get("offering_code")
+        offering = data["records"].get("subject_offerings", {}).get(offering_code) if offering_code else None
         if offering:
-            subject = (
-                data["records"].get("subjects", {}).get(offering["subject_code"], {})
-            )
-            items[index] = {
-                **item,
-                "subject": subject.get("name", offering["subject_code"]),
-            }
+            subject = data["records"].get("subjects", {}).get(offering["subject_code"], {})
+            item = {**item, "subject": subject.get("name", offering["subject_code"])}
+        if item.get("student_code"):
+            pupil = data["records"].get("students", {}).get(item["student_code"], {})
+            item = {**item, "student_name": (pupil.get("first_name", "") + " " + pupil.get("last_name", "")).strip()}
+        items[index] = item
     actions = [
         {
             "key": a,
@@ -664,8 +701,15 @@ def screen_data(
             "fields": copy.deepcopy(ACTION_FIELDS[a]),
         }
         for a in allowed_actions(screen, user)
+        if a not in {"create_event", "publish_announcement", "send_alert"}
+        or has_permission(data, user, {"create_event": "calendar_events", "publish_announcement": "announcements", "send_alert": "notifications"}[a], "create")
     ]
+    def named(rows, name):
+        return [{"code": r["code"], "name": name(r)} for r in rows]
+
     for action in actions:
+        if action["key"] in FIXED_ACTIONS:
+            continue
         form = next(
             (
                 f
@@ -684,6 +728,16 @@ def screen_data(
                 else:
                     action["fields"].append(custom)
             action["form_revision"] = form["revision"]
+    # Every form receives only records the current identity can act on.
+    needed = {f["key"] for action in actions for f in action["fields"]}
+    assignments = [r for r in query_rows(data, "assignments") if r["offering_code"] in offerings] if needed & {"assignment_code", "submission_code"} else []
+    assignment_codes = {r["code"] for r in assignments}
+    submissions = [r for r in query_rows(data, "assignment_submissions")
+                   if r["assignment_code"] in assignment_codes and (teacher or r["student_code"] == selected)] if "submission_code" in needed else []
+    sessions = [r for r in query_rows(data, "attendance_sessions") if r["offering_code"] in offerings] if "session_code" in needed else []
+    papers = [r for r in query_rows(data, "exam_papers") if r["offering_code"] in offerings] if "paper_code" in needed else []
+    slots = [r for r in query_rows(data, "timetable_slots") if r["offering_code"] in offerings] if "slot_code" in needed else []
+    own_threads = {r["thread_code"] for r in query_rows(data, "thread_members") if r["user_code"] == user["code"]} if "thread_code" in needed else set()
     return {
         "screen": screen,
         "title": title,
@@ -697,9 +751,9 @@ def screen_data(
             if r["code"] in context["children"]
         ],
         "lookups": {
-            "contacts": contacts(data, user, context),
+            "contacts": named([a for a in data["accounts"].values() if a["active"]], lambda a: a["login_id"]) if admin and has_permission(data, user, "notifications", "create") else contacts(data, user, context),
             "offerings": [
-                clean(r)
+                {**clean(r), "name": data["records"].get("subjects", {}).get(r["subject_code"], {}).get("name", r["subject_code"]) + " / " + r["section_code"]}
                 for r in query_rows(data, "subject_offerings")
                 if r["code"] in offerings
             ],
@@ -708,8 +762,20 @@ def screen_data(
                 for r in query_rows(data, "students")
                 if r["code"] in context["class_students"]
             ],
-            "leave_types": query_rows(data, "leave_types"),
-            "certificate_types": query_rows(data, "certificate_types"),
+            "leave_types": query_rows(data, "leave_types") if "leave_type_code" in needed else [],
+            "certificate_types": query_rows(data, "certificate_types") if "type_code" in needed else [],
+            "campuses": named(query_rows(data, "campuses") if admin else [], lambda r: r.get("name", r["code"])),
+            "charges": named(items if screen == "fees" else [], lambda r: r.get("description", r.get("fee_head", r["code"])) + " — " + str(r.get("outstanding", ""))),
+            "assignments": named(assignments, lambda r: r["title"]),
+            "submissions": named(submissions, lambda r: r["student_code"] + " / " + r["assignment_code"]),
+            "sessions": named(sessions, lambda r: r.get("session_date", r["code"]) + " / " + r["offering_code"]),
+            "papers": named(papers, lambda r: r.get("title", r.get("name", r["code"]))),
+            "slots": named(slots, lambda r: r["offering_code"] + " / " + str(r.get("weekday", "")) + " / " + r.get("start_time", "")),
+            "swap_slots": named([r for r in query_rows(data, "timetable_slots")
+                                 if r["offering_code"] in {o["code"] for o in query_rows(data, "subject_offerings")
+                                                         if o["section_code"] in context["sections"]}] if "target_slot_code" in needed else [],
+                                lambda r: r["offering_code"] + " / " + str(r.get("weekday", "")) + " / " + r.get("start_time", "")),
+            "threads": named([r for r in query_rows(data, "message_threads") if r["code"] in own_threads] if "thread_code" in needed else [], lambda r: r["subject"]),
         },
         "selected_student_code": selected,
         "downloads": {
@@ -745,6 +811,8 @@ def mobile_action(
         ),
         None,
     )
+    if action in FIXED_ACTIONS:
+        bound = None
     if (
         set(body.values)
         - allowed
@@ -763,6 +831,15 @@ def mobile_action(
                 raise HTTPException(422, "Invalid numeric value")
         if f["required"] and body.values.get(f["key"]) in (None, ""):
             raise HTTPException(422, f"{f['label']} is required")
+    if action == "send_alert":
+        from app.core.push_api import AlertInput, send_alert
+        if not has_permission(request.app.state.store.snapshot(), user, "notifications", "create"):
+            raise HTTPException(403, "Create permission denied")
+        try:
+            alert = AlertInput(**body.values)
+        except ValueError:
+            raise HTTPException(422, "Invalid alert details")
+        return send_alert(alert, request, user)
     if action == "make_payment":
         from app.core.integrations_api import OrderInput, order
 
@@ -781,6 +858,26 @@ def mobile_action(
             raise HTTPException(422, "Invalid payment amount")
         return order(request, payment, user)
     with request.app.state.store.transaction() as data:
+        if action in {"create_event", "publish_announcement"}:
+            table = "calendar_events" if action == "create_event" else "announcements"
+            if not has_permission(data, user, table, "create"):
+                raise HTTPException(403, "Create permission denied")
+            record = {k: value for k, value in body.values.items() if k in allowed}
+            record["code"] = new_code("MOB")
+            if action == "publish_announcement":
+                record["published_at"] = now()
+                record["author_code"] = user["person_code"]
+            else:
+                try:
+                    if datetime.fromisoformat(record["ends_at"]) <= datetime.fromisoformat(record["starts_at"]):
+                        raise ValueError()
+                except (ValueError, TypeError):
+                    raise HTTPException(422, "Event end must be after its start")
+            record = validate_record(table, record)
+            ensure_references(data, table, record)
+            query_save(data, table, record)
+            audit(data, user["code"], action, table, record["code"])
+            return {"record": clean(record)}
         if action == "change_password":
             from app.core.security import check_password, hasher, revoke_user
 

@@ -31,10 +31,12 @@ export type DownloadKind =
   | "certificate"
   | "receipt"
   | "admission-document"
-  | "document";
+  | "document"
+  | "import-workbook";
 
 /** Table name -> download kind, for the Download button on record screens. */
 export const DOWNLOAD_KIND_BY_TABLE: Record<string, DownloadKind> = {
+  import_jobs: "import-workbook",
   payslips: "payslip",
   employee_tax_documents: "tax-document",
   certificates: "certificate",

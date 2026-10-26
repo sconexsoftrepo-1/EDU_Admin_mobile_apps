@@ -165,3 +165,11 @@ signing key in an environment variable. It refuses to start on Vercel without th
 Limits to know: request and response bodies are capped at 4.5 MB by Vercel (uploads here are at
 most 650 KB), and each request may run up to 60 s (`maxDuration` in `vercel.json`).
 
+
+## Private S3 uploads
+
+See [S3 storage setup and file APIs](docs/S3_STORAGE.md) for the `Admin_Uploads` folder layout,
+file inventory schema, deployment configuration, permissions, and upload/view/delete endpoints.
+
+The [upload field and database map](docs/UPLOAD_DATABASE_AND_S3_MAP.md) lists connected upload controls,
+legacy preview exceptions, database tables/columns, S3 folder rules, and SQL examples.

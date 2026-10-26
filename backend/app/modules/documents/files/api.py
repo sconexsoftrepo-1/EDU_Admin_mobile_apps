@@ -6,6 +6,10 @@ import hashlib
 import io
 import os
 import secrets
+import re
+import logging
+from contextlib import contextmanager
+from urllib.parse import quote
 from datetime import date
 from pathlib import Path
 
@@ -104,9 +108,68 @@ def permitted_person(data, user, kind, code):
     )
 
 
-def file_store(request):
-    """Private file storage (local folder or Supabase Storage; see app/core/files.py)."""
+def file_store(request, record=None):
+    """Resolve recorded providers and preserve reads of legacy files still on local disk."""
+    if record:
+        from app.core.files import LocalFiles, S3Files, SupabaseFiles
+        settings = request.app.state.settings
+        provider = record.get("storage_provider")
+        local = LocalFiles(settings.data_dir / "files")
+        if provider == "local" or (not provider and record.get("storage_key") and local.get(record["storage_key"]) is not None):
+            return local
+        if provider == "s3" and settings.file_storage != "s3":
+            return S3Files(settings)
+        if provider == "supabase" and settings.file_storage != "supabase":
+            if not settings.supabase_url or not settings.supabase_service_role_key:
+                raise HTTPException(503, "The original Supabase file storage needs configuration")
+            return SupabaseFiles(settings.supabase_url, settings.supabase_service_role_key.get_secret_value(), settings.supabase_bucket)
     return request.app.state.files
+
+
+@contextmanager
+def file_transaction(request):
+    """Remove newly written objects if the database transaction rolls back."""
+    pending = []
+    try:
+        with request.app.state.store.transaction() as data:
+            yield data, pending
+    except Exception:
+        for key in pending:
+            try:
+                file_store(request).delete(key)
+            except Exception:
+                logging.getLogger(__name__).error("Could not remove an uncommitted uploaded object")
+        raise
+
+
+def folder_segment(value):
+    # Retain recognizable IDs and append a digest when normalization changes one.
+    value = str(value)
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", value).replace("..", "_")[:60].strip(".")
+    return (safe or "record") + ("-" + hashlib.sha256(value.encode()).hexdigest()[:10] if safe != value else "")
+
+
+def person_folder(data, kind, code):
+    if kind == "admission_document":
+        person = query_get(data, "admission_applications", code)
+        category, identifier = "Applications", person.get("application_number") or code
+    elif kind == "student_document":
+        person = query_get(data, "students", code)
+        category, identifier = "Students", person.get("admission_number") or code
+    else:
+        person = query_get(data, "employees", code)
+        category = {"teacher": "Teaching_Staff", "staff": "Non_Teaching_Staff", "labour": "Labour"}.get(person.get("employee_type"), "Employees")
+        identifier = person.get("employee_number") or code
+    return f"{category}/{folder_segment(identifier)}/{folder_segment(code)}"
+
+
+def file_metadata(request, key, filename, mime, raw, kind, code):
+    path = f"/api/v1/documents/{kind}/{code}/view"
+    return {"original_filename": Path(filename.replace("\\", "/")).name,
+            "mime_type": mime, "size_bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest(),
+            "document_url": path, "uploaded_at": now(),
+            **(file_store(request).metadata(key) if hasattr(file_store(request), "metadata")
+               else {"storage_provider": request.app.state.settings.file_storage})}
 
 
 class UploadInput(StrictModel):
@@ -164,7 +227,8 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
         )
     key = new_code("FILE")
     sha = hashlib.sha256(raw).hexdigest()
-    with request.app.state.store.transaction() as data:
+    with file_transaction(request) as (data, pending):
+        key = person_folder(data, body.kind, body.person_code) + "/" + folder_segment(body.document_label or body.kind) + "/" + key + {"application/pdf": ".pdf", "image/png": ".png", "image/jpeg": ".jpg"}[mime]
         if table == "employee_tax_documents":
             query_get(data, "employees", body.person_code)
             revision = 1 + max(
@@ -238,9 +302,24 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
                 mark_admission_document(data, body.person_code, body.document_label, record, key)
             if person == "employees" and body.document_label:
                 mark_employee_document(data, body.person_code, body.document_label, record)
+        download_kind = {"documents": "document", "admission_documents": "admission-document", "employee_tax_documents": "tax-document"}[table]
+        record.update(file_metadata(request, key, body.filename, mime, raw, download_kind, record["code"]))
+        record["uploaded_by_user_code"] = user["code"]
+        if body.kind in {"student_document", "employee_document"} and body.document_label in {"student_photo", "employee_photo", "profile_photo", "staff_photo"} and mime.startswith("image/"):
+            person_table = "students" if body.kind == "student_document" else "employees"
+            person = query_get(data, person_table, body.person_code)
+            person["profile_photo_url"] = record["document_url"]
+            person["profile_photo_storage_key"] = key
         # File key is server generated; user filenames never become storage paths.
+        pending.append(key)
         file_store(request).put(key, raw, mime)
         query_save(data, table, record)
+        query_save(data, "file_storage_objects", {
+            **{k: record[k] for k in ("original_filename", "mime_type", "size_bytes", "sha256", "document_url", "uploaded_at", "storage_provider")},
+            **{k: record.get(k) for k in ("s3_bucket", "s3_key", "s3_uri")},
+            "code": record["code"], "owner_type": "application" if body.kind == "admission_document" else "student" if body.kind == "student_document" else "employee",
+            "owner_code": body.person_code, "document_table": table, "document_code": record["code"],
+            "storage_key": key, "uploaded_by_user_code": user["code"], "deleted_at": None})
         audit(data, user["code"], "upload", table, record["code"])
         return {k: v for k, v in record.items() if k != "storage_key"}
 
@@ -274,7 +353,7 @@ def signing_key(request):
 
 @router.post("/certificates/issue", status_code=201)
 def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
-    with request.app.state.store.transaction() as data:
+    with file_transaction(request) as (data, pending):
         if user["person_type"] not in {"employee", "system"} or not has_permission(
             data, user, "certificates", "approve"
         ):
@@ -319,7 +398,8 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
                 serialization.Encoding.Raw, serialization.PublicFormat.Raw
             )
         ).decode()
-        storage = new_code("CERT-FILE")
+        storage = person_folder(data, "student_document", student["code"]) + "/Certificates/" + new_code("CERT-FILE") + ".pdf"
+        pending.append(storage)
         file_store(request).put(storage, raw, "application/pdf")
         record = query_save(
             data,
@@ -332,10 +412,15 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
                 "issued_by_code": user["person_code"],
                 "verification_token": token,
                 "storage_key": storage,
-                "document_url": "",
+                **file_metadata(request, storage, code + ".pdf", "application/pdf", raw, "certificate", code),
                 "revoked_on": None,
             },
         )
+        query_save(data, "file_storage_objects", {
+            **file_metadata(request, storage, code + ".pdf", "application/pdf", raw, "certificate", code),
+            "code": code, "owner_type": "student", "owner_code": student["code"],
+            "document_table": "certificates", "document_code": code, "storage_key": storage,
+            "uploaded_by_user_code": user["code"], "deleted_at": None})
         query_save(
             data,
             "certificate_signatures",
@@ -389,7 +474,7 @@ def verify(token: str, request: Request):
     valid = False
     if signature and not record.get("revoked_on") and not signature.get("revoked_at"):
         try:
-            raw = file_store(request).get(record.get("storage_key"))
+            raw = file_store(request, record).get(record.get("storage_key"))
             if raw is None:
                 raise ValueError("certificate file missing")
             Ed25519PublicKey.from_public_bytes(
@@ -408,7 +493,7 @@ def verify(token: str, request: Request):
 
 
 @router.get("/{kind}/{code}/download")
-def download(kind: str, code: str, request: Request, user=Depends(current_user)):
+def download(kind: str, code: str, request: Request, user=Depends(current_user), inline: bool = False):
     with request.app.state.store.transaction() as data:
         if kind == "payslip":
             slip = query_get(data, "payslips", code)
@@ -429,14 +514,17 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user))
                 ],
             )
             mime = "application/pdf"
-        elif kind in {"tax-document", "document", "admission-document", "certificate"}:
+        elif kind in {"tax-document", "document", "admission-document", "certificate", "import-workbook"}:
             table = {
                 "tax-document": "employee_tax_documents",
                 "document": "documents",
                 "admission-document": "admission_documents",
                 "certificate": "certificates",
+                "import-workbook": "import_jobs",
             }[kind]
             record = query_get(data, table, code)
+            if record.get("deleted_at"):
+                raise HTTPException(404, "Document was deleted")
             if kind == "certificate":
                 req = query_get(data, "certificate_requests", record["request_code"])
                 if record.get("revoked_on"):
@@ -446,7 +534,7 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user))
                 allowed = permitted_person(
                     data, user, "employee", record["employee_code"]
                 )
-            elif kind == "admission-document":
+            elif kind in {"admission-document", "import-workbook"}:
                 allowed = False
             else:
                 allowed = permitted_person(
@@ -460,7 +548,7 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user))
                 and has_permission(data, user, table, "view")
             ):
                 raise HTTPException(404, "Document not found")
-            raw = file_store(request).get(record.get("storage_key"))
+            raw = file_store(request, record).get(record.get("storage_key"))
             if raw is None:
                 raise HTTPException(404, "Document bytes are not available")
             mime = record.get("mime_type", "application/pdf")
@@ -502,7 +590,9 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user))
             raw,
             media_type=mime,
             headers={
-                "Content-Disposition": f'attachment; filename="{kind}-{code}.pdf"'
+                "Cache-Control": "private, no-store",
+                "X-Content-Type-Options": "nosniff",
+                "Content-Disposition": ("inline" if inline else "attachment") + "; filename*=UTF-8''" + quote(record.get("original_filename") or f"{kind}-{code}.pdf", safe="") if kind in {"tax-document", "document", "admission-document", "certificate", "import-workbook"} else f'attachment; filename="{kind}-{code}.pdf"'
             },
         )
 
@@ -529,3 +619,67 @@ def revoke(code: str, body: RevokeInput, request: Request, user=Depends(current_
                 signature["revoked_at"] = now()
         audit(data, user["code"], "revoke", "certificates", code)
         return {"code": code, "revoked": True}
+
+
+@router.get("/{kind}/{code}/view")
+def view(kind: str, code: str, request: Request, user=Depends(current_user)):
+    return download(kind, code, request, user, inline=True)
+
+
+@router.get("/files/{person_kind}/{person_code}")
+def list_files(person_kind: str, person_code: str, request: Request, user=Depends(current_user)):
+    table = {"student": "students", "employee": "employees", "application": "admission_applications"}.get(person_kind)
+    if not table:
+        raise HTTPException(404, "Unknown owner type")
+    data = request.app.state.store.snapshot()
+    query_get(data, table, person_code)
+    owner_field = {"student": "student_code", "employee": "employee_code", "application": "application_code"}[person_kind]
+    result = []
+    for documents, kind in [("documents", "document"), ("employee_tax_documents", "tax-document"), ("admission_documents", "admission-document")]:
+        allowed = (person_kind != "application" and permitted_person(data, user, person_kind, person_code)) or (user["person_type"] in {"employee", "system"} and has_permission(data, user, documents, "view"))
+        if allowed:
+            for row in query_rows(data, documents):
+                if row.get(owner_field) == person_code and not row.get("deleted_at"):
+                    result.append({**{k: v for k, v in row.items() if k != "storage_key"}, "download_kind": kind})
+    if person_kind == "student" and (permitted_person(data, user, "student", person_code) or (user["person_type"] in {"employee", "system"} and has_permission(data, user, "certificates", "view"))):
+        requests = {row["code"] for row in query_rows(data, "certificate_requests") if row.get("student_code") == person_code}
+        for row in query_rows(data, "certificates"):
+            if row.get("request_code") in requests:
+                result.append({**{k: v for k, v in row.items() if k not in {"storage_key", "verification_token"}}, "original_filename": row.get("original_filename") or row["code"] + ".pdf", "download_kind": "certificate"})
+    return {"items": result}
+
+
+@router.delete("/{kind}/{code}/file")
+def delete_file(kind: str, code: str, request: Request, user=Depends(current_user)):
+    table = {"document": "documents", "admission-document": "admission_documents", "tax-document": "employee_tax_documents", "import-workbook": "import_jobs"}.get(kind)
+    if not table:
+        raise HTTPException(409, "Retained generated document; revoke certificates instead")
+    with request.app.state.store.transaction() as data:
+        if user["person_type"] not in {"employee", "system"} or not has_permission(data, user, table, "delete"):
+            raise HTTPException(403, "Delete permission denied")
+        record = query_get(data, table, code)
+        # Keep metadata and references for audit; deny reads before removing bytes.
+        record["deleted_at"] = record.get("deleted_at") or now()
+        if table == "admission_documents":
+            record["is_current"] = False
+        key = record.get("storage_key")
+        inventory = data["records"].get("file_storage_objects", {}).get(code)
+        if inventory:
+            inventory["deleted_at"] = record["deleted_at"]
+        for profiles in ("student_admission_profiles", "employee_profiles"):
+            for profile in query_rows(data, profiles):
+                checklist = dict(profile.get("document_checklist") or {})
+                for label, entry in checklist.items():
+                    if entry.get("document_code") == code:
+                        checklist[label] = {**entry, "uploaded": False, "document_code": None}
+                profile["document_checklist"] = checklist
+        for people in ("students", "employees"):
+            owner = record.get("student_code" if people == "students" else "employee_code")
+            if owner:
+                person = query_get(data, people, owner)
+                if person.get("profile_photo_storage_key") == key:
+                    person.update(profile_photo_storage_key=None, profile_photo_url=None)
+        audit(data, user["code"], "delete_file", table, code)
+    if key:
+        file_store(request, record).delete(key)
+    return {"code": code, "deleted": True}

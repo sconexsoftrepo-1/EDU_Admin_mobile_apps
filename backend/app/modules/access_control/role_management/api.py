@@ -12,7 +12,7 @@ from app.core.security import (
 )
 from app.core.storage import audit, new_code
 from app.modules.administration.workspace.api import SCREENS as WORKSPACE_SCREENS
-from app.modules.mobile.workspace.api import ACTION_FIELDS
+from app.modules.mobile.workspace.api import FORM_ACTIONS
 
 router = APIRouter(prefix="/administration", tags=["Roles and accounts"])
 
@@ -40,7 +40,7 @@ def check_grant(data, actor, permissions):
 
 def validate_permissions(request, body, actor):
     screens = (
-        set(request.app.state.catalog) | {"mobile." + a for a in ACTION_FIELDS}
+        set(request.app.state.catalog) | {"mobile." + a for a in FORM_ACTIONS}
     ) | {
         "accounts",
         "roles",
@@ -60,7 +60,7 @@ def validate_permissions(request, body, actor):
 def screens(request: Request, user=Depends(require("roles", "view"))):
     return {
         "screens": sorted(
-            (set(request.app.state.catalog) | {"mobile." + a for a in ACTION_FIELDS})
+            (set(request.app.state.catalog) | {"mobile." + a for a in FORM_ACTIONS})
             | {"accounts", "roles", "forms", "reports", "audit", "mobile"}
         ),
         "actions": ["view", "create", "edit", "delete", "approve", "export"],

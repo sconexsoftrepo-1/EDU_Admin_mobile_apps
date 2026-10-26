@@ -12,3 +12,5 @@ pymssql>=2.3,<3
 filelock>=3.20,<4
 
 httpx>=0.27,<1
+
+boto3>=1.40,<2

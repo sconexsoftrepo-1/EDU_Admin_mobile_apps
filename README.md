@@ -2,7 +2,7 @@
 
 - `admin-dashboard/`: complete copied Next.js template source and assets, including the public EduNexa website, ERP/admin dashboard and existing mobile web previews. Root opens EduNexa. Other showcase source is retained for shared dependencies.
 - `backend/`: FastAPI backend with SQL Server persistence selected by its local `.env`. See `backend/README.md` for runtime and migration details.
-- `mobile-apps/admin & teachers/`: Admin & Teachers Flutter app. `mobile-apps/parent & student mobile app/`: Parents & Students Flutter app. Both use role toggles at login, role-specific dashboards and their own authenticated API clients. See `mobile-apps/README.md`.
+- `mobile-apps/admin_teachers/`: Admin & Teachers Flutter app. `mobile-apps/parent_student/`: Parents & Students Flutter app. Both use role toggles at login, role-specific dashboards and their own authenticated API clients. See `mobile-apps/README.md`.
 - `database/edunexa_schema_postgresql.sql`: the complete PostgreSQL schema (145 tables, keys, constraints, indexes, triggers and views) retained as the PostgreSQL migration source schema.
 - `database/edunexa_schema_mysql.sql`: the same schema for MySQL 8.
 - `client-data/initial-data-entry/`: 13 separate professional Excel collection files, with detailed fields, instructions and examples. A client-ready ZIP is in client-data/.
