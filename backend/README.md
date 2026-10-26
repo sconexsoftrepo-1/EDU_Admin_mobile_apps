@@ -173,3 +173,5 @@ file inventory schema, deployment configuration, permissions, and upload/view/de
 
 The [upload field and database map](docs/UPLOAD_DATABASE_AND_S3_MAP.md) lists connected upload controls,
 legacy preview exceptions, database tables/columns, S3 folder rules, and SQL examples.
+
+See [admission numbering](docs/ADMISSION_NUMBERS.md) for year/course/branch-based student IDs and the existing-student migration command.

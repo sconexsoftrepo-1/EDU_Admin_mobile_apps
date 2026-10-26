@@ -106,7 +106,8 @@ const subscribe = (l: () => void) => {
   return () => listeners.delete(l);
 };
 const snapshot = () => items;
-const serverSnapshot = (): ToastItem[] => [];
+const emptyServerSnapshot: ToastItem[] = [];
+const serverSnapshot = (): ToastItem[] => emptyServerSnapshot;
 
 const ICON = {
   success: CheckCircle2,

@@ -95,3 +95,30 @@ using it while the original files/credentials remain available. Legacy records w
 can still read an existing local file under `EDUNEXA_DATA_DIR/files` on that backend host.
 Legacy Supabase-only records need a provider backfill/migration before switching their deployment
 to S3; retain that deployment's original configuration until migrated.
+
+## Optional S3 CORS configuration
+
+The confirmed deployed frontend is `https://eduportal-beige.vercel.app`.
+
+- **AWS console:** open bucket `edu-admin-portal-file` → Permissions → Cross-origin resource
+  sharing (CORS) → Edit. Paste the complete JSON array from [`tools/s3-cors.json`](../tools/s3-cors.json)
+  and save. This is a bucket-level configuration, including the `Admin_Uploads/` prefix.
+- **AWS CLI:** use [`tools/s3-cors-cli.json`](../tools/s3-cors-cli.json), which wraps the same rules
+  in `CORSRules`. From `backend/`, with AWS credentials configured:
+
+```sh
+aws s3api put-bucket-cors --bucket edu-admin-portal-file --region ap-south-1 --cors-configuration file://tools/s3-cors-cli.json
+aws s3api get-bucket-cors --bucket edu-admin-portal-file --region ap-south-1
+```
+
+Both files include the deployed frontend, localhost/127.0.0.1 frontend ports 3000, 3010 and 3012,
+the configured backend origin `http://185.193.19.156:8010`, and local backend port 8010.
+Origins contain a scheme, host and port where applicable, without paths or trailing slashes.
+GET, HEAD, PUT, POST and DELETE are included; S3 handles preflight OPTIONS automatically.
+The two formats follow the [AWS S3 CORS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html).
+
+Creating these files does not apply the policy to AWS. Applying a CORS configuration replaces
+the bucket's existing CORS rules, so retain any rules for other applications using this bucket.
+CORS does not grant object access or make the bucket public. Existing dashboard uploads pass
+through the backend and do not require S3 CORS; these rules support browser-to-S3 requests when
+using an authorized S3 URL. Backend API CORS remains a separate `EDUNEXA_CORS_ORIGINS` setting.

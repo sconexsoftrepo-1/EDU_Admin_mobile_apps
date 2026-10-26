@@ -230,7 +230,6 @@ not `dbo`/`public`. Older files are not automatically backfilled into this new i
 - `backend/app/core/sql_store.py` and `sqlserver.py`: SQL records and `record_extras` persistence.
 - `database/sqlserver/012_file_storage_objects.sql`: SQL Server inventory DDL.
 - `database/file_storage_objects_postgresql.sql`: PostgreSQL inventory DDL.
-- `backend/tests/test_s3_files.py`: folder separation, metadata, private access, deletion, rollback.
 - `backend/tools/check_s3_storage.py`: live temporary-object upload/read/delete verification.
 
 The earlier live S3 health check succeeded and removed its test object. This confirms actual

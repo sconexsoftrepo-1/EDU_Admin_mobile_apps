@@ -21,6 +21,9 @@ export interface WizardCourse {
   code: string;
   name: string;
   branch?: string | null;
+  /** Stable branch identifier used in admission numbers. */
+  branch_code?: string;
+  course_code?: "INT" | "DEG";
   qualification?: string;
   duration_semesters?: number;
   /** Course family, e.g. "Commerce, Finance and Management". */

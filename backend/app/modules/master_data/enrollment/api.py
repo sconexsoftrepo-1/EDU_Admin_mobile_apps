@@ -18,6 +18,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+from app.core.admission_numbers import branch_code, course_code, next_admission_number
 from app.core.resources import staff_only
 from app.core.security import current_user
 from app.core.storage import audit, new_code
@@ -47,13 +48,6 @@ def year_of(data, academic_year_code):
     if not year:
         raise HTTPException(422, "Unknown academic year")
     return year, int(str(year["start_date"])[:4])
-
-
-def next_admission_number(data, start_year):
-    prefix = f"ADM-{start_year}-"
-    used = [int(s["admission_number"][len(prefix):]) for s in rows(data, "students")
-            if str(s.get("admission_number", "")).startswith(prefix) and s["admission_number"][len(prefix):].isdigit()]
-    return f"{prefix}{max(used, default=0) + 1:04d}"
 
 
 def next_registration_number(data, program_code, start_year):
@@ -111,6 +105,7 @@ def courses(data):
             continue
         out[level].append({
             "code": p["code"], "name": p["name"], "branch": p.get("branch"),
+            "branch_code": branch_code(p), "course_code": course_code(p),
             "qualification": p.get("qualification"), "duration_semesters": p.get("duration_semesters"),
             "category": p.get("category"), "duration_label": p.get("duration_label"),
             "semesters_label": p.get("semesters_label"), "subjects": p.get("subjects"),
@@ -143,8 +138,11 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
     }
     if academic_year_code:
         _, start = year_of(data, academic_year_code)
-        result["admission_number"] = next_admission_number(data, start)
         if program_code:
+            program = data["records"].get("programs", {}).get(program_code)
+            if not program:
+                raise HTTPException(422, "Unknown course")
+            result["admission_number"] = next_admission_number(data, program, start)
             result["registration_number"] = next_registration_number(data, program_code, start)
             result["fees"] = fee_lines(data, program_code, academic_year_code, hostel, transport)
             result["fees_available"] = fee_lines(data, program_code, academic_year_code, True, True)
@@ -221,7 +219,7 @@ def enroll(data, body: EnrollmentInput, actor):
     if not campus:
         raise HTTPException(422, "Choose the campus")
 
-    admission_number = next_admission_number(data, start_year)
+    admission_number = next_admission_number(data, program, start_year)
     registration_number = next_registration_number(data, choice.program_code, start_year)
     guardian = body.guardian
     q = body.last_qualification
@@ -473,14 +471,15 @@ def enrollment_review(student_code: str, request: Request, user=Depends(current_
     need(data, user, ("students", "view"))
     student = data["records"].get("students", {}).get(student_code)
     profile = next((p for p in rows(data, PROFILES) if p["student_code"] == student_code), None)
-    if not student or not profile:
+    if not student:
         raise HTTPException(404, "Enrollment not found")
+    profile = profile or {}
     parents = {p["code"]: p for p in rows(data, "parents")}
     links = [{**l, "parent": parents.get(l["parent_code"])} for l in rows(data, "student_parents")
              if l["student_code"] == student_code]
-    documents = [d for d in rows(data, "documents") if d.get("student_code") == student_code]
+    documents = [d for d in rows(data, "documents") if d.get("student_code") == student_code and not d.get("deleted_at")]
     return {"student": student, "profile": profile, "parents": links,
-            "program": data["records"].get("programs", {}).get(profile["program_code"]),
+            "program": data["records"].get("programs", {}).get(profile.get("program_code")),
             "batch": data["records"].get("batches", {}).get(profile.get("batch_code")),
             "documents": [{k: d.get(k) for k in ("code", "document_type", "original_filename", "mime_type")}
                           for d in documents]}

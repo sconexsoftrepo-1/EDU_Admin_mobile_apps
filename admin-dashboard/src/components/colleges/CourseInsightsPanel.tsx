@@ -266,6 +266,7 @@ export default function CourseInsightsPanel({
               ["Subjects", course.subjects],
               ["Careers", course.career_opportunities],
               ["Course code", course.code],
+              ["Admission branch code", course.branch_code],
             ]
               .filter(([, v]) => v)
               .map(([k, v]) => (

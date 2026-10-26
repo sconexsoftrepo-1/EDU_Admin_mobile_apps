@@ -1,0 +1,34 @@
+[
+  {
+    "AllowedHeaders": [
+      "*"
+    ],
+    "AllowedMethods": [
+      "GET",
+      "HEAD",
+      "PUT",
+      "POST",
+      "DELETE"
+    ],
+    "AllowedOrigins": [
+      "https://eduportal-beige.vercel.app",
+      "http://localhost:3000",
+      "http://localhost:3010",
+      "http://localhost:3012",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3010",
+      "http://127.0.0.1:3012",
+      "http://185.193.19.156:8010",
+      "http://localhost:8010",
+      "http://127.0.0.1:8010"
+    ],
+    "ExposeHeaders": [
+      "ETag",
+      "Content-Disposition",
+      "x-amz-request-id",
+      "x-amz-id-2",
+      "x-amz-server-side-encryption"
+    ],
+    "MaxAgeSeconds": 3600
+  }
+]

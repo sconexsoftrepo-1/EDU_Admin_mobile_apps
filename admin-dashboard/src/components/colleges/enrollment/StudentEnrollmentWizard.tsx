@@ -1881,7 +1881,9 @@ export default function StudentEnrollmentWizard({
                 <div className="enw-numbers-bar">
                   <div>
                     <span>Admission number</span>
-                    <strong>{quote?.admission_number || "—"}</strong>
+                    <strong>
+                      {quote?.admission_number || "Choose a course and year"}
+                    </strong>
                   </div>
                   <div>
                     <span>Registration number</span>
@@ -1892,7 +1894,8 @@ export default function StudentEnrollmentWizard({
                     </strong>
                   </div>
                   <small>
-                    Numbers are reserved when the enrollment is confirmed.
+                    Admission number: year + INT/DEG + branch code + sequence
+                    (e.g. 26INTMPC0001). Assigned when enrollment is confirmed.
                   </small>
                 </div>
                 <Card

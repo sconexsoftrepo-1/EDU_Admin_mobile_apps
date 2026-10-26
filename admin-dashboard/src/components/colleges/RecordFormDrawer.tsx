@@ -477,7 +477,13 @@ export default function RecordFormDrawer({
                                         transport: "Transport — bus users only",
                                         other: "Other — all students",
                                       }[o] || o
-                                    : o}
+                                    : f.key === "previous_education.level"
+                                      ? o === "ssc"
+                                        ? "SSC / 10th class"
+                                        : o === "intermediate"
+                                          ? "Intermediate"
+                                          : o
+                                      : o}
                               </option>
                             ))
                           )}
