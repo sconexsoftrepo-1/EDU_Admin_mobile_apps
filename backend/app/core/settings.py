@@ -31,8 +31,14 @@ class Settings(BaseSettings):
     # postgres uses EDUNEXA_DB_*; sqlserver uses EDUNEXA_MSSQL_*; local-json is offline storage.
     storage_backend: Literal["local-json", "postgres", "sqlserver"] = "local-json"
     public_portal_url: str = "http://localhost:3000"
-    # Private files: "local" = <data_dir>/files; "supabase" = a private Supabase Storage bucket.
-    file_storage: Literal["local", "supabase"] = "local"
+    # Private files: local development, private Supabase Storage, or Amazon S3.
+    file_storage: Literal["local", "supabase", "s3"] = "local"
+    s3_bucket_name: str = "edu-admin-portal-file"
+    s3_prefix: str = "Admin_Uploads"
+    s3_region: str = "ap-south-1"
+    s3_access_key: SecretStr | None = None
+    s3_secret_key: SecretStr | None = None
+    s3_session_token: SecretStr | None = None
     supabase_url: str | None = None
     supabase_service_role_key: SecretStr | None = None
     supabase_bucket: str = "edunexa-private"
@@ -45,6 +51,11 @@ class Settings(BaseSettings):
             raise ValueError("Generate a private random JWT secret before starting")
         if self.file_storage == "supabase" and not (self.supabase_url and self.supabase_service_role_key):
             raise ValueError("EDUNEXA_FILE_STORAGE=supabase needs EDUNEXA_SUPABASE_URL and EDUNEXA_SUPABASE_SERVICE_ROLE_KEY")
+        if self.file_storage == "s3":
+            if not self.s3_bucket_name or "/" in self.s3_bucket_name:
+                raise ValueError("S3 bucket name must contain only the bucket, without a prefix")
+            if bool(self.s3_access_key) != bool(self.s3_secret_key):
+                raise ValueError("Configure both S3 access key and secret key, or use an IAM role")
         if os.environ.get("VERCEL"):
             # Serverless: nothing on local disk survives. Records must be in remote SQL storage; files and
             # the signing key are optional at start-up (their endpoints answer 503 until configured).

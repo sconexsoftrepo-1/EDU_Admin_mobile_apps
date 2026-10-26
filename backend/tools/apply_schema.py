@@ -64,6 +64,7 @@ def install(conn, schema):
             " VALUES (%s, %s, %s, %s, %s)",
             (version, SCHEMA_FILE.name, applied, SCHEMA_FILE.name, applied),
         )
+    cur.execute(script(SCHEMA_FILE.parent / "file_storage_objects_postgresql.sql"))
     cur.execute(COUNTS, {"s": schema})
     return cur.fetchone()
 

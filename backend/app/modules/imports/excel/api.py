@@ -414,7 +414,8 @@ def validate(
         )
         if allocated > Decimal(str(payment["amount"])):
             errors.append({"error": "Allocations exceed payment " + payment["code"]})
-    with request.app.state.store.transaction() as live:
+    from app.modules.documents.files.api import file_transaction
+    with file_transaction(request) as (live, pending):
         code = new_code("IMP")
         job = {
             "code": code,
@@ -429,6 +430,17 @@ def validate(
             "errors": errors,
             "staged_rows": rows,
         }
+        from app.modules.documents.files.api import file_metadata, file_store
+        key = f"Imports/{code}/{new_code('FILE')}.xlsx"
+        mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        metadata = file_metadata(request, key, body.filename, mime, raw, "import-workbook", code)
+        job.update(metadata, storage_key=key)
+        pending.append(key)
+        file_store(request).put(key, raw, mime)
+        query_save(live, "file_storage_objects", {
+            **metadata, "code": code, "owner_type": "import", "owner_code": code,
+            "document_table": "import_jobs", "document_code": code, "storage_key": key,
+            "uploaded_by_user_code": user["code"], "deleted_at": None})
         query_save(live, "import_jobs", job)
         audit(live, user["code"], "validate", "import_jobs", code)
     return {k: v for k, v in job.items() if k != "staged_rows"}
@@ -440,7 +452,7 @@ def commit(
 ):
     with request.app.state.store.transaction() as data:
         job = data["records"].get("import_jobs", {}).get(code)
-        if not job:
+        if not job or job.get("deleted_at"):
             raise HTTPException(404, "Import not found")
         if job["status"] != "validated":
             raise HTTPException(

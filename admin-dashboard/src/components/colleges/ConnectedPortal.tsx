@@ -1,4 +1,5 @@
 "use client";
+import PersonFiles from "./PersonFiles";
 import {
   useCallback,
   useEffect,
@@ -189,6 +190,10 @@ export default function ConnectedPortal({
   );
   const cachedInitial = readWorkspaceCache<ScreenSnapshot>(initialCacheKey);
   const identityRef = useRef(sessionAccount?.code || "");
+  const [fileOwner, setFileOwner] = useState<{
+    personKind: "student" | "employee" | "application";
+    personCode: string;
+  } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [displayRole, setDisplayRole] = useState(sessionRole);
   const requestSequence = useRef(0);
@@ -1309,6 +1314,27 @@ export default function ConnectedPortal({
                           ))}
                           <td>
                             <div className="edu-row-actions">
+                              {[
+                                "students",
+                                "employees",
+                                "admission_applications",
+                              ].includes(resource.name) && (
+                                <button
+                                  onClick={() =>
+                                    setFileOwner({
+                                      personKind:
+                                        resource.name === "students"
+                                          ? "student"
+                                          : resource.name === "employees"
+                                            ? "employee"
+                                            : "application",
+                                      personCode: String(row.code),
+                                    })
+                                  }
+                                >
+                                  Files
+                                </button>
+                              )}
                               {resource.actions.includes("edit") && (
                                 <IconAction
                                   kind="edit"
@@ -1323,10 +1349,26 @@ export default function ConnectedPortal({
                                   onClick={async () => {
                                     if (!confirm("Delete this record?")) return;
                                     try {
-                                      await api.workspace.remove(
-                                        resource.path,
-                                        String(row.code),
-                                      );
+                                      const kind =
+                                        DOWNLOAD_KIND_BY_TABLE[resource.name];
+                                      if (
+                                        [
+                                          "document",
+                                          "tax-document",
+                                          "admission-document",
+                                          "import-workbook",
+                                        ].includes(kind)
+                                      ) {
+                                        await api.documents.remove(
+                                          kind,
+                                          String(row.code),
+                                        );
+                                      } else {
+                                        await api.workspace.remove(
+                                          resource.path,
+                                          String(row.code),
+                                        );
+                                      }
                                       toast.success(
                                         `${String(row.name ?? row.code)} deleted successfully`,
                                       );
@@ -1572,6 +1614,9 @@ export default function ConnectedPortal({
           }
           onClose={() => setDialog(null)}
         />
+      )}
+      {fileOwner && (
+        <PersonFiles {...fileOwner} onClose={() => setFileOwner(null)} />
       )}
       {staffFormOpen && staffKind && (
         <StaffOnboardingForm

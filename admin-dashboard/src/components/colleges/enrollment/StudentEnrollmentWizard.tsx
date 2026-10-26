@@ -80,24 +80,53 @@ const fullName = (p: {
   last_name?: string;
 }) => [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ");
 
-/** Re-encode large photos as JPEG so they fit the upload limit. */
+/** Normalize camera/selected images to a format and size accepted by document storage. */
 export async function fitImage(
   file: File | Blob,
   name = "photo.jpg",
 ): Promise<File> {
-  if (file.size <= MAX_FILE && file instanceof File) return file;
+  if (
+    file.size <= MAX_FILE &&
+    file instanceof File &&
+    ["image/jpeg", "image/png"].includes(file.type)
+  )
+    return file;
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 900 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise<Blob>((resolve) =>
-    canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85),
-  );
-  return new File([blob], name.replace(/\.\w+$/, "") + ".jpg", {
-    type: "image/jpeg",
-  });
+  try {
+    const scale = Math.min(1, 900 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    for (const [factor, quality] of [
+      [1, 0.85],
+      [0.75, 0.7],
+      [0.5, 0.55],
+    ]) {
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale * factor));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale * factor));
+      const context = canvas.getContext("2d");
+      if (!context)
+        throw new Error("Unable to prepare this photo. Choose another image.");
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(
+          (value) =>
+            value
+              ? resolve(value)
+              : reject(new Error("Unable to encode this photo.")),
+          "image/jpeg",
+          quality,
+        ),
+      );
+      if (blob.size <= MAX_FILE)
+        return new File([blob], name.replace(/\.\w+$/, "") + ".jpg", {
+          type: "image/jpeg",
+        });
+    }
+    throw new Error(
+      "Photo exceeds 650 KB after resizing. Choose a smaller image.",
+    );
+  } finally {
+    bitmap.close();
+  }
 }
 
 export function toBase64(file: File): Promise<string> {
@@ -335,16 +364,35 @@ function PhotoCapture({
   async function take() {
     const v = video.current;
     if (!v) return;
-    const canvas = document.createElement("canvas");
-    canvas.width = v.videoWidth;
-    canvas.height = v.videoHeight;
-    canvas.getContext("2d")!.drawImage(v, 0, 0);
-    const blob = await new Promise<Blob>((r) =>
-      canvas.toBlob((b) => r(b!), "image/jpeg", 0.9),
-    );
-    onChange(await fitImage(blob, "student-photo.jpg"));
-    stream?.getTracks().forEach((t) => t.stop());
-    setStream(null);
+    setError("");
+    try {
+      if (!v.videoWidth || !v.videoHeight)
+        throw new Error("Wait for the camera preview before taking a photo.");
+      const canvas = document.createElement("canvas");
+      canvas.width = v.videoWidth;
+      canvas.height = v.videoHeight;
+      const context = canvas.getContext("2d");
+      if (!context)
+        throw new Error(
+          "Unable to capture the photo. Upload an image instead.",
+        );
+      context.drawImage(v, 0, 0);
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(
+          (value) =>
+            value
+              ? resolve(value)
+              : reject(new Error("Unable to capture the photo.")),
+          "image/jpeg",
+          0.9,
+        ),
+      );
+      onChange(await fitImage(blob, "student-photo.jpg"));
+      stream?.getTracks().forEach((t) => t.stop());
+      setStream(null);
+    } catch (e) {
+      setError(errorText(e));
+    }
   }
   return (
     <div className="enw-photo">
@@ -385,8 +433,19 @@ function PhotoCapture({
                 accept="image/*"
                 capture="user"
                 onChange={async (e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onChange(await fitImage(f, f.name));
+                  const input = e.currentTarget;
+                  const f = input.files?.[0];
+                  if (!f) return;
+                  setError("");
+                  try {
+                    onChange(await fitImage(f, f.name));
+                  } catch {
+                    setError(
+                      "Unable to read this photo. Choose a valid JPEG, PNG or WebP image.",
+                    );
+                  } finally {
+                    input.value = "";
+                  }
                 }}
               />
             </label>

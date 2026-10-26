@@ -26,6 +26,12 @@ export class DocumentService {
     });
   }
 
+  remove(kind: string, code: string) {
+    return apiRequest(`documents/${kind}/${encodeURIComponent(code)}/file`, {
+      method: "DELETE",
+    });
+  }
+
   /** Save a private PDF (payslip, receipt, certificate, ...) in the browser. */
   download(
     kind: DownloadKind | string,

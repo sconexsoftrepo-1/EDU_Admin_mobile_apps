@@ -133,6 +133,7 @@ async function proxy(
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
         },
       });
     }
@@ -143,6 +144,7 @@ async function proxy(
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
         },
       });
     }
@@ -210,6 +212,7 @@ async function proxy(
           "Content-Type":
             result.headers.get("content-type") || "application/json",
           "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
           ...(result.headers.has("content-disposition")
             ? {
                 "Content-Disposition": result.headers.get(
