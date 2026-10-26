@@ -14,6 +14,7 @@ export interface Page<T = Row> {
   total: number;
   offset: number;
   limit: number;
+  filter_options?: Record<string, string[]>;
 }
 
 /** Error body of every failed request: {"detail": "message"} (422 may carry a list). */

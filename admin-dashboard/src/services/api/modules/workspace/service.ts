@@ -2,7 +2,7 @@
  * Workspace endpoints. Record screens are generic: the screen contract gives each table's list
  * path (Resource.path), so one service lists, saves and deletes records of any table.
  */
-import { apiRequest } from "../../client";
+import { apiRequest, type Query } from "../../client";
 import { API_CONFIG } from "../../config";
 import type { LookupOption, Page, Row } from "../../consts";
 import type {
@@ -42,8 +42,15 @@ export class WorkspaceService {
   }
 
   /** One page of a table, from the path in the screen contract. */
-  list(resourcePath: string, offset = 0, limit: number = API_CONFIG.pageSize) {
-    return apiRequest<Page<Row>>(resourcePath, { query: { offset, limit } });
+  list(
+    resourcePath: string,
+    offset = 0,
+    limit: number = API_CONFIG.pageSize,
+    filters: Query = {},
+  ) {
+    return apiRequest<Page<Row>>(resourcePath, {
+      query: { ...filters, offset, limit },
+    });
   }
 
   /** Delete a record (the backend refuses records still referenced elsewhere). */

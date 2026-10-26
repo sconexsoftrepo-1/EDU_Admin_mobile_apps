@@ -534,7 +534,10 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user),
                 allowed = permitted_person(
                     data, user, "employee", record["employee_code"]
                 )
-            elif kind in {"admission-document", "import-workbook"}:
+            elif kind == "admission-document":
+                allowed = any(link.get("admission_document_code") == code and permitted_person(data, user, "student", link.get("student_code"))
+                              for link in query_rows(data, "student_document_links"))
+            elif kind == "import-workbook":
                 allowed = False
             else:
                 allowed = permitted_person(
@@ -641,6 +644,11 @@ def list_files(person_kind: str, person_code: str, request: Request, user=Depend
             for row in query_rows(data, documents):
                 if row.get(owner_field) == person_code and not row.get("deleted_at"):
                     result.append({**{k: v for k, v in row.items() if k != "storage_key"}, "download_kind": kind})
+    if person_kind == "student" and (permitted_person(data, user, "student", person_code) or (user["person_type"] in {"employee", "system"} and has_permission(data, user, "admission_documents", "view"))):
+        linked = {row.get("admission_document_code") for row in query_rows(data, "student_document_links") if row.get("student_code") == person_code}
+        for row in query_rows(data, "admission_documents"):
+            if row["code"] in linked and not row.get("deleted_at"):
+                result.append({**{k: v for k,v in row.items() if k != "storage_key"}, "download_kind": "admission-document"})
     if person_kind == "student" and (permitted_person(data, user, "student", person_code) or (user["person_type"] in {"employee", "system"} and has_permission(data, user, "certificates", "view"))):
         requests = {row["code"] for row in query_rows(data, "certificate_requests") if row.get("student_code") == person_code}
         for row in query_rows(data, "certificates"):

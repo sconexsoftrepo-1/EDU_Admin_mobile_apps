@@ -5415,6 +5415,13 @@
         "choices": []
       },
       {
+        "name": "branch_code",
+        "type": "character varying",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
         "name": "category",
         "type": "text",
         "required": false,

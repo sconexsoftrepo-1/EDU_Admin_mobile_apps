@@ -1,5 +1,11 @@
 "use client";
 import PersonFiles from "./PersonFiles";
+import TableColumnFilter from "./TableColumnFilter";
+import StudentEnrollmentDetails from "./StudentEnrollmentDetails";
+import {
+  studentEditForm,
+  studentEditValues,
+} from "@/lib/colleges/student-edit-form";
 import {
   useCallback,
   useEffect,
@@ -18,6 +24,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Info,
   RefreshCw,
   Shield,
   Plus,
@@ -190,6 +197,14 @@ export default function ConnectedPortal({
   );
   const cachedInitial = readWorkspaceCache<ScreenSnapshot>(initialCacheKey);
   const identityRef = useRef(sessionAccount?.code || "");
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
+    {},
+  );
+  const [filterOptions, setFilterOptions] = useState<Record<string, string[]>>(
+    {},
+  );
+  const [pageOffset, setPageOffset] = useState(0);
+  const [studentInfo, setStudentInfo] = useState<Row | null>(null);
   const [fileOwner, setFileOwner] = useState<{
     personKind: "student" | "employee" | "application";
     personCode: string;
@@ -244,6 +259,7 @@ export default function ConnectedPortal({
       setResource(snapshot.first);
       setRows(snapshot.records.items);
       setTotal(snapshot.records.total);
+      setPageOffset(0);
       setSummary(snapshot.totals);
       setSpecial(snapshot.extra);
     };
@@ -503,7 +519,7 @@ export default function ConnectedPortal({
     const key = workspaceCacheKey(
       identityRef.current,
       activeRoleRef.current?.code,
-      `resource:${r.path}:${offset}`,
+      `resource:${r.path}:${offset}:${selected === "student-enrollment" && r.name === "students" ? JSON.stringify({ column_filters: JSON.stringify(columnFilters), search: filter }) : ""}`,
     );
     const cached = readWorkspaceCache<{ items: Row[]; total: number }>(key);
     setResource(r);
@@ -516,18 +532,32 @@ export default function ConnectedPortal({
     } else setRows([]);
     try {
       const result = await refreshWorkspaceCache(key, () =>
-        api.workspace.list(r.path, offset, pageSize(r.name)),
+        api.workspace.list(
+          r.path,
+          offset,
+          pageSize(r.name),
+          selected === "student-enrollment" && r.name === "students"
+            ? { column_filters: JSON.stringify(columnFilters), search: filter }
+            : {},
+        ),
       );
       if (sequence !== requestSequence.current) return;
       setRows(result.items);
       setTotal(result.total);
+      if (result.filter_options) setFilterOptions(result.filter_options);
+      setPageOffset(offset);
       const screenKey = workspaceCacheKey(
         identityRef.current,
         activeRoleRef.current?.code,
         `screen:${selected}`,
       );
       const snapshot = readWorkspaceCache<ScreenSnapshot>(screenKey);
-      if (snapshot?.first?.name === r.name && offset === 0)
+      if (
+        snapshot?.first?.name === r.name &&
+        offset === 0 &&
+        !filter &&
+        Object.keys(columnFilters).length === 0
+      )
         writeWorkspaceCache(screenKey, { ...snapshot, records: result });
     } catch (e) {
       if (sequence === requestSequence.current) setError(errorText(e));
@@ -538,6 +568,40 @@ export default function ConnectedPortal({
       }
     }
   }
+  useEffect(() => {
+    if (selected !== "student-enrollment" || resource?.name !== "students")
+      return;
+    let active = true;
+    const timer = window.setTimeout(async () => {
+      const sequence = ++requestSequence.current;
+      setRefreshing(true);
+      try {
+        const result = await api.workspace.list(
+          resource.path,
+          0,
+          pageSize(resource.name),
+          { column_filters: JSON.stringify(columnFilters), search: filter },
+        );
+        if (active && sequence === requestSequence.current) {
+          setRows(result.items);
+          setTotal(result.total);
+          if (result.filter_options) setFilterOptions(result.filter_options);
+          setPageOffset(0);
+          setError("");
+        }
+      } catch (e) {
+        if (active && sequence === requestSequence.current)
+          setError(errorText(e));
+      } finally {
+        if (active && sequence === requestSequence.current)
+          setRefreshing(false);
+      }
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [selected, resource, columnFilters, filter]);
   const edit = async (row?: Row) => {
     if (!resource || (!row && selected === "student-enrollment")) return;
     const current = resource;
@@ -576,13 +640,18 @@ export default function ConnectedPortal({
         }
         configured = feeHeadForm(fields, configured.initial, existing);
       }
+      if (current.name === "students")
+        configured = studentEditForm(configured.fields, configured.initial);
       setDialog({
         title: (row ? "Edit " : "Create ") + current.title,
         fields: configured.fields,
         initial: configured.initial,
         save: async (values) => {
           const payload = {
-            values,
+            values:
+              current.name === "students"
+                ? studentEditValues(values, configured.initial)
+                : values,
             form_code: form?.code,
             form_revision: form?.revision,
           };
@@ -842,18 +911,41 @@ export default function ConnectedPortal({
         )}
       </>
     );
-  const columns = Array.from(
-    new Set(
-      rows.length
-        ? rows.flatMap((row) => Object.keys(row))
-        : resource?.fields
-            .slice(0, 8)
-            .map((field) => field.name || field.key || "") || [],
-    ),
-  ).filter(
-    (k) =>
-      !["storage_key", "request", "staged_rows", "password_hash"].includes(k),
-  );
+  const studentRegister =
+    selected === "student-enrollment" && resource?.name === "students";
+  const studentHeaders: Record<string, string> = {
+    student_name: "Student name",
+    admission_number: "Admission number",
+    university_registration_number: "University registration number",
+    course_name: "Course",
+    batch_year: "Batch year",
+  };
+  const columnLabel = (key: string) =>
+    studentRegister
+      ? studentHeaders[key] || headerLabel(key)
+      : headerLabel(key);
+  const cellValue = (row: Row, key: string) =>
+    key === "student_name" && !row[key]
+      ? [row.first_name, row.middle_name, row.last_name]
+          .filter(Boolean)
+          .join(" ")
+      : row[key];
+  const columns = studentRegister
+    ? Object.keys(studentHeaders)
+    : Array.from(
+        new Set(
+          rows.length
+            ? rows.flatMap((row) => Object.keys(row))
+            : resource?.fields
+                .slice(0, 8)
+                .map((field) => field.name || field.key || "") || [],
+        ),
+      ).filter(
+        (k) =>
+          !["storage_key", "request", "staged_rows", "password_hash"].includes(
+            k,
+          ),
+      );
   const cards = resource?.name === "programs";
   /** Delete a record; `confirmed` when the card already asked (course cards confirm inline). */
   async function removeRow(row: Row, confirmed = false) {
@@ -879,8 +971,13 @@ export default function ConnectedPortal({
           a.key !== primaryForm?.key &&
           screen?.resources.some((r) => r.name === a.resource),
       );
-  const visibleRows = rows.filter((row) =>
-    JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()),
+  const visibleRows = rows.filter(
+    (row) =>
+      JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()) &&
+      (!studentRegister ||
+        Object.entries(columnFilters).every(([key, values]) =>
+          values.includes(String(cellValue(row, key) || "")),
+        )),
   );
   /** Excel / PDF of the table as shown (current search applied), on record screens only. */
   const canExport =
@@ -891,9 +988,9 @@ export default function ConnectedPortal({
     !NO_EXPORT_SCREENS.has(selected);
   const exportTitle = resource?.title || headerLabel(selected);
   const exportFile = `${selected}-${new Date().toISOString().slice(0, 10)}`;
-  const exportColumns = columns.map(headerLabel);
+  const exportColumns = columns.map(columnLabel);
   const exportRows = () =>
-    visibleRows.map((row) => columns.map((k) => text(row[k])));
+    visibleRows.map((row) => columns.map((k) => text(cellValue(row, k))));
   const exportExcel = () =>
     excelTable(exportFile, exportTitle, exportColumns, exportRows());
   const exportPdf = async () => {
@@ -1135,8 +1232,16 @@ export default function ConnectedPortal({
                       />
                     </label>
                     <p className="edu-count">
-                      {rows.length} of {total} records
+                      {visibleRows.length} of {total} records
                     </p>
+                    {Object.keys(columnFilters).length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setColumnFilters({})}
+                      >
+                        Clear column filters
+                      </button>
+                    )}
                   </>
                 ) : (
                   <input
@@ -1287,7 +1392,35 @@ export default function ConnectedPortal({
                       <tr>
                         {columns.map((k) => (
                           <th key={k} className={alignClass(k) || undefined}>
-                            {headerLabel(k)}
+                            {studentRegister ? (
+                              <div className="edu-column-heading">
+                                <span>{columnLabel(k)}</span>
+                                <TableColumnFilter
+                                  label={columnLabel(k)}
+                                  options={
+                                    filterOptions[k] ||
+                                    [
+                                      ...new Set(
+                                        rows.map((row) =>
+                                          String(cellValue(row, k) || ""),
+                                        ),
+                                      ),
+                                    ].sort()
+                                  }
+                                  value={columnFilters[k]}
+                                  onChange={(values) =>
+                                    setColumnFilters((current) => {
+                                      const next = { ...current };
+                                      if (values === undefined) delete next[k];
+                                      else next[k] = values;
+                                      return next;
+                                    })
+                                  }
+                                />
+                              </div>
+                            ) : (
+                              columnLabel(k)
+                            )}
                           </th>
                         ))}
                         <th>Actions</th>
@@ -1308,7 +1441,7 @@ export default function ConnectedPortal({
                               {isDetails(row[k]) ? (
                                 <Details value={row[k]} />
                               ) : (
-                                text(row[k])
+                                text(cellValue(row, k))
                               )}
                             </td>
                           ))}
@@ -1318,23 +1451,24 @@ export default function ConnectedPortal({
                                 "students",
                                 "employees",
                                 "admission_applications",
-                              ].includes(resource.name) && (
-                                <button
-                                  onClick={() =>
-                                    setFileOwner({
-                                      personKind:
-                                        resource.name === "students"
-                                          ? "student"
-                                          : resource.name === "employees"
-                                            ? "employee"
-                                            : "application",
-                                      personCode: String(row.code),
-                                    })
-                                  }
-                                >
-                                  Files
-                                </button>
-                              )}
+                              ].includes(resource.name) &&
+                                !studentRegister && (
+                                  <button
+                                    onClick={() =>
+                                      setFileOwner({
+                                        personKind:
+                                          resource.name === "students"
+                                            ? "student"
+                                            : resource.name === "employees"
+                                              ? "employee"
+                                              : "application",
+                                        personCode: String(row.code),
+                                      })
+                                    }
+                                  >
+                                    Files
+                                  </button>
+                                )}
                               {resource.actions.includes("edit") && (
                                 <IconAction
                                   kind="edit"
@@ -1342,43 +1476,56 @@ export default function ConnectedPortal({
                                   onClick={() => edit(row)}
                                 />
                               )}
-                              {resource.actions.includes("delete") && (
-                                <IconAction
-                                  kind="delete"
-                                  label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                  onClick={async () => {
-                                    if (!confirm("Delete this record?")) return;
-                                    try {
-                                      const kind =
-                                        DOWNLOAD_KIND_BY_TABLE[resource.name];
-                                      if (
-                                        [
-                                          "document",
-                                          "tax-document",
-                                          "admission-document",
-                                          "import-workbook",
-                                        ].includes(kind)
-                                      ) {
-                                        await api.documents.remove(
-                                          kind,
-                                          String(row.code),
-                                        );
-                                      } else {
-                                        await api.workspace.remove(
-                                          resource.path,
-                                          String(row.code),
-                                        );
-                                      }
-                                      toast.success(
-                                        `${String(row.name ?? row.code)} deleted successfully`,
-                                      );
-                                      await refreshResource(resource);
-                                    } catch (e) {
-                                      setError(errorText(e));
-                                    }
-                                  }}
-                                />
+                              {studentRegister && (
+                                <button
+                                  type="button"
+                                  className="icon-action"
+                                  aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
+                                  title="Student information"
+                                  onClick={() => setStudentInfo(row)}
+                                >
+                                  <Info size={16} />
+                                </button>
                               )}
+                              {!studentRegister &&
+                                resource.actions.includes("delete") && (
+                                  <IconAction
+                                    kind="delete"
+                                    label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                    onClick={async () => {
+                                      if (!confirm("Delete this record?"))
+                                        return;
+                                      try {
+                                        const kind =
+                                          DOWNLOAD_KIND_BY_TABLE[resource.name];
+                                        if (
+                                          [
+                                            "document",
+                                            "tax-document",
+                                            "admission-document",
+                                            "import-workbook",
+                                          ].includes(kind)
+                                        ) {
+                                          await api.documents.remove(
+                                            kind,
+                                            String(row.code),
+                                          );
+                                        } else {
+                                          await api.workspace.remove(
+                                            resource.path,
+                                            String(row.code),
+                                          );
+                                        }
+                                        toast.success(
+                                          `${String(row.name ?? row.code)} deleted successfully`,
+                                        );
+                                        await refreshResource(resource);
+                                      } catch (e) {
+                                        setError(errorText(e));
+                                      }
+                                    }}
+                                  />
+                                )}
                               {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
                                 <button
                                   onClick={() =>
@@ -1444,7 +1591,9 @@ export default function ConnectedPortal({
               {!cards && !busy && rows.length === 0 && (
                 <p className="edu-empty">
                   {selected === "student-enrollment"
-                    ? "No students enrolled yet. Use Student enrollment to add a student."
+                    ? filter || Object.keys(columnFilters).length > 0
+                      ? "No students match these filters. Clear the filters or change your search."
+                      : "No students enrolled yet. Use Student enrollment to add a student."
                     : "No records yet. Use Create record or complete the preceding setup steps."}
                 </p>
               )}
@@ -1453,8 +1602,24 @@ export default function ConnectedPortal({
                   {rows.length} of {total} records
                 </p>
               )}
-              {total > rows.length && (
-                <button onClick={() => refreshResource(resource, rows.length)}>
+              {pageOffset > 0 && (
+                <button
+                  onClick={() =>
+                    refreshResource(
+                      resource,
+                      Math.max(0, pageOffset - (pageSize(resource.name) || 50)),
+                    )
+                  }
+                >
+                  Previous page
+                </button>
+              )}
+              {total > pageOffset + rows.length && (
+                <button
+                  onClick={() =>
+                    refreshResource(resource, pageOffset + rows.length)
+                  }
+                >
                   Next page
                 </button>
               )}
@@ -1613,6 +1778,20 @@ export default function ConnectedPortal({
               : undefined
           }
           onClose={() => setDialog(null)}
+        />
+      )}
+      {studentInfo && (
+        <StudentEnrollmentDetails
+          student={studentInfo}
+          onClose={() => setStudentInfo(null)}
+          onEdit={
+            resource?.actions.includes("edit")
+              ? () => {
+                  setStudentInfo(null);
+                  void edit(studentInfo);
+                }
+              : undefined
+          }
         />
       )}
       {fileOwner && (

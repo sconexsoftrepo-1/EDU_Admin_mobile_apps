@@ -209,6 +209,9 @@ class ResourceService:
         return record
 
     def business_validation(self, data, record):
+        if self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
+            from .admission_numbers import validate_branch_code
+            record["branch_code"] = validate_branch_code(data, record)
         if self.table in {"hostel_beds", "vehicle_seats"}:
             table, key, ref = "hostel_rooms", "room_code", "hostel_beds"
             if self.table == "vehicle_seats":
@@ -424,7 +427,10 @@ class ResourceService:
         if "code" in patch and patch["code"] != code:
             raise HTTPException(422, "Record code is immutable")
         record = {**old, **patch, "code": code}
-        record = validate_record(self.table, record)
+        known = {field["name"] for field in CATALOG[self.table]["fields"]}
+        # Persisted extension metadata (e.g. profile-photo URLs) is not an input field.
+        # Validate the schema fields while retaining already stored extensions.
+        record = {**record, **validate_record(self.table, {k: v for k, v in record.items() if k in known})}
         ensure_references(data, self.table, record)
         self.business_validation(data, record)
         self.repo.save(data, record)

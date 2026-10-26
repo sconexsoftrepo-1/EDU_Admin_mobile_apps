@@ -202,7 +202,7 @@ def test_enrollment_wizard_end_to_end(client, app):
     options = client.get("/api/v1/master-data/enrollment/options?academic_year_code=AY&program_code=INT-MPC&hostel=true",
                          headers=h).json()
     assert [c["branch"] for c in options["courses"]["intermediate"]] == ["MPC"]
-    assert options["admission_number"] == "ADM-2026-0001"
+    assert options["admission_number"] == "26INTMPC0001"
     assert options["registration_number"] == "INT-MPC-2026-001"
     assert {f["category"] for f in options["fees"]} == {"academic", "hostel"}
 
@@ -216,7 +216,7 @@ def test_enrollment_wizard_end_to_end(client, app):
     assert result.status_code == 201, result.text
     body = result.json()
     student = body["student"]
-    assert student["admission_number"] == "ADM-2026-0001" and student["current_year"] == 1
+    assert student["admission_number"] == "26INTMPC0001" and student["current_year"] == 1
     assert body["profile"]["registration_number"] == "INT-MPC-2026-001"
     assert body["profile"]["gross_fee"] == "102000.00" and body["profile"]["net_fee"] == "96000.00"
     assert [(p["relationship"]["relationship"], p["relationship"]["is_primary"]) for p in body["parents"]] == [("father", True)]

@@ -307,13 +307,36 @@ def list_records(
     request: Request,
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
+    column_filters: str = Query("", max_length=20000),
+    search: str = Query("", max_length=200),
+    student_name: str = Query("", max_length=200),
+    admission_number: str = Query("", max_length=200),
+    university_registration_number: str = Query("", max_length=200),
+    course_name: str = Query("", max_length=200),
+    batch_year: str = Query("", max_length=200),
     user=Depends(require(TABLE, "view")),
 ):
     staff_only(user)
     data = request.app.state.store.snapshot()
-    records = display_rows(data, TABLE, query_list(data))
+    from app.core.student_directory import student_directory_rows, filter_student_directory, set_filter_student_directory, student_filter_options
+    records = student_directory_rows(data, display_rows(data, TABLE, query_list(data)))
+    options = student_filter_options(records)
+    if column_filters:
+        import json
+        try:
+            filters = json.loads(column_filters)
+            if not isinstance(filters, dict) or any(key not in options or not isinstance(values,list) or len(values)>10000 or any(not isinstance(value,str) or len(value)>500 for value in values) for key,values in filters.items()):
+                raise ValueError()
+        except (ValueError, TypeError):
+            raise HTTPException(422, "Invalid column filters") from None
+        records = set_filter_student_directory(records, filters)
+    records = filter_student_directory(records, {
+        "student_name": student_name, "admission_number": admission_number,
+        "university_registration_number": university_registration_number,
+        "course_name": course_name, "batch_year": batch_year}, search)
     return {
         "items": records[offset : offset + limit],
+        "filter_options": options,
         "total": len(records),
         "offset": offset,
         "limit": limit,
