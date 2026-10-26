@@ -51,6 +51,7 @@ import Select from "../SearchSelect";
 import { PhoneInput } from "../CountryCodePicker";
 import { UploadButton } from "../UploadBox";
 import DateInput, { formatDate } from "../DateInput";
+import AcademicYearForm from "../AcademicYearForm";
 
 const MAX_FILE = 650_000; // backend upload limit (bytes)
 const BOARDS = ["SSC (State board)", "CBSE", "ICSE", "Other"];
@@ -553,6 +554,7 @@ export default function StudentEnrollmentWizard({
   });
   const [courseQuery, setCourseQuery] = useState("");
   const [courseFamily, setCourseFamily] = useState("");
+  const [academicYearFormOpen, setAcademicYearFormOpen] = useState(false);
   const [hostel, setHostel] = useState(false);
   const [transport, setTransport] = useState(false);
   const [scholarship, setScholarship] = useState({ amount: "", name: "" });
@@ -568,7 +570,9 @@ export default function StudentEnrollmentWizard({
         setCourse((c) => ({
           ...c,
           academic_year_code:
-            c.academic_year_code || value.academic_years[0]?.code || "",
+            c.academic_year_code ||
+            value.academic_years.find((y) => !y.program_code)?.code ||
+            "",
         }));
         if (value.campuses.length === 1)
           setStudent((s) => ({ ...s, campus_code: value.campuses[0].code }));
@@ -618,6 +622,9 @@ export default function StudentEnrollmentWizard({
         .includes(courseQuery.trim().toLowerCase()),
   );
   const program = programs.find((p) => p.code === course.program_code);
+  const academicYears = (options?.academic_years || []).filter(
+    (y) => !y.program_code || y.program_code === course.program_code,
+  );
   const year = options?.academic_years.find(
     (y) => y.code === course.academic_year_code,
   );
@@ -1902,7 +1909,7 @@ export default function StudentEnrollmentWizard({
                   title="Course selection"
                   icon={<GraduationCap size={17} />}
                 >
-                  <div className="enw-grid">
+                  <div className="enw-academic-year-actions">
                     <Field label="Academic year *">
                       <Select
                         required
@@ -1914,13 +1921,26 @@ export default function StudentEnrollmentWizard({
                           })
                         }
                       >
-                        {(options?.academic_years || []).map((y) => (
+                        <option value="">
+                          {course.program_code
+                            ? "Select an academic year"
+                            : "Choose a course or shared academic year"}
+                        </option>
+                        {academicYears.map((y) => (
                           <option key={y.code} value={y.code}>
                             {y.name}
                           </option>
                         ))}
                       </Select>
                     </Field>
+                    <button
+                      type="button"
+                      className="enw-manage-years"
+                      onClick={() => setAcademicYearFormOpen(true)}
+                    >
+                      <Plus size={14} aria-hidden="true" />
+                      Manage academic years
+                    </button>
                   </div>
                   <div
                     className="enw-segmented"
@@ -1937,13 +1957,18 @@ export default function StudentEnrollmentWizard({
                         role="radio"
                         aria-checked={course.level === value}
                         className={course.level === value ? "is-on" : ""}
-                        onClick={() =>
+                        onClick={() => {
+                          setQuote(null);
                           setCourse({
                             ...course,
                             level: value as CourseLevel,
                             program_code: "",
-                          })
-                        }
+                            academic_year_code:
+                              options?.academic_years.find(
+                                (year) => !year.program_code,
+                              )?.code || "",
+                          });
+                        }}
                       >
                         {label}
                       </button>
@@ -2006,9 +2031,24 @@ export default function StudentEnrollmentWizard({
                                 ? "enw-choice is-on"
                                 : "enw-choice"
                             }
-                            onClick={() =>
-                              setCourse({ ...course, program_code: p.code })
-                            }
+                            onClick={() => {
+                              const matching = (
+                                options?.academic_years || []
+                              ).filter(
+                                (y) =>
+                                  !y.program_code || y.program_code === p.code,
+                              );
+                              const preferred =
+                                matching.find(
+                                  (y) => y.program_code === p.code,
+                                ) || matching[0];
+                              setQuote(null);
+                              setCourse({
+                                ...course,
+                                program_code: p.code,
+                                academic_year_code: preferred?.code || "",
+                              });
+                            }}
                             aria-pressed={p.code === course.program_code}
                           >
                             <strong>{p.branch || p.name}</strong>
@@ -2288,6 +2328,59 @@ export default function StudentEnrollmentWizard({
           )}
         </footer>
       </div>
+      {academicYearFormOpen && (
+        <AcademicYearForm
+          title="Create Academic Years"
+          initial={{ program_code: course.program_code }}
+          onClose={() => setAcademicYearFormOpen(false)}
+          onSave={async (values) => {
+            const saved = await api.workspace.create("academic_years", {
+              values,
+            });
+            const createdYear = {
+              code: String(saved.code || values.code),
+              name: String(saved.name || values.name),
+              program_code: String(values.program_code),
+              start_date: String(values.start_date),
+              end_date: String(values.end_date),
+            };
+            // Keep the saved year available even if refreshing options fails.
+            setOptions((current) =>
+              current
+                ? {
+                    ...current,
+                    academic_years: [
+                      ...current.academic_years.filter(
+                        (year) => year.code !== createdYear.code,
+                      ),
+                      createdYear,
+                    ],
+                  }
+                : current,
+            );
+            setQuote(null);
+            setCourse((current) => ({
+              ...current,
+              level: options?.courses.degree.some(
+                (entry) => entry.code === createdYear.program_code,
+              )
+                ? "degree"
+                : "intermediate",
+              program_code: createdYear.program_code,
+              academic_year_code: createdYear.code,
+            }));
+            toast.success("Academic year created", createdYear.name);
+            try {
+              setOptions(await api.masterData.enrollmentOptions());
+            } catch {
+              toast.error(
+                "Academic year saved",
+                "Could not refresh all course options. The saved year is selected; reopen enrollment to refresh the remaining options.",
+              );
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

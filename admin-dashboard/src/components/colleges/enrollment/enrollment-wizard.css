@@ -1,4 +1,27 @@
 /* Student enrollment wizard — same palette as the connected workspace (ink #18344b, accent #a77524). */
+.enw-academic-year-actions {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.enw-academic-year-actions > label {
+  flex: 1 1 240px;
+}
+.enw-backdrop .enw-manage-years {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #82591d;
+  background: #fffaf0;
+  border-color: #dec8a2;
+}
+.enw-backdrop .enw-manage-years:hover {
+  background: #f5ead5;
+}
 .enw-backdrop {
   --enw-ink: #18344b;
   --enw-accent: #a77524;
@@ -203,10 +226,7 @@
 }
 /* One control height everywhere, so fields in a row line up whether or not they carry a hint. */
 .enw-backdrop
-  :is(
-    input:not([type="checkbox"], [type="radio"], [type="file"]),
-    select
-  ) {
+  :is(input:not([type="checkbox"], [type="radio"], [type="file"]), select) {
   box-sizing: border-box;
   height: 40px;
   min-height: 40px;
@@ -959,7 +979,9 @@
   background: #fff7f7;
   box-shadow: 0 0 0 3px #d9363618;
 }
-.is-validated .enw-idfile-box:has(input[type="file"]:invalid) .enw-idfile-upload {
+.is-validated
+  .enw-idfile-box:has(input[type="file"]:invalid)
+  .enw-idfile-upload {
   color: #c62828;
 }
 
@@ -992,7 +1014,9 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .enw-backdrop .enw-photo label.enw-file-button:hover,
 .enw-backdrop .enw-photo label.enw-file-button:focus-within {

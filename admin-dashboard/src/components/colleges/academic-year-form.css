@@ -1,0 +1,123 @@
+.edu-academic-year-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin: 0;
+}
+.edu-academic-year-content {
+  flex: 1;
+}
+.edu-academic-year-section {
+  padding: 22px;
+  margin-bottom: 20px;
+  border: 1px solid #e9dfcf;
+  border-radius: 12px;
+  background: #fff;
+}
+.edu-academic-year-section h3 {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 650;
+  color: #30251c;
+}
+.edu-academic-year-section label {
+  display: grid;
+  gap: 8px;
+  color: #62513c;
+  font-size: 12px;
+  font-weight: 500;
+}
+.edu-academic-year-section p {
+  margin: 12px 0 0;
+  color: #8b7962;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.edu-academic-year-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.edu-academic-year-section input:not([type="hidden"]),
+.edu-academic-year-section .combo > textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #ded4c5;
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: #30251c;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+}
+.edu-academic-year-section input:read-only {
+  background: #faf7f1;
+  color: #7a5c32;
+}
+.edu-academic-year-section input:focus {
+  outline: 2px solid #a46a2720;
+  border-color: #b88c50;
+}
+.edu-academic-year-section .date-input > input {
+  padding-right: 40px;
+}
+.edu-academic-year-section .date-input input:disabled {
+  background: #f5f2ed;
+}
+.edu-academic-year-generated {
+  border-color: #dfcba9;
+}
+.edu-academic-year-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  color: #a46a27;
+}
+.edu-academic-year-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  bottom: -26px;
+  margin: 0 -30px -26px;
+  padding: 18px 30px;
+  border-top: 1px solid #e9dfcf;
+  background: #fff;
+}
+.edu-academic-year-footer > span {
+  color: #8b7962;
+  font-size: 12px;
+}
+.edu-academic-year-footer > div {
+  display: flex;
+  gap: 9px;
+}
+.edu-record-drawer .edu-academic-year-footer button {
+  min-height: 40px;
+  padding: 10px 16px;
+}
+@media (max-width: 680px) {
+  .edu-academic-year-section {
+    padding: 18px 15px;
+  }
+  .edu-academic-year-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .edu-academic-year-footer {
+    bottom: -18px;
+    margin: 0 -14px -18px;
+    padding: 14px 18px;
+  }
+  .edu-academic-year-footer > span {
+    display: none;
+  }
+  .edu-academic-year-footer > div {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

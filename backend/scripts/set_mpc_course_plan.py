@@ -20,8 +20,11 @@ def main():
     store = SqlServerStore()
     with store.transaction() as data:
         structures = data['records']['fee_structures']
+        academic_year_code = ('INT-MPC-2026-2028'
+                              if 'INT-MPC-2026-2028' in data['records']['academic_years']
+                              else 'TEST')
         rows = [r for r in structures.values() if r['program_code'] == 'INT-MPC'
-                and r['academic_year_code'] == 'TEST']
+                and r['academic_year_code'] == academic_year_code]
         if len(rows) != 8 or sum((Decimal(r['amount']) for r in rows), Decimal(0)) != Decimal('67000'):
             raise RuntimeError('MPC schedule changed; expected exactly eight heads totaling 67000')
         if int(data['records']['programs']['INT-MPC']['duration_semesters']) != 4:
