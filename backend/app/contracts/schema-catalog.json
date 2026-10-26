@@ -10,6 +10,13 @@
         "choices": []
       },
       {
+        "name": "program_code",
+        "type": "character varying",
+        "required": false,
+        "reference": "programs",
+        "choices": []
+      },
+      {
         "name": "name",
         "type": "text",
         "required": true,

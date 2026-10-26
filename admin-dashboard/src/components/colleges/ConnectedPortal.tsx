@@ -1,5 +1,6 @@
 "use client";
 import PersonFiles from "./PersonFiles";
+import AcademicYearForm from "./AcademicYearForm";
 import TableColumnFilter from "./TableColumnFilter";
 import StudentEnrollmentDetails from "./StudentEnrollmentDetails";
 import {
@@ -231,11 +232,17 @@ export default function ConnectedPortal({
     [busy, setBusy] = useState(!loginError && !cachedInitial),
     [filter, setFilter] = useState(""),
     [dialog, setDialog] = useState<{
+      resourceName?: string;
       title: string;
       fields: Field[];
       initial?: Row;
       save: (r: Row) => Promise<void>;
     } | null>(null);
+  const ActiveEntryForm =
+    dialog?.resourceName === "academic_years" &&
+    (!dialog.initial?.code || dialog.initial?.program_code)
+      ? AcademicYearForm
+      : EntryForm;
   useErrorToast(loginRedirect ? "" : error);
   const [special, setSpecial] = useState<Row[]>(cachedInitial?.extra || []);
   const [signInRoles, setSignInRoles] = useState<SignInRole[]>([]),
@@ -643,6 +650,7 @@ export default function ConnectedPortal({
       if (current.name === "students")
         configured = studentEditForm(configured.fields, configured.initial);
       setDialog({
+        resourceName: current.name,
         title: (row ? "Edit " : "Create ") + current.title,
         fields: configured.fields,
         initial: configured.initial,
@@ -901,7 +909,7 @@ export default function ConnectedPortal({
           openForm={setDialog}
         />
         {dialog && (
-          <EntryForm
+          <ActiveEntryForm
             title={dialog.title}
             fields={dialog.fields}
             initial={dialog.initial}
@@ -1756,7 +1764,7 @@ export default function ConnectedPortal({
         />
       )}{" "}
       {dialog && (
-        <EntryForm
+        <ActiveEntryForm
           key={dialog.title}
           title={dialog.title}
           fields={dialog.fields}

@@ -209,6 +209,10 @@ class ResourceService:
         return record
 
     def business_validation(self, data, record):
+        if record.get("program_code") and record.get("academic_year_code"):
+            year = data["records"].get("academic_years", {}).get(record["academic_year_code"], {})
+            if year.get("program_code") and year["program_code"] != record["program_code"]:
+                raise HTTPException(422, "The academic year does not belong to the selected course")
         if self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
             from .admission_numbers import validate_branch_code
             record["branch_code"] = validate_branch_code(data, record)

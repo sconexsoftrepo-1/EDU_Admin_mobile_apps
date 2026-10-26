@@ -128,16 +128,19 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
     staff_only(user)
     data = request.app.state.store.snapshot()
     years = sorted(rows(data, "academic_years"), key=lambda y: str(y["start_date"]), reverse=True)
+    years = [year for year in years if not program_code or not year.get("program_code") or year["program_code"] == program_code]
     result = {
         "courses": courses(data),
         "academic_years": [{"code": y["code"], "name": y["name"], "start_date": y["start_date"],
-                            "end_date": y["end_date"]} for y in years],
+                            "end_date": y["end_date"], "program_code": y.get("program_code")} for y in years],
         "campuses": [{"code": c["code"], "name": c["name"]} for c in rows(data, "campuses")],
         "documents": [{"key": k, "label": v} for k, v in DOCUMENTS.items()],
         "identity_documents": [{"key": k, "label": v} for k, v in IDENTITY_DOCUMENTS.items()],
     }
     if academic_year_code:
-        _, start = year_of(data, academic_year_code)
+        academic_year, start = year_of(data, academic_year_code)
+        if program_code and academic_year.get("program_code") and academic_year["program_code"] != program_code:
+            raise HTTPException(422, "The academic year does not belong to the selected course")
         if program_code:
             program = data["records"].get("programs", {}).get(program_code)
             if not program:
@@ -211,7 +214,9 @@ def enroll(data, body: EnrollmentInput, actor):
     unknown = set(body.documents) - set(DOCUMENTS)
     if unknown:
         raise HTTPException(422, "Unknown documents: " + ", ".join(sorted(unknown)))
-    _, start_year = year_of(data, choice.academic_year_code)
+    academic_year, start_year = year_of(data, choice.academic_year_code)
+    if academic_year.get("program_code") and academic_year["program_code"] != choice.program_code:
+        raise HTTPException(422, "The academic year does not belong to the selected course")
     batch = pick_batch(data, choice, start_year)
     section_code = pick_section(data, choice, batch, choice.academic_year_code)
     campuses = rows(data, "campuses")
