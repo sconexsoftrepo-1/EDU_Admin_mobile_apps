@@ -1,0 +1,5056 @@
+{
+  "admin": {
+    "screens": {
+      "screens": [
+        {
+          "key": "overview",
+          "title": "Overview",
+          "resource": "summary"
+        },
+        {
+          "key": "dues",
+          "title": "Outstanding fees",
+          "resource": "student_fee_charges"
+        },
+        {
+          "key": "reports",
+          "title": "Finance reports",
+          "resource": "reports"
+        },
+        {
+          "key": "activity",
+          "title": "Activity and audit",
+          "resource": "audit"
+        },
+        {
+          "key": "students",
+          "title": "Students",
+          "resource": "students"
+        },
+        {
+          "key": "admissions",
+          "title": "Admissions",
+          "resource": "admission_applications"
+        },
+        {
+          "key": "collections",
+          "title": "Collections and receipts",
+          "resource": "payments"
+        },
+        {
+          "key": "expenses",
+          "title": "Expenditures",
+          "resource": "expenses"
+        },
+        {
+          "key": "employees",
+          "title": "Employees",
+          "resource": "employees"
+        },
+        {
+          "key": "hostel",
+          "title": "Hostel allocations",
+          "resource": "hostel_allocations"
+        },
+        {
+          "key": "calendar",
+          "title": "Calendar and events",
+          "resource": "calendar_events"
+        },
+        {
+          "key": "announcements",
+          "title": "Announcements",
+          "resource": "announcements"
+        },
+        {
+          "key": "notifications",
+          "title": "Notifications",
+          "resource": "notifications"
+        },
+        {
+          "key": "profile",
+          "title": "My profile",
+          "resource": "profile"
+        }
+      ]
+    },
+    "overview": {
+      "screen": "overview",
+      "title": "Overview",
+      "items": [],
+      "total": 0,
+      "summary": {
+        "currency": "INR",
+        "gross": "50000.00",
+        "discount": "0.00",
+        "scholarship": "0.00",
+        "paid": "10000.00",
+        "outstanding": "40000.00",
+        "internal_collections": "10000.00",
+        "external_collections": "0.00",
+        "external_remitted": "0.00",
+        "recorded_expenses": "0.00"
+      },
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "dues": {
+      "screen": "dues",
+      "title": "Outstanding fees",
+      "items": [
+        {
+          "student_code": "STU1",
+          "name": "Ananya Demo",
+          "gross": "50000.00",
+          "discount": "0.00",
+          "scholarship": "0.00",
+          "paid": "10000.00",
+          "outstanding": "40000.00",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "reports": {
+      "screen": "reports",
+      "title": "Finance reports",
+      "items": [],
+      "total": 0,
+      "summary": {
+        "currency": "INR",
+        "gross": "50000.00",
+        "discount": "0.00",
+        "scholarship": "0.00",
+        "paid": "10000.00",
+        "outstanding": "40000.00",
+        "internal_collections": "10000.00",
+        "external_collections": "0.00",
+        "external_remitted": "0.00",
+        "recorded_expenses": "0.00"
+      },
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "activity": {
+      "screen": "activity",
+      "title": "Activity and audit",
+      "items": [
+        {
+          "code": "AUD-b97f6fd9ecc94cc38f5ab791c55290c5",
+          "actor": "USR-f59e87379c624c86921796b6b93fc993",
+          "action": "login",
+          "resource": "accounts",
+          "entity_code": "USR-f59e87379c624c86921796b6b93fc993",
+          "occurred_at": "2026-10-26T06:00:51.889811+00:00"
+        },
+        {
+          "code": "AUD-2056cc7d26cd41d19c6e6b22d44299a2",
+          "actor": "USR-f59e87379c624c86921796b6b93fc993",
+          "action": "demo_seed",
+          "resource": "institutions",
+          "entity_code": "EDU",
+          "occurred_at": "2026-10-26T06:00:51.853596+00:00"
+        },
+        {
+          "code": "AUD-439a3171dadc46d1b3f8cfecb8b02d5c",
+          "actor": "USR-f59e87379c624c86921796b6b93fc993",
+          "action": "collect",
+          "resource": "payments",
+          "entity_code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+          "occurred_at": "2026-10-26T06:00:51.853094+00:00"
+        }
+      ],
+      "total": 3,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "students": {
+      "screen": "students",
+      "title": "Students",
+      "items": [
+        {
+          "code": "STU1",
+          "campus_code": "MAIN",
+          "admission_number": "ADM-2026-001",
+          "first_name": "Ananya",
+          "last_name": "Demo",
+          "date_of_birth": "2008-06-15",
+          "gender": "female",
+          "admission_date": "2026-06-01",
+          "address": "Demo address",
+          "city": "Chennai",
+          "state": "Tamil Nadu",
+          "postal_code": "600001",
+          "country": "India",
+          "emergency_contact_name": "Priya Demo",
+          "emergency_contact_phone": "9999900001",
+          "status": "active"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "admissions": {
+      "screen": "admissions",
+      "title": "Admissions",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "collections": {
+      "screen": "collections",
+      "title": "Collections and receipts",
+      "items": [
+        {
+          "code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+          "student_code": "STU1",
+          "amount": "10000.00",
+          "currency": "INR",
+          "paid_on": "2026-10-22",
+          "method": "cash",
+          "transaction_reference": "DEMO-COLLECTION-1",
+          "status": "settled",
+          "idempotency_key": "demo-payment-1",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "expenses": {
+      "screen": "expenses",
+      "title": "Expenditures",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "employees": {
+      "screen": "employees",
+      "title": "Employees",
+      "items": [
+        {
+          "code": "EMP-ADMIN",
+          "campus_code": "MAIN",
+          "department_code": "SCI",
+          "first_name": "Kumar",
+          "last_name": "Demo",
+          "employee_type": "staff",
+          "designation": "Administrator",
+          "email": "emp-admin@example.test",
+          "phone": "9999900000",
+          "join_date": "2026-06-01",
+          "employment_type": "permanent",
+          "status": "active"
+        },
+        {
+          "code": "EMP-TEACHER",
+          "campus_code": "MAIN",
+          "department_code": "SCI",
+          "first_name": "Kavitha",
+          "last_name": "Demo",
+          "employee_type": "teacher",
+          "designation": "Lecturer",
+          "email": "emp-teacher@example.test",
+          "phone": "9999900000",
+          "join_date": "2026-06-01",
+          "employment_type": "permanent",
+          "status": "active"
+        },
+        {
+          "code": "EMP-DRIVER",
+          "campus_code": "MAIN",
+          "department_code": "SCI",
+          "first_name": "Ravi",
+          "last_name": "Demo",
+          "employee_type": "staff",
+          "designation": "Driver",
+          "email": "emp-driver@example.test",
+          "phone": "9999900000",
+          "join_date": "2026-06-01",
+          "employment_type": "permanent",
+          "status": "active"
+        }
+      ],
+      "total": 3,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "hostel": {
+      "screen": "hostel",
+      "title": "Hostel allocations",
+      "items": [
+        {
+          "code": "HA1",
+          "student_code": "STU1",
+          "bed_code": "BED1",
+          "start_date": "2026-06-01",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "calendar": {
+      "screen": "calendar",
+      "title": "Calendar and events",
+      "items": [
+        {
+          "code": "EVENT1",
+          "campus_code": "MAIN",
+          "title": "College science day",
+          "starts_at": "2026-11-01T09:00:00Z",
+          "ends_at": "2026-11-01T17:00:00Z",
+          "event_type": "academic"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "create_event",
+          "label": "Create event",
+          "fields": [
+            {
+              "key": "campus_code",
+              "label": "Campus",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "title",
+              "label": "Event title",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "starts_at",
+              "label": "Starts",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "ends_at",
+              "label": "Ends",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "event_type",
+              "label": "Event type",
+              "type": "select",
+              "required": true,
+              "options": [
+                "holiday",
+                "academic",
+                "cultural",
+                "sports",
+                "meeting"
+              ]
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "announcements": {
+      "screen": "announcements",
+      "title": "Announcements",
+      "items": [
+        {
+          "code": "NOTICE1",
+          "campus_code": "MAIN",
+          "title": "Welcome to the academic year",
+          "body": "This is an explicitly seeded local demonstration college.",
+          "published_at": "2026-06-01T00:00:00Z",
+          "author_code": "EMP-ADMIN"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "publish_announcement",
+          "label": "Publish announcement",
+          "fields": [
+            {
+              "key": "campus_code",
+              "label": "Campus",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "title",
+              "label": "Title",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Announcement",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "notifications": {
+      "screen": "notifications",
+      "title": "Notifications",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "read_notification",
+          "label": "Read notification",
+          "fields": [
+            {
+              "key": "notification_code",
+              "label": "Notification code",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        },
+        {
+          "key": "send_alert",
+          "label": "Send alert",
+          "fields": [
+            {
+              "key": "recipient_user_code",
+              "label": "Recipient",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "title",
+              "label": "Title",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Alert message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "push",
+              "label": "Also send a push notification",
+              "type": "boolean",
+              "required": false,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "profile": {
+      "screen": "profile",
+      "title": "My profile",
+      "items": [
+        {
+          "code": "EMP-ADMIN",
+          "campus_code": "MAIN",
+          "department_code": "SCI",
+          "first_name": "Kumar",
+          "last_name": "Demo",
+          "employee_type": "staff",
+          "designation": "Administrator",
+          "email": "emp-admin@example.test",
+          "phone": "9999900000",
+          "join_date": "2026-06-01",
+          "employment_type": "permanent",
+          "status": "active"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "change_password",
+          "label": "Change password",
+          "fields": [
+            {
+              "key": "current_password",
+              "label": "Current password",
+              "type": "password",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "new_password",
+              "label": "New password (12 or more characters)",
+              "type": "password",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-f59e87379c624c86921796b6b93fc993",
+            "name": "demo.admin"
+          },
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "demo.teacher"
+          },
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "demo.parent"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "demo.student"
+          }
+        ],
+        "offerings": [],
+        "students": [],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [
+          {
+            "code": "MAIN",
+            "name": "Main campus"
+          }
+        ],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    }
+  },
+  "teacher": {
+    "screens": {
+      "screens": [
+        {
+          "key": "profile",
+          "title": "My profile",
+          "resource": "profile"
+        },
+        {
+          "key": "classes",
+          "title": "Assigned classes",
+          "resource": "subject_offerings"
+        },
+        {
+          "key": "timetable",
+          "title": "Timetable and period swap",
+          "resource": "timetable_slots"
+        },
+        {
+          "key": "attendance",
+          "title": "Attendance entry",
+          "resource": "student_attendance"
+        },
+        {
+          "key": "assignments",
+          "title": "Homework and assignments",
+          "resource": "assignments"
+        },
+        {
+          "key": "submissions",
+          "title": "Submissions and grading",
+          "resource": "assignment_submissions"
+        },
+        {
+          "key": "syllabus",
+          "title": "Syllabus progress and resources",
+          "resource": "learning_resources"
+        },
+        {
+          "key": "results",
+          "title": "Exam marks",
+          "resource": "exam_results"
+        },
+        {
+          "key": "leave",
+          "title": "Leave requests",
+          "resource": "leave_requests"
+        },
+        {
+          "key": "payslips",
+          "title": "Salary and payslips",
+          "resource": "payslips"
+        },
+        {
+          "key": "tax-documents",
+          "title": "Form 16 and tax documents",
+          "resource": "employee_tax_documents"
+        },
+        {
+          "key": "calendar",
+          "title": "Calendar and events",
+          "resource": "calendar_events"
+        },
+        {
+          "key": "announcements",
+          "title": "Announcements",
+          "resource": "announcements"
+        },
+        {
+          "key": "messages",
+          "title": "Messages",
+          "resource": "messages"
+        },
+        {
+          "key": "notifications",
+          "title": "Notifications",
+          "resource": "notifications"
+        }
+      ]
+    },
+    "profile": {
+      "screen": "profile",
+      "title": "My profile",
+      "items": [
+        {
+          "code": "EMP-TEACHER",
+          "campus_code": "MAIN",
+          "department_code": "SCI",
+          "first_name": "Kavitha",
+          "last_name": "Demo",
+          "employee_type": "teacher",
+          "designation": "Lecturer",
+          "email": "emp-teacher@example.test",
+          "phone": "9999900000",
+          "join_date": "2026-06-01",
+          "employment_type": "permanent",
+          "status": "active"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "change_password",
+          "label": "Change password",
+          "fields": [
+            {
+              "key": "current_password",
+              "label": "Current password",
+              "type": "password",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "new_password",
+              "label": "New password (12 or more characters)",
+              "type": "password",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "classes": {
+      "screen": "classes",
+      "title": "Assigned classes",
+      "items": [
+        {
+          "code": "OFFER1",
+          "subject_code": "SUB1",
+          "section_code": "SEC-A",
+          "teacher_code": "FAC1",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "timetable": {
+      "screen": "timetable",
+      "title": "Timetable and period swap",
+      "items": [
+        {
+          "code": "SLOT1",
+          "offering_code": "OFFER1",
+          "room_code": "ROOM1",
+          "weekday": 1,
+          "start_time": "09:00:00",
+          "end_time": "10:00:00",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_swap",
+          "label": "Request swap",
+          "fields": [
+            {
+              "key": "slot_code",
+              "label": "Your timetable slot",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "target_slot_code",
+              "label": "Requested slot",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [
+          {
+            "code": "SLOT1",
+            "name": "OFFER1 / 1 / 09:00:00"
+          }
+        ],
+        "swap_slots": [
+          {
+            "code": "SLOT1",
+            "name": "OFFER1 / 1 / 09:00:00"
+          }
+        ],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "attendance": {
+      "screen": "attendance",
+      "title": "Attendance entry",
+      "items": [
+        {
+          "code": "SA1",
+          "session_code": "ATT1",
+          "student_code": "STU1",
+          "status": "present",
+          "session_date": "2026-10-22",
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "create_session",
+          "label": "Create session",
+          "fields": [
+            {
+              "key": "offering_code",
+              "label": "Assigned subject offering",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "session_date",
+              "label": "Session date",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "start_time",
+              "label": "Start time",
+              "type": "time",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "end_time",
+              "label": "End time",
+              "type": "time",
+              "required": true,
+              "options": []
+            }
+          ]
+        },
+        {
+          "key": "record_attendance",
+          "label": "Record attendance",
+          "fields": [
+            {
+              "key": "session_code",
+              "label": "Attendance session code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "status",
+              "label": "Attendance",
+              "type": "select",
+              "required": true,
+              "options": [
+                "present",
+                "absent",
+                "late",
+                "excused"
+              ]
+            },
+            {
+              "key": "remarks",
+              "label": "Remarks",
+              "type": "textarea",
+              "required": false,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [
+          {
+            "code": "ATT1",
+            "name": "2026-10-22 / OFFER1"
+          }
+        ],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "assignments": {
+      "screen": "assignments",
+      "title": "Homework and assignments",
+      "items": [
+        {
+          "code": "HW1",
+          "offering_code": "OFFER1",
+          "title": "Motion and forces",
+          "instructions": "Submit your worked examples",
+          "due_at": "2099-10-30T17:00:00Z",
+          "max_marks": "20",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "create_assignment",
+          "label": "Create assignment",
+          "fields": [
+            {
+              "key": "offering_code",
+              "label": "Assigned subject offering",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "title",
+              "label": "Title",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "instructions",
+              "label": "Instructions",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "due_at",
+              "label": "Due at",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "max_marks",
+              "label": "Maximum marks",
+              "type": "number",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "submissions": {
+      "screen": "submissions",
+      "title": "Submissions and grading",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "grade_submission",
+          "label": "Grade submission",
+          "fields": [
+            {
+              "key": "submission_code",
+              "label": "Submission code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "marks",
+              "label": "Marks",
+              "type": "number",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "feedback",
+              "label": "Feedback",
+              "type": "textarea",
+              "required": false,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [
+          {
+            "code": "HW1",
+            "name": "Motion and forces"
+          }
+        ],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "syllabus": {
+      "screen": "syllabus",
+      "title": "Syllabus progress and resources",
+      "items": [
+        {
+          "code": "RES1",
+          "offering_code": "OFFER1",
+          "title": "Semester syllabus",
+          "resource_url": "https://example.org/syllabus",
+          "resource_type": "link",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "publish_resource",
+          "label": "Publish resource",
+          "fields": [
+            {
+              "key": "offering_code",
+              "label": "Subject offering",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "title",
+              "label": "Topic / syllabus progress",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "resource_url",
+              "label": "Resource link",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "resource_type",
+              "label": "Type",
+              "type": "select",
+              "required": true,
+              "options": [
+                "document",
+                "video",
+                "link",
+                "other"
+              ]
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "results": {
+      "screen": "results",
+      "title": "Exam marks",
+      "items": [
+        {
+          "code": "MARK1",
+          "paper_code": "PAPER1",
+          "student_code": "STU1",
+          "marks": "86",
+          "is_absent": false,
+          "grade": "A",
+          "published": true,
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "record_marks",
+          "label": "Record marks",
+          "fields": [
+            {
+              "key": "paper_code",
+              "label": "Exam paper code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "student_code",
+              "label": "Student code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "marks",
+              "label": "Marks",
+              "type": "number",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "grade",
+              "label": "Grade",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "is_absent",
+              "label": "Absent",
+              "type": "boolean",
+              "required": false,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [
+          {
+            "code": "PAPER1",
+            "name": "PAPER1"
+          }
+        ],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "leave": {
+      "screen": "leave",
+      "title": "Leave requests",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_leave",
+          "label": "Request leave",
+          "fields": [
+            {
+              "key": "leave_type_code",
+              "label": "Leave type code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "start_date",
+              "label": "From",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "end_date",
+              "label": "To",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [
+          {
+            "code": "CASUAL",
+            "name": "Casual leave",
+            "annual_days": "12"
+          }
+        ],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "payslips": {
+      "screen": "payslips",
+      "title": "Salary and payslips",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": "payslip"
+    },
+    "tax-documents": {
+      "screen": "tax-documents",
+      "title": "Form 16 and tax documents",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": "tax-document"
+    },
+    "calendar": {
+      "screen": "calendar",
+      "title": "Calendar and events",
+      "items": [
+        {
+          "code": "EVENT1",
+          "campus_code": "MAIN",
+          "title": "College science day",
+          "starts_at": "2026-11-01T09:00:00Z",
+          "ends_at": "2026-11-01T17:00:00Z",
+          "event_type": "academic"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "announcements": {
+      "screen": "announcements",
+      "title": "Announcements",
+      "items": [
+        {
+          "code": "NOTICE1",
+          "campus_code": "MAIN",
+          "title": "Welcome to the academic year",
+          "body": "This is an explicitly seeded local demonstration college.",
+          "published_at": "2026-06-01T00:00:00Z",
+          "author_code": "EMP-ADMIN"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "messages": {
+      "screen": "messages",
+      "title": "Messages",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "start_thread",
+          "label": "Start thread",
+          "fields": [
+            {
+              "key": "recipient_user_code",
+              "label": "Recipient",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "subject",
+              "label": "Subject",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        },
+        {
+          "key": "send_message",
+          "label": "Send message",
+          "fields": [
+            {
+              "key": "thread_code",
+              "label": "Message thread code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    },
+    "notifications": {
+      "screen": "notifications",
+      "title": "Notifications",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "read_notification",
+          "label": "Read notification",
+          "fields": [
+            {
+              "key": "notification_code",
+              "label": "Notification code",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-622a5a5cc42a47aead87d4a9284164d9",
+            "name": "Priya Demo"
+          },
+          {
+            "code": "USR-7810b9b7a9ee41ebae5386c21e04dcec",
+            "name": "Ananya Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": null,
+      "downloads": null
+    }
+  },
+  "parent": {
+    "screens": {
+      "screens": [
+        {
+          "key": "children",
+          "title": "My children",
+          "resource": "students"
+        },
+        {
+          "key": "profile",
+          "title": "My profile",
+          "resource": "profile"
+        },
+        {
+          "key": "fees",
+          "title": "Fees and balances",
+          "resource": "fees"
+        },
+        {
+          "key": "payments",
+          "title": "Payments and receipts",
+          "resource": "payments"
+        },
+        {
+          "key": "attendance",
+          "title": "Attendance",
+          "resource": "student_attendance"
+        },
+        {
+          "key": "leave",
+          "title": "Student leave",
+          "resource": "student_leave_requests"
+        },
+        {
+          "key": "results",
+          "title": "Exam results",
+          "resource": "exam_results"
+        },
+        {
+          "key": "timetable",
+          "title": "Timetable",
+          "resource": "timetable_slots"
+        },
+        {
+          "key": "assignments",
+          "title": "Assignments and performance",
+          "resource": "assignments"
+        },
+        {
+          "key": "syllabus",
+          "title": "Syllabus and resources",
+          "resource": "learning_resources"
+        },
+        {
+          "key": "certificates",
+          "title": "Certificates",
+          "resource": "certificates"
+        },
+        {
+          "key": "hostel",
+          "title": "Hostel and pickup permissions",
+          "resource": "hostel_permissions"
+        },
+        {
+          "key": "transport",
+          "title": "Bus and route",
+          "resource": "transport_allocations"
+        },
+        {
+          "key": "calendar",
+          "title": "Calendar and events",
+          "resource": "calendar_events"
+        },
+        {
+          "key": "announcements",
+          "title": "Announcements",
+          "resource": "announcements"
+        },
+        {
+          "key": "messages",
+          "title": "Teacher messages",
+          "resource": "messages"
+        },
+        {
+          "key": "notifications",
+          "title": "Notifications",
+          "resource": "notifications"
+        }
+      ]
+    },
+    "children": {
+      "screen": "children",
+      "title": "My children",
+      "items": [
+        {
+          "code": "STU1",
+          "campus_code": "MAIN",
+          "admission_number": "ADM-2026-001",
+          "first_name": "Ananya",
+          "last_name": "Demo",
+          "date_of_birth": "2008-06-15",
+          "gender": "female",
+          "admission_date": "2026-06-01",
+          "address": "Demo address",
+          "city": "Chennai",
+          "state": "Tamil Nadu",
+          "postal_code": "600001",
+          "country": "India",
+          "emergency_contact_name": "Priya Demo",
+          "emergency_contact_phone": "9999900001",
+          "status": "active"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "profile": {
+      "screen": "profile",
+      "title": "My profile",
+      "items": [
+        {
+          "code": "PAR1",
+          "first_name": "Priya",
+          "last_name": "Demo",
+          "email": "parent@example.test",
+          "phone": "9999900001"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "change_password",
+          "label": "Change password",
+          "fields": [
+            {
+              "key": "current_password",
+              "label": "Current password",
+              "type": "password",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "new_password",
+              "label": "New password (12 or more characters)",
+              "type": "password",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "fees": {
+      "screen": "fees",
+      "title": "Fees and balances",
+      "items": [
+        {
+          "code": "CHARGE1",
+          "student_code": "STU1",
+          "fee_structure_code": "FEE1",
+          "amount": "50000",
+          "due_date": "2026-10-01",
+          "tax_amount": "0",
+          "fee_head": "Tuition fees",
+          "ownership": "internal",
+          "currency": "INR",
+          "gross": "50000.00",
+          "discount": "0.00",
+          "scholarship": "0.00",
+          "paid": "10000.00",
+          "outstanding": "40000.00",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": {
+        "student_code": "STU1",
+        "currency": "INR",
+        "totals": {
+          "gross": "50000.00",
+          "discount": "0.00",
+          "scholarship": "0.00",
+          "paid": "10000.00",
+          "outstanding": "40000.00"
+        },
+        "course_plans": []
+      },
+      "actions": [
+        {
+          "key": "make_payment",
+          "label": "Make payment",
+          "fields": [
+            {
+              "key": "charge_code",
+              "label": "Fee charge code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "amount",
+              "label": "Amount to pay",
+              "type": "number",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [
+          {
+            "code": "CHARGE1",
+            "name": "Tuition fees \u2014 40000.00"
+          }
+        ],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "payments": {
+      "screen": "payments",
+      "title": "Payments and receipts",
+      "items": [
+        {
+          "code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+          "student_code": "STU1",
+          "amount": "10000.00",
+          "currency": "INR",
+          "paid_on": "2026-10-22",
+          "method": "cash",
+          "transaction_reference": "DEMO-COLLECTION-1",
+          "status": "settled",
+          "idempotency_key": "demo-payment-1",
+          "receipts": [
+            {
+              "code": "RCT-88d18c2a6da14c2b916c69eae01849ea",
+              "payment_code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+              "receipt_number": "EDU-RCT-977b01d471b84d9fb9fcb54e7969b5aa",
+              "issued_on": "2026-10-22"
+            }
+          ],
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "attendance": {
+      "screen": "attendance",
+      "title": "Attendance",
+      "items": [
+        {
+          "code": "SA1",
+          "session_code": "ATT1",
+          "student_code": "STU1",
+          "status": "present",
+          "session_date": "2026-10-22",
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "leave": {
+      "screen": "leave",
+      "title": "Student leave",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_student_leave",
+          "label": "Request student leave",
+          "fields": [
+            {
+              "key": "start_date",
+              "label": "From",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "end_date",
+              "label": "To",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "results": {
+      "screen": "results",
+      "title": "Exam results",
+      "items": [
+        {
+          "code": "MARK1",
+          "paper_code": "PAPER1",
+          "student_code": "STU1",
+          "marks": "86",
+          "is_absent": false,
+          "grade": "A",
+          "published": true,
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "timetable": {
+      "screen": "timetable",
+      "title": "Timetable",
+      "items": [
+        {
+          "code": "SLOT1",
+          "offering_code": "OFFER1",
+          "room_code": "ROOM1",
+          "weekday": 1,
+          "start_time": "09:00:00",
+          "end_time": "10:00:00",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "assignments": {
+      "screen": "assignments",
+      "title": "Assignments and performance",
+      "items": [
+        {
+          "code": "HW1",
+          "offering_code": "OFFER1",
+          "title": "Motion and forces",
+          "instructions": "Submit your worked examples",
+          "due_at": "2099-10-30T17:00:00Z",
+          "max_marks": "20",
+          "my_submission": null,
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "syllabus": {
+      "screen": "syllabus",
+      "title": "Syllabus and resources",
+      "items": [
+        {
+          "code": "RES1",
+          "offering_code": "OFFER1",
+          "title": "Semester syllabus",
+          "resource_url": "https://example.org/syllabus",
+          "resource_type": "link",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "certificates": {
+      "screen": "certificates",
+      "title": "Certificates",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_certificate",
+          "label": "Request certificate",
+          "fields": [
+            {
+              "key": "type_code",
+              "label": "Certificate type code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "roll_number",
+              "label": "Roll number",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [
+          {
+            "code": "BONAFIDE",
+            "name": "Bonafide certificate",
+            "template_reference": "bonafide-v1"
+          }
+        ],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": "certificate"
+    },
+    "hostel": {
+      "screen": "hostel",
+      "title": "Hostel and pickup permissions",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_hostel_permission",
+          "label": "Request hostel permission",
+          "fields": [
+            {
+              "key": "leave_at",
+              "label": "Departure",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "return_at",
+              "label": "Expected return",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "pickup_person_name",
+              "label": "Pickup person",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "pickup_relationship",
+              "label": "Relationship",
+              "type": "select",
+              "required": true,
+              "options": [
+                "parent",
+                "sibling",
+                "guardian",
+                "authorized_relative",
+                "self"
+              ]
+            },
+            {
+              "key": "pickup_contact",
+              "label": "Pickup contact",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "transport": {
+      "screen": "transport",
+      "title": "Bus and route",
+      "items": [
+        {
+          "code": "TA1",
+          "student_code": "STU1",
+          "stop_code": "STOP1",
+          "start_date": "2026-06-01",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "calendar": {
+      "screen": "calendar",
+      "title": "Calendar and events",
+      "items": [
+        {
+          "code": "EVENT1",
+          "campus_code": "MAIN",
+          "title": "College science day",
+          "starts_at": "2026-11-01T09:00:00Z",
+          "ends_at": "2026-11-01T17:00:00Z",
+          "event_type": "academic"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "announcements": {
+      "screen": "announcements",
+      "title": "Announcements",
+      "items": [
+        {
+          "code": "NOTICE1",
+          "campus_code": "MAIN",
+          "title": "Welcome to the academic year",
+          "body": "This is an explicitly seeded local demonstration college.",
+          "published_at": "2026-06-01T00:00:00Z",
+          "author_code": "EMP-ADMIN"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "messages": {
+      "screen": "messages",
+      "title": "Teacher messages",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "start_thread",
+          "label": "Start thread",
+          "fields": [
+            {
+              "key": "recipient_user_code",
+              "label": "Recipient",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "subject",
+              "label": "Subject",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        },
+        {
+          "key": "send_message",
+          "label": "Send message",
+          "fields": [
+            {
+              "key": "thread_code",
+              "label": "Message thread code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "notifications": {
+      "screen": "notifications",
+      "title": "Notifications",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "read_notification",
+          "label": "Read notification",
+          "fields": [
+            {
+              "key": "notification_code",
+              "label": "Notification code",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    }
+  },
+  "student": {
+    "screens": {
+      "screens": [
+        {
+          "key": "profile",
+          "title": "My profile",
+          "resource": "profile"
+        },
+        {
+          "key": "timetable",
+          "title": "Timetable",
+          "resource": "timetable_slots"
+        },
+        {
+          "key": "attendance",
+          "title": "Attendance",
+          "resource": "student_attendance"
+        },
+        {
+          "key": "assignments",
+          "title": "Assignments and submissions",
+          "resource": "assignments"
+        },
+        {
+          "key": "syllabus",
+          "title": "Syllabus and resources",
+          "resource": "learning_resources"
+        },
+        {
+          "key": "results",
+          "title": "Exam results",
+          "resource": "exam_results"
+        },
+        {
+          "key": "fees",
+          "title": "Fees and balances",
+          "resource": "fees"
+        },
+        {
+          "key": "payments",
+          "title": "Payments and receipts",
+          "resource": "payments"
+        },
+        {
+          "key": "certificates",
+          "title": "Certificates",
+          "resource": "certificates"
+        },
+        {
+          "key": "leave",
+          "title": "Leave requests",
+          "resource": "student_leave_requests"
+        },
+        {
+          "key": "library",
+          "title": "Library loans",
+          "resource": "library_loans"
+        },
+        {
+          "key": "hostel",
+          "title": "Hostel permissions",
+          "resource": "hostel_permissions"
+        },
+        {
+          "key": "transport",
+          "title": "Bus and route",
+          "resource": "transport_allocations"
+        },
+        {
+          "key": "calendar",
+          "title": "Calendar and events",
+          "resource": "calendar_events"
+        },
+        {
+          "key": "announcements",
+          "title": "Announcements",
+          "resource": "announcements"
+        },
+        {
+          "key": "messages",
+          "title": "Messages",
+          "resource": "messages"
+        },
+        {
+          "key": "notifications",
+          "title": "Notifications",
+          "resource": "notifications"
+        }
+      ]
+    },
+    "profile": {
+      "screen": "profile",
+      "title": "My profile",
+      "items": [
+        {
+          "code": "STU1",
+          "campus_code": "MAIN",
+          "admission_number": "ADM-2026-001",
+          "first_name": "Ananya",
+          "last_name": "Demo",
+          "date_of_birth": "2008-06-15",
+          "gender": "female",
+          "admission_date": "2026-06-01",
+          "address": "Demo address",
+          "city": "Chennai",
+          "state": "Tamil Nadu",
+          "postal_code": "600001",
+          "country": "India",
+          "emergency_contact_name": "Priya Demo",
+          "emergency_contact_phone": "9999900001",
+          "status": "active"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "change_password",
+          "label": "Change password",
+          "fields": [
+            {
+              "key": "current_password",
+              "label": "Current password",
+              "type": "password",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "new_password",
+              "label": "New password (12 or more characters)",
+              "type": "password",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "timetable": {
+      "screen": "timetable",
+      "title": "Timetable",
+      "items": [
+        {
+          "code": "SLOT1",
+          "offering_code": "OFFER1",
+          "room_code": "ROOM1",
+          "weekday": 1,
+          "start_time": "09:00:00",
+          "end_time": "10:00:00",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "attendance": {
+      "screen": "attendance",
+      "title": "Attendance",
+      "items": [
+        {
+          "code": "SA1",
+          "session_code": "ATT1",
+          "student_code": "STU1",
+          "status": "present",
+          "session_date": "2026-10-22",
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "assignments": {
+      "screen": "assignments",
+      "title": "Assignments and submissions",
+      "items": [
+        {
+          "code": "HW1",
+          "offering_code": "OFFER1",
+          "title": "Motion and forces",
+          "instructions": "Submit your worked examples",
+          "due_at": "2099-10-30T17:00:00Z",
+          "max_marks": "20",
+          "my_submission": null,
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [
+        {
+          "key": "submit_assignment",
+          "label": "Submit assignment",
+          "fields": [
+            {
+              "key": "assignment_code",
+              "label": "Assignment code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "document_url",
+              "label": "Submission link",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [
+          {
+            "code": "HW1",
+            "name": "Motion and forces"
+          }
+        ],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "syllabus": {
+      "screen": "syllabus",
+      "title": "Syllabus and resources",
+      "items": [
+        {
+          "code": "RES1",
+          "offering_code": "OFFER1",
+          "title": "Semester syllabus",
+          "resource_url": "https://example.org/syllabus",
+          "resource_type": "link",
+          "subject": "Applied Physics"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "results": {
+      "screen": "results",
+      "title": "Exam results",
+      "items": [
+        {
+          "code": "MARK1",
+          "paper_code": "PAPER1",
+          "student_code": "STU1",
+          "marks": "86",
+          "is_absent": false,
+          "grade": "A",
+          "published": true,
+          "subject": "Applied Physics",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "fees": {
+      "screen": "fees",
+      "title": "Fees and balances",
+      "items": [
+        {
+          "code": "CHARGE1",
+          "student_code": "STU1",
+          "fee_structure_code": "FEE1",
+          "amount": "50000",
+          "due_date": "2026-10-01",
+          "tax_amount": "0",
+          "fee_head": "Tuition fees",
+          "ownership": "internal",
+          "currency": "INR",
+          "gross": "50000.00",
+          "discount": "0.00",
+          "scholarship": "0.00",
+          "paid": "10000.00",
+          "outstanding": "40000.00",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": {
+        "student_code": "STU1",
+        "currency": "INR",
+        "totals": {
+          "gross": "50000.00",
+          "discount": "0.00",
+          "scholarship": "0.00",
+          "paid": "10000.00",
+          "outstanding": "40000.00"
+        },
+        "course_plans": []
+      },
+      "actions": [
+        {
+          "key": "make_payment",
+          "label": "Make payment",
+          "fields": [
+            {
+              "key": "charge_code",
+              "label": "Fee charge code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "amount",
+              "label": "Amount to pay",
+              "type": "number",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [
+          {
+            "code": "CHARGE1",
+            "name": "Tuition fees \u2014 40000.00"
+          }
+        ],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "payments": {
+      "screen": "payments",
+      "title": "Payments and receipts",
+      "items": [
+        {
+          "code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+          "student_code": "STU1",
+          "amount": "10000.00",
+          "currency": "INR",
+          "paid_on": "2026-10-22",
+          "method": "cash",
+          "transaction_reference": "DEMO-COLLECTION-1",
+          "status": "settled",
+          "idempotency_key": "demo-payment-1",
+          "receipts": [
+            {
+              "code": "RCT-88d18c2a6da14c2b916c69eae01849ea",
+              "payment_code": "PAY-460a8dcdccc249d986bce3d0b21ef8cc",
+              "receipt_number": "EDU-RCT-977b01d471b84d9fb9fcb54e7969b5aa",
+              "issued_on": "2026-10-22"
+            }
+          ],
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "certificates": {
+      "screen": "certificates",
+      "title": "Certificates",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_certificate",
+          "label": "Request certificate",
+          "fields": [
+            {
+              "key": "type_code",
+              "label": "Certificate type code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "roll_number",
+              "label": "Roll number",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [
+          {
+            "code": "BONAFIDE",
+            "name": "Bonafide certificate",
+            "template_reference": "bonafide-v1"
+          }
+        ],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": "certificate"
+    },
+    "leave": {
+      "screen": "leave",
+      "title": "Leave requests",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_student_leave",
+          "label": "Request student leave",
+          "fields": [
+            {
+              "key": "start_date",
+              "label": "From",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "end_date",
+              "label": "To",
+              "type": "date",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "library": {
+      "screen": "library",
+      "title": "Library loans",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "hostel": {
+      "screen": "hostel",
+      "title": "Hostel permissions",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "request_hostel_permission",
+          "label": "Request hostel permission",
+          "fields": [
+            {
+              "key": "leave_at",
+              "label": "Departure",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "return_at",
+              "label": "Expected return",
+              "type": "datetime-local",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "reason",
+              "label": "Reason",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "pickup_person_name",
+              "label": "Pickup person",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "pickup_relationship",
+              "label": "Relationship",
+              "type": "select",
+              "required": true,
+              "options": [
+                "parent",
+                "sibling",
+                "guardian",
+                "authorized_relative",
+                "self"
+              ]
+            },
+            {
+              "key": "pickup_contact",
+              "label": "Pickup contact",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "transport": {
+      "screen": "transport",
+      "title": "Bus and route",
+      "items": [
+        {
+          "code": "TA1",
+          "student_code": "STU1",
+          "stop_code": "STOP1",
+          "start_date": "2026-06-01",
+          "student_name": "Ananya Demo"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "calendar": {
+      "screen": "calendar",
+      "title": "Calendar and events",
+      "items": [
+        {
+          "code": "EVENT1",
+          "campus_code": "MAIN",
+          "title": "College science day",
+          "starts_at": "2026-11-01T09:00:00Z",
+          "ends_at": "2026-11-01T17:00:00Z",
+          "event_type": "academic"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "announcements": {
+      "screen": "announcements",
+      "title": "Announcements",
+      "items": [
+        {
+          "code": "NOTICE1",
+          "campus_code": "MAIN",
+          "title": "Welcome to the academic year",
+          "body": "This is an explicitly seeded local demonstration college.",
+          "published_at": "2026-06-01T00:00:00Z",
+          "author_code": "EMP-ADMIN"
+        }
+      ],
+      "total": 1,
+      "summary": null,
+      "actions": [],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "messages": {
+      "screen": "messages",
+      "title": "Messages",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "start_thread",
+          "label": "Start thread",
+          "fields": [
+            {
+              "key": "recipient_user_code",
+              "label": "Recipient",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "subject",
+              "label": "Subject",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        },
+        {
+          "key": "send_message",
+          "label": "Send message",
+          "fields": [
+            {
+              "key": "thread_code",
+              "label": "Message thread code",
+              "type": "text",
+              "required": true,
+              "options": []
+            },
+            {
+              "key": "body",
+              "label": "Message",
+              "type": "textarea",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    },
+    "notifications": {
+      "screen": "notifications",
+      "title": "Notifications",
+      "items": [],
+      "total": 0,
+      "summary": null,
+      "actions": [
+        {
+          "key": "read_notification",
+          "label": "Read notification",
+          "fields": [
+            {
+              "key": "notification_code",
+              "label": "Notification code",
+              "type": "text",
+              "required": true,
+              "options": []
+            }
+          ]
+        }
+      ],
+      "students": [
+        {
+          "code": "STU1",
+          "name": "Ananya Demo"
+        }
+      ],
+      "lookups": {
+        "contacts": [
+          {
+            "code": "USR-de28ad5d206f49108e8b9bc0217cea4d",
+            "name": "Kavitha Demo"
+          }
+        ],
+        "offerings": [
+          {
+            "code": "OFFER1",
+            "subject_code": "SUB1",
+            "section_code": "SEC-A",
+            "teacher_code": "FAC1",
+            "name": "Applied Physics / SEC-A"
+          }
+        ],
+        "students": [
+          {
+            "code": "STU1",
+            "name": "Ananya Demo"
+          }
+        ],
+        "leave_types": [],
+        "certificate_types": [],
+        "campuses": [],
+        "charges": [],
+        "assignments": [],
+        "submissions": [],
+        "sessions": [],
+        "papers": [],
+        "slots": [],
+        "swap_slots": [],
+        "threads": []
+      },
+      "selected_student_code": "STU1",
+      "downloads": null
+    }
+  }
+}
