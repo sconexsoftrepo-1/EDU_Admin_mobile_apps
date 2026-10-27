@@ -84,3 +84,29 @@ def test_migration_merges_login_and_remaps_its_relationships():
     assert aliases['old-link'] == 'current-link'
     assert allowed == {'current'}
     assert source['records']['users'][0]['code'] == 'old'
+
+
+def test_staff_schema_check_requires_both_validated_constraints():
+    import importlib.util
+    from pathlib import Path
+    path = Path(__file__).parents[1] / 'tools/setup_staff_schema.py'
+    spec = importlib.util.spec_from_file_location('staff_schema', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    class Checks:
+        def __init__(self, rows):
+            self.rows = rows
+        def execute(self, sql, params):
+            assert params == ('dbo',)
+        def fetchall(self):
+            return self.rows
+
+    compatible = [
+        ('employees_employee_type_check', "employee_type IN ('teacher','staff','labour')", False, False),
+        ('employees_employment_type_check', "employment_type IN ('permanent','contract','part_time','daily_wage')", False, False),
+    ]
+    assert module.compatible(Checks(compatible), 'dbo')
+    assert not module.compatible(Checks(compatible[:1]), 'dbo')
+    assert not module.compatible(Checks([(compatible[0][0], "employee_type IN ('teacher','staff')", False, False), compatible[1]]), 'dbo')
+    assert not module.compatible(Checks([(*compatible[0][:2], False, True), compatible[1]]), 'dbo')

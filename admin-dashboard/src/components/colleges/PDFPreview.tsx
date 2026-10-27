@@ -1,18 +1,13 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Download, ExternalLink, X } from "lucide-react";
 const PDFCanvasViewer = dynamic(() => import("./PDFCanvasViewer"), {
   ssr: false,
   loading: () => <p role="status">Loading PDF viewer…</p>,
 });
-export default function PDFPreview({
-  slug,
-  onDownload,
-}: {
-  slug: string;
-  onDownload: (name: string) => boolean;
-}) {
+/** One listener per college page; generated reports keep the same preview/download bytes. */
+export default function PDFPreview() {
   const [file, setFile] = useState<{
     name: string;
     url: string;
@@ -25,16 +20,18 @@ export default function PDFPreview({
         event as CustomEvent<{
           name: string;
           blob: Blob;
+          trigger?: HTMLElement | null;
         }>
       ).detail;
       if (!detail || !(detail.blob instanceof Blob)) return;
-      trigger.current = document.activeElement as HTMLElement;
+      trigger.current =
+        detail.trigger || (document.activeElement as HTMLElement);
       setFile({ name: detail.name, url: URL.createObjectURL(detail.blob) });
     };
     window.addEventListener("college:pdf-preview", open);
     return () => window.removeEventListener("college:pdf-preview", open);
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!file) return;
     const d = dialog.current;
     const previous = document.body.style.overflow;
@@ -44,7 +41,7 @@ export default function PDFPreview({
       d?.close();
       URL.revokeObjectURL(file.url);
       document.body.style.overflow = previous;
-      trigger.current?.focus();
+      trigger.current?.focus({ preventScroll: true });
     };
   }, [file]);
   return file ? (
@@ -69,13 +66,7 @@ export default function PDFPreview({
         </button>
       </header>
       <nav aria-label="PDF preview actions">
-        <a
-          href={file.url}
-          download={file.name + ".pdf"}
-          onClick={(e) => {
-            if (!onDownload(file.name)) e.preventDefault();
-          }}
-        >
+        <a href={file.url} download={file.name + ".pdf"}>
           <Download size={15} /> Download PDF
         </a>
         <a href={file.url} target="_blank" rel="noopener noreferrer">

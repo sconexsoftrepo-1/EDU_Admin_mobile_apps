@@ -464,10 +464,25 @@ dialog.edu-record-drawer[open] {
   gap: 5px;
   flex-shrink: 0;
 }
-.edu-file-preview-header button {
+.edu-file-preview-header button,
+.edu-file-preview-header .edu-file-original {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: 32px;
   padding: 6px 8px;
   font-size: 11px;
+}
+.edu-file-preview-header .edu-file-original {
+  border: 1px solid #e5dac8;
+  border-radius: 8px;
+  background: #fff;
+  color: #62513c;
+  text-decoration: none;
+}
+.edu-file-preview-header > div:last-child {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .edu-file-preview .edu-image-controls {
   margin-bottom: 10px;

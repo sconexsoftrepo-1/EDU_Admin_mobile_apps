@@ -304,14 +304,10 @@ def validate(
     user=Depends(require("import_jobs", "create")),
 ):
     definition = next(
-        (f for f in CONTRACT["files"] if f["file"] == body.filename), None
+        (f for f in CONTRACT["files"] if f["file"].casefold() == body.filename.strip().casefold()), None
     )
-    if not definition:
-        raise HTTPException(
-            422, "Select one of the 13 supplied client workbook filenames"
-        )
     allowed = role_limit(request.app.state.store.snapshot(), user, "import_files")
-    if allowed is not None and body.filename not in allowed:
+    if definition and allowed is not None and definition["file"] not in allowed:
         raise HTTPException(403, "Your role cannot import this workbook")
     try:
         raw = base64.b64decode(body.content_base64, validate=True)
@@ -321,6 +317,29 @@ def validate(
         workbook = load_workbook(io.BytesIO(raw), read_only=True, data_only=False)
     except Exception:
         raise HTTPException(422, "Invalid or oversized XLSX workbook")
+    if not definition:
+        # Browser downloads and staff edits often rename an otherwise valid
+        # template. Identify its contract from sheet names and row-6 headers.
+        candidates = []
+        for candidate in CONTRACT["files"]:
+            if not all(sheet["name"] in workbook.sheetnames for sheet in candidate["sheets"]):
+                continue
+            matches = True
+            for sheet in candidate["sheets"]:
+                headers = next(workbook[sheet["name"]].iter_rows(min_row=CONTRACT["header_row"], max_row=CONTRACT["header_row"], values_only=True), ())
+                expected = [normalize(field["label"]) for field in sheet["fields"]]
+                if [normalize(header) for header in headers[:len(expected)]] != expected:
+                    matches = False
+                    break
+            if matches:
+                candidates.append(candidate)
+        if len(candidates) != 1:
+            workbook.close()
+            raise HTTPException(422, "Workbook does not match a supplied import template. Keep the template's sheet names and headers in row 6.")
+        definition = candidates[0]
+    if allowed is not None and definition["file"] not in allowed:
+        workbook.close()
+        raise HTTPException(403, "Your role cannot import this workbook")
     data = request.app.state.store.snapshot()
     trial = copy.deepcopy(data)
     rows = []
@@ -420,7 +439,7 @@ def validate(
         job = {
             "code": code,
             "uploaded_by_code": user["code"],
-            "filename": body.filename,
+            "filename": definition["file"],
             "file_sha256": hashlib.sha256(raw).hexdigest(),
             "status": "validated" if not errors else "failed",
             "total_rows": len(rows) + len(errors),

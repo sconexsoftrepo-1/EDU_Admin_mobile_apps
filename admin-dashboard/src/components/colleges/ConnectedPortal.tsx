@@ -145,7 +145,11 @@ function specialRows(screen: string): Promise<Row[]> {
 type ScreenSnapshot = {
   spec: Screen;
   first: Resource | null;
-  records: { items: Row[]; total: number };
+  records: {
+    items: Row[];
+    total: number;
+    filter_options?: Record<string, string[]>;
+  };
   totals: Row | null;
   extra: Row[];
 };
@@ -202,6 +206,8 @@ export default function ConnectedPortal({
     {},
   );
   const [pageOffset, setPageOffset] = useState(0);
+  const [validatingWorkbook, setValidatingWorkbook] = useState(false);
+  const studentFilterRequest = useRef({ path: "", query: "" });
   const [studentInfo, setStudentInfo] = useState<Row | null>(null);
   const [fileOwner, setFileOwner] = useState<{
     personKind: "student" | "employee" | "application";
@@ -262,6 +268,7 @@ export default function ConnectedPortal({
       setResource(snapshot.first);
       setRows(snapshot.records.items);
       setTotal(snapshot.records.total);
+      setFilterOptions(snapshot.records.filter_options || {});
       setPageOffset(0);
       setSummary(snapshot.totals);
       setSpecial(snapshot.extra);
@@ -285,7 +292,7 @@ export default function ConnectedPortal({
           : rawSpec;
         const first = spec.resources[0] || null;
         const [records, totals, extra] = await Promise.all([
-          first
+          first && !STAFF_SCREENS[name]
             ? api.workspace.list(first.path, 0, pageSize(first.name))
             : Promise.resolve({ items: [], total: 0 }),
           FINANCE_SUMMARY_SCREENS.includes(name)
@@ -458,18 +465,6 @@ export default function ConnectedPortal({
     };
   }, [initialize, initialSelection, sessionAccount, sessionRole, loginError]);
   useEffect(() => {
-    if (!account || loginRedirect) return;
-    const revalidate = () => {
-      if (document.visibilityState === "visible") void load(selected);
-    };
-    window.addEventListener("focus", revalidate);
-    const timer = window.setInterval(revalidate, 60_000);
-    return () => {
-      window.removeEventListener("focus", revalidate);
-      window.clearInterval(timer);
-    };
-  }, [account, loginRedirect, load, selected]);
-  useEffect(() => {
     if (account) return;
     let active = true;
     void api.auth
@@ -571,18 +566,30 @@ export default function ConnectedPortal({
       }
     }
   }
+  const studentResourcePath =
+    resource?.name === "students" ? resource.path : "";
   useEffect(() => {
-    if (selected !== "student-enrollment" || resource?.name !== "students")
-      return;
+    if (selected !== "student-enrollment" || !studentResourcePath) return;
+    const query = JSON.stringify({ columnFilters, filter });
+    if (studentFilterRequest.current.path !== studentResourcePath) {
+      studentFilterRequest.current = { path: studentResourcePath, query: "" };
+      // The screen's initial request already loaded the unfiltered records.
+      if (!filter && Object.keys(columnFilters).length === 0) {
+        studentFilterRequest.current.query = query;
+        return;
+      }
+    }
+    if (studentFilterRequest.current.query === query) return;
     let active = true;
     const timer = window.setTimeout(async () => {
+      studentFilterRequest.current = { path: studentResourcePath, query };
       const sequence = ++requestSequence.current;
       setRefreshing(true);
       try {
         const result = await api.workspace.list(
-          resource.path,
+          studentResourcePath,
           0,
-          pageSize(resource.name),
+          pageSize("students"),
           { column_filters: JSON.stringify(columnFilters), search: filter },
         );
         if (active && sequence === requestSequence.current) {
@@ -604,7 +611,7 @@ export default function ConnectedPortal({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [selected, resource, columnFilters, filter]);
+  }, [selected, studentResourcePath, columnFilters, filter]);
   const edit = async (row?: Row) => {
     if (!resource || (!row && selected === "student-enrollment")) return;
     const current = resource;
@@ -1090,7 +1097,11 @@ export default function ConnectedPortal({
             )}
             <button
               className="edu-icon-button"
-              onClick={() => load(selected)}
+              onClick={() =>
+                selected === "student-enrollment" && resource
+                  ? refreshResource(resource)
+                  : load(selected)
+              }
               disabled={busy}
               aria-label="Refresh"
               title="Refresh"
@@ -1239,22 +1250,49 @@ export default function ConnectedPortal({
                   label="Client workbook (.xlsx)"
                   accept=".xlsx"
                   placeholder="No workbook chosen"
+                  disabled={validatingWorkbook}
                   onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
+                    setError("");
+                    if (!/\.xlsx$/i.test(file.name)) {
+                      setError(
+                        "Choose an Excel workbook (.xlsx), using a supplied import template.",
+                      );
+                      return;
+                    }
+                    if (file.size > 700000) {
+                      setError(
+                        "Choose an XLSX workbook up to 700 KB. Remove unused sheets or split large imports into separate workbooks.",
+                      );
+                      return;
+                    }
+                    setValidatingWorkbook(true);
                     try {
                       const result = await api.imports.validate({
                         filename: file.name,
                         content_base64: await fileToBase64(file),
                       });
                       setSpecial([result]);
-                      toast.success(`${file.name} validated`);
+                      if (Number(result.failed_rows) > 0)
+                        toast.warning(
+                          "Workbook needs corrections",
+                          `${result.failed_rows} rows or sheets need attention. Review the validation errors before importing.`,
+                        );
+                      else toast.success(`${file.name} validated`);
                       if (resource) await refreshResource(resource);
                     } catch (err) {
                       setError(errorText(err));
+                    } finally {
+                      setValidatingWorkbook(false);
                     }
                   }}
                 />
+                <small>
+                  {validatingWorkbook
+                    ? "Checking workbook…"
+                    : "XLSX up to 700 KB. Keep the supplied sheet names and headers in row 6."}
+                </small>
               </div>
             )}
             {selected === "forms" && (
@@ -1308,7 +1346,7 @@ export default function ConnectedPortal({
                 sessionScreens?.find((s) => s.key === selected)?.title ||
                 pretty(selected)
               }
-              onRefresh={() => load(selected)}
+              onRefresh={() => setStaffReload((n) => n + 1)}
               onAdd={() => setStaffForm(true)}
             />
           )}
@@ -1754,7 +1792,8 @@ export default function ConnectedPortal({
           }}
           onEnrolled={() => {
             clearWorkspaceCache();
-            void load(selected);
+            if (resource?.name === "students") void refreshResource(resource);
+            else void load(selected);
           }}
         />
       )}

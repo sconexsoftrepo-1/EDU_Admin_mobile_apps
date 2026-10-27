@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { CollegeStore } from "./CollegeStore";
 import { Toaster } from "./toast";
+import PDFPreview from "./PDFPreview";
 import "./brand-buttons.css";
 import "./data-tables.css";
 export default function CollegeWorkspaceProvider({
@@ -16,6 +17,7 @@ export default function CollegeWorkspaceProvider({
   return (
     <>
       {portal ? <CollegeStore slug={slug}>{children}</CollegeStore> : children}
+      <PDFPreview />
       <Toaster />
     </>
   );
