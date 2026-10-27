@@ -113,6 +113,14 @@ export interface StaffOnboardingResult {
   salary_components: Row[];
 }
 
+export interface StaffDetail {
+  employee: Row;
+  profile: Row | null;
+  role?: Row | null;
+  department?: string | null;
+  salary_components: Row[];
+}
+
 /** A row of the staff tables (numbers masked). */
 export interface StaffRow {
   employee_id: string;

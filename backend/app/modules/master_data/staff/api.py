@@ -20,7 +20,7 @@ from app.core.resources import staff_only
 from app.core.security import current_user
 from app.core.storage import audit, new_code
 
-from ..onboarding.api import create, department_for, need
+from ..onboarding.api import create, department_for, need, table_service
 from .schemas import StaffOnboardingInput
 
 router = APIRouter(prefix="/master-data/staff-onboarding", tags=["Master data entry"])
@@ -94,10 +94,17 @@ def salary_summary(body: StaffOnboardingInput):
             "ctc_annual": str(money(s.ctc_annual) if s.ctc_annual is not None else earnings * 12)}
 
 
-def onboard(data, body: StaffOnboardingInput, actor):
-    if any(p.get("aadhaar_number") == body.aadhaar_number for p in rows(data, PROFILES)):
+def onboard(data, body: StaffOnboardingInput, actor, employee_code=None):
+    existing = data["records"].get("employees", {}).get(employee_code) if employee_code else None
+    if employee_code and not existing:
+        raise HTTPException(404, "Employee not found")
+    if existing and existing.get("employee_type") != EMPLOYEE_TYPE[body.kind]:
+        raise HTTPException(422, "Staff kind cannot be changed through onboarding edits")
+    old_profile = next((p for p in rows(data, PROFILES) if p["employee_code"] == employee_code), {})
+    others = [p for p in rows(data, PROFILES) if p["employee_code"] != employee_code]
+    if any(p.get("aadhaar_number") == body.aadhaar_number for p in others):
         raise HTTPException(409, "An employee with this Aadhaar number already exists")
-    if body.pan_number and any(p.get("pan_number") == body.pan_number for p in rows(data, PROFILES)):
+    if body.pan_number and any(p.get("pan_number") == body.pan_number for p in others):
         raise HTTPException(409, "An employee with this PAN already exists")
     if body.kind != "labour" and not body.qualification:
         raise HTTPException(422, "Choose the highest qualification")
@@ -105,14 +112,14 @@ def onboard(data, body: StaffOnboardingInput, actor):
         raise HTTPException(422, "Enter the phone number and email")
     summary = salary_summary(body)
     campuses = rows(data, "campuses")
-    campus = body.job.campus_code or (campuses[0]["code"] if campuses else None)
+    campus = body.job.campus_code or (existing or {}).get("campus_code") or (campuses[0]["code"] if campuses else None)
     if not campus:
         raise HTTPException(409, "Create the campus first (Settings)")
     department = department_for(data, body.job.department or DEFAULT_DEPARTMENT[body.kind], campus, actor)
 
-    employee = create(data, "employees", {
-        **body.personal.model_dump(mode="json", exclude_none=True),
-        "code": next_employee_id(data),
+    values = {
+        **body.personal.model_dump(mode="json", exclude_none=not bool(existing)),
+        "code": employee_code or next_employee_id(data),
         "campus_code": campus,
         "department_code": department,
         "employee_type": EMPLOYEE_TYPE[body.kind],
@@ -120,8 +127,12 @@ def onboard(data, body: StaffOnboardingInput, actor):
         "join_date": body.job.join_date.isoformat(),
         "employment_type": "daily_wage" if body.kind == "labour" and body.job.employment_type == "permanent"
         else body.job.employment_type,
-        "status": "active",
-    }, actor)
+        "status": (existing or {}).get("status", "active"),
+    }
+    if existing:
+        employee = table_service("employees").update(data, employee_code, values, actor)
+    else:
+        employee = create(data, "employees", values, actor)
     q = body.qualification
     qualification_text = (f"{q.level.replace('_', ' ').title()}" + (f" — {q.specialization}" if q.specialization else "")
                           if q else None)
@@ -129,22 +140,34 @@ def onboard(data, body: StaffOnboardingInput, actor):
                 if e.from_date) // 365
     role = None
     if body.kind == "teaching":
-        role = create(data, "teachers", {"employee_code": employee["code"], "qualification": qualification_text,
-                                         "specialization": q.specialization, "experience_years": years}, actor)
+        table = "teachers"
+        role_values = {"employee_code": employee["code"], "qualification": qualification_text,
+                       "specialization": q.specialization, "experience_years": years}
     elif body.kind == "non_teaching":
-        role = create(data, "staff_profiles", {"employee_code": employee["code"],
-                                               "responsibility": body.job.designation}, actor)
+        table = "staff_profiles"
+        role_values = {"employee_code": employee["code"], "responsibility": body.job.designation}
+    if body.kind != "labour":
+        old_role = next((r for r in rows(data, table) if r["employee_code"] == employee["code"]), None)
+        role = (table_service(table).update(data, old_role["code"], role_values, actor)
+                if old_role else create(data, table, role_values, actor))
 
     components = []
+    old_components = [c for c in rows(data, "employee_salary_components") if c["employee_code"] == employee["code"]]
     if body.kind != "labour":
-        for c in body.salary.components:
-            components.append(create(data, "employee_salary_components", {
+        for i, c in enumerate(body.salary.components):
+            component_values = {
                 "employee_code": employee["code"], "component": c.component, "component_type": c.component_type,
-                "amount": str(money(c.amount)), "effective_from": body.job.join_date.isoformat()}, actor))
+                "amount": str(money(c.amount)), "effective_from": body.job.join_date.isoformat()}
+            service = table_service("employee_salary_components")
+            components.append(service.update(data, old_components[i]["code"], component_values, actor)
+                              if i < len(old_components) else create(data, "employee_salary_components", component_values, actor))
+    for c in old_components[len(components):]:
+        table_service("employee_salary_components").delete(data, c["code"], actor)
 
     b = body.bank
     profile = {
-        "code": new_code("EMPP"),
+        **old_profile,
+        "code": old_profile.get("code") or new_code("EMPP"),
         "employee_code": employee["code"],
         "staff_kind": body.kind,
         "qualification_level": q.level if q else None,
@@ -160,12 +183,13 @@ def onboard(data, body: StaffOnboardingInput, actor):
         "previous_experience": [e.model_dump(mode="json") for e in body.previous_experience],
         "employment_history": [h.model_dump(mode="json") for h in body.employment_history],
         "achievements": [a.model_dump(mode="json") for a in body.achievements],
-        "document_checklist": checklist(body),
+        "document_checklist": {key: {**item, **(old_profile.get("document_checklist", {}).get(key, {})), "label": item["label"]}
+                               for key, item in checklist(body).items()},
         **summary,
-        "created_by_user_code": actor,
+        "created_by_user_code": old_profile.get("created_by_user_code", actor),
     }
     data["records"].setdefault(PROFILES, {})[profile["code"]] = profile
-    audit(data, actor, "create", PROFILES, profile["code"])
+    audit(data, actor, "edit" if existing else "create", PROFILES, profile["code"])
     return {"employee": employee, "role": role, "profile": profile, "salary_components": components}
 
 
@@ -237,4 +261,21 @@ def staff_detail(employee_code: str, request: Request, user=Depends(current_user
         raise HTTPException(404, "Employee not found")
     profile = next((p for p in rows(data, PROFILES) if p["employee_code"] == employee_code), None)
     components = [c for c in rows(data, "employee_salary_components") if c["employee_code"] == employee_code]
-    return {"employee": employee, "profile": profile, "salary_components": components}
+    role = next((r for table in ("teachers", "staff_profiles") for r in rows(data, table)
+                 if r["employee_code"] == employee_code), None)
+    department = data["records"].get("departments", {}).get(employee.get("department_code"), {})
+    return {"employee": employee, "profile": profile, "salary_components": components,
+            "role": role, "department": department.get("name")}
+
+
+@router.put("/{employee_code}")
+def update_staff(employee_code: str, body: StaffOnboardingInput, request: Request, user=Depends(current_user)):
+    """Edit the complete onboarding record atomically, retaining employee and document IDs."""
+    staff_only(user)
+    with request.app.state.store.transaction() as data:
+        grants = [("employees", "edit")]
+        if body.kind != "labour":
+            grants.extend([("teachers" if body.kind == "teaching" else "staff_profiles", "edit"),
+                           ("employee_salary_components", "edit")])
+        need(data, user, *grants)
+        return onboard(data, body, user["code"], employee_code)

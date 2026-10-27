@@ -7,6 +7,7 @@ import { headerLabel } from "@/lib/colleges/export-table";
 import { formatDate } from "./DateInput";
 import SideDrawer from "./SideDrawer";
 import { PersonFileList } from "./PersonFiles";
+import RecordDetailTabs from "./RecordDetailTabs";
 
 const hidden = new Set([
   "code",
@@ -43,7 +44,7 @@ function valueText(value: unknown, key: string): string {
     return formatDate(value.slice(0, 10));
   return String(value).replaceAll("_", " ");
 }
-function RegisteredValues({ value }: { value: Row }) {
+export function RegisteredValues({ value }: { value: Row }) {
   return (
     <dl className="edu-student-values">
       {Object.entries(value)
@@ -193,22 +194,11 @@ export default function StudentEnrollmentDetails({
           {valueText(person.status, "status")}
         </span>
       </div>
-      <nav className="edu-detail-tabs" aria-label="Student information">
-        <button
-          type="button"
-          aria-current={tab === "details" ? "page" : undefined}
-          onClick={() => setTab("details")}
-        >
-          Registered details
-        </button>
-        <button
-          type="button"
-          aria-current={tab === "files" ? "page" : undefined}
-          onClick={() => setTab("files")}
-        >
-          Documents & files
-        </button>
-      </nav>
+      <RecordDetailTabs
+        active={tab}
+        onChange={setTab}
+        label="Student information"
+      />
       {error && (
         <p className="edu-error" role="alert">
           {error}

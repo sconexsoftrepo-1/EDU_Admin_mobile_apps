@@ -1,4 +1,64 @@
 /* Staff onboarding form (extends the enrollment side screen) and staff tables. */
+.stf-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.stf-row-actions button {
+  min-width: 36px;
+  min-height: 36px;
+}
+.stf-fields {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.stf-edit-content.enw-backdrop {
+  position: static;
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+.stf-edit-content .stf-shell {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.stf-edit-content .enw-top {
+  display: none;
+}
+.stf-edit-content .enw-body {
+  overflow: visible;
+  padding: 0;
+}
+.stf-edit-content .enw-footer {
+  position: sticky;
+  bottom: -26px;
+  margin: 20px -30px -26px;
+  z-index: 2;
+}
+.stf-edit-content .enw-error {
+  margin-bottom: 16px;
+}
+@media (max-width: 680px) {
+  .stf-edit-content .enw-footer {
+    bottom: -18px;
+    margin-inline: -14px;
+    margin-bottom: -18px;
+  }
+  .stf-row-actions button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 .stf-id {
   margin-left: auto;
   display: grid;
