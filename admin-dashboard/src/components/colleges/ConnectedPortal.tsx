@@ -22,12 +22,9 @@ import Link from "next/link";
 import {
   ArrowRight,
   Download,
-  Eye,
-  EyeOff,
   FileText,
   Info,
   RefreshCw,
-  Shield,
   Plus,
   Search,
 } from "lucide-react";
@@ -90,7 +87,7 @@ import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
 import { toast, useErrorToast } from "./toast";
-import RoleSelect from "./RoleSelect";
+import CollegeLogin from "./CollegeLogin";
 import UploadBox from "./UploadBox";
 import IconAction from "./IconAction";
 import { formatDate } from "./DateInput";
@@ -247,7 +244,6 @@ export default function ConnectedPortal({
   const [special, setSpecial] = useState<Row[]>(cachedInitial?.extra || []);
   const [signInRoles, setSignInRoles] = useState<SignInRole[]>([]),
     [signInRole, setSignInRole] = useState(""),
-    [showPassword, setShowPassword] = useState(false),
     [signingIn, setSigningIn] = useState(false);
   const [configuration, setConfiguration] = useState<{
     kind: "role" | "form" | "account";
@@ -788,107 +784,18 @@ export default function ConnectedPortal({
     );
   if (!account)
     return (
-      <div
-        className="college-login"
-        style={{ "--college-accent": college.accent } as React.CSSProperties}
-      >
-        <div className="college-login-art">
-          <Image
-            src={`/assets/colleges-institutions/${college.slug}/campus.webp`}
-            alt="Campus"
-            fill
-            sizes="(max-width: 960px) 100vw, 55vw"
-          />
-          <div>
-            <Link href={collegeRoot(college)}>Back to website</Link>
-            <h1>
-              Your campus.
-              <br />
-              Connected.
-            </h1>
-            <p>
-              One place for the people, learning, and everyday work that make{" "}
-              {college.short}.
-            </p>
-            <span>{college.short} · Campus workspace</span>
-          </div>
-        </div>
-        <div className="college-login-form">
-          <div className="college-login-heading">
-            <Image
-              src="/assets/pragathilogo.jpg"
-              alt="Pragathi College logo"
-              width={60}
-              height={66}
-            />
-            <div>
-              {/* <h2>Welcome to {college.short}.</h2> */}
-              <h2>Welcome to Pragathi College.</h2>
-              <p>Sign in to your campus workspace.</p>
-            </div>
-          </div>
-          <form onSubmit={login} aria-busy={signingIn}>
-            <div className="role-select-field">
-              <span>Role</span>
-              <RoleSelect
-                options={signInRoles}
-                value={signInRole}
-                disabled={signingIn}
-                onChange={(value) => {
-                  setSignInRole(value);
-                  setError("");
-                }}
-              />
-            </div>
-            <label>
-              Login ID
-              <input
-                name="login"
-                autoComplete="username"
-                required
-                disabled={signingIn}
-                aria-describedby={error ? "sign-in-error" : undefined}
-              />
-            </label>
-            <label>
-              Password
-              <div className="erp-password">
-                <input
-                  name="password"
-                  disabled={signingIn}
-                  aria-describedby={error ? "sign-in-error" : undefined}
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-            </label>
-            {error && (
-              <p id="sign-in-error" role="alert" className="edu-error">
-                {error}
-              </p>
-            )}
-            <button className="college-button" disabled={signingIn}>
-              {signingIn ? "Signing in…" : "Sign in"} <ArrowRight size={17} />
-            </button>
-          </form>
-          <div className="college-demo-note">
-            <Shield size={20} />
-            <p>
-              Choose the role you were given and sign in with your college
-              account. Forgotten passwords are reset by the college
-              administrator.
-            </p>
-          </div>
-        </div>
-      </div>
+      <CollegeLogin
+        college={college}
+        roles={signInRoles}
+        role={signInRole}
+        signingIn={signingIn}
+        error={error}
+        onSubmit={login}
+        onRoleChange={(value) => {
+          setSignInRole(value);
+          setError("");
+        }}
+      />
     );
   if (
     ["student", "parent"].includes(String(account.person_type)) ||

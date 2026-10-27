@@ -1,9 +1,33 @@
 "use client";
-/** Sign-in role picker whose list always opens below the field (a native select may open upwards). */
-import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+/** API-driven role picker; keeps keyboard focus on the combobox. */
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  Crown,
+  GraduationCap,
+  Settings,
+  ShieldCheck,
+  UserRound,
+  UsersRound,
+} from "lucide-react";
 
 type Option = { code: string; name: string };
+
+function RoleIcon({ name }: { name: string }) {
+  const Icon = /super admin/i.test(name)
+    ? Crown
+    : /admin/i.test(name)
+      ? Settings
+      : /faculty|teacher|principal/i.test(name)
+        ? GraduationCap
+        : /parent/i.test(name)
+          ? UsersRound
+          : /student/i.test(name)
+            ? UserRound
+            : ShieldCheck;
+  return <Icon size={18} strokeWidth={1.7} aria-hidden="true" />;
+}
 
 export default function RoleSelect({
   options,
@@ -20,6 +44,7 @@ export default function RoleSelect({
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [placement, setPlacement] = useState({ above: false, height: 270 });
   const root = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLUListElement>(null);
   const id = useId();
@@ -35,11 +60,44 @@ export default function RoleSelect({
   }, [open]);
 
   useEffect(() => {
-    if (open)
-      list.current
-        ?.querySelector<HTMLElement>(`[data-index="${active}"]`)
-        ?.scrollIntoView({ block: "nearest" });
+    const panel = list.current;
+    const item = panel?.querySelector<HTMLElement>(`[data-index="${active}"]`);
+    if (!open || !panel || !item) return;
+    if (item.offsetTop < panel.scrollTop) panel.scrollTop = item.offsetTop;
+    else if (
+      item.offsetTop + item.offsetHeight >
+      panel.scrollTop + panel.clientHeight
+    )
+      panel.scrollTop = item.offsetTop + item.offsetHeight - panel.clientHeight;
   }, [open, active]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const rect = root.current?.getBoundingClientRect();
+      if (!rect) return;
+      const viewport = window.visualViewport;
+      const top = viewport?.offsetTop || 0;
+      const bottom = top + (viewport?.height || window.innerHeight);
+      const below = bottom - rect.bottom - 12;
+      const above = rect.top - top - 12;
+      const useAbove =
+        below < Math.min(220, options.length * 44 + 12) && above > below;
+      setPlacement({
+        above: useAbove,
+        height: Math.max(44, Math.min(270, useAbove ? above : below)),
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    window.visualViewport?.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+      window.visualViewport?.removeEventListener("resize", update);
+    };
+  }, [open, options.length]);
 
   const show = () => {
     if (disabled || !options.length) return;
@@ -57,7 +115,14 @@ export default function RoleSelect({
   };
 
   return (
-    <div className="role-select" ref={root}>
+    <div
+      className="role-select"
+      ref={root}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+          setOpen(false);
+      }}
+    >
       <button
         type="button"
         className="role-select-trigger"
@@ -97,11 +162,25 @@ export default function RoleSelect({
           }
         }}
       >
-        <span>{selected?.name ?? placeholder}</span>
-        <ChevronDown size={16} aria-hidden="true" />
+        <span>
+          <RoleIcon name={selected?.name || ""} />
+          <span>{selected?.name ?? placeholder}</span>
+        </span>
+        <ChevronDown className="role-chevron" size={16} aria-hidden="true" />
       </button>
       {open && (
-        <ul className="role-select-list" role="listbox" id={id} ref={list}>
+        <ul
+          className="role-select-list"
+          role="listbox"
+          aria-label="Role"
+          id={id}
+          ref={list}
+          style={{
+            top: placement.above ? "auto" : "calc(100% + 4px)",
+            bottom: placement.above ? "calc(100% + 4px)" : "auto",
+            maxHeight: placement.height,
+          }}
+        >
           {options.map((o, i) => (
             <li
               key={o.code}
@@ -114,7 +193,10 @@ export default function RoleSelect({
               onPointerDown={(e) => e.preventDefault()}
               onClick={() => pick(i)}
             >
-              {o.name}
+              <span className="role-option-label">
+                <RoleIcon name={o.name} />
+                {o.name}
+              </span>
               {o.code === value && <Check size={14} aria-hidden="true" />}
             </li>
           ))}
