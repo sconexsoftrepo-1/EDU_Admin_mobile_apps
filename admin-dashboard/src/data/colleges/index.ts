@@ -7,6 +7,7 @@ export type College = {
   headline: string;
   description: string;
   accent: string;
+  logo?: string;
   programs: {
     slug: string;
     name: string;
@@ -32,6 +33,7 @@ export const colleges: College[] = [
     description:
       "A place to discover your potential, challenge your thinking, and build a life of purpose.",
     accent: "#a77524",
+    logo: "/assets/pragathilogo.jpg",
     programs: [
       ["science", "B.Sc. Applied Sciences", "Science"],
       ["commerce", "B.Com. Accounting & Finance", "Commerce"],
