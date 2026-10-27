@@ -329,10 +329,10 @@ export default function ConnectedPortal({
       const personal =
         ["student", "parent"].includes(String(person.person_type)) ||
         ["teaching", "self"].includes(String(person.workspace_scope));
-      const availableScreens = roleScreens(
-        sessionScreens || SCREEN_CATALOG,
-        active,
-      );
+      // A workspace's cached screens may be empty after session expiry, or belong
+      // to a previously selected role. Derive access from the verified role and
+      // full catalog rather than filtering that stale subset again.
+      const availableScreens = roleScreens(SCREEN_CATALOG, active);
       if (!active)
         throw Error(
           "No role has been assigned to this account. Contact your college administrator.",
@@ -396,7 +396,7 @@ export default function ConnectedPortal({
       );
       await load(first);
     },
-    [load, loginRedirect, college, sessionScreens],
+    [load, loginRedirect, college],
   );
   /** Enter the workspace; `known` is the account and roles the login response already gave. */
   async function start(known?: MeResponse, requestedRole?: string) {
@@ -771,7 +771,13 @@ export default function ConnectedPortal({
     }
   }
   if (account && loginRedirect && landing) {
-    return <TemplateRedirect href={landing} college={college} />;
+    return (
+      <TemplateRedirect
+        href={landing}
+        college={college}
+        reloadWorkspace={!!shared}
+      />
+    );
   }
   if (loginRedirect && account && !landing)
     return <PortalShellSkeleton college={college} />;
@@ -1742,13 +1748,18 @@ export default function ConnectedPortal({
 function TemplateRedirect({
   href,
   college,
+  reloadWorkspace = false,
 }: {
   href: string;
   college: College;
+  reloadWorkspace?: boolean;
 }) {
   const router = useRouter();
   useEffect(() => {
-    router.replace(href);
-  }, [href, router]);
+    // Re-authentication inside a workspace must recreate its session provider.
+    // Replacing an unchanged URL leaves the old provider mounted and loading.
+    if (reloadWorkspace) window.location.replace(href);
+    else router.replace(href);
+  }, [href, router, reloadWorkspace]);
   return <PortalShellSkeleton college={college} />;
 }

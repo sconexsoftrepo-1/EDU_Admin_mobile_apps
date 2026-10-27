@@ -61,6 +61,22 @@ async function mockApi(
       ["admin/roles", "admin/accounts", "admin/forms", "forms"].includes(path)
     )
       return route.fulfill({ json: [] });
+    if (path === "workspace/screens/student-enrollment")
+      return route.fulfill({
+        json: {
+          key: "student-enrollment",
+          title: "Student enrollment",
+          resources: [
+            {
+              name: "students",
+              title: "Students",
+              path: "academics/students",
+              fields: [],
+              actions: [],
+            },
+          ],
+        },
+      });
     return route.fulfill({
       json: { items: [], total: 0, actions: [], screens: [], summary: {} },
     });
@@ -125,6 +141,76 @@ test("a valid login still enters the assigned dashboard", async ({ page }) => {
   await fillLogin(page);
   await expect(page).toHaveURL(new RegExp(`${root}/portal/admin/dashboard$`));
 });
+for (const entry of ["login", "master-data-entry/student-enrollment"]) {
+  test(`Master Data Entry can sign in from ${entry} with duplicate assigned roles`, async ({
+    page,
+  }) => {
+    // Mirrors the deployed response: a non-admin system account with seven allocated screens.
+    const allocated = {
+      ...master,
+      system_admin: false,
+      screens: [
+        "course-setup",
+        "fee-structures",
+        "student-enrollment",
+        "teaching-staff",
+        "non-teaching-staff",
+        "daily-labour",
+        "imports",
+      ],
+      permissions: Object.fromEntries(
+        [
+          "programs",
+          "batches",
+          "sections",
+          "academic_years",
+          "departments",
+          "semesters",
+          "subjects",
+          "curriculum_subjects",
+          "student_enrollments",
+          "fee_heads",
+          "fee_structures",
+          "students",
+          "parents",
+          "student_parents",
+          "documents",
+          "employees",
+          "teachers",
+          "staff_profiles",
+          "employee_salary_components",
+          "import_jobs",
+          "import_rows",
+        ].map((table) => [table, ["view", "create", "edit"]]),
+      ),
+    };
+    await mockApi(page, { roles: [allocated, allocated] });
+    await page.goto(`${origin}${root}/portal/${entry}`);
+    const picker = page.getByRole("combobox", { name: "Role" });
+    await expect(picker).toBeEnabled();
+    await picker.click();
+    await page
+      .getByRole("option", { name: "Master Data Entry", exact: true })
+      .click();
+    await page.getByLabel("Login ID", { exact: true }).fill("college-user");
+    await page.locator('input[name="password"]').fill("test-password");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(page).toHaveURL(
+      `${origin}${root}/portal/master-data-entry/student-enrollment`,
+    );
+    await expect(
+      page.getByRole("heading", { name: "Student enrollment", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByLabel("Login ID", { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByText("This role has no workspace access.", { exact: false }),
+    ).toHaveCount(0);
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "Student enrollment", exact: true }),
+    ).toBeVisible();
+  });
+}
 test("an unavailable workspace opens sign-in with an inline access message", async ({
   page,
 }) => {
