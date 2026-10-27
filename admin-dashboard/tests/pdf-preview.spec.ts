@@ -83,16 +83,21 @@ async function openAdmissions(page: Page) {
 }
 
 for (const width of [390, 1440]) {
-  test(`View PDF opens a rendered report, downloads it and can reopen at ${width}px`, async ({
+  test(`View PDF opens a rendered report, downloads it and can reopen after closing at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 });
     await openAdmissions(page);
-    await page
+    const viewButton = page
       .getByRole("row")
       .filter({ hasText: "Preview Applicant" })
-      .getByRole("button", { name: "View PDF", exact: true })
-      .click();
+      .getByRole("button", { name: "View PDF", exact: true });
+    // Avoid the app's global smooth-scroll rule making Playwright's click
+    // target move between pointerdown and pointerup on short viewports.
+    await viewButton.evaluate((button) =>
+      button.scrollIntoView({ behavior: "instant", block: "center" }),
+    );
+    await viewButton.click();
     const preview = page.getByRole("dialog", {
       name: "PDF-APPLICATION",
       exact: true,
@@ -115,11 +120,10 @@ for (const width of [390, 1440]) {
     ).toHaveAttribute("target", "_blank");
     await preview.getByRole("button", { name: "Close PDF preview" }).click();
     await expect(preview).toHaveCount(0);
-    await page
-      .getByRole("row")
-      .filter({ hasText: "Preview Applicant" })
-      .getByRole("button", { name: "View PDF", exact: true })
-      .press("Enter");
+    await viewButton.evaluate((button) =>
+      button.scrollIntoView({ behavior: "instant", block: "center" }),
+    );
+    await viewButton.click();
     await expect(preview).toBeVisible();
     await expect(preview.locator('canvas[data-rendered="true"]')).toBeVisible({
       timeout: 20000,
