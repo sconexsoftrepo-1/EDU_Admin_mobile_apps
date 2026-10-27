@@ -117,16 +117,83 @@ dialog.edu-record-drawer[open] {
   font-size: 12px;
   text-transform: capitalize;
 }
-.edu-detail-tabs {
-  display: flex;
-  gap: 8px;
-  padding-bottom: 20px;
-  margin-bottom: 4px;
+/* Content-sized information tabs; never stretch to the drawer width. */
+.edu-record-drawer .edu-detail-tabs {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  gap: 14px;
+  padding: 0;
+  margin: 0 0 20px;
+  border: 0;
+  border-bottom: 1px solid #e8dece;
+  border-radius: 0;
+  background: transparent;
 }
-.edu-detail-tabs button[aria-current="page"] {
-  color: #87511d;
-  background: #f4ebdc;
-  border-color: #cbb18a;
+.edu-record-drawer .edu-detail-tabs button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 32px;
+  gap: 6px;
+  padding: 7px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #756957;
+  background: transparent;
+  box-shadow: none;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+.edu-record-drawer .edu-detail-tabs button:hover,
+.edu-connected
+  .edu-record-drawer
+  .edu-detail-tabs
+  button:is(:hover, :focus-visible):not(:disabled) {
+  color: #81511b;
+  background: #faf5ed;
+  border-bottom-color: #d7c3a5;
+}
+.edu-record-drawer .edu-detail-tabs button[aria-current="page"],
+.edu-connected
+  .edu-record-drawer
+  .edu-detail-tabs
+  button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled) {
+  color: #81511b;
+  background: transparent;
+  border-bottom-color: #a46a27;
+  box-shadow: none;
+  font-weight: 600;
+}
+.edu-record-drawer .edu-detail-tabs button:focus-visible {
+  outline: 2px solid #a46a27;
+  outline-offset: 3px;
+}
+@media (max-width: 680px) {
+  .edu-record-drawer .edu-detail-tabs {
+    gap: 12px;
+  }
+  .edu-record-drawer .edu-detail-tabs button {
+    min-height: 34px;
+    gap: 5px;
+    padding: 7px 2px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .edu-record-drawer .edu-detail-tabs button {
+    transition: none;
+  }
 }
 .edu-student-section,
 .edu-person-files {

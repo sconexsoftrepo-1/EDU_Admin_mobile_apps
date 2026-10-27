@@ -3,7 +3,17 @@ import PersonFiles from "../PersonFiles";
 import { useErrorToast } from "../toast";
 /** Staff table of one kind (teaching, non-teaching or daily labour) with search. */
 import { useEffect, useState } from "react";
-import { Download, FileText, Plus, RefreshCw, Search } from "lucide-react";
+import {
+  Download,
+  FileText,
+  Info,
+  Plus,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import IconAction from "../IconAction";
+import StaffDetails from "./StaffDetails";
+import StaffOnboardingForm from "./StaffOnboardingForm";
 import {
   STAFF_KIND_LABEL,
   api,
@@ -77,13 +87,18 @@ export default function StaffDirectory({
   title,
   onRefresh,
   onAdd,
+  canEdit = false,
 }: {
   kind: StaffKind;
   reloadKey: number;
   title: string;
   onRefresh: () => void;
   onAdd: () => void;
+  canEdit?: boolean;
 }) {
+  const [details, setDetails] = useState<StaffRow | null>(null);
+  const [editing, setEditing] = useState<StaffRow | null>(null);
+  const [revision, setRevision] = useState(0);
   const [fileOwner, setFileOwner] = useState<string | null>(null);
   const [rows, setRows] = useState<StaffRow[] | null>(null);
   const [error, setError] = useState("");
@@ -98,7 +113,7 @@ export default function StaffDirectory({
     return () => {
       active = false;
     };
-  }, [kind, reloadKey]);
+  }, [kind, reloadKey, revision]);
   const visible = (rows || []).filter((r) =>
     `${r.employee_id} ${r.name} ${r.designation} ${r.department || ""} ${r.phone || ""}`
       .toLowerCase()
@@ -202,7 +217,7 @@ export default function StaffDirectory({
                   </th>
                 ))}
                 {kind !== "labour" && <th>Documents</th>}
-                <th>Files</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -235,12 +250,30 @@ export default function StaffDirectory({
                     </td>
                   )}
                   <td>
-                    <button
-                      type="button"
-                      onClick={() => setFileOwner(r.employee_id)}
-                    >
-                      Files
-                    </button>
+                    <div className="stf-row-actions">
+                      <button
+                        type="button"
+                        className="icon-action"
+                        title={`View details for ${r.name}`}
+                        aria-label={`View details for ${r.name}`}
+                        onClick={() => setDetails(r)}
+                      >
+                        <Info size={16} aria-hidden="true" />
+                      </button>
+                      {canEdit && (
+                        <IconAction
+                          kind="edit"
+                          label={`Edit ${r.name}`}
+                          onClick={() => setEditing(r)}
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setFileOwner(r.employee_id)}
+                      >
+                        Files
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -255,6 +288,34 @@ export default function StaffDirectory({
           )}
         </div>
       </div>
+      {details && (
+        <StaffDetails
+          key={details.employee_id}
+          staff={details}
+          kind={kind}
+          onClose={() => setDetails(null)}
+          onEdit={
+            canEdit
+              ? () => {
+                  setDetails(null);
+                  setEditing(details);
+                }
+              : undefined
+          }
+        />
+      )}
+      {editing && (
+        <StaffOnboardingForm
+          key={editing.employee_id}
+          kind={kind}
+          employeeId={editing.employee_id}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setRevision((n) => n + 1);
+            setEditing(null);
+          }}
+        />
+      )}
       {fileOwner && (
         <PersonFiles
           personKind="employee"

@@ -6,8 +6,8 @@ import type {
   StaffOnboardingResult,
   StaffOptions,
   StaffRow,
+  StaffDetail,
 } from "./consts";
-import type { Row } from "../../consts";
 
 export const STAFF_ENDPOINTS = {
   onboarding: "master-data/staff-onboarding",
@@ -40,11 +40,14 @@ export class StaffService {
   }
 
   detail(code: string) {
-    return apiRequest<{
-      employee: Row;
-      profile: Row | null;
-      salary_components: Row[];
-    }>(STAFF_ENDPOINTS.detail(code));
+    return apiRequest<StaffDetail>(STAFF_ENDPOINTS.detail(code));
+  }
+
+  update(code: string, payload: StaffOnboardingPayload) {
+    return apiRequest<StaffOnboardingResult>(STAFF_ENDPOINTS.detail(code), {
+      method: "PUT",
+      body: payload,
+    });
   }
 }
 

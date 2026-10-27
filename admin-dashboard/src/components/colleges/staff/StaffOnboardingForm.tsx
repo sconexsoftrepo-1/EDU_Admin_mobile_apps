@@ -47,6 +47,9 @@ import ComboInput from "../ComboInput";
 import AutoTextarea from "../AutoTextarea";
 import Select from "../SearchSelect";
 import DateInput from "../DateInput";
+import SideDrawer from "../SideDrawer";
+import { PersonFileList } from "../PersonFiles";
+import { splitPhone } from "../CountryCodePicker";
 
 type Experience = {
   organization: string;
@@ -107,15 +110,20 @@ export default function StaffOnboardingForm({
   kind,
   onClose,
   onSaved,
+  employeeId,
 }: {
   kind: StaffKind;
   onClose: () => void;
   onSaved?: (employeeId: string) => void;
+  employeeId?: string;
 }) {
   const labour = kind === "labour";
   const [options, setOptions] = useState<StaffOptions | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(!!employeeId);
+  const [loaded, setLoaded] = useState(!employeeId);
+  const [existingAadhaar, setExistingAadhaar] = useState(false);
   const [result, setResult] = useState<StaffOnboardingResult | null>(null);
   const [issues, setIssues] = useState<string[]>([]);
   const [person, setPerson] = useState({
@@ -181,6 +189,125 @@ export default function StaffOnboardingForm({
         toast.error("Could not load form options", errorText(e));
       });
   }, []);
+
+  useEffect(() => {
+    if (!employeeId) return;
+    let active = true;
+    api.staff
+      .detail(employeeId)
+      .then((data) => {
+        if (!active) return;
+        const e = data.employee;
+        const p = data.profile || {};
+        const text = (value: unknown) => (value == null ? "" : String(value));
+        setPerson(
+          (old) =>
+            Object.fromEntries(
+              Object.keys(old).map((key) => [
+                key,
+                key === "address" && e.address && typeof e.address === "object"
+                  ? text(
+                      (e.address as Record<string, unknown>).line1 ||
+                        (e.address as Record<string, unknown>).text,
+                    )
+                  : text(e[key]),
+              ]),
+            ) as typeof old,
+        );
+        const phone = splitPhone(text(e.phone));
+        setPhoneCode(phone.code);
+        setPerson((old) => ({ ...old, phone: phone.number }));
+        setJob({
+          designation: text(e.designation),
+          department: text(data.department || e.department_code),
+          join_date: text(e.join_date).slice(0, 10),
+          employment_type: text(e.employment_type),
+        });
+        setQualification({
+          level: (p.qualification_level ||
+            (data.role?.qualification ? "other" : "")) as
+            QualificationLevel | "",
+          specialization: text(p.specialization || data.role?.specialization),
+        });
+        setCertificates(
+          ((p.qualification_certificates || []) as { name: string }[]).map(
+            (c) => ({ name: c.name }),
+          ),
+        );
+        setAadhaar({ number: text(p.aadhaar_number), file: undefined });
+        setPan({ number: text(p.pan_number), file: undefined });
+        setExperience(
+          ((p.previous_experience || []) as Experience[]).map((x) => ({
+            organization: text(x.organization),
+            role: text(x.role),
+            from_date: text(x.from_date),
+            to_date: text(x.to_date),
+            details: text(x.details),
+          })),
+        );
+        setHistory(
+          ((p.employment_history || []) as History[]).map((x) => ({
+            organization: text(x.organization),
+            designation: text(x.designation),
+            from_date: text(x.from_date),
+            to_date: text(x.to_date),
+            reason_for_leaving: text(x.reason_for_leaving),
+          })),
+        );
+        setAchievements(
+          (
+            (p.achievements || []) as {
+              title: string;
+              year?: number;
+              details?: string;
+            }[]
+          ).map((x) => ({
+            title: text(x.title),
+            year: text(x.year),
+            details: text(x.details),
+          })),
+        );
+        setBank({
+          account_holder: text(p.bank_account_holder),
+          account_number: text(p.bank_account_number),
+          bank_name: text(p.bank_name),
+          ifsc: text(p.bank_ifsc),
+          branch: text(p.bank_branch),
+          file: undefined,
+        });
+        setComponents(
+          data.salary_components.length
+            ? data.salary_components.map((c) => ({
+                component: text(c.component),
+                component_type: c.component_type as "earning" | "deduction",
+                amount: text(c.amount),
+              }))
+            : DEFAULT_COMPONENTS,
+        );
+        setCtc(text(p.ctc_annual));
+        setInHand(text(p.in_hand_monthly));
+        setWage({
+          basis: (p.salary_basis || "daily") as "daily" | "monthly" | "yearly",
+          amount: text(p.salary_amount),
+        });
+        setExistingAadhaar(
+          !!(
+            p.document_checklist as
+              Record<string, { uploaded?: boolean }> | undefined
+          )?.aadhaar_copy?.uploaded,
+        );
+        setLoaded(true);
+      })
+      .catch((e) => {
+        if (active) setError(errorText(e));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [employeeId]);
 
   const totals = useMemo(() => {
     const earnings = components
@@ -302,12 +429,14 @@ export default function StaffOnboardingForm({
 
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy || loading || !loaded) return;
     const warn = (text: string) => {
       setError(text);
       toast.warning(text);
     };
     if (!event.currentTarget.reportValidity()) return;
-    if (!aadhaar.file) return warn("Upload the Aadhaar copy.");
+    if (!aadhaar.file && !existingAadhaar)
+      return warn("Upload the Aadhaar copy.");
     if (!labour && totals.earnings <= 0)
       return warn("Add the salary breakdown: at least one earning.");
     if (!labour && totals.deductions > totals.earnings)
@@ -315,10 +444,14 @@ export default function StaffOnboardingForm({
     setBusy(true);
     setError("");
     try {
-      const done = await api.staff.onboard(payload());
+      const done = employeeId
+        ? await api.staff.update(employeeId, payload())
+        : await api.staff.onboard(payload());
       const code = String(done.employee.code);
       const uploads: [string, File][] = [
-        ["aadhaar_copy", aadhaar.file],
+        ...(aadhaar.file
+          ? ([["aadhaar_copy", aadhaar.file]] as [string, File][])
+          : []),
         ...(pan.file ? ([["pan_copy", pan.file]] as [string, File][]) : []),
         ...(bank.file ? ([["bank_proof", bank.file]] as [string, File][]) : []),
         ...certificates
@@ -348,7 +481,7 @@ export default function StaffOnboardingForm({
       setIssues(failed);
       setResult(done);
       onSaved?.(code);
-      const added = `${STAFF_KIND_LABEL[kind][0].toUpperCase()}${STAFF_KIND_LABEL[kind].slice(1)} added successfully`;
+      const added = `${STAFF_KIND_LABEL[kind][0].toUpperCase()}${STAFF_KIND_LABEL[kind].slice(1)} ${employeeId ? "updated" : "added"} successfully`;
       if (failed.length)
         toast.warning(
           `${added}, but some documents did not upload`,
@@ -358,7 +491,7 @@ export default function StaffOnboardingForm({
     } catch (e) {
       setError(errorText(e));
       toast.error(
-        `Failed to add ${STAFF_KIND_LABEL[kind]}. Please try again.`,
+        `Failed to ${employeeId ? "update" : "add"} ${STAFF_KIND_LABEL[kind]}. Please try again.`,
         errorText(e),
       );
     } finally {
@@ -366,12 +499,12 @@ export default function StaffOnboardingForm({
     }
   }
 
-  const title = `Add ${STAFF_KIND_LABEL[kind]}`;
-  return (
+  const title = `${employeeId ? "Edit" : "Add"} ${STAFF_KIND_LABEL[kind]}`;
+  const content = (
     <div
-      className="enw-backdrop"
-      role="dialog"
-      aria-modal="true"
+      className={`enw-backdrop ${employeeId ? "stf-edit-content" : ""}`}
+      role={employeeId ? undefined : "dialog"}
+      aria-modal={employeeId ? undefined : true}
       aria-label={title}
     >
       <form className="enw-shell stf-shell" onSubmit={save} noValidate={false}>
@@ -383,9 +516,14 @@ export default function StaffOnboardingForm({
           <div className="stf-id">
             <span>Employee ID</span>
             <strong>
-              {String(result?.employee.code || options?.employee_id || "…")}
+              {String(
+                employeeId ||
+                  result?.employee.code ||
+                  options?.employee_id ||
+                  "…",
+              )}
             </strong>
-            {!result && <small>assigned when saved</small>}
+            {!result && !employeeId && <small>assigned when saved</small>}
           </div>
           <button
             type="button"
@@ -404,6 +542,7 @@ export default function StaffOnboardingForm({
         )}
 
         <div className="enw-body">
+          {loading && <p role="status">Loading staff record…</p>}
           {result ? (
             <div className="enw-success">
               <CheckCircle2 size={34} />
@@ -426,7 +565,10 @@ export default function StaffOnboardingForm({
               </div>
             </div>
           ) : (
-            <>
+            <fieldset
+              className="stf-fields"
+              disabled={loading || !loaded || busy}
+            >
               <Card
                 title={labour ? "Labourer" : "Personal details"}
                 icon={<UserRound size={17} />}
@@ -674,7 +816,7 @@ export default function StaffOnboardingForm({
                         })
                       }
                       fileLabel="Aadhaar copy"
-                      fileRequired
+                      fileRequired={!existingAadhaar}
                       file={aadhaar.file}
                       onFile={(file) => setAadhaar({ ...aadhaar, file })}
                     />
@@ -1241,7 +1383,10 @@ export default function StaffOnboardingForm({
                   </>
                 )}
               </Card>
-            </>
+              {employeeId && (
+                <PersonFileList personKind="employee" personCode={employeeId} />
+              )}
+            </fieldset>
           )}
         </div>
 
@@ -1255,13 +1400,23 @@ export default function StaffOnboardingForm({
               <button type="button" onClick={onClose} disabled={busy}>
                 Cancel
               </button>
-              <button className="enw-primary" disabled={busy || !options}>
-                {busy ? "Submitting…" : "Submit"}
+              <button
+                className="enw-primary"
+                disabled={busy || !options || loading || !loaded}
+              >
+                {busy ? "Saving…" : employeeId ? "Save changes" : "Submit"}
               </button>
             </>
           )}
         </footer>
       </form>
     </div>
+  );
+  return employeeId ? (
+    <SideDrawer expanded title={title} subtitle={employeeId} onClose={onClose}>
+      {content}
+    </SideDrawer>
+  ) : (
+    content
   );
 }

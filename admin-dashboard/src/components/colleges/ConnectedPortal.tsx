@@ -1285,6 +1285,23 @@ export default function ConnectedPortal({
           {staffKind && (
             <StaffDirectory
               kind={staffKind}
+              canEdit={
+                !!displayRole &&
+                (displayRole.system_admin ||
+                  [
+                    "employees",
+                    ...(staffKind === "labour"
+                      ? []
+                      : [
+                          staffKind === "teaching"
+                            ? "teachers"
+                            : "staff_profiles",
+                          "employee_salary_components",
+                        ]),
+                  ].every((table) =>
+                    displayRole.permissions[table]?.includes("edit"),
+                  ))
+              }
               reloadKey={staffReload}
               title={
                 screen?.title ||

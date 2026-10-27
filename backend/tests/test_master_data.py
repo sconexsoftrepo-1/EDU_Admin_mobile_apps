@@ -487,6 +487,60 @@ def test_staff_onboarding_ids_profiles_and_tables(client, app):
     assert len(detail["salary_components"]) == 3
 
 
+
+def test_staff_edit_preserves_identity_documents_and_related_records(client, app):
+    h = master_data_user(app, client)
+    payload = staff_payload("teaching", "111122223333")
+    made = client.post("/api/v1/master-data/staff-onboarding", headers=h, json=payload).json()
+    code = made["employee"]["code"]
+    upload = client.post("/api/v1/documents/upload", headers=h, json={
+        "kind": "employee_document", "person_code": code, "filename": "aadhaar.pdf",
+        "content_base64": PDF, "document_label": "aadhaar_copy"})
+    assert upload.status_code == 201, upload.text
+    payload["personal"]["first_name"] = "Asha Updated"
+    payload["personal"]["city"] = "Warangal"
+    payload["qualification"]["specialization"] = "Applied Physics"
+    payload["salary"]["components"] = [
+        {"component": "Basic pay", "component_type": "earning", "amount": "60000"},
+        {"component": "PF", "component_type": "deduction", "amount": "6000"}]
+    saved = client.put(f"/api/v1/master-data/staff-onboarding/{code}", headers=h, json=payload)
+    assert saved.status_code == 200, saved.text
+    result = saved.json()
+    assert result["employee"]["code"] == code
+    assert result["employee"]["first_name"] == "Asha Updated"
+    assert result["profile"]["code"] == made["profile"]["code"]
+    assert result["profile"]["document_checklist"]["aadhaar_copy"]["uploaded"] is True
+    assert result["profile"]["net_monthly"] == "54000.00"
+    assert result["role"]["code"] == made["role"]["code"]
+    assert result["role"]["specialization"] == "Applied Physics"
+    assert len(result["salary_components"]) == 2
+    assert result["salary_components"][0]["code"] == made["salary_components"][0]["code"]
+    detail = client.get(f"/api/v1/master-data/staff-onboarding/{code}", headers=h).json()
+    assert detail["department"] == "Physics" and detail["employee"]["city"] == "Warangal"
+    assert len(detail["salary_components"]) == 2
+    files = client.get(f"/api/v1/documents/files/employee/{code}", headers=h).json()["items"]
+    assert len(files) == 1 and files[0]["original_filename"] == "aadhaar.pdf"
+    assert client.get("/api/v1/master-data/staff-onboarding?kind=teaching", headers=h).json()["total"] == 1
+
+
+def test_staff_edit_denies_missing_grants_and_rolls_back_invalid_changes(client, app):
+    h = master_data_user(app, client)
+    payload = staff_payload("teaching", "111122223333")
+    made = client.post("/api/v1/master-data/staff-onboarding", headers=h, json=payload).json()
+    code = made["employee"]["code"]
+    other = staff_payload("teaching", "444455556666", pan_number="PQRST6789K")
+    assert client.post("/api/v1/master-data/staff-onboarding", headers=h, json=other).status_code == 201
+    payload["personal"]["first_name"] = "Must not persist"
+    payload["aadhaar_number"] = "444455556666"
+    assert client.put(f"/api/v1/master-data/staff-onboarding/{code}", headers=h, json=payload).status_code == 409
+    assert client.get(f"/api/v1/master-data/staff-onboarding/{code}", headers=h).json()["employee"]["first_name"] == "Asha"
+    payload["aadhaar_number"] = "111122223333"
+    with app.state.store.transaction() as data:
+        data["roles"][role_tool.ROLE_CODE]["permissions"]["employees"] = ["view", "create"]
+    assert client.put(f"/api/v1/master-data/staff-onboarding/{code}", headers=h, json=payload).status_code == 403
+    assert client.get(f"/api/v1/master-data/staff-onboarding/{code}", headers=h).json()["employee"]["first_name"] == "Asha"
+
+
 def fee_schedule_setup(app, client):
     headers = master_data_user(app, client)
     with app.state.store.transaction() as data:
@@ -555,3 +609,34 @@ def test_inline_fees_cannot_change_already_charged_amounts(client, app):
     denied = client.post('/api/v1/master-data/actions/course-fee-structure', headers=h, json={'values': values})
     assert denied.status_code == 409, denied.text
     assert str(app.state.store.snapshot()['records']['fee_structures'][row['code']]['amount']) == '3500.00'
+
+
+def test_non_teaching_and_daily_wage_staff_can_be_edited(client, app):
+    h = master_data_user(app, client)
+    for kind, aadhaar, pan in [("non_teaching", "111122223333", "ABCDE1234F"), ("labour", "444455556666", None)]:
+        payload = staff_payload(kind, aadhaar, pan_number=pan)
+        if kind == "labour":
+            payload.update(qualification=None, certificates=[], previous_experience=[], employment_history=[], achievements=[], salary={"basis":"daily", "amount":"600"})
+        created = client.post("/api/v1/master-data/staff-onboarding", headers=h, json=payload)
+        assert created.status_code == 201, created.text
+        made = created.json()
+        code = made["employee"]["code"]
+        payload["personal"]["first_name"] = "Updated employee"
+        if kind == "labour":
+            payload["salary"]["amount"] = "650"
+        else:
+            payload["job"]["designation"] = "Senior administrator"
+        saved = client.put(f"/api/v1/master-data/staff-onboarding/{code}", headers=h, json=payload)
+        assert saved.status_code == 200, saved.text
+        result = saved.json()
+        assert result["employee"]["code"] == code
+        assert result["employee"]["first_name"] == "Updated employee"
+        assert result["profile"]["code"] == made["profile"]["code"]
+        if kind == "labour":
+            assert result["profile"]["salary_basis"] == "daily"
+            assert result["profile"]["salary_amount"] == "650.00"
+            assert result["profile"]["net_monthly"] == "16900.00"
+            assert result["role"] is None
+        else:
+            assert result["role"]["code"] == made["role"]["code"]
+            assert result["role"]["responsibility"] == "Senior administrator"
