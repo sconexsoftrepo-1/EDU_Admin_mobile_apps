@@ -43,6 +43,24 @@ export function buildQuery(query?: Query): string {
 function errorMessage(body: ApiErrorBody | undefined, status: number) {
   const detail = body?.detail;
   if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail.flatMap((issue) => {
+      if (!issue || typeof issue !== "object" || typeof issue.msg !== "string")
+        return [];
+      const field = Array.isArray(issue.loc)
+        ? issue.loc
+            .filter(
+              (part: unknown) =>
+                typeof part === "string" &&
+                !["body", "query", "path"].includes(part),
+            )
+            .join(".")
+            .replaceAll("_", " ")
+        : "";
+      return [field ? `${field}: ${issue.msg}` : issue.msg];
+    });
+    if (messages.length) return messages.join("; ");
+  }
   if (detail !== undefined) return JSON.stringify(detail);
   return `Request failed (${status})`;
 }

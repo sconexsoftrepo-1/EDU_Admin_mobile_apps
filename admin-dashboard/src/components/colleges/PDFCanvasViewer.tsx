@@ -109,6 +109,7 @@ export default function PDFCanvasViewer({
     <div className="erp-pdf-viewer">
       <div className="erp-pdf-page-controls">
         <button
+          type="button"
           disabled={!doc || pageNumber === 1}
           onClick={() => setPageNumber((n) => Math.max(1, n - 1))}
         >
@@ -131,6 +132,7 @@ export default function PDFCanvasViewer({
           of {doc?.numPages || "…"}
         </label>
         <button
+          type="button"
           disabled={!doc || pageNumber === doc.numPages}
           onClick={() =>
             setPageNumber((n) => Math.min(doc?.numPages || 1, n + 1))

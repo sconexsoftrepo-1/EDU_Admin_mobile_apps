@@ -94,17 +94,10 @@ export default function BatchManager({
       .finally(() => {
         if (sequence === pendingRequests.current) setLoading(false);
       });
-    const focus = () => void refresh();
-    const timer = window.setInterval(() => {
-      if (!document.hidden) void refresh();
-    }, 30000);
-    window.addEventListener("focus", focus);
     return () => {
       pendingRequests.current++;
-      clearInterval(timer);
-      window.removeEventListener("focus", focus);
     };
-  }, [course, refresh]);
+  }, [course]);
   async function save(batch: Batch) {
     const from = Number(start),
       to = Number(end);
@@ -245,8 +238,8 @@ export default function BatchManager({
         </button>
       </div>
       <p className="edu-batch-hint">
-        Student counts refresh every 30 seconds and when you return to this
-        window.
+        Counts load when this view opens. Use Refresh counts to get the latest
+        student totals.
       </p>
       {error && (
         <p className="edu-error" role="alert">

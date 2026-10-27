@@ -585,3 +585,44 @@ def test_scoped_message_thread_and_parent_performance(client, seeded):
         client.get("/api/v1/mobile/workspace/messages", headers=parent).json()["total"]
         == 2
     )
+
+
+def test_excel_recognizes_renamed_templates_without_bypassing_role_limits(client, headers, app):
+    from app.modules.imports.excel.api import CONTRACT
+    definition = next(f for f in CONTRACT['files'] if f['file'] == '12_Leave_Types.xlsx')
+    workbook = Workbook()
+    workbook.remove(workbook.active)
+    for sheet in definition['sheets']:
+        ws = workbook.create_sheet(sheet['name'])
+        for _ in range(5):
+            ws.append([])
+        ws.append([field['label'] + (' *' if field['required'] else '') for field in sheet['fields']])
+        ws.append([field['example'] for field in sheet['fields']])
+    raw = io.BytesIO()
+    workbook.save(raw)
+    payload = {'filename':'Leave Types - completed (1).xlsx','content_base64':base64.b64encode(raw.getvalue()).decode()}
+    response = client.post('/api/v1/imports/excel/validate', headers=headers, json=payload)
+    assert response.status_code == 201, response.text
+    assert response.json()['filename'] == definition['file']
+    assert response.json()['failed_rows'] == 0
+    committed = client.post('/api/v1/imports/excel/' + response.json()['code'] + '/commit', headers=headers)
+    assert committed.status_code == 200, committed.text
+    # Detection must use the actual workbook contract for the role allowlist.
+    with app.state.store.transaction() as data:
+        data['roles']['ROOT']['system_admin'] = False
+        data['roles']['ROOT']['scope'] = 'college'
+        data['roles']['ROOT']['permissions'] = {'import_jobs':['view','create','approve']}
+        data['roles']['ROOT']['import_files'] = ['01_Students_and_Parents.xlsx']
+    denied = client.post('/api/v1/imports/excel/validate', headers=headers, json=payload)
+    assert denied.status_code == 403
+
+
+def test_excel_rejects_unrecognized_workbooks_with_an_actionable_message(client, headers):
+    workbook = Workbook()
+    workbook.active.append(['Unrelated spreadsheet'])
+    raw = io.BytesIO()
+    workbook.save(raw)
+    response = client.post('/api/v1/imports/excel/validate', headers=headers,
+        json={'filename':'notes.xlsx','content_base64':base64.b64encode(raw.getvalue()).decode()})
+    assert response.status_code == 422
+    assert 'sheet names and headers in row 6' in response.json()['detail']

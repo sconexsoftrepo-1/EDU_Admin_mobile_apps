@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Download, Minus, Plus, RotateCcw, X } from "lucide-react";
+import {
+  Download,
+  ExternalLink,
+  Minus,
+  Plus,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import { apiUrl } from "@/services/api/config";
 import { documentService } from "@/services/api/modules/documents/service";
 import { errorText } from "@/services/api/client";
@@ -61,6 +68,17 @@ export default function FilePreviewPanel({
           <small>{file.document_type?.replaceAll("_", " ")}</small>
         </div>
         <div>
+          {pdf && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="edu-file-original"
+            >
+              <ExternalLink size={16} aria-hidden="true" />
+              Open original
+            </a>
+          )}
           <button
             type="button"
             disabled={busy}

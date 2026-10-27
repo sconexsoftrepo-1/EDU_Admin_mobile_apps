@@ -29,11 +29,18 @@ export async function professionalPdf(
   report: PDFReport,
   mode: PDFMode = "download",
 ) {
+  const trigger =
+    typeof document !== "undefined" &&
+    document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
   const { createReport } = await import("./report-engine");
   const blob = await createReport(report);
   if (mode === "view")
     window.dispatchEvent(
-      new CustomEvent("college:pdf-preview", { detail: { name, blob } }),
+      new CustomEvent("college:pdf-preview", {
+        detail: { name, blob, trigger },
+      }),
     );
   else download(name + ".pdf", blob, "application/pdf");
 }

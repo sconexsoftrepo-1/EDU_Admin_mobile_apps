@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Download,
   FileText,
+  FolderOpen,
   Info,
   Plus,
   RefreshCw,
@@ -269,9 +270,12 @@ export default function StaffDirectory({
                       )}
                       <button
                         type="button"
+                        className="icon-action"
+                        title={`Files for ${r.name}`}
+                        aria-label={`Files for ${r.name}`}
                         onClick={() => setFileOwner(r.employee_id)}
                       >
-                        Files
+                        <FolderOpen size={16} aria-hidden="true" />
                       </button>
                     </div>
                   </td>
