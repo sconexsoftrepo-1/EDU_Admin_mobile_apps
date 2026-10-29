@@ -166,6 +166,17 @@ def ensure_references(data, table, record):
                 raise HTTPException(422, f"{field} must be numeric")
 
 
+# Safe create defaults mirror the database defaults in every storage backend.
+RESOURCE_DEFAULTS = {
+    "expenses": {"payment_status": "unpaid", "currency": "INR"},
+    "scholarships": {"award_method": "fixed_amount", "eligibility_rules": {}},
+    "notification_templates": {"is_active": True},
+    "admission_sources": {"is_active": True},
+    "admission_enquiries": {"status": "new", "communication_consent": False},
+    "vehicle_trips": {"status": "scheduled"},
+}
+
+
 class ResourceRepository:
     def __init__(self, table):
         self.table = table
@@ -197,7 +208,9 @@ class ResourceService:
             raise HTTPException(
                 409, "Use the dedicated workflow endpoint for this managed resource"
             )
-        record = validate_record(self.table, body)
+        record = validate_record(
+            self.table, {**RESOURCE_DEFAULTS.get(self.table, {}), **body}
+        )
         record["code"] = record.get("code") or new_code(self.table[:3].upper())
         rows = data["records"].setdefault(self.table, {})
         if record["code"] in rows:
@@ -209,6 +222,39 @@ class ResourceService:
         return record
 
     def business_validation(self, data, record):
+        if self.table == "vehicles":
+            if record["capacity"] <= 0:
+                raise HTTPException(422, "Passenger capacity must be greater than zero")
+            record["registration_number"] = record["registration_number"].strip().upper()
+            if not record["registration_number"]:
+                raise HTTPException(422, "Vehicle registration is required")
+            if any(
+                r["code"] != record["code"]
+                and r["registration_number"].strip().upper() == record["registration_number"]
+                for r in data["records"].get("vehicles", {}).values()
+            ):
+                raise HTTPException(409, "Vehicle registration already exists")
+        if self.table == "expenses":
+            if record.get("payment_status") == "paid" and not record.get("paid_on"):
+                raise HTTPException(422, "Paid on is required for a paid expense")
+        if self.table == "scholarships":
+            percent = record.get("award_percent")
+            if record["award_method"] == "percentage":
+                if percent is None or not 0 <= Decimal(str(percent)) <= 100:
+                    raise HTTPException(
+                        422, "Percentage scholarships require an award percent between 0 and 100"
+                    )
+            elif percent is not None:
+                raise HTTPException(
+                    422, "Award percent must be empty for a fixed amount scholarship"
+                )
+            if not isinstance(record["eligibility_rules"], dict):
+                raise HTTPException(422, "Eligibility rules must be a JSON object")
+        if self.table == "transport_attendance":
+            if bool(record.get("student_code")) == bool(record.get("employee_code")):
+                raise HTTPException(
+                    422, "Choose exactly one passenger: a student or an employee"
+                )
         if record.get("program_code") and record.get("academic_year_code"):
             year = data["records"].get("academic_years", {}).get(record["academic_year_code"], {})
             if year.get("program_code") and year["program_code"] != record["program_code"]:

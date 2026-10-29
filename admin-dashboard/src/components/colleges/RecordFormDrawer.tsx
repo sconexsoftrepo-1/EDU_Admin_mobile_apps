@@ -10,6 +10,7 @@ import {
 import { Check, ChevronRight, LoaderCircle, X } from "lucide-react";
 import { api, type Field, type LookupOption, type Row } from "@/services/api";
 import { useOptionalCollege } from "./CollegeStore";
+import type { ResourceFormResponse } from "@/services/api/modules/workspace/consts";
 import { successText, toast } from "./toast";
 import {
   readWorkspaceCache,
@@ -131,6 +132,31 @@ export default function RecordFormDrawer({
       }),
     ),
   );
+  const [referenceValues, setReferenceValues] = useState<
+    Record<string, string>
+  >({});
+  const [referenceForm, setReferenceForm] = useState<{
+    field: string;
+    table: string;
+    bound: ResourceFormResponse;
+  } | null>(null);
+  const [loadingReference, setLoadingReference] = useState("");
+  async function addReference(field: string, table: string) {
+    setLoadingReference(field);
+    setError("");
+    try {
+      const bound = await api.workspace.resourceForm(table);
+      if (!bound.resource?.actions.includes("create"))
+        throw new Error(
+          "You do not have permission to create these records. Ask an administrator to add one.",
+        );
+      setReferenceForm({ field, table, bound });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to open related form");
+    } finally {
+      setLoadingReference("");
+    }
+  }
   const [lookupErrors, setLookupErrors] = useState<Record<string, string>>({});
   useEffect(() => {
     const node = dialog.current;
@@ -203,9 +229,19 @@ export default function RecordFormDrawer({
           if (initial[field.key] !== undefined) row[field.key] = null;
           continue;
         }
+        let parsed: unknown = value;
+        if (field.type === "json") {
+          try {
+            parsed = JSON.parse(String(value));
+          } catch {
+            throw new Error(
+              `${field.label}: enter valid JSON, for example {} for no rules.`,
+            );
+          }
+        }
         row[field.key] =
           field.type === "json"
-            ? JSON.parse(String(value))
+            ? parsed
             : field.type === "datetime-local"
               ? new Date(String(value)).toISOString()
               : field.type === "number" &&
@@ -246,346 +282,438 @@ export default function RecordFormDrawer({
       ? "Create record"
       : "Save changes";
   return (
-    <dialog
-      ref={dialog}
-      className="edu-connected edu-form-drawer"
-      aria-labelledby={`${formId}-title`}
-      onClose={onClose}
-      onCancel={(event) => {
-        if (busy) event.preventDefault();
-      }}
-    >
-      <header className="edu-drawer-header">
-        <div>
-          <p className="edu-drawer-eyebrow">College records</p>
-          <h2 id={`${formId}-title`}>{title}</h2>
-          <p>
-            Enter the details below. Required fields are marked{" "}
-            <span aria-hidden="true">*</span>.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="edu-drawer-close"
-          aria-label="Close form"
-          onClick={close}
-          disabled={busy}
-        >
-          <X size={20} />
-        </button>
-      </header>
-      {renderBrowse && (
-        <div className="edu-batch-tabbar">
-          <div
-            className="edu-batch-tabs"
-            role="group"
-            aria-label="Batch workspace view"
-          >
-            <button
-              type="button"
-              aria-pressed={!browsing}
-              disabled={busy}
-              onClick={() => setBrowsing(false)}
-            >
-              Create batch
-            </button>
-            <button
-              type="button"
-              aria-pressed={browsing}
-              disabled={busy}
-              onClick={() => {
-                const form = document.getElementById(
-                  formId,
-                ) as HTMLFormElement | null;
-                if (form)
-                  setBrowseValues(Object.fromEntries(new FormData(form)));
-                setBrowsing(true);
-              }}
-            >
-              Batch cards
-            </button>
-          </div>
-        </div>
-      )}
-      {browsing && renderBrowse && (
-        <div className="edu-drawer-body">{renderBrowse(browseValues)}</div>
-      )}
-      {!renderBrowse && !browsing && groups.length > 1 && (
-        <nav className="edu-drawer-sections" aria-label="Form sections">
-          {groups.map(([name], index) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() =>
-                document
-                  .getElementById(`${formId}-section-${index}`)
-                  ?.scrollIntoView({
-                    behavior: window.matchMedia(
-                      "(prefers-reduced-motion: reduce)",
-                    ).matches
-                      ? "instant"
-                      : "smooth",
-                    block: "start",
-                  })
-              }
-            >
-              {name}
-              <ChevronRight size={13} />
-            </button>
-          ))}
-        </nav>
-      )}
-      <form
-        onSubmit={save}
-        hidden={browsing}
-        style={browsing ? { display: "none" } : undefined}
-        className="edu-drawer-form"
-        id={formId}
-        aria-busy={busy}
+    <>
+      <dialog
+        ref={dialog}
+        className="edu-connected edu-form-drawer"
+        aria-labelledby={`${formId}-title`}
+        onClose={onClose}
+        onCancel={(event) => {
+          if (busy) event.preventDefault();
+        }}
       >
-        <div className="edu-drawer-body">
-          {groups.map(([name, items], index) => (
-            <section
-              className="edu-form-section"
-              key={name}
-              id={`${formId}-section-${index}`}
-              aria-labelledby={`${formId}-section-title-${index}`}
+        <header className="edu-drawer-header">
+          <div>
+            <p className="edu-drawer-eyebrow">College records</p>
+            <h2 id={`${formId}-title`}>{title}</h2>
+            <p>
+              Enter the details below. Required fields are marked{" "}
+              <span aria-hidden="true">*</span>.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="edu-drawer-close"
+            aria-label="Close form"
+            onClick={close}
+            disabled={busy}
+          >
+            <X size={20} />
+          </button>
+        </header>
+        {renderBrowse && (
+          <div className="edu-batch-tabbar">
+            <div
+              className="edu-batch-tabs"
+              role="group"
+              aria-label="Batch workspace view"
             >
-              <div className="edu-form-section-heading">
-                <h3 id={`${formId}-section-title-${index}`}>{name}</h3>
-                {items.every((f) => !f.required) && <span>Optional</span>}
-              </div>
-              <div className="edu-field-grid">
-                {items.map((original) => {
-                  if (
-                    isFeeHead &&
-                    original.key === "external_party_code" &&
-                    ownership === "internal"
-                  )
-                    return null;
-                  const f =
-                    isFeeHead && original.key === "external_party_code"
-                      ? { ...original, required: true }
-                      : original;
-                  const options = f.reference
-                    ? lookups[f.reference]
-                    : undefined;
-                  const label = f.key.includes(".")
-                    ? pretty(f.label.replace(/^[^:]+:\s*/, ""))
-                    : f.label;
-                  const multiline =
-                    f.type === "json" ||
-                    f.type === "textarea" ||
-                    /(^|[._])(address|remarks|notes|description)$/.test(f.key);
-                  const value = initial[f.key];
-                  return (
-                    <label
-                      key={f.key}
-                      className={`${multiline ? "edu-field-wide" : ""} ${f.type === "boolean" ? "edu-field-checkbox" : ""}`}
-                    >
-                      <span>
-                        {label}
-                        {f.required && f.key !== "code" && (
-                          <span className="edu-required" aria-hidden="true">
-                            {" "}
-                            *
-                          </span>
-                        )}
-                        {f.key === "link.is_primary" && (
-                          <small className="edu-checkbox-description">
-                            Use as the main contact for student updates.
-                          </small>
-                        )}
-                      </span>
-                      {f.type === "fee-category" ? (
-                        <>
+              <button
+                type="button"
+                aria-pressed={!browsing}
+                disabled={busy}
+                onClick={() => setBrowsing(false)}
+              >
+                Create batch
+              </button>
+              <button
+                type="button"
+                aria-pressed={browsing}
+                disabled={busy}
+                onClick={() => {
+                  const form = document.getElementById(
+                    formId,
+                  ) as HTMLFormElement | null;
+                  if (form)
+                    setBrowseValues(Object.fromEntries(new FormData(form)));
+                  setBrowsing(true);
+                }}
+              >
+                Batch cards
+              </button>
+            </div>
+          </div>
+        )}
+        {browsing && renderBrowse && (
+          <div className="edu-drawer-body">{renderBrowse(browseValues)}</div>
+        )}
+        {!renderBrowse && !browsing && groups.length > 1 && (
+          <nav className="edu-drawer-sections" aria-label="Form sections">
+            {groups.map(([name], index) => (
+              <button
+                key={name}
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById(`${formId}-section-${index}`)
+                    ?.scrollIntoView({
+                      behavior: window.matchMedia(
+                        "(prefers-reduced-motion: reduce)",
+                      ).matches
+                        ? "instant"
+                        : "smooth",
+                      block: "start",
+                    })
+                }
+              >
+                {name}
+                <ChevronRight size={13} />
+              </button>
+            ))}
+          </nav>
+        )}
+        <form
+          onSubmit={save}
+          hidden={browsing}
+          style={browsing ? { display: "none" } : undefined}
+          className="edu-drawer-form"
+          id={formId}
+          aria-busy={busy}
+        >
+          <div className="edu-drawer-body">
+            {groups.map(([name, items], index) => (
+              <section
+                className="edu-form-section"
+                key={name}
+                id={`${formId}-section-${index}`}
+                aria-labelledby={`${formId}-section-title-${index}`}
+              >
+                <div className="edu-form-section-heading">
+                  <h3 id={`${formId}-section-title-${index}`}>{name}</h3>
+                  {items.every((f) => !f.required) && <span>Optional</span>}
+                </div>
+                <div className="edu-field-grid">
+                  {items.map((original) => {
+                    if (
+                      isFeeHead &&
+                      original.key === "external_party_code" &&
+                      ownership === "internal"
+                    )
+                      return null;
+                    const f =
+                      isFeeHead && original.key === "external_party_code"
+                        ? { ...original, required: true }
+                        : original;
+                    const options = f.reference
+                      ? lookups[f.reference]
+                      : undefined;
+                    const label = f.key.includes(".")
+                      ? pretty(f.label.replace(/^[^:]+:\s*/, ""))
+                      : f.label;
+                    const multiline =
+                      f.type === "json" ||
+                      f.type === "textarea" ||
+                      /(^|[._])(address|remarks|notes|description|body)$/.test(
+                        f.key,
+                      );
+                    const value = initial[f.key];
+                    return (
+                      <label
+                        key={f.key}
+                        className={`${multiline ? "edu-field-wide" : ""} ${f.type === "boolean" ? "edu-field-checkbox" : ""}`}
+                      >
+                        <span>
+                          {label}
+                          {f.required && f.key !== "code" && (
+                            <span className="edu-required" aria-hidden="true">
+                              {" "}
+                              *
+                            </span>
+                          )}
+                          {f.key === "link.is_primary" && (
+                            <small className="edu-checkbox-description">
+                              Use as the main contact for student updates.
+                            </small>
+                          )}
+                        </span>
+                        {f.type === "fee-category" ? (
+                          <>
+                            <input
+                              name={f.key}
+                              aria-label={label}
+                              required={f.required}
+                              defaultValue={String(value || "")}
+                              list={`${formId}-fee-categories`}
+                              maxLength={80}
+                              placeholder="Choose or type a category"
+                            />
+                            <datalist id={`${formId}-fee-categories`}>
+                              {(f.choices || []).map((category) => (
+                                <option key={category} value={category} />
+                              ))}
+                            </datalist>
+                          </>
+                        ) : f.type === "boolean" ? (
                           <input
+                            type="checkbox"
+                            name={f.key}
+                            defaultChecked={value === true}
+                          />
+                        ) : f.reference ||
+                          f.choices?.length ||
+                          f.options?.length ? (
+                          <Select
+                            aria-label={label}
+                            name={f.key}
+                            value={
+                              f.reference
+                                ? (referenceValues[f.key] ??
+                                  String(value ?? ""))
+                                : undefined
+                            }
+                            onChange={(event) => {
+                              if (f.reference)
+                                setReferenceValues((old) => ({
+                                  ...old,
+                                  [f.key]: event.target.value,
+                                }));
+                              if (isFeeHead && f.key === "collection_ownership")
+                                setOwnership(event.target.value);
+                            }}
+                            required={f.required}
+                            defaultValue={String(value ?? "")}
+                            disabled={
+                              !!f.reference && options === undefined && !value
+                            }
+                          >
+                            <option value="">
+                              {f.reference && options === undefined
+                                ? "Loading options…"
+                                : f.reference && options?.length === 0
+                                  ? "No records available"
+                                  : `Select ${label.toLowerCase()}`}
+                            </option>
+                            {f.reference ? (
+                              <>
+                                {value &&
+                                  !options?.some(
+                                    (o) => o.value === String(value),
+                                  ) && (
+                                    <option value={String(value)}>
+                                      {String(value)}
+                                    </option>
+                                  )}
+                                {options?.map((o) => (
+                                  <option key={o.value} value={o.value}>
+                                    {o.label}
+                                  </option>
+                                ))}
+                              </>
+                            ) : (
+                              (f.choices?.length
+                                ? f.choices
+                                : f.options || []
+                              ).map((o) => (
+                                <option key={o} value={o}>
+                                  {isFeeHead && f.key === "collection_ownership"
+                                    ? o === "internal"
+                                      ? "Internal — college income"
+                                      : "External — collected for another organization"
+                                    : isFeeHead && f.key === "category"
+                                      ? {
+                                          academic: "Academic — all students",
+                                          hostel: "Hostel — residents only",
+                                          transport:
+                                            "Transport — bus users only",
+                                          other: "Other — all students",
+                                        }[o] || o
+                                      : f.key === "previous_education.level"
+                                        ? o === "ssc"
+                                          ? "SSC / 10th class"
+                                          : o === "intermediate"
+                                            ? "Intermediate"
+                                            : o
+                                        : o}
+                                </option>
+                              ))
+                            )}
+                          </Select>
+                        ) : multiline ? (
+                          <textarea
+                            name={f.key}
+                            required={f.required}
+                            rows={f.type === "json" ? 5 : 3}
+                            defaultValue={
+                              value === undefined
+                                ? ""
+                                : f.type === "json"
+                                  ? JSON.stringify(value, null, 2)
+                                  : String(value)
+                            }
+                          />
+                        ) : f.type === "date" ? (
+                          <DateInput
                             name={f.key}
                             aria-label={label}
                             required={f.required}
-                            defaultValue={String(value || "")}
-                            list={`${formId}-fee-categories`}
-                            maxLength={80}
-                            placeholder="Choose or type a category"
-                          />
-                          <datalist id={`${formId}-fee-categories`}>
-                            {(f.choices || []).map((category) => (
-                              <option key={category} value={category} />
-                            ))}
-                          </datalist>
-                        </>
-                      ) : f.type === "boolean" ? (
-                        <input
-                          type="checkbox"
-                          name={f.key}
-                          defaultChecked={value === true}
-                        />
-                      ) : f.reference ||
-                        f.choices?.length ||
-                        f.options?.length ? (
-                        <Select
-                          aria-label={label}
-                          name={f.key}
-                          onChange={
-                            isFeeHead && f.key === "collection_ownership"
-                              ? (event) => setOwnership(event.target.value)
-                              : undefined
-                          }
-                          required={f.required}
-                          defaultValue={String(value ?? "")}
-                          disabled={
-                            !!f.reference && options === undefined && !value
-                          }
-                        >
-                          <option value="">
-                            {f.reference && options === undefined
-                              ? "Loading options…"
-                              : f.reference && options?.length === 0
-                                ? "No records available"
-                                : `Select ${label.toLowerCase()}`}
-                          </option>
-                          {f.reference ? (
-                            <>
-                              {value &&
-                                !options?.some(
-                                  (o) => o.value === String(value),
-                                ) && (
-                                  <option value={String(value)}>
-                                    {String(value)}
-                                  </option>
-                                )}
-                              {options?.map((o) => (
-                                <option key={o.value} value={o.value}>
-                                  {o.label}
-                                </option>
-                              ))}
-                            </>
-                          ) : (
-                            (f.choices?.length
-                              ? f.choices
-                              : f.options || []
-                            ).map((o) => (
-                              <option key={o} value={o}>
-                                {isFeeHead && f.key === "collection_ownership"
-                                  ? o === "internal"
-                                    ? "Internal — college income"
-                                    : "External — collected for another organization"
-                                  : isFeeHead && f.key === "category"
-                                    ? {
-                                        academic: "Academic — all students",
-                                        hostel: "Hostel — residents only",
-                                        transport: "Transport — bus users only",
-                                        other: "Other — all students",
-                                      }[o] || o
-                                    : f.key === "previous_education.level"
-                                      ? o === "ssc"
-                                        ? "SSC / 10th class"
-                                        : o === "intermediate"
-                                          ? "Intermediate"
-                                          : o
-                                      : o}
-                              </option>
-                            ))
-                          )}
-                        </Select>
-                      ) : multiline ? (
-                        <textarea
-                          name={f.key}
-                          required={f.required}
-                          rows={f.type === "json" ? 5 : 3}
-                          defaultValue={
-                            value === undefined
-                              ? ""
-                              : f.type === "json"
-                                ? JSON.stringify(value, null, 2)
+                            defaultValue={
+                              value === undefined || value === null
+                                ? ""
                                 : String(value)
-                          }
-                        />
-                      ) : f.type === "date" ? (
-                        <DateInput
-                          name={f.key}
-                          aria-label={label}
-                          required={f.required}
-                          defaultValue={
-                            value === undefined || value === null
-                              ? ""
-                              : String(value)
-                          }
-                        />
-                      ) : isPhoneField(f.key, f.type) ? (
-                        <FormPhoneInput
-                          name={f.key}
-                          label={label}
-                          required={f.required}
-                          defaultValue={
-                            value === undefined || value === null
-                              ? ""
-                              : String(value)
-                          }
-                        />
-                      ) : (
-                        <input
-                          name={f.key}
-                          type={
-                            [
-                              "date",
-                              "datetime-local",
-                              "time",
-                              "number",
-                              "email",
-                              "password",
-                            ].includes(f.type)
-                              ? f.type
-                              : "text"
-                          }
-                          step="any"
-                          required={f.required && f.key !== "code"}
-                          defaultValue={
-                            value === undefined ? "" : String(value)
-                          }
-                        />
-                      )}{" "}
-                      {f.help && (
-                        <small className="edu-field-help">{f.help}</small>
-                      )}
-                      {f.reference && lookupErrors[f.reference] && (
-                        <small className="edu-field-error">
-                          {lookupErrors[f.reference]}
-                        </small>
-                      )}
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-          {error && (
-            <p role="alert" className="edu-error">
-              {error}
-            </p>
-          )}
-        </div>
-        <footer className="edu-drawer-footer">
-          <span>Your changes are saved when you submit this form.</span>
-          <div>
-            <button type="button" onClick={close} disabled={busy}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="edu-primary"
-              disabled={busy || pending}
-            >
-              {busy ? (
-                <LoaderCircle size={16} className="edu-spin" />
-              ) : (
-                <Check size={16} />
-              )}{" "}
-              {busy ? "Saving…" : primary}
-            </button>
+                            }
+                          />
+                        ) : isPhoneField(f.key, f.type) ? (
+                          <FormPhoneInput
+                            name={f.key}
+                            label={label}
+                            required={f.required}
+                            defaultValue={
+                              value === undefined || value === null
+                                ? ""
+                                : String(value)
+                            }
+                          />
+                        ) : (
+                          <input
+                            name={f.key}
+                            type={
+                              [
+                                "date",
+                                "datetime-local",
+                                "time",
+                                "number",
+                                "email",
+                                "password",
+                              ].includes(f.type)
+                                ? f.type
+                                : "text"
+                            }
+                            step="any"
+                            required={f.required && f.key !== "code"}
+                            defaultValue={
+                              value === undefined ? "" : String(value)
+                            }
+                          />
+                        )}{" "}
+                        {f.reference && (
+                          <button
+                            type="button"
+                            disabled={busy || !!loadingReference}
+                            onClick={(event) => {
+                              event.preventDefault();
+                              void addReference(f.key, f.reference!);
+                            }}
+                          >
+                            {loadingReference === f.key
+                              ? "Loading…"
+                              : `Add ${pretty(f.reference.replaceAll("_", " "))}`}
+                          </button>
+                        )}
+                        {f.help && (
+                          <small className="edu-field-help">{f.help}</small>
+                        )}
+                        {f.reference && lookupErrors[f.reference] && (
+                          <small className="edu-field-error">
+                            {lookupErrors[f.reference]}
+                          </small>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+            {error && (
+              <p role="alert" className="edu-error">
+                {error}
+              </p>
+            )}
           </div>
-        </footer>
-      </form>
-    </dialog>
+          <footer className="edu-drawer-footer">
+            <span>Your changes are saved when you submit this form.</span>
+            <div>
+              <button type="button" onClick={close} disabled={busy}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="edu-primary"
+                disabled={busy || pending}
+              >
+                {busy ? (
+                  <LoaderCircle size={16} className="edu-spin" />
+                ) : (
+                  <Check size={16} />
+                )}{" "}
+                {busy ? "Saving…" : primary}
+              </button>
+            </div>
+          </footer>
+        </form>
+      </dialog>
+      {referenceForm && (
+        <RecordFormDrawer
+          title={`Create ${referenceForm.bound.resource!.title}`}
+          fields={[
+            ...referenceForm.bound.resource!.fields.map((field) => {
+              const custom = referenceForm.bound.form?.fields.find(
+                (item) => item.key === field.name,
+              );
+              return custom
+                ? {
+                    ...field,
+                    label: custom.label,
+                    required: field.required || custom.required,
+                    choices: custom.options,
+                  }
+                : field;
+            }),
+            ...(referenceForm.bound.form?.fields.filter(
+              (field) =>
+                !referenceForm.bound.resource!.fields.some(
+                  (item) => item.name === field.key,
+                ),
+            ) || []),
+          ]}
+          initial={referenceForm.bound.defaults}
+          onClose={() => setReferenceForm(null)}
+          onSave={async (values) => {
+            const { field, table, bound } = referenceForm;
+            const created = await api.workspace.create(table, {
+              values,
+              form_code: bound.form?.code,
+              form_revision: bound.form?.revision,
+            });
+            const createdOption = {
+              value: String(created.code),
+              label: String(
+                created.name || created.registration_number || created.code,
+              ),
+            };
+            const loaded = await refreshWorkspaceCache(
+              workspaceCacheKey(
+                session?.account?.code,
+                session?.activeRole?.code,
+                `lookup:${table}`,
+              ),
+              () => api.workspace.lookup(table),
+            ).catch(() => lookups[table] || []);
+            // A saved record remains selectable if reloading the options fails or
+            // the new code falls outside the lookup endpoint's first 1000 rows.
+            const options = loaded.some(
+              (option) => option.value === createdOption.value,
+            )
+              ? loaded
+              : [...loaded, createdOption];
+            setLookups((old) => ({ ...old, [table]: options }));
+            setLookupErrors((old) => ({ ...old, [table]: "" }));
+            setReferenceValues((old) => ({
+              ...old,
+              [field]: String(created.code),
+            }));
+          }}
+        />
+      )}
+    </>
   );
 }

@@ -302,6 +302,23 @@ def amount(value, positive=True):
     return n
 
 
+# These actions record the user in the audit log and do not write an employee FK.
+USER_AUDITED_ACTIONS = {"certificate-reject", "payroll-publish", "send-fee-reminder"}
+
+
+def workflow_fields(key, fields, user):
+    if user.get("person_type") == "system" and key not in USER_AUDITED_ACTIONS:
+        return [
+            *fields,
+            {
+                **f("administrator_employee_code", "Administrator employee (links your account)"),
+                "reference": "employees",
+                "help": "Select your own employee record to link this administrator account and authorize the transaction.",
+            },
+        ]
+    return fields
+
+
 @router.get("")
 def actions(request: Request, user=Depends(current_user)):
     staff_only(user)
@@ -313,7 +330,7 @@ def actions(request: Request, user=Depends(current_user)):
                 "label": key.replace("-", " ").capitalize(),
                 "resource": table,
                 "permission": permission,
-                "fields": fields,
+                "fields": workflow_fields(key, fields, user),
             }
             for key, (table, permission, fields) in SPECS.items()
             if has_permission(data, user, table, permission)
@@ -330,15 +347,11 @@ def perform(
     action: str, body: WorkflowInput, request: Request, user=Depends(current_user)
 ):
     staff_only(user)
-    if user["person_type"] != "employee":
-        raise HTTPException(
-            409,
-            "Link the administrator to an employee record before college transactions",
-        )
     if action not in SPECS:
         raise HTTPException(404, "Unknown action")
     table, permission, fields = SPECS[action]
-    v = body.values
+    fields = workflow_fields(action, fields, user)
+    v = dict(body.values)
     if set(v) - {f["key"] for f in fields}:
         raise HTTPException(422, "Unexpected action fields")
     for field in fields:
@@ -363,7 +376,20 @@ def perform(
         if not has_permission(data, user, table, permission):
             raise HTTPException(403, "Action permission denied")
         result = {}
-        actor = user["person_code"]
+        if user.get("person_type") == "system" and action not in USER_AUDITED_ACTIONS:
+            from app.modules.access_control.role_management.api import link_bootstrap_employee
+
+            employee_code = v.pop("administrator_employee_code")
+            link_bootstrap_employee(data, user, employee_code)
+            # Identity is read from the account on every request. Keep this session usable,
+            # and revoke other sessions after the explicit employee-link choice.
+            for session in data["sessions"].values():
+                if session["user_code"] == user["code"] and session["code"] != user["session_code"]:
+                    session["revoked"] = True
+            actor = employee_code
+            user = {**user, "person_type": "employee", "person_code": employee_code}
+        else:
+            actor = user.get("person_code")
         if action == "seat-release":
             allocation = query_get(data, "passenger_seats", v["code"])
             if allocation.get("end_date"):
