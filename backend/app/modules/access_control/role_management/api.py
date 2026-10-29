@@ -80,8 +80,8 @@ def roles(request: Request, user=Depends(require("roles", "view"))):
                     **public_account(a),
                     "employee": data["records"]
                     .get("employees", {})
-                    .get(a["person_code"])
-                    if a["person_type"] == "employee"
+                    .get(a.get("person_code"))
+                    if a.get("person_type") == "employee"
                     else None,
                 }
                 for a in data["accounts"].values()
@@ -272,21 +272,25 @@ def link_bootstrap(
     body: EmployeeLinkInput, request: Request, user=Depends(require("accounts", "edit"))
 ):
     with request.app.state.store.transaction() as data:
-        account = data["accounts"][user["code"]]
-        if account["person_type"] != "system" or not any(
-            data["roles"].get(r, {}).get("system_admin") for r in account["role_codes"]
-        ):
-            raise HTTPException(
-                409, "Only an unlinked bootstrap administrator can use this action"
-            )
-        if body.employee_code not in data["records"].get("employees", {}):
-            raise HTTPException(422, "Create the employee record first")
-        if any(
-            a["person_type"] == "employee" and a["person_code"] == body.employee_code
-            for a in data["accounts"].values()
-        ):
-            raise HTTPException(409, "Employee already has a login")
-        account.update(person_type="employee", person_code=body.employee_code)
+        link_bootstrap_employee(data, user, body.employee_code)
         revoke_user(data, user["code"])
-        audit(data, user["code"], "link_employee", "accounts", user["code"])
         return {"reauthenticate": True}
+
+
+def link_bootstrap_employee(data, user, employee_code):
+    account = data["accounts"][user["code"]]
+    if account["person_type"] != "system" or not any(
+        data["roles"].get(r, {}).get("system_admin") for r in account["role_codes"]
+    ):
+        raise HTTPException(
+            409, "Only an unlinked bootstrap administrator can use this action"
+        )
+    if employee_code not in data["records"].get("employees", {}):
+        raise HTTPException(422, "Create the employee record first")
+    if any(
+        a.get("person_type") == "employee" and a.get("person_code") == employee_code
+        for a in data["accounts"].values()
+    ):
+        raise HTTPException(409, "Employee already has a login")
+    account.update(person_type="employee", person_code=employee_code)
+    audit(data, user["code"], "link_employee", "accounts", user["code"])

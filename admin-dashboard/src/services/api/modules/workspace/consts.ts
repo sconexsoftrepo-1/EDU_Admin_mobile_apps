@@ -50,6 +50,8 @@ export interface BoundForm {
 export interface ResourceFormResponse {
   form: BoundForm | null;
   values: Row;
+  defaults?: Row;
+  resource?: Resource;
 }
 
 /** POST/PATCH workspace/resources/{table}[/{code}]. */

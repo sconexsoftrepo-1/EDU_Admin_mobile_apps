@@ -630,6 +630,8 @@ class Accounts(Mapped):
         account.update(code=row["code"], login_id=row["login_id"], password_hash=row["password_hash"],
                        active=bool(row["is_active"]), clients=row.get("allowed_clients", []),
                        role_codes=self.roles_of(row["code"]))
+        account.setdefault("person_type", "system")
+        account.setdefault("person_code", None)
         if row.get("email") is not None:
             account["email"] = row["email"]
         for person_type, column in self.PERSON.items():

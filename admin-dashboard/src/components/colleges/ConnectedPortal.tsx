@@ -636,7 +636,10 @@ export default function ConnectedPortal({
       for (const field of customFields)
         if (!fields.some((f) => f.name === field.key))
           fields.push({ ...field, name: field.key, choices: field.options });
-      let configured = { fields, initial: { ...row, ...bound.values } };
+      let configured = {
+        fields,
+        initial: { ...bound.defaults, ...row, ...bound.values },
+      };
       if (current.name === "fee_heads") {
         const existing: Row[] = [];
         for (;;) {
@@ -721,6 +724,21 @@ export default function ConnectedPortal({
       );
     return { ...values, "batch.name": `${start}–${end}` };
   }
+  async function saveAction(action: Action, values: Row) {
+    await api.workflows.run(action, courseBatchValues(action, values));
+    if (values.administrator_employee_code) {
+      // The transaction linked the bootstrap account. Reload its identity and action
+      // descriptors so another approval does not submit the old employee-link field.
+      const [me, workflows, masterData] = await Promise.all([
+        api.auth.me(),
+        api.workflows.list(),
+        api.masterData.actions(),
+      ]);
+      setAccount(me.account);
+      setActions([...workflows.actions, ...masterData.actions]);
+    }
+    await load(selected);
+  }
   const runAction = (action: Action) =>
     action.key === "enroll-student"
       ? setWizard(true)
@@ -728,8 +746,7 @@ export default function ConnectedPortal({
           title: action.label,
           fields: courseBatchFields(action),
           save: async (values) => {
-            await api.workflows.run(action, courseBatchValues(action, values));
-            await load(selected);
+            await saveAction(action, values);
           },
         });
   // Opened from "Manage …": student enrollment shows the wizard until it is closed once.
