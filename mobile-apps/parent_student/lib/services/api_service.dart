@@ -116,6 +116,12 @@ class CollegeApi {
     }
   }
 
+  Future<Uint8List> assignmentFile(String code) async => (await _response(
+    'GET',
+    '/academics/assignment-workspace/files/${Uri.encodeComponent(code)}/view',
+    null,
+  )).bodyBytes;
+
   Future<dynamic> get(String path) => _send('GET', path, null);
   Future<dynamic> post(String path, Json body) => _send('POST', path, body);
   Future<http.Response> _response(

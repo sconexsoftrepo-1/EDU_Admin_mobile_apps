@@ -137,7 +137,7 @@ test("Super Admin can reload failed dashboard requests without signing out", asy
     });
   });
   await page.goto(
-    `${origin}/colleges-institutions/edunexa-college/portal/admin/dashboard`,
+    `${origin}/portal/admin/dashboard`,
   );
   const warning = page.locator(".erp-record-recovery");
   await expect(warning).toContainText("Some data requests failed");

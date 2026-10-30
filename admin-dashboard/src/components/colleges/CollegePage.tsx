@@ -55,7 +55,7 @@ function Verification({ college: c, id }: { college: College; id: string }) {
           </dl>
         </>
       )}
-      <Link className="college-button" href={collegeRoot(c)}>
+      <Link className="college-button" href={`${collegeRoot(c)}/portal/login`}>
         Return to login
       </Link>
     </main>

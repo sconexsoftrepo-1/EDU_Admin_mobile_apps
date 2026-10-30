@@ -386,7 +386,7 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
                 "Development signing key: Ed25519",
                 "Verify: "
                 + request.app.state.settings.public_portal_url.rstrip("/")
-                + "/colleges-institutions/edunexa-college/verify-certificate/"
+                + "/verify-certificate/"
                 + token,
             ],
         )

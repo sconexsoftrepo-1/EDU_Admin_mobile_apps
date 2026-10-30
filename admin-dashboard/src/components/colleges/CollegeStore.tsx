@@ -178,10 +178,7 @@ export function CollegeStore({
       const destination = allowed.some((s) => s.key === activeModule)
         ? activeModule
         : landing;
-      if (destination)
-        router.replace(
-          `/colleges-institutions/${slug}/portal/${ownArea}/${destination}`,
-        );
+      if (destination) router.replace(`/portal/${ownArea}/${destination}`);
       setReady(true);
       return;
     }
@@ -238,7 +235,7 @@ export function CollegeStore({
         sessionPending.current = null;
         setAccount(null);
         setRole(null);
-        router.replace(`/colleges-institutions/${slug}/portal/login`);
+        router.replace(`/portal/login`);
       }
       throw error;
     });
@@ -288,7 +285,7 @@ export function CollegeStore({
           sessionCache.current = null;
           setAccount(null);
           setRole(null);
-          router.replace(`/colleges-institutions/${slug}/portal/login`);
+          router.replace(`/portal/login`);
         }
       });
   }, [slug, refresh, router]);
@@ -362,7 +359,7 @@ export function CollegeStore({
             setState(emptyTemplateState(slug));
             setAccount(null);
             setRole(null);
-            router.push(`/colleges-institutions/${slug}/portal/login`);
+            router.push(`/portal/login`);
           });
         },
         run: manage,

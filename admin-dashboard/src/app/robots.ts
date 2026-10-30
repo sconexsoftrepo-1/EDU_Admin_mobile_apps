@@ -7,6 +7,8 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       disallow: [
+        "/portal",
+        "/verify-certificate",
         "/colleges-institutions/*/portal",
         "/colleges-institutions/*/verify-certificate",
         "/colleges-institutions/*/admissions/apply",

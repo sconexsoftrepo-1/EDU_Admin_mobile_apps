@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const path = "/colleges-institutions/edunexa-college/portal/login";
+const path = "/portal/login";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend.");
 const roles = [
   { code: "SYSTEM-ADMIN", name: "Super Admin" },
@@ -204,5 +204,20 @@ test("login is the landing page and removed website URLs return to sign in", asy
     await expect(
       page.getByRole("link", { name: "Back to website" }),
     ).toHaveCount(0);
+  }
+});
+
+test("old portal links preserve their destination and query on the shorter URL", async ({
+  request,
+}) => {
+  for (const suffix of ["login", "admin/student-enrollment"]) {
+    const response = await request.get(
+      `${origin}/colleges-institutions/edunexa-college/portal/${suffix}?source=bookmark`,
+      { maxRedirects: 0 },
+    );
+    expect(response.status()).toBe(308);
+    expect(response.headers().location).toBe(
+      `/portal/${suffix}?source=bookmark`,
+    );
   }
 });

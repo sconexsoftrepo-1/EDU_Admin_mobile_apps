@@ -72,7 +72,7 @@ async function openAdmissions(page: Page) {
     });
   });
   await page.goto(
-    `${origin}/colleges-institutions/edunexa-college/portal/admin/admissions`,
+    `${origin}/portal/admin/admissions`,
   );
   await expect(
     page

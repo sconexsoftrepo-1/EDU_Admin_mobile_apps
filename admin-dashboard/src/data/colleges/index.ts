@@ -54,7 +54,8 @@ export const colleges: College[] = [
 ];
 export const collegeBySlug = (slug: string) =>
   colleges.find((c) => c.slug === slug);
-export const collegeRoot = (c: College) => `/colleges-institutions/${c.slug}`;
+// One institution is served directly at the domain root.
+export const collegeRoot = (_college: College) => "";
 // Operational screens; keys match backend screen contracts.
 export const operationLabels: Record<string, string> = {
   "campus-analytics": "Campus analytics",
@@ -302,7 +303,6 @@ export const permissions: Record<Role, string[]> = {
   ],
 };
 export function validCollegePath(_c: College, parts: string[]) {
-
   if (parts[0] === "verify-certificate")
     return parts.length === 2 && /^[A-Za-z0-9_-]{1,100}$/.test(parts[1]);
   if (parts[0] !== "portal") return false;

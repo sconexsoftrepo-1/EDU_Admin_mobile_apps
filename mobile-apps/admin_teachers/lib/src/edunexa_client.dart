@@ -1,5 +1,8 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'package:file_selector/file_selector.dart';
+import 'package:pdfrx/pdfrx.dart';
 import '../services/push_notifications.dart';
 import '../services/api_service.dart';
 export '../services/api_service.dart';
@@ -12,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 part 'mobile_workspace.dart';
+part 'assignment_workspace.dart';
 part 'workspace_widgets.dart';
 part 'workspace_forms.dart';
 part 'workspace_presentations.dart';

@@ -214,7 +214,7 @@ export const showroomCollection: ShowroomTemplate[] = [
       c.slug === "edunexa-college"
         ? "Editorial academic serif"
         : "Contemporary technical sans",
-    href: `/colleges-institutions/${c.slug}`,
+    href: "/portal/login",
     identity: `/assets/colleges-institutions/${c.slug}/crest.svg`,
     initial: `/assets/colleges-institutions/${c.slug}/initial.webp`,
     refresh: `/assets/colleges-institutions/${c.slug}/refresh.webp`,

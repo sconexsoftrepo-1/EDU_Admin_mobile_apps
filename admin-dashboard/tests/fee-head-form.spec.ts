@@ -95,7 +95,7 @@ for (const width of [390, 1440])
       });
     });
     await page.goto(
-      `${origin}/colleges-institutions/edunexa-college/portal/admin/fees`,
+      `${origin}/portal/admin/fees`,
     );
     await page.locator(".erp-api-controls button").click();
     const manager = page.getByRole("dialog", {

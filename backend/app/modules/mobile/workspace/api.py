@@ -26,6 +26,7 @@ SCREENS = {
         ("collections", "Collections and receipts", "payments"),
         ("expenses", "Expenditures", "expenses"),
         ("employees", "Employees", "employees"),
+        ("assignments", "Assignments and review", "assignments"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
         ("announcements", "Announcements", "announcements"),
@@ -650,22 +651,18 @@ def screen_data(
         items = [r for r in query_rows(data, table) if r["thread_code"] in threads]
     elif table == "notifications":
         items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
-    if table == "assignments" and not teacher:
-        items = [
-            {
-                **item,
-                "my_submission": next(
-                    (
-                        clean(r)
-                        for r in query_rows(data, "assignment_submissions")
-                        if r["assignment_code"] == item["code"]
-                        and r["student_code"] == selected
-                    ),
-                    None,
-                ),
-            }
-            for item in items
-        ]
+    if table == "assignments":
+        from app.core.assignment_workspace import listing as assignment_listing
+        items = assignment_listing(request, student_code, user)["items"]
+    if table == "exam_results" and user.get("person_type") in {"student", "parent"}:
+        from app.core.assignment_workspace import listing as assignment_listing
+        assignment_grades = assignment_listing(request, student_code, user)["items"]
+        for assignment in assignment_grades:
+            submission = assignment.get("my_submission")
+            if submission and submission.get("marks") is not None:
+                items.append({"code": submission["code"], "title": assignment["title"], "assessment_type": "assignment",
+                              "marks_obtained": submission["marks"], "marks": submission["marks"], "subject": assignment["title"], "max_marks": assignment["max_marks"],
+                              "feedback": submission.get("feedback"), "reviewed_at": submission.get("reviewed_at")})
     if table == "calendar_events":
         if from_date and to_date and (to_date < from_date or (to_date - from_date).days > 366):
             raise HTTPException(422, "Choose a calendar range of up to one year")

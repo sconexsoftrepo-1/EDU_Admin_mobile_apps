@@ -49,7 +49,7 @@ test("older student responses resolve course level from registered courses witho
 });
 
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const root = "/colleges-institutions/edunexa-college/portal/admin";
+const root = "/portal/admin";
 const student = {
   code: "STUDENT-1",
   first_name: "Asha",

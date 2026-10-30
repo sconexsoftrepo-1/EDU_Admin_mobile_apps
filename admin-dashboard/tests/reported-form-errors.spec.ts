@@ -105,7 +105,7 @@ async function setup(page: Page, table: string) {
     });
   });
   await page.goto(
-    `${origin}/colleges-institutions/edunexa-college/portal/admin/buses`,
+    `${origin}/portal/admin/buses`,
   );
   await page.locator(".erp-api-controls button").click();
   await page
