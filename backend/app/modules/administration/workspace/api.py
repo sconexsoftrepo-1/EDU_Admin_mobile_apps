@@ -102,7 +102,7 @@ def screen(key: str, request: Request, user=Depends(current_user)):
         output.append(
             {
                 "name": table,
-                "title": table.replace("_", " ").title(),
+                "title": ("Batches" if table == "academic_years" else table.replace("_", " ").title()),
                 "path": path,
                 "fields": CATALOG[table]["fields"],
                 "actions": actions,
@@ -194,7 +194,7 @@ def resource_form(
         "defaults": RESOURCE_DEFAULTS.get(table, {}) if not entity_code else {},
         "resource": {
             "name": table,
-            "title": table.replace("_", " ").title(),
+            "title": ("Batches" if table == "academic_years" else table.replace("_", " ").title()),
             "path": RESOURCES[table]["path"],
             "fields": CATALOG[table]["fields"],
             "actions": ["create"] if table not in MANAGED and has_permission(data, user, table, "create") else [],

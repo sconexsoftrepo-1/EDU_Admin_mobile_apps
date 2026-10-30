@@ -526,7 +526,6 @@
       "academic_years",
       "departments",
       "programs",
-      "batches",
       "semesters",
       "sections",
       "subjects",
@@ -600,7 +599,6 @@
       "assignment_submissions",
       "assignments",
       "attendance_sessions",
-      "batches",
       "calendar_events",
       "campuses",
       "curriculum_subjects",
@@ -618,7 +616,6 @@
       "subject_offerings",
       "subjects",
       "timetable_slots",
-      "website_pages",
       "timetable_swap_requests"
     ]
   },
@@ -819,7 +816,6 @@
     "title": "Courses & enrollment",
     "resources": [
       "programs",
-      "batches",
       "sections",
       "student_enrollments",
       "academic_years",

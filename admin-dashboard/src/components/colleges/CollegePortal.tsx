@@ -4,6 +4,8 @@ import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
+import PersonPhoto from "./PersonPhoto";
+import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
 import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
 import { operationLabels, visibleNotices } from "@/lib/colleges/operations";
@@ -1222,7 +1224,11 @@ export default function CollegePortal({
   const table = (
     title: string,
     rows: object[],
-    columns: ReturnType<typeof cols>,
+    columns: {
+      key: string;
+      label: string;
+      render?: (row: TableRecord) => ReactNode;
+    }[],
     actions?: (r: TableRecord) => ReactNode,
     detailsExtra?: (r: TableRecord) => ReactNode,
     filters?: ReactNode,
@@ -1577,16 +1583,28 @@ export default function CollegePortal({
                 : "Day scholar",
             })),
             [
-              ...cols(
-                "id",
-                "name",
-                "program",
-                "department",
-                "year",
-                "date",
-                "status",
-                "hostel",
-              ),
+              {
+                key: "name",
+                label: "Student name",
+                render: (r: TableRecord) => <strong>{String(r.name)}</strong>,
+              },
+              {
+                key: "courseLevel",
+                label: "Course level",
+                render: (r: TableRecord) => courseLevelLabel(r.courseLevel),
+              },
+              { key: "program", label: "Course / branch" },
+              {
+                key: "photo",
+                label: "Photo",
+                render: (r: TableRecord) => (
+                  <PersonPhoto
+                    value={(r.profile as { photo?: string } | undefined)?.photo}
+                    name={String(r.name)}
+                  />
+                ),
+              },
+              ...cols("id", "year", "date", "status", "hostel"),
               {
                 key: "outstanding",
                 label: "Outstanding",
@@ -2521,7 +2539,7 @@ export default function CollegePortal({
                     students in selection
                   </p>
                   <p>Coordinator: {faculty[0]?.name || "Not assigned yet"}</p>
-                  <Link href={`${root}/academics/${p.slug}`}>
+                  <Link href={nav("course-setup")}>
                     View program details <ArrowUpRight size={13} />
                   </Link>
                 </section>
@@ -2555,7 +2573,7 @@ export default function CollegePortal({
               "status",
             ),
             (r) => (
-              <Link href={`${root}/academics/${r.id}`}>Program website</Link>
+              <Link href={nav("course-setup")}>Manage course</Link>
             ),
           )}
         </>
@@ -3130,9 +3148,25 @@ export default function CollegePortal({
               </>
             )}
           {message && (
-            <p className="erp-api-warning" role="status">
-              {message}
-            </p>
+            <div className="erp-api-warning erp-record-recovery" role="status">
+              <span>{message}</span>
+              <button
+                type="button"
+                disabled={reloadingRecords}
+                onClick={async () => {
+                  setReloadingRecords(true);
+                  try {
+                    await refresh();
+                  } catch (error) {
+                    toast.error("Could not reload records", errorText(error));
+                  } finally {
+                    setReloadingRecords(false);
+                  }
+                }}
+              >
+                {reloadingRecords ? "Reloading…" : "Reload records"}
+              </button>
+            </div>
           )}
           {activeModule !== "roles" &&
             activeModule !== "timetable" &&

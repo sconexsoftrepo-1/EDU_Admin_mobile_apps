@@ -4,7 +4,7 @@
  * accessible name, e.g. label="Edit Katta" or label="Delete role".
  */
 import type { MouseEventHandler } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, FolderOpen } from "lucide-react";
 
 export default function IconAction({
   kind,
@@ -12,12 +12,13 @@ export default function IconAction({
   onClick,
   disabled,
 }: {
-  kind: "edit" | "delete";
+  kind: "edit" | "delete" | "files";
   label: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
 }) {
-  const Icon = kind === "edit" ? Pencil : Trash2;
+  const Icon =
+    kind === "edit" ? Pencil : kind === "files" ? FolderOpen : Trash2;
   return (
     <button
       type="button"

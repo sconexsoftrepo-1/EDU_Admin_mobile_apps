@@ -37,6 +37,7 @@ export type StudentProfile = {
 };
 export type Student = {
   profile?: StudentProfile;
+  courseLevel?: string;
   id: string;
   name: string;
   program: string;

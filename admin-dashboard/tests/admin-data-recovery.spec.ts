@@ -73,6 +73,19 @@ test("dashboard permission denials are not retried or bypassed", async () => {
   }
 });
 
+test("a genuinely expired session propagates once instead of becoming screen loading warnings", async () => {
+  const previous = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({ detail: "Please sign in again" }, { status: 401 });
+  try {
+    await expect(
+      loadTemplateState("edunexa-college", [summary], "dashboard"),
+    ).rejects.toMatchObject({ status: 401 });
+  } finally {
+    globalThis.fetch = previous;
+  }
+});
+
 test("Super Admin can reload failed dashboard requests without signing out", async ({
   page,
 }) => {

@@ -70,9 +70,7 @@ export function OperationsSummary({ college }: { college: College }) {
           ["Total employees", m.employees],
           ["Faculty", m.faculty],
           ["Payroll net", money(m.payroll)],
-          ["Passengers", `${m.occupied} / ${m.capacity}`],
           ["Purchase approvals", m.purchases],
-          ["Low stock", m.lowStock],
         ]}
       />
       <div className="ops-module-links">

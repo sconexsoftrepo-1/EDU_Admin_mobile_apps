@@ -4,7 +4,6 @@ import {
   collegeBySlug,
   colleges,
   collegeRoot,
-  publicRoutes,
   modules,
   roleHome,
   validCollegePath,
@@ -20,8 +19,6 @@ type Props = {
 export function generateStaticParams() {
   return colleges.flatMap((c) =>
     [
-      ...publicRoutes,
-      ...c.programs.map((p) => "academics/" + p.slug),
       "portal/login",
       ...Array.from(new Set(Object.values(roleHome))).flatMap((a) => [
         `portal/${a}`,
@@ -34,50 +31,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { collegeSlug, slug = [] } = await params,
     c = collegeBySlug(collegeSlug);
   if (!c) return {};
-  const origin = siteOrigin(),
-    privatePage =
-      ["portal", "verify-certificate"].includes(slug[0]) ||
-      slug.join("/") === "admissions/apply",
-    url = collegeRoot(c) + (slug.length ? "/" + slug.join("/") : "");
+  const origin = siteOrigin();
+  const url =
+    collegeRoot(c) + (slug.length ? "/" + slug.join("/") : "/portal/login");
   return {
-    title: `${slug.length ? slug.at(-1)!.replaceAll("-", " ") + " | " : ""}${c.name} — College Demo`,
-    description:
-      c.description +
-      " Fictional institution and interactive campus management demonstration.",
-    robots: {
-      index:
-        !privatePage && process.env.NEXT_PUBLIC_INDEX_COLLEGE_DEMOS === "true",
-      follow: !privatePage,
-    },
+    title: `${slug.at(-1)?.replaceAll("-", " ") || "Login"} | ${c.name}`,
+    description: `Sign in to ${c.name} campus management.`,
+    robots: { index: false, follow: false },
     metadataBase: origin ? new URL(origin) : undefined,
     alternates: origin ? { canonical: origin + url } : undefined,
-    openGraph: {
-      title: c.name,
-      description: c.description,
-      images: origin
-        ? [`${origin}/assets/colleges-institutions/${c.slug}/campus.webp`]
-        : undefined,
-    },
   };
 }
 export default async function Page({ params }: Props) {
   const { collegeSlug, slug = [] } = await params,
     c = collegeBySlug(collegeSlug);
-  if (!c || !validCollegePath(c, slug)) notFound();
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CreativeWork",
-            name: c.name + " — fictional college template",
-            description: c.description,
-          }).replaceAll("<", "\\u003c"),
-        }}
-      />
-      <CollegePage college={c} parts={slug} />
-    </>
-  );
+  if (!c) notFound();
+  if (!slug.length || !["portal", "verify-certificate"].includes(slug[0]))
+    redirect(`${collegeRoot(c)}/portal/login`);
+  if (!validCollegePath(c, slug)) notFound();
+  return <CollegePage college={c} parts={slug} />;
 }

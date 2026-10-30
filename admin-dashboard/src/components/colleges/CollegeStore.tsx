@@ -215,9 +215,33 @@ export function CollegeStore({
     if (cached) setState(cached.state);
     const result = await refreshWorkspaceCache(
       key,
-      () => loadTemplateState(slug, allowed, activeModule),
+      () =>
+        loadTemplateState(
+          slug,
+          allowed,
+          activeModule,
+          workspaceCacheKey(
+            me.account.code,
+            active.code,
+            "student-course-labels",
+          ),
+        ),
       (value) => value.errors.length === 0,
-    );
+    ).catch((error) => {
+      if (
+        error instanceof ApiError &&
+        error.status === 401 &&
+        sequence === dataRequest.current
+      ) {
+        clearWorkspaceCache();
+        sessionCache.current = null;
+        sessionPending.current = null;
+        setAccount(null);
+        setRole(null);
+        router.replace(`/colleges-institutions/${slug}/portal/login`);
+      }
+      throw error;
+    });
     if (sequence !== dataRequest.current) return;
     setState(result.errors.length && cached ? cached.state : result.state);
     setMessage(

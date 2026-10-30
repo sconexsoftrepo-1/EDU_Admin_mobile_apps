@@ -1,2 +1,4 @@
 import { redirect } from "next/navigation";
-export default function Page() { redirect("/colleges-institutions/edunexa-college"); }
+export default function Page() {
+  redirect("/colleges-institutions/edunexa-college/portal/login");
+}

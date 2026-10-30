@@ -132,7 +132,7 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
     result = {
         "courses": courses(data),
         "academic_years": [{"code": y["code"], "name": y["name"], "start_date": y["start_date"],
-                            "end_date": y["end_date"], "program_code": y.get("program_code")} for y in years],
+                            "end_date": y["end_date"], "program_code": y.get("program_code"), "batch_code": y.get("batch_code")} for y in years],
         "campuses": [{"code": c["code"], "name": c["name"]} for c in rows(data, "campuses")],
         "documents": [{"key": k, "label": v} for k, v in DOCUMENTS.items()],
         "identity_documents": [{"key": k, "label": v} for k, v in IDENTITY_DOCUMENTS.items()],
@@ -152,7 +152,15 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
     return result
 
 
-def pick_batch(data, choice, start_year):
+def pick_batch(data, choice, start_year, actor=None):
+    year = data["records"]["academic_years"][choice.academic_year_code]
+    if year.get("program_code"):
+        from app.modules.academics.academic_years.service import ensure_course_batch
+        batch = ensure_course_batch(data, year, actor)
+        if choice.batch_code and choice.batch_code != batch["code"]:
+            raise HTTPException(422, "Select the batch belonging to the chosen course and dates")
+        table_service("academic_years").repo.save(data, year)
+        return batch
     batches = [b for b in rows(data, "batches") if b["program_code"] == choice.program_code]
     if choice.batch_code:
         batch = next((b for b in batches if b["code"] == choice.batch_code), None)
@@ -217,7 +225,7 @@ def enroll(data, body: EnrollmentInput, actor):
     academic_year, start_year = year_of(data, choice.academic_year_code)
     if academic_year.get("program_code") and academic_year["program_code"] != choice.program_code:
         raise HTTPException(422, "The academic year does not belong to the selected course")
-    batch = pick_batch(data, choice, start_year)
+    batch = pick_batch(data, choice, start_year, actor)
     section_code = pick_section(data, choice, batch, choice.academic_year_code)
     campuses = rows(data, "campuses")
     campus = body.student.campus_code or (campuses[0]["code"] if len(campuses) == 1 else None)

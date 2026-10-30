@@ -23,8 +23,28 @@ export const MASTER_DATA_ENDPOINTS = {
 
 export class MasterDataService {
   /** Data entry forms the user may fill (each posts {values} to its path). */
-  actions() {
-    return apiRequest<MasterDataActionsResponse>(MASTER_DATA_ENDPOINTS.actions);
+  async actions() {
+    const result = await apiRequest<MasterDataActionsResponse>(
+      MASTER_DATA_ENDPOINTS.actions,
+    );
+    return {
+      ...result,
+      actions: result.actions
+        .filter(
+          (action) => !["create-batch", "promote-batch"].includes(action.key),
+        )
+        .map((action) =>
+          action.key === "create-course"
+            ? {
+                ...action,
+                fields: action.fields.filter(
+                  (field) =>
+                    !/^(batch|section)\./.test(field.key || field.name || ""),
+                ),
+              }
+            : action,
+        ),
+    };
   }
 
   /** Wizard options; pass a year and course for numbers and the fee breakdown. */

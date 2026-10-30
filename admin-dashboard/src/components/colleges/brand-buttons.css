@@ -169,14 +169,6 @@ button.icon-action:disabled {
   cursor: not-allowed;
 }
 /* Row action groups: one line, vertically centred. */
-:is(.edu-row-actions, .erp-row-actions, .ops-row-actions, .edu-batch-actions):has(
-    .icon-action
-  ) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
 td:has(> :is(.edu-row-actions, .erp-row-actions, .ops-row-actions) .icon-action) {
   white-space: nowrap;
 }
