@@ -1554,6 +1554,7 @@ export default function CollegePortal({
                 className="erp-primary"
                 onClick={() => {
                   setManageModule(null);
+                  setFeeStructureId(null);
                   setApiOpen(true);
                 }}
               >
@@ -3129,24 +3130,27 @@ export default function CollegePortal({
               </>
             )}
           {message && (
-            <div className="erp-api-warning erp-record-recovery" role="status">
-              <span>{message}</span>
-              <button
-                type="button"
-                disabled={reloadingRecords}
-                onClick={async () => {
-                  setReloadingRecords(true);
-                  try {
-                    await refresh();
-                  } catch (error) {
-                    toast.error("Could not reload records", errorText(error));
-                  } finally {
-                    setReloadingRecords(false);
-                  }
-                }}
-              >
-                {reloadingRecords ? "Reloading…" : "Reload records"}
-              </button>
+            <p className="erp-api-warning" role="status">
+              {message}
+            </p>
+          )}
+          {activeModule !== "roles" && !entryScreens.includes(activeModule) && (
+            <div className="erp-api-controls">
+              <span>College records</span>
+              {/* The Student directory shows Manage beside "Add student" instead. */}
+              {!studentDirectory && (
+                <button
+                  className="erp-primary"
+                  onClick={() => {
+                    setManageModule(null);
+                    setFeeStructureId(null);
+                    setApiOpen(true);
+                  }}
+                >
+                  Manage {labels[activeModule] || activeModule}{" "}
+                  <Plus size={15} />
+                </button>
+              )}
             </div>
           )}
           {activeModule !== "roles" &&
