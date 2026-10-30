@@ -3134,27 +3134,9 @@ export default function CollegePortal({
               {message}
             </p>
           )}
-          {activeModule !== "roles" && !entryScreens.includes(activeModule) && (
-            <div className="erp-api-controls">
-              <span>College records</span>
-              {/* The Student directory shows Manage beside "Add student" instead. */}
-              {!studentDirectory && (
-                <button
-                  className="erp-primary"
-                  onClick={() => {
-                    setManageModule(null);
-                    setFeeStructureId(null);
-                    setApiOpen(true);
-                  }}
-                >
-                  Manage {labels[activeModule] || activeModule}{" "}
-                  <Plus size={15} />
-                </button>
-              )}
-            </div>
-          )}
           {activeModule !== "roles" &&
             activeModule !== "timetable" &&
+            !studentDirectory &&
             !entryScreens.includes(activeModule) && (
               <div className="erp-api-controls">
                 <span>College records</span>
