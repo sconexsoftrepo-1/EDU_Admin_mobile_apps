@@ -1,0 +1,23 @@
+<service>
+  <id>EduNexaBackend</id>
+  <name>EduNexa Backend</name>
+  <description>EduNexa College FastAPI backend.</description>
+  <executable>%BASE%\..\..\.venv\Scripts\python.exe</executable>
+  <workingdirectory>%BASE%\..\..</workingdirectory>
+  <arguments>-m uvicorn app.asgi:app --host 127.0.0.1 --port 8010 --workers 1</arguments>
+  <env name="PYTHONUNBUFFERED" value="1" />
+  <startmode>Automatic</startmode>
+  <delayedAutoStart />
+  <onfailure action="restart" delay="10 sec" />
+  <resetfailure>1 hour</resetfailure>
+  <stoptimeout>30 sec</stoptimeout>
+  <serviceaccount>
+    <domain>NT AUTHORITY</domain>
+    <user>LocalService</user>
+  </serviceaccount>
+  <logpath>%BASE%\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+</service>

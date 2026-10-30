@@ -4,7 +4,7 @@
 
 Use the updated backend source and install `requirements.txt` in the server’s active virtual environment. Local development file locking uses `filelock`, which supports Windows; the server no longer imports Unix-only `fcntl` directly. The SQL Server backend continues to use database transactions and application locks.
 
-From `C:\edu_admin_backend\backend` with the virtual environment activated:
+From `C:\edu portal\backend` with the virtual environment activated:
 
 ```bat
 python -m pip install -r requirements.txt
@@ -14,6 +14,129 @@ python -m uvicorn app.asgi:app --host 0.0.0.0 --port 8010
 In a second terminal, check `curl.exe http://127.0.0.1:8010/health`. The configured SQL Server runtime should report `"storage":"sqlserver"`. Then check `curl.exe http://127.0.0.1:8010/api/v1/auth/roles` for the migrated roles.
 
 ## Current SQL Server configuration
+
+### Automatic startup on the Windows database server
+
+The repository includes a [WinSW service configuration](deploy/windows/EduNexaBackend.xml)
+and [one-command setup](deploy/windows/setup.ps1). The service runs as LocalService,
+starts automatically after boot, restarts after process failure, and keeps running
+when Remote Desktop disconnects. These files are prepared locally; they have not
+been installed or tested on the Windows server.
+
+1. Install **64-bit Python 3.12 for all users** on Windows so LocalService can access
+   the base Python installation. Copy the backend to `C:\edu portal\backend`.
+   Exclude the Mac `.venv`, `.migration-target`, caches, and development recordings.
+   The setup script creates a fresh Windows `.venv` and installs dependencies.
+   On a fresh server, open **PowerShell as Administrator** and install the
+   official Python 3.12.10 x64 installer (the final traditional Windows installer
+   in the 3.12 series):
+
+   ```powershell
+   $ErrorActionPreference = 'Stop'
+   [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+   $pythonInstaller = Join-Path $env:TEMP 'python-3.12.10-amd64.exe'
+   Invoke-WebRequest -UseBasicParsing -Uri 'https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe' -OutFile $pythonInstaller
+   $pythonInstall = Start-Process -FilePath $pythonInstaller -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1 Include_launcher=1 InstallLauncherAllUsers=1 Include_pip=1 Include_test=0' -Wait -PassThru
+   if ($pythonInstall.ExitCode -notin @(0, 3010)) { throw "Python install failed: $($pythonInstall.ExitCode)" }
+   if ($pythonInstall.ExitCode -eq 3010) { Write-Host 'Windows requests a reboot before continuing.' }
+   ```
+
+   Close and reopen PowerShell as Administrator after installation (reboot first
+   if requested), then verify `py -3.12 --version`. Installation flags follow
+   [Python's Windows documentation](https://docs.python.org/3.12/using/windows.html#installing-without-ui).
+   Use quotes around the backend path because `edu portal` contains a space.
+
+2. Place the production `.env` in that backend folder. Retain the existing JWT and
+   certificate signing keys and file-storage credentials/settings so tokens, signed
+   documents, and uploaded files continue to work. Copy any local files referenced
+   by those settings, including `var` if it contains uploads or signing keys.
+   Change these database settings for the migrated database on the same machine:
+
+   ```dotenv
+   EDUNEXA_STORAGE_BACKEND=sqlserver
+   EDUNEXA_MSSQL_HOST=127.0.0.1
+   EDUNEXA_MSSQL_PORT=1433
+   EDUNEXA_MSSQL_NAME='Edu Admin'
+   EDUNEXA_MSSQL_USER=YOUR_NEW_SERVER_SQL_LOGIN
+   EDUNEXA_MSSQL_PASSWORD='YOUR_NEW_SERVER_SQL_PASSWORD'
+   EDUNEXA_MSSQL_ENCRYPTION=require
+   ```
+
+   Use a SQL login that has access to `Edu Admin`; source-server SQL logins are not
+   transferred by the database data copy. Keep the existing storage settings; this
+   service setup does not move objects between S3, Supabase, or local storage.
+   Set `EDUNEXA_PUBLIC_API_URL`, `EDUNEXA_PUBLIC_PORTAL_URL`, and
+   `EDUNEXA_CORS_ORIGINS` to your deployment URLs. CORS origins use a JSON array.
+   The service defaults to the backend's `var` folder for runtime files. If you use
+   a different `EDUNEXA_DATA_DIR`, grant LocalService write access there too.
+
+3. In **PowerShell as Administrator**, run (adjust the path if you placed the
+   backend elsewhere; the scripts locate the backend relative to themselves):
+
+   ```powershell
+   cd "C:\edu portal\backend"
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\deploy\windows\setup.ps1
+   ```
+
+   Setup creates `.venv`, installs `requirements.txt`, validates production
+   settings and SQL database access, downloads **WinSW-x64.exe** from the official
+   [WinSW 2.12.0 release](https://github.com/winsw/winsw/releases/tag/v2.12.0),
+   then installs and starts the service. Internet access is needed for dependencies
+   and WinSW. An existing compatible Windows `.venv` is reused; a copied Mac
+   `.venv` is rejected. Setup does not overwrite `.env` or change database data.
+   If a service is already installed, setup stops with an instruction instead of
+   changing the running service.
+
+   Then open `services.msc` and find **EduNexa Backend**. Manage it using:
+
+   ```powershell
+   Get-Service EduNexaBackend
+   Restart-Service EduNexaBackend
+   Stop-Service EduNexaBackend
+   Start-Service EduNexaBackend
+   curl.exe http://127.0.0.1:8010/health
+   curl.exe http://127.0.0.1:8010/api/v1/auth/roles
+   ```
+
+   `/health` reports configuration and HTTP availability; the roles endpoint also
+   tests database access. To follow startup/error logs live:
+
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\deploy\windows\logs.ps1
+   ```
+
+   For HTTP request logs, use `logs.ps1 -Stream out`; for service wrapper problems,
+   use `logs.ps1 -Stream wrapper`. Press **Ctrl+C** to stop watching without stopping
+   the backend. Rerun the viewer if the service restarts or a log rotates.
+   Logs are also plain text files you can open in Notepad:
+
+   - `deploy\windows\logs\EduNexaBackend.err.log`: startup messages and errors.
+   - `deploy\windows\logs\EduNexaBackend.out.log`: HTTP access/output messages.
+   - `deploy\windows\logs\EduNexaBackend.wrapper.log`: service wrapper diagnostics.
+
+   Application logs rotate at 10 MiB, keeping up to eight rotated files per stream.
+   For application
+   updates, stop the service, replace source/install dependencies, and start it.
+   For example, after copying updated source (keep `.env`, `var`, and service files):
+
+   ```powershell
+   Stop-Service EduNexaBackend
+   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+   Start-Service EduNexaBackend
+   ```
+
+   To uninstall, stop it and run `.\deploy\windows\EduNexaBackend.exe uninstall`.
+
+4. For public access, put an HTTPS reverse proxy (for example IIS with ARR/URL
+   Rewrite) in front of `http://127.0.0.1:8010`. The supplied service listens only
+   locally. Allow the proxy's HTTPS port **443** through Windows Firewall and Utho,
+   configure DNS and its TLS certificate, and point the dashboard/mobile API URL
+   to that HTTPS address. SQL port **1433** serves database clients; it does not
+   serve the backend HTTP API. Verify sign-in and file access before switching
+   users over from the original backend.
+
+See the [WinSW configuration documentation](https://github.com/winsw/winsw/blob/v2.12.0/doc/xmlConfigFile.md)
+for service startup, account, and recovery options.
 
 The runtime `.env` now selects `EDUNEXA_STORAGE_BACKEND=sqlserver` and uses `EDUNEXA_MSSQL_*` settings for the `edu-admin-portal` database on `185.193.19.156:1433`, with encrypted SQL Server authentication. No PostgreSQL connection settings remain in the runtime `.env`.
 
