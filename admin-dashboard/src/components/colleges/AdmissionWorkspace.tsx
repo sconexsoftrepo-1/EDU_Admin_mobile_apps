@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
 } from "react";
@@ -18,6 +19,7 @@ import {
 } from "@/services/api";
 import SideDrawer from "./SideDrawer";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
+import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./admission-workspace.css";
 
 type Lookups = { employees: LookupOption[]; options: EnrollmentOptions };
@@ -27,6 +29,7 @@ type Props = {
   canCreate: boolean;
   canConvert: boolean;
 };
+const admissionSnapshots = new Map<string, { rows: Row[]; lookups: Lookups; savedAt: number }>();
 const text = (value: unknown) =>
   value == null || value === "" ? "—" : String(value);
 const nice = (value: unknown) =>
@@ -47,10 +50,13 @@ export default function AdmissionWorkspace({
   canCreate,
   canConvert,
 }: Props) {
-  const [tab, setTab] = useState<"manage" | "create">("manage");
-  const [rows, setRows] = useState<Row[]>([]);
-  const [lookups, setLookups] = useState<Lookups | null>(null);
-  const [loading, setLoading] = useState(true);
+  const snapshot = admissionSnapshots.get(path);
+  const cached = snapshot && Date.now() - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
+  const hasCachedData = useRef(Boolean(cached));
+  const [tab, setTab] = useState<"manage" | "create">("create");
+  const [rows, setRows] = useState<Row[]>(cached?.rows || []);
+  const [lookups, setLookups] = useState<Lookups | null>(cached?.lookups || null);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [detail, setDetail] = useState<Row | null>(null);
@@ -66,7 +72,7 @@ export default function AdmissionWorkspace({
   const [formError, setFormError] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!hasCachedData.current) setLoading(true);
     setError("");
     try {
       const [page, employees, options] = await Promise.all([
@@ -76,6 +82,8 @@ export default function AdmissionWorkspace({
       ]);
       setRows(page.items);
       setLookups({ employees, options });
+      admissionSnapshots.set(path, { rows: page.items, lookups: { employees, options }, savedAt: Date.now() });
+      hasCachedData.current = true;
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -203,34 +211,24 @@ export default function AdmissionWorkspace({
             Capture enquiries, follow up, and continue into student enrollment.
           </span>
         </div>
-        <button
-          type="button"
-          className="adm-refresh"
-          onClick={() => {
-            void load();
-          }}
-          disabled={loading}
-        >
-          <RefreshCw size={16} /> Refresh
-        </button>
+        <div className="adm-heading-actions">
+          <button
+            type="button"
+            className="adm-refresh"
+            onClick={() => void load()}
+            disabled={loading}
+          >
+            <RefreshCw size={16} /> Refresh
+          </button>
+          <WorkspacePrimaryAction
+            disabled={!canCreate}
+            onClick={() => setTab((current) => current === "create" ? "manage" : "create")}
+            title={tab === "create" ? "View admission enquiries" : "Create an application"}
+          >
+            {tab === "create" ? <><Info size={16} /> Manage admissions <span>{rows.length}</span></> : <><Plus size={16} /> New application</>}
+          </WorkspacePrimaryAction>
+        </div>
       </header>
-      <div className="adm-tabs" role="tablist" aria-label="Admissions">
-        <button
-          role="tab"
-          aria-selected={tab === "manage"}
-          onClick={() => setTab("manage")}
-        >
-          Manage admissions <span>{rows.length}</span>
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === "create"}
-          onClick={() => setTab("create")}
-          disabled={!canCreate}
-        >
-          <Plus size={16} /> New application
-        </button>
-      </div>
       {error && (
         <div className="adm-alert" role="alert">
           {error}

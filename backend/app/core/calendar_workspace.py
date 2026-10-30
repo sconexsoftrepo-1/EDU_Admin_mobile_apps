@@ -116,7 +116,8 @@ def options(request: Request, user=Depends(current_user)):
     data = request.app.state.store.snapshot()
     if not staff_can(data, user, "create"):
         raise HTTPException(403, "Calendar event creation is not assigned to this role")
-    return {"departments": [{"code": r["code"], "name": r["name"]} for r in rows(data, "departments")],
+    departments = sorted(rows(data, "departments"), key=lambda row: str(row.get("name") or "").casefold())
+    return {"departments": [{"code": r["code"], "name": r["name"]} for r in departments],
             "courses": [{"code": r["code"], "name": r["name"], "department_code": r.get("department_code"),
                          "course_level": r.get("course_level"), "specialization": r.get("branch") or "General"}
                         for r in rows(data, "programs") if r.get("course_level") in {"intermediate", "degree"}],

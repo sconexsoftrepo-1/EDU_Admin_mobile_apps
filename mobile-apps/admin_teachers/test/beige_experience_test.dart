@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:edunexa_admin/src/edunexa_client.dart';
-import 'package:edunexa_admin/src/mobile_design.dart';
+import 'package:edunexa_admin/app/edunexa_client.dart';
+import 'package:edunexa_admin/theme/mobile_design.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 

@@ -17,6 +17,12 @@
   justify-content: space-between;
   gap: 18px;
 }
+.adm-heading-actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
 .adm-heading p,
 .adm-form-title span {
   color: var(--adm-accent);
@@ -31,7 +37,7 @@
   letter-spacing: -0.04em;
   margin: 0;
 }
-.adm-heading span,
+.adm-heading > div > span,
 .adm-list-toolbar p,
 .adm-form-title p {
   color: var(--adm-muted);
@@ -92,6 +98,34 @@
   color: var(--adm-accent);
   font-size: 11px;
   padding: 2px 7px;
+}
+.adm-workspace .adm-tabs {
+  background: transparent;
+  border-bottom: 1px solid #e2e8eb;
+  border-radius: 0;
+  gap: 4px;
+  padding: 0;
+  width: 100%;
+}
+.adm-workspace .adm-tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #52626d;
+  justify-content: center;
+  margin-bottom: -1px;
+  padding: 11px 16px;
+}
+.adm-workspace .adm-tabs button[aria-selected="true"] {
+  background: #eef5f7;
+  border-bottom-color: #195e72;
+  box-shadow: none;
+  color: #164a5e;
+  font-weight: 700;
+}
+.adm-workspace .adm-tabs button:focus-visible {
+  outline: 2px solid #b77a20;
+  outline-offset: 2px;
 }
 .adm-list-panel,
 .adm-create-form {
@@ -357,6 +391,10 @@
   .adm-form-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+  .adm-heading-actions {
+    justify-content: space-between;
+    width: 100%;
   }
   .adm-tabs {
     width: 100%;

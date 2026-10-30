@@ -1,6 +1,6 @@
 import 'helpers/splash_test_support.dart';
 import 'dart:convert';
-import 'package:edunexa_parent/src/edunexa_client.dart';
+import 'package:edunexa_parent/app/edunexa_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';

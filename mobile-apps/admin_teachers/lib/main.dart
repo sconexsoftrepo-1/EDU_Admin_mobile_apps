@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'src/edunexa_client.dart';
+import 'app/edunexa_client.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
