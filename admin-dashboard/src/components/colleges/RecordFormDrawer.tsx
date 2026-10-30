@@ -1,12 +1,5 @@
 "use client";
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-  type FormEvent,
-} from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { Check, ChevronRight, LoaderCircle, X } from "lucide-react";
 import { api, type Field, type LookupOption, type Row } from "@/services/api";
 import { useOptionalCollege } from "./CollegeStore";
@@ -18,6 +11,7 @@ import {
   workspaceCacheKey,
 } from "@/lib/colleges/workspace-cache";
 import Select from "./SearchSelect";
+import AcademicYearForm from "./AcademicYearForm";
 import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
 import DateInput from "./DateInput";
 const pretty = (key: string) =>
@@ -29,7 +23,10 @@ function standard(fields: Field[]) {
   return fields.map((f) => ({
     ...f,
     key: f.key || f.name!,
-    label: f.label || pretty(f.name || f.key || "Field"),
+    label:
+      f.reference === "academic_years"
+        ? "Batch"
+        : f.label || pretty(f.name || f.key || "Field"),
     type: f.type.includes("timestamp")
       ? "datetime-local"
       : f.type === "boolean"
@@ -75,18 +72,14 @@ export default function RecordFormDrawer({
   initial = {},
   onSave,
   onClose,
-  renderBrowse,
 }: {
   title: string;
   fields: Field[];
   initial?: Row;
   onSave: (row: Row) => Promise<void>;
   onClose: () => void;
-  renderBrowse?: (values: Row) => ReactNode;
 }) {
   const session = useOptionalCollege();
-  const [browsing, setBrowsing] = useState(false);
-  const [browseValues, setBrowseValues] = useState<Row>({});
   const dialog = useRef<HTMLDialogElement>(null);
   const formId = useId();
   const normalized = standard(fields);
@@ -281,6 +274,10 @@ export default function RecordFormDrawer({
     : /^create|^add /i.test(title)
       ? "Create record"
       : "Save changes";
+  const RelatedRecordForm =
+    referenceForm?.table === "academic_years"
+      ? AcademicYearForm
+      : RecordFormDrawer;
   return (
     <>
       <dialog
@@ -311,43 +308,7 @@ export default function RecordFormDrawer({
             <X size={20} />
           </button>
         </header>
-        {renderBrowse && (
-          <div className="edu-batch-tabbar">
-            <div
-              className="edu-batch-tabs"
-              role="group"
-              aria-label="Batch workspace view"
-            >
-              <button
-                type="button"
-                aria-pressed={!browsing}
-                disabled={busy}
-                onClick={() => setBrowsing(false)}
-              >
-                Create batch
-              </button>
-              <button
-                type="button"
-                aria-pressed={browsing}
-                disabled={busy}
-                onClick={() => {
-                  const form = document.getElementById(
-                    formId,
-                  ) as HTMLFormElement | null;
-                  if (form)
-                    setBrowseValues(Object.fromEntries(new FormData(form)));
-                  setBrowsing(true);
-                }}
-              >
-                Batch cards
-              </button>
-            </div>
-          </div>
-        )}
-        {browsing && renderBrowse && (
-          <div className="edu-drawer-body">{renderBrowse(browseValues)}</div>
-        )}
-        {!renderBrowse && !browsing && groups.length > 1 && (
+        {groups.length > 1 && (
           <nav className="edu-drawer-sections" aria-label="Form sections">
             {groups.map(([name], index) => (
               <button
@@ -374,8 +335,6 @@ export default function RecordFormDrawer({
         )}
         <form
           onSubmit={save}
-          hidden={browsing}
-          style={browsing ? { display: "none" } : undefined}
           className="edu-drawer-form"
           id={formId}
           aria-busy={busy}
@@ -606,7 +565,7 @@ export default function RecordFormDrawer({
                           >
                             {loadingReference === f.key
                               ? "Loading…"
-                              : `Add ${pretty(f.reference.replaceAll("_", " "))}`}
+                              : `Add ${f.reference === "academic_years" ? "batch" : pretty(f.reference.replaceAll("_", " "))}`}
                           </button>
                         )}
                         {f.help && (
@@ -652,7 +611,7 @@ export default function RecordFormDrawer({
         </form>
       </dialog>
       {referenceForm && (
-        <RecordFormDrawer
+        <RelatedRecordForm
           title={`Create ${referenceForm.bound.resource!.title}`}
           fields={[
             ...referenceForm.bound.resource!.fields.map((field) => {

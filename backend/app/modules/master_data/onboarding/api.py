@@ -200,12 +200,6 @@ def batch_record(values):
     return {**b, "entry_year": start, "graduation_year": end, "name": b.get("name") or f"{start}-{end % 100:02d}"}
 
 
-BATCH_FIELDS = lambda required: [  # noqa: E731 - used by two forms
-    field("batch.entry_year", "Batch: start year", "number", required),
-    field("batch.graduation_year", "Batch: end year", "number", required),
-]
-
-
 def create_batch(data, program_code, body: BatchInput, actor):
     table_service("programs").repo.get(data, program_code)
     batch = create(data, "batches", {**batch_record(body.batch), "program_code": program_code}, actor)
@@ -568,12 +562,6 @@ def course_fee_structure(data, v, actor):
             "fee_structures": saved}
 
 
-def promote_batch(data, v, actor):
-    from ..enrollment.api import promote_students
-
-    return promote_students(data, v.get("batch_code", ""), int(v.get("to_year") or 0), actor)
-
-
 ACTIONS = {
     # Student enrollment is also the admission form of the dashboard: the student with one guardian
     # (name, relationship, mobile number as the primary contact). More guardians: "Add parent or guardian".
@@ -614,24 +602,16 @@ ACTIONS = {
                                for k, label, kind in PAY if v.get("pay", {}).get(k) not in (None, "")]), a),
     ),
     "create-course": (
-        "Create course", "programs", [("programs", "create"), ("batches", "create")],
+        "Create course", "programs", [("programs", "create")],
         # The department is typed (existing ones are reused, new ones registered on the campus).
         lambda: [field("program.department_code", "Program: department (e.g. Science, Commerce)")]
         + fields("programs", "program", skip=("department_code",))
         + [field("campus_code", "Campus of a new department (only if there are several)", required=False,
-                 reference="campuses")]
-        + BATCH_FIELDS(False),
-        # The first batch is optional here; when a start year is given the end year is required too.
+                 reference="campuses")],
+        # Dated batches are created through the single course-linked calendar form.
         lambda d, v, a: create_course(d, CourseInput(program=v.get("program", {}),
-                                                     batches=[v["batch"]] if v.get("batch", {}).get("entry_year") else []), a,
+                                                     batches=[]), a,
                                       campus_code=v.get("campus_code") or None),
-    ),
-    "create-batch": (
-        "Year-based batch", "batches", [("batches", "create")],
-        lambda: [field("program_code", "Course", reference="programs")] + BATCH_FIELDS(True)
-        + fields("sections", "section", skip=("batch_code",), optional=True),
-        lambda d, v, a: create_batch(d, v.get("program_code", ""), BatchInput(
-            batch=v.get("batch", {}), sections=[v["section"]] if v.get("section", {}).get("name") else []), a),
     ),
     "course-fee-structure": (
         "Course fee structure", "fee_structures", [("fee_heads", "create"), ("fee_structures", "create")],
@@ -643,11 +623,6 @@ ACTIONS = {
         + [field(f"amount.{key}", f"{name} ({'hostel students only' if cat == 'hostel' else 'bus users only' if cat == 'transport' else 'per year'})",
                  "number", False) for key, _, name, cat in FEE_HEADS],
         lambda d, v, a: course_fee_structure(d, v, a),
-    ),
-    "promote-batch": (
-        "Move batch to a year of study", "batches", [("students", "edit")],
-        lambda: [field("batch_code", "Batch", reference="batches"), field("to_year", "Year of study", "number")],
-        lambda d, v, a: promote_batch(d, v, a),
     ),
     "enroll-students-to-course": (
         "Enroll students in a course", "student_enrollments", [("student_enrollments", "create")],

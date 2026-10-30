@@ -184,3 +184,25 @@ test("a reduced mobile viewport keeps password and submit reachable", async ({
   await submit.scrollIntoViewIfNeeded();
   await expect(submit).toBeInViewport();
 });
+
+test("login is the landing page and removed website URLs return to sign in", async ({
+  page,
+}) => {
+  await openLogin(page);
+  for (const entry of [
+    "/",
+    "/colleges-institutions",
+    "/colleges-institutions/edunexa-college",
+    "/colleges-institutions/edunexa-college/about",
+    "/colleges-institutions/edunexa-college/admissions/apply",
+  ]) {
+    await page.goto(`${origin}${entry}`);
+    await expect(page).toHaveURL(`${origin}${path}`);
+    await expect(
+      page.getByRole("heading", { name: "Welcome to Pragathi College" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Back to website" }),
+    ).toHaveCount(0);
+  }
+});

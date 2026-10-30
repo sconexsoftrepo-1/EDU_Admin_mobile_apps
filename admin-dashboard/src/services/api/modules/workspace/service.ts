@@ -25,6 +25,48 @@ export const WORKSPACE_ENDPOINTS = {
     `${resourcePath}/${encodeURIComponent(code)}`,
 } as const;
 
+/** Compatibility while the Windows API rolls forward to atomic calendar/cohort saves. */
+async function completeCourseBatch(table: string, saved: Row): Promise<Row> {
+  if (table !== "academic_years" || !saved.program_code || saved.batch_code)
+    return saved;
+  const program = String(saved.program_code);
+  const start = Number(String(saved.start_date).slice(0, 4));
+  const end = Number(String(saved.end_date).slice(0, 4));
+  const overview = await apiRequest<{ batches: Row[] }>(
+    "master-data/enrollment/batches/overview",
+    { query: { program_code: program } },
+  );
+  const matching = overview.batches.filter(
+    (batch) =>
+      Number(batch.entry_year) === start &&
+      Number(batch.graduation_year) === end,
+  );
+  if (matching.length > 1)
+    throw new Error(
+      "Batch dates are saved. Multiple existing batches match this course and year range; resolve those records before enrolling students.",
+    );
+  const batch =
+    matching[0] ||
+    (
+      await apiRequest<{ batch: Row }>(
+        `master-data/courses/${encodeURIComponent(program)}/batches`,
+        {
+          method: "POST",
+          body: {
+            batch: {
+              code: String(saved.code),
+              name: String(saved.name),
+              entry_year: start,
+              graduation_year: end,
+            },
+            sections: [],
+          },
+        },
+      )
+    ).batch;
+  return { ...saved, batch_code: batch.code };
+}
+
 export class WorkspaceService {
   /** Screens the signed-in user may open (role screen allocation applied). */
   screens() {
@@ -32,8 +74,20 @@ export class WorkspaceService {
   }
 
   /** One screen with its tables, fields and permitted actions. */
-  screen(key: string) {
-    return apiRequest<Screen>(WORKSPACE_ENDPOINTS.screen(key));
+  async screen(key: string) {
+    const result = await apiRequest<Screen>(WORKSPACE_ENDPOINTS.screen(key));
+    return {
+      ...result,
+      resources: result.resources
+        .filter(
+          (resource) => !["batches", "website_pages"].includes(resource.name),
+        )
+        .map((resource) =>
+          resource.name === "academic_years"
+            ? { ...resource, title: "Batches" }
+            : resource,
+        ),
+    };
   }
 
   /** Options for a reference field (code + label), up to 1000. */
@@ -69,18 +123,26 @@ export class WorkspaceService {
   }
 
   /** Create a record; custom form values are stored with it. */
-  create(table: string, payload: RecordSavePayload) {
-    return apiRequest<Row>(WORKSPACE_ENDPOINTS.createRecord(table), {
-      method: "POST",
-      body: payload,
-    });
+  async create(table: string, payload: RecordSavePayload) {
+    const saved = await apiRequest<Row>(
+      WORKSPACE_ENDPOINTS.createRecord(table),
+      {
+        method: "POST",
+        body: payload,
+      },
+    );
+    return completeCourseBatch(table, saved);
   }
 
-  update(table: string, code: string, payload: RecordSavePayload) {
-    return apiRequest<Row>(WORKSPACE_ENDPOINTS.updateRecord(table, code), {
-      method: "PATCH",
-      body: payload,
-    });
+  async update(table: string, code: string, payload: RecordSavePayload) {
+    const saved = await apiRequest<Row>(
+      WORKSPACE_ENDPOINTS.updateRecord(table, code),
+      {
+        method: "PATCH",
+        body: payload,
+      },
+    );
+    return completeCourseBatch(table, saved);
   }
 }
 

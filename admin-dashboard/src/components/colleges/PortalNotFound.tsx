@@ -112,8 +112,8 @@ export default function PortalNotFound() {
       </section>
       <footer className="portal-missing-footer">
         <span>Learning. People. Possibilities.</span>
-        <Link href={collegeHome}>
-          Visit college website <ArrowRight size={14} />
+        <Link href={dashboardEntry}>
+          Return to login <ArrowRight size={14} />
         </Link>
       </footer>
     </main>

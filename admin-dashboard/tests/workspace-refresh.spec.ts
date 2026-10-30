@@ -12,10 +12,10 @@ const resources = {
     fields: [],
     actions: ["view", "create", "edit"],
   },
-  batches: {
-    name: "batches",
+  academic_years: {
+    name: "academic_years",
     title: "Batches",
-    path: "academics/batches",
+    path: "academics/academic-years",
     fields: [],
     actions: ["view", "create", "edit"],
   },
@@ -49,7 +49,7 @@ const role = {
   permissions: Object.fromEntries(
     [
       "programs",
-      "batches",
+      "academic_years",
       "students",
       "employees",
       "teachers",
@@ -96,7 +96,7 @@ async function setup(page: Page, screen: string) {
           title: titles[key] || key,
           resources:
             key === "course-setup"
-              ? [resources.programs, resources.batches]
+              ? [resources.programs, resources.academic_years]
               : key === "student-enrollment"
                 ? [resources.students]
                 : [resources.employees],
@@ -136,16 +136,38 @@ async function setup(page: Page, screen: string) {
           ],
         },
       });
-    if (path === "master-data/actions/create-batch") {
+    if (path === "workspace/resources/academic_years/form")
+      return route.fulfill({
+        json: { resource: resources.academic_years, defaults: {}, form: null },
+      });
+    if (path === "master-data/enrollment/options")
+      return route.fulfill({
+        json: {
+          courses: {
+            intermediate: [],
+            degree: [
+              { code: "BSC", name: "B.Sc", duration_semesters: 6, batches: [] },
+            ],
+          },
+          academic_years: [],
+          campuses: [],
+          documents: [],
+        },
+      });
+    if (
+      path === "workspace/resources/academic_years" &&
+      route.request().method() === "POST"
+    ) {
       writes++;
-      return route.fulfill({
-        json: { batch: { code: "BATCH", name: "2026–2029" } },
+      const { values } = route.request().postDataJSON();
+      expect(values).toMatchObject({
+        program_code: "BSC",
+        start_date: "2026-06-01",
+        end_date: "2029-05-31",
+        code: "BSC-2026-2029",
       });
+      return route.fulfill({ json: { ...values, batch_code: values.code } });
     }
-    if (path === "master-data/enrollment/batches/overview")
-      return route.fulfill({
-        json: { batches: [], totals: { batches: 0, students: 0 } },
-      });
     if (path === "workspace/lookups/programs")
       return route.fulfill({ json: [{ value: "BSC", label: "B.Sc" }] });
     if (path === "master-data/staff-onboarding")
@@ -233,59 +255,100 @@ for (const screen of Object.keys(titles)) {
   });
 }
 
-test("batch counts only reload after opening, changing the course or refreshing", async ({
+test("retired batch manager and promotion options stay hidden with an older API", async ({
   page,
 }) => {
-  const { calls } = await setup(page, "course-setup");
-  await page
-    .getByRole("button", { name: "Year-based batch", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Batch cards", exact: true }).click();
+  await setup(page, "course-setup");
   await expect(
-    page.getByRole("heading", { name: "No batches created yet" }),
+    page.getByRole("button", { name: "Year-based batch", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Batch cards", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /Move batch to/i }),
+  ).toHaveCount(0);
+  await page
+    .getByRole("combobox", { name: "Screen resource" })
+    .selectOption("academic_years");
+  await expect(
+    page.getByRole("button", { name: "Create batch", exact: true }),
   ).toBeVisible();
-  const target = "master-data/enrollment/batches/overview";
-  const baseline = calls.filter((path) => path === target).length;
-  await idle(page);
-  expect(calls.filter((path) => path === target)).toHaveLength(baseline);
-  await page
-    .getByRole("button", { name: "Refresh counts", exact: true })
-    .click();
-  await expect
-    .poll(() => calls.filter((path) => path === target).length)
-    .toBe(baseline + 1);
-  await page
-    .getByRole("combobox", { name: "View batches for course" })
-    .selectOption("BSC");
-  await expect
-    .poll(() => calls.filter((path) => path === target).length)
-    .toBe(baseline + 2);
-  await idle(page);
-  expect(calls.filter((path) => path === target)).toHaveLength(baseline + 2);
 });
 
-test("creating a record refreshes the current screen once and then stays idle", async ({
+test("dated course batch saves the exact selected course and dates once", async ({
   page,
 }) => {
   const api = await setup(page, "course-setup");
-  const target = "workspace/screens/course-setup";
-  const before = api.calls.filter((path) => path === target).length;
   await page
-    .getByRole("button", { name: "Year-based batch", exact: true })
-    .click();
-  const form = page.getByRole("dialog", {
-    name: "Year-based batch",
-    exact: true,
-  });
-  await form.getByLabel("Course", { exact: false }).fill("BSC");
-  await form.getByLabel("Start year", { exact: false }).fill("2026");
-  await form.getByLabel("End year", { exact: false }).fill("2029");
-  await form.getByRole("button", { name: "Save changes", exact: true }).click();
+    .getByRole("combobox", { name: "Screen resource" })
+    .selectOption("academic_years");
+  await page.getByRole("button", { name: "Create batch", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "Create batch", exact: true });
+  await form.getByRole("combobox", { name: "Course", exact: true }).click();
+  await form.getByRole("option", { name: "B.Sc (BSC)", exact: true }).click();
+  await form
+    .getByRole("textbox", { name: "Start date", exact: true })
+    .fill("01/06/2026");
+  await form.getByRole("textbox", { name: "Start date", exact: true }).blur();
+  await expect(
+    form.getByRole("textbox", { name: "End date", exact: true }),
+  ).toHaveValue("31/05/2029");
+  await expect(
+    form.getByRole("textbox", { name: "Batch code", exact: true }),
+  ).toHaveValue("BSC-2026-2029");
+  await form.getByRole("button", { name: "Create batch", exact: true }).click();
   await expect(form).not.toBeVisible();
   expect(api.writes()).toBe(1);
-  expect(api.calls.filter((path) => path === target)).toHaveLength(before + 1);
   await page.waitForLoadState("networkidle");
   const saved = api.calls.length;
   await idle(page);
   expect(api.calls).toHaveLength(saved);
+});
+
+test("dated batch creation also completes the cohort on the older Windows API", async ({
+  page,
+}) => {
+  await setup(page, "course-setup");
+  let cohortWrites = 0;
+  await page.route(
+    "**/api/college/workspace/resources/academic_years",
+    (route) => {
+      const { values } = route.request().postDataJSON();
+      return route.fulfill({ json: values });
+    },
+  );
+  await page.route(
+    "**/api/college/master-data/enrollment/batches/overview?*",
+    (route) => route.fulfill({ json: { batches: [] } }),
+  );
+  await page.route(
+    "**/api/college/master-data/courses/BSC/batches",
+    (route) => {
+      cohortWrites++;
+      expect(route.request().postDataJSON()).toMatchObject({
+        batch: {
+          code: "BSC-2026-2029",
+          entry_year: 2026,
+          graduation_year: 2029,
+        },
+        sections: [],
+      });
+      return route.fulfill({ json: { batch: { code: "BSC-2026-2029" } } });
+    },
+  );
+  await page
+    .getByRole("combobox", { name: "Screen resource" })
+    .selectOption("academic_years");
+  await page.getByRole("button", { name: "Create batch", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "Create batch", exact: true });
+  await form.getByRole("combobox", { name: "Course", exact: true }).click();
+  await form.getByRole("option", { name: "B.Sc (BSC)", exact: true }).click();
+  await form
+    .getByRole("textbox", { name: "Start date", exact: true })
+    .fill("01/06/2026");
+  await form.getByRole("textbox", { name: "Start date", exact: true }).blur();
+  await form.getByRole("button", { name: "Create batch", exact: true }).click();
+  await expect(form).not.toBeVisible();
+  expect(cohortWrites).toBe(1);
 });

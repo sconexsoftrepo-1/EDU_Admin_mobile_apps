@@ -1,5 +1,8 @@
 "use client";
 import PersonFiles from "./PersonFiles";
+import PersonPhoto from "./PersonPhoto";
+import { courseLevelLabel } from "@/lib/colleges/person-photo";
+import { studentCourseLabels } from "@/lib/colleges/student-course-labels";
 import AcademicYearForm from "./AcademicYearForm";
 import TableColumnFilter from "./TableColumnFilter";
 import StudentEnrollmentDetails from "./StudentEnrollmentDetails";
@@ -79,7 +82,6 @@ import {
 } from "@/lib/colleges/workspace-cache";
 import EntryForm from "./RecordFormDrawer";
 import { feeHeadForm } from "@/lib/colleges/fee-head-form";
-import BatchManager from "./BatchManager";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
@@ -167,7 +169,7 @@ const pageSize = (table?: string) => (table === "programs" ? 200 : undefined);
 /** Screens that show only their data-entry form button (everything is inside that form). */
 const PRIMARY_ONLY = new Set(["student-enrollment"]);
 /** Screens whose forms sit in the page header (no table picker or search box). */
-const HEADER_ACTIONS = new Set(["course-setup"]);
+const HEADER_ACTIONS = new Set<string>();
 export default function ConnectedPortal({
   college,
   parts,
@@ -300,6 +302,15 @@ export default function ConnectedPortal({
             : Promise.resolve(null),
           specialRows(name),
         ]);
+        if (first?.name === "students")
+          records.items = await studentCourseLabels(
+            records.items,
+            workspaceCacheKey(
+              identityRef.current,
+              activeRoleRef.current?.code,
+              "student-course-labels",
+            ),
+          );
         return { spec, first, records, totals: totals as Row | null, extra };
       });
       if (sequence === requestSequence.current) apply(snapshot);
@@ -531,16 +542,26 @@ export default function ConnectedPortal({
       setTotal(cached.total);
     } else setRows([]);
     try {
-      const result = await refreshWorkspaceCache(key, () =>
-        api.workspace.list(
+      const result = await refreshWorkspaceCache(key, async () => {
+        const page = await api.workspace.list(
           r.path,
           offset,
           pageSize(r.name),
           selected === "student-enrollment" && r.name === "students"
             ? { column_filters: JSON.stringify(columnFilters), search: filter }
             : {},
-        ),
-      );
+        );
+        if (r.name === "students")
+          page.items = await studentCourseLabels(
+            page.items,
+            workspaceCacheKey(
+              identityRef.current,
+              activeRoleRef.current?.code,
+              "student-course-labels",
+            ),
+          );
+        return page;
+      });
       if (sequence !== requestSequence.current) return;
       setRows(result.items);
       setTotal(result.total);
@@ -682,52 +703,15 @@ export default function ConnectedPortal({
     }
   };
   /** The data-entry form that "Create" opens on this screen, when the user may use it. */
-  const primaryForm = actions.find((a) => a.key === PRIMARY_FORMS[selected]);
+  const primaryForm =
+    resource?.name === "academic_years"
+      ? undefined
+      : actions.find((a) => a.key === PRIMARY_FORMS[selected]);
   const primaryOpened = useRef(false);
   /** Student enrollment uses the full wizard (student, guardian, course, fees, review). */
   const [wizard, setWizard] = useState(false);
-  function courseBatchFields(action: Action) {
-    if (!["create-course", "create-batch"].includes(action.key))
-      return action.fields;
-    return action.fields
-      .filter(
-        (field) =>
-          !["batch.name", "section.semester_code"].includes(
-            field.key || field.name || "",
-          ),
-      )
-      .map((field) => {
-        const key = field.key || field.name;
-        return key === "batch.entry_year" || key === "batch.graduation_year"
-          ? {
-              ...field,
-              label:
-                key === "batch.entry_year"
-                  ? "Batch: start year"
-                  : "Batch: end year",
-              required: true,
-            }
-          : field;
-      });
-  }
-  function courseBatchValues(action: Action, values: Row): Row {
-    if (!["create-course", "create-batch"].includes(action.key)) return values;
-    const start = Number(values["batch.entry_year"]);
-    const end = Number(values["batch.graduation_year"]);
-    if (
-      !Number.isInteger(start) ||
-      !Number.isInteger(end) ||
-      start < 1000 ||
-      end > 9999 ||
-      end <= start
-    )
-      throw new Error(
-        "Enter valid start and end years. End year must be after start year.",
-      );
-    return { ...values, "batch.name": `${start}–${end}` };
-  }
   async function saveAction(action: Action, values: Row) {
-    await api.workflows.run(action, courseBatchValues(action, values));
+    await api.workflows.run(action, values);
     if (values.administrator_employee_code) {
       // The transaction linked the bootstrap account. Reload its identity and action
       // descriptors so another approval does not submit the old employee-link field.
@@ -746,7 +730,7 @@ export default function ConnectedPortal({
       ? setWizard(true)
       : setDialog({
           title: action.label,
-          fields: courseBatchFields(action),
+          fields: action.fields,
           save: async (values) => {
             await saveAction(action, values);
           },
@@ -778,12 +762,9 @@ export default function ConnectedPortal({
     primaryOpened.current = true;
     setDialog({
       title: primaryForm.label,
-      fields: courseBatchFields(primaryForm),
+      fields: primaryForm.fields,
       save: async (values) => {
-        await api.workflows.run(
-          primaryForm,
-          courseBatchValues(primaryForm, values),
-        );
+        await api.workflows.run(primaryForm, values);
         await load(selected);
       },
     });
@@ -860,39 +841,65 @@ export default function ConnectedPortal({
     );
   const studentRegister =
     selected === "student-enrollment" && resource?.name === "students";
+  const studentTable = resource?.name === "students";
   const studentHeaders: Record<string, string> = {
     student_name: "Student name",
+    course_level: "Course level",
+    course_name: "Course / branch",
+    profile_photo_url: "Photo",
     admission_number: "Admission number",
     university_registration_number: "University registration number",
-    course_name: "Course",
     batch_year: "Batch year",
+    status: "Status",
+    email: "Email",
   };
   const columnLabel = (key: string) =>
-    studentRegister
-      ? studentHeaders[key] || headerLabel(key)
-      : headerLabel(key);
+    resource?.name === "academic_years"
+      ? {
+          name: "Batch",
+          program_code: "Course",
+          start_date: "Start date",
+          end_date: "End date",
+          dates_need_review: "Dates need review",
+        }[key] || headerLabel(key)
+      : key === "profile_photo_url"
+        ? "Photo"
+        : studentTable
+          ? studentHeaders[key] || headerLabel(key)
+          : headerLabel(key);
   const cellValue = (row: Row, key: string) =>
-    key === "student_name" && !row[key]
+    key === "student_name"
       ? [row.first_name, row.middle_name, row.last_name]
           .filter(Boolean)
-          .join(" ")
-      : row[key];
-  const columns = studentRegister
+          .join(" ") ||
+        row.student_name ||
+        row.name ||
+        row.code
+      : key === "course_level"
+        ? courseLevelLabel(row[key])
+        : row[key];
+  const columns = studentTable
     ? Object.keys(studentHeaders)
-    : Array.from(
-        new Set(
-          rows.length
-            ? rows.flatMap((row) => Object.keys(row))
-            : resource?.fields
-                .slice(0, 8)
-                .map((field) => field.name || field.key || "") || [],
-        ),
-      ).filter(
-        (k) =>
-          !["storage_key", "request", "staged_rows", "password_hash"].includes(
-            k,
+    : resource?.name === "academic_years"
+      ? ["name", "program_code", "start_date", "end_date", "dates_need_review"]
+      : Array.from(
+          new Set(
+            rows.length
+              ? rows.flatMap((row) => Object.keys(row))
+              : resource?.fields
+                  .slice(0, 8)
+                  .map((field) => field.name || field.key || "") || [],
           ),
-      );
+        ).filter(
+          (k) =>
+            ![
+              "storage_key",
+              "profile_photo_storage_key",
+              "request",
+              "staged_rows",
+              "password_hash",
+            ].includes(k),
+        );
   const cards = resource?.name === "programs";
   /** Delete a record; `confirmed` when the card already asked (course cards confirm inline). */
   async function removeRow(row: Row, confirmed = false) {
@@ -935,9 +942,10 @@ export default function ConnectedPortal({
     !NO_EXPORT_SCREENS.has(selected);
   const exportTitle = resource?.title || headerLabel(selected);
   const exportFile = `${selected}-${new Date().toISOString().slice(0, 10)}`;
-  const exportColumns = columns.map(columnLabel);
+  const exportKeys = columns.filter((key) => key !== "profile_photo_url");
+  const exportColumns = exportKeys.map(columnLabel);
   const exportRows = () =>
-    visibleRows.map((row) => columns.map((k) => text(cellValue(row, k))));
+    visibleRows.map((row) => exportKeys.map((k) => text(cellValue(row, k))));
   const exportExcel = () =>
     excelTable(exportFile, exportTitle, exportColumns, exportRows());
   const exportPdf = async () => {
@@ -1013,8 +1021,8 @@ export default function ConnectedPortal({
             </h1>
             {selected === "course-setup" && (
               <p className="crs-page-description">
-                Manage all academic programs, years, semesters and enrollments
-                in one place.
+                Manage courses, dated batches, semesters and enrollments in one
+                place.
               </p>
             )}
           </div>
@@ -1055,32 +1063,6 @@ export default function ConnectedPortal({
                   </div>
                 </details>
               </>
-            )}
-            {account.person_type === "system" && displayRole?.system_admin && (
-              <button
-                onClick={() =>
-                  setDialog({
-                    title: "Link administrator employee",
-                    fields: [
-                      {
-                        key: "employee_code",
-                        label: "Administrator employee",
-                        type: "text",
-                        reference: "employees",
-                        required: true,
-                      },
-                    ],
-                    save: async (values) => {
-                      await api.administration.linkEmployee({
-                        employee_code: String(values.employee_code),
-                      });
-                      setAccount(null);
-                    },
-                  })
-                }
-              >
-                Link employee record
-              </button>
             )}
             {displayRole?.system_admin && (
               <button
@@ -1213,7 +1195,10 @@ export default function ConnectedPortal({
                   selected !== "student-enrollment" &&
                   resource.actions.includes("create") && (
                     <button className="edu-primary" onClick={() => edit()}>
-                      <Plus size={15} aria-hidden="true" /> Create record
+                      <Plus size={15} aria-hidden="true" />{" "}
+                      {resource.name === "academic_years"
+                        ? "Create batch"
+                        : "Create record"}
                     </button>
                   )
                 )}
@@ -1387,7 +1372,10 @@ export default function ConnectedPortal({
                       <tr>
                         {columns.map((k) => (
                           <th key={k} className={alignClass(k) || undefined}>
-                            {studentRegister ? (
+                            {studentRegister &&
+                            k !== "profile_photo_url" &&
+                            k !== "course_level" &&
+                            !["status", "email"].includes(k) ? (
                               <div className="edu-column-heading">
                                 <span>{columnLabel(k)}</span>
                                 <TableColumnFilter
@@ -1433,7 +1421,14 @@ export default function ConnectedPortal({
                                   : alignClass(k) || undefined
                               }
                             >
-                              {isDetails(row[k]) ? (
+                              {k === "profile_photo_url" ? (
+                                <PersonPhoto
+                                  value={row.profile_photo_url}
+                                  name={String(
+                                    cellValue(row, "student_name") || row.code,
+                                  )}
+                                />
+                              ) : isDetails(row[k]) ? (
                                 <Details value={row[k]} />
                               ) : (
                                 text(cellValue(row, k))
@@ -1448,7 +1443,9 @@ export default function ConnectedPortal({
                                 "admission_applications",
                               ].includes(resource.name) &&
                                 !studentRegister && (
-                                  <button
+                                  <IconAction
+                                    kind="files"
+                                    label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
                                     onClick={() =>
                                       setFileOwner({
                                         personKind:
@@ -1460,9 +1457,7 @@ export default function ConnectedPortal({
                                         personCode: String(row.code),
                                       })
                                     }
-                                  >
-                                    Files
-                                  </button>
+                                  />
                                 )}
                               {resource.actions.includes("edit") && (
                                 <IconAction
@@ -1471,7 +1466,7 @@ export default function ConnectedPortal({
                                   onClick={() => edit(row)}
                                 />
                               )}
-                              {studentRegister && (
+                              {studentTable && (
                                 <button
                                   type="button"
                                   className="icon-action"
@@ -1737,21 +1732,6 @@ export default function ConnectedPortal({
           fields={dialog.fields}
           initial={dialog.initial}
           onSave={dialog.save}
-          renderBrowse={
-            dialog.title === "Year-based batch"
-              ? () => (
-                  <BatchManager
-                    resource={screen?.resources.find(
-                      (item) => item.name === "batches",
-                    )}
-                    sectionResource={screen?.resources.find(
-                      (item) => item.name === "sections",
-                    )}
-                    onChanged={() => load(selected)}
-                  />
-                )
-              : undefined
-          }
           onClose={() => setDialog(null)}
         />
       )}

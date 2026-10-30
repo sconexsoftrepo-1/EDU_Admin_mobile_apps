@@ -3,6 +3,7 @@ import { api, ApiError, type Row, type ScreenSummary } from "@/services/api";
 import type { CollegeState, RecordRow, Student } from "./store";
 import { operationLabels, type OperationRecord } from "./operations";
 import { programFeeSchedules } from "./program-fee-schedules";
+import { studentCourseLabels } from "./student-course-labels";
 export function emptyTemplateState(slug: string): CollegeState {
   return {
     version: 1,
@@ -43,7 +44,7 @@ const name = (r: Row) =>
     r.name ||
       r.subject ||
       r.message ||
-      [r.first_name, r.last_name].filter(Boolean).join(" ") ||
+      [r.first_name, r.middle_name, r.last_name].filter(Boolean).join(" ") ||
       r.title ||
       r.code,
   );
@@ -66,6 +67,7 @@ export async function loadTemplateState(
   slug: string,
   screens: ScreenSummary[],
   active: string,
+  courseLabelsKey: string | null = null,
 ) {
   const state = emptyTemplateState(slug),
     errors: string[] = [],
@@ -93,6 +95,7 @@ export async function loadTemplateState(
           resources: spec.resources.filter((r) => s.resources.includes(r.name)),
         };
       } catch (e) {
+        if (e instanceof ApiError && e.status === 401) throw e;
         errors.push(s.title);
         return null;
       }
@@ -118,13 +121,19 @@ export async function loadTemplateState(
             offset = rows.length;
           }
           tables[r.name] = rows;
-        } catch {
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401) throw error;
           errors.push(r.title);
         }
       }
     }),
   );
   const rows = (key: string) => tables[key] || [];
+  if (rows("students").length)
+    tables.students = await studentCourseLabels(
+      rows("students"),
+      courseLabelsKey,
+    );
   // These labels may not be resources on the fee-structures screen itself.
   if (rows("fee_structures").length) {
     await Promise.all(
@@ -148,7 +157,8 @@ export async function loadTemplateState(
                 name: option.label,
               });
           tables[table] = [...merged.values()];
-        } catch {
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401) throw error;
           errors.push(`${table.replaceAll("_", " ")} labels`);
         }
       }),
@@ -186,18 +196,23 @@ export async function loadTemplateState(
     );
     return {
       id: str(r.code),
-      name: name(r),
+      name:
+        [r.first_name, r.middle_name, r.last_name].filter(Boolean).join(" ") ||
+        str(r.student_name) ||
+        name(r),
+      courseLevel: str(r.course_level),
       status: title(r.status),
       date: str(r.admission_date || r.created_at),
       email: str(r.email),
       guardian: str(r.guardian_name),
       program: str(
-        by("programs", e?.program_code)?.name ||
+        r.course_name ||
+          by("programs", e?.program_code)?.name ||
           e?.program_code ||
           r.program_code,
       ),
       department: str(r.department_code),
-      year: str(e?.academic_year_code || r.academic_year_code),
+      year: str(r.batch_year || e?.academic_year_code || r.academic_year_code),
       fee: charges.reduce(
         (n, x) => n + cents(x.amount || x.gross_amount) + cents(x.tax_amount),
         0,
@@ -214,6 +229,8 @@ export async function loadTemplateState(
         0,
       ),
       profile: {
+        photo: str(r.profile_photo_url),
+        branch: str(r.branch),
         phone: str(r.phone),
         dob: str(r.date_of_birth),
         gender: title(r.gender),

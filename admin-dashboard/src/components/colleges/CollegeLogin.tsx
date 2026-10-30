@@ -2,9 +2,7 @@
 
 import { useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowLeft,
   ArrowRight,
   Building2,
   Eye,
@@ -17,7 +15,7 @@ import {
   UserRound,
   UsersRound,
 } from "lucide-react";
-import { collegeRoot, type College } from "@/data/colleges";
+import { type College } from "@/data/colleges";
 import RoleSelect from "./RoleSelect";
 import "./college-login.css";
 
@@ -60,9 +58,6 @@ function CampusHero({ college }: { college: College }) {
         {/* Native picture provides intentional art-directed crops at each breakpoint. */}
         <img src={`${base}/campus.webp`} alt="" fetchPriority="high" />
       </picture>
-      <Link className="ca-back" href={collegeRoot(college)}>
-        <ArrowLeft size={18} aria-hidden="true" /> Back to website
-      </Link>
       <div className="ca-hero-copy">
         <p className="ca-eyebrow">{college.name}</p>
         <h1>

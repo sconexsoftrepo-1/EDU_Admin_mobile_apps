@@ -81,6 +81,11 @@ export default function Select({
   const list = useRef<HTMLUListElement>(null);
   const id = useId();
   const field = useAutoHeight(query ?? selected?.label ?? "");
+  useEffect(() => {
+    field.current?.setCustomValidity(
+      required && !selected ? "Choose a value from the list." : "",
+    );
+  }, [required, selected, field]);
   const q = query?.trim().toLowerCase() || "";
   const shown = q
     ? options.filter((o) => o.label.toLowerCase().includes(q))

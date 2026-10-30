@@ -10,12 +10,6 @@ import { api, errorText, type CourseInsights, type Row } from "@/services/api";
 
 const text = (value: unknown) =>
   value === null || value === undefined ? "" : String(value);
-const inr = (value: string | number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(Number(value || 0));
 const ordinal = (n: number) =>
   `${n}${n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"} year`;
 
@@ -60,7 +54,6 @@ export default function CourseInsightsPanel({
   }, []);
 
   const totals = data?.totals;
-  const peak = Math.max(1, ...(data?.batches.map((b) => b.students) || [1]));
   const yearsOfStudy = Array.from(
     { length: data?.years || 0 },
     (_, i) => i + 1,
@@ -177,62 +170,6 @@ export default function CourseInsightsPanel({
                 </div>
               </section>
             )}
-
-            <section className="crs-panel-section">
-              <h3>Year-wise batches</h3>
-              {data.batches.length === 0 ? (
-                <p className="crs-panel-empty">
-                  No batches yet. Add one with Year-based batch, then enroll
-                  students into it.
-                </p>
-              ) : (
-                <ol className="crs-batches">
-                  {data.batches.map((b) => (
-                    <li key={b.code} className="crs-batch">
-                      <div className="crs-batch-head">
-                        <strong>{b.name}</strong>
-                        <span>
-                          {b.entry_year} to {b.graduation_year}
-                        </span>
-                      </div>
-                      <div className="crs-batch-bar" aria-hidden="true">
-                        <i style={{ width: `${(100 * b.students) / peak}%` }} />
-                      </div>
-                      <dl className="crs-batch-facts">
-                        <div>
-                          <dt>Students</dt>
-                          <dd>{b.students}</dd>
-                        </div>
-                        <div>
-                          <dt>Hostel</dt>
-                          <dd>{b.hostel}</dd>
-                        </div>
-                        <div>
-                          <dt>Bus</dt>
-                          <dd>{b.transport}</dd>
-                        </div>
-                        <div>
-                          <dt>Sections</dt>
-                          <dd>{b.sections.length || "None"}</dd>
-                        </div>
-                      </dl>
-                      {b.students > 0 && (
-                        <p className="crs-batch-note">
-                          {Object.entries(b.by_gender)
-                            .map(([g, n]) => `${n} ${g.replaceAll("_", " ")}`)
-                            .join(", ")}
-                          . First-year fees raised {inr(b.net_fee)}
-                          {b.net_fee !== b.gross_fee
-                            ? ` after concessions (gross ${inr(b.gross_fee)})`
-                            : ""}
-                          .
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
 
             {data.semester_labels.length > 0 && (
               <section className="crs-panel-section">
