@@ -12,6 +12,9 @@ from fastapi.responses import JSONResponse
 from app.core import integrations_api, mobile_api, push_api
 from app.core.timetable_templates import router as timetable_templates_router
 from app.core.assignment_workspace import router as assignment_workspace_router
+from app.core.syllabus_workspace import router as syllabus_workspace_router
+from app.core.calendar_workspace import router as calendar_workspace_router
+from app.core.certificate_workspace import router as certificate_workspace_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
 from app.core.settings import Settings
@@ -148,6 +151,9 @@ def create_app(settings=None):
         )
 
     for router in [
+        calendar_workspace_router,
+        certificate_workspace_router,
+        syllabus_workspace_router,
         auth_api.router,
         timetable_templates_router,
         assignment_workspace_router,

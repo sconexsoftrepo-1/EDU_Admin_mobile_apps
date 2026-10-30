@@ -5,6 +5,8 @@ import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
 import AssignmentWorkspace from "./AssignmentWorkspace";
+import SyllabusWorkspace from "./SyllabusWorkspace";
+import CalendarWorkspace from "./CalendarWorkspace";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
@@ -1347,6 +1349,8 @@ export default function CollegePortal({
     );
   function content() {
     if (activeModule === "assignments") return <AssignmentWorkspace />;
+    if (activeModule === "syllabus") return <SyllabusWorkspace />;
+    if (activeModule === "calendar") return <CalendarWorkspace />;
     if (activeModule === "roles") return <RolesAccess />;
     if (operationLabels[activeModule])
       return <OperationsWorkspace college={c} module={activeModule} />;

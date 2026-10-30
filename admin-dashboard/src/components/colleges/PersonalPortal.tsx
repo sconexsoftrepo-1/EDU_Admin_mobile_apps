@@ -1,6 +1,9 @@
 "use client";
 import { useErrorToast } from "./toast";
 import AssignmentWorkspace from "./AssignmentWorkspace";
+import SyllabusWorkspace from "./SyllabusWorkspace";
+import CalendarWorkspace from "./CalendarWorkspace";
+import CertificateWorkspace from "./CertificateWorkspace";
 import { useCallback, useEffect, useState } from "react";
 import {
   api,
@@ -110,6 +113,12 @@ export default function PersonalPortal({
       <section className="edu-content">
         {["assignments", "submissions"].includes(selected) ? (
           <AssignmentWorkspace studentCode={student || undefined} />
+        ) : selected === "syllabus" ? (
+          <SyllabusWorkspace studentCode={student || undefined} />
+        ) : selected === "calendar" ? (
+          <CalendarWorkspace studentCode={student || undefined} />
+        ) : selected === "certificates" ? (
+          <CertificateWorkspace personal studentCode={student || undefined} />
         ) : (
           <>
             <header className="edu-heading">
@@ -179,6 +188,9 @@ export default function PersonalPortal({
             {data?.items.map((row, i) => (
               <article className="edu-special" key={String(row.code || i)}>
                 {record(row)}
+                {selected === "notifications" && Boolean(row.certificate_request_code || row.certificate_code) && (
+                  <button onClick={() => setSelected("certificates")}>View certificates</button>
+                )}
                 {data.downloads && row.record_type !== "request" && (
                   <button
                     onClick={() => download(data.downloads!, String(row.code))}

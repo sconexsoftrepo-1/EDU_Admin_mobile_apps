@@ -29,6 +29,7 @@ SCREENS = {
         ("assignments", "Assignments and review", "assignments"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
+        ("certificates", "Certificate approvals", "certificates"),
         ("announcements", "Announcements", "announcements"),
         ("notifications", "Notifications", "notifications"),
         ("profile", "My profile", "profile"),
@@ -632,10 +633,19 @@ def screen_data(
             s = data["records"].get("students", {}).get(child, {})
             if s.get("campus_code"):
                 campus_codes.add(s["campus_code"])
+        scoped_students = set()
+        if user.get("person_type") == "student" and context.get("student"):
+            scoped_students = {context["student"]}
+        elif user.get("person_type") == "parent":
+            scoped_students = set(context.get("children", []))
+        from app.core.calendar_workspace import matches as event_matches
         items = [
             r
             for r in query_rows(data, table)
-            if r["campus_code"] in campus_codes
+            if (r["campus_code"] in campus_codes
+                or table == "calendar_events" and r.get("audience_type"))
+            and (table != "calendar_events" or user.get("person_type") not in {"student", "parent"}
+                 or event_matches(data, r, scoped_students))
             and (
                 table != "announcements"
                 or r.get("published_at")

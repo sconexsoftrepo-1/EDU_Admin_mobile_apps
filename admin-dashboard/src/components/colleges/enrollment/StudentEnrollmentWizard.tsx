@@ -472,10 +472,22 @@ export default function StudentEnrollmentWizard({
   college,
   onClose,
   onEnrolled,
+  initialApplicant,
 }: {
   college: College;
   onClose: () => void;
   onEnrolled?: (studentCode: string) => void;
+  initialApplicant?: {
+    first_name: string;
+    last_name: string;
+    email?: string;
+    phone?: string;
+    parent_name?: string;
+    parent_phone?: string;
+    program_code?: string;
+    academic_year_code?: string;
+    course_level?: "intermediate" | "degree";
+  };
 }) {
   const [step, setStep] = useState(0);
   const [options, setOptions] = useState<EnrollmentOptions | null>(null);
@@ -496,13 +508,13 @@ export default function StudentEnrollmentWizard({
   );
   const [files, setFiles] = useState<Files>({});
   const [student, setStudent] = useState({
-    first_name: "",
+    first_name: initialApplicant?.first_name || "",
     middle_name: "",
-    last_name: "",
+    last_name: initialApplicant?.last_name || "",
     date_of_birth: "",
     gender: "",
-    email: "",
-    phone: "",
+    email: initialApplicant?.email || "",
+    phone: String(initialApplicant?.phone || "").replace(/^\+?91\s*/, ""),
     aadhaar_number: "",
     blood_group: "",
     address: "",
@@ -534,9 +546,20 @@ export default function StudentEnrollmentWizard({
     number?.trim() ? `${code} ${number.trim()}` : "";
   const [guardian, setGuardian] = useState<Guardian>({
     relationship: "father",
-    first_name: "",
-    last_name: "",
-    phone: "",
+    first_name: String(initialApplicant?.parent_name || "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, -1)
+      .join(" "),
+    last_name:
+      String(initialApplicant?.parent_name || "")
+        .trim()
+        .split(/\s+/)
+        .slice(-1)[0] || "",
+    phone: String(initialApplicant?.parent_phone || "").replace(
+      /^\+?91\s*/,
+      "",
+    ),
     alternate_phone: "",
   });
   const [referred, setReferred] = useState(false);
@@ -548,9 +571,9 @@ export default function StudentEnrollmentWizard({
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [course, setCourse] = useState({
-    level: "intermediate" as CourseLevel,
-    program_code: "",
-    academic_year_code: "",
+    level: (initialApplicant?.course_level || "intermediate") as CourseLevel,
+    program_code: initialApplicant?.program_code || "",
+    academic_year_code: initialApplicant?.academic_year_code || "",
   });
   const [courseQuery, setCourseQuery] = useState("");
   const [courseFamily, setCourseFamily] = useState("");
