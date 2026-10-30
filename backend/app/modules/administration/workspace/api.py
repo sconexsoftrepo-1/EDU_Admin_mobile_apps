@@ -40,6 +40,7 @@ def screens(request: Request, user=Depends(current_user)):
     staff_only(user)
     data = request.app.state.store.snapshot()
     allowed = role_limit(data, user, "screens")
+    system_admin = any(data["roles"].get(code, {}).get("system_admin") for code in user["role_codes"])
     items = []
     for screen in SCREENS:
         if allowed is not None and screen["key"] not in allowed:
@@ -59,16 +60,12 @@ def screens(request: Request, user=Depends(current_user)):
             data, user, special[screen["key"]]
         )
         if (
-            resources
+            system_admin
+            or resources
             or special_access
             or screen["key"]
             in {
                 "dashboard",
-                "mobile-apps",
-                "admin-app",
-                "parent-app",
-                "teacher-app",
-                "student-app",
             }
             and permitted(data, user, "reports")
         ):

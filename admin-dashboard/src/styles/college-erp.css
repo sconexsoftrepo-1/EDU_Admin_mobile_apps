@@ -2701,6 +2701,9 @@ body:has(.college-erp dialog[open]) {
   background: #fff8e9;
   overflow-wrap: anywhere;
 }
+.erp-record-recovery { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.erp-record-recovery > span { flex:1; min-width:0; }
+.erp-record-recovery > button { flex-shrink:0; padding:8px 12px; }
 .erp-api-overlay {
   position: fixed;
   inset: 0;

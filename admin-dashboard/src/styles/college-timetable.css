@@ -652,9 +652,6 @@
 .academic-week-table button[draggable="true"]:active {
   cursor: grabbing;
 }
-.college-erp .mobile-redesign .app-screen {
-  container-type: inline-size;
-}
 @container (max-width:600px) {
   .academic-mobile-week {
     display: grid;

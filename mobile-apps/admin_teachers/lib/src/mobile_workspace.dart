@@ -25,7 +25,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   final Map<String, String> sectionErrors = {};
   String? selected, student, error;
   String query = '', filter = 'All';
-  bool busy = true, saving = false, paging = false;
+  bool busy = true, saving = false, paging = false, downloading = false;
   int generation = 0;
   DateTime calendarDay = DateUtils.dateOnly(DateTime.now());
   DateTime calendarMonth = DateTime(DateTime.now().year, DateTime.now().month);
@@ -180,7 +180,19 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       'announcements',
       if (widget.role != MobileRole.admin) 'timetable',
       if (widget.role == MobileRole.parent) 'children',
-      if (widget.role == MobileRole.student) 'attendance',
+      if (widget.role == MobileRole.student ||
+          widget.role == MobileRole.parent) ...[
+        'attendance',
+        'results',
+        'assignments',
+        'syllabus',
+      ],
+      if (widget.role == MobileRole.admin) ...[
+        'activity',
+        'students',
+        'employees',
+      ],
+      if (widget.role == MobileRole.teacher) 'assignments',
     };
     // Establish the selected child before loading independent dashboard sections.
     if (has('profile')) await fetchSection('profile');
@@ -228,6 +240,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   void open(String? key) {
     if (saving) return;
     generation++;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       selected = key;
       query = '';
@@ -237,6 +250,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       busy = false;
     });
     if (key != null && key != '_more') load();
+  }
+
+  Future<void> refreshWorkspace() async {
+    await load();
+    if (!mounted) return;
+    if (error != null ||
+        ((selected == null || selected == '_more') &&
+            sectionErrors.isNotEmpty)) {
+      throw StateError(error ?? 'Some college records could not refresh');
+    }
   }
 
   Future<void> changeStudent(String value) async {
@@ -291,7 +314,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           );
         }
       } else if (mounted) {
-        toast('${descriptor['label']} completed.');
+        toast('${descriptor['label']} completed.', success: true);
       }
       if (response.reauthenticate) {
         await widget.api.clear();
@@ -306,15 +329,35 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     }
   }
 
-  void toast(String text) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  void toast(String text, {bool success = false}) =>
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              if (success) ...[
+                const SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: EduArtwork(name: 'motion/success_check', height: 26),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(child: Text(text)),
+            ],
+          ),
+        ),
+      );
 
   Future<void> download(String kind, String code) async {
+    if (downloading) return;
+    setState(() => downloading = true);
+    toast('Preparing your document…');
     try {
       final bytes = kind == 'finance-report'
           ? await widget.api.downloadFinanceReport()
           : await widget.api.download(kind, code);
       if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       final box = context.findRenderObject() as RenderBox?;
       await SharePlus.instance.share(
         ShareParams(
@@ -326,7 +369,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
       );
     } catch (e) {
-      if (mounted) toast(e.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        toast(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
     }
   }
 
@@ -412,6 +460,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         : (screens.where((s) => s['key'] == selected).firstOrNull?['title'] ??
                   'College')
               .toString();
+    final pageWidgets = <Widget>[
+      if (selected != null) ...[
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 16),
+      ],
+      if (busy || saving || downloading) ...[
+        const LinearProgressIndicator(minHeight: 3),
+        if ((selected == null && cache.isEmpty) ||
+            (selected != null && data == null))
+          const EduLoadingSkeleton(),
+      ],
+      if (error != null)
+        WorkspaceMessage(
+          icon: Icons.cloud_off_outlined,
+          title: 'Couldn’t load this screen',
+          message: error!,
+          onRetry: load,
+        ),
+      if (selected == null)
+        ...home(context)
+      else if (selected == '_more')
+        ...modules(context)
+      else if (data != null)
+        ...screenContent(context),
+    ];
     return PopScope(
       canPop: selected == null,
       onPopInvokedWithResult: (didPop, result) {
@@ -425,7 +498,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             children: [
               const Text('EduNexa'),
               Text(
-                widget.role.label,
+                selected == null ? widget.title : widget.role.label,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
@@ -473,7 +546,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 ...screens.map(
                   (s) => ListTile(
                     selected: selected == s['key'],
-                    leading: Icon(moduleIcon(s['key'])),
+                    leading: EduModuleIcon(icon: moduleIcon(s['key'])),
                     title: Text(s['title']),
                     onTap: () {
                       Navigator.pop(context);
@@ -491,6 +564,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
           child: NavigationBar(
             selectedIndex: tab,
+            animationDuration: EduMotion.duration(context, EduMotion.tab),
             onDestinationSelected: saving
                 ? null
                 : (i) => open(
@@ -504,22 +578,22 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ),
             destinations: [
               const NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
+                icon: EduModuleIcon(icon: Icons.home_outlined),
+                selectedIcon: EduModuleIcon(icon: Icons.home_rounded),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: Icon(moduleIcon(primary)),
+                icon: EduModuleIcon(icon: moduleIcon(primary)),
                 label: primaryLabel,
               ),
               const NavigationDestination(
-                icon: Icon(Icons.calendar_month_outlined),
+                icon: EduModuleIcon(icon: Icons.calendar_month_outlined),
                 label: 'Calendar',
               ),
               NavigationDestination(
                 icon: Badge(
                   isLabelVisible: unread > 0,
-                  child: const Icon(Icons.inbox_outlined),
+                  child: const EduModuleIcon(icon: Icons.inbox_outlined),
                 ),
                 label: 'Inbox',
               ),
@@ -536,34 +610,17 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: RefreshIndicator(
-                onRefresh: load,
-                child: ListView(
-                  key: ValueKey('page-${selected ?? 'home'}'),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 20),
-                    if (busy || saving)
-                      const LinearProgressIndicator(minHeight: 3),
-                    if (error != null)
-                      WorkspaceMessage(
-                        icon: Icons.cloud_off_outlined,
-                        title: 'Couldn’t load this screen',
-                        message: error!,
-                        onRetry: load,
-                      ),
-                    if (selected == null)
-                      ...home(context)
-                    else if (selected == '_more')
-                      ...modules(context)
-                    else if (!busy && error == null)
-                      ...screenContent(context),
-                  ],
+              child: EduNexaAnimatedRefresh(
+                onRefresh: refreshWorkspace,
+                child: AnimatedSwitcher(
+                  duration: EduMotion.duration(context, EduMotion.tab),
+                  child: ListView.builder(
+                    key: ValueKey('page-${selected ?? 'home'}'),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                    itemCount: pageWidgets.length,
+                    itemBuilder: (context, index) => pageWidgets[index],
+                  ),
                 ),
               ),
             ),
@@ -576,65 +633,150 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   List<Widget> home(BuildContext context) {
     final person = rows('profile').firstOrNull;
     final name = person == null
-        ? widget.role.label
+        ? ''
         : [
             person['first_name'],
             person['last_name'],
           ].where((v) => v != null).join(' ');
-    final summary = cache[primary]?['summary'] as Json?;
     final today = DateTime.now();
     final greeting = today.hour < 12
         ? 'Good morning'
         : today.hour < 17
         ? 'Good afternoon'
         : 'Good evening';
-    final priority = switch (widget.role) {
-      MobileRole.admin => ['dues', 'collections', 'students', 'reports'],
-      MobileRole.teacher => [
-        'attendance',
-        'assignments',
-        'results',
-        'payslips',
-      ],
-      MobileRole.parent => ['fees', 'attendance', 'leave', 'messages'],
-      MobileRole.student => ['timetable', 'assignments', 'results', 'fees'],
-    };
-    final announcements = rows('announcements').toList()
-      ..sort(
-        (a, b) => (b['published_at'] ?? '').toString().compareTo(
-          (a['published_at'] ?? '').toString(),
-        ),
-      );
-    final events =
-        rows(
-            'calendar',
-          ).where((r) => eventEnd(r)?.isBefore(DateTime.now()) != true).toList()
-          ..sort(
-            (a, b) => (a['starts_at'] ?? '').toString().compareTo(
-              (b['starts_at'] ?? '').toString(),
-            ),
-          );
+    final role = widget.role;
     final periods =
         rows(
-            'timetable',
-          ).where((r) => r['weekday'].toString() == '${today.weekday}').toList()
-          ..sort(
-            (a, b) => (a['start_time'] ?? '').toString().compareTo(
-              (b['start_time'] ?? '').toString(),
-            ),
-          );
+          'timetable',
+        ).where((r) => '${r['weekday']}' == '${today.weekday}').toList()..sort(
+          (a, b) =>
+              '${a['start_time'] ?? ''}'.compareTo('${b['start_time'] ?? ''}'),
+        );
+    final events =
+        rows(
+          'calendar',
+        ).where((r) => eventEnd(r)?.isBefore(today) != true).toList()..sort(
+          (a, b) =>
+              '${a['starts_at'] ?? ''}'.compareTo('${b['starts_at'] ?? ''}'),
+        );
+    final announcements = rows('announcements').toList()
+      ..sort(
+        (a, b) => '${b['published_at'] ?? ''}'.compareTo(
+          '${a['published_at'] ?? ''}',
+        ),
+      );
     final children =
         (cache['profile']?['students'] as List? ??
                 cache[primary]?['students'] as List? ??
                 [])
             .cast<Json>();
+    final summary = cache[primary]?['summary'] as Json?;
+    final priorities = switch (role) {
+      MobileRole.admin => ['dues', 'collections', 'students', 'reports'],
+      MobileRole.teacher => [
+        'attendance',
+        'assignments',
+        'submissions',
+        'results',
+      ],
+      MobileRole.parent => [
+        'attendance',
+        'timetable',
+        'fees',
+        'results',
+        'assignments',
+        'messages',
+      ],
+      MobileRole.student => ['syllabus', 'results', 'fees', 'messages'],
+    };
+    List<Widget> records(String key, String heading, {int limit = 2}) =>
+        has(key)
+        ? [
+            SectionHeading(
+              title: heading,
+              action: 'View all',
+              onAction: () => open(key),
+            ),
+            if (sectionErrors[key] != null)
+              sectionFailure(key)
+            else if (cache[key] == null && busy)
+              const EduLoadingSkeleton()
+            else if (rows(key).isEmpty)
+              QuietEmpty(
+                icon: moduleIcon(key),
+                title: emptyTitle(key),
+                message: emptyDescription(key),
+              )
+            else
+              ...rows(key)
+                  .take(limit)
+                  .map(
+                    (r) => CampusRecord(
+                      record: r,
+                      screen: key,
+                      onTap: () => open(key),
+                    ),
+                  ),
+          ]
+        : [];
+    final teaching = role == MobileRole.teacher;
+    final learning = role == MobileRole.student;
+    final family = role == MobileRole.parent;
+    final schedule = has('timetable')
+        ? <Widget>[
+            SectionHeading(
+              title: teaching ? 'Today’s classes' : 'Today’s schedule',
+              action: 'Timetable',
+              onAction: () => open('timetable'),
+            ),
+            if (sectionErrors['timetable'] != null)
+              sectionFailure('timetable')
+            else if (periods.isEmpty)
+              const QuietEmpty(
+                icon: Icons.wb_sunny_outlined,
+                title: 'No classes scheduled today',
+                message: 'Choose a different day in your timetable.',
+              )
+            else
+              ...periods
+                  .take(3)
+                  .map(
+                    (r) => CampusRecord(
+                      record: r,
+                      screen: 'timetable',
+                      onTap: () => open('timetable'),
+                    ),
+                  ),
+          ]
+        : <Widget>[];
     return [
+      EduReveal(
+        key: ValueKey('greeting-${role.name}-$student'),
+        child: EduGreeting(
+          name: name,
+          greeting: greeting,
+          role: role.label,
+          description: role.description,
+          date: prettyDate(today),
+          artwork: switch (role) {
+            MobileRole.admin => 'academic_campus',
+            MobileRole.teacher => 'teacher_workspace',
+            MobileRole.parent => 'parent_student',
+            MobileRole.student => 'student_studying',
+          },
+          onProfile: has('profile') ? () => open('profile') : null,
+        ),
+      ),
       if (children.length > 1) ...[
+        const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           key: ValueKey('home-child-$student'),
           initialValue: student,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Viewing student'),
+          decoration: const InputDecoration(
+            labelText: 'Viewing student',
+            prefixIcon: Icon(Icons.family_restroom_outlined),
+          ),
           items: children
               .map(
                 (s) => DropdownMenuItem<String>(
@@ -647,72 +789,101 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             if (v != null) changeStudent(v);
           },
         ),
-        const SizedBox(height: 16),
       ],
-      Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: widget.role.accent,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              prettyDate(today),
-              style: const TextStyle(color: Colors.white70),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$greeting,\n${name.isEmpty ? widget.role.label : name}.',
-              style: const TextStyle(
-                fontSize: 27,
-                height: 1.2,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              widget.role.description,
-              style: const TextStyle(color: Colors.white, height: 1.5),
-            ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: [
-                FilledButton.tonalIcon(
-                  onPressed: () => open(has(primary) ? primary : '_more'),
-                  icon: Icon(moduleIcon(primary), size: 18),
-                  label: Text('Open $primaryLabel'),
-                ),
-                if (has('profile'))
-                  TextButton(
-                    onPressed: () => open('profile'),
-                    style: TextButton.styleFrom(foregroundColor: Colors.white),
-                    child: const Text('My profile'),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 22),
-      if (unread > 0)
+      if (family && children.isNotEmpty)
         Card(
           child: ListTile(
-            leading: const Icon(Icons.notifications_active_outlined),
-            title: Text('$unread unread ${unread == 1 ? 'alert' : 'alerts'}'),
-            subtitle: const Text('Stay up to date with your college'),
+            leading: const EduModuleIcon(icon: Icons.groups_outlined),
+            title: Text(
+              '${children.where((c) => c['code'] == student).firstOrNull?['name'] ?? children.first['name']}',
+            ),
+            subtitle: const Text('Selected child'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => open('notifications'),
+            onTap: has('children') ? () => open('children') : null,
           ),
         ),
-      if (summary != null)
+      if (teaching || learning) ...schedule,
+      if (teaching && periods.isNotEmpty) ...[
+        SectionHeading(title: 'Next scheduled period'),
+        NextPeriodCard(periods: periods, onOpen: () => open('timetable')),
+      ],
+      if (learning) ...records('assignments', 'Your assignments'),
+      if (role == MobileRole.admin) ...[
+        SectionHeading(
+          title: 'College finances',
+          action: 'Finance',
+          onAction: () => open('overview'),
+        ),
+        if (summary != null)
+          EduReveal(
+            order: 1,
+            child: SummaryPanel(
+              summary: summary,
+              financial: true,
+              compact: true,
+            ),
+          ),
+        if (sectionErrors[primary] != null) sectionFailure(primary),
+        if (summary != null) FinanceComposition(summary: summary),
+        if (cache['students']?['total'] != null ||
+            cache['employees']?['total'] != null)
+          MetricStrip(
+            metrics: [
+              if (cache['students']?['total'] != null)
+                (
+                  'Students',
+                  '${cache['students']!['total']}',
+                  Icons.groups_outlined,
+                ),
+              if (cache['employees']?['total'] != null)
+                (
+                  'Employees',
+                  '${cache['employees']!['total']}',
+                  Icons.people_outline,
+                ),
+            ],
+          ),
+      ],
+      if ((family || learning) && cache['attendance'] != null) ...[
+        SectionHeading(title: 'Academic snapshot'),
+        EduReveal(
+          order: 1,
+          child: AttendanceSummary(items: rows('attendance')),
+        ),
+      ],
+      if (family || learning)
+        ...records('results', 'Published results', limit: 1),
+      if (family && summary != null) ...[
+        SectionHeading(
+          title: 'Fees at a glance',
+          action: 'Review fees',
+          onAction: () => open('fees'),
+        ),
         SummaryPanel(summary: summary, financial: true, compact: true),
-      if (sectionErrors[primary] != null) sectionFailure(primary),
-      if (widget.role == MobileRole.teacher)
+      ],
+      SectionHeading(
+        title: teaching
+            ? 'Teaching tools'
+            : family
+            ? 'For your child'
+            : learning
+            ? 'Learning & self-service'
+            : 'Campus tools',
+        action: 'View all',
+        onAction: () => open('_more'),
+      ),
+      EduReveal(
+        order: 2,
+        child: shortcutGrid(
+          priorities
+              .where(has)
+              .map((k) => screens.firstWhere((s) => s['key'] == k))
+              .toList(),
+          compact: true,
+        ),
+      ),
+      if (teaching) ...[
+        SectionHeading(title: 'Teaching overview'),
         MetricStrip(
           metrics: [
             (
@@ -727,49 +898,23 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             ),
           ],
         ),
-      if (widget.role == MobileRole.student && cache['attendance'] != null)
-        AttendanceSummary(items: rows('attendance')),
-      const SizedBox(height: 12),
-      SectionHeading(
-        title: 'Quick access',
-        action: 'View all',
-        onAction: () => open('_more'),
-      ),
-      shortcutGrid(
-        priority
-            .where(has)
-            .map((key) => screens.firstWhere((s) => s['key'] == key))
-            .toList(),
-        compact: true,
-      ),
-      if (has('timetable')) ...[
-        SectionHeading(
-          title: 'Today’s schedule',
-          action: 'Timetable',
-          onAction: () => open('timetable'),
+        ...records('assignments', 'Assignments & grading', limit: 1),
+        SectionHeading(title: 'Employee self-service'),
+        shortcutGrid(
+          ['leave', 'payslips', 'tax-documents']
+              .where(has)
+              .map((k) => screens.firstWhere((s) => s['key'] == k))
+              .toList(),
+          compact: true,
         ),
-        if (sectionErrors['timetable'] != null)
-          sectionFailure('timetable')
-        else if (periods.isEmpty)
-          const QuietEmpty(
-            icon: Icons.wb_sunny_outlined,
-            title: 'A little breathing room',
-            message: 'No classes scheduled for today.',
-          )
-        else
-          ...periods
-              .take(3)
-              .map(
-                (r) => CampusRecord(
-                  record: r,
-                  screen: 'timetable',
-                  onTap: () => open('timetable'),
-                ),
-              ),
       ],
+      if (family) ...schedule,
+      if (learning) ...records('syllabus', 'Learning resources', limit: 1),
+      if (role == MobileRole.admin)
+        ...records('activity', 'Recent activity', limit: 3),
       if (has('calendar')) ...[
         SectionHeading(
-          title: 'Coming up',
+          title: 'Upcoming events',
           action: 'Calendar',
           onAction: () => open('calendar'),
         ),
@@ -778,12 +923,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         else if (events.isEmpty)
           const QuietEmpty(
             icon: Icons.event_available_outlined,
-            title: 'You’re up to date',
-            message: 'Upcoming college events will appear here.',
+            title: 'No upcoming events',
+            message: 'Published college events will appear here.',
           )
         else
           ...events
-              .take(3)
+              .take(2)
               .map(
                 (r) => CampusRecord(
                   record: r,
@@ -794,7 +939,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       ],
       if (has('announcements')) ...[
         SectionHeading(
-          title: 'Latest from college',
+          title: 'College notices',
           action: 'View all',
           onAction: () => open('announcements'),
         ),
@@ -811,8 +956,21 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               .take(2)
               .map((r) => CampusRecord(record: r, screen: 'announcements')),
       ],
-      SectionHeading(title: 'Your college workspace'),
-      shortcutGrid(screens),
+      if (unread > 0)
+        Card(
+          child: ListTile(
+            leading: const EduModuleIcon(icon: Icons.notifications_outlined),
+            title: Text('$unread unread ${unread == 1 ? 'alert' : 'alerts'}'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => open('notifications'),
+          ),
+        ),
+      const SizedBox(height: 20),
+      OutlinedButton.icon(
+        onPressed: () => open('_more'),
+        icon: const Icon(Icons.grid_view_outlined),
+        label: const Text('Explore your workspace'),
+      ),
     ];
   }
 
@@ -830,7 +988,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               MediaQuery.textScalerOf(context).scale(16) > 22 ||
                   constraints.maxWidth < 300
               ? 1
-              : constraints.maxWidth >= 640
+              : constraints.maxWidth >= 760
+              ? 4
+              : constraints.maxWidth >= 540
               ? 3
               : 2;
           final width = (constraints.maxWidth - (columns - 1) * 12) / columns;
@@ -864,6 +1024,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               s['title'].toString().toLowerCase().contains(query.toLowerCase()),
         )
         .toList();
+    final groups = <String, List<Json>>{};
+    for (final s in filtered) {
+      groups.putIfAbsent(moduleGroup(s['key']), () => []).add(s);
+    }
     return [
       TextField(
         controller: search,
@@ -873,8 +1037,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           prefixIcon: Icon(Icons.search),
         ),
       ),
-      const SizedBox(height: 20),
-      shortcutGrid(filtered),
+      for (final group in groups.entries) ...[
+        SectionHeading(title: group.key),
+        shortcutGrid(group.value),
+      ],
       if (filtered.isEmpty)
         const QuietEmpty(
           icon: Icons.search_off,
@@ -904,6 +1070,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         return false;
       }
       if (filter == 'Unread' && r['status'] == 'read') return false;
+      if (selected == 'assignments' && widget.role == MobileRole.student) {
+        final submitted = r['my_submission'] != null;
+        if (filter == 'Submitted' && !submitted) return false;
+        if (filter == 'Pending' && submitted) return false;
+      }
       if (filter == 'Pending' &&
           [
             'approved',
@@ -1015,23 +1186,28 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
         ),
       if (selected == 'calendar')
-        CampusCalendar(
-          month: calendarMonth,
-          selected: calendarDay,
-          events: all,
-          onMonth: (v) {
-            setState(() => calendarMonth = v);
-            load();
-          },
-          onDay: (v) => setState(() => calendarDay = v),
+        AnimatedSwitcher(
+          duration: EduMotion.duration(context, EduMotion.tab),
+          child: CampusCalendar(
+            key: ValueKey('month-${calendarMonth.year}-${calendarMonth.month}'),
+            month: calendarMonth,
+            selected: calendarDay,
+            events: all,
+            onMonth: (v) {
+              setState(() => calendarMonth = v);
+              load();
+            },
+            onDay: (v) => setState(() => calendarDay = v),
+          ),
         ),
+      if (selected == 'calendar')
+        SectionHeading(title: 'Agenda · ${prettyDate(calendarDay)}'),
       if (selected == 'timetable') ...[
-        CalendarDatePicker(
-          initialDate: calendarDay,
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2100),
-          onDateChanged: (v) => setState(() => calendarDay = v),
+        TimetableDaySelector(
+          selected: calendarDay,
+          onChanged: (v) => setState(() => calendarDay = v),
         ),
+        const SizedBox(height: 12),
       ],
       if (actions.isNotEmpty) ...[
         Wrap(
@@ -1073,6 +1249,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 [
                       'All',
                       if (selected == 'notifications') 'Unread' else 'Pending',
+                      if (selected == 'assignments' &&
+                          widget.role == MobileRole.student)
+                        'Submitted',
                     ]
                     .map(
                       (v) => ChoiceChip(

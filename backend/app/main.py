@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core import integrations_api, mobile_api, push_api
+from app.core.timetable_templates import router as timetable_templates_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
 from app.core.settings import Settings
@@ -147,6 +148,7 @@ def create_app(settings=None):
 
     for router in [
         auth_api.router,
+        timetable_templates_router,
         admin_api.router,
         forms_router,
         finance_router,

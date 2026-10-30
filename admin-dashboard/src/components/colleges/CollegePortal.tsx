@@ -4,7 +4,6 @@ import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
-import FloatingMobileApps from "./FloatingMobileApps";
 import PDFActions from "./PDFActions";
 import OperationsWorkspace, { OperationsSummary } from "./OperationsWorkspace";
 import { operationLabels, visibleNotices } from "@/lib/colleges/operations";
@@ -127,7 +126,6 @@ const labels: Record<string, string> = {
   hostels: "Hostel management",
   "hostel-permissions": "Hostel permissions",
   academics: "Academics",
-  staff: "Faculty & staff",
   notifications: "Notifications",
   reports: "Reports & analytics",
   "audit-logs": "Audit logs",
@@ -176,10 +174,12 @@ export default function CollegePortal({
       workspaceArea,
       sessionError,
       modules,
+      refresh,
     } = useCollege(),
     router = useRouter(),
     root = collegeRoot(c);
   const [apiOpen, setApiOpen] = useState(false);
+  const [reloadingRecords, setReloadingRecords] = useState(false);
   const [feeStructureId, setFeeStructureId] = useState<string | null>(null);
   const [manageModule, setManageModule] = useState<string | null>(null);
   useEffect(() => {
@@ -1342,8 +1342,6 @@ export default function CollegePortal({
     if (activeModule === "roles") return <RolesAccess />;
     if (operationLabels[activeModule])
       return <OperationsWorkspace college={c} module={activeModule} />;
-    if (activeModule === "dashboard" && role === "Parent")
-      return <OperationsWorkspace college={c} module="parent-app" />;
     if (activeModule === "dashboard")
       return (
         <>
@@ -2475,62 +2473,6 @@ export default function CollegePortal({
           )}
         </>
       );
-    if (activeModule === "staff")
-      return (
-        <>
-          {heading(
-            "Faculty & staff",
-            "Assigned responsibilities and role management.",
-            role === "Super Admin"
-              ? button("Add staff", () =>
-                  form("Add staff member", "staff.save", [
-                    field("name", "Staff name"),
-                    field("category", "Demo role", "select", [...roles]),
-                  ]),
-                )
-              : undefined,
-          )}
-          {table(
-            "Staff directory",
-            s.staff,
-            cols("id", "name", "category", "note", "status"),
-            (r) =>
-              role === "Super Admin" && (
-                <button
-                  onClick={() =>
-                    form(
-                      "Edit staff member",
-                      "staff.save",
-                      [
-                        field(
-                          "name",
-                          "Staff name",
-                          "text",
-                          undefined,
-                          String(r.name),
-                        ),
-                        field(
-                          "category",
-                          "Assigned role",
-                          "select",
-                          [...roles],
-                          String(r.category),
-                        ),
-                        field("status", "Status", "select", [
-                          "Active",
-                          "Archived",
-                        ]),
-                      ],
-                      r.id,
-                    )
-                  }
-                >
-                  Edit / assign role
-                </button>
-              ),
-          )}
-        </>
-      );
     if (activeModule === "academics") {
       const programs = c.programs.filter(
         (p) => department === "all" || p.department === department,
@@ -3103,7 +3045,7 @@ export default function CollegePortal({
               )}
               {role === "Super Admin" && (
                 <>
-                  <Link href={nav("employees")}>Add faculty</Link>
+                  <Link href={nav("teaching-staff")}>Add faculty</Link>
                   <Link href={nav("timetable")}>Create timetable</Link>
                   <Link href={nav("bus-seating")}>Assign bus seat</Link>
                   <Link href={nav("assessments")}>Create assessment</Link>
@@ -3211,6 +3153,24 @@ export default function CollegePortal({
               )}
             </div>
           )}
+          {activeModule !== "roles" &&
+            activeModule !== "timetable" &&
+            !entryScreens.includes(activeModule) && (
+              <div className="erp-api-controls">
+                <span>College records</span>
+                <button
+                  className="erp-primary"
+                  onClick={() => {
+                    setManageModule(null);
+                    setFeeStructureId(null);
+                    setApiOpen(true);
+                  }}
+                >
+                  Manage {labels[activeModule] || activeModule}{" "}
+                  <Plus size={15} />
+                </button>
+              </div>
+            )}
 
           {[
             "accounts",

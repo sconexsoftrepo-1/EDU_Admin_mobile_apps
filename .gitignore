@@ -10,3 +10,6 @@
 **/.env
 **/.env.local
 /mock_logins.txt
+/artifacts/
+/admin-dashboard/test-results/
+/admin-dashboard/playwright-report/

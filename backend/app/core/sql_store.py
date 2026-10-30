@@ -962,7 +962,7 @@ class ImportMetadata(MutableMapping):
         self.orig = copy.deepcopy(self.tables)
 
     def clone(self, session):
-        other = ImportMetadata(session)
+        other = type(self)(session)
         other.tables, other.orig = copy.deepcopy(self.tables), copy.deepcopy(self.orig)
         return other
 
@@ -977,6 +977,12 @@ class ImportMetadata(MutableMapping):
                 if code in rows:
                     cur.execute(f"INSERT INTO {EXTRAS} (table_name, record_code, data) VALUES (%s, %s, %s)",
                                 (self.PREFIX + table, code, json.dumps(rows[code], ensure_ascii=False, sort_keys=True, default=str)))
+
+
+class Documents(ImportMetadata):
+    """Versioned workspace documents stored in the existing record_extras table."""
+
+    PREFIX = "document:"
 
 
 MAPPED = {"accounts": Accounts, "roles": Roles, "sessions": Sessions, "forms": Forms, "submissions": Submissions}
@@ -1027,6 +1033,8 @@ class Session(MutableMapping):
                 self.parts[key] = LoginAttempts(self)
             elif key == "import_metadata":
                 self.parts[key] = ImportMetadata(self)
+            elif key == "documents":
+                self.parts[key] = Documents(self)
             elif key in MAPPED:
                 self.parts[key] = MAPPED[key](self)
             else:
@@ -1035,7 +1043,7 @@ class Session(MutableMapping):
 
     # -- mapping protocol for the root -------------------------------------
     KEYS = ("records", "accounts", "roles", "sessions", "audit", "forms", "submissions", "login_attempts",
-            "import_metadata")
+            "import_metadata", "documents")
 
     def __getitem__(self, key):
         return self.part(key)
@@ -1170,7 +1178,7 @@ class Session(MutableMapping):
                 if not blocked[f] and f not in done:
                     heapq.heappush(ready, (ops[f][0], f))
 
-        for key in ("login_attempts", "import_metadata"):
+        for key in ("login_attempts", "import_metadata", "documents"):
             if key in self.parts:
                 self.parts[key].write(cur, self.schema)
         cur.run()

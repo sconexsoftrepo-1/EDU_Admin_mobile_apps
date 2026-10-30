@@ -59,6 +59,47 @@ const navigation: ScreenSummary[] = [
   },
 ];
 test.beforeEach(() => clearWorkspaceCache());
+test("failed record refreshes cannot replace the last successful cache", async () => {
+  const key = workspaceCacheKey("ADMIN", "ROOT", "template:dashboard");
+  const complete = { records: ["EMP-1"], errors: [] as string[] };
+  writeWorkspaceCache(key, complete);
+  const failed = await refreshWorkspaceCache(
+    key,
+    async () => ({ records: [], errors: ["Dashboard"] }),
+    (value) => value.errors.length === 0,
+  );
+  expect(failed.errors).toEqual(["Dashboard"]);
+  expect(readWorkspaceCache(key)).toEqual(complete);
+});
+test("removed mobile preview modules no longer have dashboard routes", () => {
+  for (const key of [
+    "mobile-apps",
+    "admin-app",
+    "parent-app",
+    "teacher-app",
+    "student-app",
+    "staff",
+  ]) {
+    expect(
+      validCollegePath(collegeBySlug("edunexa-college")!, [
+        "portal",
+        "admin",
+        key,
+      ]),
+    ).toBe(false);
+  }
+});
+test("dedicated staff directories remain registered after removing the legacy staff screen", () => {
+  for (const key of ["teaching-staff", "non-teaching-staff", "daily-labour"]) {
+    expect(
+      validCollegePath(collegeBySlug("edunexa-college")!, [
+        "portal",
+        "admin",
+        key,
+      ]),
+    ).toBe(true);
+  }
+});
 test("Master Data Entry uses its own URL and first assigned screen", () => {
   expect(roleArea(master)).toBe("master-data-entry");
   expect(templateRole(master)).toBe("Master Data Entry");

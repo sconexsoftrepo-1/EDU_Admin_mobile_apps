@@ -1,3 +1,5 @@
+import screenCatalog from "../../services/api/modules/workspace/screens.json";
+
 export type College = {
   slug: string;
   number: string;
@@ -110,11 +112,6 @@ export const operationLabels: Record<string, string> = {
   "vehicle-maintenance": "Vehicle maintenance",
   fuel: "Fuel records",
   "transport-reports": "Transport reports",
-  "mobile-apps": "Mobile apps emulator",
-  "admin-app": "Admin app preview",
-  "parent-app": "Parent app preview",
-  "student-app": "Student app preview",
-  "teacher-app": "Teacher app preview",
   accounts: "User accounts",
   credentials: "Credential provisioning",
   campaigns: "Notification campaigns",
@@ -146,7 +143,6 @@ export const modules = [
   "hostels",
   "hostel-permissions",
   "academics",
-  "staff",
   "roles",
   "notifications",
   "reports",
@@ -209,7 +205,7 @@ export const permissions: Record<Role, string[]> = {
     "imports",
   ],
   "Super Admin": modules,
-  Parent: ["dashboard", "parent-app", "timetable"],
+  Parent: ["dashboard", "timetable"],
   "HR Manager": [
     "dashboard",
     "employees",
@@ -266,7 +262,6 @@ export const permissions: Record<Role, string[]> = {
   Driver: ["dashboard", "trips", "manifest", "transport-attendance"],
   Principal: [
     "dashboard",
-    "admin-app",
     "timetable",
     "students",
     "admissions",
@@ -276,11 +271,9 @@ export const permissions: Record<Role, string[]> = {
     "scholarships",
     "hostels",
     "notifications",
-    "staff",
   ],
   "Accounts Manager": [
     "dashboard",
-    "admin-app",
     "fees",
     "fee-structures",
     "payments",
@@ -310,14 +303,12 @@ export const permissions: Record<Role, string[]> = {
     "academics",
     "students",
     "notifications",
-    "teacher-app",
     "assignments",
     "assessments",
     "attendance",
     "timetable",
   ],
   Student: [
-    "student-app",
     "timetable",
     "dashboard",
     "fees",
@@ -346,14 +337,16 @@ export function validCollegePath(c: College, parts: string[]) {
         "admin",
         "principal",
         "accounts",
-        "staff",
         "student",
         "certificates",
         "hostel",
       ].includes(parts[1])
     );
   if (parts.length === 3)
-    return safeArea(parts[1]) && /^[a-z0-9][a-z0-9-]{0,79}$/.test(parts[2]);
+    return (
+      safeArea(parts[1]) &&
+      screenCatalog.some((screen) => screen.key === parts[2])
+    );
   return (
     parts.length === 4 &&
     safeArea(parts[1]) &&

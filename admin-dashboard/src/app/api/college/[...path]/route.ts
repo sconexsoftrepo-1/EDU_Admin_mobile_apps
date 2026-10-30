@@ -157,7 +157,15 @@ async function proxy(
       const result = await upstream(path, "POST", body);
       const payload = await result.json();
       if (!result.ok)
-        return NextResponse.json(payload, { status: result.status });
+        return NextResponse.json(payload, {
+          status: result.status,
+          headers: {
+            "Cache-Control": "no-store",
+            ...(result.headers.has("retry-after")
+              ? { "Retry-After": result.headers.get("retry-after")! }
+              : {}),
+          },
+        });
       // Tokens stay in httpOnly cookies; the page gets the account and its roles (navigation).
       const response = NextResponse.json({
         account: payload.account,

@@ -123,6 +123,17 @@ test("an unassigned selected role stays on the login form", async ({
   );
   await expect(page).toHaveURL(`${origin}${root}/portal/login`);
 });
+test("a throttled login shows readable feedback and preserves the form", async ({ page }) => {
+  await mockApi(page, { status: 429 });
+  await fillLogin(page);
+  const message = page.locator("#sign-in-error");
+  await expect(message).toContainText("Sign-in is temporarily paused");
+  await expect(message).toContainText("15 minutes");
+  await expect(message).not.toContainText('{"detail"');
+  await expect(page.getByLabel("Login ID", { exact: true })).toHaveValue("college-user");
+  await expect(page.locator('input[name="password"]')).toHaveValue("wrong-password");
+  await expect(page).toHaveURL(`${origin}${root}/portal/login`);
+});
 test("a role without workspace permissions shows an inline access error", async ({
   page,
 }) => {
