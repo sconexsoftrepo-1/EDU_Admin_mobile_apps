@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const root = "/colleges-institutions/edunexa-college/portal/admin";
+const root = "/portal/admin";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running dashboard");
 
 async function setup(page: Page) {

@@ -592,17 +592,17 @@ function TimetableSessionDetails({
         {role === "Faculty" && (
           <div className="ops-row-actions">
             <Link
-              href={`/colleges-institutions/${state.slug}/portal/staff/attendance`}
+              href={`/portal/staff/attendance`}
             >
               Mark attendance
             </Link>
             <Link
-              href={`/colleges-institutions/${state.slug}/portal/staff/students`}
+              href={`/portal/staff/students`}
             >
               View students
             </Link>
             <Link
-              href={`/colleges-institutions/${state.slug}/portal/staff/assignments`}
+              href={`/portal/staff/assignments`}
             >
               Open assignments
             </Link>

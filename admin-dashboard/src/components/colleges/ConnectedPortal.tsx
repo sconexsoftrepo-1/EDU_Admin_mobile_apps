@@ -84,6 +84,7 @@ import EntryForm from "./RecordFormDrawer";
 import { feeHeadForm } from "@/lib/colleges/fee-head-form";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
+import AssignmentWorkspace from "./AssignmentWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import StaffDirectory from "./staff/StaffDirectory";
@@ -1009,713 +1010,749 @@ export default function ConnectedPortal({
       <section
         className={`edu-content ${selected === "student-enrollment" ? "edu-enroll" : ""}`}
       >
-        <header
-          className={`edu-heading ${staffKind ? "edu-staff-heading-hidden" : ""}`}
-        >
-          <div>
-            <p>College administration</p>
-            <h1>
-              {screen?.title ||
-                sessionScreens?.find((s) => s.key === selected)?.title ||
-                pretty(selected)}
-            </h1>
-            {selected === "course-setup" && (
-              <p className="crs-page-description">
-                Manage courses, dated batches, semesters and enrollments in one
-                place.
-              </p>
-            )}
-          </div>
-          <div className="edu-row-actions">
-            {HEADER_ACTIONS.has(selected) && (
-              <>
-                {primaryForm && (
+        {selected === "assignments" ? (
+          <AssignmentWorkspace
+            allowCreate={
+              !!displayRole &&
+              (displayRole.system_admin ||
+                displayRole.scope === "teaching" ||
+                displayRole.permissions.assignments?.includes("create"))
+            }
+          />
+        ) : (
+          <>
+            <header
+              className={`edu-heading ${staffKind ? "edu-staff-heading-hidden" : ""}`}
+            >
+              <div>
+                <p>College administration</p>
+                <h1>
+                  {screen?.title ||
+                    sessionScreens?.find((s) => s.key === selected)?.title ||
+                    pretty(selected)}
+                </h1>
+                {selected === "course-setup" && (
+                  <p className="crs-page-description">
+                    Manage courses, dated batches, semesters and enrollments in
+                    one place.
+                  </p>
+                )}
+              </div>
+              <div className="edu-row-actions">
+                {HEADER_ACTIONS.has(selected) && (
+                  <>
+                    {primaryForm && (
+                      <button
+                        className="edu-primary"
+                        onClick={() => runAction(primaryForm)}
+                      >
+                        <Plus size={15} aria-hidden="true" />{" "}
+                        {primaryForm.label}
+                      </button>
+                    )}
+                    <div className="crs-header-desktop">
+                      {screenActions.map((a) => (
+                        <button key={a.key} onClick={() => runAction(a)}>
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                    <details className="crs-header-more">
+                      <summary>More actions</summary>
+                      <div>
+                        {screenActions.map((a) => (
+                          <button
+                            key={a.key}
+                            onClick={(e) => {
+                              e.currentTarget
+                                .closest("details")
+                                ?.removeAttribute("open");
+                              runAction(a);
+                            }}
+                          >
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  </>
+                )}
+                {displayRole?.system_admin && (
                   <button
-                    className="edu-primary"
-                    onClick={() => runAction(primaryForm)}
+                    onClick={() =>
+                      setDialog({
+                        title: "Change password",
+                        fields: [
+                          {
+                            key: "current_password",
+                            label: "Current password",
+                            type: "password",
+                            required: true,
+                          },
+                          {
+                            key: "new_password",
+                            label: "New password (12 or more characters)",
+                            type: "password",
+                            required: true,
+                          },
+                        ],
+                        save: async (values) => {
+                          await api.auth.changePassword({
+                            current_password: String(values.current_password),
+                            new_password: String(values.new_password),
+                          });
+                          setAccount(null);
+                        },
+                      })
+                    }
                   >
-                    <Plus size={15} aria-hidden="true" /> {primaryForm.label}
+                    Change password
                   </button>
                 )}
-                <div className="crs-header-desktop">
-                  {screenActions.map((a) => (
+                <button
+                  className="edu-icon-button"
+                  onClick={() =>
+                    selected === "student-enrollment" && resource
+                      ? refreshResource(resource)
+                      : load(selected)
+                  }
+                  disabled={busy}
+                  aria-label="Refresh"
+                  title="Refresh"
+                >
+                  <RefreshCw
+                    size={17}
+                    className={refreshing ? "edu-spin" : ""}
+                  />
+                </button>
+              </div>
+            </header>
+            {error && (
+              <p className="edu-error" role="alert">
+                {error}
+              </p>
+            )}
+            {busy && <WorkspaceSkeleton label="Loading screen data" />}
+            {refreshing && (
+              <p className="erp-background-refresh" role="status">
+                Updating records…
+              </p>
+            )}
+            {summary && (
+              <section className="edu-summary">
+                {Object.entries(summary).map(([k, v]) => (
+                  <div key={k}>
+                    <span>{pretty(k)}</span>
+                    <strong>{text(v)}</strong>
+                  </div>
+                ))}
+              </section>
+            )}
+            <div className="edu-card">
+              <div className="edu-toolbar" hidden={!!staffKind}>
+                {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
+                  <>
+                    <select
+                      aria-label="Screen resource"
+                      value={resource.name}
+                      onChange={(e) => {
+                        const r = screen?.resources.find(
+                          (r) => r.name === e.target.value,
+                        );
+                        if (r) void refreshResource(r);
+                      }}
+                    >
+                      {screen?.resources.map((r) => (
+                        <option key={r.name} value={r.name}>
+                          {r.title}
+                        </option>
+                      ))}
+                    </select>
+                    {selected === "student-enrollment" ? (
+                      <>
+                        <label className="stf-search">
+                          <Search size={15} aria-hidden="true" />
+                          <input
+                            type="search"
+                            aria-label="Search records"
+                            placeholder="Search by name, admission no. or email"
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                          />
+                        </label>
+                        <p className="edu-count">
+                          {visibleRows.length} of {total} records
+                        </p>
+                        {Object.keys(columnFilters).length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setColumnFilters({})}
+                          >
+                            Clear column filters
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <input
+                        aria-label="Search records"
+                        placeholder="Search this page"
+                        value={filter}
+                        onChange={(e) => setFilter(e.target.value)}
+                      />
+                    )}
+                    {primaryForm ? (
+                      <button
+                        className="edu-primary"
+                        onClick={() => runAction(primaryForm)}
+                      >
+                        <Plus size={15} aria-hidden="true" />{" "}
+                        {primaryForm.label}
+                      </button>
+                    ) : (
+                      selected !== "student-enrollment" &&
+                      resource.actions.includes("create") && (
+                        <button className="edu-primary" onClick={() => edit()}>
+                          <Plus size={15} aria-hidden="true" />{" "}
+                          {resource.name === "academic_years"
+                            ? "Create batch"
+                            : "Create record"}
+                        </button>
+                      )
+                    )}
+                    {canExport && (
+                      <>
+                        <button
+                          type="button"
+                          className="edu-export"
+                          onClick={exportExcel}
+                          disabled={!visibleRows.length}
+                        >
+                          <Download size={14} aria-hidden="true" /> Excel
+                        </button>
+                        <button
+                          type="button"
+                          className="edu-export"
+                          onClick={() => void exportPdf()}
+                          disabled={!visibleRows.length}
+                        >
+                          <FileText size={14} aria-hidden="true" /> PDF
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+                {!HEADER_ACTIONS.has(selected) &&
+                  !staffKind &&
+                  screenActions.map((a) => (
                     <button key={a.key} onClick={() => runAction(a)}>
                       {a.label}
                     </button>
                   ))}
-                </div>
-                <details className="crs-header-more">
-                  <summary>More actions</summary>
-                  <div>
-                    {screenActions.map((a) => (
-                      <button
-                        key={a.key}
-                        onClick={(e) => {
-                          e.currentTarget
-                            .closest("details")
-                            ?.removeAttribute("open");
-                          runAction(a);
-                        }}
-                      >
-                        {a.label}
-                      </button>
-                    ))}
-                  </div>
-                </details>
-              </>
-            )}
-            {displayRole?.system_admin && (
-              <button
-                onClick={() =>
-                  setDialog({
-                    title: "Change password",
-                    fields: [
-                      {
-                        key: "current_password",
-                        label: "Current password",
-                        type: "password",
-                        required: true,
-                      },
-                      {
-                        key: "new_password",
-                        label: "New password (12 or more characters)",
-                        type: "password",
-                        required: true,
-                      },
-                    ],
-                    save: async (values) => {
-                      await api.auth.changePassword({
-                        current_password: String(values.current_password),
-                        new_password: String(values.new_password),
-                      });
-                      setAccount(null);
-                    },
-                  })
-                }
-              >
-                Change password
-              </button>
-            )}
-            <button
-              className="edu-icon-button"
-              onClick={() =>
-                selected === "student-enrollment" && resource
-                  ? refreshResource(resource)
-                  : load(selected)
-              }
-              disabled={busy}
-              aria-label="Refresh"
-              title="Refresh"
-            >
-              <RefreshCw size={17} className={refreshing ? "edu-spin" : ""} />
-            </button>
-          </div>
-        </header>
-        {error && (
-          <p className="edu-error" role="alert">
-            {error}
-          </p>
-        )}
-        {busy && <WorkspaceSkeleton label="Loading screen data" />}
-        {refreshing && (
-          <p className="erp-background-refresh" role="status">
-            Updating records…
-          </p>
-        )}
-        {summary && (
-          <section className="edu-summary">
-            {Object.entries(summary).map(([k, v]) => (
-              <div key={k}>
-                <span>{pretty(k)}</span>
-                <strong>{text(v)}</strong>
-              </div>
-            ))}
-          </section>
-        )}
-        <div className="edu-card">
-          <div className="edu-toolbar" hidden={!!staffKind}>
-            {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
-              <>
-                <select
-                  aria-label="Screen resource"
-                  value={resource.name}
-                  onChange={(e) => {
-                    const r = screen?.resources.find(
-                      (r) => r.name === e.target.value,
-                    );
-                    if (r) void refreshResource(r);
-                  }}
-                >
-                  {screen?.resources.map((r) => (
-                    <option key={r.name} value={r.name}>
-                      {r.title}
-                    </option>
-                  ))}
-                </select>
-                {selected === "student-enrollment" ? (
+                {selected === "reports" && (
                   <>
-                    <label className="stf-search">
-                      <Search size={15} aria-hidden="true" />
-                      <input
-                        type="search"
-                        aria-label="Search records"
-                        placeholder="Search by name, admission no. or email"
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                      />
-                    </label>
-                    <p className="edu-count">
-                      {visibleRows.length} of {total} records
-                    </p>
-                    {Object.keys(columnFilters).length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setColumnFilters({})}
-                      >
-                        Clear column filters
-                      </button>
-                    )}
+                    <button
+                      onClick={() =>
+                        download(() => api.finance.downloadLedger())
+                      }
+                    >
+                      Download student ledger
+                    </button>
+                    <button
+                      onClick={() =>
+                        download(() => api.reports.downloadFinanceReport())
+                      }
+                    >
+                      Download finance PDF
+                    </button>
                   </>
-                ) : (
-                  <input
-                    aria-label="Search records"
-                    placeholder="Search this page"
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                  />
                 )}
-                {primaryForm ? (
+                {selected === "imports" && (
+                  <div className="edu-file">
+                    <span>Validate client workbook</span>
+                    <UploadBox
+                      label="Client workbook (.xlsx)"
+                      accept=".xlsx"
+                      placeholder="No workbook chosen"
+                      disabled={validatingWorkbook}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setError("");
+                        if (!/\.xlsx$/i.test(file.name)) {
+                          setError(
+                            "Choose an Excel workbook (.xlsx), using a supplied import template.",
+                          );
+                          return;
+                        }
+                        if (file.size > 700000) {
+                          setError(
+                            "Choose an XLSX workbook up to 700 KB. Remove unused sheets or split large imports into separate workbooks.",
+                          );
+                          return;
+                        }
+                        setValidatingWorkbook(true);
+                        try {
+                          const result = await api.imports.validate({
+                            filename: file.name,
+                            content_base64: await fileToBase64(file),
+                          });
+                          setSpecial([result]);
+                          if (Number(result.failed_rows) > 0)
+                            toast.warning(
+                              "Workbook needs corrections",
+                              `${result.failed_rows} rows or sheets need attention. Review the validation errors before importing.`,
+                            );
+                          else toast.success(`${file.name} validated`);
+                          if (resource) await refreshResource(resource);
+                        } catch (err) {
+                          setError(errorText(err));
+                        } finally {
+                          setValidatingWorkbook(false);
+                        }
+                      }}
+                    />
+                    <small>
+                      {validatingWorkbook
+                        ? "Checking workbook…"
+                        : "XLSX up to 700 KB. Keep the supplied sheet names and headers in row 6."}
+                    </small>
+                  </div>
+                )}
+                {selected === "forms" && (
                   <button
                     className="edu-primary"
-                    onClick={() => runAction(primaryForm)}
+                    onClick={() => setConfiguration({ kind: "form" })}
                   >
-                    <Plus size={15} aria-hidden="true" /> {primaryForm.label}
+                    Create form
                   </button>
-                ) : (
-                  selected !== "student-enrollment" &&
-                  resource.actions.includes("create") && (
-                    <button className="edu-primary" onClick={() => edit()}>
-                      <Plus size={15} aria-hidden="true" />{" "}
-                      {resource.name === "academic_years"
-                        ? "Create batch"
-                        : "Create record"}
-                    </button>
-                  )
                 )}
-                {canExport && (
-                  <>
-                    <button
-                      type="button"
-                      className="edu-export"
-                      onClick={exportExcel}
-                      disabled={!visibleRows.length}
-                    >
-                      <Download size={14} aria-hidden="true" /> Excel
-                    </button>
-                    <button
-                      type="button"
-                      className="edu-export"
-                      onClick={() => void exportPdf()}
-                      disabled={!visibleRows.length}
-                    >
-                      <FileText size={14} aria-hidden="true" /> PDF
-                    </button>
-                  </>
+                {selected === "roles" && (
+                  <button
+                    className="edu-primary"
+                    onClick={() => setConfiguration({ kind: "role" })}
+                  >
+                    Create role
+                  </button>
                 )}
-              </>
-            )}
-            {!HEADER_ACTIONS.has(selected) &&
-              !staffKind &&
-              screenActions.map((a) => (
-                <button key={a.key} onClick={() => runAction(a)}>
-                  {a.label}
-                </button>
-              ))}
-            {selected === "reports" && (
-              <>
-                <button
-                  onClick={() => download(() => api.finance.downloadLedger())}
-                >
-                  Download student ledger
-                </button>
-                <button
-                  onClick={() =>
-                    download(() => api.reports.downloadFinanceReport())
-                  }
-                >
-                  Download finance PDF
-                </button>
-              </>
-            )}
-            {selected === "imports" && (
-              <div className="edu-file">
-                <span>Validate client workbook</span>
-                <UploadBox
-                  label="Client workbook (.xlsx)"
-                  accept=".xlsx"
-                  placeholder="No workbook chosen"
-                  disabled={validatingWorkbook}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setError("");
-                    if (!/\.xlsx$/i.test(file.name)) {
-                      setError(
-                        "Choose an Excel workbook (.xlsx), using a supplied import template.",
-                      );
-                      return;
-                    }
-                    if (file.size > 700000) {
-                      setError(
-                        "Choose an XLSX workbook up to 700 KB. Remove unused sheets or split large imports into separate workbooks.",
-                      );
-                      return;
-                    }
-                    setValidatingWorkbook(true);
-                    try {
-                      const result = await api.imports.validate({
-                        filename: file.name,
-                        content_base64: await fileToBase64(file),
-                      });
-                      setSpecial([result]);
-                      if (Number(result.failed_rows) > 0)
-                        toast.warning(
-                          "Workbook needs corrections",
-                          `${result.failed_rows} rows or sheets need attention. Review the validation errors before importing.`,
-                        );
-                      else toast.success(`${file.name} validated`);
-                      if (resource) await refreshResource(resource);
-                    } catch (err) {
-                      setError(errorText(err));
-                    } finally {
-                      setValidatingWorkbook(false);
-                    }
-                  }}
-                />
-                <small>
-                  {validatingWorkbook
-                    ? "Checking workbook…"
-                    : "XLSX up to 700 KB. Keep the supplied sheet names and headers in row 6."}
-                </small>
+                {["accounts", "credentials"].includes(selected) && (
+                  <button
+                    className="edu-primary"
+                    onClick={() => setConfiguration({ kind: "account" })}
+                  >
+                    Create login
+                  </button>
+                )}
               </div>
-            )}
-            {selected === "forms" && (
-              <button
-                className="edu-primary"
-                onClick={() => setConfiguration({ kind: "form" })}
-              >
-                Create form
-              </button>
-            )}
-            {selected === "roles" && (
-              <button
-                className="edu-primary"
-                onClick={() => setConfiguration({ kind: "role" })}
-              >
-                Create role
-              </button>
-            )}
-            {["accounts", "credentials"].includes(selected) && (
-              <button
-                className="edu-primary"
-                onClick={() => setConfiguration({ kind: "account" })}
-              >
-                Create login
-              </button>
-            )}
-          </div>
-          {staffKind && (
-            <StaffDirectory
-              kind={staffKind}
-              canEdit={
-                !!displayRole &&
-                (displayRole.system_admin ||
-                  [
-                    "employees",
-                    ...(staffKind === "labour"
-                      ? []
-                      : [
-                          staffKind === "teaching"
-                            ? "teachers"
-                            : "staff_profiles",
-                          "employee_salary_components",
-                        ]),
-                  ].every((table) =>
-                    displayRole.permissions[table]?.includes("edit"),
-                  ))
-              }
-              reloadKey={staffReload}
-              title={
-                screen?.title ||
-                sessionScreens?.find((s) => s.key === selected)?.title ||
-                pretty(selected)
-              }
-              onRefresh={() => setStaffReload((n) => n + 1)}
-              onAdd={() => setStaffForm(true)}
-            />
-          )}
-          {resource && !staffKind && (
-            <>
-              {cards && (
-                <CourseCards
-                  rows={rows}
-                  canEdit={resource.actions.includes("edit")}
-                  canDelete={resource.actions.includes("delete")}
-                  onEdit={(row) => void edit(row)}
-                  onDelete={(row) => removeRow(row, true)}
+              {staffKind && (
+                <StaffDirectory
+                  kind={staffKind}
+                  canEdit={
+                    !!displayRole &&
+                    (displayRole.system_admin ||
+                      [
+                        "employees",
+                        ...(staffKind === "labour"
+                          ? []
+                          : [
+                              staffKind === "teaching"
+                                ? "teachers"
+                                : "staff_profiles",
+                              "employee_salary_components",
+                            ]),
+                      ].every((table) =>
+                        displayRole.permissions[table]?.includes("edit"),
+                      ))
+                  }
+                  reloadKey={staffReload}
+                  title={
+                    screen?.title ||
+                    sessionScreens?.find((s) => s.key === selected)?.title ||
+                    pretty(selected)
+                  }
+                  onRefresh={() => setStaffReload((n) => n + 1)}
+                  onAdd={() => setStaffForm(true)}
                 />
               )}
-              {!cards && (
-                <div className="edu-table">
-                  <table>
-                    <thead>
-                      <tr>
-                        {columns.map((k) => (
-                          <th key={k} className={alignClass(k) || undefined}>
-                            {studentRegister &&
-                            k !== "profile_photo_url" &&
-                            k !== "course_level" &&
-                            !["status", "email"].includes(k) ? (
-                              <div className="edu-column-heading">
-                                <span>{columnLabel(k)}</span>
-                                <TableColumnFilter
-                                  label={columnLabel(k)}
-                                  options={
-                                    filterOptions[k] ||
-                                    [
-                                      ...new Set(
-                                        rows.map((row) =>
-                                          String(cellValue(row, k) || ""),
-                                        ),
-                                      ),
-                                    ].sort()
+              {resource && !staffKind && (
+                <>
+                  {cards && (
+                    <CourseCards
+                      rows={rows}
+                      canEdit={resource.actions.includes("edit")}
+                      canDelete={resource.actions.includes("delete")}
+                      onEdit={(row) => void edit(row)}
+                      onDelete={(row) => removeRow(row, true)}
+                    />
+                  )}
+                  {!cards && (
+                    <div className="edu-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            {columns.map((k) => (
+                              <th
+                                key={k}
+                                className={alignClass(k) || undefined}
+                              >
+                                {studentRegister &&
+                                k !== "profile_photo_url" &&
+                                k !== "course_level" &&
+                                !["status", "email"].includes(k) ? (
+                                  <div className="edu-column-heading">
+                                    <span>{columnLabel(k)}</span>
+                                    <TableColumnFilter
+                                      label={columnLabel(k)}
+                                      options={
+                                        filterOptions[k] ||
+                                        [
+                                          ...new Set(
+                                            rows.map((row) =>
+                                              String(cellValue(row, k) || ""),
+                                            ),
+                                          ),
+                                        ].sort()
+                                      }
+                                      value={columnFilters[k]}
+                                      onChange={(values) =>
+                                        setColumnFilters((current) => {
+                                          const next = { ...current };
+                                          if (values === undefined)
+                                            delete next[k];
+                                          else next[k] = values;
+                                          return next;
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                ) : (
+                                  columnLabel(k)
+                                )}
+                              </th>
+                            ))}
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {visibleRows.map((row) => (
+                            <tr key={String(row.code)}>
+                              {columns.map((k) => (
+                                <td
+                                  key={k}
+                                  className={
+                                    isDetails(row[k])
+                                      ? "edu-kv-cell"
+                                      : alignClass(k) || undefined
                                   }
-                                  value={columnFilters[k]}
-                                  onChange={(values) =>
-                                    setColumnFilters((current) => {
-                                      const next = { ...current };
-                                      if (values === undefined) delete next[k];
-                                      else next[k] = values;
-                                      return next;
-                                    })
-                                  }
-                                />
-                              </div>
-                            ) : (
-                              columnLabel(k)
-                            )}
-                          </th>
-                        ))}
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleRows.map((row) => (
-                        <tr key={String(row.code)}>
-                          {columns.map((k) => (
-                            <td
-                              key={k}
-                              className={
-                                isDetails(row[k])
-                                  ? "edu-kv-cell"
-                                  : alignClass(k) || undefined
-                              }
-                            >
-                              {k === "profile_photo_url" ? (
-                                <PersonPhoto
-                                  value={row.profile_photo_url}
-                                  name={String(
-                                    cellValue(row, "student_name") || row.code,
+                                >
+                                  {k === "profile_photo_url" ? (
+                                    <PersonPhoto
+                                      value={row.profile_photo_url}
+                                      name={String(
+                                        cellValue(row, "student_name") ||
+                                          row.code,
+                                      )}
+                                    />
+                                  ) : isDetails(row[k]) ? (
+                                    <Details value={row[k]} />
+                                  ) : (
+                                    text(cellValue(row, k))
                                   )}
-                                />
-                              ) : isDetails(row[k]) ? (
-                                <Details value={row[k]} />
-                              ) : (
-                                text(cellValue(row, k))
-                              )}
-                            </td>
-                          ))}
-                          <td>
-                            <div className="edu-row-actions">
-                              {[
-                                "students",
-                                "employees",
-                                "admission_applications",
-                              ].includes(resource.name) &&
-                                !studentRegister && (
-                                  <IconAction
-                                    kind="files"
-                                    label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
-                                    onClick={() =>
-                                      setFileOwner({
-                                        personKind:
-                                          resource.name === "students"
-                                            ? "student"
-                                            : resource.name === "employees"
-                                              ? "employee"
-                                              : "application",
-                                        personCode: String(row.code),
-                                      })
-                                    }
-                                  />
-                                )}
-                              {resource.actions.includes("edit") && (
-                                <IconAction
-                                  kind="edit"
-                                  label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                  onClick={() => edit(row)}
-                                />
-                              )}
-                              {studentTable && (
-                                <button
-                                  type="button"
-                                  className="icon-action"
-                                  aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
-                                  title="Student information"
-                                  onClick={() => setStudentInfo(row)}
-                                >
-                                  <Info size={16} />
-                                </button>
-                              )}
-                              {!studentRegister &&
-                                resource.actions.includes("delete") && (
-                                  <IconAction
-                                    kind="delete"
-                                    label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                    onClick={async () => {
-                                      if (!confirm("Delete this record?"))
-                                        return;
-                                      try {
-                                        const kind =
-                                          DOWNLOAD_KIND_BY_TABLE[resource.name];
-                                        if (
-                                          [
-                                            "document",
-                                            "tax-document",
-                                            "admission-document",
-                                            "import-workbook",
-                                          ].includes(kind)
-                                        ) {
-                                          await api.documents.remove(
-                                            kind,
-                                            String(row.code),
-                                          );
-                                        } else {
-                                          await api.workspace.remove(
-                                            resource.path,
-                                            String(row.code),
-                                          );
+                                </td>
+                              ))}
+                              <td>
+                                <div className="edu-row-actions">
+                                  {[
+                                    "students",
+                                    "employees",
+                                    "admission_applications",
+                                  ].includes(resource.name) &&
+                                    !studentRegister && (
+                                      <IconAction
+                                        kind="files"
+                                        label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
+                                        onClick={() =>
+                                          setFileOwner({
+                                            personKind:
+                                              resource.name === "students"
+                                                ? "student"
+                                                : resource.name === "employees"
+                                                  ? "employee"
+                                                  : "application",
+                                            personCode: String(row.code),
+                                          })
                                         }
-                                        toast.success(
-                                          `${String(row.name ?? row.code)} deleted successfully`,
-                                        );
-                                        await refreshResource(resource);
-                                      } catch (e) {
-                                        setError(errorText(e));
+                                      />
+                                    )}
+                                  {resource.actions.includes("edit") && (
+                                    <IconAction
+                                      kind="edit"
+                                      label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                      onClick={() => edit(row)}
+                                    />
+                                  )}
+                                  {studentTable && (
+                                    <button
+                                      type="button"
+                                      className="icon-action"
+                                      aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
+                                      title="Student information"
+                                      onClick={() => setStudentInfo(row)}
+                                    >
+                                      <Info size={16} />
+                                    </button>
+                                  )}
+                                  {!studentRegister &&
+                                    resource.actions.includes("delete") && (
+                                      <IconAction
+                                        kind="delete"
+                                        label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                        onClick={async () => {
+                                          if (!confirm("Delete this record?"))
+                                            return;
+                                          try {
+                                            const kind =
+                                              DOWNLOAD_KIND_BY_TABLE[
+                                                resource.name
+                                              ];
+                                            if (
+                                              [
+                                                "document",
+                                                "tax-document",
+                                                "admission-document",
+                                                "import-workbook",
+                                              ].includes(kind)
+                                            ) {
+                                              await api.documents.remove(
+                                                kind,
+                                                String(row.code),
+                                              );
+                                            } else {
+                                              await api.workspace.remove(
+                                                resource.path,
+                                                String(row.code),
+                                              );
+                                            }
+                                            toast.success(
+                                              `${String(row.name ?? row.code)} deleted successfully`,
+                                            );
+                                            await refreshResource(resource);
+                                          } catch (e) {
+                                            setError(errorText(e));
+                                          }
+                                        }}
+                                      />
+                                    )}
+                                  {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
+                                    <button
+                                      onClick={() =>
+                                        download(() =>
+                                          api.documents.download(
+                                            DOWNLOAD_KIND_BY_TABLE[
+                                              resource.name
+                                            ],
+                                            String(row.code),
+                                          ),
+                                        )
                                       }
-                                    }}
-                                  />
-                                )}
-                              {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
-                                <button
-                                  onClick={() =>
-                                    download(() =>
-                                      api.documents.download(
-                                        DOWNLOAD_KIND_BY_TABLE[resource.name],
-                                        String(row.code),
-                                      ),
-                                    )
-                                  }
-                                >
-                                  Download
-                                </button>
-                              )}
-                              {resource.name === "import_jobs" &&
-                                row.status === "validated" && (
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        await api.imports.commit(
-                                          String(row.code),
-                                        );
-                                        toast.success(
-                                          "Import committed successfully",
-                                        );
-                                        await refreshResource(resource);
-                                      } catch (e) {
-                                        setError(errorText(e));
-                                      }
-                                    }}
-                                  >
-                                    Commit import
-                                  </button>
-                                )}
-                              {resource.name === "certificate_requests" &&
-                                row.status === "pending" && (
-                                  <button
-                                    onClick={async () => {
-                                      try {
-                                        await api.documents.issueCertificate({
-                                          request_code: String(row.code),
-                                        });
-                                        toast.success(
-                                          "Certificate issued successfully",
-                                        );
-                                        await refreshResource(resource);
-                                      } catch (e) {
-                                        setError(errorText(e));
-                                      }
-                                    }}
-                                  >
-                                    Authorize and issue
-                                  </button>
-                                )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                                    >
+                                      Download
+                                    </button>
+                                  )}
+                                  {resource.name === "import_jobs" &&
+                                    row.status === "validated" && (
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await api.imports.commit(
+                                              String(row.code),
+                                            );
+                                            toast.success(
+                                              "Import committed successfully",
+                                            );
+                                            await refreshResource(resource);
+                                          } catch (e) {
+                                            setError(errorText(e));
+                                          }
+                                        }}
+                                      >
+                                        Commit import
+                                      </button>
+                                    )}
+                                  {resource.name === "certificate_requests" &&
+                                    row.status === "pending" && (
+                                      <button
+                                        onClick={async () => {
+                                          try {
+                                            await api.documents.issueCertificate(
+                                              {
+                                                request_code: String(row.code),
+                                              },
+                                            );
+                                            toast.success(
+                                              "Certificate issued successfully",
+                                            );
+                                            await refreshResource(resource);
+                                          } catch (e) {
+                                            setError(errorText(e));
+                                          }
+                                        }}
+                                      >
+                                        Authorize and issue
+                                      </button>
+                                    )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {!cards && !busy && rows.length === 0 && (
+                    <p className="edu-empty">
+                      {selected === "student-enrollment"
+                        ? filter || Object.keys(columnFilters).length > 0
+                          ? "No students match these filters. Clear the filters or change your search."
+                          : "No students enrolled yet. Use Student enrollment to add a student."
+                        : "No records yet. Use Create record or complete the preceding setup steps."}
+                    </p>
+                  )}
+                  {!cards && selected !== "student-enrollment" && (
+                    <p>
+                      {rows.length} of {total} records
+                    </p>
+                  )}
+                  {pageOffset > 0 && (
+                    <button
+                      onClick={() =>
+                        refreshResource(
+                          resource,
+                          Math.max(
+                            0,
+                            pageOffset - (pageSize(resource.name) || 50),
+                          ),
+                        )
+                      }
+                    >
+                      Previous page
+                    </button>
+                  )}
+                  {total > pageOffset + rows.length && (
+                    <button
+                      onClick={() =>
+                        refreshResource(resource, pageOffset + rows.length)
+                      }
+                    >
+                      Next page
+                    </button>
+                  )}
+                </>
               )}
-              {!cards && !busy && rows.length === 0 && (
-                <p className="edu-empty">
-                  {selected === "student-enrollment"
-                    ? filter || Object.keys(columnFilters).length > 0
-                      ? "No students match these filters. Clear the filters or change your search."
-                      : "No students enrolled yet. Use Student enrollment to add a student."
-                    : "No records yet. Use Create record or complete the preceding setup steps."}
-                </p>
-              )}
-              {!cards && selected !== "student-enrollment" && (
-                <p>
-                  {rows.length} of {total} records
-                </p>
-              )}
-              {pageOffset > 0 && (
-                <button
-                  onClick={() =>
-                    refreshResource(
-                      resource,
-                      Math.max(0, pageOffset - (pageSize(resource.name) || 50)),
-                    )
-                  }
-                >
-                  Previous page
-                </button>
-              )}
-              {total > pageOffset + rows.length && (
-                <button
-                  onClick={() =>
-                    refreshResource(resource, pageOffset + rows.length)
-                  }
-                >
-                  Next page
-                </button>
-              )}
-            </>
-          )}
-        </div>
-        {special.map((row, i) => (
-          <article className="edu-special" key={String(row.code ?? i)}>
-            <h2>{String(row.name ?? row.login_id ?? row.code ?? "Details")}</h2>
-            <Details value={row} />
-            {selected === "roles" && !row.system_admin && (
-              <div className="edu-row-actions">
-                <IconAction
-                  kind="edit"
-                  label="Edit role"
-                  onClick={() =>
-                    setConfiguration({ kind: "role", initial: row })
-                  }
-                />
-                <IconAction
-                  kind="delete"
-                  label="Delete role"
-                  onClick={async () => {
-                    if (
-                      !confirm(
-                        `Delete the role ${String(row.name ?? row.code)}?`,
-                      )
-                    )
-                      return;
-                    try {
-                      await api.administration.deleteRole(String(row.code));
-                      toast.success("Role deleted successfully");
-                      await load(selected);
-                    } catch (e) {
-                      setError(errorText(e));
-                    }
-                  }}
-                />
-              </div>
-            )}
-            {["accounts", "credentials"].includes(selected) && (
-              <div className="edu-row-actions">
-                <IconAction
-                  kind="edit"
-                  label="Edit access"
-                  onClick={() =>
-                    setConfiguration({ kind: "account", initial: row })
-                  }
-                />
-                <button
-                  onClick={() =>
-                    setDialog({
-                      title: "Reset account password",
-                      fields: [
-                        {
-                          key: "new_password",
-                          label: "New password (at least 12 characters)",
-                          type: "password",
-                          required: true,
-                        },
-                      ],
-                      save: async (values) => {
-                        await api.administration.resetPassword(
-                          String(row.code),
-                          { new_password: String(values.new_password) },
-                        );
-                      },
-                    })
-                  }
-                >
-                  Reset password
-                </button>
-              </div>
-            )}
-            {selected === "forms" && (
-              <div className="edu-row-actions">
-                <IconAction
-                  kind="edit"
-                  label="Edit form"
-                  onClick={() =>
-                    setConfiguration({ kind: "form", initial: row })
-                  }
-                />
-                <IconAction
-                  kind="delete"
-                  label="Delete form"
-                  onClick={async () => {
-                    if (
-                      !confirm(
-                        `Delete the form ${String(row.name ?? row.code)}?`,
-                      )
-                    )
-                      return;
-                    try {
-                      await api.forms.remove(String(row.code));
-                      toast.success("Form deleted successfully");
-                      await load(selected);
-                    } catch (e) {
-                      setError(errorText(e));
-                    }
-                  }}
-                />
-              </div>
-            )}
-          </article>
-        ))}
+            </div>
+            {special.map((row, i) => (
+              <article className="edu-special" key={String(row.code ?? i)}>
+                <h2>
+                  {String(row.name ?? row.login_id ?? row.code ?? "Details")}
+                </h2>
+                <Details value={row} />
+                {selected === "roles" && !row.system_admin && (
+                  <div className="edu-row-actions">
+                    <IconAction
+                      kind="edit"
+                      label="Edit role"
+                      onClick={() =>
+                        setConfiguration({ kind: "role", initial: row })
+                      }
+                    />
+                    <IconAction
+                      kind="delete"
+                      label="Delete role"
+                      onClick={async () => {
+                        if (
+                          !confirm(
+                            `Delete the role ${String(row.name ?? row.code)}?`,
+                          )
+                        )
+                          return;
+                        try {
+                          await api.administration.deleteRole(String(row.code));
+                          toast.success("Role deleted successfully");
+                          await load(selected);
+                        } catch (e) {
+                          setError(errorText(e));
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+                {["accounts", "credentials"].includes(selected) && (
+                  <div className="edu-row-actions">
+                    <IconAction
+                      kind="edit"
+                      label="Edit access"
+                      onClick={() =>
+                        setConfiguration({ kind: "account", initial: row })
+                      }
+                    />
+                    <button
+                      onClick={() =>
+                        setDialog({
+                          title: "Reset account password",
+                          fields: [
+                            {
+                              key: "new_password",
+                              label: "New password (at least 12 characters)",
+                              type: "password",
+                              required: true,
+                            },
+                          ],
+                          save: async (values) => {
+                            await api.administration.resetPassword(
+                              String(row.code),
+                              { new_password: String(values.new_password) },
+                            );
+                          },
+                        })
+                      }
+                    >
+                      Reset password
+                    </button>
+                  </div>
+                )}
+                {selected === "forms" && (
+                  <div className="edu-row-actions">
+                    <IconAction
+                      kind="edit"
+                      label="Edit form"
+                      onClick={() =>
+                        setConfiguration({ kind: "form", initial: row })
+                      }
+                    />
+                    <IconAction
+                      kind="delete"
+                      label="Delete form"
+                      onClick={async () => {
+                        if (
+                          !confirm(
+                            `Delete the form ${String(row.name ?? row.code)}?`,
+                          )
+                        )
+                          return;
+                        try {
+                          await api.forms.remove(String(row.code));
+                          toast.success("Form deleted successfully");
+                          await load(selected);
+                        } catch (e) {
+                          setError(errorText(e));
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </article>
+            ))}
+          </>
+        )}
       </section>
       {configuration && (
         <ConfigurationEditor

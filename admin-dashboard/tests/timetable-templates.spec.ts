@@ -44,7 +44,7 @@ test("morning and evening blocks preserve the original times and class content",
 });
 
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const root = "/colleges-institutions/edunexa-college/portal/admin/timetable";
+const root = "/portal/admin/timetable";
 const endpoint = "academics/timetable-templates";
 const role = {
   code: "SYSTEM-ADMIN",

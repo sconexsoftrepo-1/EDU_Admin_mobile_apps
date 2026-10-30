@@ -4,6 +4,7 @@ import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
+import AssignmentWorkspace from "./AssignmentWorkspace";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
@@ -1345,6 +1346,7 @@ export default function CollegePortal({
       ),
     );
   function content() {
+    if (activeModule === "assignments") return <AssignmentWorkspace />;
     if (activeModule === "roles") return <RolesAccess />;
     if (operationLabels[activeModule])
       return <OperationsWorkspace college={c} module={activeModule} />;
@@ -2948,7 +2950,7 @@ export default function CollegePortal({
           <ChevronDown size={16} />
         </button>
         <div className="erp-sidebar-brand">
-          <Link href={root}>
+          <Link href={`${root}/portal/${area}`}>
             <Image
               className="erp-brand-logo"
               src="/assets/pragathilogo.jpg"

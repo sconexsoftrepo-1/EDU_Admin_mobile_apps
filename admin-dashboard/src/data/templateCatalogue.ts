@@ -132,7 +132,7 @@ export const templateCategories: {
       description: c.description,
       image: `/assets/colleges-institutions/previews/${c.slug}-desktop.webp`,
       mobile: `/assets/colleges-institutions/previews/${c.slug}-mobile.webp`,
-      href: `/colleges-institutions/${c.slug}`,
+      href: "/portal/login",
       external: false,
       accent: c.accent,
       category: "Colleges & Institutions",

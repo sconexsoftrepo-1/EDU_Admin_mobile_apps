@@ -610,7 +610,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: EduNexaAnimatedRefresh(
+              child: selected == 'assignments' || selected == 'submissions'
+                ? AssignmentHub(key: ValueKey('assignment-$selected-$student-$generation'), api: widget.api, role: widget.role, title: title)
+                : EduNexaAnimatedRefresh(
                 onRefresh: refreshWorkspace,
                 child: AnimatedSwitcher(
                   duration: EduMotion.duration(context, EduMotion.tab),
@@ -1300,7 +1302,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ? 'Submit assignment'
                   : selected == 'messages'
                   ? 'Reply'
-                  : null,
+                  : selected == 'notifications' && r['assignment_code'] != null ? 'Open assignment' : null,
             ),
             if (r['receipts'] is List)
               ...(r['receipts'] as List).map(
@@ -1325,6 +1327,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   }
 
   VoidCallback? recordAction(Json record, List<Json> actions) {
+    if (selected == 'notifications' && record['assignment_code'] != null) {
+      return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: record['assignment_code'].toString())));
+    }
     String? key;
     Json initial = {};
     if (selected == 'fees' &&

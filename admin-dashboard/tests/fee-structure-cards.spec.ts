@@ -109,7 +109,7 @@ for (const width of [390, 1440]) {
       });
     });
     await page.goto(
-      `${origin}/colleges-institutions/edunexa-college/portal/admin/fee-structures`,
+      `${origin}/portal/admin/fee-structures`,
     );
     const card = page.getByRole("article", { name: "Inter MPC fee structure" });
     await expect(card).toBeVisible({ timeout: 20000 });

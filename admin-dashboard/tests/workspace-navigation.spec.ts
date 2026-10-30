@@ -110,9 +110,9 @@ test("Master Data Entry uses its own URL and first assigned screen", () => {
     "parent-enrollment",
   ]);
   expect(
-    workspacePath("/colleges-institutions/edunexa-college", master, allowed),
+    workspacePath("", master, allowed),
   ).toBe(
-    "/colleges-institutions/edunexa-college/portal/master-data-entry/student-enrollment",
+    "/portal/master-data-entry/student-enrollment",
   );
   expect(
     validCollegePath(collegeBySlug("edunexa-college")!, [

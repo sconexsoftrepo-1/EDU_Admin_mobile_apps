@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const root = "/colleges-institutions/edunexa-college";
+const root = "";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend.");
 test.setTimeout(60_000);
 const admin = {

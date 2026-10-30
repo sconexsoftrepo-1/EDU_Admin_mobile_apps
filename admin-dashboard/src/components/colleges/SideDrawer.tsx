@@ -8,6 +8,7 @@ export default function SideDrawer({
   title,
   subtitle,
   expanded = false,
+  className = "",
   actions,
   children,
   onClose,
@@ -15,6 +16,7 @@ export default function SideDrawer({
   title: string;
   subtitle?: string;
   expanded?: boolean;
+  className?: string;
   actions?: ReactNode;
   children: ReactNode;
   onClose: () => void;
@@ -36,7 +38,7 @@ export default function SideDrawer({
   return (
     <dialog
       ref={ref}
-      className={`edu-record-drawer ${expanded ? "edu-record-drawer-expanded" : ""}`}
+      className={`edu-record-drawer ${expanded ? "edu-record-drawer-expanded" : ""} ${className}`}
       aria-labelledby={titleId}
       onCancel={onClose}
       onClick={(e) => {
