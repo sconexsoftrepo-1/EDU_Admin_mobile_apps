@@ -2,7 +2,7 @@
 abstract final class ApiConfig {
   static const baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://185.193.19.156:8010',
+    defaultValue: 'http://150.241.246.34:8010',
   );
   static const apiPrefix = '/api/v1';
   static const requestTimeout = Duration(seconds: 20);
