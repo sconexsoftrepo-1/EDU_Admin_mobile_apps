@@ -117,7 +117,21 @@ class QuietEmpty extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: collegeMuted, size: 28),
+        EduArtwork(
+          name: switch (icon) {
+            Icons.assignment_outlined => 'empty_states/no_assignments',
+            Icons.notifications_outlined => 'empty_states/no_notifications',
+            Icons.chat_bubble_outline => 'empty_states/no_messages',
+            Icons.quiz_outlined => 'empty_states/no_results',
+            Icons.calendar_month_outlined ||
+            Icons.event_outlined ||
+            Icons.event_available_outlined ||
+            Icons.wb_sunny_outlined => 'empty_states/no_events',
+            Icons.cloud_off_outlined => 'empty_states/no_internet',
+            _ => 'empty_states/no_documents',
+          },
+          height: 76,
+        ),
         const SizedBox(height: 14),
         Text(title, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 6),
@@ -146,7 +160,7 @@ class MetricStrip extends StatelessWidget {
                 width: width,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: collegeIvory,
                   border: Border.all(color: collegeLine),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -159,9 +173,13 @@ class MetricStrip extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(height: 14),
-                    Text(
-                      m.$2,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                    AnimatedSwitcher(
+                      duration: EduMotion.duration(context, EduMotion.tab),
+                      child: Text(
+                        m.$2,
+                        key: ValueKey(m.$2),
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
                     ),
                     const SizedBox(height: 5),
                     Text(m.$1, style: Theme.of(context).textTheme.bodySmall),
@@ -259,7 +277,7 @@ class SummaryPanel extends StatelessWidget {
                   Text(
                     money(outstanding),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: collegeIvory,
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
                     ),
@@ -346,7 +364,7 @@ class AttendanceSummary extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Attendance snapshot',
+                    'Attendance · loaded records',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -356,15 +374,11 @@ class AttendanceSummary extends StatelessWidget {
             Text(
               percentage == null
                   ? 'No attendance recorded'
-                  : '${(percentage * 100).toStringAsFixed(0)}% attended',
+                  : '${(percentage * 100).toStringAsFixed(0)}% of loaded records',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: percentage ?? 0,
-              minHeight: 7,
-              borderRadius: BorderRadius.circular(4),
-            ),
+            EduProgress(value: percentage ?? 0, color: collegePine),
             const SizedBox(height: 10),
             Text(
               '$present present or late / ${items.length} loaded records',
@@ -493,128 +507,194 @@ class CampusRecord extends StatelessWidget {
         record['session_date'] ??
         record['sent_at'] ??
         record['published_at'];
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap ?? () => showDetails(context),
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(11),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: .08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      moduleIcon(screen),
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: unread
-                                    ? FontWeight.w800
-                                    : FontWeight.w600,
-                              ),
+    final directory = {
+      'students',
+      'employees',
+      'children',
+      'profile',
+    }.contains(screen);
+    final audit = screen == 'activity';
+    return EduPress(
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onTap ?? () => showDetails(context),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (directory)
+                      CircleAvatar(
+                        backgroundColor: collegeCard,
+                        foregroundColor: collegePine,
+                        child: Text(
+                          title.isEmpty
+                              ? '?'
+                              : title.substring(0, 1).toUpperCase(),
                         ),
-                        if (date != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              friendlyValue(date),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: audit ? const Color(0xffe1e7d9) : collegeCard,
+                          borderRadius: BorderRadius.circular(audit ? 24 : 12),
+                        ),
+                        child: EduModuleIcon(
+                          icon: moduleIcon(screen),
+                          size: 21,
+                        ),
+                      ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontSize: 15,
+                                  fontWeight: unread
+                                      ? FontWeight.w800
+                                      : FontWeight.w600,
+                                ),
+                          ),
+                          if (date != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                friendlyValue(date),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          if (directory)
+                            Text(
+                              '${record['admission_number'] ?? record['employee_type'] ?? record['email'] ?? ''}',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
+                          if (audit)
+                            Text(
+                              '${record['action'] ?? ''} ${record['resource'] ?? ''}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    if (unread)
+                      const Badge()
+                    else
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 18,
+                        color: collegeMuted,
+                      ),
+                  ],
+                ),
+                if (detail != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      '$detail',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: collegeMuted, height: 1.5),
+                    ),
+                  ),
+                if (record['start_time'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        const Icon(
+                          Icons.schedule_outlined,
+                          size: 17,
+                          color: collegePine,
+                        ),
+                        Text(
+                          '${record['start_time']} – ${record['end_time'] ?? ''}',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        if (periodDuration(record) != null)
+                          Text(
+                            periodDuration(record)!,
+                            style: const TextStyle(color: collegeMuted),
+                          ),
+                        if (record['section_code'] != null)
+                          Text(
+                            '${record['section_code']}',
+                            style: const TextStyle(color: collegeMuted),
                           ),
                       ],
                     ),
                   ),
-                  if (unread)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 8, top: 6),
-                      child: Badge(),
+                if (screen == 'results' && record['marks'] != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      'Marks  ${record['marks']}',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                ],
-              ),
-              if (detail != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Text(
-                    '$detail',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: collegeMuted, height: 1.5),
                   ),
-                ),
-              if (record['start_time'] != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    '${record['start_time']} – ${record['end_time'] ?? ''}',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                if (screen == 'assignments' && record['my_submission'] != null)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: StatusBadge(status: 'submitted'),
                   ),
-                ),
-              if (amount != null || status != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 14),
-                  child: Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      if (amount != null)
-                        Text(
-                          money(amount),
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      if (status != null)
-                        StatusBadge(status: status.toString()),
-                    ],
+                if (amount != null || status != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        if (amount != null)
+                          Text(
+                            money(amount),
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        if (status != null)
+                          StatusBadge(status: status.toString()),
+                      ],
+                    ),
                   ),
-                ),
-              if (onDownload != null || onRead != null || onPrimary != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (onPrimary != null)
-                        FilledButton.tonal(
-                          onPressed: onPrimary,
-                          child: Text(primaryLabel ?? 'Continue'),
-                        ),
-                      if (onRead != null)
-                        TextButton.icon(
-                          onPressed: onRead,
-                          icon: const Icon(Icons.done_all, size: 18),
-                          label: const Text('Mark as read'),
-                        ),
-                      if (onDownload != null)
-                        OutlinedButton.icon(
-                          onPressed: onDownload,
-                          icon: const Icon(Icons.download_outlined, size: 18),
-                          label: const Text('Download / share PDF'),
-                        ),
-                    ],
+                if (onDownload != null || onRead != null || onPrimary != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (onPrimary != null)
+                          FilledButton.tonal(
+                            onPressed: onPrimary,
+                            child: Text(primaryLabel ?? 'Continue'),
+                          ),
+                        if (onRead != null)
+                          TextButton.icon(
+                            onPressed: onRead,
+                            icon: const Icon(Icons.done_all, size: 18),
+                            label: const Text('Mark as read'),
+                          ),
+                        if (onDownload != null)
+                          OutlinedButton.icon(
+                            onPressed: onDownload,
+                            icon: const Icon(Icons.download_outlined, size: 18),
+                            label: const Text('Download / share PDF'),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -626,68 +706,22 @@ class CampusRecord extends StatelessWidget {
     isScrollControlled: true,
     showDragHandle: true,
     useSafeArea: true,
+    sheetAnimationStyle: AnimationStyle(
+      duration: EduMotion.duration(context, const Duration(milliseconds: 300)),
+      reverseDuration: EduMotion.duration(
+        context,
+        const Duration(milliseconds: 240),
+      ),
+    ),
     builder: (context) => DraggableScrollableSheet(
       expand: false,
-      initialChildSize: .7,
+      initialChildSize: .76,
       maxChildSize: .95,
       minChildSize: .35,
       builder: (context, controller) => SingleChildScrollView(
         controller: controller,
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 16),
-            ...record.entries
-                .where(
-                  (e) =>
-                      e.value != null &&
-                      !{
-                        'user_code',
-                        'sender_code',
-                        'session_code',
-                      }.contains(e.key),
-                )
-                .map(
-                  (e) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label(e.key),
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        if (e.value is String &&
-                            Uri.tryParse(e.value)?.scheme == 'https')
-                          TextButton.icon(
-                            onPressed: () async {
-                              final opened = await launchUrl(
-                                Uri.parse(e.value),
-                                mode: LaunchMode.externalApplication,
-                              );
-                              if (!opened && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Couldn’t open this link.'),
-                                  ),
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.open_in_new),
-                            label: const Text('Open resource'),
-                          )
-                        else
-                          SelectableText(friendlyValue(e.value)),
-                        const Divider(),
-                      ],
-                    ),
-                  ),
-                ),
-          ],
-        ),
+        child: EduRecordDetails(title: title, record: record),
       ),
     ),
   );
@@ -722,7 +756,7 @@ class StatusBadge extends StatelessWidget {
         }.contains(normalized)
         ? collegePine
         : {'failed', 'absent', 'rejected', 'overdue'}.contains(normalized)
-        ? const Color(0xffb44242)
+        ? collegeError
         : collegeCaramel;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -844,7 +878,8 @@ class CampusCalendar extends StatelessWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () => onDay(date),
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: EduMotion.duration(context, EduMotion.tab),
                           margin: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: active

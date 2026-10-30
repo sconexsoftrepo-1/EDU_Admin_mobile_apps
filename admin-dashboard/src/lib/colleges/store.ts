@@ -870,24 +870,6 @@ export function execute(s: CollegeState, cmd: Command): CollegeState {
       r.actor = role;
       break;
     }
-    case "staff.save":
-      requireRole(["Super Admin"]);
-      if (!d.name) throw Error("Name required.");
-      {
-        const st = next.staff.find((x) => x.id === cmd.id);
-        if (st)
-          Object.assign(st, {
-            name: d.name,
-            category: d.category,
-            status: d.status || st.status,
-          });
-        else
-          next.staff.push({
-            ...base(d.name, "Active"),
-            category: d.category || "Faculty",
-          });
-      }
-      break;
     case "notification":
       requireRole([
         "Super Admin",

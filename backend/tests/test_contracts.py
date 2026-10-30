@@ -17,3 +17,16 @@ def test_login_returns_roles_for_navigation(client):
     assert response.status_code == 200
     roles = response.json()["roles"]
     assert [r["code"] for r in roles] == ["ROOT"] and roles[0]["system_admin"] is True
+
+
+def test_super_admin_can_open_every_registered_screen_even_with_a_screen_allowlist(client, headers, app):
+    with app.state.store.transaction() as data:
+        # A legacy allowlist must never restrict the system administrator.
+        data["roles"]["ROOT"]["screens"] = ["dashboard"]
+    expected = json.loads((ROOT / "backend/app/contracts/screens.json").read_text())
+    result = client.get("/api/v1/workspace/screens", headers=headers)
+    assert result.status_code == 200
+    assert {s["key"] for s in result.json()["screens"]} == {s["key"] for s in expected}
+    for screen in expected:
+        response = client.get("/api/v1/workspace/screens/" + screen["key"], headers=headers)
+        assert response.status_code == 200, (screen["key"], response.text)

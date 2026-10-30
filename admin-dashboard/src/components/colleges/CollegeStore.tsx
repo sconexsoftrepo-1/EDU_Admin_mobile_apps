@@ -213,14 +213,17 @@ export function CollegeStore({
     const cached =
       readWorkspaceCache<Awaited<ReturnType<typeof loadTemplateState>>>(key);
     if (cached) setState(cached.state);
-    const result = await refreshWorkspaceCache(key, () =>
-      loadTemplateState(slug, allowed, activeModule),
+    const result = await refreshWorkspaceCache(
+      key,
+      () => loadTemplateState(slug, allowed, activeModule),
+      (value) => value.errors.length === 0,
     );
     if (sequence !== dataRequest.current) return;
-    setState(result.state);
+    setState(result.errors.length && cached ? cached.state : result.state);
     setMessage(
       result.errors.length
-        ? "Some records could not be loaded: " + result.errors.join("; ")
+        ? "Some data requests failed. Reload records to try again: " +
+            result.errors.join("; ")
         : "",
     );
     if (result.errors.length)

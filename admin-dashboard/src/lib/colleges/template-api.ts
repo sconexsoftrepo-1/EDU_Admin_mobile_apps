@@ -1,5 +1,5 @@
 /** Read adapter only: preserves the original template view models, without demo seeding or local mutations. */
-import { api, type Row, type ScreenSummary } from "@/services/api";
+import { api, ApiError, type Row, type ScreenSummary } from "@/services/api";
 import type { CollegeState, RecordRow, Student } from "./store";
 import { operationLabels, type OperationRecord } from "./operations";
 import { programFeeSchedules } from "./program-fee-schedules";
@@ -47,6 +47,21 @@ const name = (r: Row) =>
       r.title ||
       r.code,
   );
+
+/** Retry interrupted reads once; permission failures must remain explicit. */
+async function readWithRecovery<T>(read: () => Promise<T>): Promise<T> {
+  try {
+    return await read();
+  } catch (error) {
+    const temporary =
+      error instanceof TypeError ||
+      (error instanceof ApiError &&
+        [500, 502, 503, 504].includes(error.status));
+    if (!temporary) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return read();
+  }
+}
 export async function loadTemplateState(
   slug: string,
   screens: ScreenSummary[],
@@ -72,7 +87,7 @@ export async function loadTemplateState(
   const specs = await Promise.all(
     selected.map(async (s) => {
       try {
-        const spec = await api.workspace.screen(s.key);
+        const spec = await readWithRecovery(() => api.workspace.screen(s.key));
         return {
           ...spec,
           resources: spec.resources.filter((r) => s.resources.includes(r.name)),
@@ -95,7 +110,9 @@ export async function loadTemplateState(
           const rows: Row[] = [];
           let offset = 0;
           while (true) {
-            const page = await api.workspace.list(r.path, offset, 100);
+            const page = await readWithRecovery(() =>
+              api.workspace.list(r.path, offset, 100),
+            );
             rows.push(...page.items);
             if (rows.length >= page.total || !page.items.length) break;
             offset = rows.length;
@@ -120,7 +137,9 @@ export async function loadTemplateState(
         if (rows("fee_structures").every((row) => present.has(row[reference])))
           return;
         try {
-          const options = await api.workspace.lookup(table);
+          const options = await readWithRecovery(() =>
+            api.workspace.lookup(table),
+          );
           const merged = new Map(rows(table).map((row) => [row.code, row]));
           for (const option of options)
             if (!merged.has(option.value))

@@ -53,11 +53,6 @@ const special: Record<string, string> = {
   credentials: "accounts",
   "audit-logs": "audit",
   "campus-analytics": "reports",
-  "mobile-apps": "reports",
-  "admin-app": "reports",
-  "parent-app": "reports",
-  "teacher-app": "reports",
-  "student-app": "reports",
 };
 const SELF_PERMISSION = new Set(["roles", "accounts", "forms", "reports"]);
 export function roleScreens(

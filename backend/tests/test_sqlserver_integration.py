@@ -24,7 +24,7 @@ def test_sqlserver_login_courses_refresh_and_logout(tmp_path):
     admin = connect(settings)
     admin.autocommit = True
     raw = admin.raw.cursor()
-    tables = ['institutions','campuses','departments','programs','users','roles','permissions',
+    tables = ['institutions','campuses','departments','programs','batches','users','roles','permissions',
         'user_roles','role_permissions','refresh_tokens','login_attempts','audit_logs',
         'record_extras','form_definitions','form_submissions','admission_sources']
     store = None
@@ -75,6 +75,29 @@ def test_sqlserver_login_courses_refresh_and_logout(tmp_path):
             courses=client.get('/api/v1/academics/programs',headers=headers)
             assert courses.status_code==200,courses.status_code
             assert courses.json()['total']==1
+            # Template documents use the existing extras table, including through a new store.
+            batch = client.post('/api/v1/academics/batches', headers=headers, json={
+                'program_code': created.json()['code'], 'name': '2026–2029',
+                'entry_year': 2026, 'graduation_year': 2029})
+            assert batch.status_code == 201, batch.text
+            timetable = {'name': 'SQL persistence verification', 'template': 'degree',
+                'program_code': created.json()['code'], 'batch_code': batch.json()['code'],
+                'periods': [{'start':'09:00','end':'10:00'}, {'start':'10:00','end':'10:30','kind':'break','label':'Break'}],
+                'cells': [{'day':0,'row':0,'title':'Computer science','faculty':'Test faculty','room':'Lab 1'}]}
+            saved = client.post('/api/v1/academics/timetable-templates', headers=headers, json=timetable)
+            assert saved.status_code == 201, saved.text
+            code = saved.json()['code']
+            other = SqlServerStore(settings.model_copy(update={'db_schema':schema}))
+            try:
+                assert other.snapshot()['documents']['timetables'][code]['cells'][0]['title'] == 'Computer science'
+            finally:
+                other.close()
+            edited = client.put('/api/v1/academics/timetable-templates/'+code, headers=headers,
+                json={**timetable,'revision':1,'coordinator':'Test coordinator'})
+            assert edited.status_code == 200, edited.text
+            assert edited.json()['revision'] == 2
+            assert client.put('/api/v1/academics/timetable-templates/'+code, headers=headers,
+                json={**timetable,'revision':1}).status_code == 409
             refresh=client.post('/api/v1/auth/refresh',json={'refresh_token':session['refresh_token'],'client':'admin-web'})
             assert refresh.status_code==200,refresh.status_code
             assert client.get('/api/v1/auth/me',headers=headers).status_code==401

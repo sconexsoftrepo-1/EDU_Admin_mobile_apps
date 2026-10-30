@@ -34,6 +34,7 @@ export function writeWorkspaceCache<T>(key: string | null, value: T): T {
 export function refreshWorkspaceCache<T>(
   key: string | null,
   loader: () => Promise<T>,
+  shouldCache: (value: T) => boolean = () => true,
 ): Promise<T> {
   if (!key) return loader();
   const existing = pending.get(key);
@@ -42,7 +43,8 @@ export function refreshWorkspaceCache<T>(
   const task = Promise.resolve()
     .then(loader)
     .then((value) => {
-      if (version === generation) writeWorkspaceCache(key, value);
+      if (version === generation && shouldCache(value))
+        writeWorkspaceCache(key, value);
       return value;
     })
     .finally(() => {

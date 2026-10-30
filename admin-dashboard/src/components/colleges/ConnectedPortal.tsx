@@ -505,7 +505,9 @@ export default function ConnectedPortal({
           ? "Login ID or password is incorrect. Please try again."
           : e instanceof ApiError && e.status === 403
             ? "Your account does not have access to the selected role. Choose your assigned role and try again."
-            : errorText(e),
+            : e instanceof ApiError && e.status === 429
+              ? "Sign-in is temporarily paused after several unsuccessful attempts. Please wait 15 minutes before trying again."
+              : errorText(e),
       );
       setBusy(false);
     } finally {
@@ -1719,26 +1721,6 @@ export default function ConnectedPortal({
             )}
           </article>
         ))}
-
-        {[
-          "mobile-apps",
-          "admin-app",
-          "parent-app",
-          "teacher-app",
-          "student-app",
-        ].includes(selected) && (
-          <section>
-            <h2>Connected mobile applications</h2>
-            <p>
-              Admin, Parent, Student and Teacher Flutter apps use the same
-              college backend, with individual login accounts and
-              identity-scoped screens.
-            </p>
-            <p>
-              Assign the corresponding app client when provisioning an account.
-            </p>
-          </section>
-        )}
       </section>
       {configuration && (
         <ConfigurationEditor

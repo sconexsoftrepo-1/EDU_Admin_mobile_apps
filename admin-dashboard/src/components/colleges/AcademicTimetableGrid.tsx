@@ -3,7 +3,7 @@ import Link from "next/link";
 import { courseOfferings } from "@/data/colleges/subjects";
 import { sessionForStudent } from "@/lib/colleges/academic-scope";
 import Image from "next/image";
-import { localDate } from "@/lib/colleges/mobile-schedule";
+import { localDate } from "@/lib/colleges/daily-schedule";
 import { useCollege } from "./CollegeStore";
 import { scheduleConfiguration } from "@/lib/colleges/academic-engine";
 import { useEffect, useRef, useState } from "react";

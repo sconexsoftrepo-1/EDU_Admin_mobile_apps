@@ -280,31 +280,6 @@
     ]
   },
   {
-    "key": "mobile-apps",
-    "title": "Mobile apps emulator",
-    "resources": []
-  },
-  {
-    "key": "admin-app",
-    "title": "Admin app preview",
-    "resources": []
-  },
-  {
-    "key": "parent-app",
-    "title": "Parent app preview",
-    "resources": []
-  },
-  {
-    "key": "student-app",
-    "title": "Student app preview",
-    "resources": []
-  },
-  {
-    "key": "teacher-app",
-    "title": "Teacher app preview",
-    "resources": []
-  },
-  {
     "key": "accounts",
     "title": "User accounts",
     "resources": []
@@ -558,15 +533,6 @@
       "curriculum_subjects",
       "subject_offerings",
       "rooms"
-    ]
-  },
-  {
-    "key": "staff",
-    "title": "Staff",
-    "resources": [
-      "employees",
-      "teachers",
-      "staff_profiles"
     ]
   },
   {

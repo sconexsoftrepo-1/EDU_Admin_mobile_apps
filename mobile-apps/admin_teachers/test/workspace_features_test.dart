@@ -325,6 +325,13 @@ void main() {
     await tester.tap(find.text('Second child').last);
     await tester.pumpAndSettle();
     expect(requests.last, 'STU2');
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Fees'),
+      ),
+    );
+    await tester.pumpAndSettle();
     expect(find.text('₹2,500'), findsOneWidget);
   });
 }

@@ -1,0 +1,256 @@
+/* Shared academic calendar and legacy timetable views. */
+.academic-calendar-theme {
+  --calendar-bg: var(--erp-bg);
+  --calendar-surface: var(--erp-surface);
+  --calendar-raised: var(--erp-raised);
+  --calendar-ink: var(--erp-ink);
+  --calendar-muted: var(--erp-muted);
+  --calendar-accent: var(--erp-accent);
+  --calendar-line: var(--erp-border);
+}
+.calendar-segments {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 3px 0 8px;
+  margin-bottom: 10px;
+}
+.college-erp .academic-calendar-theme .calendar-segments button {
+  flex-shrink: 0;
+  border: 0 !important;
+  background: var(--calendar-raised) !important;
+  padding: 8px 12px !important;
+  border-radius: 20px;
+  min-height: 36px !important;
+  color: var(--calendar-muted);
+}
+.college-erp
+  .academic-calendar-theme
+  .calendar-segments
+  button[aria-pressed="true"] {
+  background: var(--calendar-accent) !important;
+  color: var(--calendar-bg) !important;
+}
+.academic-calendar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  gap: 4px;
+}
+.academic-calendar-heading label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.college-erp .academic-calendar-theme .academic-calendar-heading input {
+  padding: 6px !important;
+  min-height: 40px !important;
+  background: transparent !important;
+  border: 0 !important;
+  width: 145px;
+  color: var(--calendar-ink);
+  font-size: 12px;
+}
+.college-erp .academic-calendar-theme .academic-calendar-heading button {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 7px !important;
+}
+.calendar-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.college-erp .academic-calendar-theme .calendar-week-strip button {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  border: 0 !important;
+  background: transparent !important;
+  padding: 8px 0 !important;
+  border-radius: 16px;
+}
+.calendar-week-strip strong {
+  font-size: 15px;
+}
+.calendar-week-strip small {
+  font-size: 9px;
+}
+.college-erp
+  .academic-calendar-theme
+  .calendar-week-strip
+  button[aria-pressed="true"] {
+  background: var(--calendar-accent) !important;
+  color: var(--calendar-bg);
+}
+.calendar-week-strip button[aria-pressed="true"] small {
+  color: inherit;
+}
+.academic-calendar i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+  display: block;
+}
+.academic-calendar i[data-has-events="true"] {
+  background: var(--calendar-accent);
+}
+.academic-calendar [aria-pressed="true"] i {
+  background: currentColor;
+}
+.calendar-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin: 20px 0;
+}
+.calendar-month-grid > small {
+  text-align: center;
+}
+.college-erp .academic-calendar-theme .calendar-month-grid button {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  background: var(--calendar-surface) !important;
+  border: 0 !important;
+  padding: 7px !important;
+}
+.calendar-month-grid [data-muted="true"] {
+  opacity: 0.4;
+}
+.college-erp
+  .academic-calendar-theme
+  .calendar-month-grid
+  [aria-pressed="true"] {
+  outline: 2px solid var(--calendar-accent);
+}
+.calendar-timeline {
+  margin-top: 16px;
+}
+.calendar-timeline-event {
+  position: relative;
+  border-bottom: 1px solid var(--calendar-line);
+  padding: 0 0 15px;
+  margin: 0 0 15px;
+}
+.calendar-timeline-event summary {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.calendar-timeline-event summary::-webkit-details-marker {
+  display: none;
+}
+.calendar-timeline-event time {
+  flex: 0 0 45px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+.calendar-timeline-event summary > span {
+  display: grid;
+  gap: 6px;
+  border-left: 3px solid var(--calendar-accent);
+  padding: 10px 12px;
+  background: var(--calendar-surface);
+  border-radius: 0 12px 12px 0;
+  flex: 1;
+}
+.calendar-timeline-event strong {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.calendar-timeline-event[data-kind="Lab"] summary > span {
+  border-color: #8d79df;
+}
+.calendar-event-detail {
+  padding: 5px 8px 0 60px;
+}
+.calendar-empty {
+  padding: 20px 4px;
+}
+.admin-academic-calendar {
+  max-width: 800px;
+}
+.admin-academic-calendar .academic-calendar {
+  max-width: 640px;
+}
+.admin-academic-calendar .academic-calendar-heading label {
+  flex: 0 0 auto;
+}
+.timetable-overview {
+  margin-bottom: 24px;
+}
+.timetable-week-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
+  padding: 12px 0;
+}
+.timetable-week-grid > section {
+  min-width: 150px;
+}
+.timetable-week-grid h4 {
+  padding: 12px;
+  background: var(--erp-raised);
+  border-radius: 8px;
+}
+.timetable-week-grid details {
+  margin: 10px 0;
+  padding: 12px;
+  border-left: 3px solid var(--erp-accent);
+  background: var(--erp-bg);
+  border-radius: 0 10px 10px 0;
+}
+.timetable-week-grid summary {
+  display: grid;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.timetable-week-grid strong {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.timetable-week-grid small {
+  color: var(--erp-muted);
+  font-size: 10px;
+}
+.timetable-week-grid [data-status="Draft"] {
+  opacity: 0.8;
+  border-left-style: dashed;
+}
+.timetable-week-grid p,
+.timetable-week-grid button {
+  font-size: 11px !important;
+}
+.timetable-overview .ops-toolbar label {
+  display: grid;
+  gap: 7px;
+  min-width: 130px;
+  flex: 1;
+}
+.calendar-term-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.calendar-term-range label {
+  font-size: 10px;
+  display: grid;
+  gap: 4px;
+}
+.calendar-term-range > small {
+  grid-column: 1/-1;
+}
+.college-erp .academic-calendar-theme .calendar-term-range input {
+  font-size: 10px !important;
+  padding: 6px !important;
+  width: 100%;
+}
