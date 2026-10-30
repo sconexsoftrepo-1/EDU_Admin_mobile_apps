@@ -10,7 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:edunexa_parent/src/edunexa_client.dart';
+import 'package:edunexa_parent/app/edunexa_client.dart';
 import 'helpers/splash_test_support.dart';
 
 void main() {

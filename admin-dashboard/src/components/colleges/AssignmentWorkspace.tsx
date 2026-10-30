@@ -28,6 +28,8 @@ import SideDrawer from "./SideDrawer";
 import Image from "next/image";
 import Select from "./SearchSelect";
 import { toast } from "./toast";
+import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
+import { readWorkspaceCache, workspaceCacheKey, writeWorkspaceCache } from "@/lib/colleges/workspace-cache";
 import "./assignment-workspace.css";
 
 const date = (value: string) =>
@@ -113,6 +115,8 @@ export default function AssignmentWorkspace({
 }) {
   const session = useOptionalCollege();
   const role = session?.activeRole;
+  const dataKey = workspaceCacheKey(session?.account?.code, role?.code, `special:assignments:${studentCode || "self"}`);
+  const cachedData = readWorkspaceCache<AssignmentList>(dataKey);
   const sessionCanCreate =
     !!session?.account &&
     !["parent", "student"].includes(session.account.person_type) &&
@@ -121,9 +125,9 @@ export default function AssignmentWorkspace({
       role.scope === "teaching" ||
       role.permissions.assignments?.includes("create"));
   const [activeStudent, setActiveStudent] = useState(studentCode || "");
-  const [data, setData] = useState<AssignmentList | null>(null),
+  const [data, setData] = useState<AssignmentList | null>(cachedData || null),
     [error, setError] = useState(""),
-    [busy, setBusy] = useState(true);
+    [busy, setBusy] = useState(!cachedData);
   const [tab, setTab] = useState("all"),
     [mine, setMine] = useState(false),
     [query, setQuery] = useState(""),
@@ -135,6 +139,7 @@ export default function AssignmentWorkspace({
   const load = useCallback(async () => {
     try {
       const result = await assignments.list(activeStudent);
+      writeWorkspaceCache(dataKey, result);
       setData(result);
       if (
         !activeStudent &&
@@ -152,13 +157,14 @@ export default function AssignmentWorkspace({
     } finally {
       setBusy(false);
     }
-  }, [activeStudent]);
+  }, [activeStudent, dataKey]);
   useEffect(() => {
     let active = true;
     void assignments
       .list(activeStudent)
       .then((result) => {
         if (!active) return;
+        writeWorkspaceCache(dataKey, result);
         setData(result);
         setError("");
         if (
@@ -182,7 +188,7 @@ export default function AssignmentWorkspace({
     return () => {
       active = false;
     };
-  }, [activeStudent]);
+  }, [activeStudent, dataKey]);
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview.url);
@@ -267,13 +273,9 @@ export default function AssignmentWorkspace({
             <RefreshCw size={16} />
           </button>
           {canCreate && (
-            <button
-              className="edu-primary"
-              type="button"
-              onClick={() => setCreating(true)}
-            >
+            <WorkspacePrimaryAction onClick={() => setCreating(true)}>
               <Plus size={16} /> Add assignment
-            </button>
+            </WorkspacePrimaryAction>
           )}
         </div>
       </header>
@@ -535,10 +537,9 @@ function AssignmentCreate({
   }
   return (
     <SideDrawer
-      className="as-drawer"
+      className="as-drawer as-assignment-composer"
       title="Add assignment"
       subtitle="Choose the academic batch, select the students, then set their work."
-      expanded
       onClose={() => {
         if (!busy) onClose();
       }}

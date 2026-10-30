@@ -6,7 +6,9 @@ import { useOptionalCollege } from "./CollegeStore";
 import { ApiError, errorText } from "@/services/api";
 import { syllabus, type SyllabusFile, type SyllabusOptions, type SyllabusPayload, type SyllabusRecord } from "@/services/api/modules/assignments/syllabus";
 import { toast } from "./toast";
+import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./assignment-workspace.css";
+import { readWorkspaceCache, workspaceCacheKey, writeWorkspaceCache } from "@/lib/colleges/workspace-cache";
 
 const allowed = ".pdf,.jpg,.jpeg,.png,.webp";
 function AttachmentList({ files, onOpen }: { files: SyllabusFile[]; onOpen: (file: SyllabusFile) => void }) {
@@ -15,11 +17,13 @@ function AttachmentList({ files, onOpen }: { files: SyllabusFile[]; onOpen: (fil
 export default function SyllabusWorkspace({ studentCode }: { studentCode?: string }) {
   const session = useOptionalCollege();
   const role = session?.activeRole;
+  const dataKey = workspaceCacheKey(session?.account?.code, role?.code, `special:syllabus:${studentCode || "self"}`);
+  const cached = readWorkspaceCache<{ data: SyllabusPayload; options: SyllabusOptions | null }>(dataKey);
   const roleCreate = !!session?.account && !["parent", "student"].includes(session.account.person_type) && !!role && (role.system_admin || role.scope === "teaching" || role.permissions.learning_resources?.includes("create"));
-  const [data, setData] = useState<SyllabusPayload | null>(null), [options, setOptions] = useState<SyllabusOptions | null>(null), [error, setError] = useState(""), [busy, setBusy] = useState(true), [creating, setCreating] = useState(false), [saving, setSaving] = useState(false), [search, setSearch] = useState(""), [child, setChild] = useState(studentCode || ""), [files, setFiles] = useState<File[]>([]);
+  const [data, setData] = useState<SyllabusPayload | null>(cached?.data || null), [options, setOptions] = useState<SyllabusOptions | null>(cached?.options || null), [error, setError] = useState(""), [busy, setBusy] = useState(!cached), [creating, setCreating] = useState(false), [saving, setSaving] = useState(false), [search, setSearch] = useState(""), [child, setChild] = useState(studentCode || ""), [files, setFiles] = useState<File[]>([]);
   const [level, setLevel] = useState("intermediate"), [courseName, setCourseName] = useState(""), [programCode, setProgramCode] = useState(""), [specialization, setSpecialization] = useState(""), [year, setYear] = useState(""), [name, setName] = useState(""), [description, setDescription] = useState("");
   async function load(selected = child) {
-    try { let result = await syllabus.list(selected || undefined); if (!selected && result.role === "parent" && result.students.length) { const first = result.students[0].code; setChild(first); result = await syllabus.list(first); } setData(result); setError(""); if (result.can_create) setOptions(await syllabus.options()); }
+    try { let result = await syllabus.list(selected || undefined); if (!selected && result.role === "parent" && result.students.length) { const first = result.students[0].code; setChild(first); result = await syllabus.list(first); } const loadedOptions = result.can_create ? await syllabus.options() : null; setData(result); setOptions(loadedOptions); writeWorkspaceCache(dataKey, { data: result, options: loadedOptions }); setError(""); }
     catch (e) { setError(e instanceof ApiError && e.status === 404 ? "The syllabus service needs the latest backend update before shared resources can load." : errorText(e)); }
     finally { setBusy(false); }
   }
@@ -34,13 +38,13 @@ export default function SyllabusWorkspace({ studentCode }: { studentCode?: strin
           result = await syllabus.list(first);
         }
         const loadedOptions = result.can_create ? await syllabus.options() : null;
-        if (active) { setData(result); setOptions(loadedOptions); setError(""); setBusy(false); }
+        if (active) { setData(result); setOptions(loadedOptions); writeWorkspaceCache(dataKey, { data: result, options: loadedOptions }); setError(""); setBusy(false); }
       } catch (e) {
         if (active) { setError(e instanceof ApiError && e.status === 404 ? "The syllabus service needs the latest backend update before shared resources can load." : errorText(e)); setBusy(false); }
       }
     })();
     return () => { active = false; };
-  }, [studentCode]);
+  }, [studentCode, dataKey]);
   const courses = options?.courses.filter((row) => row.course_level === level) || [];
   const courseNames = [...new Set(courses.map((row) => row.name))];
   const specializations = courses.filter((row) => row.name === courseName);
@@ -64,7 +68,7 @@ export default function SyllabusWorkspace({ studentCode }: { studentCode?: strin
   }
   const canCreate = data?.can_create ?? roleCreate;
   return <main className="as-workspace">
-    <header className="as-header"><div><span className="as-eyebrow">ACADEMIC LIBRARY</span><h1>Syllabus &amp; resources</h1><p>Publish course materials to the right academic year. Students and parents can preview and download every file.</p></div>{canCreate && <button className="as-primary" onClick={openComposer}><Plus size={17}/> Add shared resource</button>}</header>
+    <header className="as-header"><div><span className="as-eyebrow">ACADEMIC LIBRARY</span><h1>Syllabus &amp; resources</h1><p>Publish course materials to the right academic year. Students and parents can preview and download every file.</p></div>{canCreate && <WorkspacePrimaryAction onClick={openComposer}><Plus size={17}/> Add shared resource</WorkspacePrimaryAction>}</header>
     <section className="as-metrics"><div><BookOpen/><span><b>{data?.items.length || 0}</b><small>Shared resources</small></span></div><div><FileText/><span><b>{data?.items.reduce((n, row) => n + row.attachments.length, 0) || 0}</b><small>Files available</small></span></div></section>
     {data?.role === "parent" && data.students.length > 1 && <label className="as-parent-select">Student<select value={child} onChange={(e) => { setChild(e.target.value); void load(e.target.value); }}><option value="">Choose a student</option>{data.students.map((student) => <option key={student.code} value={student.code}>{student.name}</option>)}</select></label>}
     <div className="as-toolbar"><label><Search size={16}/><input placeholder="Search syllabus and files" value={search} onChange={(e) => setSearch(e.target.value)}/></label><button type="button" onClick={() => void load()} disabled={busy}>Refresh</button></div>

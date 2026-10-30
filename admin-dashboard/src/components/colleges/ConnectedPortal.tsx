@@ -176,6 +176,14 @@ const pageSize = (table?: string) => (table === "programs" ? 200 : undefined);
 const PRIMARY_ONLY = new Set(["student-enrollment"]);
 /** Screens whose forms sit in the page header (no table picker or search box). */
 const HEADER_ACTIONS = new Set<string>();
+const CUSTOM_WORKSPACES = new Set([
+  "admissions",
+  "assignments",
+  "syllabus",
+  "calendar",
+  "certificates",
+  "certificate-requests",
+]);
 export default function ConnectedPortal({
   college,
   parts,
@@ -352,6 +360,23 @@ export default function ConnectedPortal({
       }
     }
   }, []);
+  const prefetchScreen = useCallback((name: string) => {
+    if (CUSTOM_WORKSPACES.has(name)) return;
+    const key = workspaceCacheKey(identityRef.current, activeRoleRef.current?.code, `screen:${name}`);
+    if (!key || readWorkspaceCache<ScreenSnapshot>(key)) return;
+    void refreshWorkspaceCache(key, async () => {
+      const rawSpec = await api.workspace.screen(name);
+      const spec = activeRoleRef.current ? roleScreen(rawSpec, activeRoleRef.current) : rawSpec;
+      const first = spec.resources[0] || null;
+      const [records, totals, extra] = await Promise.all([
+        first && !STAFF_SCREENS[name] ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
+        FINANCE_SUMMARY_SCREENS.includes(name) ? api.finance.summary().catch(() => null) : Promise.resolve(null),
+        specialRows(name),
+      ]);
+      if (first?.name === "students") records.items = await studentCourseLabels(records.items, workspaceCacheKey(identityRef.current, activeRoleRef.current?.code, "student-course-labels"));
+      return { spec, first, records, totals: totals as Row | null, extra };
+    }).catch(() => undefined);
+  }, []);
   const initialize = useCallback(
     async (person: Account, preferred: string) => {
       const active = activeRoleRef.current;
@@ -423,7 +448,8 @@ export default function ConnectedPortal({
       ]).then(([workflow, masterData]) =>
         setActions([...workflow.actions, ...masterData.actions]),
       );
-      await load(first);
+      if (CUSTOM_WORKSPACES.has(first)) setBusy(false);
+      else await load(first);
     },
     [load, loginRedirect, college],
   );
@@ -993,10 +1019,12 @@ export default function ConnectedPortal({
               <button
                 key={s.key}
                 className={s.key === selected ? "active" : ""}
+                onPointerEnter={() => prefetchScreen(s.key)}
+                onFocus={() => prefetchScreen(s.key)}
                 onClick={() => {
                   setSelected(s.key);
                   setFilter("");
-                  void load(s.key);
+                  if (!CUSTOM_WORKSPACES.has(s.key)) void load(s.key);
                 }}
               >
                 {s.title}
@@ -1020,14 +1048,12 @@ export default function ConnectedPortal({
       <section
         className={`edu-content ${selected === "student-enrollment" ? "edu-enroll" : ""}`}
       >
-        {selected === "admissions" &&
-        resource?.name === "admission_enquiries" ? (
+        {selected === "admissions" ? (
           <AdmissionWorkspace
             college={college}
-            path={resource.path}
-            canCreate={resource.actions.includes("create")}
+            path={resource?.name === "admission_enquiries" ? resource.path : "/api/v1/admissions/admission-enquiries"}
+            canCreate={!!displayRole && (displayRole.system_admin || displayRole.permissions.admission_enquiries?.includes("create"))}
             canConvert={
-              resource.actions.includes("edit") &&
               !!displayRole &&
               (displayRole.system_admin ||
                 displayRole.permissions.student_enrollments?.includes(

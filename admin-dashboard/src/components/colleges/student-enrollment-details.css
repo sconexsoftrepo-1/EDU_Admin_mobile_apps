@@ -1,18 +1,17 @@
 dialog.edu-record-drawer {
   position: fixed;
-  inset: 0 0 0 auto;
+  inset: 10px 10px 10px auto;
   margin: 0;
   padding: 0;
-  width: min(980px, calc(100vw - 80px));
+  width: min(920px, calc(100vw - 48px));
   max-width: 100vw;
-  height: 100dvh;
-  max-height: 100dvh;
-  border: 0;
-  border-left: 1px solid #e7ddce;
-  border-radius: 20px 0 0 20px;
+  height: calc(100dvh - 20px);
+  max-height: calc(100dvh - 20px);
+  border: 1px solid #e7ddce;
+  border-radius: 22px;
   background: #fcfaf6;
   color: #30251c;
-  box-shadow: -24px 0 80px #21160c30;
+  box-shadow: 0 22px 70px #21160c30;
   overflow: hidden;
 }
 dialog.edu-record-drawer-expanded {
@@ -32,7 +31,7 @@ dialog.edu-record-drawer[open] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  padding: 26px 30px 22px;
+  padding: 22px 24px 18px;
   background: #fff;
   border-bottom: 1px solid #e9dfcf;
   flex-shrink: 0;
@@ -82,7 +81,8 @@ dialog.edu-record-drawer[open] {
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 26px 30px;
+  scroll-behavior: smooth;
+  padding: 22px 24px;
   scrollbar-gutter: stable;
 }
 .edu-student-summary {
@@ -364,8 +364,11 @@ dialog.edu-record-drawer[open] {
 @media (max-width: 680px) {
   dialog.edu-record-drawer,
   dialog.edu-record-drawer-expanded {
-    width: 100vw;
-    border-radius: 0;
+    inset: 6px;
+    width: calc(100vw - 12px);
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    border-radius: 16px;
   }
   .edu-record-drawer-header {
     padding: 20px 18px;
@@ -405,6 +408,9 @@ dialog.edu-record-drawer[open] {
 @media (prefers-reduced-motion: reduce) {
   dialog.edu-record-drawer[open] {
     animation: none;
+  }
+  .edu-record-drawer-body {
+    scroll-behavior: auto;
   }
 }
 /* A file expands the current drawer; previews never create another dialog. */

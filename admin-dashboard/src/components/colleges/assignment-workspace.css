@@ -404,27 +404,60 @@
   scrollbar-width: thin;
   scrollbar-color: #b8b1a5 transparent;
 }
+.as-drawer .edu-record-drawer-header {
+  padding: 20px 24px 17px;
+  border-color: #e5ddcf;
+  background: linear-gradient(180deg, #fff, #fdfbf7);
+}
 .as-drawer .as-form,
 .as-drawer .as-detail {
-  padding: 26px 30px;
+  padding: 20px 24px 24px;
   color: #30251c;
 }
+.as-drawer .as-form {
+  gap: 14px;
+}
 .as-drawer .as-form fieldset {
-  padding: 20px;
+  padding: 16px;
   border: 1px solid #e5ddcf;
-  border-radius: 14px;
-  background: #fff;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff, #fdfcf9);
+  gap: 12px;
 }
 .as-drawer .as-form legend {
   padding: 0 6px;
   color: #493a2b;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.as-drawer .as-form label {
+  gap: 5px;
+  font-size: 12px;
 }
 .as-drawer .as-form .combo textarea,
 .as-drawer .as-form input:not([type="checkbox"]),
 .as-drawer .as-form textarea {
-  min-height: 42px;
-  border-radius: 9px;
+  min-height: 40px;
+  border-radius: 10px;
   border-color: #ddd5c8;
+}
+.as-drawer .as-form select {
+  min-height: 40px;
+  padding-left: 11px;
+  padding-right: 36px;
+  border-radius: 10px;
+}
+.as-drawer .as-form-grid {
+  gap: 12px 14px;
+}
+.as-drawer .as-student-picker {
+  max-height: 190px;
+  gap: 8px;
+  padding: 12px 0;
+}
+.as-drawer .as-upload {
+  padding: 12px;
+  border-radius: 12px;
 }
 .as-drawer .as-audience {
   border-radius: 12px;
@@ -434,11 +467,28 @@
 .as-drawer .as-form > .as-actions {
   position: sticky;
   bottom: 0;
-  margin: 0 -30px -26px;
-  padding: 16px 30px;
+  margin: 0 -24px -24px;
+  padding: 12px 24px;
   background: #fff;
   border-top: 1px solid #e5ddcf;
   z-index: 3;
+}
+.as-assignment-composer.edu-record-drawer {
+  width: min(900px, calc(100vw - 48px));
+}
+.as-assignment-composer .as-form {
+  padding-top: 16px;
+}
+.as-assignment-composer .as-form fieldset {
+  gap: 11px;
+}
+.as-assignment-composer .as-audience {
+  padding: 13px;
+  border-radius: 14px;
+}
+.as-assignment-composer .edu-record-drawer-body {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 .as-drawer .as-review-table {
   border: 1px solid #e5ddcf;
@@ -476,14 +526,14 @@
 @media (max-width: 650px) {
   .as-drawer .as-form,
   .as-drawer .as-detail {
-    padding: 16px;
+    padding: 14px;
   }
   .as-drawer .as-form fieldset {
-    padding: 15px;
+    padding: 13px;
   }
   .as-drawer .as-form > .as-actions {
-    margin: 0 -16px -16px;
-    padding: 14px 16px;
+    margin: 0 -14px -14px;
+    padding: 12px 14px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -502,3 +552,5 @@
 .as-empty{display:grid;justify-items:center;gap:8px;padding:60px 20px;border:1px dashed #ddd3c6;border-radius:18px;background:#fffdf9;color:#887b6b;text-align:center}.as-empty h2,.as-empty p{margin:0}.as-alert{display:flex;justify-content:space-between;gap:16px;padding:14px 16px;margin:16px 0;border:1px solid #ead5b9;border-radius:12px;background:#fff8ed;color:#775426}
 @media(max-width:760px){.as-header{flex-direction:column}.as-cards{grid-template-columns:minmax(0,1fr)}.as-metrics{flex-wrap:wrap}.as-toolbar{align-items:stretch}}
 .as-cert-preview{background:linear-gradient(145deg,#fffdf7,#f8f6ef);border:5px double #b59655;border-radius:12px;padding:28px 22px;text-align:center;color:#20334b;box-shadow:0 10px 28px #172a3b14}.as-cert-preview h3{font:600 24px Georgia,serif;margin:18px 0 10px;color:#6d2530}.as-cert-preview p{line-height:1.55;color:#3f4751}.as-cert-preview>div{margin-top:8px;font-size:13px}.as-cert-preview footer{display:flex;justify-content:space-between;gap:12px;margin-top:28px;padding-top:14px;border-top:1px solid #b59655;font-size:11px;font-weight:650}
+.certificate-workspace .as-header{align-items:center}.certificate-request-panel{display:grid;grid-template-columns:minmax(220px,1fr) minmax(220px,320px) auto;align-items:end;gap:18px;margin:4px 0 22px;padding:22px;border:1px solid #dfe8e7;border-radius:18px;background:linear-gradient(115deg,#f4f8f7,#fbfaf6)}.certificate-request-panel h2,.certificate-issued-section>h2{margin:0 0 6px;font:600 1.25rem/1.3 var(--sans);letter-spacing:-.02em;color:#173b4b}.certificate-request-panel p{max-width:520px;margin:0;color:#66756f}.certificate-request-panel label{display:grid;gap:6px;color:#586a68;font-size:.84rem;font-weight:650}.certificate-request-panel select{width:100%}.certificate-workspace .as-card{border-radius:16px;border-color:#dfe6e3;box-shadow:0 7px 18px #173b4b0a}.certificate-workspace .as-card h2{font:650 1.1rem/1.35 var(--sans);letter-spacing:-.02em}.certificate-workspace .as-pill{border-radius:999px;padding:5px 10px;text-transform:capitalize}.certificate-workspace .as-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.certificate-workspace .as-actions button,.certificate-issued-section button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 13px;border:1px solid #dce5e3;border-radius:10px;background:#fff;color:#24434a;font-weight:650}.certificate-workspace .as-actions .as-primary{border-color:#195e72;background:#195e72;color:#fff}.certificate-issued-section{margin-top:30px}.certificate-issued-section>h2{margin-bottom:14px}.certificate-issue-form{display:grid;gap:16px}.certificate-issue-form fieldset{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:20px;border:1px solid #dce5e3;border-radius:16px;background:#fff}.certificate-issue-form legend{grid-column:1/-1;padding:0 7px;font-size:.96rem;font-weight:700;color:#26464c}.certificate-issue-form label{display:grid;gap:6px;min-width:0;color:#5b696d;font-size:.84rem;font-weight:650}.certificate-issue-form select{width:100%}.certificate-issue-form .as-cert-preview{grid-column:1/-1;min-height:238px}.as-cert-achievement{border-color:#7b2429;background:linear-gradient(135deg,#fffdf8,#f7f0e8);color:#69252a}.as-cert-attendance{border-color:#168c91;background:#f5fbfb;color:#126c73}.as-cert-conduct{border-color:#344f6a;background:#f5f8fb;color:#29445f}.as-cert-course_completion{border-color:#568166;background:#f5f8f1;color:#315d45}.certificate-drawer .edu-record-drawer-body{scroll-behavior:smooth}.certificate-drawer .edu-record-drawer-header{border-bottom-color:#dfe8e5;background:#fcfdfb}.certificate-drawer .as-form{display:grid;gap:16px}.certificate-drawer .as-form fieldset{border-color:#dfe8e5;border-radius:16px;background:#fbfcfa}.certificate-drawer .as-form legend{color:#24434a}.certificate-drawer .edu-record-drawer-actions .as-primary{min-height:42px;border:0;border-radius:11px;background:#195e72;color:white;padding:0 16px;font-weight:700}
+@media(max-width:760px){.certificate-request-panel{grid-template-columns:1fr;align-items:stretch}.certificate-request-panel .as-primary{width:100%}.certificate-issue-form fieldset{grid-template-columns:1fr}.certificate-issue-form legend,.certificate-issue-form .as-cert-preview{grid-column:auto}.certificate-workspace .as-header{align-items:flex-start}}

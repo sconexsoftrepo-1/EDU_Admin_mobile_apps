@@ -7,13 +7,13 @@ There are exactly two self-contained Flutter app projects:
 | `admin_teachers/` | Admin / Teacher | College management or teaching modules |
 | `parent_student/` | Parent / Student | Linked children or student modules |
 
-Each project contains its own screens, API client, styling, tests, and Android/iOS project files. There is no shared package or dependency on the other app. Screen and design code live in each app’s `lib/src/` folder. Each app has its own independent `lib/services/` folder for API calls, models and configuration.
+Each project contains its own screens, API client, styling, tests, and Android/iOS project files. There is no shared package or dependency on the other app. The app shell lives in `lib/app/`; feature screens live in `lib/screens/`; reusable UI lives in `lib/components/`; API access lives in `lib/services/`; API contracts and configuration live in `lib/models/` and `lib/constants/`; styling and motion helpers live in `lib/theme/` and `lib/utils/`. Each installable app owns its own copy of these layers.
 
 Role selection chooses the existing role-specific API client policy. The server controls data access and available screens. Each role opens its own dashboard with module shortcuts, downloads and actions. Sign out to return to the role selector. Secure session restoration remembers the last signed-in role.
 
 The existing native application IDs are retained for admin and parent installations. Backend client identifiers continue to represent four access policies for the two installable apps.
 
-The mobile design uses EduNexa’s college crest, navy and bronze identity, role-specific accents, responsive module shortcuts and bottom navigation. Login controls and module layouts adapt to enlarged accessibility text. Styling is defined in each project’s `lib/src/mobile_design.dart`.
+The mobile design uses EduNexa’s college crest, navy and bronze identity, role-specific accents, responsive module shortcuts and bottom navigation. Login controls and module layouts adapt to enlarged accessibility text. Styling is defined in each project’s `lib/theme/mobile_design.dart`, with reusable motion helpers in `lib/utils/`.
 
 Quote folder names in shell commands, for example:
 
@@ -67,24 +67,30 @@ Online fee payment uses the existing HTTPS checkout adapter and callback verific
 
 Run `flutter analyze --no-pub --no-fatal-infos` and `flutter test --no-pub` inside each app. `test/workspace_features_test.dart` renders all 63 role/screen combinations against API fixtures exported from an isolated local demo store, checks the five tabs, payment/date validation and enlarged calendar text. Authentication/session tests also cover secure storage, refresh rotation, role restoration and logout. The fixture data is fictional and is never loaded into a signed-in production workspace.
 
-## Independent API service folders
+## Mobile project structure
 
-Each app owns the following files; neither imports service files from the other app:
+The two apps have matching, self-contained source layers. Screen, component, service, contract, design and utility files are grouped by responsibility inside each app:
 
 ```text
-admin_teachers/lib/services/
-  api_service.dart       # All REST endpoints, authenticated calls, refresh and downloads
-  conts.dart             # Base URL, API prefix, timeouts, client IDs, storage keys, Firebase options
-  constants.dart         # Request payloads, response models, query/form models and API errors
-  push_notifications.dart # Native Firebase registration, foreground handling and tap lifecycle
-
-parent_student/lib/services/
-  api_service.dart
-  conts.dart
-  constants.dart
-  push_notifications.dart
+lib/
+  app/                  # App shell, role selection and shared navigation
+  screens/
+    workspace/          # Main role-aware workspace
+    assignments/        # Assignment creation, submission and review
+    syllabus/           # Shared course resources
+    calendar/           # Events and event details
+    certificates/       # Certificate request and approval screens
+  components/
+    auth/               # Authentication controls
+    workspace/          # Shared forms, presentation, records and widgets
+  services/             # REST API and push notifications
+  models/               # API payload and response contracts
+  constants/            # API, role and push configuration
+  theme/                # Colors, typography and reusable styles
+  utils/                # Motion and small shared helpers
+  splash/                # Splash experience components
 ```
 
-Change `ApiConfig.baseUrl` in the relevant app's `conts.dart`, or set `API_BASE_URL` when building that app. `constants.dart` defines `LoginPayload`, `RefreshPayload`, `WorkspaceQuery`, `WorkspaceActionPayload`, `DeviceRegistrationPayload`, `TokenPayload`, `AlertPayload`, `AuthResponse`, `AccountResponse`, `WorkspaceScreen`, `WorkspaceResponse`, `ActionResponse`, `ActionDefinition` and `FormFieldDefinition`. JSON conversion stays with these models. Server-defined fields and business records are preserved for configurable forms and screen descriptors.
+`services/api_service.dart` is the single REST endpoint registry and owns all API methods, authenticated calls, refresh and downloads. The base URL and API prefix live in `constants/api_config.dart`; change them there or set `API_BASE_URL` at build time. `models/api_models.dart` defines payloads and response contracts. `constants/api_config.dart` owns the API URL, prefix, timeouts, client IDs, storage keys and Firebase options. `push_notifications.dart` owns native Firebase registration and notification handling. Set `API_BASE_URL` when building an app to override the configured default.
 
 Screens call `CollegeApi.listScreens`, `workspace`, `executeAction`, `markNotificationRead`, `registerDevice`, `unregisterDevice`, `download` and `downloadFinanceReport`; they do not construct REST paths. Service tests import `services/api_service.dart` directly and verify URL/query construction, payload serialization, response parsing, authentication headers and device/notification requests.
