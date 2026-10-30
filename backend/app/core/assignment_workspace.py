@@ -453,6 +453,10 @@ class FileStart(StrictModel):
     filename: str = Field(min_length=1, max_length=180)
     size_bytes: int = Field(gt=0, le=MAX_FILE)
     assignment_code: str | None = None
+    syllabus_code: str | None = None
+    resource_upload: bool = False
+    event_upload: bool = False
+    event_code: str | None = None
 
 
 class FileChunk(StrictModel):
@@ -463,7 +467,26 @@ class FileChunk(StrictModel):
 @router.post("/files/start", status_code=201)
 def start_file(body: FileStart, request: Request, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
-        if body.assignment_code:
+        if sum((bool(body.assignment_code), bool(body.syllabus_code), body.resource_upload, body.event_upload, bool(body.event_code))) > 1:
+            raise HTTPException(422, "Choose one upload destination")
+        if body.event_upload:
+            from .calendar_workspace import staff_can
+            if not staff_can(data, user, "create"):
+                raise HTTPException(403, "Calendar event publishing is not assigned to this role")
+        elif body.event_code:
+            from .calendar_workspace import authorize_event, get_event
+            authorize_event(data, user, get_event(data, body.event_code))
+        elif body.resource_upload:
+            from .syllabus_workspace import staff_can
+            if not staff_can(data, user, "create"):
+                raise HTTPException(403, "Syllabus publishing is not assigned to this role")
+        elif body.syllabus_code:
+            from .syllabus_workspace import authorize_syllabus, get_syllabus
+            syllabus = get_syllabus(data, body.syllabus_code)
+            authorize_syllabus(data, user, syllabus)
+            if personal(user):
+                raise HTTPException(403, "Only staff can upload shared resources")
+        elif body.assignment_code:
             assignment = get_assignment(data, body.assignment_code)
             authorize(data, user, assignment)
             if user.get("person_type") == "parent":
@@ -475,7 +498,10 @@ def start_file(body: FileStart, request: Request, user=Depends(current_user)):
             raise HTTPException(422, "Choose PDF, JPG, PNG or WebP files")
         code = new_code("AFILE")
         docs(data, "files")[code] = {"code": code, "owner": user["code"], "filename": filename,
-            "size_bytes": body.size_bytes, "assignment_code": body.assignment_code, "parts": {}, "ready": False, "created_at": now()}
+            "size_bytes": body.size_bytes, "assignment_code": body.assignment_code,
+            "syllabus_code": body.syllabus_code, "event_code": body.event_code,
+            "resource_upload": body.resource_upload, "event_upload": body.event_upload,
+            "parts": {}, "ready": False, "created_at": now()}
         return {"code": code, "chunk_size": CHUNK_SIZE}
 
 
@@ -495,7 +521,8 @@ def chunk_file(code: str, body: FileChunk, request: Request, user=Depends(curren
         expected = min(CHUNK_SIZE, record["size_bytes"] - body.index * CHUNK_SIZE)
         if expected <= 0 or len(raw) != expected:
             raise HTTPException(422, "File chunk has an incorrect size")
-        key = f"Assignments/{code}/part-{body.index}-{new_code('P')}"
+        folder = "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
+        key = f"{folder}/{code}/part-{body.index}-{new_code('P')}"
         request.app.state.files.put(key, raw, "application/octet-stream")
         pending.append(key)
         record["parts"][str(body.index)] = key
@@ -516,9 +543,12 @@ def finish_file(code: str, request: Request, user=Depends(current_user)):
             raise HTTPException(422, "Upload all file parts before submitting")
         raw = b"".join(request.app.state.files.get(record["parts"][str(i)]) or b"" for i in range(parts))
         mime = "application/pdf" if raw.startswith(b"%PDF-") else "image/png" if raw.startswith(b"\x89PNG\r\n\x1a\n") else "image/jpeg" if raw.startswith(b"\xff\xd8\xff") else "image/webp" if raw.startswith(b"RIFF") and raw[8:12] == b"WEBP" else None
+        if record.get("event_upload") or record.get("event_code"):
+            mime = mime if mime in {"image/png", "image/jpeg", "image/webp"} else None
         if len(raw) != record["size_bytes"] or not mime:
             raise HTTPException(422, "Upload a valid PDF or supported image file")
-        key = f"Assignments/{code}/{new_code('FILE')}"
+        folder = "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
+        key = f"{folder}/{code}/{new_code('FILE')}"
         request.app.state.files.put(key, raw, mime)
         pending.append(key)
         record.update(ready=True, storage_key=key, mime_type=mime, sha256=hashlib.sha256(raw).hexdigest(),
@@ -541,13 +571,26 @@ def view_file(code: str, request: Request, user=Depends(current_user)):
     if not record or not record.get("ready"):
         raise HTTPException(404, "File not found")
     if record["owner"] != user["code"]:
-        assignment = get_assignment(data, record.get("assignment_code"))
-        authorize(data, user, assignment)
-        if code not in assignment.get("attachments", []):
-            linked = [s for s in submissions(data, assignment["code"]).values() if code in s.get("attachments", [])]
-            allowed = bool(linked) and (can_review(data, user, assignment) or any(s["student_code"] in own_students(data, user) for s in linked))
-            if not allowed:
+        if record.get("syllabus_code"):
+            from .syllabus_workspace import authorize_syllabus, get_syllabus
+            syllabus = get_syllabus(data, record["syllabus_code"])
+            authorize_syllabus(data, user, syllabus)
+            if code not in syllabus.get("attachments", []):
                 raise HTTPException(404, "File not found")
+        elif record.get("event_code"):
+            from .calendar_workspace import authorize_event, get_event
+            event = get_event(data, record["event_code"])
+            authorize_event(data, user, event)
+            if code != event.get("image_code"):
+                raise HTTPException(404, "File not found")
+        else:
+            assignment = get_assignment(data, record.get("assignment_code"))
+            authorize(data, user, assignment)
+            if code not in assignment.get("attachments", []):
+                linked = [s for s in submissions(data, assignment["code"]).values() if code in s.get("attachments", [])]
+                allowed = bool(linked) and (can_review(data, user, assignment) or any(s["student_code"] in own_students(data, user) for s in linked))
+                if not allowed:
+                    raise HTTPException(404, "File not found")
     raw = file_store(request, record).get(record["storage_key"])
     if raw is None:
         raise HTTPException(404, "File bytes are unavailable")

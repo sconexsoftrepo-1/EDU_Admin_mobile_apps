@@ -1,4 +1,4 @@
-from app.core.resources import display_rows
+from app.core.resources import CATALOG, display_rows, validate_record
 
 """Admission Enquiries endpoints and their PostgreSQL queries."""
 
@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.core import sql_queries as sql
 from app.core.resources import staff_only
-from app.core.security import require
+from app.core.security import StrictModel, require
 
 from .schemas import CreateRequest, UpdateRequest
 from .service import Service
@@ -185,6 +185,56 @@ class Queries:
 
 
 service = Service(Queries())
+
+
+class IntakeInput(StrictModel):
+    values: dict
+
+
+@router.post("/intake", status_code=201)
+def create_intake(body: IntakeInput, request: Request, user=Depends(require(TABLE, "create"))):
+    """Admission screen intake: normalized enquiry fields plus approved extra details."""
+    staff_only(user)
+    known = {field["name"] for field in CATALOG[TABLE]["fields"]}
+    values = body.values
+    record_values = {key: value for key, value in values.items() if key in known}
+    extras = {key: value for key, value in values.items() if key not in known}
+    if record_values.get("status") == "joined":
+        record_values["status"] = "closed"
+        extras["workflow_status"] = "joined"
+    with request.app.state.store.transaction() as data:
+        if not record_values.get("source_code") or record_values["source_code"] not in data["records"].get("admission_sources", {}):
+            sources = data["records"].get("admission_sources", {})
+            direct = next((source for source in sources.values() if source.get("is_active") and source.get("channel") == "walk_in"), None)
+            if direct is None:
+                from app.modules.admissions.admission_sources.api import service as sources_service
+                direct = sources_service.create(data, {"name": "Direct / walk-in", "channel": "walk_in", "is_active": True}, user["code"])
+            record_values["source_code"] = direct["code"]
+        record = validate_record(TABLE, record_values)
+        created = service.create(data, record, user["code"])
+        created.update(extras)
+        query_save(data, created)
+        return created
+
+
+@router.patch("/intake/{code}")
+def update_intake(code: str, body: IntakeInput, request: Request, user=Depends(require(TABLE, "edit"))):
+    """Update enquiry workflow state and its retained intake details."""
+    staff_only(user)
+    known = {field["name"] for field in CATALOG[TABLE]["fields"]}
+    values = body.values
+    record_values = {key: value for key, value in values.items() if key in known}
+    extras = {key: value for key, value in values.items() if key not in known}
+    if record_values.get("status") == "joined":
+        record_values["status"] = "closed"
+        extras["workflow_status"] = "joined"
+    elif "status" in record_values:
+        extras["workflow_status"] = None
+    with request.app.state.store.transaction() as data:
+        updated = service.update(data, code, record_values, user["code"])
+        updated.update(extras)
+        query_save(data, updated)
+        return updated
 
 
 @router.get("")

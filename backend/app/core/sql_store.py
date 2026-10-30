@@ -737,7 +737,7 @@ class Roles(Mapped):
 
 class Sessions(Mapped):
     table = "refresh_tokens"
-    KNOWN = {"code", "user_code", "refresh_hash", "expires_at", "revoked", "used", "family", "client"}
+    KNOWN = {"code", "user_code", "refresh_hash", "expires_at", "revoked", "used", "used_at_epoch", "family", "client"}
 
     def __init__(self, session):
         super().__init__(session)
@@ -747,13 +747,16 @@ class Sessions(Mapped):
         session = {k: v for k, v in row.items() if k not in self.s.table(self.table).t.columns}
         session.update(code=row["code"], user_code=row["user_code"], refresh_hash=row["token_hash"],
                        expires_at=_epoch(row["expires_at"]), revoked=row.get("revoked_at") is not None,
-                       used=row.get("used_at") is not None, family=row["family_code"], client=row["client_id"])
+                       used=row.get("used_at") is not None, used_at_epoch=_epoch(row.get("used_at")),
+                       family=row["family_code"], client=row["client_id"])
         self.stamps[row["code"]] = (row.get("revoked_at"), row.get("used_at"))
         return session
 
     def encode(self, key, obj):
         stamp = datetime.now(timezone.utc).isoformat()
         revoked_at, used_at = self.stamps.get(key, (None, None))
+        if obj.get("used_at_epoch") is not None:
+            used_at = datetime.fromtimestamp(float(obj["used_at_epoch"]), timezone.utc).isoformat()
         return {"code": key, "user_code": obj["user_code"], "token_hash": obj["refresh_hash"],
                 "expires_at": obj["expires_at"], "family_code": obj["family"], "client_id": obj["client"],
                 "revoked_at": (revoked_at or stamp) if obj.get("revoked") else None,

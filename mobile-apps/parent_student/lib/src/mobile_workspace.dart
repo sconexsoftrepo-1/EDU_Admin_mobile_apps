@@ -66,8 +66,15 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     WidgetsBinding.instance.addObserver(this);
     loadScreens();
     push = PushNotifications(
-      onOpen: (_) {
-        if (mounted && has('notifications')) open('notifications');
+      onOpen: (code) async {
+        if (!mounted || !has('notifications')) return;
+        await fetchSection('notifications');
+        final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
+        if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
+          open('certificates');
+        } else {
+          open('notifications');
+        }
       },
       onForeground: (title, body) {
         if (!mounted) return;
@@ -611,20 +618,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
               child: selected == 'assignments' || selected == 'submissions'
-                ? AssignmentHub(key: ValueKey('assignment-$selected-$student-$generation'), api: widget.api, role: widget.role, title: title)
-                : EduNexaAnimatedRefresh(
-                onRefresh: refreshWorkspace,
-                child: AnimatedSwitcher(
-                  duration: EduMotion.duration(context, EduMotion.tab),
-                  child: ListView.builder(
-                    key: ValueKey('page-${selected ?? 'home'}'),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                    itemCount: pageWidgets.length,
-                    itemBuilder: (context, index) => pageWidgets[index],
-                  ),
-                ),
-              ),
+                  ? AssignmentHub(
+                      key: ValueKey(
+                        'assignment-$selected-$student-$generation',
+                      ),
+                      api: widget.api,
+                      role: widget.role,
+                      title: title,
+                    )
+                  : selected == 'calendar'
+                  ? CalendarHub(api: widget.api, role: widget.role, title: title)
+                  : selected == 'syllabus'
+                  ? SyllabusHub(api: widget.api, role: widget.role, title: title)
+                  : EduNexaAnimatedRefresh(
+                      onRefresh: refreshWorkspace,
+                      child: AnimatedSwitcher(
+                        duration: EduMotion.duration(context, EduMotion.tab),
+                        child: ListView.builder(
+                          key: ValueKey('page-${selected ?? 'home'}'),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                          itemCount: pageWidgets.length,
+                          itemBuilder: (context, index) => pageWidgets[index],
+                        ),
+                      ),
+                    ),
             ),
           ),
         ),
@@ -1055,7 +1073,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   List<Widget> screenContent(BuildContext context) {
     final all = rows(selected!);
     final students = (data?['students'] as List? ?? []).cast<Json>();
-    final actions = (data?['actions'] as List? ?? []).cast<Json>();
+    final actions = selected == 'certificates' ? <Json>[] : (data?['actions'] as List? ?? []).cast<Json>();
     final financial = {
       'overview',
       'dues',
@@ -1066,7 +1084,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       'reports',
       'payslips',
     }.contains(selected);
-    final items = all.where((r) {
+    final items = (selected == 'certificates' ? <Json>[] : all).where((r) {
       if (query.isNotEmpty &&
           !display(r).toLowerCase().contains(query.toLowerCase())) {
         return false;
@@ -1204,6 +1222,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
       if (selected == 'calendar')
         SectionHeading(title: 'Agenda · ${prettyDate(calendarDay)}'),
+      if (selected == 'certificates')
+        CertificateMobileWorkspace(api: widget.api, role: widget.role, studentCode: student),
       if (selected == 'timetable') ...[
         TimetableDaySelector(
           selected: calendarDay,
@@ -1271,7 +1291,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
         const SizedBox(height: 8),
       ],
-      if (items.isEmpty && selected != 'overview' && selected != 'reports')
+      if (items.isEmpty && selected != 'overview' && selected != 'reports' && selected != 'certificates')
         QuietEmpty(
           icon: moduleIcon(selected!),
           title: query.isNotEmpty
@@ -1288,6 +1308,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             CampusRecord(
               record: r,
               screen: selected!,
+              onTap: selected == 'calendar'
+                  ? () => Navigator.of(context).push<void>(MaterialPageRoute(
+                      builder: (_) => EventDetailScreen(api: widget.api, event: r),
+                    ))
+                  : null,
               onDownload:
                   data?['downloads'] != null && r['record_type'] != 'request'
                   ? () => download(data!['downloads'], r['code'])
@@ -1302,7 +1327,15 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ? 'Submit assignment'
                   : selected == 'messages'
                   ? 'Reply'
-                  : selected == 'notifications' && r['assignment_code'] != null ? 'Open assignment' : null,
+                  : selected == 'notifications' && r['assignment_code'] != null
+                  ? 'Open assignment'
+                  : selected == 'notifications' && r['syllabus_code'] != null
+                  ? 'Open resource'
+                  : selected == 'notifications' && r['calendar_event_code'] != null
+                  ? 'Open event'
+                  : selected == 'notifications' && (r['certificate_request_code'] != null || r['certificate_code'] != null || r['screen'] == 'certificates')
+                  ? 'Open certificates'
+                  : null,
             ),
             if (r['receipts'] is List)
               ...(r['receipts'] as List).map(
@@ -1327,8 +1360,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   }
 
   VoidCallback? recordAction(Json record, List<Json> actions) {
+    if (selected == 'notifications' && record['calendar_event_code'] != null) {
+      return () async {
+        try {
+          final event = Map<String, dynamic>.from(await widget.api.get('/academics/calendar-workspace/${Uri.encodeComponent(record['calendar_event_code'].toString())}') as Map);
+          if (mounted) await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => EventDetailScreen(api: widget.api, event: event)));
+        } catch (e) { if (mounted) toast(e.toString()); }
+      };
+    }
+    if (selected == 'notifications' && (record['certificate_request_code'] != null || record['certificate_code'] != null || record['screen'] == 'certificates')) {
+      return () => open('certificates');
+    }
+    if (selected == 'notifications' && record['syllabus_code'] != null) {
+      return () => Navigator.of(context).push<void>(MaterialPageRoute(
+        builder: (_) => SyllabusDetail(api: widget.api, code: record['syllabus_code'].toString()),
+      ));
+    }
     if (selected == 'notifications' && record['assignment_code'] != null) {
-      return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: record['assignment_code'].toString())));
+      return () => Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => AssignmentReview(
+            api: widget.api,
+            code: record['assignment_code'].toString(),
+          ),
+        ),
+      );
     }
     String? key;
     Json initial = {};

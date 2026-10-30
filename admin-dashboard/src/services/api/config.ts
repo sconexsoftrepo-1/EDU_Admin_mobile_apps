@@ -56,7 +56,7 @@ export const API_CONFIG = {
     access: "edu_access",
     refresh: "edu_refresh",
     path: "/api/college",
-    refreshMaxAgeSeconds: 7 * 86_400,
+    refreshMaxAgeSeconds: 30 * 86_400,
   },
   /** Default page size of list endpoints (backend default 50, maximum 200). */
   pageSize: 50,

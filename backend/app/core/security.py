@@ -124,6 +124,7 @@ def issue(data, account, client, settings, family=None):
         "expires_at": time.time() + settings.refresh_days * 86400,
         "revoked": False,
         "used": False,
+        "used_at_epoch": None,
     }
     expires = datetime.now(timezone.utc) + timedelta(minutes=settings.access_minutes)
     token = jwt.encode(

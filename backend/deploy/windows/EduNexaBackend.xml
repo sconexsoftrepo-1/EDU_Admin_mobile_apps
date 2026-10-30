@@ -4,7 +4,7 @@
   <description>EduNexa College FastAPI backend.</description>
   <executable>%BASE%\..\..\.venv\Scripts\python.exe</executable>
   <workingdirectory>%BASE%\..\..</workingdirectory>
-  <arguments>-m uvicorn app.asgi:app --host 127.0.0.1 --port 8010 --workers 1</arguments>
+  <arguments>-m uvicorn app.asgi:app --host 0.0.0.0 --port 8010 --workers 1</arguments>
   <env name="PYTHONUNBUFFERED" value="1" />
   <startmode>Automatic</startmode>
   <delayedAutoStart />

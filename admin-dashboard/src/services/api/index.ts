@@ -11,6 +11,8 @@
  * modules/<module>/consts.ts    payloads, responses and constants of that module
  */
 import { administrationService } from "./modules/administration/service";
+import { admissionsApi } from "./modules/admissions";
+import { certificates } from "./modules/certificates";
 import { authService } from "./modules/auth/service";
 import { documentService } from "./modules/documents/service";
 import { financeService } from "./modules/finance/service";
@@ -30,6 +32,8 @@ export const api = {
   workflows: workflowService,
   masterData: masterDataService,
   administration: administrationService,
+  admissions: admissionsApi,
+  certificates,
   forms: formService,
   finance: financeService,
   reports: reportService,
@@ -54,6 +58,7 @@ export * from "./consts";
 export * from "./modules/administration/consts";
 export * from "./modules/auth/consts";
 export * from "./modules/documents/consts";
+export * from "./modules/certificates";
 export * from "./modules/finance/consts";
 export * from "./modules/forms/consts";
 export * from "./modules/imports/consts";

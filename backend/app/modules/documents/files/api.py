@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from pydantic import Field
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfgen.canvas import Canvas
 
 from app.core.security import StrictModel, current_user, has_permission
@@ -68,6 +68,73 @@ def pdf(title, lines):
                 canvas.linkURL(str(line)[8:], (46, y - 2, 549, y + 12), relative=0)
             y -= 16
     canvas.save()
+    return out.getvalue()
+
+
+def certificate_pdf(title, student, kind, enrollment, data, code, issued, verify_url, issuer=None, academic_year_code=None):
+    """Generate a formal, printable landscape certificate with a verifiable reference."""
+    out = io.BytesIO()
+    page = landscape(A4)
+    c = Canvas(out, pagesize=page)
+    width, height = page
+    settings = next(iter(query_rows(data, "institution_settings")), {})
+    institution = data["records"].get("institutions", {}).get(settings.get("institution_code")) or next(iter(query_rows(data, "institutions")), {})
+    institution_name = institution.get("name") or "EduNexa College"
+    section = data["records"].get("sections", {}).get(enrollment.get("section_code"), {})
+    batch = data["records"].get("batches", {}).get(section.get("batch_code"), {})
+    program = data["records"].get("programs", {}).get(enrollment.get("program_code") or batch.get("program_code"), {})
+    year = data["records"].get("academic_years", {}).get(academic_year_code or batch.get("academic_year_code"), {})
+    if not year:
+        year = next((y for y in query_rows(data, "academic_years") if y.get("program_code") == batch.get("program_code")
+                     and batch.get("entry_year") == int(str(y.get("start_date", "0"))[:4])
+                     and batch.get("graduation_year") == int(str(y.get("end_date", "0"))[:4])), {})
+    profile = next((p for p in query_rows(data, "student_admission_profiles") if p.get("student_code") == student["code"]), {})
+    name = " ".join(str(student.get(k) or "").strip() for k in ("first_name", "middle_name", "last_name")).strip()
+    course = program.get("name") or "the registered course"
+    academic = year.get("name") or (f"{year.get('start_date', '')} – {year.get('end_date', '')}" if year else "")
+    templates = {
+        "study_certificate": f"This is to certify that {name} is a bonafide student of {institution_name}, pursuing {course}{(' for the academic year ' + academic) if academic else ''}.",
+        "conduct_certificate": f"This is to certify that {name}, a student of {course} at {institution_name}, has maintained good conduct during the period of study as per the records of the institution.",
+        "attendance_certificate": f"This is to certify that {name} attended {course} at {institution_name} during {academic or 'the registered academic period'}. Attendance is recorded in the institution register.",
+        "course_completion": f"This is to certify that {name} has successfully completed the prescribed course of study in {course} at {institution_name}.",
+        "achievement": f"This certificate is presented to {name} in recognition of an achievement recorded by {institution_name}.",
+    }
+    c.setTitle(title)
+    c.setFillColorRGB(.97, .98, 1)
+    c.rect(0, 0, width, height, fill=1, stroke=0)
+    c.setStrokeColorRGB(.12, .25, .43); c.setLineWidth(3); c.rect(24, 24, width-48, height-48, fill=0, stroke=1)
+    c.setStrokeColorRGB(.72, .56, .28); c.setLineWidth(1); c.rect(32, 32, width-64, height-64, fill=0, stroke=1)
+    c.setFillColorRGB(.12, .25, .43); c.setFont("Helvetica-Bold", 20); c.drawCentredString(width/2, height-82, institution_name)
+    address = " • ".join(str(institution.get(k) or "").strip() for k in ("address", "city", "state", "postal_code") if institution.get(k))
+    contacts = " • ".join(str(institution.get(k) or "").strip() for k in ("phone", "email") if institution.get(k))
+    if address:
+        c.setFillColorRGB(.35, .39, .45); c.setFont("Helvetica", 9); c.drawCentredString(width/2, height-99, address[:130])
+    if contacts:
+        c.setFillColorRGB(.35, .39, .45); c.setFont("Helvetica", 8); c.drawCentredString(width/2, height-113, contacts[:130])
+    c.setFillColorRGB(.72, .56, .28); c.setFont("Helvetica-Bold", 23); c.drawCentredString(width/2, height-148, title.upper())
+    c.setFillColorRGB(.12, .15, .2); c.setFont("Helvetica", 12)
+    text = c.beginText(100, height-194); text.setLeading(20)
+    for line in wrap(templates.get(kind.get("code"), f"This is to certify that {name} is a student of {institution_name}."), 100):
+        text.textLine(line)
+    c.drawText(text)
+    details = [f"Course: {course}", f"Academic year: {academic or 'As per institutional records'}",
+               f"Admission number: {student.get('admission_number') or profile.get('admission_number') or '—'}",
+               f"University roll number: {enrollment.get('university_roll_number') or enrollment.get('roll_number') or '—'}"]
+    c.setFont("Helvetica", 10); c.setFillColorRGB(.18, .23, .3)
+    for i, line in enumerate(details): c.drawString(100, height-286-i*18, line)
+    c.setFont("Helvetica", 9); c.drawString(78, 96, f"Certificate No. {code}  •  Issued {issued}")
+    c.setStrokeColorRGB(.18, .23, .3); c.line(width-214, 112, width-88, 112)
+    issuer_name = " ".join(str((issuer or {}).get(k) or "").strip() for k in ("first_name", "middle_name", "last_name")).strip()
+    designation = (issuer or {}).get("designation") or "Authorized signatory"
+    if issuer_name:
+        c.setFillColorRGB(.12, .25, .43); c.setFont("Helvetica-Oblique", 13); c.drawCentredString(width-151, 119, issuer_name)
+    c.setFillColorRGB(.12, .15, .2); c.setFont("Helvetica-Bold", 8); c.drawCentredString(width-151, 96, designation[:36])
+    c.setStrokeColorRGB(.72, .56, .28); c.setLineWidth(2); c.circle(width-270, 110, 31, fill=0, stroke=1)
+    c.setFillColorRGB(.12, .25, .43); c.setFont("Helvetica-Bold", 7); c.drawCentredString(width-270, 113, "OFFICIAL SEAL")
+    c.setFont("Helvetica", 7); c.drawCentredString(width-270, 102, "COLLEGE")
+    c.setFillColorRGB(.35, .39, .45); c.setFont("Helvetica", 7); c.drawString(78, 66, f"Verify: {verify_url}")
+    c.linkURL(verify_url, (75, 60, width-70, 77), relative=0)
+    c.save()
     return out.getvalue()
 
 
@@ -353,6 +420,8 @@ def signing_key(request):
 
 @router.post("/certificates/issue", status_code=201)
 def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
+    if request.app.state.settings.file_storage != "s3":
+        raise HTTPException(503, "Certificate issuance requires EDUNEXA_FILE_STORAGE=s3 and configured S3 access")
     with file_transaction(request) as (data, pending):
         if user["person_type"] not in {"employee", "system"} or not has_permission(
             data, user, "certificates", "approve"
@@ -363,33 +432,27 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
             raise HTTPException(409, "Request already processed")
         student = query_get(data, "students", req["student_code"])
         kind = query_get(data, "certificate_types", req["type_code"])
-        enrollment = next(
-            (
-                e
-                for e in query_rows(data, "student_enrollments")
-                if e["student_code"] == student["code"] and e["status"] == "active"
-            ),
-            None,
-        )
+        acceptable_status = {"active", "completed"} if kind.get("code") == "course_completion" else {"active"}
+        candidate_enrollments = [e for e in query_rows(data, "student_enrollments")
+                                 if e["student_code"] == student["code"] and e["status"] in acceptable_status]
+        required_program, required_year = req.get("program_code"), req.get("academic_year_code")
+        def matches_selection(enrollment):
+            section = data["records"].get("sections", {}).get(enrollment.get("section_code"), {})
+            batch = data["records"].get("batches", {}).get(section.get("batch_code"), {})
+            if required_program and batch.get("program_code") != required_program: return False
+            if required_year and batch.get("academic_year_code") != required_year:
+                year = data["records"].get("academic_years", {}).get(required_year, {})
+                if not (str(batch.get("entry_year")) == str(year.get("start_date", ""))[:4] and str(batch.get("graduation_year")) == str(year.get("end_date", ""))[:4]): return False
+            return True
+        enrollment = next((e for e in candidate_enrollments if matches_selection(e)), None)
         if not enrollment:
             raise HTTPException(409, "Active enrollment and roll number required")
         code = new_code("CERT")
         token = secrets.token_urlsafe(32)
-        raw = pdf(
-            kind["name"],
-            [
-                "Certificate number: " + code,
-                "Student: " + student["first_name"] + " " + student["last_name"],
-                "Roll number: " + enrollment["roll_number"],
-                "Issued: " + date.today().isoformat(),
-                "Authorized by account: " + user["code"],
-                "Development signing key: Ed25519",
-                "Verify: "
-                + request.app.state.settings.public_portal_url.rstrip("/")
-                + "/verify-certificate/"
-                + token,
-            ],
-        )
+        issuer = data["records"].get("employees", {}).get(user.get("person_code"), {})
+        raw = certificate_pdf(kind["name"], student, kind, enrollment, data, code,
+                              date.today().isoformat(), request.app.state.settings.public_portal_url.rstrip("/")
+                              + "/verify-certificate/" + token, issuer, req.get("academic_year_code"))
         key = signing_key(request)
         signature = base64.b64encode(key.sign(raw)).decode()
         sha = hashlib.sha256(raw).hexdigest()

@@ -4,6 +4,7 @@
  */
 import { apiUrl } from "./config";
 import { HTTP_STATUS, type ApiErrorBody, type HttpMethod } from "./consts";
+import { invalidateWorkspaceDataCache } from "@/lib/colleges/workspace-cache";
 
 /** Failed API call: `status` is the HTTP status, `message` the backend's detail text. */
 export class ApiError extends Error {
@@ -87,6 +88,8 @@ export async function apiRequest<T = unknown>(
       errorMessage(value, response.status),
       value,
     );
+  if (method !== "GET" && !path.startsWith("auth/"))
+    invalidateWorkspaceDataCache();
   return value as T;
 }
 

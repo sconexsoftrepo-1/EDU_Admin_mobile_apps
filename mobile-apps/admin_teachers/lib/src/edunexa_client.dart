@@ -1,6 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../services/push_notifications.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 part 'mobile_workspace.dart';
 part 'assignment_workspace.dart';
+part 'certificate_workspace.dart';
 part 'workspace_widgets.dart';
 part 'workspace_forms.dart';
 part 'workspace_presentations.dart';

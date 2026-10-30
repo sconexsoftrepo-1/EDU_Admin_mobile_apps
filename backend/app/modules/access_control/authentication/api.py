@@ -106,16 +106,46 @@ def refresh(body: RefreshInput, request: Request, response: Response):
         if session and session["client"] == body.client:
             account = data["accounts"].get(session["user_code"])
             if session["used"]:
-                for s in data["sessions"].values():
-                    if s["family"] == session["family"]:
-                        s["revoked"] = True
-                audit(
-                    data,
-                    session["user_code"],
-                    "refresh_reuse_blocked",
-                    "sessions",
-                    session["code"],
+                # Parallel requests can reach separate API workers with the same old
+                # httpOnly cookie. Allow a short overlap only while a valid successor
+                # proves that this session family is still active.
+                current_time = time.time()
+                successor_exists = any(
+                    s["family"] == session["family"]
+                    and not s["used"]
+                    and not s["revoked"]
+                    and s["expires_at"] > current_time
+                    for s in data["sessions"].values()
                 )
+                within_overlap = (
+                    session.get("used_at_epoch") is not None
+                    and current_time - float(session["used_at_epoch"]) <= 30
+                )
+                if (
+                    within_overlap
+                    and successor_exists
+                    and account
+                    and account["active"]
+                    and body.client in account["clients"]
+                ):
+                    result = issue(
+                        data,
+                        account,
+                        body.client,
+                        request.app.state.settings,
+                        session["family"],
+                    )
+                else:
+                    for s in data["sessions"].values():
+                        if s["family"] == session["family"]:
+                            s["revoked"] = True
+                    audit(
+                        data,
+                        session["user_code"],
+                        "refresh_reuse_blocked",
+                        "sessions",
+                        session["code"],
+                    )
             elif (
                 not session["revoked"]
                 and session["expires_at"] > time.time()
@@ -125,6 +155,7 @@ def refresh(body: RefreshInput, request: Request, response: Response):
             ):
                 session["used"] = True
                 session["revoked"] = True
+                session["used_at_epoch"] = time.time()
                 result = issue(
                     data,
                     account,

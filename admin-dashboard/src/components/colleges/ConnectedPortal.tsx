@@ -79,12 +79,17 @@ import {
   workspaceCacheKey,
   writeWorkspaceCache,
   clearWorkspaceCache,
+  invalidateWorkspaceDataCache,
 } from "@/lib/colleges/workspace-cache";
 import EntryForm from "./RecordFormDrawer";
 import { feeHeadForm } from "@/lib/colleges/fee-head-form";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
 import AssignmentWorkspace from "./AssignmentWorkspace";
+import SyllabusWorkspace from "./SyllabusWorkspace";
+import CalendarWorkspace from "./CalendarWorkspace";
+import CertificateWorkspace from "./CertificateWorkspace";
+import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import StaffDirectory from "./staff/StaffDirectory";
@@ -317,19 +322,24 @@ export default function ConnectedPortal({
       if (sequence === requestSequence.current) apply(snapshot);
     } catch (e) {
       if (sequence === requestSequence.current) {
-        if (e instanceof ApiError && [401, 403].includes(e.status)) {
+        if (e instanceof ApiError && e.status === 401) {
           clearWorkspaceCache();
           setRows([]);
           setSpecial([]);
           setSummary(null);
           setResource(null);
           setScreen(null);
-          window.dispatchEvent(
-            new CustomEvent("edunexa:records-changed", {
-              detail: { permissions: true },
-            }),
-          );
           setError(errorText(e));
+        } else if (e instanceof ApiError && e.status === 403) {
+          invalidateWorkspaceDataCache();
+          setRows([]);
+          setSpecial([]);
+          setSummary(null);
+          setResource(null);
+          setScreen(null);
+          setError(
+            "Your role does not have access to this screen. Your session is still active.",
+          );
         } else
           setError(
             `${cached ? "Could not refresh; showing cached records. " : ""}${errorText(e)}`,
@@ -1010,7 +1020,25 @@ export default function ConnectedPortal({
       <section
         className={`edu-content ${selected === "student-enrollment" ? "edu-enroll" : ""}`}
       >
-        {selected === "assignments" ? (
+        {selected === "admissions" &&
+        resource?.name === "admission_enquiries" ? (
+          <AdmissionWorkspace
+            college={college}
+            path={resource.path}
+            canCreate={resource.actions.includes("create")}
+            canConvert={
+              resource.actions.includes("edit") &&
+              !!displayRole &&
+              (displayRole.system_admin ||
+                displayRole.permissions.student_enrollments?.includes(
+                  "create",
+                ) ||
+                displayRole.permissions.admission_applications?.includes(
+                  "approve",
+                ))
+            }
+          />
+        ) : selected === "assignments" ? (
           <AssignmentWorkspace
             allowCreate={
               !!displayRole &&
@@ -1019,6 +1047,12 @@ export default function ConnectedPortal({
                 displayRole.permissions.assignments?.includes("create"))
             }
           />
+        ) : selected === "syllabus" ? (
+          <SyllabusWorkspace />
+        ) : selected === "calendar" ? (
+          <CalendarWorkspace />
+        ) : selected === "certificates" || selected === "certificate-requests" ? (
+          <CertificateWorkspace />
         ) : (
           <>
             <header
@@ -1149,7 +1183,10 @@ export default function ConnectedPortal({
               </section>
             )}
             <div className="edu-card">
-              <div className="edu-toolbar" hidden={!!staffKind}>
+              <div
+                className="edu-toolbar"
+                hidden={!!staffKind || resource?.name === "calendar_events"}
+              >
                 {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
                   <>
                     <select
@@ -1373,280 +1410,293 @@ export default function ConnectedPortal({
                   onAdd={() => setStaffForm(true)}
                 />
               )}
-              {resource && !staffKind && (
-                <>
-                  {cards && (
-                    <CourseCards
-                      rows={rows}
-                      canEdit={resource.actions.includes("edit")}
-                      canDelete={resource.actions.includes("delete")}
-                      onEdit={(row) => void edit(row)}
-                      onDelete={(row) => removeRow(row, true)}
-                    />
-                  )}
-                  {!cards && (
-                    <div className="edu-table">
-                      <table>
-                        <thead>
-                          <tr>
-                            {columns.map((k) => (
-                              <th
-                                key={k}
-                                className={alignClass(k) || undefined}
-                              >
-                                {studentRegister &&
-                                k !== "profile_photo_url" &&
-                                k !== "course_level" &&
-                                !["status", "email"].includes(k) ? (
-                                  <div className="edu-column-heading">
-                                    <span>{columnLabel(k)}</span>
-                                    <TableColumnFilter
-                                      label={columnLabel(k)}
-                                      options={
-                                        filterOptions[k] ||
-                                        [
-                                          ...new Set(
-                                            rows.map((row) =>
-                                              String(cellValue(row, k) || ""),
-                                            ),
-                                          ),
-                                        ].sort()
-                                      }
-                                      value={columnFilters[k]}
-                                      onChange={(values) =>
-                                        setColumnFilters((current) => {
-                                          const next = { ...current };
-                                          if (values === undefined)
-                                            delete next[k];
-                                          else next[k] = values;
-                                          return next;
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                ) : (
-                                  columnLabel(k)
-                                )}
-                              </th>
-                            ))}
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {visibleRows.map((row) => (
-                            <tr key={String(row.code)}>
+              {resource?.name === "calendar_events" && !staffKind ? (
+                <CalendarWorkspace />
+              ) : (
+                resource &&
+                !staffKind && (
+                  <>
+                    {cards && (
+                      <CourseCards
+                        rows={rows}
+                        canEdit={resource.actions.includes("edit")}
+                        canDelete={resource.actions.includes("delete")}
+                        onEdit={(row) => void edit(row)}
+                        onDelete={(row) => removeRow(row, true)}
+                      />
+                    )}
+                    {!cards && (
+                      <div className="edu-table">
+                        <table>
+                          <thead>
+                            <tr>
                               {columns.map((k) => (
-                                <td
+                                <th
                                   key={k}
-                                  className={
-                                    isDetails(row[k])
-                                      ? "edu-kv-cell"
-                                      : alignClass(k) || undefined
-                                  }
+                                  className={alignClass(k) || undefined}
                                 >
-                                  {k === "profile_photo_url" ? (
-                                    <PersonPhoto
-                                      value={row.profile_photo_url}
-                                      name={String(
-                                        cellValue(row, "student_name") ||
-                                          row.code,
-                                      )}
-                                    />
-                                  ) : isDetails(row[k]) ? (
-                                    <Details value={row[k]} />
-                                  ) : (
-                                    text(cellValue(row, k))
-                                  )}
-                                </td>
-                              ))}
-                              <td>
-                                <div className="edu-row-actions">
-                                  {[
-                                    "students",
-                                    "employees",
-                                    "admission_applications",
-                                  ].includes(resource.name) &&
-                                    !studentRegister && (
-                                      <IconAction
-                                        kind="files"
-                                        label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
-                                        onClick={() =>
-                                          setFileOwner({
-                                            personKind:
-                                              resource.name === "students"
-                                                ? "student"
-                                                : resource.name === "employees"
-                                                  ? "employee"
-                                                  : "application",
-                                            personCode: String(row.code),
+                                  {studentRegister &&
+                                  k !== "profile_photo_url" &&
+                                  k !== "course_level" &&
+                                  !["status", "email"].includes(k) ? (
+                                    <div className="edu-column-heading">
+                                      <span>{columnLabel(k)}</span>
+                                      <TableColumnFilter
+                                        label={columnLabel(k)}
+                                        options={
+                                          filterOptions[k] ||
+                                          [
+                                            ...new Set(
+                                              rows.map((row) =>
+                                                String(cellValue(row, k) || ""),
+                                              ),
+                                            ),
+                                          ].sort()
+                                        }
+                                        value={columnFilters[k]}
+                                        onChange={(values) =>
+                                          setColumnFilters((current) => {
+                                            const next = { ...current };
+                                            if (values === undefined)
+                                              delete next[k];
+                                            else next[k] = values;
+                                            return next;
                                           })
                                         }
                                       />
+                                    </div>
+                                  ) : (
+                                    columnLabel(k)
+                                  )}
+                                </th>
+                              ))}
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {visibleRows.map((row) => (
+                              <tr key={String(row.code)}>
+                                {columns.map((k) => (
+                                  <td
+                                    key={k}
+                                    className={
+                                      isDetails(row[k])
+                                        ? "edu-kv-cell"
+                                        : alignClass(k) || undefined
+                                    }
+                                  >
+                                    {k === "profile_photo_url" ? (
+                                      <PersonPhoto
+                                        value={row.profile_photo_url}
+                                        name={String(
+                                          cellValue(row, "student_name") ||
+                                            row.code,
+                                        )}
+                                      />
+                                    ) : isDetails(row[k]) ? (
+                                      <Details value={row[k]} />
+                                    ) : (
+                                      text(cellValue(row, k))
                                     )}
-                                  {resource.actions.includes("edit") && (
-                                    <IconAction
-                                      kind="edit"
-                                      label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                      onClick={() => edit(row)}
-                                    />
-                                  )}
-                                  {studentTable && (
-                                    <button
-                                      type="button"
-                                      className="icon-action"
-                                      aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
-                                      title="Student information"
-                                      onClick={() => setStudentInfo(row)}
-                                    >
-                                      <Info size={16} />
-                                    </button>
-                                  )}
-                                  {!studentRegister &&
-                                    resource.actions.includes("delete") && (
-                                      <IconAction
-                                        kind="delete"
-                                        label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                        onClick={async () => {
-                                          if (!confirm("Delete this record?"))
-                                            return;
-                                          try {
-                                            const kind =
-                                              DOWNLOAD_KIND_BY_TABLE[
-                                                resource.name
-                                              ];
-                                            if (
-                                              [
-                                                "document",
-                                                "tax-document",
-                                                "admission-document",
-                                                "import-workbook",
-                                              ].includes(kind)
-                                            ) {
-                                              await api.documents.remove(
-                                                kind,
-                                                String(row.code),
-                                              );
-                                            } else {
-                                              await api.workspace.remove(
-                                                resource.path,
-                                                String(row.code),
-                                              );
-                                            }
-                                            toast.success(
-                                              `${String(row.name ?? row.code)} deleted successfully`,
-                                            );
-                                            await refreshResource(resource);
-                                          } catch (e) {
-                                            setError(errorText(e));
+                                  </td>
+                                ))}
+                                <td>
+                                  <div className="edu-row-actions">
+                                    {resource.name === "notifications" && Boolean(row.certificate_request_code) && (
+                                      <button type="button" className="edu-primary" onClick={() => setSelected("certificate-requests")}>
+                                        Review certificate
+                                      </button>
+                                    )}
+                                    {[
+                                      "students",
+                                      "employees",
+                                      "admission_applications",
+                                    ].includes(resource.name) &&
+                                      !studentRegister && (
+                                        <IconAction
+                                          kind="files"
+                                          label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
+                                          onClick={() =>
+                                            setFileOwner({
+                                              personKind:
+                                                resource.name === "students"
+                                                  ? "student"
+                                                  : resource.name ===
+                                                      "employees"
+                                                    ? "employee"
+                                                    : "application",
+                                              personCode: String(row.code),
+                                            })
                                           }
-                                        }}
+                                        />
+                                      )}
+                                    {resource.actions.includes("edit") && (
+                                      <IconAction
+                                        kind="edit"
+                                        label={`Edit ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                        onClick={() => edit(row)}
                                       />
                                     )}
-                                  {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
-                                    <button
-                                      onClick={() =>
-                                        download(() =>
-                                          api.documents.download(
-                                            DOWNLOAD_KIND_BY_TABLE[
-                                              resource.name
-                                            ],
-                                            String(row.code),
-                                          ),
-                                        )
-                                      }
-                                    >
-                                      Download
-                                    </button>
-                                  )}
-                                  {resource.name === "import_jobs" &&
-                                    row.status === "validated" && (
+                                    {studentTable && (
                                       <button
-                                        onClick={async () => {
-                                          try {
-                                            await api.imports.commit(
+                                        type="button"
+                                        className="icon-action"
+                                        aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
+                                        title="Student information"
+                                        onClick={() => setStudentInfo(row)}
+                                      >
+                                        <Info size={16} />
+                                      </button>
+                                    )}
+                                    {!studentRegister &&
+                                      resource.actions.includes("delete") && (
+                                        <IconAction
+                                          kind="delete"
+                                          label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                          onClick={async () => {
+                                            if (!confirm("Delete this record?"))
+                                              return;
+                                            try {
+                                              const kind =
+                                                DOWNLOAD_KIND_BY_TABLE[
+                                                  resource.name
+                                                ];
+                                              if (
+                                                [
+                                                  "document",
+                                                  "tax-document",
+                                                  "admission-document",
+                                                  "import-workbook",
+                                                ].includes(kind)
+                                              ) {
+                                                await api.documents.remove(
+                                                  kind,
+                                                  String(row.code),
+                                                );
+                                              } else {
+                                                await api.workspace.remove(
+                                                  resource.path,
+                                                  String(row.code),
+                                                );
+                                              }
+                                              toast.success(
+                                                `${String(row.name ?? row.code)} deleted successfully`,
+                                              );
+                                              await refreshResource(resource);
+                                            } catch (e) {
+                                              setError(errorText(e));
+                                            }
+                                          }}
+                                        />
+                                      )}
+                                    {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
+                                      <button
+                                        onClick={() =>
+                                          download(() =>
+                                            api.documents.download(
+                                              DOWNLOAD_KIND_BY_TABLE[
+                                                resource.name
+                                              ],
                                               String(row.code),
-                                            );
-                                            toast.success(
-                                              "Import committed successfully",
-                                            );
-                                            await refreshResource(resource);
-                                          } catch (e) {
-                                            setError(errorText(e));
-                                          }
-                                        }}
+                                            ),
+                                          )
+                                        }
                                       >
-                                        Commit import
+                                        Download
                                       </button>
                                     )}
-                                  {resource.name === "certificate_requests" &&
-                                    row.status === "pending" && (
-                                      <button
-                                        onClick={async () => {
-                                          try {
-                                            await api.documents.issueCertificate(
-                                              {
-                                                request_code: String(row.code),
-                                              },
-                                            );
-                                            toast.success(
-                                              "Certificate issued successfully",
-                                            );
-                                            await refreshResource(resource);
-                                          } catch (e) {
-                                            setError(errorText(e));
-                                          }
-                                        }}
-                                      >
-                                        Authorize and issue
-                                      </button>
-                                    )}
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                  {!cards && !busy && rows.length === 0 && (
-                    <p className="edu-empty">
-                      {selected === "student-enrollment"
-                        ? filter || Object.keys(columnFilters).length > 0
-                          ? "No students match these filters. Clear the filters or change your search."
-                          : "No students enrolled yet. Use Student enrollment to add a student."
-                        : "No records yet. Use Create record or complete the preceding setup steps."}
-                    </p>
-                  )}
-                  {!cards && selected !== "student-enrollment" && (
-                    <p>
-                      {rows.length} of {total} records
-                    </p>
-                  )}
-                  {pageOffset > 0 && (
-                    <button
-                      onClick={() =>
-                        refreshResource(
-                          resource,
-                          Math.max(
-                            0,
-                            pageOffset - (pageSize(resource.name) || 50),
-                          ),
-                        )
-                      }
-                    >
-                      Previous page
-                    </button>
-                  )}
-                  {total > pageOffset + rows.length && (
-                    <button
-                      onClick={() =>
-                        refreshResource(resource, pageOffset + rows.length)
-                      }
-                    >
-                      Next page
-                    </button>
-                  )}
-                </>
+                                    {resource.name === "import_jobs" &&
+                                      row.status === "validated" && (
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              await api.imports.commit(
+                                                String(row.code),
+                                              );
+                                              toast.success(
+                                                "Import committed successfully",
+                                              );
+                                              await refreshResource(resource);
+                                            } catch (e) {
+                                              setError(errorText(e));
+                                            }
+                                          }}
+                                        >
+                                          Commit import
+                                        </button>
+                                      )}
+                                    {resource.name === "certificate_requests" &&
+                                      row.status === "pending" && (
+                                        <button
+                                          onClick={async () => {
+                                            try {
+                                              await api.documents.issueCertificate(
+                                                {
+                                                  request_code: String(
+                                                    row.code,
+                                                  ),
+                                                },
+                                              );
+                                              toast.success(
+                                                "Certificate issued successfully",
+                                              );
+                                              await refreshResource(resource);
+                                            } catch (e) {
+                                              setError(errorText(e));
+                                            }
+                                          }}
+                                        >
+                                          Authorize and issue
+                                        </button>
+                                      )}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {!cards && !busy && rows.length === 0 && (
+                      <p className="edu-empty">
+                        {selected === "student-enrollment"
+                          ? filter || Object.keys(columnFilters).length > 0
+                            ? "No students match these filters. Clear the filters or change your search."
+                            : "No students enrolled yet. Use Student enrollment to add a student."
+                          : "No records yet. Use Create record or complete the preceding setup steps."}
+                      </p>
+                    )}
+                    {!cards && selected !== "student-enrollment" && (
+                      <p>
+                        {rows.length} of {total} records
+                      </p>
+                    )}
+                    {pageOffset > 0 && (
+                      <button
+                        onClick={() =>
+                          refreshResource(
+                            resource,
+                            Math.max(
+                              0,
+                              pageOffset - (pageSize(resource.name) || 50),
+                            ),
+                          )
+                        }
+                      >
+                        Previous page
+                      </button>
+                    )}
+                    {total > pageOffset + rows.length && (
+                      <button
+                        onClick={() =>
+                          refreshResource(resource, pageOffset + rows.length)
+                        }
+                      >
+                        Next page
+                      </button>
+                    )}
+                  </>
+                )
               )}
             </div>
             {special.map((row, i) => (
