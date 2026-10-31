@@ -76,10 +76,15 @@ def roster(data, year_code, program_code, section_code=None):
     year = data["records"].get("academic_years", {}).get(year_code)
     if not year or year.get("program_code") != program_code:
         raise HTTPException(422, "Select an academic batch belonging to this course")
-    batches = {b["code"] for b in rows(data, "batches") if b["program_code"] == program_code
-               and (b["code"] == year.get("batch_code") or b.get("academic_year_code") == year_code
-                    or (int(b["entry_year"]) == int(str(year["start_date"])[:4])
-                        and int(b["graduation_year"]) == int(str(year["end_date"])[:4])))}
+    candidates = [b for b in rows(data, "batches") if b["program_code"] == program_code]
+    # Explicit links take precedence over a historical date-range match.
+    batches = {b["code"] for b in candidates if b["code"] == year.get("batch_code")}
+    if not batches:
+        batches = {b["code"] for b in candidates if b.get("academic_year_code") == year_code}
+    if not batches:
+        batches = {b["code"] for b in candidates if not b.get("academic_year_code")
+                   and int(b["entry_year"]) == int(str(year["start_date"])[:4])
+                   and int(b["graduation_year"]) == int(str(year["end_date"])[:4])}
     sections = {s["code"] for s in rows(data, "sections") if s["batch_code"] in batches}
     if section_code and section_code not in sections:
         raise HTTPException(422, "The section does not belong to this academic batch")
