@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import Image from "next/image";
 import { Camera, CheckCircle2, ArrowDown } from "lucide-react";
@@ -245,11 +246,8 @@ export default function ERPFormFields({
                   defaultValue: f.value,
                   "aria-invalid": !!errors[f.key],
                   "aria-describedby": `erp-help-${f.key}`,
-                  onChange: (
-                    e: ChangeEvent<
-                      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-                    >,
-                  ) => change(f.key, e.target.value),
+                  onChange: (e: { target: { value: string } }) =>
+                    change(f.key, e.target.value),
                   onInvalid: (
                     e: SyntheticEvent<
                       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -289,7 +287,7 @@ export default function ERPFormFields({
                       </div>
                     )}
                     {f.type === "select" ? (
-                      <select {...props}>
+                      <Select {...props}>
                         {f.options
                           ?.filter(
                             (o) =>
@@ -316,7 +314,7 @@ export default function ERPFormFields({
                                     : o}
                             </option>
                           ))}
-                      </select>
+                      </Select>
                     ) : f.type === "textarea" ? (
                       <textarea {...props} rows={4} />
                     ) : f.type === "date" ? (

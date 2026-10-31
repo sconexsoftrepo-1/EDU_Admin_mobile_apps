@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import AdminFinanceMobile from "./AdminFinanceMobile";
 import { useRouter } from "next/navigation";
 import AcademicTimetableGrid from "./AcademicTimetableGrid";
@@ -910,7 +911,7 @@ export default function MobileAppsWorkspace({
         Notifications ·{" "}
         {notifications.filter((n) => n.status !== "Read").length} unread
       </h3>
-      <select
+      <Select
         aria-label="App notification filter"
         value={notificationFilter}
         onChange={(e) => setNotificationFilter(e.target.value)}
@@ -918,8 +919,8 @@ export default function MobileAppsWorkspace({
         <option>All</option>
         <option>Unread</option>
         <option>Read</option>
-      </select>
-      <select
+      </Select>
+      <Select
         aria-label="Notification category"
         value={notificationCategory}
         onChange={(e) => setNotificationCategory(e.target.value)}
@@ -935,7 +936,7 @@ export default function MobileAppsWorkspace({
         ].map((c) => (
           <option key={c}>{c}</option>
         ))}
-      </select>
+      </Select>
       {notifications
         .filter(
           (n) =>
@@ -1696,7 +1697,7 @@ export default function MobileAppsWorkspace({
         {admin && (
           <label>
             Institution
-            <select
+            <Select
               aria-label="Emulator institution"
               value={college.slug}
               onChange={(e) =>
@@ -1710,7 +1711,7 @@ export default function MobileAppsWorkspace({
                   {c.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         )}
         <p>Explore your connected campus.</p>
@@ -1745,7 +1746,7 @@ export default function MobileAppsWorkspace({
         {admin && (
           <label>
             Demo account
-            <select
+            <Select
               aria-label="Demo app account"
               value={selected?.id || ""}
               onChange={(e) => {
@@ -1759,13 +1760,13 @@ export default function MobileAppsWorkspace({
                   {u.name} · {u.id}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         )}
         {parent && (
           <label>
             Linked student
-            <select
+            <Select
               aria-label="Linked student"
               value={student?.id || ""}
               onChange={(e) => setChildId(e.target.value)}
@@ -1777,12 +1778,12 @@ export default function MobileAppsWorkspace({
                     {st.name}
                   </option>
                 ))}
-            </select>
+            </Select>
           </label>
         )}
         <label>
           Device width
-          <select
+          <Select
             aria-label="Device width"
             value={size}
             onChange={(e) => setSize(e.target.value)}
@@ -1793,11 +1794,11 @@ export default function MobileAppsWorkspace({
             <option value="390">Standard · 390</option>
             <option value="414">Wide · 414</option>
             <option value="430">Large · 430</option>
-          </select>
+          </Select>
         </label>
         <label>
           Open app screen
-          <select
+          <Select
             aria-label="Open app screen"
             value={tab}
             onChange={(e) => setTab(e.target.value)}
@@ -1805,7 +1806,7 @@ export default function MobileAppsWorkspace({
             {safeTabs.map((t) => (
               <option key={t}>{t}</option>
             ))}
-          </select>
+          </Select>
         </label>
         <button onClick={() => setTab("Home")}>
           <RotateCcw size={15} /> Reset navigation
@@ -1877,7 +1878,7 @@ export default function MobileAppsWorkspace({
           </header>
           {parent && student && (
             <div className="app-child-switch">
-              <select
+              <Select
                 aria-label="App selected child"
                 value={student.id}
                 onChange={(e) => setChildId(e.target.value)}
@@ -1889,7 +1890,7 @@ export default function MobileAppsWorkspace({
                       {st.name}
                     </option>
                   ))}
-              </select>
+              </Select>
             </div>
           )}
           <main

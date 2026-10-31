@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { Component, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -228,7 +229,7 @@ export default function TransportWorkspace({
       <div className="ops-toolbar">
         <label>
           Selected vehicle
-          <select
+          <Select
             aria-label="Selected vehicle"
             value={bus.id}
             onChange={(e) => {
@@ -241,11 +242,13 @@ export default function TransportWorkspace({
                 {b.name} · {occupancy(state, b.id).occupied}/{b.seats.length}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         {writable && (
           <>
-            <button onClick={() => editBus()}>Add bus</button>
+            <button className="erp-primary" onClick={() => editBus()}>
+              Add bus
+            </button>
             <button onClick={() => editBus(bus)}>Edit selected bus</button>
           </>
         )}
@@ -294,7 +297,7 @@ export default function TransportWorkspace({
                     </SceneBoundary>
                   </div>
                   <div className="ops-camera-controls">
-                    <select
+                    <Select
                       aria-label="Camera view"
                       value={view}
                       onChange={(e) => setView(e.target.value)}
@@ -309,7 +312,7 @@ export default function TransportWorkspace({
                       ].map((v) => (
                         <option key={v}>{v}</option>
                       ))}
-                    </select>
+                    </Select>
                     <button aria-pressed={roof} onClick={() => setRoof(!roof)}>
                       Toggle roof
                     </button>
@@ -540,7 +543,7 @@ export default function TransportWorkspace({
                   <>
                     <label>
                       Passenger type
-                      <select
+                      <Select
                         aria-label="Passenger type"
                         value={kind}
                         onChange={(e) => setKind(e.target.value)}
@@ -548,7 +551,7 @@ export default function TransportWorkspace({
                         {["Student", "Faculty", "Staff"].map((x) => (
                           <option key={x}>{x}</option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       Find passenger
@@ -598,7 +601,7 @@ export default function TransportWorkspace({
                 </h3>
                 <label>
                   Passenger list filter
-                  <select
+                  <Select
                     aria-label="Passenger list filter"
                     value={rosterFilter}
                     onChange={(e) => setRosterFilter(e.target.value)}
@@ -606,7 +609,7 @@ export default function TransportWorkspace({
                     {["All", "Student", "Faculty", "Staff"].map((x) => (
                       <option key={x}>{x}</option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <label>
                   Search occupied passengers

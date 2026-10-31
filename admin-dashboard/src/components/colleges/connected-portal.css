@@ -137,6 +137,9 @@
 .edu-toolbar input {
   max-width: 100%;
 }
+.edu-toolbar :where(.combo) {
+  max-width: 100%;
+}
 .edu-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -242,6 +245,9 @@
 .edu-field-grid input,
 .edu-field-grid textarea,
 .edu-field-grid select {
+  width: 100%;
+}
+.edu-field-grid :where(.combo) {
   width: 100%;
 }
 .edu-field-grid input[type="checkbox"] {
@@ -580,9 +586,9 @@
 }
 /* Explicit foreground/background pairs keep labels readable in every button state. */
 .edu-connected .edu-primary {
-  background: #a46a27;
+  background: var(--erp-primary-bg, #a46a27);
   color: #fff;
-  border-color: #a46a27;
+  border-color: #b27b35;
 }
 .edu-connected .edu-primary:is(:hover, :focus-visible, :active):not(:disabled) {
   background: #87511d;
@@ -832,6 +838,9 @@
   border-radius: 8px;
   font: inherit;
 }
+.edu-batch-controls :where(.combo) {
+  width: 100%;
+}
 .edu-batch-hint {
   color: #657183;
   font-size: 12px;
@@ -977,8 +986,8 @@
 }
 .edu-connected .edu-batch-manager .edu-primary {
   color: #fff;
-  background: #a46a27;
-  border-color: #a46a27;
+  background: var(--erp-primary-bg, #a46a27);
+  border-color: #b27b35;
 }
 .edu-connected
   .edu-batch-manager

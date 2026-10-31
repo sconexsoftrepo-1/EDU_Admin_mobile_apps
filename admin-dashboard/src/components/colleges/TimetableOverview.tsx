@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import TimetableEditor from "./TimetableEditor";
 import type { OperationRecord } from "@/lib/colleges/operations";
 import { academicRooms, teachingLoad } from "@/lib/colleges/academic-engine";
@@ -217,7 +218,7 @@ export default function TimetableOverview({ college }: { college: College }) {
       {role === "Parent" && (
         <label>
           Linked student
-          <select
+          <Select
             aria-label="Timetable linked student"
             value={student?.id || ""}
             onChange={(e) => setChildId(e.target.value)}
@@ -227,7 +228,7 @@ export default function TimetableOverview({ college }: { college: College }) {
                 {s.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
       {!student && (
@@ -275,7 +276,7 @@ export default function TimetableOverview({ college }: { college: College }) {
           ).map((f) => (
             <label key={f.key}>
               {f.label}
-              <select
+              <Select
                 aria-label={`Timetable ${f.label.toLowerCase()}`}
                 value={f.value}
                 onChange={(e) => {
@@ -294,13 +295,13 @@ export default function TimetableOverview({ college }: { college: College }) {
                 {choices(f.key).map((v) => (
                   <option key={v}>{v}</option>
                 ))}
-              </select>
+              </Select>
             </label>
           ))}
           {!faculty && (
             <label>
               Faculty
-              <select
+              <Select
                 aria-label="Timetable faculty"
                 value={teacher}
                 onChange={(e) => setTeacher(e.target.value)}
@@ -313,7 +314,7 @@ export default function TimetableOverview({ college }: { college: College }) {
                       {s.name}
                     </option>
                   ))}
-              </select>
+              </Select>
             </label>
           )}
         </div>
@@ -360,14 +361,16 @@ export default function TimetableOverview({ college }: { college: College }) {
           ))}
           <button onClick={() => window.print()}>Print</button>
           {manage && (
-            <button onClick={() => setEditor({})}>Create timetable</button>
+            <button className="erp-primary" onClick={() => setEditor({})}>
+              Create timetable
+            </button>
           )}
         </div>
       </div>
       {view === "Day" && (
         <label>
           Selected day
-          <select value={day} onChange={(e) => setDay(e.target.value)}>
+          <Select value={day} onChange={(e) => setDay(e.target.value)}>
             {[
               "Monday",
               "Tuesday",
@@ -378,20 +381,20 @@ export default function TimetableOverview({ college }: { college: College }) {
             ].map((d) => (
               <option key={d}>{d}</option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
       {view === "Room" && (
         <label>
           Room view
-          <select value={room} onChange={(e) => setRoom(e.target.value)}>
+          <Select value={room} onChange={(e) => setRoom(e.target.value)}>
             <option value="">All rooms</option>
             {academicRooms(state).map((r) => (
               <option key={r.id} value={r.name}>
                 {r.name} · {r.capacity} seats
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
       {view === "Faculty" && (

@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useEffect, useState, type FormEvent } from "react";
 import {
@@ -200,11 +201,11 @@ export default function ConfigurationEditor({
           {kind === "role" && (
             <label>
               Access scope
-              <select value={scope} onChange={(e) => setScope(e.target.value)}>
+              <Select value={scope} onChange={(e) => setScope(e.target.value)}>
                 <option value="college">College administration</option>
                 <option value="teaching">Assigned teaching classes</option>
                 <option value="self">Personal access only</option>
-              </select>
+              </Select>
             </label>
           )}
           {kind === "role" && (
@@ -298,7 +299,7 @@ export default function ConfigurationEditor({
                   <>
                     <label>
                       Person type
-                      <select
+                      <Select
                         value={personType}
                         onChange={(e) => {
                           setPersonType(e.target.value);
@@ -308,11 +309,11 @@ export default function ConfigurationEditor({
                         <option value="employee">Employee</option>
                         <option value="student">Student</option>
                         <option value="parent">Parent</option>
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       Existing person
-                      <select
+                      <Select
                         value={person}
                         onChange={(e) => setPerson(e.target.value)}
                         required
@@ -323,7 +324,7 @@ export default function ConfigurationEditor({
                             {p.label} ({p.value})
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       Initial password
@@ -413,7 +414,7 @@ export default function ConfigurationEditor({
               <div className="edu-field-grid">
                 <label>
                   Screen binding
-                  <select
+                  <Select
                     value={binding}
                     onChange={(e) => setBinding(e.target.value)}
                   >
@@ -422,7 +423,7 @@ export default function ConfigurationEditor({
                         {s.replaceAll("_", " ")}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </label>
                 <label>
                   <span>
@@ -463,7 +464,7 @@ export default function ConfigurationEditor({
                     </label>
                     <label>
                       Type
-                      <select
+                      <Select
                         value={String(field.type)}
                         onChange={(e) => update(index, "type", e.target.value)}
                       >
@@ -480,7 +481,7 @@ export default function ConfigurationEditor({
                         ].map((t) => (
                           <option key={t}>{t}</option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       Section

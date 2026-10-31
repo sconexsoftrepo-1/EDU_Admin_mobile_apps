@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { X, ArrowRight } from "lucide-react";
@@ -120,7 +121,7 @@ export function OpsSheet({
                   {f.required !== false ? " *" : ""}
                 </span>
                 {f.options ? (
-                  <select
+                  <Select
                     name={f.key}
                     aria-label={f.label}
                     defaultValue={f.value || ""}
@@ -132,7 +133,7 @@ export function OpsSheet({
                         {o.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 ) : f.type === "textarea" ? (
                   <textarea
                     name={f.key}

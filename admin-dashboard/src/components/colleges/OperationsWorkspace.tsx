@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import TimetableOverview from "./TimetableOverview";
 import MobileAcademicCalendar from "./MobileAcademicCalendar";
 import PDFActions from "./PDFActions";
@@ -1071,7 +1072,7 @@ export default function OperationsWorkspace({
           </label>
           <label>
             Department
-            <select
+            <Select
               aria-label="Payroll department"
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
@@ -1082,7 +1083,7 @@ export default function OperationsWorkspace({
               ).map((d) => (
                 <option key={d}>{d}</option>
               ))}
-            </select>
+            </Select>
           </label>
           {module === "payroll" && (
             <>
@@ -1263,7 +1264,7 @@ export default function OperationsWorkspace({
           <div className="ops-toolbar">
             <label>
               Audience
-              <select
+              <Select
                 aria-label="Notification audience"
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
@@ -1277,11 +1278,11 @@ export default function OperationsWorkspace({
                 ].map((x) => (
                   <option key={x}>{x}</option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label>
               Program
-              <select
+              <Select
                 aria-label="Notification program"
                 value={program}
                 onChange={(e) => setProgram(e.target.value)}
@@ -1290,11 +1291,11 @@ export default function OperationsWorkspace({
                 {college.programs.map((p) => (
                   <option key={p.slug}>{p.name}</option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label>
               Academic year
-              <select
+              <Select
                 aria-label="Notification year"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
@@ -1305,7 +1306,7 @@ export default function OperationsWorkspace({
                     <option key={x}>{x}</option>
                   ),
                 )}
-              </select>
+              </Select>
             </label>
           </div>
           <strong>{recipients.length} eligible active accounts</strong>

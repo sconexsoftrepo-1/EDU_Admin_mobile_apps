@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import PDFActions from "./PDFActions";
 import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
@@ -158,7 +159,7 @@ export default function ERPTable({
             }}
           />
         </label>
-        <select
+        <Select
           aria-label="Status filter"
           value={status}
           onChange={(e) => {
@@ -172,7 +173,7 @@ export default function ERPTable({
           ).map((s) => (
             <option key={s}>{s}</option>
           ))}
-        </select>
+        </Select>
         <details className="erp-columns">
           <summary>Columns</summary>
           <div>
@@ -403,9 +404,9 @@ export default function ERPTable({
             : "0"}{" "}
           of {filtered.length}
         </span>
-        <select
+        <Select
           aria-label="Rows per page"
-          value={size}
+          value={String(size)}
           onChange={(e) => {
             setSize(+e.target.value);
             setPage(0);
@@ -416,7 +417,7 @@ export default function ERPTable({
               {n} per page
             </option>
           ))}
-        </select>
+        </Select>
         <button
           aria-label="Previous page"
           disabled={safePage === 0}

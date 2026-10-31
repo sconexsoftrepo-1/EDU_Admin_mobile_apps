@@ -753,6 +753,7 @@ export default function StaffOnboardingForm({
                       onKeyDown={addCertificate}
                     />
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() => addCertificate()}
                       disabled={!certificateName.trim()}
@@ -888,6 +889,7 @@ export default function StaffOnboardingForm({
                   icon={<Briefcase size={17} />}
                   aside={
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() =>
                         setExperience([
@@ -988,6 +990,7 @@ export default function StaffOnboardingForm({
                   title="Employment history"
                   aside={
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() =>
                         setHistory([
@@ -1072,6 +1075,7 @@ export default function StaffOnboardingForm({
                   icon={<Award size={17} />}
                   aside={
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() =>
                         setAchievements([
@@ -1273,7 +1277,7 @@ export default function StaffOnboardingForm({
                                 />
                               </td>
                               <td>
-                                <select
+                                <Select
                                   aria-label="Type"
                                   value={c.component_type}
                                   onChange={(e) =>
@@ -1285,7 +1289,7 @@ export default function StaffOnboardingForm({
                                 >
                                   <option value="earning">Earning</option>
                                   <option value="deduction">Deduction</option>
-                                </select>
+                                </Select>
                               </td>
                               <td>
                                 <input
@@ -1320,7 +1324,7 @@ export default function StaffOnboardingForm({
                     </table>
                     <button
                       type="button"
-                      className="stf-add-row"
+                      className="stf-add-row erp-primary"
                       onClick={() =>
                         setComponents([
                           ...components,

@@ -529,6 +529,10 @@
   padding: 10px;
   font-size: 12px;
 }
+.academic-editor-fields :is(input, :where(.combo)) {
+  width: 100%;
+  min-width: 0;
+}
 .academic-slot-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -553,6 +557,10 @@
   min-width: 0;
   width: 100%;
   padding: 8px;
+}
+.academic-slot-config :is(input, :where(.combo)) {
+  min-width: 0;
+  width: 100%;
 }
 .academic-day-options {
   display: flex;

@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { api, errorText } from "@/services/api";
 import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
@@ -596,7 +597,7 @@ export default function CollegePortal({
             </button>
           )}
           {allowed("Super Admin", "Admission Officer") && (
-            <button onClick={() => application()}>
+            <button className="erp-primary" onClick={() => application()}>
               New admission <Plus size={15} />
             </button>
           )}
@@ -2921,7 +2922,7 @@ export default function CollegePortal({
     <>
       <label>
         Academic year
-        <select
+        <Select
           aria-label="Academic year filter"
           value={year}
           onChange={(e) => setYear(e.target.value)}
@@ -2930,11 +2931,11 @@ export default function CollegePortal({
           {["2024-2025", "2025-2026", "2026-2027"].map((y) => (
             <option key={y}>{y}</option>
           ))}
-        </select>
+        </Select>
       </label>
       <label>
         Department
-        <select
+        <Select
           aria-label="Department filter"
           value={department}
           onChange={(e) => setDepartment(e.target.value)}
@@ -2943,7 +2944,7 @@ export default function CollegePortal({
           {Array.from(new Set(c.programs.map((p) => p.department))).map((d) => (
             <option key={d}>{d}</option>
           ))}
-        </select>
+        </Select>
       </label>
       <label>
         From

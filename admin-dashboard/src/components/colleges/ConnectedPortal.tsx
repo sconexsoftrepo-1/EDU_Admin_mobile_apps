@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import PersonFiles from "./PersonFiles";
 import AcademicYearForm from "./AcademicYearForm";
 import TableColumnFilter from "./TableColumnFilter";
@@ -1135,7 +1136,7 @@ export default function ConnectedPortal({
           <div className="edu-toolbar" hidden={!!staffKind}>
             {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
               <>
-                <select
+                <Select
                   aria-label="Screen resource"
                   value={resource.name}
                   onChange={(e) => {
@@ -1150,7 +1151,7 @@ export default function ConnectedPortal({
                       {r.title}
                     </option>
                   ))}
-                </select>
+                </Select>
                 {selected === "student-enrollment" ? (
                   <>
                     <label className="stf-search">

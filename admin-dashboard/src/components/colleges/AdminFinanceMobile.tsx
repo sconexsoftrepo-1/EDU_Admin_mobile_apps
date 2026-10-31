@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useState } from "react";
 import {
   ArrowDownToLine,
@@ -158,7 +159,7 @@ export default function AdminFinanceMobile({ college }: { college: College }) {
         <div className="en-admin-filters">
           <label>
             Collection period
-            <select
+            <Select
               value={period}
               onChange={(e) => setPeriod(e.target.value as AdminPeriod)}
             >
@@ -167,7 +168,7 @@ export default function AdminFinanceMobile({ college }: { college: College }) {
                   <option key={p}>{p}</option>
                 ),
               )}
-            </select>
+            </Select>
           </label>
           <label>
             As of

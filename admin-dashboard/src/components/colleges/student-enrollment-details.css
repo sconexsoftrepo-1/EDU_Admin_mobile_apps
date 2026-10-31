@@ -327,6 +327,9 @@ dialog.edu-record-drawer[open] {
   background: #fff;
   color: #30251c;
 }
+.edu-file-upload-form :is(input:not([type="file"]), :where(.combo)) {
+  width: 100%;
+}
 .edu-file-upload-form small {
   color: #7d6b54;
 }

@@ -869,6 +869,10 @@
   border-right: 0;
   background: #f4f6f8;
 }
+.enw-backdrop .enw-phone :where(.combo) {
+  flex: none;
+  width: 78px;
+}
 .enw-backdrop .enw-phone input {
   flex: 1;
   min-width: 0;

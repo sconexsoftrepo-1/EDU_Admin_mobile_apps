@@ -64,6 +64,9 @@
 /* Type-or-pick field (ComboInput): list opens below, same look as the sign-in role picker. */
 .combo {
   position: relative;
+}
+/* Zero specificity so a screen's own sizing for the field (e.g. a toolbar filter width) wins. */
+:where(.combo) {
   width: 100%;
 }
 .combo > :is(input, textarea) {

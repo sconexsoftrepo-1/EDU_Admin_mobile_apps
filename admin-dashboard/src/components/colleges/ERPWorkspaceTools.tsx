@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -602,14 +603,14 @@ export function NotificationCenter({
           </button>
         </div>
         <div className="erp-notification-controls">
-          <select
+          <Select
             aria-label="Notification filter"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">All updates</option>
             <option value="unread">Unread only</option>
-          </select>
+          </Select>
           <button onClick={() => mark(rows.map((r) => r.id))}>
             Mark all as read
           </button>

@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -175,7 +176,7 @@ export default function ERPInsights({
           <p>{config.note}</p>
         </div>
         <div className="erp-chart-controls">
-          <select
+          <Select
             aria-label="Insight metric"
             value={selectedMetric}
             onChange={(e) => {
@@ -186,15 +187,15 @@ export default function ERPInsights({
             {available.map((k) => (
               <option key={k}>{k}</option>
             ))}
-          </select>
-          <select
+          </Select>
+          <Select
             aria-label="Insight chart type"
             value={type}
             onChange={(e) => setType(e.target.value)}
           >
             <option value="donut">Donut</option>
             <option value="bars">Bars</option>
-          </select>
+          </Select>
         </div>
       </div>
       <div style={{ height: 190, width: "100%" }}>

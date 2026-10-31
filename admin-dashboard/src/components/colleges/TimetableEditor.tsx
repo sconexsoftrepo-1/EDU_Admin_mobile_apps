@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useEffect, useRef, useState } from "react";
 import type { College } from "@/data/colleges";
@@ -128,7 +129,7 @@ export default function TimetableEditor({
     <label key={key}>
       {label}
       {options ? (
-        <select
+        <Select
           aria-label={label}
           required
           value={data[key] || ""}
@@ -140,7 +141,7 @@ export default function TimetableEditor({
               {o.label}
             </option>
           ))}
-        </select>
+        </Select>
       ) : type === "date" ? (
         <DateInput
           aria-label={label}
@@ -294,7 +295,7 @@ export default function TimetableEditor({
                   {courses.length > 0 && (
                     <label>
                       Semester course
-                      <select
+                      <Select
                         value={data.name}
                         onChange={(e) => {
                           const c = courses.find(
@@ -313,7 +314,7 @@ export default function TimetableEditor({
                         {courses.map((c) => (
                           <option key={c.id}>{c.name}</option>
                         ))}
-                      </select>
+                      </Select>
                     </label>
                   )}
                   {field("Course / activity name", "name")}
@@ -376,10 +377,10 @@ export default function TimetableEditor({
                     </label>
                     <label>
                       Type
-                      <select name="kind">
+                      <Select name="kind">
                         <option>Classroom</option>
                         <option>Lab</option>
-                      </select>
+                      </Select>
                     </label>
                     <label>
                       Capacity
@@ -498,7 +499,7 @@ export default function TimetableEditor({
                           }))
                         }
                       />
-                      <select
+                      <Select
                         aria-label={`Slot ${i + 1} type`}
                         value={slot.kind}
                         onChange={(e) =>
@@ -519,7 +520,7 @@ export default function TimetableEditor({
                         <option>Teaching</option>
                         <option>Break</option>
                         <option>Lunch</option>
-                      </select>
+                      </Select>
                     </div>
                   ))}
                   <button

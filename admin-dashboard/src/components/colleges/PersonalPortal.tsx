@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -114,7 +115,7 @@ export default function PersonalPortal({
         {data && data.students.length > 1 && (
           <label>
             Student
-            <select
+            <Select
               value={student || data.selected_student_code || ""}
               onChange={(e) => setStudent(e.target.value)}
             >
@@ -123,7 +124,7 @@ export default function PersonalPortal({
                   {s.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         )}
         {error && (

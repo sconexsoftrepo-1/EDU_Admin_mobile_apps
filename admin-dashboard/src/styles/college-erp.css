@@ -12,6 +12,8 @@
   --erp-navy: #251e18;
   --erp-sidebar: #302016;
   --erp-danger: #b43540;
+  /* Shared fill for every Add / Create / primary action button. */
+  --erp-primary-bg: linear-gradient(125deg, #b27b35, #87511d);
   background: var(--erp-bg);
   color: var(--erp-ink);
   font-size: 12px;
@@ -56,7 +58,7 @@
   outline-offset: 3px;
 }
 .college-erp .erp-primary {
-  background: linear-gradient(125deg, #b27b35, #87511d);
+  background: var(--erp-primary-bg);
   border-color: #b27b35;
   color: white;
   box-shadow: 0 3px 10px #73441116;
@@ -1135,6 +1137,9 @@ body:has(.college-erp dialog[open]) {
     width: 100%;
     font-size: 9px;
     padding: 8px;
+  }
+  .college-erp .erp-filters :is(input, :where(.combo)) {
+    width: 100%;
   }
   .college-erp .erp-filters > button {
     grid-column: 1/-1;
@@ -2224,6 +2229,9 @@ body:has(.college-erp dialog[open]) {
   font-size: 12px;
   min-height: 43px;
 }
+.college-erp .erp-form-field :is(input, :where(.combo), textarea) {
+  width: 100%;
+}
 .college-erp .erp-form-field > small {
   display: block;
   font-size: 10px;
@@ -2747,7 +2755,7 @@ body:has(.college-erp dialog[open]) {
   padding-top: 0;
 }
 .college-erp .edu-embedded .edu-primary {
-  background: var(--erp-accent);
+  background: var(--erp-primary-bg);
 }
 .college-erp .erp-content,
 .college-erp .erp-workspace,
@@ -2932,6 +2940,9 @@ body:has(.college-erp dialog[open]) {
   flex: 1;
 }
 .erp-role-assign select {
+  width: 100%;
+}
+.erp-role-assign :where(.combo) {
   width: 100%;
 }
 .erp-role-confirm {
@@ -3384,7 +3395,7 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-primary {
   padding: 0 14px;
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: var(--erp-primary-bg);
   border: 0;
   color: #fff;
   box-shadow: 0 1px 2px #5a361333;
@@ -3415,6 +3426,11 @@ body:has(.college-erp dialog[open]) {
     padding: 12px;
   }
   .college-erp .edu-embedded .edu-enroll .edu-toolbar > :is(select, .stf-search) {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+  }
+  .college-erp .edu-embedded .edu-enroll .edu-toolbar > :is(:where(.combo), .stf-search) {
     flex: 1 1 100%;
     width: 100%;
     max-width: none;

@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useId, useState } from "react";
 import {
   Area,
@@ -90,7 +91,7 @@ export default function ERPAnalytics({
           <p>Completed payments · INR</p>
         </div>
         <div className="erp-chart-controls">
-          <select
+          <Select
             aria-label="Chart year"
             value={year}
             onChange={(e) => setYear(e.target.value)}
@@ -98,15 +99,15 @@ export default function ERPAnalytics({
             {years.map((y) => (
               <option key={y}>{y}</option>
             ))}
-          </select>
-          <select
+          </Select>
+          <Select
             aria-label="Chart type"
             value={kind}
             onChange={(e) => setKind(e.target.value)}
           >
             <option value="bars">Bars</option>
             <option value="area">Area</option>
-          </select>
+          </Select>
         </div>
       </div>
       <button

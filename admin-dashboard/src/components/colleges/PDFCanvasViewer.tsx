@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useEffect, useRef, useState } from "react";
 import type {
   PDFDocumentProxy,
@@ -142,7 +143,7 @@ export default function PDFCanvasViewer({
         </button>
         <label>
           Zoom
-          <select
+          <Select
             aria-label="PDF zoom"
             value={zoom}
             onChange={(e) => setZoom(e.target.value)}
@@ -152,7 +153,7 @@ export default function PDFCanvasViewer({
             <option value="1">100%</option>
             <option value="1.25">125%</option>
             <option value="1.5">150%</option>
-          </select>
+          </Select>
         </label>
       </div>
       <div

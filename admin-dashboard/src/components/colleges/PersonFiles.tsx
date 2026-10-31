@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "./SearchSelect";
 import { useEffect, useRef, useState } from "react";
 import {
   Download,
@@ -94,7 +95,7 @@ export function PersonFileList({
           {personKind === "application" && (
             <label>
               Document type
-              <select
+              <Select
                 value={documentType}
                 onChange={(e) => setDocumentType(e.target.value)}
               >
@@ -104,7 +105,7 @@ export function PersonFileList({
                     {t.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           )}
           <UploadBox

@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "./SearchSelect";
 import { useEffect, useState, type FormEvent } from "react";
 import { ArrowLeft, Pencil, Plus, Save, Trash2 } from "lucide-react";
 import { api, errorText, type LookupOption, type Row } from "@/services/api";
@@ -333,7 +334,7 @@ export default function FeeStructureManager({
             <div className="erp-fee-manager-fields">
               <label>
                 Course
-                <select
+                <Select
                   required
                   value={draft.program}
                   disabled={draft.existing}
@@ -347,11 +348,11 @@ export default function FeeStructureManager({
                       {option.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label>
                 Academic year
-                <select
+                <Select
                   required
                   value={draft.year}
                   disabled={draft.existing}
@@ -365,11 +366,11 @@ export default function FeeStructureManager({
                       {option.label}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label>
                 Fee basis
-                <select
+                <Select
                   value={draft.basis}
                   disabled={draft.existing}
                   onChange={(e) =>
@@ -378,7 +379,7 @@ export default function FeeStructureManager({
                 >
                   <option value="full_course">Full course total</option>
                   <option value="annual">Annual / study year</option>
-                </select>
+                </Select>
               </label>
               {draft.basis === "full_course" && (
                 <label>
@@ -476,7 +477,7 @@ export default function FeeStructureManager({
                   {draft.lines.map((line, index) => (
                     <tr key={line.key}>
                       <td>
-                        <select
+                        <Select
                           aria-label={`Fee head ${index + 1}`}
                           required
                           value={line.feeHead}
@@ -497,7 +498,7 @@ export default function FeeStructureManager({
                             </option>
                           ))}
                           <option value="_new">New fee head…</option>
-                        </select>
+                        </Select>
                         {line.feeHead === "_new" && (
                           <input
                             aria-label={`New fee head name ${index + 1}`}
@@ -513,7 +514,7 @@ export default function FeeStructureManager({
                       </td>
                       <td>
                         {line.feeHead === "_new" ? (
-                          <select
+                          <Select
                             aria-label={`Category ${index + 1}`}
                             value={line.category}
                             onChange={(event) =>
@@ -527,7 +528,7 @@ export default function FeeStructureManager({
                                 <option key={category}>{category}</option>
                               ),
                             )}
-                          </select>
+                          </Select>
                         ) : (
                           String(
                             data.heads.find(
@@ -582,7 +583,7 @@ export default function FeeStructureManager({
             </div>
             <button
               type="button"
-              className="erp-fee-add-row"
+              className="erp-fee-add-row erp-primary"
               onClick={() =>
                 setDraft({ ...draft, lines: [...draft.lines, newLine()] })
               }

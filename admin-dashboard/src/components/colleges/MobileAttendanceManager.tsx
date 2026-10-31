@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useState } from "react";
 import { useCollege } from "./CollegeStore";
 import { opRows } from "@/lib/colleges/operations";
@@ -58,7 +59,7 @@ export default function MobileAttendanceManager({
       <h4>Class attendance register</h4>
       <label>
         Assigned class
-        <select
+        <Select
           value={program}
           onChange={(e) => {
             setProgram(e.target.value);
@@ -68,7 +69,7 @@ export default function MobileAttendanceManager({
           {programs.map((p) => (
             <option key={p}>{p}</option>
           ))}
-        </select>
+        </Select>
       </label>
       <label>
         Attendance date
@@ -116,7 +117,7 @@ export default function MobileAttendanceManager({
               {s.name}
               <small>{s.id}</small>
             </span>
-            <select
+            <Select
               aria-label={`Attendance for ${s.name}`}
               value={marks[s.id] || "Present"}
               onChange={(e) => setMarks({ ...marks, [s.id]: e.target.value })}
@@ -124,7 +125,7 @@ export default function MobileAttendanceManager({
               {["Present", "Absent", "Late", "Excused"].map((v) => (
                 <option key={v}>{v}</option>
               ))}
-            </select>
+            </Select>
           </label>
         ))}
       </div>

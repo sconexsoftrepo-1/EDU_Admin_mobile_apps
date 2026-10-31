@@ -158,6 +158,9 @@
 .stf-salary td select {
   width: 100%;
 }
+.stf-salary td :where(.combo) {
+  width: 100%;
+}
 .stf-salary tr.deduction td:first-child input {
   border-left: 3px solid #c0584e;
 }
@@ -296,13 +299,13 @@
 .edu-connected .stf-directory-actions .stf-directory-add {
   gap: 8px;
   padding: 0 14px;
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: var(--erp-primary-bg);
   border: 0;
   color: #fff;
   box-shadow: 0 1px 2px #5a361333;
 }
 .edu-connected .stf-directory-actions .stf-directory-add:hover {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: var(--erp-primary-bg);
   color: #fff;
   filter: brightness(0.94);
 }

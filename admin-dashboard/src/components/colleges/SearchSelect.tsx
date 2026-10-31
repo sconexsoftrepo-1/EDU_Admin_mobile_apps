@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type SyntheticEvent,
 } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { oneLine, useAutoHeight } from "./useAutoHeight";
@@ -57,7 +58,11 @@ export default function Select({
   name,
   required,
   disabled,
+  id: fieldId,
+  onInvalid,
   "aria-label": ariaLabel,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedBy,
 }: {
   value?: string;
   defaultValue?: string;
@@ -66,14 +71,24 @@ export default function Select({
   name?: string;
   required?: boolean;
   disabled?: boolean;
+  id?: string;
+  onInvalid?: (e: SyntheticEvent<HTMLTextAreaElement>) => void;
   "aria-label"?: string;
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }) {
-  const all = readOptions(children);
-  const placeholder = all.find((o) => o.value === "")?.label || "Select";
-  const options = all.filter((o) => o.value !== "");
-  const [inner, setInner] = useState(defaultValue ?? "");
+  // The empty option ("All …", "Select …") stays pickable, as in a native select.
+  const options = readOptions(children);
+  const placeholder = options.find((o) => o.value === "")?.label || "Select";
+  // Like a native select, an uncontrolled field without an empty option starts on its first option.
+  const [inner, setInner] = useState(
+    defaultValue ??
+      (options.some((o) => o.value === "") ? "" : (options[0]?.value ?? "")),
+  );
   const current = value ?? inner;
-  const selected = options.find((o) => o.value === current);
+  const selected = current
+    ? options.find((o) => o.value === current)
+    : undefined;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
   const [active, setActive] = useState(-1);
@@ -123,7 +138,11 @@ export default function Select({
         ref={field}
         rows={1}
         role="combobox"
+        id={fieldId}
+        onInvalid={onInvalid}
         aria-label={ariaLabel}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
         aria-autocomplete="list"
         aria-expanded={open}
         aria-controls={id}

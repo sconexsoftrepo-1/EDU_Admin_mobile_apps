@@ -91,6 +91,19 @@
   min-height: 40px;
 }
 .college-erp
+  :is(
+    .ops-toolbar,
+    .ops-sheet,
+    .ops-app-controls,
+    .ops-seat-details,
+    .app-screen,
+    .app-child-switch
+  )
+  :is(input, :where(.combo), textarea) {
+  width: 100%;
+  min-width: 0;
+}
+.college-erp
   :is(.ops-workspace, .ops-transport, .ops-emulator, .ops-sheet)
   button {
   display: inline-flex;

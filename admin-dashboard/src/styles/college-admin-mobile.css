@@ -92,6 +92,10 @@
   color: #263c4a;
   font-size: 12px;
 }
+.en-admin-filters :where(.combo) {
+  min-width: 0;
+  width: 100%;
+}
 .en-admin-content {
   padding: 0 22px 20px;
   min-height: 360px;

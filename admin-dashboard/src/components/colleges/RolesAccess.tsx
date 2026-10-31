@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -455,7 +456,7 @@ export default function RolesAccess() {
                 <div className="erp-role-assign">
                   <label>
                     Assign an existing user
-                    <select
+                    <Select
                       aria-label="Existing user to assign"
                       value={accountCode}
                       onChange={(e) => setAccountCode(e.target.value)}
@@ -466,7 +467,7 @@ export default function RolesAccess() {
                           {user.login_id} — {user.person_code}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                   <button
                     className="erp-primary"

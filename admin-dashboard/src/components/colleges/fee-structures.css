@@ -212,6 +212,10 @@
   min-width: 0;
   width: 100%;
 }
+.erp-fee-manager :where(.combo) {
+  min-width: 0;
+  width: 100%;
+}
 .erp-fee-manager-scroll {
   max-width: 100%;
   overflow-x: auto;
@@ -243,8 +247,14 @@
 .erp-fee-manager td select {
   min-width: 160px;
 }
+.erp-fee-manager td :where(.combo) {
+  min-width: 160px;
+}
 .erp-fee-manager td input + input,
 .erp-fee-manager td select + input {
+  margin-top: 6px;
+}
+.erp-fee-manager td :where(.combo) + input {
   margin-top: 6px;
 }
 .erp-fee-manager .erp-fee-add-row {

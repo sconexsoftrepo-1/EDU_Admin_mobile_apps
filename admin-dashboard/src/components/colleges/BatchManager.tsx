@@ -1,4 +1,5 @@
 "use client";
+import Select from "./SearchSelect";
 import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -206,7 +207,7 @@ export default function BatchManager({
       <div className="edu-batch-controls">
         <label>
           Course
-          <select
+          <Select
             aria-label="View batches for course"
             value={course}
             disabled={saving}
@@ -227,7 +228,7 @@ export default function BatchManager({
                 {item.label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <button
           type="button"

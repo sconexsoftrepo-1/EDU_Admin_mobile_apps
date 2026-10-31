@@ -1724,6 +1724,7 @@ export default function StudentEnrollmentWizard({
                   title="Academic achievements (optional)"
                   aside={
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() =>
                         setAchievements([
@@ -1807,6 +1808,7 @@ export default function StudentEnrollmentWizard({
                   title="Certifications — NCC, NSS, sports, … (optional)"
                   aside={
                     <button
+                      className="erp-primary"
                       type="button"
                       onClick={() =>
                         setCertificates([
