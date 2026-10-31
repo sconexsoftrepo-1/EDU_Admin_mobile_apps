@@ -1,6 +1,13 @@
 "use client";
 import WorkspaceSkeleton from "./WorkspaceSkeleton";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import {
   Pencil,
   Plus,
@@ -9,6 +16,7 @@ import {
   FlaskConical,
   Check,
   X,
+  Layers,
 } from "lucide-react";
 import {
   courseWorkspace,
@@ -25,6 +33,7 @@ type Edit = {
   subject_type: string;
   credits: string;
 };
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 export default function CourseSemesterWorkspace({ course }: { course: Row }) {
   const code = String(course.code);
   const intermediate =
@@ -41,6 +50,8 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
     [editing, setEditing] = useState<Edit | null>(null),
     [adding, setAdding] = useState(false),
     [faculty, setFaculty] = useState<Record<string, string>>({});
+  const tabsId = useId();
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   useEffect(() => {
     let active = true;
     courseWorkspace
@@ -48,15 +59,7 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
       .then((r) => {
         if (active) {
           setData(r);
-          if (r.academic_years.length === 1) {
-            setYear(r.academic_years[0].code);
-            const eligible = r.sections.filter(
-              (s) =>
-                s.academic_year_code === r.academic_years[0].code &&
-                (!s.semester_number || s.semester_number === 1),
-            );
-            if (eligible.length === 1) setSection(eligible[0].code);
-          }
+          if (r.academic_years.length === 1) setYear(r.academic_years[0].code);
         }
       })
       .catch((e) => {
@@ -83,17 +86,73 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
     intermediate
       ? `${Math.floor((n - 1) / 2) + 1}-${((n - 1) % 2) + 1}`
       : `Semester ${n}`;
+  const semesters = Array.from(
+    { length: Number(course.duration_semesters) || 4 },
+    (_, i) => i + 1,
+  );
   const rows = (data?.items || []).filter(
     (s) => s.semester_number === semester,
   );
   const filtered = rows.filter((s) =>
     s.name.toLowerCase().includes(query.toLowerCase()),
   );
-  const sections = (data?.sections || []).filter(
-    (s) =>
-      s.academic_year_code === year &&
-      (!s.semester_number || s.semester_number === semester),
+  const yearSections = (data?.sections || []).filter(
+    (s) => s.academic_year_code === year,
   );
+  const sections = yearSections.filter(
+    (s) => !s.semester_number || s.semester_number === semester,
+  );
+  // One class for this semester is the active class; a batch without any section allocates
+  // to the whole batch (the backend creates its section on the first allocation).
+  const activeSection =
+    sections.length === 1
+      ? sections[0].code
+      : sections.some((s) => s.code === section)
+        ? section
+        : "";
+  const batchWide = !!year && !yearSections.length;
+  const scopeReady = !!activeSection || batchWide;
+  const offering = (subject: CurriculumItem) =>
+    activeSection
+      ? data?.offerings.find(
+          (o) =>
+            o.section_code === activeSection &&
+            o.subject_code === subject.subject_code,
+        )
+      : undefined;
+  const allocated = rows.filter((s) => offering(s)).length;
+  const teacherName = (teacher?: string) =>
+    data?.teachers.find((t) => t.code === teacher)?.name || teacher || "";
+  function chooseSemester(n: number) {
+    setSemester(n);
+    setSection("");
+    setQuery("");
+    setEditing(null);
+    setAdding(false);
+    setFaculty({});
+    setMessage("");
+  }
+  function tabKeys(event: KeyboardEvent<HTMLDivElement>) {
+    const index = semesters.indexOf(semester);
+    const next =
+      event.key === "ArrowRight"
+        ? (index + 1) % semesters.length
+        : event.key === "ArrowLeft"
+          ? (index - 1 + semesters.length) % semesters.length
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? semesters.length - 1
+              : -1;
+    if (next < 0 || busy) return;
+    event.preventDefault();
+    chooseSemester(semesters[next]);
+    tabRefs.current[next]?.focus();
+    tabRefs.current[next]?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+  }
   async function saveSubject(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!data) return;
@@ -126,11 +185,8 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
     }
   }
   async function assign(subject: CurriculumItem) {
-    if (!data || !year || !section) return;
-    const old = data.offerings.find(
-      (o) =>
-        o.section_code === section && o.subject_code === subject.subject_code,
-    );
+    if (!data || !year || !scopeReady) return;
+    const old = offering(subject);
     setBusy(true);
     setError("");
     setMessage("");
@@ -139,7 +195,7 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
         await courseWorkspace.assign(code, {
           revision: data.allocation_revision,
           academic_year_code: year,
-          section_code: section,
+          section_code: activeSection || null,
           subject_code: subject.subject_code,
           teacher_code: faculty[subject.subject_code],
           expected_teacher_code: old?.teacher_code || null,
@@ -218,6 +274,10 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
       </form>
     );
   }
+  const sectionName = sections.find((s) => s.code === activeSection)?.name;
+  const labs = rows.filter((s) => s.subject_type === "practical").length;
+  const theory = rows.length - labs;
+  const credits = rows.reduce((sum, s) => sum + Number(s.credits || 0), 0);
   return (
     <section
       className="crs-panel-section cs-workspace"
@@ -248,177 +308,226 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
         </p>
       )}
       {!data ? (
-        error ? <p>Use Refresh to retry.</p> : <WorkspaceSkeleton compact label="Loading semester subjects" />
+        error ? (
+          <p>Use Refresh to retry.</p>
+        ) : (
+          <WorkspaceSkeleton compact label="Loading semester subjects" />
+        )
       ) : (
         <>
-          <nav className="cs-tabs" role="tablist" aria-label="Course semesters">
-            {Array.from(
-              { length: Number(course.duration_semesters) || 4 },
-              (_, i) => i + 1,
-            ).map((n) => (
-              <button
-                type="button"
-                key={n}
-                role="tab"
-                aria-selected={semester === n}
-                disabled={busy}
-                onClick={() => {
-                  setSemester(n);
-                  setSection("");
-                  setQuery("");
-                  setEditing(null);
-                  setAdding(false);
-                  setFaculty({});
-                  setMessage("");
-                }}
-              >
-                {semesterName(n)}
-              </button>
-            ))}
-          </nav>
-          {intermediate && (
-            <p className="cs-note">1-2 means first year, second semester.</p>
-          )}
-          {data.status === "starter_draft" && (
-            <p className="cs-note">
-              Generated starter draft · verify against the approved syllabus.
-            </p>
-          )}
-          <div className="cs-summary">
-            <strong>
-              {rows.filter((s) => s.subject_type !== "practical").length}{" "}
-              subjects
-            </strong>
-            <strong>
-              {rows.filter((s) => s.subject_type === "practical").length} labs
-            </strong>
-            <span>
-              {rows.reduce((sum, s) => sum + Number(s.credits || 0), 0)} credits
-            </span>
-          </div>
-          <div className="cs-faculty-scope">
-            <label>
-              Academic batch
-              <Select
-                value={year}
-                disabled={busy}
-                onChange={(e) => {
-                  setYear(e.target.value);
-                  setSection("");
-                  setFaculty({});
-                }}
-              >
-                <option value="">Select academic batch</option>
-                {data.academic_years.map((y) => (
-                  <option key={y.code} value={y.code}>
-                    {y.name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label>
-              Class / section
-              <Select
-                value={section}
-                disabled={busy || !year}
-                onChange={(e) => {
-                  setSection(e.target.value);
-                  setFaculty({});
-                }}
-              >
-                <option value="">Select section</option>
-                {sections.map((s) => (
-                  <option key={s.code} value={s.code}>
-                    {s.name}
-                  </option>
-                ))}
-              </Select>
-            </label>
-          </div>
-          {year && !sections.length && (
-            <p className="cs-note">
-              No sections are configured for this batch and semester. Add a
-              class section before allocating faculty.
-            </p>
-          )}
-          <div className="cs-tools">
-            <SearchField
-              aria-label="Search semester subjects"
-              placeholder="Search subjects or labs"
-              value={query}
-              onValueChange={setQuery}
-              suggestions={searchValues(rows, ["name"])}
-            />
-            {data.can_edit && (
-              <button
-                type="button"
-                disabled={busy || adding || !!editing}
-                onClick={() => setAdding(true)}
-              >
-                <Plus size={16} />
-                Add subject / lab
-              </button>
-            )}
-          </div>
-          {adding && editor(null)}
-          <ul className="cs-subjects">
-            {filtered.map((subject) => {
-              const current = data.offerings.find(
-                (o) =>
-                  o.section_code === section &&
-                  o.subject_code === subject.subject_code,
-              );
-              const selected =
-                faculty[subject.subject_code] ?? current?.teacher_code ?? "";
+          <div
+            className="cs-tabs"
+            role="tablist"
+            aria-label="Course semesters"
+            onKeyDown={tabKeys}
+          >
+            {semesters.map((n, i) => {
+              const count = data.items.filter(
+                (s) => s.semester_number === n,
+              ).length;
               return (
-                <li key={subject.code || subject.subject_code}>
-                  {editing?.code === subject.code ? (
-                    editor(editing)
-                  ) : (
-                    <>
-                      <div className="cs-subject-main">
+                <button
+                  type="button"
+                  key={n}
+                  ref={(node) => {
+                    tabRefs.current[i] = node;
+                  }}
+                  id={`${tabsId}-tab-${n}`}
+                  role="tab"
+                  aria-selected={semester === n}
+                  aria-controls={`${tabsId}-panel`}
+                  tabIndex={semester === n ? 0 : -1}
+                  aria-label={`${semesterName(n)}, ${plural(count, "item")}`}
+                  disabled={busy}
+                  onClick={() => chooseSemester(n)}
+                >
+                  <span aria-hidden="true">
+                    {intermediate ? (
+                      semesterName(n)
+                    ) : (
+                      <>
+                        Sem<span className="cs-tab-long">ester</span> {n}
+                      </>
+                    )}
+                  </span>
+                  <small aria-hidden="true">{count}</small>
+                </button>
+              );
+            })}
+          </div>
+          <div
+            className="cs-panel"
+            role="tabpanel"
+            id={`${tabsId}-panel`}
+            aria-labelledby={`${tabsId}-tab-${semester}`}
+          >
+            {intermediate && (
+              <p className="cs-note">1-2 means first year, second semester.</p>
+            )}
+            {data.status === "starter_draft" && (
+              <p className="cs-note">
+                Generated starter draft · verify against the approved syllabus.
+              </p>
+            )}
+            <div className="cs-scope">
+              <label>
+                Academic batch
+                <Select
+                  value={year}
+                  disabled={busy}
+                  onChange={(e) => {
+                    setYear(e.target.value);
+                    setSection("");
+                    setFaculty({});
+                  }}
+                >
+                  <option value="">Select academic batch</option>
+                  {data.academic_years.map((y) => (
+                    <option key={y.code} value={y.code}>
+                      {y.name}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              {sections.length > 1 ? (
+                <label>
+                  Class / section
+                  <Select
+                    value={activeSection}
+                    disabled={busy}
+                    onChange={(e) => {
+                      setSection(e.target.value);
+                      setFaculty({});
+                    }}
+                  >
+                    <option value="">Select section</option>
+                    {sections.map((s) => (
+                      <option key={s.code} value={s.code}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              ) : (
+                <div className="cs-scope-field">
+                  <span>Class / section</span>
+                  <div
+                    className={`cs-scope-static ${scopeReady ? "is-active" : ""}`}
+                    role="status"
+                  >
+                    <Layers size={16} aria-hidden="true" />
+                    <strong>
+                      {!year
+                        ? "Select a batch first"
+                        : sectionName
+                          ? `Section ${sectionName}`
+                          : batchWide
+                            ? "Whole batch"
+                            : "No section this semester"}
+                    </strong>
+                    {scopeReady && <em>Active</em>}
+                  </div>
+                </div>
+              )}
+            </div>
+            {batchWide && (
+              <p className="cs-note">
+                This batch has no sections, so it is treated as one class. Its
+                section is created when you assign the first faculty.
+              </p>
+            )}
+            {year && !scopeReady && !sections.length && (
+              <p className="cs-note">
+                No section of this batch belongs to {semesterName(semester)}.
+                Add a class section before allocating faculty.
+              </p>
+            )}
+            <div className="cs-toolbar">
+              <div className="cs-summary" aria-label="Semester summary">
+                {(
+                  [
+                    [theory, "subject"],
+                    [labs, "lab"],
+                    [credits, "credit"],
+                  ] as const
+                ).map(([n, word]) => (
+                  <span key={word}>
+                    <strong>{n}</strong> {word}
+                    {n === 1 ? "" : "s"}
+                  </span>
+                ))}
+                {scopeReady && rows.length > 0 && (
+                  <span className="cs-summary-progress">
+                    <strong>
+                      {allocated}/{rows.length}
+                    </strong>{" "}
+                    faculty assigned
+                  </span>
+                )}
+              </div>
+              <div className="cs-tools">
+                <SearchField
+                  aria-label="Search semester subjects"
+                  placeholder="Search subjects or labs"
+                  value={query}
+                  onValueChange={setQuery}
+                  suggestions={searchValues(rows, ["name"])}
+                />
+                {data.can_edit && (
+                  <button
+                    type="button"
+                    disabled={busy || adding || !!editing}
+                    onClick={() => setAdding(true)}
+                  >
+                    <Plus size={16} />
+                    Add subject / lab
+                  </button>
+                )}
+              </div>
+            </div>
+            {adding && editor(null)}
+            <ul className="cs-subjects">
+              {filtered.map((subject) => {
+                const current = offering(subject);
+                const selected =
+                  faculty[subject.subject_code] ?? current?.teacher_code ?? "";
+                return (
+                  <li key={subject.code || subject.subject_code}>
+                    {editing?.code === subject.code ? (
+                      editor(editing)
+                    ) : (
+                      <>
                         <div className="cs-subject-name">
                           {subject.subject_type === "practical" ? (
-                            <FlaskConical size={19} />
+                            <FlaskConical size={18} />
                           ) : (
-                            <BookOpen size={19} />
+                            <BookOpen size={18} />
                           )}
                           <div>
                             <strong>{subject.name}</strong>
-                            <small>
-                              {subject.subject_type === "practical"
-                                ? "Lab / practical"
-                                : subject.subject_type}{" "}
-                              · {subject.credits || 0} credits
-                            </small>
+                            <div className="cs-subject-meta">
+                              <small>
+                                {subject.subject_type === "practical"
+                                  ? "Lab / practical"
+                                  : subject.subject_type}{" "}
+                                · {subject.credits || 0} credits
+                              </small>
+                              {scopeReady && (
+                                <span
+                                  className={`cs-pill ${current ? "is-assigned" : ""}`}
+                                >
+                                  {current ? "Assigned" : "Unassigned"}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        {data.can_edit && subject.code && (
-                          <button
-                            type="button"
-                            disabled={busy || adding || !!editing}
-                            aria-label={`Edit ${subject.name}`}
-                            onClick={() =>
-                              setEditing({
-                                code: subject.code!,
-                                name: subject.name,
-                                subject_type: subject.subject_type,
-                                credits: subject.credits || "0",
-                              })
-                            }
-                          >
-                            <Pencil size={15} />
-                          </button>
-                        )}
-                      </div>
-                      <div className="cs-faculty-row">
-                        {data.can_assign ? (
-                          <>
-                            <label>
-                              Faculty
+                        <div className="cs-faculty-row">
+                          {data.can_assign ? (
+                            <>
                               <Select
                                 aria-label={`Faculty for ${subject.name}`}
-                                disabled={busy || !section}
+                                disabled={busy || !scopeReady}
                                 value={selected}
                                 onChange={(e) =>
                                   setFaculty((all) => ({
@@ -428,9 +537,11 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
                                 }
                               >
                                 <option value="">
-                                  {section
+                                  {scopeReady
                                     ? "Select faculty"
-                                    : "Choose batch & section first"}
+                                    : year
+                                      ? "Select a section first"
+                                      : "Choose a batch first"}
                                 </option>
                                 {data.teachers.map((t) => (
                                   <option key={t.code} value={t.code}>
@@ -446,46 +557,60 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
                                     </option>
                                   )}
                               </Select>
-                            </label>
-                            <button
-                              type="button"
-                              disabled={
-                                busy ||
-                                !section ||
-                                !selected ||
-                                selected === current?.teacher_code
-                              }
-                              onClick={() => void assign(subject)}
-                            >
-                              Assign faculty
-                            </button>
-                          </>
-                        ) : (
-                          <span>
-                            Faculty:{" "}
-                            {section
-                              ? data.teachers.find(
-                                  (t) => t.code === current?.teacher_code,
-                                )?.name ||
-                                current?.teacher_code ||
-                                "Unassigned"
-                              : "Select a batch and section to view allocations"}
-                          </span>
+                              <button
+                                type="button"
+                                disabled={
+                                  busy ||
+                                  !scopeReady ||
+                                  !selected ||
+                                  selected === current?.teacher_code
+                                }
+                                onClick={() => void assign(subject)}
+                              >
+                                {current ? "Update" : "Assign"}
+                              </button>
+                            </>
+                          ) : (
+                            <span className="cs-faculty-readonly">
+                              {scopeReady
+                                ? teacherName(current?.teacher_code) ||
+                                  "Unassigned"
+                                : "Select a batch and section to view allocations"}
+                            </span>
+                          )}
+                        </div>
+                        {data.can_edit && subject.code && (
+                          <button
+                            type="button"
+                            className="cs-edit"
+                            disabled={busy || adding || !!editing}
+                            aria-label={`Edit ${subject.name}`}
+                            onClick={() =>
+                              setEditing({
+                                code: subject.code!,
+                                name: subject.name,
+                                subject_type: subject.subject_type,
+                                credits: subject.credits || "0",
+                              })
+                            }
+                          >
+                            <Pencil size={15} />
+                          </button>
                         )}
-                      </div>
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-          {!filtered.length && (
-            <p className="cs-note">
-              {rows.length
-                ? "No matching subjects."
-                : "No subjects or labs in this semester yet."}
-            </p>
-          )}
+                      </>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {!filtered.length && (
+              <p className="cs-note">
+                {rows.length
+                  ? "No matching subjects."
+                  : "No subjects or labs in this semester yet."}
+              </p>
+            )}
+          </div>
         </>
       )}
     </section>

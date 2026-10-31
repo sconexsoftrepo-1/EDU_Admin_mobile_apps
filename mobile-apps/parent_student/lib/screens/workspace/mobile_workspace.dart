@@ -18,7 +18,6 @@ class MobileWorkspace extends StatefulWidget {
 
 class _MobileWorkspaceState extends State<MobileWorkspace>
     with WidgetsBindingObserver {
-  final scaffoldKey = GlobalKey<ScaffoldState>();
   final search = TextEditingController();
   List<Json> screens = [];
   final Map<String, Json> cache = {};
@@ -249,8 +248,19 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     }
   }
 
-  void open(String? key) {
+  /// Screens to return to with Back: a module opened from Home or More goes back there.
+  final List<String?> history = [];
+
+  /// Opens [key] (null is Home). [remember] keeps the current screen for Back; bottom-bar tabs
+  /// pass false because they are top-level destinations whose Back returns Home.
+  void open(String? key, {bool remember = true}) {
     if (saving) return;
+    if (key == null) {
+      history.clear();
+    } else if (remember && key != selected) {
+      history.add(selected);
+      if (history.length > 20) history.removeAt(0);
+    }
     generation++;
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
@@ -262,6 +272,40 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       busy = false;
     });
     if (key != null && key != '_more') load();
+  }
+
+  void goBack() {
+    if (saving) return;
+    open(history.isEmpty ? null : history.removeLast(), remember: false);
+  }
+
+  void openTab(String? key) {
+    history.clear();
+    open(key, remember: false);
+  }
+
+  Future<void> confirmLogout() async {
+    if (saving) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign out of Edu-Pragathi?'),
+        content: const Text(
+          'You will need your login ID and password to sign in again.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) await logout();
   }
 
   Future<void> refreshWorkspace() async {
@@ -500,20 +544,41 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     return PopScope(
       canPop: selected == null,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) open(null);
+        if (!didPop) goBack();
       },
       child: Scaffold(
-        key: scaffoldKey,
         appBar: AppBar(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('EduNexa'),
-              Text(
-                selected == null ? widget.title : widget.role.label,
-                style: Theme.of(context).textTheme.bodySmall,
+          automaticallyImplyLeading: false,
+          leading: selected == null
+              ? null
+              : IconButton(
+                  tooltip: 'Back',
+                  onPressed: saving ? null : goBack,
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                ),
+          titleSpacing: selected == null ? 20 : 0,
+          title: Tooltip(
+            message: 'Go to home',
+            child: InkWell(
+              onTap: saving ? null : () => open(null),
+              borderRadius: BorderRadius.circular(10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Edu-Pragathi'),
+                    Text(
+                      selected == null ? widget.title : title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
           actions: [
             if (has('notifications'))
@@ -533,88 +598,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             ),
             IconButton(
               tooltip: 'Sign out',
-              onPressed: saving ? null : logout,
+              onPressed: saving ? null : confirmLogout,
               icon: const Icon(Icons.logout),
             ),
           ],
         ),
-        drawer: Drawer(
-          child: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.all(12),
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CollegeBrand(subtitle: 'Your college, connected'),
+        bottomNavigationBar: EduFloatingNavBar(
+          selectedIndex: tab,
+          onDestinationSelected: saving
+              ? null
+              : (i) => openTab(
+                  [
+                    null,
+                    has(primary) ? primary : '_more',
+                    has('calendar') ? 'calendar' : '_more',
+                    has('notifications') ? 'notifications' : '_more',
+                    '_more',
+                  ][i],
                 ),
-                ListTile(
-                  leading: const Icon(Icons.home_outlined),
-                  title: const Text('Dashboard'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    open(null);
-                  },
-                ),
-                ...screens.map(
-                  (s) => ListTile(
-                    selected: selected == s['key'],
-                    leading: EduModuleIcon(icon: moduleIcon(s['key'])),
-                    title: Text(s['title']),
-                    onTap: () {
-                      Navigator.pop(context);
-                      open(s['key']);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: collegeLine)),
-          ),
-          child: NavigationBar(
-            selectedIndex: tab,
-            animationDuration: EduMotion.duration(context, EduMotion.tab),
-            onDestinationSelected: saving
-                ? null
-                : (i) => open(
-                    [
-                      null,
-                      has(primary) ? primary : '_more',
-                      has('calendar') ? 'calendar' : '_more',
-                      has('notifications') ? 'notifications' : '_more',
-                      '_more',
-                    ][i],
-                  ),
-            destinations: [
-              const NavigationDestination(
-                icon: EduModuleIcon(icon: Icons.home_outlined),
-                selectedIcon: EduModuleIcon(icon: Icons.home_rounded),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: EduModuleIcon(icon: moduleIcon(primary)),
-                label: primaryLabel,
-              ),
-              const NavigationDestination(
-                icon: EduModuleIcon(icon: Icons.calendar_month_outlined),
-                label: 'Calendar',
-              ),
-              NavigationDestination(
-                icon: Badge(
-                  isLabelVisible: unread > 0,
-                  child: const EduModuleIcon(icon: Icons.inbox_outlined),
-                ),
-                label: 'Inbox',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                label: 'More',
-              ),
-            ],
-          ),
+          items: [
+            const EduNavItem(Icons.home_rounded, 'Home'),
+            EduNavItem(moduleIcon(primary), primaryLabel),
+            const EduNavItem(Icons.calendar_month_outlined, 'Calendar'),
+            EduNavItem(Icons.inbox_outlined, 'Inbox', badge: unread),
+            const EduNavItem(Icons.grid_view_rounded, 'More'),
+          ],
         ),
         body: SafeArea(
           top: false,
@@ -1240,20 +1248,43 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
         const SizedBox(height: 12),
       ],
-      if (actions.isNotEmpty) ...[
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: actions
-              .where((a) => a['key'] != 'read_notification')
-              .map(
-                (a) => FilledButton.tonalIcon(
-                  onPressed: saving ? null : () => action(a),
-                  icon: Icon(actionIcon(a['key'])),
-                  label: Text(a['label']),
-                ),
-              )
-              .toList(),
+      if (actions.any((a) => a['key'] != 'read_notification')) ...[
+        // Screen actions share one even grid: same width and height for every button.
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final shown = actions
+                .where((a) => a['key'] != 'read_notification')
+                .toList();
+            final columns =
+                shown.length == 1 ||
+                    MediaQuery.textScalerOf(context).scale(16) > 22 ||
+                    constraints.maxWidth < 300
+                ? 1
+                : 2;
+            final width =
+                (constraints.maxWidth - (columns - 1) * 10) / columns;
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: shown
+                  .map(
+                    (a) => SizedBox(
+                      width: width,
+                      height: EduSizes.scaled(context, EduSizes.button),
+                      child: FilledButton.tonalIcon(
+                        onPressed: saving ? null : () => action(a),
+                        icon: Icon(actionIcon(a['key'])),
+                        label: Text(
+                          a['label'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            );
+          },
         ),
         const SizedBox(height: 20),
       ],

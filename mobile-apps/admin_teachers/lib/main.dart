@@ -10,7 +10,7 @@ class EduNexaAdminApp extends StatelessWidget {
   const EduNexaAdminApp({super.key});
   @override
   Widget build(BuildContext context) => const EdunexaApp(
-    title: 'EduNexa Admin & Teachers',
+    title: 'Edu-Pragathi Admin & Teachers',
     clientId: ApiConfig.adminClient,
     roles: [MobileRole.admin, MobileRole.teacher],
   );

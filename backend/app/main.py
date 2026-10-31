@@ -123,6 +123,7 @@ def create_app(settings=None):
         lifespan=application_lifespan,
         version="0.1.0",
         description="EduNexa College backend. PostgreSQL or Microsoft SQL Server persistence (local JSON for development).",
+        **({} if settings.api_docs else {"docs_url": None, "redoc_url": None, "openapi_url": None}),
     )
     app.state.settings = settings
     if settings.storage_backend == "postgres":
@@ -169,6 +170,9 @@ def create_app(settings=None):
         request._body = b"".join(chunks)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'none'")
+        response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = uuid4().hex
         return response
