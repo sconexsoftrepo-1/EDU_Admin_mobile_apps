@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import {
   useCallback,
   useEffect,
@@ -290,7 +291,7 @@ export default function AssessmentWorkspace() {
               <tr>
                 <td colSpan={6}>
                   {busy
-                    ? "Loading assessments…"
+                    ? <WorkspaceSkeleton compact label="Loading assessments" />
                     : "No assessments in this tab."}
                 </td>
               </tr>

@@ -1,13 +1,16 @@
 """Certificate request, approval and template workspace."""
 from typing import Literal
 
+from fastapi.responses import Response
+from datetime import date
+
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import Field
 
-from app.core.certificate_design import FORMATS
+from app.core.certificate_design import FORMATS, render
 from app.core.security import StrictModel, current_user, has_permission
 from app.core.storage import audit, new_code, now
-from app.modules.documents.files.api import CertificateInput, issue as issue_certificate
+from app.modules.documents.files.api import CertificateInput, issue_certificate, certificate_issuer, certificate_enrollment
 
 router = APIRouter(prefix="/certificates/workspace", tags=["Certificate workspace"])
 TEMPLATES = [
@@ -112,7 +115,11 @@ class DecisionInput(StrictModel):
     message: str = Field(default="", max_length=2000)
 
 
-class IssueInput(StrictModel):
+class IssuerInput(StrictModel):
+    issuer_employee_code: str | None = None
+
+
+class IssueInput(IssuerInput):
     student_code: str = Field(min_length=1, max_length=100)
     template_code: str = Field(min_length=1, max_length=80)
     program_code: str = Field(min_length=1, max_length=100)
@@ -149,7 +156,9 @@ def options(request: Request, course_level: str | None = None, program_code: str
         eligible.update(e["student_code"] for e in rows(data, "student_enrollments")
                         if e.get("status") == "active" and e.get("section_code") in matching_sections)
         students = [s for s in students if s["code"] in eligible]
-    return {"templates": [{"code": c, "name": n, "description": d, "paper_size": FORMATS[c][0]} for c, n, d in TEMPLATES],
+    return {"issuer_required": user.get("person_type") == "system",
+            "issuers": [{"code": e["code"], "name": person_name(e), "designation": e.get("designation")} for e in rows(data, "employees")] if user.get("person_type") == "system" else [],
+            "templates": [{"code": c, "name": n, "description": d, "paper_size": FORMATS[c][0]} for c, n, d in TEMPLATES],
             "courses": [{"code": p["code"], "name": p.get("name"), "specialization": p.get("specialization") or p.get("branch") or p.get("qualification"), "course_level": p.get("course_level")} for p in courses],
             "academic_years": [{"code": y["code"], "name": y.get("name"), "program_code": y.get("program_code")} for y in years],
             "students": [{"code": s["code"], "name": person_name(s), "admission_number": s.get("admission_number")} for s in students]}
@@ -196,13 +205,13 @@ def create_request(body: RequestInput, request: Request, background: BackgroundT
 
 
 @router.post("/requests/{code}/approve", status_code=201)
-def approve(code: str, request: Request, background: BackgroundTasks, user=Depends(current_user)):
+def approve(code: str, request: Request, background: BackgroundTasks, body: IssuerInput = IssuerInput(), user=Depends(current_user)):
     data = request.app.state.store.snapshot()
     staff(data, user, "approve")
     record = data["records"].get("certificate_requests", {}).get(code)
     if not record or record.get("status") != "pending":
         raise HTTPException(404, "Pending certificate request not found")
-    result = issue_certificate(CertificateInput(request_code=code), request, user)
+    result = issue_certificate(CertificateInput(request_code=code, issuer_employee_code=body.issuer_employee_code), request, user)
     with request.app.state.store.transaction() as current:
         cert = next((c for c in rows(current, "certificates") if c.get("request_code") == code), {})
         result["download_path"] = f"/api/v1/documents/certificate/{cert.get('code')}/download" if cert else None
@@ -228,7 +237,8 @@ def reject(code: str, body: DecisionInput, request: Request, background: Backgro
 
 @router.post("/issue", status_code=201)
 def issue(body: IssueInput, request: Request, background: BackgroundTasks, user=Depends(current_user)):
-    with request.app.state.store.transaction() as data:
+    code = new_code("CREQ")
+    def prepare(data):
         staff(data, user, "approve")
         seed_types(data)
         if body.template_code not in data["records"]["certificate_types"] or body.student_code not in data["records"].get("students", {}):
@@ -246,14 +256,29 @@ def issue(body: IssueInput, request: Request, background: BackgroundTasks, user=
         active_enrolled = any(e.get("student_code") == body.student_code and e.get("status") == "active" and e.get("section_code") in matching_sections for e in rows(data, "student_enrollments"))
         if body.student_code not in enrolled_profiles and not active_enrolled:
             raise HTTPException(422, "The selected student is not enrolled in this course and academic year")
-        code = new_code("CREQ")
         data["records"].setdefault("certificate_requests", {})[code] = {
             "code": code, "student_code": body.student_code, "type_code": body.template_code,
             "requested_on": now(), "reason": body.reason, "status": "pending", "created_by_admin": user["code"],
             "program_code": body.program_code, "academic_year_code": body.academic_year_code}
-    result = issue_certificate(CertificateInput(request_code=code), request, user)
+    result = issue_certificate(CertificateInput(request_code=code, issuer_employee_code=body.issuer_employee_code), request, user, prepare_request=prepare)
     with request.app.state.store.transaction() as data:
         cert = next((c for c in rows(data, "certificates") if c.get("request_code") == code), {})
         notices = notify(data, personal_accounts(data, body.student_code), "Certificate issued", "Your certificate is ready to preview and download.", code, cert.get("code"))
     background.add_task(push, request, notices)
     return result
+
+
+@router.post("/preview")
+def preview(body: IssueInput, request: Request, user=Depends(current_user)):
+    data = request.app.state.store.snapshot()
+    staff(data, user, "approve")
+    template = next((t for t in TEMPLATES if t[0] == body.template_code), None)
+    student = data["records"].get("students", {}).get(body.student_code)
+    year = data["records"].get("academic_years", {}).get(body.academic_year_code)
+    if not template or not student or not year or year.get("program_code") != body.program_code:
+        raise HTTPException(422, "Choose a registered student, template, course and academic year")
+    issuer = certificate_issuer(data, user, body.issuer_employee_code)
+    kind = {"code": template[0], "name": template[1]}
+    enrollment = certificate_enrollment(data, student, kind, body.model_dump())
+    raw = render(kind["name"], student, kind, enrollment, data, "PREVIEW", date.today().isoformat(), "", issuer, body.academic_year_code, preview=True)
+    return Response(raw, media_type="application/pdf", headers={"Cache-Control": "no-store", "Content-Disposition": 'inline; filename="certificate-preview.pdf"'})

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState } from "react";
 import {
   courseCurricula,
@@ -29,7 +30,7 @@ export function CurriculumSummary({ program }: { program: string }) {
       {error ? (
         <p role="alert">{error}</p>
       ) : !data ? (
-        <p>Loading semester subjects…</p>
+        <WorkspaceSkeleton compact label="Loading semester subjects" />
       ) : (
         <>
           <p>

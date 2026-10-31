@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
 import { Component, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
@@ -12,9 +13,7 @@ import type { College } from "@/data/colleges";
 const Scene = dynamic(() => import("./BusScene"), {
   ssr: false,
   loading: () => (
-    <p className="ops-empty">
-      Loading the interactive bus… The seat grid remains available below.
-    </p>
+    <WorkspaceSkeleton compact label="Loading interactive bus" />
   ),
 });
 class SceneBoundary extends Component<

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   CalendarDays,
@@ -109,7 +110,7 @@ export default function AcademicProgressWorkspace({
           {error}
         </p>
       )}
-      {!data && !error && <p role="status">Loading academic progress…</p>}
+      {!data && !error && <WorkspaceSkeleton compact label="Loading academic progress" />}
       {data && (
         <>
           <div className="ap-filters">

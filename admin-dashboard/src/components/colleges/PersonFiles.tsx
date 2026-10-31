@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -164,7 +165,7 @@ export function PersonFileList({
         </p>
       )}
       {loading ? (
-        <p role="status">Loading files…</p>
+        <WorkspaceSkeleton compact label="Loading files" />
       ) : files.length ? (
         <ul className="edu-file-list">
           {files.map((file) => (

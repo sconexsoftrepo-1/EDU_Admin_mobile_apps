@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -209,10 +210,7 @@ export default function TimetableTemplateWorkspace({
         </div>
       )}
       {loading ? (
-        <div className="tt-loading">
-          <LoaderCircle className="tt-spinner" size={20} />
-          Loading courses and saved timetables…
-        </div>
+        <WorkspaceSkeleton label="Loading courses and saved timetables" />
       ) : (
         <>
           {records.can_create && (

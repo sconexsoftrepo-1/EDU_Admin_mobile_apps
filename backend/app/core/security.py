@@ -70,6 +70,7 @@ class AccountInput(StrictModel):
 
 
 class AccountUpdate(StrictModel):
+    login_id: str | None = Field(default=None, min_length=3, max_length=120, pattern=r"^[a-zA-Z0-9@._+-]+$")
     active: bool | None = None
     role_codes: list[str] | None = Field(default=None, max_length=30)
     clients: (
@@ -96,8 +97,15 @@ class RoleInput(StrictModel):
     screens: list[str] | None = Field(default=None, max_length=200)
 
 
+def account_client_allowed(account, client):
+    mobile_client = {"student": "student-mobile", "parent": "parent-mobile"}.get(account.get("person_type"))
+    return client in account.get("clients", []) and (mobile_client is None or client == mobile_client)
+
+
 def public_account(account):
-    return {k: v for k, v in account.items() if k != "password_hash"}
+    result = {k: v for k, v in account.items() if k != "password_hash"}
+    result["clients"] = [client for client in account.get("clients", []) if account_client_allowed(account, client)]
+    return result
 
 
 def check_password(password, hashed):
@@ -187,7 +195,7 @@ def current_user(
         or session["expires_at"] <= time.time()
         or session["user_code"] != account["code"]
         or session["client"] != payload["client"]
-        or payload["client"] not in account["clients"]
+        or not account_client_allowed(account, payload["client"])
     ):
         raise HTTPException(401, "Session revoked or account disabled")
     assigned = [data["roles"][r] for r in account["role_codes"] if r in data["roles"]]
