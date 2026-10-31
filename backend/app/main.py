@@ -1,3 +1,7 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager, nullcontext, suppress
+from types import SimpleNamespace
 import importlib
 import json
 import os
@@ -14,6 +18,7 @@ from app.core.timetable_templates import router as timetable_templates_router
 from app.core.assignment_workspace import router as assignment_workspace_router
 from app.core.syllabus_workspace import router as syllabus_workspace_router
 from app.core.calendar_workspace import router as calendar_workspace_router
+from app.core.academic_progress import router as academic_progress_router
 from app.core.assessment_workspace import router as assessment_workspace_router
 from app.core.curriculum_workspace import router as curriculum_workspace_router
 from app.core.attendance_workspace import router as attendance_workspace_router
@@ -81,10 +86,40 @@ def with_examples(app):
     app.openapi = openapi
 
 
+async def semester_reminder_worker(app):
+    from app.core.academic_progress import due_reminders
+    from app.core.certificate_workspace import push
+    def run():
+        store=app.state.store
+        with store.request_scope() if hasattr(store,'request_scope') else nullcontext():
+            with store.transaction() as data:
+                notices=due_reminders(data)
+            push(SimpleNamespace(app=app),notices)
+    while True:
+        try:
+            await asyncio.to_thread(run)
+        except Exception:
+            logging.getLogger(__name__).exception('Semester fee reminder job failed; it will retry')
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def application_lifespan(app):
+    enabled=app.state.settings.semester_reminders_enabled and app.state.settings.storage_backend!='local-json'
+    worker=asyncio.create_task(semester_reminder_worker(app)) if enabled else None
+    try:
+        yield
+    finally:
+        if worker:
+            worker.cancel()
+            with suppress(asyncio.CancelledError): await worker
+
+
 def create_app(settings=None):
     settings = settings or Settings()
     app = FastAPI(
         title="EduNexa College API",
+        lifespan=application_lifespan,
         version="0.1.0",
         description="EduNexa College backend. PostgreSQL or Microsoft SQL Server persistence (local JSON for development).",
     )
@@ -155,6 +190,7 @@ def create_app(settings=None):
 
     for router in [
         calendar_workspace_router,
+        academic_progress_router,
         assessment_workspace_router,
         curriculum_workspace_router,
         attendance_workspace_router,

@@ -658,3 +658,18 @@ def test_non_teaching_and_daily_wage_staff_can_be_edited(client, app):
         else:
             assert result["role"]["code"] == made["role"]["code"]
             assert result["role"]["responsibility"] == "Senior administrator"
+
+
+def test_fee_basis_separates_annual_course_and_semester_schedules(client,app):
+    h=fee_schedule_setup(app,client)
+    body={'program_code':'INT-MPC','academic_year_code':'AY','year_of_study':1,'due_date':'2026-06-15','term_count':4,'lines':[{'name':'Training fee','amount':'1000'}]}
+    ids=[]
+    for basis in ('annual','full_course','semester'):
+        response=client.post('/api/v1/master-data/actions/course-fee-structure',headers=h,json={'values':{**body,'fee_basis':basis}})
+        assert response.status_code==201,response.text
+        ids.append(response.json()['fee_structures'][0]['code'])
+    assert len(set(ids))==3
+    assert len(app.state.store.snapshot()['records']['fee_structures'])==3
+    with app.state.store.transaction() as data:data['records']['academic_years']['AY']['program_code']='OTHER'
+    response=client.post('/api/v1/master-data/actions/course-fee-structure',headers=h,json={'values':body})
+    assert response.status_code==422

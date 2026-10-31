@@ -20,6 +20,7 @@ part '../screens/syllabus/syllabus_workspace.dart';
 part '../screens/calendar/calendar_workspace.dart';
 part '../screens/attendance/attendance_workspace.dart';
 part '../screens/assessments/assessment_workspace.dart';
+part '../screens/academics/academic_progress.dart';
 part '../components/workspace/record_helpers.dart';
 part '../screens/certificates/certificate_workspace.dart';
 part '../components/workspace/widgets.dart';
@@ -755,6 +756,7 @@ IconData moduleIcon(String key) => switch (key) {
   'attendance' => Icons.fact_check_outlined,
   'assignments' || 'submissions' => Icons.assignment_outlined,
   'assessments' => Icons.quiz_outlined,
+  'academics' => Icons.school_outlined,
   'results' => Icons.quiz_outlined,
   'messages' => Icons.chat_bubble_outline,
   'notifications' || 'announcements' => Icons.notifications_outlined,

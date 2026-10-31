@@ -3,7 +3,6 @@ import IconAction from "./IconAction";
 import SearchField, { searchValues } from "./SearchField";
 /** Compact, API-backed course catalog. Filtering state is shared by cards and table views. */
 import { useEffect, useRef, useState } from "react";
-import CourseCurriculum from "./CourseCurriculum";
 import {
   Info,
   CalendarDays,
@@ -135,7 +134,6 @@ export default function CourseCards({
   onEdit: (row: Row) => void;
   onDelete: (row: Row) => Promise<void>;
 }) {
-  const [curriculumCourse, setCurriculumCourse] = useState<Row | null>(null);
   const [level, setLevel] = useState<"intermediate" | "degree">("intermediate");
   const [groupBy, setGroupBy] = useState<GroupBy>("years");
   const [active, setActive] = useState("");
@@ -372,7 +370,7 @@ export default function CourseCards({
       );
     return (
       <>
-        <button className="crs-btn" onClick={() => setCurriculumCourse(row)}>
+        <button className="crs-btn" onClick={() => setInsights(row)}>
           Subjects & labs
         </button>
         {canEdit && (
@@ -409,15 +407,6 @@ export default function CourseCards({
   }
   return (
     <div className="crs">
-      {curriculumCourse && (
-        <CourseCurriculum
-          program={text(curriculumCourse.code)}
-          name={text(curriculumCourse.name)}
-          semesters={Number(curriculumCourse.duration_semesters) || 4}
-          canEdit={canEdit}
-          onClose={() => setCurriculumCourse(null)}
-        />
-      )}
       <div className="crs-filters">
         <SearchField
           aria-label="Search courses"

@@ -1,0 +1,2031 @@
+{
+  "captured_at": "2026-10-31T08:34:32.541107+00:00",
+  "branch": "Chaitu_dev",
+  "head": "98dce33d5ad940560aba6bc00ab83f82f85044bf",
+  "path_base": "/Users/sconex.ios.dev/Leads porjects/edunexa-college",
+  "files": [
+    {
+      "path": "admin-dashboard/next-env.d.ts",
+      "commits": [
+        "a1031c3",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 296,
+      "sha256": "0f70629890b72a0a82e91972cc032c04b658b26c265373cb711cf576bfbf8fcc"
+    },
+    {
+      "path": "admin-dashboard/next.config.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 652,
+      "sha256": "6428733f06b2f4c2ae15f61028071d81b8e06fc5b7a46813dee7b901272253f8"
+    },
+    {
+      "path": "admin-dashboard/src/app/(campus)/layout.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 770,
+      "sha256": "e220a37edec860b5b958c7fb231794922587222e0aa1ae91cb5978d9669a0f6d"
+    },
+    {
+      "path": "admin-dashboard/src/app/(campus)/portal/[[...slug]]/page.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 794,
+      "sha256": "2f312e81b0ef13eb813f9fa46f4dc2ba5bb4ef027fc771b19b744262644cd69f"
+    },
+    {
+      "path": "admin-dashboard/src/app/(campus)/verify-certificate/[token]/page.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 481,
+      "sha256": "3a774060ad3ae2afb1638bbdbbed1235408543f450bbc9dcb4f4563b56ca28af"
+    },
+    {
+      "path": "admin-dashboard/src/app/colleges-institutions/[collegeSlug]/[[...slug]]/page.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 555,
+      "sha256": "2395c715b783819015826f9adb5a643c29ecd2677f628e7b916e3a97fced5ba0"
+    },
+    {
+      "path": "admin-dashboard/src/app/colleges-institutions/page.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 108,
+      "sha256": "6b29a30b7b6f8d53bacfa31529f73a96a1868b9006a7133cbcdd01a1a6da2b9d"
+    },
+    {
+      "path": "admin-dashboard/src/app/globals.css",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 72900,
+      "sha256": "e03622068994d80b609ba6779bbd620516cf4929a5b174bfe1b0f0b2ece4b69d"
+    },
+    {
+      "path": "admin-dashboard/src/app/page.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 108,
+      "sha256": "6b29a30b7b6f8d53bacfa31529f73a96a1868b9006a7133cbcdd01a1a6da2b9d"
+    },
+    {
+      "path": "admin-dashboard/src/app/robots.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 545,
+      "sha256": "a77666826a5fa2345ada4d671099cdb7c44bb321f544825a32be197fdf9d2455"
+    },
+    {
+      "path": "admin-dashboard/src/components/TemplateSwitcher.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 14017,
+      "sha256": "4114ab54054f5cc1a30fba6010adc17064da18bd7b99f84f397b7c84c1bcd8df"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AcademicProgressWorkspace.tsx",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 30475,
+      "sha256": "1a5aa3778e005103264178c22279e954caa6166a9cd0e959327229b3678c0403"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AcademicTimetableGrid.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 23501,
+      "sha256": "29ecd8aa950cdd61c18f10cdae3b969bd58d54cc75d20beeb51ee0c9c4be3a67"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AcademicYearForm.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 11866,
+      "sha256": "291131461ec2d3b2b7394dd51106e2173b3d043470a51e7af782f6b2c0ec25b9"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AdmissionWorkspace.tsx",
+      "commits": [
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 24629,
+      "sha256": "38ec3224a868dc7b86a9f7cb700c5739229a0431921bd2a99ce320553cb9b952"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AssessmentWorkspace.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 25550,
+      "sha256": "1d9d2540ff95b0790ee1c7811ed655a3dc32057f560ce383eb53ebdc21aa71cb"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AssignmentWorkspace.tsx",
+      "commits": [
+        "a1031c3",
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 36855,
+      "sha256": "81de8440a34d519761bff38aa555195b9f6ba96fc7ea7a9ec0da19e69fb30258"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/AttendanceWorkspace.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 23555,
+      "sha256": "a0596f472b6ad29dd25830277a1c010c3782692e97ceae1a7db14d80f325e409"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CalendarWorkspace.tsx",
+      "commits": [
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 14642,
+      "sha256": "5cdb5c1957123bfe46acfeece79ac02c2bcd113a33350295fe106945634502b2"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CertificateWorkspace.tsx",
+      "commits": [
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 15846,
+      "sha256": "b45b19f6f4ae0a261a0b581a596a651b1069d88d60f8cfb4251c21c3c1e523a2"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CollegePage.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 2394,
+      "sha256": "6d7b96a3df88e47907a3d16baff745f74563e2fbb7dc9427672ef68f0783596d"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CollegePortal.tsx",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 108886,
+      "sha256": "81383677a6c11c19747b12fc762c18edfd1fbd445aedff3198376efb94d32da1"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CollegeStore.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 11360,
+      "sha256": "484618e95692259f1389ea445caa9c80b720e2d11875610f70c9d84077edf75a"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/ConnectedPortal.tsx",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 75815,
+      "sha256": "3a2e07e91504ee600b2b3e5a6841777f7672bc82b9514debb660be6c9183a431"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CountryCodePicker.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 10106,
+      "sha256": "0862c1dc9f2a4ea5470046c607068fe5ea4af325ef778c503f60d6578b71dfa6"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CourseCards.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 25391,
+      "sha256": "0b641113d9f885c765469d98492e28743d397e2536e9751e7a59ebe218f65f58"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CourseCurriculum.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 6364,
+      "sha256": "3d26ba275bc3b0dff821edf0af07dcf5c8dd9f7cc5da6784157c67949dc70e38"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CourseInsightsPanel.tsx",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 6973,
+      "sha256": "1d3ec68043f1089fe820d432c37ed8a872803f49488d5b415b2b5c4a62657015"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/CourseSemesterWorkspace.tsx",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 16393,
+      "sha256": "5d5fbc3cbabff35cdefe9899bd80d336d2c4dd3900c9ff1a58eb1682a5333972"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/ERPFormFields.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 16005,
+      "sha256": "66284fc69950f348c9f4774660ad3ba5fbdc0b0db29b99691e5f2f01d0108e40"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/ERPTable.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 13805,
+      "sha256": "54c74a1f7558194baf5d9298a6defd4ac9aba57da7289c628c0a74362a3321a5"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/ERPWorkspaceTools.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 17846,
+      "sha256": "8cd0816102ce67ad42c9c6fb328fbdc1ac067f09db630239e719626146c25058"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/FeeHeadManager.tsx",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 15175,
+      "sha256": "977e3fe1f2aeeb599eb7f5ba0f5d25396f04641c37d4c40f5512fe711a4f3c2d"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/FeeStructureManager.tsx",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 22181,
+      "sha256": "783cb395ae65eef87a483fd427b2b6d3a8eedfc2dd8905a746427551a3f9a4a1"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/FeeStructures.tsx",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 7623,
+      "sha256": "be17a222baa4023505662a5b30f84532138c2a9dabf14f0a2e8caa85bf8fa79f"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/IconAction.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 903,
+      "sha256": "e30c13bee1f789378e9a4aac78839b4fa155ab23db9af00903dc6dd94252e674"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/PersonalPortal.tsx",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 8010,
+      "sha256": "71ca5ab92b42c44688dda64137b0b9e1b882a93a6ab4cb90fad809d59369a81d"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/PortalNotFound.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 4224,
+      "sha256": "909d58b77633a362ca3a81d893b6999ccc136aaecc19e6e93e155affbe556ccf"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/RolesAccess.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 18893,
+      "sha256": "42fc81481f9774bf1b032dafc806e2ca002b5f1878820240459847155a456bb5"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/SearchField.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 6298,
+      "sha256": "d7b7acf50a41daf7a43c47075d86e6b3937104995f06f0a41a37b25bf78cc0be"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/SideDrawer.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 1872,
+      "sha256": "7aa4a12b836311008671146a342dd6a928e67cd7470a18e5c4faf1a3de1f0841"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/StudentAssignmentSummary.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 2302,
+      "sha256": "689eedb363cf2cadeb126d8b77ee9dc42aefcdae9120e1beec03db8b11ff89e0"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/StudentEnrollmentDetails.tsx",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 7356,
+      "sha256": "279b87a39d5227215e588bed64986dbecbb076656813bb87d50d676ddd8c6434"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/SyllabusWorkspace.tsx",
+      "commits": [
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 12013,
+      "sha256": "72c21a3ddc7aab9357a93b37d4cf7c7b046cc232f55444eb5552f766724d6d50"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/TableColumnFilter.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 5845,
+      "sha256": "1f8722776fa5d1cea72cac3a6447316e3154c2512f39581946931cd911be5f0f"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/TimetableTemplateWorkspace.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 23559,
+      "sha256": "a1828c2d957981bb78a6f2f1d21931471b0462e820e69028f4c2e57162baf9c8"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/TransportWorkspace.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 34902,
+      "sha256": "aa71265004db99ba7c4c3fd2b40139c302250308decd12761f567278263cc9f7"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/WorkspacePrimaryAction.tsx",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 545,
+      "sha256": "355ff23f2ed9dd3b97a65397e643ff2f9b27f19e4371875349a60b4bef91901f"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/academic-progress.css",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 5424,
+      "sha256": "691347ed408d27d9fbc72b5731bb1652e472d01a5c394b569a1de8f756b34571"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/academic-year-form.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 2611,
+      "sha256": "667273f112611e4b4c59f73569c8beb4ae6196ef813a6c2cff75cf95e89424ba"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/admission-workspace.css",
+      "commits": [
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 8110,
+      "sha256": "549dc5066bab4fec70a8ddd0750687ac045d63289a6925b6badfbd0514df0785"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/assessment-workspace.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 3126,
+      "sha256": "05b6941c51bb2f17e5d94825974cfcbf34d51b245b52d895b9bd82e3079966cc"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/assignment-workspace.css",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 16478,
+      "sha256": "6a60e14426fbf7bf7b2f65bf3198c375a9272538280f6a02b8a38aad8103256b"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/attendance-workspace.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 5923,
+      "sha256": "8dd6f526c5c23a2a8c189291dd5e099ffc49d31508a506f3227d92f2d6a09b9c"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/calendar-workspace.css",
+      "commits": [
+        "779c961",
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 1793,
+      "sha256": "dd4f29d63807c9a265a5992420e23e2f015135fa92cdb0494d994c9ad83e8348"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/connected-portal.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 15168,
+      "sha256": "fac925a60c57be6ac9606e6e07ac8b2acbb86da8f5a76112bcf9dabf68937d35"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/course-cards.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 26724,
+      "sha256": "75e142a0403855d209d16b73de11b51c006368a6f33be7c9b1765e350777e0b3"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/course-semester-workspace.css",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 3289,
+      "sha256": "b8b9f53ee56efe161bd294762c82d98ca8720ebe0e888e8aa043320f82b78749"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/enrollment/StudentEnrollmentWizard.tsx",
+      "commits": [
+        "779c961",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 84924,
+      "sha256": "358d44cb91f0a5b01c5bfd555e04cd176d3985cb2c75c1a0a39b6025249875ad"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/enrollment/enrollment-wizard.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 21187,
+      "sha256": "9a8a773c7859f525f480366c9ab153804ecf780eaf687a8e8b578dc03c78ea5c"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/fee-head-manager.css",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 1527,
+      "sha256": "1753796d6bf10f748a41819410cac0a0377fd0d09cc996567b8721c0a665d811"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/fee-structures.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 6504,
+      "sha256": "970dc464a1e224a05af76e7431f83ac8dfd1dfea0b133f7f3dc7a5ceaa8a38ed"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/search-field.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 3485,
+      "sha256": "1462e7f7181c3d3f21d65e5e6d0dc8b51b24fd8d8f1a7d0ec4e100e23cc2c09b"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/staff/StaffDirectory.tsx",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 10377,
+      "sha256": "98390067c017aa423d94bd77fc692af04f32d8ed2052a209c08dd1d050ff48d8"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/student-enrollment-details.css",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 12540,
+      "sha256": "9b8042f6b224ec2c78aa93b832d71d7a2dfedfda48485b7fc078502bbf93d5e8"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/tab-interactions.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 2465,
+      "sha256": "1cfa1fc69fb2daf3eb40576e371cda47e6437f012dfa1a5c4fb578d3487bbec5"
+    },
+    {
+      "path": "admin-dashboard/src/components/colleges/timetable-templates.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 16430,
+      "sha256": "1804221e3915b753a47dd808df6220d4b696b4a1100ca030a5dd9fd5f77e9988"
+    },
+    {
+      "path": "admin-dashboard/src/data/colleges/index.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 8614,
+      "sha256": "2a88034d146bcd96150f142160051d2a19bf46a5aab652baed1733b0d254dde6"
+    },
+    {
+      "path": "admin-dashboard/src/data/showroomCollection.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 7660,
+      "sha256": "ca1782de7819cb923011a19b72664dbb83ac67e2bac48635ba8ae320fa450bf4"
+    },
+    {
+      "path": "admin-dashboard/src/data/templateCatalogue.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 5320,
+      "sha256": "bdd7e4a7915ccb07d2317b40c0cd6c6ed1dfc5cc3068f482c79b62777c9ca271"
+    },
+    {
+      "path": "admin-dashboard/src/lib/colleges/fees.ts",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 1785,
+      "sha256": "83deb99b165b1b6ec254928a83abaa03fddfdd2eb1e972bead391d7959c04bc7"
+    },
+    {
+      "path": "admin-dashboard/src/lib/colleges/workspace-cache.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 5543,
+      "sha256": "eea0887b50f238da1fcfcc46ed739105d5adc81641e42aecc3330cd1bae0f2b3"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/client.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 4034,
+      "sha256": "0c29d130fd081958f82ffc8c0e4cad9f192161a035fa9f768e547060f7ee05ec"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/config.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 3507,
+      "sha256": "e00595f127af385ad3f8829040e79eee65e56b4b237d1d6a9d654041789ef913"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/consts.ts",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 2190,
+      "sha256": "282246a46bddcb45d97ff55d5c6f007d8f631fc9fdf27c23a5fa4f776b06cc96"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/index.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 2720,
+      "sha256": "6184d4c1e404d1221ef55be26ea8c1f613ef936d7f522218bd02e76938f52b3e"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/academic-progress/service.ts",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 4055,
+      "sha256": "a286f80163a61b90223155d1f1d377012e861ab726211c62e13bdc0aac414e22"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/admissions.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 476,
+      "sha256": "f4c752f18d88a506cb70d4072371d8713d6e0301c93031d13847c3d149f7c3c4"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/assessments/service.ts",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 5492,
+      "sha256": "50f7a5afb2d5f7b65f73d11aea0a63f27e7bf6fda881f40b1b17024948c16e3c"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/assignments/calendar.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 2457,
+      "sha256": "38959ac16d6d7f92a63b79e27f0dd88367d0b195ca0e47834c729c4e1049c0f7"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/assignments/service.ts",
+      "commits": [
+        "a1031c3",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 4611,
+      "sha256": "b95722ade3cd6e31b20553bc71615b361f4162da6934273ec18048c1466417a1"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/assignments/syllabus.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 2652,
+      "sha256": "41399271f181cda9f017f91add390688dc4763df89340314b7c3e02f728a0d6e"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/attendance/service.ts",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 2095,
+      "sha256": "f2b8649a1de3182df01a4547736747a43e195efabb1d2bef73610ae301aed681"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/certificates.ts",
+      "commits": [
+        "779c961"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 1722,
+      "sha256": "12f2d15d43ba99439724972c760a67c802e8d3459ac69927b1b19c6c5d3a4863"
+    },
+    {
+      "path": "admin-dashboard/src/services/api/modules/workspace/catalog.ts",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 886,
+      "sha256": "0967b56f4bf13db72d2a467ecc9590040599cb1cf2379d16cf6c3c8150a79f69"
+    },
+    {
+      "path": "admin-dashboard/src/styles/college-erp.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 80434,
+      "sha256": "a9822bf92342a329c92a7aef4b78e59a3aadfb7c1b53f8d283248cd2c8eaaf67"
+    },
+    {
+      "path": "admin-dashboard/src/styles/college-operations.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 17237,
+      "sha256": "9e3af7bde9b3e63aad4830141c140a91def9df2f1d2444beaa521015e120c751"
+    },
+    {
+      "path": "admin-dashboard/src/styles/college-timetable.css",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 16023,
+      "sha256": "d0772b45341305aba49e683dda8c43671552f10cc1498f8268a6384008c2455a"
+    },
+    {
+      "path": "admin-dashboard/tests/admin-data-recovery.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 4184,
+      "sha256": "af83e1f1b0e4cfa39bc27f946043e5944ed95ab8724b088f8b6c2576e049d0f1"
+    },
+    {
+      "path": "admin-dashboard/tests/college-login-design.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 7611,
+      "sha256": "d4452c8c41f2388af6928d6afaa91e1eee959bf7b720b8d854a20cb5e19293c9"
+    },
+    {
+      "path": "admin-dashboard/tests/fee-head-form.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 5623,
+      "sha256": "8b078e01ff8c0f9bd7e57f55fa0073a61c2619a65dbc250860c183bfe31ece63"
+    },
+    {
+      "path": "admin-dashboard/tests/fee-structure-cards.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 5590,
+      "sha256": "c7201d80fd242e22b521f78c3229f86939f87f0a890f53f09fb0eacfd30c6ba4"
+    },
+    {
+      "path": "admin-dashboard/tests/login-recovery.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 9607,
+      "sha256": "7bf2451c80f03b10cfd5bef6f453a8051024a38a5bd9461f2048c5cf27e8a3bf"
+    },
+    {
+      "path": "admin-dashboard/tests/pdf-preview.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 4310,
+      "sha256": "eabacd4b0a5e68f68c1f29a9fcbd33aa31638781350c8a0aa44c1cec65f98154"
+    },
+    {
+      "path": "admin-dashboard/tests/record-controls.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 3222,
+      "sha256": "5c02d4a5fbbdcacb1f8be3fa9340e6e0379024a78dab48a11ccaa0c42b5869b6"
+    },
+    {
+      "path": "admin-dashboard/tests/reported-form-errors.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 9191,
+      "sha256": "2289c02b3fb2f1c567c40bf5e63e57df6b06c0f1b1acd4cc796acec219986c41"
+    },
+    {
+      "path": "admin-dashboard/tests/staff-directory.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 17779,
+      "sha256": "58d43ed1bdd41541c90bfa3602e8a242a6679f52659423b10a79285f0429d025"
+    },
+    {
+      "path": "admin-dashboard/tests/student-table-display.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 7199,
+      "sha256": "ca51f7dfc8271d3671cf291178de61d94163a0ea8642786c58927549eda1289a"
+    },
+    {
+      "path": "admin-dashboard/tests/timetable-templates.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 13049,
+      "sha256": "8d26f51280c0deac8b340d21eb64b73a4ce9199f2415e89ebb99981ae289d3b3"
+    },
+    {
+      "path": "admin-dashboard/tests/workspace-navigation.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 8873,
+      "sha256": "707fc8a8883931fbb351195a01ebbb241d0becafea89c8685d049f4b3c3aecfe"
+    },
+    {
+      "path": "admin-dashboard/tests/workspace-refresh.spec.ts",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 11496,
+      "sha256": "4e904eb8c3d914bf80cd851fda342853a73505f20a2d36dc4599a9fb8a889f19"
+    },
+    {
+      "path": "backend/app/core/academic_progress.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 30518,
+      "sha256": "b1414cbeb5e7bf0c048f5baade500fedfadc8a9aa8729e3663d0ecd692909d0c"
+    },
+    {
+      "path": "backend/app/core/assessment_workspace.py",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 15113,
+      "sha256": "7874c47e170eb4ab400b5c9e5362d8870348562e5b6e3200bf727b169e72e0f3"
+    },
+    {
+      "path": "backend/app/core/assignment_workspace.py",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 38514,
+      "sha256": "b7cfcc8618dd511f7e95fe9386edb8dac9a4c7ede88dd1a39f9f079e542b7322"
+    },
+    {
+      "path": "backend/app/core/attendance_workspace.py",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 17806,
+      "sha256": "a603385d0955f7ef8644c331a11de7c75eac19143f9d8ca784d297991887ac37"
+    },
+    {
+      "path": "backend/app/core/calendar_workspace.py",
+      "commits": [
+        "779c961",
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 14000,
+      "sha256": "fe328cdfd6d8186c9ea0bc754ad94a5069cc7212f79c062f19fd090861c1a3d0"
+    },
+    {
+      "path": "backend/app/core/certificate_design.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 8451,
+      "sha256": "e01d677ded0518ae70139bf5e825c9042f580c7672f3f7ffb2935c9b2ac69d73"
+    },
+    {
+      "path": "backend/app/core/certificate_workspace.py",
+      "commits": [
+        "779c961"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 16006,
+      "sha256": "327d471a455faa7fdb53ad992e2c2bcdb700618e19a85dccb55d95ec15515166"
+    },
+    {
+      "path": "backend/app/core/curriculum_workspace.py",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 22887,
+      "sha256": "56ec0650bc588934ddbe197cbafe6f90ca32454e7d822da22db1839507908b1a"
+    },
+    {
+      "path": "backend/app/core/resources.py",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 24023,
+      "sha256": "03b795a77c20cbbb74632028fd31f6a0e862a151c9edf68c558ea590cc8e9756"
+    },
+    {
+      "path": "backend/app/core/security.py",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 8468,
+      "sha256": "d8c9722ebe252519d4552a08b2cea7c68fedc956c9a47e120de6824482439fc8"
+    },
+    {
+      "path": "backend/app/core/settings.py",
+      "commits": [
+        "779c961"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 3596,
+      "sha256": "b583bbe2aee04fb34aa3db6333d6563af675be7055f4c6abf84d140124bc0fa2"
+    },
+    {
+      "path": "backend/app/core/sql_store.py",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 53118,
+      "sha256": "c8745c3c5b842ece4010dee084a792da407da2444a90934da7faeef5986664c5"
+    },
+    {
+      "path": "backend/app/core/sqlserver.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 8892,
+      "sha256": "b2189e1138e433da904e1fa2c0baf86be1f8841bf38cb81559e1ee1c3a7a5d3d"
+    },
+    {
+      "path": "backend/app/core/syllabus_workspace.py",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 11027,
+      "sha256": "78e74fe2f0a87e010a0f5921bfd06341735008002eb9f26fe74b6eda7cb932a4"
+    },
+    {
+      "path": "backend/app/main.py",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 9858,
+      "sha256": "688ea10c124455ce3d3a30aec0623c87d0102958302b835701ac05276cd53008"
+    },
+    {
+      "path": "backend/app/modules/academics/academic_years/service.py",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 4948,
+      "sha256": "609a24bfd1ff28556435cf7280f9803e73e9b076b9e9e7ca9e86a279531f0c17"
+    },
+    {
+      "path": "backend/app/modules/access_control/authentication/api.py",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 8114,
+      "sha256": "b705559615b5255d9ecb210b84824e5f5e37a46c9345c52ea91b66a0e98afef9"
+    },
+    {
+      "path": "backend/app/modules/administration/workspace/api.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 9658,
+      "sha256": "f4f3d8418095da11bf234a775bc7633935aa0eeba25f3dd297be79dcf16d749b"
+    },
+    {
+      "path": "backend/app/modules/admissions/admission_enquiries/api.py",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 9018,
+      "sha256": "0d88498673b881fbad333c5820f42bae25ebc072fdc73f1cbd212ad52904fc92"
+    },
+    {
+      "path": "backend/app/modules/documents/files/api.py",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "18d5376"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 34155,
+      "sha256": "f854a8deca98c1d9af616880eee7e74eb56e9ad7603067fbbcff04483766a512"
+    },
+    {
+      "path": "backend/app/modules/master_data/onboarding/api.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 35089,
+      "sha256": "23bb1920c648b1913cf5b24531ba2f928c671130627ab3463501acc528d32152"
+    },
+    {
+      "path": "backend/app/modules/master_data/onboarding/schemas.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 3904,
+      "sha256": "9536e3ea7510dadd4bff323013a0ea9967fa01127e895067ece493633f51cce5"
+    },
+    {
+      "path": "backend/app/modules/mobile/workspace/api.py",
+      "commits": [
+        "a1031c3",
+        "779c961",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 50584,
+      "sha256": "76f5d36a6356e4ae8d11eb19d7ac6c354c9629678f4a594c35ae54d33ddd1835"
+    },
+    {
+      "path": "backend/assets/pragathi-logo.jpg",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 43551,
+      "sha256": "0e9df7cb07a040981280953939e3691fd8cdc3c5832f8e80140d93c4a54b2914"
+    },
+    {
+      "path": "backend/deploy/windows/EduNexaBackend.xml",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 812,
+      "sha256": "67fd1b34f4ee7322859269285ffec7112613e40abebb38391b2b98c5cc3acbf4"
+    },
+    {
+      "path": "backend/docs/ASSESSMENT_WORKSPACE.md",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 5609,
+      "sha256": "bb2b85a3b755b72c9832a344444e0e6d2734432f2dd616deac57f3d91b382323"
+    },
+    {
+      "path": "backend/docs/ATTENDANCE_WORKSPACE.md",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 4303,
+      "sha256": "04693e97e1b1219e489bd8408f30dadc19b5eaa1db1820792c3f10b203c2fb13"
+    },
+    {
+      "path": "backend/docs/SEMESTER_ACADEMICS.md",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 5835,
+      "sha256": "cae1086f7b11bf3b5f68a5571d916b48f658b7a934b355f67c8b29717272fa29"
+    },
+    {
+      "path": "backend/tests/conftest.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 5275,
+      "sha256": "903ead046f094428d10a8ffe4cf5417cf340bca810a3c494478c446e5f7886af"
+    },
+    {
+      "path": "backend/tests/test_academic_progress.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 7761,
+      "sha256": "cad5dfe3c61cf83e35690c95c9204045f4c56e9d3d8f395001fc83607636503d"
+    },
+    {
+      "path": "backend/tests/test_assessment_workspace.py",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 11224,
+      "sha256": "5c7a11df6fc939e55280892326ed57511b2a572e3674ce279888a821f324b179"
+    },
+    {
+      "path": "backend/tests/test_attendance_workspace.py",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 10959,
+      "sha256": "36aecdbb7c1819e30e9559d30b7ff41374473ac502391242a9eabf3a3a7c00fd"
+    },
+    {
+      "path": "backend/tests/test_certificate_design.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 1340,
+      "sha256": "065c6b1181ea88ea74f507596dca5f85eb3fab886f13bf421547f5ad53efe7f9"
+    },
+    {
+      "path": "backend/tests/test_course_semester_workspace.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 7011,
+      "sha256": "4771f84a07b7a4b768aa8fa7b9d509083774d7c6a26e7fb142376f0404b34cba"
+    },
+    {
+      "path": "backend/tests/test_linked_academic_seed.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 3218,
+      "sha256": "fc26ea18d0d6934650189418790d5c9f30da7bc3949c1926b602982e787ca37c"
+    },
+    {
+      "path": "backend/tests/test_master_data.py",
+      "commits": [],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 43790,
+      "sha256": "f8095681c6e3e3e3a4226b6e86833aaf28850d4fb2c4652b2d9b8148c1a462f5"
+    },
+    {
+      "path": "backend/tests/test_sqlserver_integration.py",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 8062,
+      "sha256": "3713050dd68c408ad4c2a14706ea4c33287fd81c2757a04a397b1118f3ddf487"
+    },
+    {
+      "path": "backend/tools/seed_course_curricula.py",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 1720,
+      "sha256": "68346db9901defdde57aa27ba053f94781eb29ee687f0cc79081579728181b77"
+    },
+    {
+      "path": "backend/tools/seed_linked_academics.py",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 25051,
+      "sha256": "cfa30a150bbce8f9609272ed3838070fef82d5fce018a1cd1316cabd4b38997a"
+    },
+    {
+      "path": "image copy 2.png",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 39592,
+      "sha256": "3077f0b210f6664e35b3c78457b20907635436ac186ae11810e2a9166dc4ec94"
+    },
+    {
+      "path": "image copy 3.png",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 14581,
+      "sha256": "fa874a6e8846d60617142f2bec98d1a43c572e2e7101bd3dc42d12f16370617a"
+    },
+    {
+      "path": "image copy.png",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 1221569,
+      "sha256": "4219b3051bc39bcd8f056864e9277367f7b2836eb2805ed0ff49e26eb3d6e501"
+    },
+    {
+      "path": "image.png",
+      "commits": [
+        "779c961"
+      ],
+      "exists": true,
+      "size_bytes": 252869,
+      "sha256": "d5ddec9ac2db5fded51adda81b97eaa0c82c7d5333e72787e1af2ab0d944ee1d"
+    },
+    {
+      "path": "mobile-apps/README.md",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 9023,
+      "sha256": "2026c4a1cf681a48fb6c4d4947c84ab7f95aa0679eca56b0734bd15c8663cdd4"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/README.md",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 1586,
+      "sha256": "9870a0606f7cb2f2210d76e199e9d8f175afcdee788e3177227062d91077da76"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/app/edunexa_client.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 30311,
+      "sha256": "82671973990d0d83cb642254c7a22147fbb52afcdd8b799f02dd0f34fcda726d"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/components/auth/auth_widgets.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 29336,
+      "sha256": "6fba48924683803d32a0f7454d06f435d162a3799506b3761c9c79612b203444"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/components/workspace/forms.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 13572,
+      "sha256": "f8d3dc0251864ce6e5c4a82b5a780119c6db1389f7322a341db13961358e468b"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/components/workspace/presentations.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12622,
+      "sha256": "5a26f9ff6e7857f439aa621bfbf536134265cf9c05e2451d977a38da102d4fa6"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/components/workspace/record_helpers.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 4030,
+      "sha256": "eff35d10181893e2abb04269340e311d0551b90333e9c63a47324b93d51e677d"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/components/workspace/widgets.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 32510,
+      "sha256": "c2f92e539ceab27ecac24045071c7ed5c440e098ba4658e2ee0cd51a5b2afc60"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/constants/api_config.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 1301,
+      "sha256": "305b10b2e4fd3e1972f4edc3df226117b0adb4157de969a4336087dda0a24f7b"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/main.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 462,
+      "sha256": "73c76ef0243cee29b9a2122488d898e8ac7f98f279265663d25a1f5ef39f722e"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/models/api_models.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 6965,
+      "sha256": "60eaf85003c1ed52f069aaeb79b09e19b29b82ea64d37ed7d7c297fbca6e6ee7"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/academics/academic_progress.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 37217,
+      "sha256": "b8862612b1aa45ebcb2e38f6660e74fe9e0811d4e371e890318919ef684db927"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/assessments/assessment_workspace.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 29708,
+      "sha256": "e16c7e6b85f5fb6bd2720b153784fb699bd96c3015fe87b61da3964b5669c623"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/assignments/assignment_workspace.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 41446,
+      "sha256": "e4cdf4d898233dfc020a8a18e5884bcf17e5bcd5faaefb1ac0fbbd5abcec8c36"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/attendance/attendance_workspace.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 30479,
+      "sha256": "df7ed2a675be780bad82981b7ed6361c265607953f883609e4996cd9ce7fcaa0"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/calendar/calendar_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12637,
+      "sha256": "5385bf01a47e597115278c1fc609714310efaaf1fccb347f34fd952c550ec5d0"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/certificates/certificate_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 7021,
+      "sha256": "b4ddd6ec9097a97854e526f455c40baca4ff207b7867dc3da5da891dd490f078"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/syllabus/syllabus_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 13142,
+      "sha256": "6a38649ddcdf20f82318bf4e6c5819b4353aa010aeee6c36a2b24b81f53977ef"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/screens/workspace/mobile_workspace.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 48216,
+      "sha256": "3b61784dfeb013eb58da36a95a22ad24b76961c639ffb6606906d5f9c9361ba9"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/services/api_service.dart",
+      "commits": [
+        "a1031c3",
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 15411,
+      "sha256": "9851b076ae43d58905e89f9c7ad760aefd4965483eaac4a94d447621df8207c0"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/services/push_notifications.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 4760,
+      "sha256": "c0f333d2fda14b897f37c22dc38851429e9e739da56180d09d4c72ba5cb199a7"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/src/assignment_workspace.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/src/certificate_workspace.dart",
+      "commits": [
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/src/edunexa_client.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/src/mobile_workspace.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/theme/mobile_design.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 22401,
+      "sha256": "96966a64305fec19819168eb00d0d1299f18ff2557f8fdf8057f8c277d7674be"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/lib/utils/mobile_motion.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 16559,
+      "sha256": "451e676420cd2eb2e77823bd3541a2534d8b46ae4278d55c1a4ec0f21fff20e1"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/pubspec.lock",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 24592,
+      "sha256": "f6913bb150c95208443e839afcace023b7cafc980c1bd2ea522e89b93e4dbe90"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/pubspec.yaml",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 938,
+      "sha256": "8f20c9311df7c0cf20da7dc195ef83d79ca061a4736f560e27a9e7234f0ec301"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/academic_progress_test.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 7050,
+      "sha256": "f844ff2824a6fb08cb254ccfc45bb37e3341d835dee21df79f7155e16995b82c"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/assessment_workspace_test.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 5095,
+      "sha256": "6560e6539fce687dc81bfe2d963dd3688332cde398a4ef2a94a4aaa29e70e2e9"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/assignment_loading_test.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 2613,
+      "sha256": "16e707c28d2903ee4c2c8d257b3140cffe38a4721ba6434407b3e1ace450e975"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/attendance_workspace_test.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 6404,
+      "sha256": "5bf4d533183419b6351da45b5a3ee5ade9cd35cbf6f8649f814abb540d3de8cb"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/auth_experience_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 13018,
+      "sha256": "2be35a1d306988a0de9f5de41d3b826d529e5c624d6bf41159e3c6413eee0a14"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/beige_experience_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12727,
+      "sha256": "0b6b40e5291bb5999e770850860444433029d50215992b782b45595697fd0be4"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/role_navigation_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 10420,
+      "sha256": "0425608ab6d30aba906a07fc995e2aa6a7a60629e11310bb29200865f42baa91"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/splash_screen_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 11263,
+      "sha256": "8588552202e9be4038064f51e06b177b94f49ea1a95fa9c90aa9a18646da9232"
+    },
+    {
+      "path": "mobile-apps/admin_teachers/test/workspace_features_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 11429,
+      "sha256": "25d3dfd4ccecdd4c054b6789b32def486be8cf02edc617a1b8cbe5d45f9a3e72"
+    },
+    {
+      "path": "mobile-apps/parent_student/README.md",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 1591,
+      "sha256": "95b470d3bc06ed8390c332fe825497960e320f4ab9c7e80db4d4f15d90f827ef"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/app/edunexa_client.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 30311,
+      "sha256": "82671973990d0d83cb642254c7a22147fbb52afcdd8b799f02dd0f34fcda726d"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/components/auth/auth_widgets.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 29336,
+      "sha256": "6fba48924683803d32a0f7454d06f435d162a3799506b3761c9c79612b203444"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/components/workspace/forms.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 13572,
+      "sha256": "f8d3dc0251864ce6e5c4a82b5a780119c6db1389f7322a341db13961358e468b"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/components/workspace/presentations.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12622,
+      "sha256": "5a26f9ff6e7857f439aa621bfbf536134265cf9c05e2451d977a38da102d4fa6"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/components/workspace/record_helpers.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 4030,
+      "sha256": "eff35d10181893e2abb04269340e311d0551b90333e9c63a47324b93d51e677d"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/components/workspace/widgets.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 32510,
+      "sha256": "c2f92e539ceab27ecac24045071c7ed5c440e098ba4658e2ee0cd51a5b2afc60"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/constants/api_config.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 1301,
+      "sha256": "305b10b2e4fd3e1972f4edc3df226117b0adb4157de969a4336087dda0a24f7b"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/main.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 451,
+      "sha256": "fc5299511c9f8e50c89b62872317e214d80f8628cb58b5f5bba5c0f0ad7d1dfc"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/models/api_models.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 6965,
+      "sha256": "60eaf85003c1ed52f069aaeb79b09e19b29b82ea64d37ed7d7c297fbca6e6ee7"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/academics/academic_progress.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 37217,
+      "sha256": "b8862612b1aa45ebcb2e38f6660e74fe9e0811d4e371e890318919ef684db927"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/assessments/assessment_workspace.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 29708,
+      "sha256": "e16c7e6b85f5fb6bd2720b153784fb699bd96c3015fe87b61da3964b5669c623"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/assignments/assignment_workspace.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 41446,
+      "sha256": "e4cdf4d898233dfc020a8a18e5884bcf17e5bcd5faaefb1ac0fbbd5abcec8c36"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/attendance/attendance_workspace.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 30479,
+      "sha256": "df7ed2a675be780bad82981b7ed6361c265607953f883609e4996cd9ce7fcaa0"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/calendar/calendar_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12637,
+      "sha256": "5385bf01a47e597115278c1fc609714310efaaf1fccb347f34fd952c550ec5d0"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/certificates/certificate_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 6063,
+      "sha256": "b89ba98106550fadcc879bc4f8e34fd8058037e361bd7727ad138ac798f19628"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/syllabus/syllabus_workspace.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 11556,
+      "sha256": "7792031e599b43f7676f58e31caf06bc3649dfbfa765011eea1f5cfcec357d73"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/screens/workspace/mobile_workspace.dart",
+      "commits": [
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 48216,
+      "sha256": "3b61784dfeb013eb58da36a95a22ad24b76961c639ffb6606906d5f9c9361ba9"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/services/api_service.dart",
+      "commits": [
+        "a1031c3",
+        "18d5376",
+        "98dce33"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 15411,
+      "sha256": "9851b076ae43d58905e89f9c7ad760aefd4965483eaac4a94d447621df8207c0"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/services/push_notifications.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 4760,
+      "sha256": "c0f333d2fda14b897f37c22dc38851429e9e739da56180d09d4c72ba5cb199a7"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/src/assignment_workspace.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/src/certificate_workspace.dart",
+      "commits": [
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/src/edunexa_client.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/src/mobile_workspace.dart",
+      "commits": [
+        "a1031c3",
+        "779c961"
+      ],
+      "exists": false
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/theme/mobile_design.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 22401,
+      "sha256": "96966a64305fec19819168eb00d0d1299f18ff2557f8fdf8057f8c277d7674be"
+    },
+    {
+      "path": "mobile-apps/parent_student/lib/utils/mobile_motion.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 16559,
+      "sha256": "451e676420cd2eb2e77823bd3541a2534d8b46ae4278d55c1a4ec0f21fff20e1"
+    },
+    {
+      "path": "mobile-apps/parent_student/pubspec.lock",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 24592,
+      "sha256": "f6913bb150c95208443e839afcace023b7cafc980c1bd2ea522e89b93e4dbe90"
+    },
+    {
+      "path": "mobile-apps/parent_student/pubspec.yaml",
+      "commits": [
+        "a1031c3"
+      ],
+      "exists": true,
+      "size_bytes": 941,
+      "sha256": "abc84d177de6a55c9ce4de10fa24d63a18c2586ce869d6bb406185daa79c4c50"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/academic_progress_test.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 7051,
+      "sha256": "d06f0b41889f8e72f3eedee200930032dccb5e2465c2ea3e87cd12174765b248"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/assessment_workspace_test.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 5096,
+      "sha256": "7e8b380dd6c006e8a2d474ee87294bafe6ba5a144cd30e6cde3e55c58d68a805"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/assignment_loading_test.dart",
+      "commits": [],
+      "working_tree_status": "??",
+      "exists": true,
+      "size_bytes": 2614,
+      "sha256": "5ee896668df76b3333cb8f6fdc19e49edc330b1adb76b1b383b04d424c88f08c"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/attendance_workspace_test.dart",
+      "commits": [
+        "98dce33"
+      ],
+      "exists": true,
+      "size_bytes": 6405,
+      "sha256": "2a61e13285ade61f334473c12430d05d230402379c4ef9a5e35529dd77f3f235"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/auth_experience_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 13021,
+      "sha256": "9de7f768e0e7df7768332b43357a0fa1621405cb39b9d9424fdbf42f29a4d8c7"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/beige_experience_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 12730,
+      "sha256": "32b1fd5335dd8e5a5de831f101f5fc9184ec76dd5ecdedda8392c3e22354af90"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/role_navigation_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 10421,
+      "sha256": "7b731ed03c8bc106b5fba9a930d3840ac3fb47d6518df877512f974367bffaf7"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/splash_screen_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "exists": true,
+      "size_bytes": 11273,
+      "sha256": "d2220d23a07c0e15b05496194f4c48bd1dd510cf456a674c387fdf361d6198a3"
+    },
+    {
+      "path": "mobile-apps/parent_student/test/workspace_features_test.dart",
+      "commits": [
+        "18d5376"
+      ],
+      "working_tree_status": " M",
+      "exists": true,
+      "size_bytes": 11431,
+      "sha256": "a3faf5b08bc395e08da689270ef36ab9c196866bc5a801f58c2d07b36b110d1b"
+    },
+    {
+      "path": "mock_logins.html",
+      "commits": [],
+      "working_tree_status": "??",
+      "note": "Untracked file present before handover; authorship and contents not reviewed. May contain credentials. Do not auto-commit or publish. The file changed while this handover was generated; its recorded size/hash describe the earlier capture and are not an audited source snapshot.",
+      "exists": true,
+      "size_bytes": 119263,
+      "sha256": "0c84a3869c0b76cbe93c3104415a1c9b42350a54cf3e4e31c96b6920b628360f"
+    }
+  ]
+}

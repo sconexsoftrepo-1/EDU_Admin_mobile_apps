@@ -68,6 +68,7 @@ export interface AssignmentList {
   students: { code: string; name: string }[];
 }
 export interface AssignmentOptions {
+  current_semester?: number | null;
   subjects?: {
     subject_code: string;
     name: string;

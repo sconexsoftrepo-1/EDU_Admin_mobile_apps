@@ -6,6 +6,8 @@ import { api, errorText, type LookupOption, type Row } from "@/services/api";
 import { programFeeSchedules } from "@/lib/colleges/program-fee-schedules";
 import type { RecordRow } from "@/lib/colleges/store";
 import { money } from "@/data/colleges";
+import FeeHeadManager from "./FeeHeadManager";
+import SideDrawer from "./SideDrawer";
 import DateInput from "./DateInput";
 import "./fee-structures.css";
 
@@ -117,6 +119,7 @@ export default function FeeStructureManager({
 }: {
   initialId?: string | null;
 }) {
+  const [headsOpen, setHeadsOpen] = useState(false);
   const [data, setData] = useState<Snapshot | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState("");
@@ -221,6 +224,15 @@ export default function FeeStructureManager({
     ) || 0;
   return (
     <section className="erp-fee-manager">
+      {headsOpen && (
+        <SideDrawer
+          title="Fee heads"
+          expanded
+          onClose={() => setHeadsOpen(false)}
+        >
+          <FeeHeadManager onChanged={async () => setData(await loadFees())} />
+        </SideDrawer>
+      )}
       <div className="erp-fee-manager-title">
         <div>
           <h3>
@@ -232,6 +244,9 @@ export default function FeeStructureManager({
           </h3>
           <p>Course, academic year and saved fee heads in one place.</p>
         </div>
+        <button type="button" onClick={() => setHeadsOpen(true)}>
+          Fee heads & custom heads
+        </button>
         {!draft && (
           <button
             type="button"
@@ -338,7 +353,15 @@ export default function FeeStructureManager({
                   value={draft.program}
                   disabled={draft.existing}
                   onChange={(event) =>
-                    setDraft({ ...draft, program: event.target.value })
+                    setDraft({
+                      ...draft,
+                      program: event.target.value,
+                      year: "",
+                      termCount:
+                        data.programs.find(
+                          (p) => p.value === event.target.value,
+                        )?.duration_semesters || draft.termCount,
+                    })
                   }
                 >
                   <option value="">Choose course</option>
@@ -360,11 +383,16 @@ export default function FeeStructureManager({
                   }
                 >
                   <option value="">Choose academic year</option>
-                  {data.years.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
+                  {data.years
+                    .filter(
+                      (y) =>
+                        !y.program_code || y.program_code === draft.program,
+                    )
+                    .map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                 </select>
               </label>
               <label>
@@ -378,6 +406,7 @@ export default function FeeStructureManager({
                 >
                   <option value="full_course">Full course total</option>
                   <option value="annual">Annual / study year</option>
+                  <option value="semester">One semester</option>
                 </select>
               </label>
               {draft.basis === "full_course" && (
@@ -496,7 +525,7 @@ export default function FeeStructureManager({
                               {String(head.name)}
                             </option>
                           ))}
-                          <option value="_new">New fee head…</option>
+                          <option value="_new">Custom fee head…</option>
                         </select>
                         {line.feeHead === "_new" && (
                           <input

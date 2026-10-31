@@ -1,0 +1,73 @@
+ M admin-dashboard/src/components/colleges/AssessmentWorkspace.tsx
+ M admin-dashboard/src/components/colleges/AssignmentWorkspace.tsx
+ M admin-dashboard/src/components/colleges/AttendanceWorkspace.tsx
+ M admin-dashboard/src/components/colleges/CertificateWorkspace.tsx
+ M admin-dashboard/src/components/colleges/CollegePortal.tsx
+ M admin-dashboard/src/components/colleges/ConnectedPortal.tsx
+ M admin-dashboard/src/components/colleges/CourseCards.tsx
+ M admin-dashboard/src/components/colleges/CourseInsightsPanel.tsx
+ M admin-dashboard/src/components/colleges/FeeStructureManager.tsx
+ M admin-dashboard/src/components/colleges/FeeStructures.tsx
+ M admin-dashboard/src/components/colleges/PersonalPortal.tsx
+ M admin-dashboard/src/lib/colleges/fees.ts
+ M admin-dashboard/src/services/api/consts.ts
+ M admin-dashboard/src/services/api/modules/assessments/service.ts
+ M admin-dashboard/src/services/api/modules/assignments/service.ts
+ M admin-dashboard/src/services/api/modules/attendance/service.ts
+ M admin-dashboard/src/services/api/modules/certificates.ts
+ M backend/app/core/assessment_workspace.py
+ M backend/app/core/assignment_workspace.py
+ M backend/app/core/attendance_workspace.py
+ M backend/app/core/certificate_workspace.py
+ M backend/app/core/curriculum_workspace.py
+ M backend/app/core/settings.py
+ M backend/app/core/sqlserver.py
+ M backend/app/main.py
+ M backend/app/modules/administration/workspace/api.py
+ M backend/app/modules/documents/files/api.py
+ M backend/app/modules/master_data/onboarding/api.py
+ M backend/app/modules/master_data/onboarding/schemas.py
+ M backend/app/modules/mobile/workspace/api.py
+ M backend/docs/ASSESSMENT_WORKSPACE.md
+ M backend/tests/conftest.py
+ M backend/tests/test_master_data.py
+ M backend/tools/seed_course_curricula.py
+ M mobile-apps/admin_teachers/lib/app/edunexa_client.dart
+ M mobile-apps/admin_teachers/lib/screens/assessments/assessment_workspace.dart
+ M mobile-apps/admin_teachers/lib/screens/assignments/assignment_workspace.dart
+ M mobile-apps/admin_teachers/lib/screens/attendance/attendance_workspace.dart
+ M mobile-apps/admin_teachers/lib/screens/workspace/mobile_workspace.dart
+ M mobile-apps/admin_teachers/lib/services/api_service.dart
+ M mobile-apps/admin_teachers/test/workspace_features_test.dart
+ M mobile-apps/parent_student/lib/app/edunexa_client.dart
+ M mobile-apps/parent_student/lib/screens/assessments/assessment_workspace.dart
+ M mobile-apps/parent_student/lib/screens/assignments/assignment_workspace.dart
+ M mobile-apps/parent_student/lib/screens/attendance/attendance_workspace.dart
+ M mobile-apps/parent_student/lib/screens/workspace/mobile_workspace.dart
+ M mobile-apps/parent_student/lib/services/api_service.dart
+ M mobile-apps/parent_student/test/workspace_features_test.dart
+?? SESSION_HANDOVER_2026-10-31.md
+?? admin-dashboard/src/components/colleges/AcademicProgressWorkspace.tsx
+?? admin-dashboard/src/components/colleges/CourseSemesterWorkspace.tsx
+?? admin-dashboard/src/components/colleges/FeeHeadManager.tsx
+?? admin-dashboard/src/components/colleges/academic-progress.css
+?? admin-dashboard/src/components/colleges/course-semester-workspace.css
+?? admin-dashboard/src/components/colleges/fee-head-manager.css
+?? admin-dashboard/src/services/api/modules/academic-progress/service.ts
+?? backend/app/core/academic_progress.py
+?? backend/app/core/certificate_design.py
+?? backend/assets/pragathi-logo.jpg
+?? backend/docs/SEMESTER_ACADEMICS.md
+?? backend/tests/test_academic_progress.py
+?? backend/tests/test_certificate_design.py
+?? backend/tests/test_course_semester_workspace.py
+?? backend/tests/test_linked_academic_seed.py
+?? backend/tools/seed_linked_academics.py
+?? docs/handover/2026-10-31/database-counts.json
+?? mobile-apps/admin_teachers/lib/screens/academics/academic_progress.dart
+?? mobile-apps/admin_teachers/test/academic_progress_test.dart
+?? mobile-apps/admin_teachers/test/assignment_loading_test.dart
+?? mobile-apps/parent_student/lib/screens/academics/academic_progress.dart
+?? mobile-apps/parent_student/test/academic_progress_test.dart
+?? mobile-apps/parent_student/test/assignment_loading_test.dart
+?? mock_logins.html

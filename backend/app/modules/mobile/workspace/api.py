@@ -27,6 +27,7 @@ SCREENS = {
         ("expenses", "Expenditures", "expenses"),
         ("employees", "Employees", "employees"),
         ("assessments", "Assessments and marks", "exams"),
+        ("academics", "Academic progress", "exam_results"),
         ("assignments", "Assignments and review", "assignments"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
@@ -461,6 +462,10 @@ def screen_data(
     if screen not in definitions:
         raise HTTPException(404, "Screen not available")
     data = request.app.state.store.snapshot()
+    if screen == "academics":
+        from app.core.academic_progress import overview as academic_overview
+        result=academic_overview(request,student_code=student_code,user=user)
+        return {"screen":screen,"title":"Academic progress","items":[],"total":0,"students":result['children'],"actions":[],"lookups":{},"summary":result['totals']}
     if screen == "assessments":
         from app.core.assessment_workspace import listing as assessment_listing
         result = assessment_listing(request, student_code, user)

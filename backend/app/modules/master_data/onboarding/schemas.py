@@ -87,7 +87,7 @@ class CourseFeeLineInput(StrictModel):
 
 
 class CourseFeeScheduleInput(StrictModel):
-    fee_basis: str = Field(default="annual", pattern=r"^(annual|full_course)$")
+    fee_basis: str = Field(default="annual", pattern=r"^(annual|full_course|semester)$")
     term_count: int = Field(default=4, ge=1, le=40)
     term_due_dates: list[date | None] = Field(default_factory=list, max_length=40)
     program_code: str

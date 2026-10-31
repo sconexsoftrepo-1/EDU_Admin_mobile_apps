@@ -15,8 +15,15 @@ from create_master_data_role import store_for
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply',action='store_true')
+    parser.add_argument('--sql-host',help='Temporary SQL Server host override; does not change .env')
     args=parser.parse_args()
-    store=store_for(Settings())
+    settings=Settings()
+    if args.sql_host:
+        if settings.storage_backend != 'sqlserver': parser.error('--sql-host requires SQL Server storage')
+        from app.core.sqlserver import SqlServerSettings,SqlServerStore
+        store=SqlServerStore(SqlServerSettings(host=args.sql_host))
+    else:
+        store=store_for(settings)
     try:
         if args.apply:
             with store.transaction() as data:

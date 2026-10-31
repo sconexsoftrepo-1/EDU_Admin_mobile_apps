@@ -39,7 +39,7 @@ class _AssignmentHubState extends State<AssignmentHub> {
     });
     try {
       final result = Map<String, dynamic>.from(
-        widget.api.assignments(studentCode: child)
+        await widget.api.assignments(studentCode: child)
             as Map,
       );
       if (!mounted) return;
@@ -332,6 +332,7 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
       if (!mounted || current != ticket) return;
       setState(() {
         options = value;
+        subject = _asText(_asRows(value['subjects']).where((s) => s['semester_number'] == value['current_semester']).firstOrNull?['subject_code']);
         recipients = _asRows(
           value['students'],
         ).map((s) => _asText(s['code'])).toSet();
@@ -739,7 +740,7 @@ class _AssignmentReviewState extends State<AssignmentReview> {
     setState(() => busy = true);
     try {
       final value = Map<String, dynamic>.from(
-        widget.api.assignmentDetails(widget.code, studentCode: widget.student)
+        await widget.api.assignmentDetails(widget.code, studentCode: widget.student)
             as Map,
       );
       if (mounted) {

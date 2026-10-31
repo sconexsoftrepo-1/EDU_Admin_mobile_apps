@@ -45,17 +45,19 @@ class _AssessmentHubState extends State<AssessmentHub> {
       final result = Map<String, dynamic>.from(
         await widget.api.assessments(studentCode: child) as Map,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           data = result;
           loading = false;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           error = e.toString();
           loading = false;
         });
+      }
     }
   }
 
@@ -327,12 +329,13 @@ class _AssessmentDetailsState extends State<AssessmentDetails> {
             )
             as Map,
       );
-      if (mounted)
+      if (mounted) {
         setState(() {
           data = result;
           populate(result);
           error = null;
         });
+      }
     } catch (e) {
       if (mounted) setState(() => error = e.toString());
     }
@@ -367,8 +370,9 @@ class _AssessmentDetailsState extends State<AssessmentDetails> {
           });
         }
       }
-      if (rows.isEmpty)
+      if (rows.isEmpty) {
         throw const FormatException('Enter marks or mark an absence first.');
+      }
       final result = Map<String, dynamic>.from(
         await widget.api.assessmentMarks(widget.code, {
               'revision': data!['revision'],
@@ -592,7 +596,14 @@ class _AssessmentComposerState extends State<AssessmentComposer> {
             )
             as Map,
       );
-      if (mounted && ticket == current) setState(() => options = result);
+      if (mounted && ticket == current) {
+        setState(() {
+          options = result;
+          if (widget.initial == null && result['current_semester'] is int) {
+            semester = result['current_semester'] as int;
+          }
+        });
+      }
     } catch (e) {
       if (mounted && ticket == current) setState(() => error = e.toString());
     } finally {
@@ -642,7 +653,7 @@ class _AssessmentComposerState extends State<AssessmentComposer> {
           ? const TimeOfDay(hour: 9, minute: 0)
           : TimeOfDay.fromDateTime(scheduled!),
     );
-    if (time != null && mounted)
+    if (time != null && mounted) {
       setState(
         () => scheduled = DateTime(
           day.year,
@@ -652,6 +663,7 @@ class _AssessmentComposerState extends State<AssessmentComposer> {
           time.minute,
         ),
       );
+    }
   }
 
   Future<void> save(String status) async {

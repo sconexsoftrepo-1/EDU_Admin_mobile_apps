@@ -4,6 +4,7 @@ from typing import Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import Field
 
+from app.core.certificate_design import FORMATS
 from app.core.security import StrictModel, current_user, has_permission
 from app.core.storage import audit, new_code, now
 from app.modules.documents.files.api import CertificateInput, issue as issue_certificate
@@ -75,7 +76,7 @@ def push(request, notices):
                 continue
             tokens = [r["token"] for r in rows(data, "device_tokens") if r["user_code"] == item["user_code"]]
             payload = {"idempotency_key": code, "tokens": tokens, "title": item["title"], "body": item["body"],
-                       "data": {k: item.get(k) for k in ("screen", "certificate_request_code", "certificate_code")}}
+                       "data": {k: item.get(k) for k in ("screen", "certificate_request_code", "certificate_code", "academic_year_code", "semester_number", "charge_code")}}
         if tokens:
             try:
                 adapter_post(settings.push_adapter_url, settings.push_adapter_token, payload)
@@ -148,7 +149,7 @@ def options(request: Request, course_level: str | None = None, program_code: str
         eligible.update(e["student_code"] for e in rows(data, "student_enrollments")
                         if e.get("status") == "active" and e.get("section_code") in matching_sections)
         students = [s for s in students if s["code"] in eligible]
-    return {"templates": [{"code": c, "name": n, "description": d} for c, n, d in TEMPLATES],
+    return {"templates": [{"code": c, "name": n, "description": d, "paper_size": FORMATS[c][0]} for c, n, d in TEMPLATES],
             "courses": [{"code": p["code"], "name": p.get("name"), "specialization": p.get("specialization") or p.get("branch") or p.get("qualification"), "course_level": p.get("course_level")} for p in courses],
             "academic_years": [{"code": y["code"], "name": y.get("name"), "program_code": y.get("program_code")} for y in years],
             "students": [{"code": s["code"], "name": person_name(s), "admission_number": s.get("admission_number")} for s in students]}

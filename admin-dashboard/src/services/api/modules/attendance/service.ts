@@ -63,6 +63,7 @@ export const attendanceApi = {
     program_code: string;
     academic_year_code: string;
     section_code: string | null;
+    slot_code?: string;
     session_date: string;
     period: number;
     subject: string;

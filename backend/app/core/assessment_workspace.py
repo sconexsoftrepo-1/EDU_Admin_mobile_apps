@@ -97,7 +97,10 @@ def options(request:Request,program_code:str|None=None,academic_year_code:str|No
         sections=[s for s in aw.rows(data,'sections') if s['code'] in sc and (not aw.teaching(user) or s['code'] in owned_sections)]
     subjects=curriculum(data,program_code,academic_year_code)['items'] if program_code else []
     if aw.teaching(user): subjects=[s for s in subjects if any(o['subject_code']==s['subject_code'] and (not academic_year_code or o['section_code'] in {s['code'] for s in sections}) for o in offerings)]
-    return {'courses':courses,'academic_years':years,'sections':sections,'subjects':subjects,'students':[{'code':s['code'],'name':aw.name(s)} for s in students.values()], 'teachers':[{'code':t['code'],'name':aw.name(data['records'].get('employees',{}).get(t['employee_code'],{}))} for t in aw.rows(data,'teachers') if not aw.teaching(user) or t['code'] in own], 'can_create':permitted(data,user,'create')}
+    from .academic_progress import semester_state
+    year=data['records'].get('academic_years',{}).get(academic_year_code)
+    current=semester_state(data,year)['current'] if year else None
+    return {'current_semester':current,'courses':courses,'academic_years':years,'sections':sections,'subjects':subjects,'students':[{'code':s['code'],'name':aw.name(s)} for s in students.values()], 'teachers':[{'code':t['code'],'name':aw.name(data['records'].get('employees',{}).get(t['employee_code'],{}))} for t in aw.rows(data,'teachers') if not aw.teaching(user) or t['code'] in own], 'can_create':permitted(data,user,'create')}
 
 def notices(data,students,title,body,code):
     codes=aw.notifications(data,set(students),title,body,code)
