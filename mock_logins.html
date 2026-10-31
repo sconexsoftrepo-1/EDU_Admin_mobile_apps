@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pragathi College — Academic Demo Logins</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* iOS Liquid Glass Light Theme (Default) */
+      --bg-page: #f2f5fa;
+      --bg-glass-card: rgba(255, 255, 255, 0.72);
+      --bg-glass-card-hover: rgba(255, 255, 255, 0.92);
+      --bg-glass-header: rgba(255, 255, 255, 0.78);
+      --bg-glass-element: rgba(241, 245, 249, 0.85);
+      --bg-pill-inactive: rgba(0, 0, 0, 0.05);
+      --bg-pill-hover: rgba(0, 0, 0, 0.08);
+
+      --border-glass: rgba(255, 255, 255, 0.88);
+      --border-glass-card: rgba(255, 255, 255, 0.95);
+      --border-subtle: rgba(148, 163, 184, 0.22);
+      --border-element: rgba(203, 213, 225, 0.45);
+
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-tertiary: #64748b;
+      --text-dim: #94a3b8;
+
+      --shadow-glass-sm: 0 4px 12px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+      --shadow-glass-md: 0 10px 28px -4px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.03), inset 0 1px 1px rgba(255, 255, 255, 1);
+      --shadow-glass-lg: 0 20px 44px -8px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 1);
+      --shadow-island: 0 16px 36px -6px rgba(15, 23, 42, 0.25);
+
+      /* iOS System Vibrant Colors */
+      --ios-purple: #7c3aed;
+      --ios-purple-soft: rgba(124, 58, 237, 0.10);
+      --ios-purple-border: rgba(124, 58, 237, 0.28);
+      --ios-purple-gradient: linear-gradient(135deg, #8b5cf6, #6d28d9);
+
+      --ios-blue: #007aff;
+      --ios-blue-soft: rgba(0, 122, 255, 0.10);
+      --ios-blue-border: rgba(0, 122, 255, 0.28);
+      --ios-blue-gradient: linear-gradient(135deg, #007aff, #0284c7);
+
+      --ios-green: #10b981;
+      --ios-green-soft: rgba(16, 185, 129, 0.10);
+      --ios-green-border: rgba(16, 185, 129, 0.28);
+      --ios-green-gradient: linear-gradient(135deg, #10b981, #059669);
+
+      --ios-orange: #f59e0b;
+      --ios-orange-soft: rgba(245, 158, 11, 0.10);
+      --ios-orange-border: rgba(245, 158, 11, 0.28);
+      --ios-orange-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --radius-pill: 9999px;
+
+      --font-system: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #0a0e17;
+      --bg-glass-card: rgba(21, 31, 50, 0.65);
+      --bg-glass-card-hover: rgba(28, 41, 66, 0.85);
+      --bg-glass-header: rgba(17, 24, 39, 0.78);
+      --bg-glass-element: rgba(30, 41, 59, 0.85);
+      --bg-pill-inactive: rgba(255, 255, 255, 0.08);
+      --bg-pill-hover: rgba(255, 255, 255, 0.14);
+
+      --border-glass: rgba(255, 255, 255, 0.16);
+      --border-glass-card: rgba(255, 255, 255, 0.12);
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --border-element: rgba(255, 255, 255, 0.12);
+
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-tertiary: #94a3b8;
+      --text-dim: #64748b;
+
+      --shadow-glass-sm: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      --shadow-glass-md: 0 10px 28px -4px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      --shadow-glass-lg: 0 20px 44px -8px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.18s ease, box-shadow 0.25s ease;
+    }
+
+    body {
+      font-family: var(--font-system);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 90px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Liquid Aurora Glow Orbs */
+    .ambient-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.55;
+      animation: floatOrb 20s infinite alternate ease-in-out;
+    }
+
+    .orb-purple {
+      width: 580px;
+      height: 580px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.28) 0%, rgba(168, 85, 247, 0) 70%);
+      top: -120px;
+      left: 8%;
+    }
+
+    .orb-blue {
+      width: 620px;
+      height: 620px;
+      background: radial-gradient(circle, rgba(0, 122, 255, 0.25) 0%, rgba(0, 122, 255, 0) 70%);
+      top: 220px;
+      right: 4%;
+      animation-duration: 25s;
+    }
+
+    .orb-green {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(52, 199, 89, 0.22) 0%, rgba(52, 199, 89, 0) 70%);
+      bottom: -80px;
+      left: 15%;
+      animation-duration: 22s;
+    }
+
+    .orb-amber {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, rgba(245, 158, 11, 0) 70%);
+      top: 55%;
+      right: 25%;
+      animation-duration: 28s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -25px) scale(1.08); }
+      100% { transform: translate(-25px, 20px) scale(0.95); }
+    }
+
+    .container {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* iOS Glass Header */
+    header {
+      padding-top: 36px;
+      padding-bottom: 24px;
+    }
+
+    .brand-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #007aff, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #fff;
+      box-shadow: 0 12px 24px -4px rgba(0, 122, 255, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      flex-shrink: 0;
+    }
+
+    .brand-titles h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--text-primary);
+    }
+
+    .badge-apple {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--ios-blue-soft);
+      border: 1px solid var(--ios-blue-border);
+      color: var(--ios-blue);
+    }
+
+    .brand-titles p {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .brand-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Glass Buttons */
+    .glass-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-sm);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-btn:hover {
+      background: var(--bg-glass-card-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glass-md);
+    }
+
+    .glass-btn:active {
+      transform: scale(0.97);
+    }
+
+    .glass-btn.primary {
+      background: linear-gradient(135deg, #007aff, #0056b3);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      box-shadow: 0 6px 18px rgba(0, 122, 255, 0.35);
+    }
+
+    .glass-btn.primary:hover {
+      background: linear-gradient(135deg, #0a84ff, #0066cc);
+      box-shadow: 0 8px 22px rgba(0, 122, 255, 0.45);
+    }
+
+    /* Global Info Strip */
+    .global-info-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .info-strip-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid var(--border-glass-card);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-glass-md);
+    }
+
+    .info-card-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .info-icon-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-element);
+      color: var(--text-primary);
+      flex-shrink: 0;
+      box-shadow: var(--shadow-glass-sm);
+    }
+
+    .info-meta .label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+    }
+
+    .info-meta .value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-pill {
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+    }
+
+    .copy-pill:hover {
+      background: #ffffff;
+      color: var(--ios-blue);
+      border-color: var(--ios-blue-border);
+      box-shadow: var(--shadow-glass-sm);
+      transform: translateY(-1px);
+    }
+
+    .copy-pill:active {
+      transform: scale(0.96);
+    }
+
+    /* Stats Overview Ribbon */
+    .stats-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid var(--border-glass-card);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-md);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: var(--shadow-glass-lg);
+      background: var(--bg-glass-card-hover);
+    }
+
+    .stat-card.active-filter {
+      border-color: var(--ios-blue);
+      background: rgba(0, 122, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 122, 255, 0.18);
+    }
+
+    .stat-card .stat-icon-bg {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      font-size: 32px;
+      opacity: 0.16;
+      pointer-events: none;
+    }
+
+    .stat-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.8px;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    /* Sticky Control Toolbar */
+    .controls-wrapper {
+      position: sticky;
+      top: 16px;
+      z-index: 40;
+      margin-bottom: 26px;
+    }
+
+    .controls-panel {
+      background: var(--bg-glass-header);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-xl);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-glass-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* iOS Pill Search Input */
+    .search-input-wrap {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      font-size: 16px;
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      padding: 12px 42px 12px 44px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-system);
+      color: var(--text-primary);
+      outline: none;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      background: #ffffff;
+      border-color: var(--ios-blue);
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.18), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 14px;
+      background: rgba(0, 0, 0, 0.1);
+      border: none;
+      color: var(--text-secondary);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-clear-btn.visible {
+      display: flex;
+    }
+
+    .search-shortcut-badge {
+      position: absolute;
+      right: 40px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--bg-glass-card);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-tertiary);
+      pointer-events: none;
+    }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .select-dropdown {
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 10px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-dropdown:focus {
+      border-color: var(--ios-blue);
+    }
+
+    /* iOS Segmented Control */
+    .view-segmented-control {
+      display: flex;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .segmented-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .segmented-btn.active {
+      background: #ffffff;
+      color: var(--text-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Filter Pills Rows */
+    .filter-pills-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+    }
+
+    .role-pills-group, .course-pills-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-pill {
+      background: var(--bg-pill-inactive);
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+
+    .filter-pill:hover {
+      background: var(--bg-pill-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    .filter-pill.active {
+      background: #007aff;
+      border-color: #007aff;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 122, 255, 0.38);
+    }
+
+    .filter-pill .count {
+      padding: 1px 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(0, 0, 0, 0.08);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .filter-pill.active .count {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .filter-results-status {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .clear-filters-btn {
+      color: #ef4444;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-pill);
+      padding: 3px 10px;
+      cursor: pointer;
+      display: none;
+    }
+    .clear-filters-btn.visible {
+      display: inline-block;
+    }
+
+    /* Cards Grid View */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* iOS Liquid Glass Card */
+    .login-card {
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--border-glass-card);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: var(--shadow-glass-md);
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s ease, border-color 0.24s ease, background 0.24s ease;
+    }
+
+    .login-card:hover {
+      transform: translateY(-4px) scale(1.008);
+      box-shadow: var(--shadow-glass-lg);
+      background: var(--bg-glass-card-hover);
+      border-color: var(--card-accent-border, var(--border-glass));
+    }
+
+    .login-card.highlight-pulse {
+      animation: iosPulse 1.8s ease;
+    }
+
+    @keyframes iosPulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.85); border-color: #007aff; }
+      50% { box-shadow: 0 0 0 14px rgba(0, 122, 255, 0); border-color: #007aff; }
+      100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0); }
+    }
+
+    /* Role Specific Accent Rings */
+    .login-card[data-role="D26-ADMIN"] {
+      --card-accent-border: var(--ios-purple-border);
+    }
+    .login-card[data-role="D26-TEACH"] {
+      --card-accent-border: var(--ios-blue-border);
+    }
+    .login-card[data-role="D26-STUDENT"] {
+      --card-accent-border: var(--ios-green-border);
+    }
+    .login-card[data-role="D26-PARENT"] {
+      --card-accent-border: var(--ios-orange-border);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.15);
+    }
+
+    .avatar-admin { background: var(--ios-purple-gradient); }
+    .avatar-teacher { background: var(--ios-blue-gradient); }
+    .avatar-student { background: var(--ios-green-gradient); }
+    .avatar-parent { background: var(--ios-orange-gradient); }
+
+    .user-header-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .user-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .user-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.3px;
+    }
+
+    .record-id {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-element);
+      white-space: nowrap;
+    }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    .role-badge.admin {
+      background: var(--ios-purple-soft);
+      border: 1px solid var(--ios-purple-border);
+      color: var(--ios-purple);
+    }
+    .role-badge.teacher {
+      background: var(--ios-blue-soft);
+      border: 1px solid var(--ios-blue-border);
+      color: var(--ios-blue);
+    }
+    .role-badge.student {
+      background: var(--ios-green-soft);
+      border: 1px solid var(--ios-green-border);
+      color: var(--ios-green);
+    }
+    .role-badge.parent {
+      background: var(--ios-orange-soft);
+      border: 1px solid var(--ios-orange-border);
+      color: var(--ios-orange);
+    }
+
+    /* iOS Frosted Credentials Box */
+    .credentials-box {
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .cred-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cred-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      min-width: 65px;
+    }
+
+    .cred-val-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .cred-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mini-copy-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-element);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-glass-sm);
+    }
+
+    .mini-copy-btn:hover {
+      background: var(--ios-blue);
+      color: #fff;
+      border-color: var(--ios-blue);
+      transform: translateY(-1px);
+    }
+
+    .mini-copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Details Section */
+    .card-details-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-element);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      box-shadow: var(--shadow-glass-sm);
+      transition: all 0.18s ease;
+    }
+
+    .badge-tag:hover {
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+
+    .badge-tag.course-tag {
+      background: rgba(0, 122, 255, 0.08);
+      border-color: rgba(0, 122, 255, 0.25);
+      color: var(--ios-blue);
+    }
+
+    .badge-tag.sem-tag {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+      color: var(--ios-green);
+    }
+
+    .relation-banner {
+      background: var(--bg-glass-element);
+      border: 1px dashed var(--border-element);
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .relation-banner:hover {
+      border-color: var(--ios-blue);
+      background: rgba(0, 122, 255, 0.06);
+      transform: translateY(-1px);
+    }
+
+    .relation-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .relation-left .relation-label {
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .relation-left .relation-name {
+      font-weight: 800;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .relation-arrow {
+      font-size: 11px;
+      color: var(--ios-blue);
+      font-weight: 800;
+    }
+
+    /* Teacher Subjects Box */
+    .subjects-box {
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-element);
+      border-radius: var(--radius-md);
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .subjects-header {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .subjects-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      max-height: 85px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .subject-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid var(--border-element);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .subject-pill strong {
+      color: var(--ios-blue);
+      font-weight: 800;
+      margin-right: 3px;
+    }
+
+    .desc-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Card Actions Footer */
+    .card-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .card-action-btn {
+      flex: 1;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-element);
+      color: var(--text-primary);
+      padding: 9px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-glass-sm);
+    }
+
+    .card-action-btn:hover {
+      background: #ffffff;
+      border-color: var(--border-subtle);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-glass-md);
+    }
+
+    .card-action-btn.copy-pair {
+      background: var(--ios-blue-soft);
+      border-color: var(--ios-blue-border);
+      color: var(--ios-blue);
+    }
+    .card-action-btn.copy-pair:hover {
+      background: var(--ios-blue);
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(0, 122, 255, 0.35);
+    }
+
+    /* Grouped View Headers */
+    .group-section {
+      margin-bottom: 38px;
+    }
+
+    .group-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .group-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .group-icon {
+      font-size: 24px;
+    }
+
+    .group-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.4px;
+    }
+
+    .group-count {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--bg-glass-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-element);
+    }
+
+    /* Table View */
+    .table-container {
+      background: var(--bg-glass-card);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--border-glass-card);
+      border-radius: var(--radius-xl);
+      overflow-x: auto;
+      box-shadow: var(--shadow-glass-lg);
+    }
+
+    table.logins-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    table.logins-table th {
+      background: var(--bg-glass-element);
+      color: var(--text-tertiary);
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.6px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    table.logins-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    table.logins-table tr:hover td {
+      background: var(--bg-glass-card-hover);
+    }
+
+    /* iOS Glass Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.24s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(36px) saturate(200%);
+      -webkit-backdrop-filter: blur(36px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 1);
+      border-radius: var(--radius-xl);
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.25);
+      position: relative;
+      transform: scale(0.95);
+      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="dark"] .modal-content {
+      background: rgba(21, 31, 50, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.65);
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--bg-glass-element);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      color: var(--text-tertiary);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.18s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: #ffffff;
+      color: var(--text-primary);
+      transform: scale(1.05);
+    }
+
+    .code-snippet-box {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      position: relative;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 10px 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* iOS Dynamic Island Toast Pill */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 150;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-island);
+      animation: islandIn 0.3s cubic-bezier(0.16, 1, 0.3, 1), islandOut 0.3s ease 2.7s forwards;
+      pointer-events: auto;
+    }
+
+    @keyframes islandIn {
+      from { transform: translateY(-30px) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes islandOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(-20px) scale(0.9); }
+    }
+
+    /* Search Highlight */
+    mark.search-highlight {
+      background: rgba(254, 240, 138, 0.9);
+      color: #854d0e;
+      border-radius: 4px;
+      padding: 0 3px;
+      font-weight: 800;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-tertiary);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 768px) {
+      .brand-bar { flex-direction: column; align-items: flex-start; }
+      .controls-panel { padding: 14px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .stats-ribbon { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <!-- Ambient Liquid Aurora Mesh -->
+  <div class="ambient-mesh">
+    <div class="ambient-orb orb-purple"></div>
+    <div class="ambient-orb orb-blue"></div>
+    <div class="ambient-orb orb-green"></div>
+    <div class="ambient-orb orb-amber"></div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="brand-bar">
+        <div class="brand-title-wrap">
+          <div class="brand-logo-icon">🏛️</div>
+          <div class="brand-titles">
+            <h1>PRAGATHI COLLEGE <span class="badge-apple">Linked Academic Logins</span></h1>
+            <p>Verified synthetic identities for multi-role QA testing, academic governance, and parental portals.</p>
+          </div>
+        </div>
+
+        <div class="brand-actions">
+          <button class="glass-btn primary" id="btn-export-csv" title="Export currently filtered accounts to CSV">
+            <span>📥</span> Export CSV
+          </button>
+          <button class="glass-btn" id="btn-export-json" title="Export as JSON">
+            <span>💾</span> JSON
+          </button>
+          <button class="glass-btn" id="btn-toggle-theme" title="Toggle Light/Dark Theme">
+            <span id="theme-icon">🌙</span> <span id="theme-text">Dark Glass</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Global Info Strip -->
+      <div class="global-info-strip">
+        <div class="info-strip-card">
+          <div class="info-card-left">
+            <div class="info-icon-badge">🔑</div>
+            <div class="info-meta">
+              <div class="label">Universal Password</div>
+              <div class="value">test@123</div>
+            </div>
+          </div>
+          <button class="copy-pill" onclick="copyText('test@123', 'Universal Password copied')">
+            <span>📋</span> Copy
+          </button>
+        </div>
+
+        <div class="info-strip-card">
+          <div class="info-card-left">
+            <div class="info-icon-badge">🌐</div>
+            <div class="info-meta">
+              <div class="label">Backend API Base</div>
+              <div class="value">http://150.241.246.34:8010</div>
+            </div>
+          </div>
+          <button class="copy-pill" onclick="copyText('http://150.241.246.34:8010', 'API Base URL copied')">
+            <span>📋</span> Copy
+          </button>
+        </div>
+
+        <div class="info-strip-card">
+          <div class="info-card-left">
+            <div class="info-icon-badge">📦</div>
+            <div class="info-meta">
+              <div class="label">Dataset Version</div>
+              <div class="value">linked-academics-2026-v1</div>
+            </div>
+          </div>
+          <span style="font-size: 11px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); padding: 4px 10px; border-radius: var(--radius-pill);">ACTIVE</span>
+        </div>
+
+        <div class="info-strip-card">
+          <div class="info-card-left">
+            <div class="info-icon-badge">🛡️</div>
+            <div class="info-meta">
+              <div class="label">Security Scope</div>
+              <div class="value" style="font-family: var(--font-system); font-size: 12px;">Synthetic demo identities only</div>
+            </div>
+          </div>
+          <span style="font-size: 11px; font-weight: 800; color: #007aff; background: rgba(0,122,255,0.12); border: 1px solid rgba(0,122,255,0.3); padding: 4px 10px; border-radius: var(--radius-pill);">NON-DESTRUCTIVE</span>
+        </div>
+      </div>
+
+      <!-- Stats Overview Ribbon -->
+      <div class="stats-ribbon">
+        <div class="stat-card" onclick="filterByRole('ALL')">
+          <div class="stat-icon-bg">👥</div>
+          <div class="stat-title">Total Logins</div>
+          <div class="stat-number">122</div>
+          <div class="stat-sub">100% Ready for QA</div>
+        </div>
+
+        <div class="stat-card" onclick="filterByRole('D26-ADMIN')">
+          <div class="stat-icon-bg">👑</div>
+          <div class="stat-title" style="color: var(--ios-purple);">Administrators</div>
+          <div class="stat-number">1</div>
+          <div class="stat-sub">Central Governance</div>
+        </div>
+
+        <div class="stat-card" onclick="filterByRole('D26-TEACH')">
+          <div class="stat-icon-bg">👨‍🏫</div>
+          <div class="stat-title" style="color: var(--ios-blue);">Faculty / Teachers</div>
+          <div class="stat-number">25</div>
+          <div class="stat-sub">Allocated Subjects</div>
+        </div>
+
+        <div class="stat-card" onclick="filterByRole('D26-STUDENT')">
+          <div class="stat-icon-bg">🎓</div>
+          <div class="stat-title" style="color: var(--ios-green);">Students</div>
+          <div class="stat-number">48</div>
+          <div class="stat-sub">4 Stream Cohorts</div>
+        </div>
+
+        <div class="stat-card" onclick="filterByRole('D26-PARENT')">
+          <div class="stat-icon-bg">👨‍👩‍👧</div>
+          <div class="stat-title" style="color: var(--ios-orange);">Parents</div>
+          <div class="stat-number">48</div>
+          <div class="stat-sub">Linked 1:1 to Students</div>
+        </div>
+
+        <div class="stat-card" onclick="filterByCourse('ALL')">
+          <div class="stat-icon-bg">📚</div>
+          <div class="stat-title">Programs</div>
+          <div class="stat-number">4</div>
+          <div class="stat-sub">BPC, MPC, BCA, B.Com</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Controls Wrapper (Sticky Liquid Glass) -->
+    <div class="controls-wrapper">
+      <div class="controls-panel">
+        <div class="search-row">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="search-input" 
+              class="search-input" 
+              placeholder="Search by name, login (e.g. demo.teacher01), course, record, subjects, child..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <span class="search-shortcut-badge">/</span>
+            <button id="search-clear-btn" class="search-clear-btn" title="Clear Search">×</button>
+          </div>
+
+          <div class="sort-wrap">
+            <span class="sort-label">Sort:</span>
+            <select id="sort-select" class="select-dropdown">
+              <option value="default">Default Order</option>
+              <option value="name-asc">Name (A → Z)</option>
+              <option value="name-desc">Name (Z → A)</option>
+              <option value="login-asc">Login ID (A → Z)</option>
+              <option value="course-asc">Course / Department</option>
+            </select>
+          </div>
+
+          <div class="view-segmented-control">
+            <button class="segmented-btn active" data-view="grid" title="Cards Grid">
+              <span>🗂️</span> Cards
+            </button>
+            <button class="segmented-btn" data-view="grouped-category" title="By Role">
+              <span>📑</span> By Role
+            </button>
+            <button class="segmented-btn" data-view="grouped-course" title="By Course">
+              <span>📚</span> By Course
+            </button>
+            <button class="segmented-btn" data-view="table" title="Table View">
+              <span>📋</span> Table
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Pills Rows -->
+        <div class="filter-pills-row">
+          <div class="role-pills-group">
+            <span style="font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase;">Role:</span>
+            <button class="filter-pill active" data-role="ALL">All <span class="count" id="count-all">122</span></button>
+            <button class="filter-pill" data-role="D26-ADMIN">👑 Admin <span class="count" id="count-admin">1</span></button>
+            <button class="filter-pill" data-role="D26-TEACH">👨‍🏫 Teachers <span class="count" id="count-teacher">25</span></button>
+            <button class="filter-pill" data-role="D26-STUDENT">🎓 Students <span class="count" id="count-student">48</span></button>
+            <button class="filter-pill" data-role="D26-PARENT">👨‍👩‍👧 Parents <span class="count" id="count-parent">48</span></button>
+          </div>
+
+          <div class="course-pills-group">
+            <span style="font-size: 11px; font-weight: 800; color: var(--text-tertiary); text-transform: uppercase;">Course:</span>
+            <button class="filter-pill active" data-course="ALL">All Courses</button>
+            <button class="filter-pill" data-course="Intermediate BPC">Intermediate BPC (Sem 1)</button>
+            <button class="filter-pill" data-course="Intermediate MPC">Intermediate MPC (Sem 3)</button>
+            <button class="filter-pill" data-course="BCA">BCA (Sem 5)</button>
+            <button class="filter-pill" data-course="B.Com General">B.Com General (Sem 3)</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 4px; flex-wrap: wrap; gap: 8px;">
+          <div class="filter-results-status">
+            Showing <strong id="visible-count" style="color: var(--ios-blue); font-size: 15px;">122</strong> of <strong>122</strong> accounts
+            <button id="clear-filters-btn" class="clear-filters-btn" onclick="resetAllFilters()">Reset Filters ✕</button>
+          </div>
+          <button class="copy-pill" onclick="copyAllVisibleLogins()" title="Copy all currently filtered logins as TSV table">
+            <span>📋</span> Copy Visible Usernames
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main View Display Container -->
+    <main id="main-content">
+      <!-- Injected by JavaScript -->
+    </main>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detail-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeModal()">×</button>
+      <div id="modal-body">
+        <!-- Injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS Dynamic Island Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Embedded Data
+    const RAW_DATA = [{"login": "demo.admin", "name": "Sahana Rao", "role": "D26-ADMIN", "record": "D26-ADMIN-EMP", "description": "Academic administration, analytics, faculty allocation and demo collections"}, {"login": "demo.teacher01", "name": "Rohan Varma", "role": "D26-TEACH", "record": "D26-EMP01", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Botany practical 1, S2: Botany practical 1, S3: Botany practical 2, S4: Botany practical 2", "parsed_subjects": [{"sem": "S1", "name": "Botany practical 1"}, {"sem": "S2", "name": "Botany practical 1"}, {"sem": "S3", "name": "Botany practical 2"}, {"sem": "S4", "name": "Botany practical 2"}]}, {"login": "demo.teacher02", "name": "Tara Iyer", "role": "D26-TEACH", "record": "D26-EMP02", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Chemistry practical 1, S2: Chemistry practical 1, S3: Chemistry practical 2, S4: Chemistry practical 2", "parsed_subjects": [{"sem": "S1", "name": "Chemistry practical 1"}, {"sem": "S2", "name": "Chemistry practical 1"}, {"sem": "S3", "name": "Chemistry practical 2"}, {"sem": "S4", "name": "Chemistry practical 2"}]}, {"login": "demo.teacher03", "name": "Sahana Rao", "role": "D26-TEACH", "record": "D26-EMP03", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Physics practical 1, S2: Physics practical 1, S3: Physics practical 2, S4: Physics practical 2", "parsed_subjects": [{"sem": "S1", "name": "Physics practical 1"}, {"sem": "S2", "name": "Physics practical 1"}, {"sem": "S3", "name": "Physics practical 2"}, {"sem": "S4", "name": "Physics practical 2"}]}, {"login": "demo.teacher04", "name": "Arjun Varma", "role": "D26-TEACH", "record": "D26-EMP04", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Zoology practical 1, S2: Zoology practical 1, S3: Zoology practical 2, S4: Zoology practical 2", "parsed_subjects": [{"sem": "S1", "name": "Zoology practical 1"}, {"sem": "S2", "name": "Zoology practical 1"}, {"sem": "S3", "name": "Zoology practical 2"}, {"sem": "S4", "name": "Zoology practical 2"}]}, {"login": "demo.teacher05", "name": "Kiran Varma", "role": "D26-TEACH", "record": "D26-EMP05", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Botany 1, S2: Botany 1, S3: Botany 2, S4: Botany 2", "parsed_subjects": [{"sem": "S1", "name": "Botany 1"}, {"sem": "S2", "name": "Botany 1"}, {"sem": "S3", "name": "Botany 2"}, {"sem": "S4", "name": "Botany 2"}]}, {"login": "demo.teacher06", "name": "Kavya Iyer", "role": "D26-TEACH", "record": "D26-EMP06", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Chemistry 1, S2: Chemistry 1, S3: Chemistry 2, S4: Chemistry 2", "parsed_subjects": [{"sem": "S1", "name": "Chemistry 1"}, {"sem": "S2", "name": "Chemistry 1"}, {"sem": "S3", "name": "Chemistry 2"}, {"sem": "S4", "name": "Chemistry 2"}]}, {"login": "demo.teacher07", "name": "Anika Patel", "role": "D26-TEACH", "record": "D26-EMP07", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: English 1, S2: English 1, S3: English 2, S4: English 2", "parsed_subjects": [{"sem": "S1", "name": "English 1"}, {"sem": "S2", "name": "English 1"}, {"sem": "S3", "name": "English 2"}, {"sem": "S4", "name": "English 2"}]}, {"login": "demo.teacher08", "name": "Nisha Sharma", "role": "D26-TEACH", "record": "D26-EMP08", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Physics 1, S2: Physics 1, S3: Physics 2, S4: Physics 2", "parsed_subjects": [{"sem": "S1", "name": "Physics 1"}, {"sem": "S2", "name": "Physics 1"}, {"sem": "S3", "name": "Physics 2"}, {"sem": "S4", "name": "Physics 2"}]}, {"login": "demo.teacher09", "name": "Ishaan Iyer", "role": "D26-TEACH", "record": "D26-EMP09", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Second language 1, S2: Second language 1, S3: Second language 2, S4: Second language 2", "parsed_subjects": [{"sem": "S1", "name": "Second language 1"}, {"sem": "S2", "name": "Second language 1"}, {"sem": "S3", "name": "Second language 2"}, {"sem": "S4", "name": "Second language 2"}]}, {"login": "demo.teacher10", "name": "Ishaan Patel", "role": "D26-TEACH", "record": "D26-EMP10", "course": "Intermediate BPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Zoology 1, S2: Zoology 1, S3: Zoology 2, S4: Zoology 2", "parsed_subjects": [{"sem": "S1", "name": "Zoology 1"}, {"sem": "S2", "name": "Zoology 1"}, {"sem": "S3", "name": "Zoology 2"}, {"sem": "S4", "name": "Zoology 2"}]}, {"login": "demo.student01", "name": "Kiran Reddy", "role": "D26-STUDENT", "record": "D26-ST01", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent01", "parent_name": "Tara Reddy", "parent_record": "D26-PAR01"}, {"login": "demo.parent01", "name": "Tara Reddy", "role": "D26-PARENT", "record": "D26-PAR01", "batch": "2026–2028", "child": "Kiran Reddy", "course": "Intermediate BPC", "student_login": "demo.student01", "student_name": "Kiran Reddy", "student_record": "D26-ST01"}, {"login": "demo.student02", "name": "Aditya Patel", "role": "D26-STUDENT", "record": "D26-ST02", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent02", "parent_name": "Ishaan Patel", "parent_record": "D26-PAR02"}, {"login": "demo.parent02", "name": "Ishaan Patel", "role": "D26-PARENT", "record": "D26-PAR02", "batch": "2026–2028", "child": "Aditya Patel", "course": "Intermediate BPC", "student_login": "demo.student02", "student_name": "Aditya Patel", "student_record": "D26-ST02"}, {"login": "demo.student03", "name": "Vihaan Rao", "role": "D26-STUDENT", "record": "D26-ST03", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent03", "parent_name": "Neel Rao", "parent_record": "D26-PAR03"}, {"login": "demo.parent03", "name": "Neel Rao", "role": "D26-PARENT", "record": "D26-PAR03", "batch": "2026–2028", "child": "Vihaan Rao", "course": "Intermediate BPC", "student_login": "demo.student03", "student_name": "Vihaan Rao", "student_record": "D26-ST03"}, {"login": "demo.student04", "name": "Kavya Kulkarni", "role": "D26-STUDENT", "record": "D26-ST04", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent04", "parent_name": "Neel Kulkarni", "parent_record": "D26-PAR04"}, {"login": "demo.parent04", "name": "Neel Kulkarni", "role": "D26-PARENT", "record": "D26-PAR04", "batch": "2026–2028", "child": "Kavya Kulkarni", "course": "Intermediate BPC", "student_login": "demo.student04", "student_name": "Kavya Kulkarni", "student_record": "D26-ST04"}, {"login": "demo.student05", "name": "Kiran Naidu", "role": "D26-STUDENT", "record": "D26-ST05", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent05", "parent_name": "Meera Naidu", "parent_record": "D26-PAR05"}, {"login": "demo.parent05", "name": "Meera Naidu", "role": "D26-PARENT", "record": "D26-PAR05", "batch": "2026–2028", "child": "Kiran Naidu", "course": "Intermediate BPC", "student_login": "demo.student05", "student_name": "Kiran Naidu", "student_record": "D26-ST05"}, {"login": "demo.student06", "name": "Diya Nair", "role": "D26-STUDENT", "record": "D26-ST06", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent06", "parent_name": "Tara Nair", "parent_record": "D26-PAR06"}, {"login": "demo.parent06", "name": "Tara Nair", "role": "D26-PARENT", "record": "D26-PAR06", "batch": "2026–2028", "child": "Diya Nair", "course": "Intermediate BPC", "student_login": "demo.student06", "student_name": "Diya Nair", "student_record": "D26-ST06"}, {"login": "demo.student07", "name": "Aditya Kulkarni", "role": "D26-STUDENT", "record": "D26-ST07", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent07", "parent_name": "Tara Kulkarni", "parent_record": "D26-PAR07"}, {"login": "demo.parent07", "name": "Tara Kulkarni", "role": "D26-PARENT", "record": "D26-PAR07", "batch": "2026–2028", "child": "Aditya Kulkarni", "course": "Intermediate BPC", "student_login": "demo.student07", "student_name": "Aditya Kulkarni", "student_record": "D26-ST07"}, {"login": "demo.student08", "name": "Aditya Iyer", "role": "D26-STUDENT", "record": "D26-ST08", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent08", "parent_name": "Varun Iyer", "parent_record": "D26-PAR08"}, {"login": "demo.parent08", "name": "Varun Iyer", "role": "D26-PARENT", "record": "D26-PAR08", "batch": "2026–2028", "child": "Aditya Iyer", "course": "Intermediate BPC", "student_login": "demo.student08", "student_name": "Aditya Iyer", "student_record": "D26-ST08"}, {"login": "demo.student09", "name": "Saanvi Reddy", "role": "D26-STUDENT", "record": "D26-ST09", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent09", "parent_name": "Nisha Reddy", "parent_record": "D26-PAR09"}, {"login": "demo.parent09", "name": "Nisha Reddy", "role": "D26-PARENT", "record": "D26-PAR09", "batch": "2026–2028", "child": "Saanvi Reddy", "course": "Intermediate BPC", "student_login": "demo.student09", "student_name": "Saanvi Reddy", "student_record": "D26-ST09"}, {"login": "demo.student10", "name": "Neel Iyer", "role": "D26-STUDENT", "record": "D26-ST10", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent10", "parent_name": "Rohan Iyer", "parent_record": "D26-PAR10"}, {"login": "demo.parent10", "name": "Rohan Iyer", "role": "D26-PARENT", "record": "D26-PAR10", "batch": "2026–2028", "child": "Neel Iyer", "course": "Intermediate BPC", "student_login": "demo.student10", "student_name": "Neel Iyer", "student_record": "D26-ST10"}, {"login": "demo.student11", "name": "Tara Iyer", "role": "D26-STUDENT", "record": "D26-ST11", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent11", "parent_name": "Dev Iyer", "parent_record": "D26-PAR11"}, {"login": "demo.parent11", "name": "Dev Iyer", "role": "D26-PARENT", "record": "D26-PAR11", "batch": "2026–2028", "child": "Tara Iyer", "course": "Intermediate BPC", "student_login": "demo.student11", "student_name": "Tara Iyer", "student_record": "D26-ST11"}, {"login": "demo.student12", "name": "Ishaan Kulkarni", "role": "D26-STUDENT", "record": "D26-ST12", "batch": "2026–2028", "course": "Intermediate BPC", "current_semester": "1", "parent_login": "demo.parent12", "parent_name": "Arjun Kulkarni", "parent_record": "D26-PAR12"}, {"login": "demo.parent12", "name": "Arjun Kulkarni", "role": "D26-PARENT", "record": "D26-PAR12", "batch": "2026–2028", "child": "Ishaan Kulkarni", "course": "Intermediate BPC", "student_login": "demo.student12", "student_name": "Ishaan Kulkarni", "student_record": "D26-ST12"}, {"login": "demo.teacher11", "name": "Ananya Iyer", "role": "D26-TEACH", "record": "D26-EMP11", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Chemistry practical 1, S2: Chemistry practical 1, S3: Chemistry practical 2, S4: Chemistry practical 2", "parsed_subjects": [{"sem": "S1", "name": "Chemistry practical 1"}, {"sem": "S2", "name": "Chemistry practical 1"}, {"sem": "S3", "name": "Chemistry practical 2"}, {"sem": "S4", "name": "Chemistry practical 2"}]}, {"login": "demo.teacher12", "name": "Varun Varma", "role": "D26-TEACH", "record": "D26-EMP12", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Physics practical 1, S2: Physics practical 1, S3: Physics practical 2, S4: Physics practical 2", "parsed_subjects": [{"sem": "S1", "name": "Physics practical 1"}, {"sem": "S2", "name": "Physics practical 1"}, {"sem": "S3", "name": "Physics practical 2"}, {"sem": "S4", "name": "Physics practical 2"}]}, {"login": "demo.teacher13", "name": "Pranav Reddy", "role": "D26-TEACH", "record": "D26-EMP13", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Chemistry 1, S2: Chemistry 1, S3: Chemistry 2, S4: Chemistry 2", "parsed_subjects": [{"sem": "S1", "name": "Chemistry 1"}, {"sem": "S2", "name": "Chemistry 1"}, {"sem": "S3", "name": "Chemistry 2"}, {"sem": "S4", "name": "Chemistry 2"}]}, {"login": "demo.teacher14", "name": "Sahana Varma", "role": "D26-TEACH", "record": "D26-EMP14", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: English 1, S2: English 1, S3: English 2, S4: English 2", "parsed_subjects": [{"sem": "S1", "name": "English 1"}, {"sem": "S2", "name": "English 1"}, {"sem": "S3", "name": "English 2"}, {"sem": "S4", "name": "English 2"}]}, {"login": "demo.teacher15", "name": "Pranav Das", "role": "D26-TEACH", "record": "D26-EMP15", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Mathematics 1, S2: Mathematics 1, S3: Mathematics 2, S4: Mathematics 2", "parsed_subjects": [{"sem": "S1", "name": "Mathematics 1"}, {"sem": "S2", "name": "Mathematics 1"}, {"sem": "S3", "name": "Mathematics 2"}, {"sem": "S4", "name": "Mathematics 2"}]}, {"login": "demo.teacher16", "name": "Aadhya Varma", "role": "D26-TEACH", "record": "D26-EMP16", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Physics 1, S2: Physics 1, S3: Physics 2, S4: Physics 2", "parsed_subjects": [{"sem": "S1", "name": "Physics 1"}, {"sem": "S2", "name": "Physics 1"}, {"sem": "S3", "name": "Physics 2"}, {"sem": "S4", "name": "Physics 2"}]}, {"login": "demo.teacher17", "name": "Aditya Menon", "role": "D26-TEACH", "record": "D26-EMP17", "course": "Intermediate MPC", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Second language 1, S2: Second language 1, S3: Second language 2, S4: Second language 2", "parsed_subjects": [{"sem": "S1", "name": "Second language 1"}, {"sem": "S2", "name": "Second language 1"}, {"sem": "S3", "name": "Second language 2"}, {"sem": "S4", "name": "Second language 2"}]}, {"login": "demo.student13", "name": "Sahana Naidu", "role": "D26-STUDENT", "record": "D26-ST13", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent13", "parent_name": "Ishaan Naidu", "parent_record": "D26-PAR13"}, {"login": "demo.parent13", "name": "Ishaan Naidu", "role": "D26-PARENT", "record": "D26-PAR13", "batch": "2025–2027", "child": "Sahana Naidu", "course": "Intermediate MPC", "student_login": "demo.student13", "student_name": "Sahana Naidu", "student_record": "D26-ST13"}, {"login": "demo.student14", "name": "Pranav Nair", "role": "D26-STUDENT", "record": "D26-ST14", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent14", "parent_name": "Anika Nair", "parent_record": "D26-PAR14"}, {"login": "demo.parent14", "name": "Anika Nair", "role": "D26-PARENT", "record": "D26-PAR14", "batch": "2025–2027", "child": "Pranav Nair", "course": "Intermediate MPC", "student_login": "demo.student14", "student_name": "Pranav Nair", "student_record": "D26-ST14"}, {"login": "demo.student15", "name": "Varun Varma", "role": "D26-STUDENT", "record": "D26-ST15", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent15", "parent_name": "Arjun Varma", "parent_record": "D26-PAR15"}, {"login": "demo.parent15", "name": "Arjun Varma", "role": "D26-PARENT", "record": "D26-PAR15", "batch": "2025–2027", "child": "Varun Varma", "course": "Intermediate MPC", "student_login": "demo.student15", "student_name": "Varun Varma", "student_record": "D26-ST15"}, {"login": "demo.student16", "name": "Diya Joshi", "role": "D26-STUDENT", "record": "D26-ST16", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent16", "parent_name": "Varun Joshi", "parent_record": "D26-PAR16"}, {"login": "demo.parent16", "name": "Varun Joshi", "role": "D26-PARENT", "record": "D26-PAR16", "batch": "2025–2027", "child": "Diya Joshi", "course": "Intermediate MPC", "student_login": "demo.student16", "student_name": "Diya Joshi", "student_record": "D26-ST16"}, {"login": "demo.student17", "name": "Ananya Naidu", "role": "D26-STUDENT", "record": "D26-ST17", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent17", "parent_name": "Anika Naidu", "parent_record": "D26-PAR17"}, {"login": "demo.parent17", "name": "Anika Naidu", "role": "D26-PARENT", "record": "D26-PAR17", "batch": "2025–2027", "child": "Ananya Naidu", "course": "Intermediate MPC", "student_login": "demo.student17", "student_name": "Ananya Naidu", "student_record": "D26-ST17"}, {"login": "demo.student18", "name": "Anika Rao", "role": "D26-STUDENT", "record": "D26-ST18", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent18", "parent_name": "Neel Rao", "parent_record": "D26-PAR18"}, {"login": "demo.parent18", "name": "Neel Rao", "role": "D26-PARENT", "record": "D26-PAR18", "batch": "2025–2027", "child": "Anika Rao", "course": "Intermediate MPC", "student_login": "demo.student18", "student_name": "Anika Rao", "student_record": "D26-ST18"}, {"login": "demo.student19", "name": "Ananya Rao", "role": "D26-STUDENT", "record": "D26-ST19", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent19", "parent_name": "Saanvi Rao", "parent_record": "D26-PAR19"}, {"login": "demo.parent19", "name": "Saanvi Rao", "role": "D26-PARENT", "record": "D26-PAR19", "batch": "2025–2027", "child": "Ananya Rao", "course": "Intermediate MPC", "student_login": "demo.student19", "student_name": "Ananya Rao", "student_record": "D26-ST19"}, {"login": "demo.student20", "name": "Nisha Rao", "role": "D26-STUDENT", "record": "D26-ST20", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent20", "parent_name": "Vihaan Rao", "parent_record": "D26-PAR20"}, {"login": "demo.parent20", "name": "Vihaan Rao", "role": "D26-PARENT", "record": "D26-PAR20", "batch": "2025–2027", "child": "Nisha Rao", "course": "Intermediate MPC", "student_login": "demo.student20", "student_name": "Nisha Rao", "student_record": "D26-ST20"}, {"login": "demo.student21", "name": "Aadhya Das", "role": "D26-STUDENT", "record": "D26-ST21", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent21", "parent_name": "Pranav Das", "parent_record": "D26-PAR21"}, {"login": "demo.parent21", "name": "Pranav Das", "role": "D26-PARENT", "record": "D26-PAR21", "batch": "2025–2027", "child": "Aadhya Das", "course": "Intermediate MPC", "student_login": "demo.student21", "student_name": "Aadhya Das", "student_record": "D26-ST21"}, {"login": "demo.student22", "name": "Rohan Varma", "role": "D26-STUDENT", "record": "D26-ST22", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent22", "parent_name": "Aditya Varma", "parent_record": "D26-PAR22"}, {"login": "demo.parent22", "name": "Aditya Varma", "role": "D26-PARENT", "record": "D26-PAR22", "batch": "2025–2027", "child": "Rohan Varma", "course": "Intermediate MPC", "student_login": "demo.student22", "student_name": "Rohan Varma", "student_record": "D26-ST22"}, {"login": "demo.student23", "name": "Ishaan Das", "role": "D26-STUDENT", "record": "D26-ST23", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent23", "parent_name": "Sahana Das", "parent_record": "D26-PAR23"}, {"login": "demo.parent23", "name": "Sahana Das", "role": "D26-PARENT", "record": "D26-PAR23", "batch": "2025–2027", "child": "Ishaan Das", "course": "Intermediate MPC", "student_login": "demo.student23", "student_name": "Ishaan Das", "student_record": "D26-ST23"}, {"login": "demo.student24", "name": "Aditya Kulkarni", "role": "D26-STUDENT", "record": "D26-ST24", "batch": "2025–2027", "course": "Intermediate MPC", "current_semester": "3", "parent_login": "demo.parent24", "parent_name": "Rohan Kulkarni", "parent_record": "D26-PAR24"}, {"login": "demo.parent24", "name": "Rohan Kulkarni", "role": "D26-PARENT", "record": "D26-PAR24", "batch": "2025–2027", "child": "Aditya Kulkarni", "course": "Intermediate MPC", "student_login": "demo.student24", "student_name": "Aditya Kulkarni", "student_record": "D26-ST24"}, {"login": "demo.teacher18", "name": "Arjun Sharma", "role": "D26-TEACH", "record": "D26-EMP18", "course": "BCA", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Programming laboratory, S2: Object oriented programming laboratory, S3: Database laboratory, S4: Web development laboratory, S5: Data analytics laboratory, S6: Project laboratory", "parsed_subjects": [{"sem": "S1", "name": "Programming laboratory"}, {"sem": "S2", "name": "Object oriented programming laboratory"}, {"sem": "S3", "name": "Database laboratory"}, {"sem": "S4", "name": "Web development laboratory"}, {"sem": "S5", "name": "Data analytics laboratory"}, {"sem": "S6", "name": "Project laboratory"}]}, {"login": "demo.teacher19", "name": "Ishaan Kulkarni", "role": "D26-TEACH", "record": "D26-EMP19", "course": "BCA", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Digital fundamentals, S2: Computer organization, S3: Data structures, S4: Computer networks, S5: Cloud computing, S6: Artificial intelligence foundations", "parsed_subjects": [{"sem": "S1", "name": "Digital fundamentals"}, {"sem": "S2", "name": "Computer organization"}, {"sem": "S3", "name": "Data structures"}, {"sem": "S4", "name": "Computer networks"}, {"sem": "S5", "name": "Cloud computing"}, {"sem": "S6", "name": "Artificial intelligence foundations"}]}, {"login": "demo.teacher20", "name": "Varun Nair", "role": "D26-TEACH", "record": "D26-EMP20", "course": "BCA", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Mathematics for computing, S2: Discrete mathematics, S3: Database management systems, S4: Software engineering, S5: Data analytics, S6: Major project", "parsed_subjects": [{"sem": "S1", "name": "Mathematics for computing"}, {"sem": "S2", "name": "Discrete mathematics"}, {"sem": "S3", "name": "Database management systems"}, {"sem": "S4", "name": "Software engineering"}, {"sem": "S5", "name": "Data analytics"}, {"sem": "S6", "name": "Major project"}]}, {"login": "demo.teacher21", "name": "Dev Nair", "role": "D26-TEACH", "record": "D26-EMP21", "course": "BCA", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Programming fundamentals, S2: Object oriented programming, S3: Operating systems, S4: Web technologies, S5: Information security, S6: Software project management", "parsed_subjects": [{"sem": "S1", "name": "Programming fundamentals"}, {"sem": "S2", "name": "Object oriented programming"}, {"sem": "S3", "name": "Operating systems"}, {"sem": "S4", "name": "Web technologies"}, {"sem": "S5", "name": "Information security"}, {"sem": "S6", "name": "Software project management"}]}, {"login": "demo.student25", "name": "Kavya Joshi", "role": "D26-STUDENT", "record": "D26-ST25", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent25", "parent_name": "Diya Joshi", "parent_record": "D26-PAR25"}, {"login": "demo.parent25", "name": "Diya Joshi", "role": "D26-PARENT", "record": "D26-PAR25", "batch": "2024–2027", "child": "Kavya Joshi", "course": "BCA", "student_login": "demo.student25", "student_name": "Kavya Joshi", "student_record": "D26-ST25"}, {"login": "demo.student26", "name": "Sahana Rao", "role": "D26-STUDENT", "record": "D26-ST26", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent26", "parent_name": "Nisha Rao", "parent_record": "D26-PAR26"}, {"login": "demo.parent26", "name": "Nisha Rao", "role": "D26-PARENT", "record": "D26-PAR26", "batch": "2024–2027", "child": "Sahana Rao", "course": "BCA", "student_login": "demo.student26", "student_name": "Sahana Rao", "student_record": "D26-ST26"}, {"login": "demo.student27", "name": "Aadhya Sharma", "role": "D26-STUDENT", "record": "D26-ST27", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent27", "parent_name": "Varun Sharma", "parent_record": "D26-PAR27"}, {"login": "demo.parent27", "name": "Varun Sharma", "role": "D26-PARENT", "record": "D26-PAR27", "batch": "2024–2027", "child": "Aadhya Sharma", "course": "BCA", "student_login": "demo.student27", "student_name": "Aadhya Sharma", "student_record": "D26-ST27"}, {"login": "demo.student28", "name": "Kiran Naidu", "role": "D26-STUDENT", "record": "D26-ST28", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent28", "parent_name": "Anika Naidu", "parent_record": "D26-PAR28"}, {"login": "demo.parent28", "name": "Anika Naidu", "role": "D26-PARENT", "record": "D26-PAR28", "batch": "2024–2027", "child": "Kiran Naidu", "course": "BCA", "student_login": "demo.student28", "student_name": "Kiran Naidu", "student_record": "D26-ST28"}, {"login": "demo.student29", "name": "Saanvi Iyer", "role": "D26-STUDENT", "record": "D26-ST29", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent29", "parent_name": "Ananya Iyer", "parent_record": "D26-PAR29"}, {"login": "demo.parent29", "name": "Ananya Iyer", "role": "D26-PARENT", "record": "D26-PAR29", "batch": "2024–2027", "child": "Saanvi Iyer", "course": "BCA", "student_login": "demo.student29", "student_name": "Saanvi Iyer", "student_record": "D26-ST29"}, {"login": "demo.student30", "name": "Anika Varma", "role": "D26-STUDENT", "record": "D26-ST30", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent30", "parent_name": "Varun Varma", "parent_record": "D26-PAR30"}, {"login": "demo.parent30", "name": "Varun Varma", "role": "D26-PARENT", "record": "D26-PAR30", "batch": "2024–2027", "child": "Anika Varma", "course": "BCA", "student_login": "demo.student30", "student_name": "Anika Varma", "student_record": "D26-ST30"}, {"login": "demo.student31", "name": "Dev Sharma", "role": "D26-STUDENT", "record": "D26-ST31", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent31", "parent_name": "Pranav Sharma", "parent_record": "D26-PAR31"}, {"login": "demo.parent31", "name": "Pranav Sharma", "role": "D26-PARENT", "record": "D26-PAR31", "batch": "2024–2027", "child": "Dev Sharma", "course": "BCA", "student_login": "demo.student31", "student_name": "Dev Sharma", "student_record": "D26-ST31"}, {"login": "demo.student32", "name": "Varun Sharma", "role": "D26-STUDENT", "record": "D26-ST32", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent32", "parent_name": "Neel Sharma", "parent_record": "D26-PAR32"}, {"login": "demo.parent32", "name": "Neel Sharma", "role": "D26-PARENT", "record": "D26-PAR32", "batch": "2024–2027", "child": "Varun Sharma", "course": "BCA", "student_login": "demo.student32", "student_name": "Varun Sharma", "student_record": "D26-ST32"}, {"login": "demo.student33", "name": "Saanvi Joshi", "role": "D26-STUDENT", "record": "D26-ST33", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent33", "parent_name": "Arjun Joshi", "parent_record": "D26-PAR33"}, {"login": "demo.parent33", "name": "Arjun Joshi", "role": "D26-PARENT", "record": "D26-PAR33", "batch": "2024–2027", "child": "Saanvi Joshi", "course": "BCA", "student_login": "demo.student33", "student_name": "Saanvi Joshi", "student_record": "D26-ST33"}, {"login": "demo.student34", "name": "Pranav Patel", "role": "D26-STUDENT", "record": "D26-ST34", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent34", "parent_name": "Dev Patel", "parent_record": "D26-PAR34"}, {"login": "demo.parent34", "name": "Dev Patel", "role": "D26-PARENT", "record": "D26-PAR34", "batch": "2024–2027", "child": "Pranav Patel", "course": "BCA", "student_login": "demo.student34", "student_name": "Pranav Patel", "student_record": "D26-ST34"}, {"login": "demo.student35", "name": "Saanvi Das", "role": "D26-STUDENT", "record": "D26-ST35", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent35", "parent_name": "Dev Das", "parent_record": "D26-PAR35"}, {"login": "demo.parent35", "name": "Dev Das", "role": "D26-PARENT", "record": "D26-PAR35", "batch": "2024–2027", "child": "Saanvi Das", "course": "BCA", "student_login": "demo.student35", "student_name": "Saanvi Das", "student_record": "D26-ST35"}, {"login": "demo.student36", "name": "Arjun Menon", "role": "D26-STUDENT", "record": "D26-ST36", "batch": "2024–2027", "course": "BCA", "current_semester": "5", "parent_login": "demo.parent36", "parent_name": "Kavya Menon", "parent_record": "D26-PAR36"}, {"login": "demo.parent36", "name": "Kavya Menon", "role": "D26-PARENT", "record": "D26-PAR36", "batch": "2024–2027", "child": "Arjun Menon", "course": "BCA", "student_login": "demo.student36", "student_name": "Arjun Menon", "student_record": "D26-ST36"}, {"login": "demo.teacher22", "name": "Pranav Das", "role": "D26-TEACH", "record": "D26-EMP22", "course": "B.Com General", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Accounting practice, S2: Spreadsheet practice, S3: Accounting software practice, S4: Business research practice, S5: Tax computation practice, S6: Project workshop", "parsed_subjects": [{"sem": "S1", "name": "Accounting practice"}, {"sem": "S2", "name": "Spreadsheet practice"}, {"sem": "S3", "name": "Accounting software practice"}, {"sem": "S4", "name": "Business research practice"}, {"sem": "S5", "name": "Tax computation practice"}, {"sem": "S6", "name": "Project workshop"}]}, {"login": "demo.teacher23", "name": "Dev Kulkarni", "role": "D26-TEACH", "record": "D26-EMP23", "course": "B.Com General", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Business economics, S2: Advanced accounting, S3: Business law, S4: Cost accounting, S5: Auditing, S6: Business analytics", "parsed_subjects": [{"sem": "S1", "name": "Business economics"}, {"sem": "S2", "name": "Advanced accounting"}, {"sem": "S3", "name": "Business law"}, {"sem": "S4", "name": "Cost accounting"}, {"sem": "S5", "name": "Auditing"}, {"sem": "S6", "name": "Business analytics"}]}, {"login": "demo.teacher24", "name": "Meera Joshi", "role": "D26-TEACH", "record": "D26-EMP24", "course": "B.Com General", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Business organization, S2: Business statistics, S3: Corporate accounting, S4: Financial management, S5: Entrepreneurship, S6: Business project", "parsed_subjects": [{"sem": "S1", "name": "Business organization"}, {"sem": "S2", "name": "Business statistics"}, {"sem": "S3", "name": "Corporate accounting"}, {"sem": "S4", "name": "Financial management"}, {"sem": "S5", "name": "Entrepreneurship"}, {"sem": "S6", "name": "Business project"}]}, {"login": "demo.teacher25", "name": "Sahana Sharma", "role": "D26-TEACH", "record": "D26-EMP25", "course": "B.Com General", "description": "Faculty allocation, timetable, attendance and results", "subjects": "S1: Financial accounting, S2: Principles of management, S3: Marketing management, S4: Human resource management, S5: Taxation, S6: Management accounting", "parsed_subjects": [{"sem": "S1", "name": "Financial accounting"}, {"sem": "S2", "name": "Principles of management"}, {"sem": "S3", "name": "Marketing management"}, {"sem": "S4", "name": "Human resource management"}, {"sem": "S5", "name": "Taxation"}, {"sem": "S6", "name": "Management accounting"}]}, {"login": "demo.student37", "name": "Pranav Sharma", "role": "D26-STUDENT", "record": "D26-ST37", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent37", "parent_name": "Neel Sharma", "parent_record": "D26-PAR37"}, {"login": "demo.parent37", "name": "Neel Sharma", "role": "D26-PARENT", "record": "D26-PAR37", "batch": "2025–2028", "child": "Pranav Sharma", "course": "B.Com General", "student_login": "demo.student37", "student_name": "Pranav Sharma", "student_record": "D26-ST37"}, {"login": "demo.student38", "name": "Meera Varma", "role": "D26-STUDENT", "record": "D26-ST38", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent38", "parent_name": "Aditya Varma", "parent_record": "D26-PAR38"}, {"login": "demo.parent38", "name": "Aditya Varma", "role": "D26-PARENT", "record": "D26-PAR38", "batch": "2025–2028", "child": "Meera Varma", "course": "B.Com General", "student_login": "demo.student38", "student_name": "Meera Varma", "student_record": "D26-ST38"}, {"login": "demo.student39", "name": "Tara Rao", "role": "D26-STUDENT", "record": "D26-ST39", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent39", "parent_name": "Nisha Rao", "parent_record": "D26-PAR39"}, {"login": "demo.parent39", "name": "Nisha Rao", "role": "D26-PARENT", "record": "D26-PAR39", "batch": "2025–2028", "child": "Tara Rao", "course": "B.Com General", "student_login": "demo.student39", "student_name": "Tara Rao", "student_record": "D26-ST39"}, {"login": "demo.student40", "name": "Ishaan Naidu", "role": "D26-STUDENT", "record": "D26-ST40", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent40", "parent_name": "Vihaan Naidu", "parent_record": "D26-PAR40"}, {"login": "demo.parent40", "name": "Vihaan Naidu", "role": "D26-PARENT", "record": "D26-PAR40", "batch": "2025–2028", "child": "Ishaan Naidu", "course": "B.Com General", "student_login": "demo.student40", "student_name": "Ishaan Naidu", "student_record": "D26-ST40"}, {"login": "demo.student41", "name": "Ishaan Nair", "role": "D26-STUDENT", "record": "D26-ST41", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent41", "parent_name": "Ishaan Nair", "parent_record": "D26-PAR41"}, {"login": "demo.parent41", "name": "Ishaan Nair", "role": "D26-PARENT", "record": "D26-PAR41", "batch": "2025–2028", "child": "Ishaan Nair", "course": "B.Com General", "student_login": "demo.student41", "student_name": "Ishaan Nair", "student_record": "D26-ST41"}, {"login": "demo.student42", "name": "Vihaan Sharma", "role": "D26-STUDENT", "record": "D26-ST42", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent42", "parent_name": "Dev Sharma", "parent_record": "D26-PAR42"}, {"login": "demo.parent42", "name": "Dev Sharma", "role": "D26-PARENT", "record": "D26-PAR42", "batch": "2025–2028", "child": "Vihaan Sharma", "course": "B.Com General", "student_login": "demo.student42", "student_name": "Vihaan Sharma", "student_record": "D26-ST42"}, {"login": "demo.student43", "name": "Aditya Rao", "role": "D26-STUDENT", "record": "D26-ST43", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent43", "parent_name": "Aditya Rao", "parent_record": "D26-PAR43"}, {"login": "demo.parent43", "name": "Aditya Rao", "role": "D26-PARENT", "record": "D26-PAR43", "batch": "2025–2028", "child": "Aditya Rao", "course": "B.Com General", "student_login": "demo.student43", "student_name": "Aditya Rao", "student_record": "D26-ST43"}, {"login": "demo.student44", "name": "Sahana Das", "role": "D26-STUDENT", "record": "D26-ST44", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent44", "parent_name": "Meera Das", "parent_record": "D26-PAR44"}, {"login": "demo.parent44", "name": "Meera Das", "role": "D26-PARENT", "record": "D26-PAR44", "batch": "2025–2028", "child": "Sahana Das", "course": "B.Com General", "student_login": "demo.student44", "student_name": "Sahana Das", "student_record": "D26-ST44"}, {"login": "demo.student45", "name": "Dev Varma", "role": "D26-STUDENT", "record": "D26-ST45", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent45", "parent_name": "Rohan Varma", "parent_record": "D26-PAR45"}, {"login": "demo.parent45", "name": "Rohan Varma", "role": "D26-PARENT", "record": "D26-PAR45", "batch": "2025–2028", "child": "Dev Varma", "course": "B.Com General", "student_login": "demo.student45", "student_name": "Dev Varma", "student_record": "D26-ST45"}, {"login": "demo.student46", "name": "Pranav Reddy", "role": "D26-STUDENT", "record": "D26-ST46", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent46", "parent_name": "Ananya Reddy", "parent_record": "D26-PAR46"}, {"login": "demo.parent46", "name": "Ananya Reddy", "role": "D26-PARENT", "record": "D26-PAR46", "batch": "2025–2028", "child": "Pranav Reddy", "course": "B.Com General", "student_login": "demo.student46", "student_name": "Pranav Reddy", "student_record": "D26-ST46"}, {"login": "demo.student47", "name": "Nisha Naidu", "role": "D26-STUDENT", "record": "D26-ST47", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent47", "parent_name": "Ishaan Naidu", "parent_record": "D26-PAR47"}, {"login": "demo.parent47", "name": "Ishaan Naidu", "role": "D26-PARENT", "record": "D26-PAR47", "batch": "2025–2028", "child": "Nisha Naidu", "course": "B.Com General", "student_login": "demo.student47", "student_name": "Nisha Naidu", "student_record": "D26-ST47"}, {"login": "demo.student48", "name": "Arjun Das", "role": "D26-STUDENT", "record": "D26-ST48", "batch": "2025–2028", "course": "B.Com General", "current_semester": "3", "parent_login": "demo.parent48", "parent_name": "Anika Das", "parent_record": "D26-PAR48"}, {"login": "demo.parent48", "name": "Anika Das", "role": "D26-PARENT", "record": "D26-PAR48", "batch": "2025–2028", "child": "Arjun Das", "course": "B.Com General", "student_login": "demo.student48", "student_name": "Arjun Das", "student_record": "D26-ST48"}];
+    const DEFAULT_PASS = "test@123";
+    const API_BASE = "http://150.241.246.34:8010";
+
+    // App State
+    let currentRoleFilter = "ALL";
+    let currentCourseFilter = "ALL";
+    let searchQuery = "";
+    let currentSort = "default";
+    let currentView = "grid";
+    let currentModalCurl = "";
+
+    // Init
+    document.addEventListener("DOMContentLoaded", () => {
+      setupEventListeners();
+      applyFiltersAndRender();
+      setupTheme();
+    });
+
+    function setupTheme() {
+      // By default, always enforce Light Glass mode on load
+      localStorage.removeItem("pragathi_theme");
+      setTheme("light");
+      
+      const toggleBtn = document.getElementById("btn-toggle-theme");
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          const current = document.body.getAttribute("data-theme") || "light";
+          const next = current === "light" ? "dark" : "light";
+          setTheme(next);
+          showToast(`Switched to ${next === "light" ? "Light Glass" : "Dark Glass"}`, "✨");
+        });
+      }
+    }
+
+    function setTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("pragathi_theme", theme);
+      const icon = document.getElementById("theme-icon");
+      const text = document.getElementById("theme-text");
+      if (theme === "dark") {
+        icon.textContent = "☀️";
+        text.textContent = "Light Glass";
+      } else {
+        icon.textContent = "🌙";
+        text.textContent = "Dark Glass";
+      }
+    }
+
+    function setupEventListeners() {
+      // Search
+      const searchInput = document.getElementById("search-input");
+      const clearBtn = document.getElementById("search-clear-btn");
+      
+      searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value.trim().toLowerCase();
+        clearBtn.classList.toggle("visible", searchQuery.length > 0);
+        applyFiltersAndRender();
+      });
+
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        searchQuery = "";
+        clearBtn.classList.remove("visible");
+        searchInput.focus();
+        applyFiltersAndRender();
+      });
+
+      // Keyboard shortcut '/'
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "/" && document.activeElement !== searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        } else if (e.key === "Escape") {
+          closeModal();
+          if (searchQuery) {
+            searchInput.value = "";
+            searchQuery = "";
+            clearBtn.classList.remove("visible");
+            applyFiltersAndRender();
+          }
+        }
+      });
+
+      // Role filter pills
+      document.querySelectorAll(".role-pills-group .filter-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".role-pills-group .filter-pill").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentRoleFilter = btn.getAttribute("data-role");
+          applyFiltersAndRender();
+        });
+      });
+
+      // Course filter pills
+      document.querySelectorAll(".course-pills-group .filter-pill").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".course-pills-group .filter-pill").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentCourseFilter = btn.getAttribute("data-course");
+          applyFiltersAndRender();
+        });
+      });
+
+      // Sort
+      document.getElementById("sort-select").addEventListener("change", (e) => {
+        currentSort = e.target.value;
+        applyFiltersAndRender();
+      });
+
+      // Segmented view toggle
+      document.querySelectorAll(".segmented-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".segmented-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          currentView = btn.getAttribute("data-view");
+          applyFiltersAndRender();
+        });
+      });
+
+      // Export CSV
+      document.getElementById("btn-export-csv").addEventListener("click", exportFilteredCSV);
+      // Export JSON
+      document.getElementById("btn-export-json").addEventListener("click", exportFilteredJSON);
+
+      // Modal overlay click
+      document.getElementById("detail-modal").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closeModal();
+      });
+    }
+
+    function filterByRole(role) {
+      currentRoleFilter = role;
+      document.querySelectorAll(".role-pills-group .filter-pill").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-role") === role);
+      });
+      applyFiltersAndRender();
+      scrollToMain();
+    }
+
+    function filterByCourse(course) {
+      currentCourseFilter = course;
+      document.querySelectorAll(".course-pills-group .filter-pill").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-course") === course);
+      });
+      applyFiltersAndRender();
+      scrollToMain();
+    }
+
+    function resetAllFilters() {
+      currentRoleFilter = "ALL";
+      currentCourseFilter = "ALL";
+      searchQuery = "";
+      currentSort = "default";
+      
+      document.getElementById("search-input").value = "";
+      document.getElementById("search-clear-btn").classList.remove("visible");
+      document.getElementById("sort-select").value = "default";
+
+      document.querySelectorAll(".role-pills-group .filter-pill").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-role") === "ALL");
+      });
+      document.querySelectorAll(".course-pills-group .filter-pill").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-course") === "ALL");
+      });
+
+      applyFiltersAndRender();
+    }
+
+    function scrollToMain() {
+      const el = document.getElementById("main-content");
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.pageYOffset - 150;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    }
+
+    function getFilteredData() {
+      return RAW_DATA.filter(item => {
+        if (currentRoleFilter !== "ALL" && item.role !== currentRoleFilter) {
+          return false;
+        }
+
+        if (currentCourseFilter !== "ALL") {
+          if (!item.course || item.course !== currentCourseFilter) {
+            return false;
+          }
+        }
+
+        if (searchQuery) {
+          const matchString = [
+            item.login,
+            item.name,
+            item.role,
+            item.record,
+            item.course || '',
+            item.batch || '',
+            item.current_semester ? 'sem ' + item.current_semester : '',
+            item.child || '',
+            item.parent_name || '',
+            item.student_name || '',
+            item.parent_login || '',
+            item.student_login || '',
+            item.subjects || '',
+            item.description || ''
+          ].join(" ").toLowerCase();
+
+          if (!matchString.includes(searchQuery)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    }
+
+    function getSortedData(data) {
+      const copy = [...data];
+      if (currentSort === "name-asc") {
+        copy.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      } else if (currentSort === "name-desc") {
+        copy.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+      } else if (currentSort === "login-asc") {
+        copy.sort((a, b) => a.login.localeCompare(b.login));
+      } else if (currentSort === "course-asc") {
+        copy.sort((a, b) => (a.course || '').localeCompare(b.course || ''));
+      }
+      return copy;
+    }
+
+    function applyFiltersAndRender() {
+      const filtered = getFilteredData();
+      const sorted = getSortedData(filtered);
+
+      document.getElementById("visible-count").textContent = sorted.length;
+      
+      const hasActiveFilters = currentRoleFilter !== "ALL" || currentCourseFilter !== "ALL" || searchQuery.length > 0;
+      document.getElementById("clear-filters-btn").classList.toggle("visible", hasActiveFilters);
+
+      const mainContent = document.getElementById("main-content");
+
+      if (sorted.length === 0) {
+        mainContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔎</div>
+            <h3>No logins found</h3>
+            <p>Try refining your search keyword or reset filters to see all college accounts.</p>
+            <button class="glass-btn primary" style="margin-top: 14px;" onclick="resetAllFilters()">Reset All Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      if (currentView === "grid") {
+        renderGridView(sorted, mainContent);
+      } else if (currentView === "grouped-category") {
+        renderGroupedByCategoryView(sorted, mainContent);
+      } else if (currentView === "grouped-course") {
+        renderGroupedByCourseView(sorted, mainContent);
+      } else if (currentView === "table") {
+        renderTableView(sorted, mainContent);
+      }
+    }
+
+    function renderGridView(items, container) {
+      container.innerHTML = `
+        <div class="cards-grid">
+          ${items.map(it => createCardHTML(it)).join("")}
+        </div>
+      `;
+    }
+
+    function renderGroupedByCategoryView(items, container) {
+      const categories = [
+        { role: 'D26-ADMIN', title: 'Administrator Accounts', icon: '👑' },
+        { role: 'D26-TEACH', title: 'Faculty & Teachers', icon: '👨‍🏫' },
+        { role: 'D26-STUDENT', title: 'Enrolled Students', icon: '🎓' },
+        { role: 'D26-PARENT', title: 'Linked Parents', icon: '👨‍👩‍👧' }
+      ];
+
+      let html = '';
+      categories.forEach(cat => {
+        const catItems = items.filter(it => it.role === cat.role);
+        if (catItems.length > 0) {
+          html += `
+            <section class="group-section">
+              <div class="group-section-header">
+                <div class="group-title-wrap">
+                  <span class="group-icon">${cat.icon}</span>
+                  <h2 class="group-title">${cat.title}</h2>
+                  <span class="group-count">${catItems.length} accounts</span>
+                </div>
+              </div>
+              <div class="cards-grid">
+                ${catItems.map(it => createCardHTML(it)).join("")}
+              </div>
+            </section>
+          `;
+        }
+      });
+      container.innerHTML = html;
+    }
+
+    function renderGroupedByCourseView(items, container) {
+      const courses = [
+        'Intermediate BPC',
+        'Intermediate MPC',
+        'BCA',
+        'B.Com General',
+        undefined
+      ];
+
+      let html = '';
+      courses.forEach(c => {
+        const cItems = items.filter(it => it.course === c);
+        if (cItems.length > 0) {
+          const title = c ? c : 'Administrative Governance';
+          const icon = c ? '📚' : '👑';
+          html += `
+            <section class="group-section">
+              <div class="group-section-header">
+                <div class="group-title-wrap">
+                  <span class="group-icon">${icon}</span>
+                  <h2 class="group-title">${title}</h2>
+                  <span class="group-count">${cItems.length} logins</span>
+                </div>
+              </div>
+              <div class="cards-grid">
+                ${cItems.map(it => createCardHTML(it)).join("")}
+              </div>
+            </section>
+          `;
+        }
+      });
+      container.innerHTML = html;
+    }
+
+    function renderTableView(items, container) {
+      container.innerHTML = `
+        <div class="table-container">
+          <table class="logins-table">
+            <thead>
+              <tr>
+                <th>Identity</th>
+                <th>Role</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Record Code</th>
+                <th>Course / Department</th>
+                <th>Academic Details</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(it => {
+                const roleBadge = getRoleBadgeInfo(it.role);
+                return `
+                  <tr>
+                    <td>
+                      <div style="font-weight: 800; color: var(--text-primary); font-size: 14px;">${highlightSearch(it.name)}</div>
+                      <div style="font-size: 11px; color: var(--text-tertiary); font-family: var(--font-mono); font-weight: 600;">${highlightSearch(it.login)}</div>
+                    </td>
+                    <td>
+                      <span class="role-badge ${roleBadge.cssClass}" onclick="filterByRole('${it.role}')">
+                        ${roleBadge.icon} ${roleBadge.title}
+                      </span>
+                    </td>
+                    <td>
+                      <button class="mini-copy-btn" onclick="copyText('${it.login}', 'Copied username')">
+                        ${it.login} 📋
+                      </button>
+                    </td>
+                    <td>
+                      <button class="mini-copy-btn" onclick="copyText('${DEFAULT_PASS}', 'Copied password')">
+                        •••••••• 📋
+                      </button>
+                    </td>
+                    <td>
+                      <span class="record-id">${it.record || '—'}</span>
+                    </td>
+                    <td>
+                      ${it.course ? `<span class="badge-tag course-tag" onclick="filterByCourse('${escapeHTML(it.course)}')">${escapeHTML(it.course)}</span>` : '<span style="color: var(--text-tertiary); font-weight: 600;">Central Admin</span>'}
+                    </td>
+                    <td>
+                      ${getAcademicDetailsSummary(it)}
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 6px;">
+                        <button class="mini-copy-btn" onclick="copyLoginPair('${it.login}', '${escapeJS(it.name)}')">
+                          Pair 📋
+                        </button>
+                        <button class="mini-copy-btn" onclick="openDetailModal('${it.login}')">
+                          Details 🔍
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function getAcademicDetailsSummary(it) {
+      if (it.role === 'D26-STUDENT') {
+        return `Sem ${it.current_semester || '—'} • Batch ${it.batch || ''} • <span style="color: var(--ios-blue); font-weight: 700; cursor:pointer;" onclick="jumpToLogin('${it.parent_login}')">Parent: ${escapeHTML(it.parent_name || it.parent_login)}</span>`;
+      } else if (it.role === 'D26-PARENT') {
+        return `Child: <span style="color: var(--ios-green); font-weight: 700; cursor:pointer;" onclick="jumpToLogin('${it.student_login}')">${escapeHTML(it.child || it.student_login)}</span> • Batch ${it.batch || ''}`;
+      } else if (it.role === 'D26-TEACH') {
+        return `${(it.parsed_subjects || []).length} Allocated Subjects`;
+      }
+      return escapeHTML(it.description || 'Full academic administration');
+    }
+
+    function getInitials(name) {
+      if (!name) return 'U';
+      const parts = name.trim().split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.slice(0, 2).toUpperCase();
+    }
+
+    function getRoleBadgeInfo(role) {
+      switch(role) {
+        case 'D26-ADMIN':
+          return { title: 'Admin', icon: '👑', cssClass: 'admin', avatarClass: 'avatar-admin' };
+        case 'D26-TEACH':
+          return { title: 'Teacher', icon: '👨‍🏫', cssClass: 'teacher', avatarClass: 'avatar-teacher' };
+        case 'D26-STUDENT':
+          return { title: 'Student', icon: '🎓', cssClass: 'student', avatarClass: 'avatar-student' };
+        case 'D26-PARENT':
+          return { title: 'Parent', icon: '👨‍👩‍👧', cssClass: 'parent', avatarClass: 'avatar-parent' };
+        default:
+          return { title: role, icon: '👤', cssClass: 'admin', avatarClass: 'avatar-admin' };
+      }
+    }
+
+    function highlightSearch(text) {
+      if (!text) return '';
+      const safe = escapeHTML(text);
+      if (!searchQuery) return safe;
+      const regex = new RegExp(`(${escapeRegExp(searchQuery)})`, 'gi');
+      return safe.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function createCardHTML(it) {
+      const roleBadge = getRoleBadgeInfo(it.role);
+      const initials = getInitials(it.name);
+
+      let roleSpecificContent = '';
+
+      if (it.role === 'D26-ADMIN') {
+        roleSpecificContent = `
+          <div class="desc-text" style="font-size: 12px; margin-top: 4px; background: var(--bg-glass-element); padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-element);">
+            <strong style="color: var(--ios-purple);">Administrative Scope:</strong> ${highlightSearch(it.description || '')}
+          </div>
+        `;
+      } else if (it.role === 'D26-TEACH') {
+        const subjects = it.parsed_subjects || [];
+        roleSpecificContent = `
+          <div class="subjects-box">
+            <div class="subjects-header">
+              <span>Teaching Subjects (${subjects.length})</span>
+              <span style="font-size: 10px; color: var(--ios-blue); font-weight: 800;">ALLOCATED</span>
+            </div>
+            <div class="subjects-list">
+              ${subjects.map(s => `
+                <span class="subject-pill">
+                  ${s.sem ? `<strong>${escapeHTML(s.sem)}</strong>` : ''}${highlightSearch(s.name)}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (it.role === 'D26-STUDENT') {
+        roleSpecificContent = `
+          <div class="relation-banner" onclick="jumpToLogin('${it.parent_login}')" title="Click to view linked parent login (${it.parent_login})">
+            <div class="relation-left">
+              <span style="font-size: 15px;">👨‍👩‍👧</span>
+              <span class="relation-label">Linked Parent:</span>
+              <span class="relation-name">${highlightSearch(it.parent_name || it.parent_login)}</span>
+            </div>
+            <span class="relation-arrow">View &rarr;</span>
+          </div>
+        `;
+      } else if (it.role === 'D26-PARENT') {
+        roleSpecificContent = `
+          <div class="relation-banner" onclick="jumpToLogin('${it.student_login}')" title="Click to view student record (${it.student_login})">
+            <div class="relation-left">
+              <span style="font-size: 15px;">🎓</span>
+              <span class="relation-label">Student Child:</span>
+              <span class="relation-name">${highlightSearch(it.child || it.student_name || it.student_login)}</span>
+            </div>
+            <span class="relation-arrow">View &rarr;</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="login-card" id="card-${it.login}" data-role="${it.role}">
+          <div>
+            <div class="card-header">
+              <div class="user-avatar ${roleBadge.avatarClass}">${initials}</div>
+              <div class="user-header-info">
+                <div class="user-header-top">
+                  <h3 class="user-name" title="${escapeHTML(it.name)}">${highlightSearch(it.name)}</h3>
+                  <span class="record-id">${highlightSearch(it.record || '')}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="role-badge ${roleBadge.cssClass}" onclick="filterByRole('${it.role}')" title="Filter by ${roleBadge.title}">
+                    ${roleBadge.icon} ${roleBadge.title}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Credentials Box -->
+            <div class="credentials-box">
+              <div class="cred-row">
+                <span class="cred-label">Login ID</span>
+                <div class="cred-val-wrap">
+                  <span class="cred-val">${highlightSearch(it.login)}</span>
+                  <button class="mini-copy-btn" onclick="copyText('${it.login}', 'Username copied')">
+                    📋
+                  </button>
+                </div>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Password</span>
+                <div class="cred-val-wrap">
+                  <span class="cred-val" style="color: var(--text-tertiary); font-size: 13px;">${DEFAULT_PASS}</span>
+                  <button class="mini-copy-btn" onclick="copyText('${DEFAULT_PASS}', 'Password copied')">
+                    📋
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="card-details-section">
+              <div class="tags-row">
+                ${it.course ? `<span class="badge-tag course-tag" onclick="filterByCourse('${escapeHTML(it.course)}')">📚 ${highlightSearch(it.course)}</span>` : '<span class="badge-tag" style="color: var(--ios-purple); background: var(--ios-purple-soft); border-color: var(--ios-purple-border);">👑 Central Administration</span>'}
+                ${it.current_semester ? `<span class="badge-tag sem-tag">Sem ${escapeHTML(it.current_semester)}</span>` : ''}
+                ${it.batch ? `<span class="badge-tag">🗓️ ${escapeHTML(it.batch)}</span>` : ''}
+              </div>
+
+              ${roleSpecificContent}
+            </div>
+          </div>
+
+          <!-- Card Footer Actions -->
+          <div class="card-footer">
+            <button class="card-action-btn copy-pair" onclick="copyLoginPair('${it.login}', '${escapeJS(it.name)}')">
+              <span>📋</span> Copy Credentials
+            </button>
+            <button class="card-action-btn" onclick="openDetailModal('${it.login}')" title="Inspect API snippet and details">
+              <span>🔍</span> Details
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function jumpToLogin(login) {
+      if (!login) return;
+      
+      if (currentRoleFilter !== "ALL" || currentCourseFilter !== "ALL" || searchQuery) {
+        resetAllFilters();
+      }
+
+      setTimeout(() => {
+        const card = document.getElementById('card-' + login);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.remove('highlight-pulse');
+          void card.offsetWidth;
+          card.classList.add('highlight-pulse');
+          showToast(`Jumped to ${login}`, '✨');
+        } else {
+          openDetailModal(login);
+        }
+      }, 100);
+    }
+
+    function copyText(text, successMsg = 'Copied to clipboard') {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg, '✅');
+      }).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast(successMsg, '✅');
+      });
+    }
+
+    function copyLoginPair(login, name) {
+      const payload = `Username: ${login}\nPassword: ${DEFAULT_PASS}\nName: ${name}\nAPI: ${API_BASE}`;
+      copyText(payload, `Credentials for ${name} copied!`);
+    }
+
+    function copyAllVisibleLogins() {
+      const filtered = getSortedData(getFilteredData());
+      if (filtered.length === 0) {
+        showToast('No logins visible to copy', '⚠️');
+        return;
+      }
+      const list = filtered.map(it => `${it.login}\t${DEFAULT_PASS}\t${it.name}\t${it.role}\t${it.course || ''}`).join('\n');
+      copyText(list, `Copied ${filtered.length} logins to clipboard!`);
+    }
+
+    function exportFilteredCSV() {
+      const filtered = getSortedData(getFilteredData());
+      if (filtered.length === 0) {
+        showToast('No data to export', '⚠️');
+        return;
+      }
+
+      const headers = ['Login', 'Password', 'Name', 'Role', 'Record', 'Course', 'Batch', 'Semester', 'Related Account', 'Details'];
+      const rows = filtered.map(it => [
+        it.login,
+        DEFAULT_PASS,
+        `"${(it.name || '').replace(/"/g, '""')}"`,
+        it.role,
+        it.record || '',
+        `"${(it.course || '').replace(/"/g, '""')}"`,
+        `"${(it.batch || '').replace(/"/g, '""')}"`,
+        it.current_semester || '',
+        `"${(it.parent_login || it.student_login || '').replace(/"/g, '""')}"`,
+        `"${(it.subjects || it.description || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `pragathi_college_logins_${currentRoleFilter.toLowerCase()}_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Exported ${filtered.length} logins to CSV`, '📥');
+    }
+
+    function exportFilteredJSON() {
+      const filtered = getSortedData(getFilteredData());
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(filtered, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `pragathi_college_logins_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast(`Exported ${filtered.length} logins to JSON`, '💾');
+    }
+
+    function openDetailModal(login) {
+      const item = RAW_DATA.find(i => i.login === login);
+      if (!item) return;
+
+      const roleBadge = getRoleBadgeInfo(item.role);
+      currentModalCurl = `curl -X POST "${API_BASE}/api/v1/auth/login" \\
+  -H "Content-Type: application/json" \\
+  -d '{"username": "${item.login}", "password": "${DEFAULT_PASS}"}'`;
+
+      let relationHTML = '';
+      if (item.role === 'D26-STUDENT') {
+        relationHTML = `
+          <div style="background: var(--bg-glass-element); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-element); margin-top: 14px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-tertiary); font-weight: 800; letter-spacing: 0.5px;">Linked Parent Identity</div>
+            <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+              ${escapeHTML(item.parent_name || 'Parent')} (<span style="font-family: var(--font-mono); color: var(--ios-blue);">${item.parent_login}</span>)
+            </div>
+            <button class="mini-copy-btn" style="margin-top: 10px;" onclick="closeModal(); jumpToLogin('${item.parent_login}');">
+              Inspect Parent Card &rarr;
+            </button>
+          </div>
+        `;
+      } else if (item.role === 'D26-PARENT') {
+        relationHTML = `
+          <div style="background: var(--bg-glass-element); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-element); margin-top: 14px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-tertiary); font-weight: 800; letter-spacing: 0.5px;">Linked Student Identity</div>
+            <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+              ${escapeHTML(item.child || item.student_name || 'Student')} (<span style="font-family: var(--font-mono); color: var(--ios-green);">${item.student_login}</span>)
+            </div>
+            <button class="mini-copy-btn" style="margin-top: 10px;" onclick="closeModal(); jumpToLogin('${item.student_login}');">
+              Inspect Student Card &rarr;
+            </button>
+          </div>
+        `;
+      }
+
+      document.getElementById("modal-body").innerHTML = `
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 22px;">
+          <div class="user-avatar ${roleBadge.avatarClass}" style="width: 56px; height: 56px; font-size: 20px; border-radius: 18px;">
+            ${getInitials(item.name)}
+          </div>
+          <div>
+            <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.4px;">${escapeHTML(item.name)}</h2>
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+              <span class="role-badge ${roleBadge.cssClass}">${roleBadge.icon} ${roleBadge.title}</span>
+              <span class="record-id">${item.record}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="credentials-box" style="margin-bottom: 16px;">
+          <div class="cred-row">
+            <span class="cred-label">Login ID:</span>
+            <div class="cred-val-wrap">
+              <strong class="cred-val" style="font-size: 14px;">${item.login}</strong>
+              <button class="mini-copy-btn" onclick="copyText('${item.login}', 'Username copied')">Copy</button>
+            </div>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">Password:</span>
+            <div class="cred-val-wrap">
+              <strong class="cred-val" style="font-size: 14px;">${DEFAULT_PASS}</strong>
+              <button class="mini-copy-btn" onclick="copyText('${DEFAULT_PASS}', 'Password copied')">Copy</button>
+            </div>
+          </div>
+          <div class="cred-row">
+            <span class="cred-label">API Host:</span>
+            <div class="cred-val-wrap">
+              <span class="cred-val" style="font-size: 12px;">${API_BASE}</span>
+              <button class="mini-copy-btn" onclick="copyText('${API_BASE}', 'API copied')">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; font-size: 13px;">
+          <div style="background: var(--bg-glass-element); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-element);">
+            <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 700;">Course Program</div>
+            <div style="font-weight: 800; margin-top: 2px; color: var(--text-primary);">${escapeHTML(item.course || 'Administrative Level')}</div>
+          </div>
+          <div style="background: var(--bg-glass-element); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-element);">
+            <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 700;">Cohort / Semester</div>
+            <div style="font-weight: 800; margin-top: 2px; color: var(--text-primary);">${item.current_semester ? 'Semester ' + item.current_semester : '—'} ${item.batch ? '(' + item.batch + ')' : ''}</div>
+          </div>
+        </div>
+
+        ${relationHTML}
+
+        ${item.subjects ? `
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-tertiary); letter-spacing: 0.5px; margin-bottom: 6px;">Allocated Teaching Subjects</div>
+            <div style="background: var(--bg-glass-element); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-element); font-size: 12px; line-height: 1.6;">
+              ${(item.parsed_subjects || []).map(s => `<span class="subject-pill" style="margin: 2px 4px 2px 0; display: inline-block;"><strong>${escapeHTML(s.sem)}:</strong> ${escapeHTML(s.name)}</span>`).join("")}
+            </div>
+          </div>
+        ` : ''}
+
+        ${item.description ? `
+          <div style="margin-top: 14px;">
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-tertiary); letter-spacing: 0.5px; margin-bottom: 4px;">Role Scope / Permissions</div>
+            <p style="font-size: 13px; color: var(--text-secondary); background: var(--bg-glass-element); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-element); font-weight: 500;">${escapeHTML(item.description)}</p>
+          </div>
+        ` : ''}
+
+        <div style="margin-top: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-tertiary); letter-spacing: 0.5px;">API cURL Authentication</span>
+            <button class="copy-pill" onclick="copyText(currentModalCurl, 'cURL command copied')">Copy cURL</button>
+          </div>
+          <div class="code-snippet-box">${escapeHTML(currentModalCurl)}</div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button class="glass-btn primary" style="flex: 1; justify-content: center;" onclick="copyLoginPair('${item.login}', '${escapeJS(item.name)}')">
+            <span>📋</span> Copy Full Credentials
+          </button>
+          <button class="glass-btn" onclick="closeModal()">Close</button>
+        </div>
+      `;
+
+      document.getElementById("detail-modal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("detail-modal").classList.remove("open");
+    }
+
+    function showToast(message, icon = 'ℹ️') {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = "toast-msg";
+      toast.innerHTML = `<span>${icon}</span> <span>${escapeHTML(message)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 3000);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeJS(str) {
+      if (!str) return '';
+      return String(str).replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

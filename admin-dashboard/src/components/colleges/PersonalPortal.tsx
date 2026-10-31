@@ -5,6 +5,7 @@ import SyllabusWorkspace from "./SyllabusWorkspace";
 import CalendarWorkspace from "./CalendarWorkspace";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import AssessmentWorkspace from "./AssessmentWorkspace";
+import AcademicProgressWorkspace, { AcademicProgressOverview } from "./AcademicProgressWorkspace";
 import CertificateWorkspace from "./CertificateWorkspace";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -113,7 +114,8 @@ export default function PersonalPortal({
         <button onClick={signOut}>Sign out</button>
       </aside>
       <section className="edu-content">
-        {selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : ["assignments", "submissions"].includes(selected) ? (
+        {selected === "overview" && <AcademicProgressOverview onOpen={()=>setSelected("results")}/>}
+        {["academics","results"].includes(selected) ? <AcademicProgressWorkspace onNavigate={setSelected}/> : selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : ["assignments", "submissions"].includes(selected) ? (
           <AssignmentWorkspace studentCode={student || undefined} />
         ) : selected === "syllabus" ? (
           <SyllabusWorkspace studentCode={student || undefined} />

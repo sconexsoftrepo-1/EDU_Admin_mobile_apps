@@ -208,7 +208,9 @@ class SqlServerStore(shared.PostgresStore):
         except BaseException as exc:
             try:
                 connection.rollback()
-            finally:
+            except Exception:
+                shared._close(connection)
+            else:
                 self.pool.put(connection)
             if isinstance(exc, pymssql.Error):
                 error = database_error(exc)

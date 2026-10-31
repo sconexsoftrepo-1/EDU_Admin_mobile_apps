@@ -15,6 +15,7 @@ class Settings(BaseSettings):
         default_factory=lambda: Path("/tmp/edunexa") if os.environ.get("VERCEL") else Path("var")
     )
     jwt_secret: str = Field(min_length=48)
+    semester_reminders_enabled: bool = True
     push_adapter_url: str | None = None
     push_adapter_token: SecretStr | None = None
     sms_adapter_url: str | None = None

@@ -74,6 +74,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           open('certificates');
         } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
           open('assessments');
+        } else if(notice!=null&&notice['screen'] is String&&has(notice['screen'] as String)){
+          open(notice['screen'] as String);
         } else {
           open('notifications');
         }
@@ -620,7 +622,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
+              child: selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
                   ? AssignmentHub(
                       key: ValueKey(
                         'assignment-$selected-$student-$generation',
@@ -833,6 +835,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         SectionHeading(title: 'Next scheduled period'),
         NextPeriodCard(periods: periods, onOpen: () => open('timetable')),
       ],
+      if(has('academics')||has('results')) AcademicOverview(key:ValueKey('academic-home-$student-$generation'),api:widget.api,studentCode:student??'',onOpen:()=>open(has('academics')?'academics':'results')),
       if (learning) ...records('assignments', 'Your assignments'),
       if (role == MobileRole.admin) ...[
         SectionHeading(

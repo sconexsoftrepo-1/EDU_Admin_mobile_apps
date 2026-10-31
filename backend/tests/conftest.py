@@ -48,6 +48,7 @@ def app(tmp_path, sql_schema):
             jwt_secret=secrets.token_urlsafe(64),
             data_dir=tmp_path,
             file_storage="local",
+            semester_reminders_enabled=False,
             storage_backend="postgres" if sql_schema else "local-json",
             # Requests to a remote database are slow; keep tokens valid for long tests.
             **({"access_minutes": 30} if sql_schema else {}),

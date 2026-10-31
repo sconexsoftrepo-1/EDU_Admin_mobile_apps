@@ -1,0 +1,105 @@
+{
+  "target": {
+    "host": "150.241.246.34",
+    "port": 1433,
+    "database": "Edu Admin",
+    "schema": "dbo"
+  },
+  "demo_run": "linked-academics-2026-v1",
+  "canonical_demo_counts": {
+    "academic_years": 4,
+    "batches": 4,
+    "semesters": 20,
+    "sections": 20,
+    "employees": 26,
+    "teachers": 25,
+    "rooms": 40,
+    "students": 48,
+    "parents": 48,
+    "student_parents": 48,
+    "student_enrollments": 144,
+    "student_subjects": 756,
+    "subject_offerings": 116,
+    "timetable_slots": 600,
+    "fee_heads": 1,
+    "fee_structures": 20,
+    "student_fee_charges": 240,
+    "payments": 128,
+    "payment_allocations": 128,
+    "notifications": 96
+  },
+  "extras_scope_counts": {
+    "student_subjects": 756,
+    "roles": 4,
+    "fee_structures": 20,
+    "teachers": 25,
+    "document:semester_results": 482,
+    "payment_allocations": 128,
+    "users": 122,
+    "timetable_slots": 600,
+    "academic_years": 4,
+    "student_enrollments": 144,
+    "document:semester_calendar_reviewed": 4,
+    "document:attendance_registers": 320,
+    "document:academic_batch_curricula": 4,
+    "student_fee_charges": 240,
+    "students": 48,
+    "document:assignment_records": 8,
+    "subject_offerings": 116,
+    "document:academic_demo_runs": 1,
+    "document:timetables": 20,
+    "fee_heads": 1,
+    "batches": 4,
+    "rooms": 40,
+    "student_parents": 48,
+    "document:assessments": 8,
+    "semesters": 20,
+    "parents": 48,
+    "sections": 20,
+    "notifications": 96,
+    "employees": 26,
+    "document:assignment_submissions": 48,
+    "payments": 128
+  },
+  "accounts_created": {
+    "accounts": 122,
+    "parents": 48,
+    "students": 48,
+    "teachers": 25
+  },
+  "batches": [
+    {
+      "code": "D26-AY1",
+      "course": "Intermediate BPC",
+      "current_semester": 1,
+      "program_code": "INT-BPC",
+      "section_code": "D26-SEC1-1",
+      "students": 12
+    },
+    {
+      "code": "D26-AY2",
+      "course": "Intermediate MPC",
+      "current_semester": 3,
+      "program_code": "INT-MPC",
+      "section_code": "D26-SEC2-3",
+      "students": 12
+    },
+    {
+      "code": "D26-AY3",
+      "course": "BCA",
+      "current_semester": 5,
+      "program_code": "DEG-BCA",
+      "section_code": "D26-SEC3-5",
+      "students": 12
+    },
+    {
+      "code": "D26-AY4",
+      "course": "B.Com General",
+      "current_semester": 3,
+      "program_code": "DEG-B-COM-GENERAL",
+      "section_code": "D26-SEC4-3",
+      "students": 12
+    }
+  ],
+  "curriculum_links_total": 3278
+}

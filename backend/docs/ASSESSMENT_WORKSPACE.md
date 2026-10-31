@@ -45,3 +45,12 @@ Set-Location 'C:\edu portal\backend'
 ```
 
 Deploy/restart the updated backend before using the new assessment endpoints. Running the same seed again only fills missing course semesters.
+
+For a Mac development checkout whose `.env` retains the Windows server's local SQL address, the seed supports a temporary host override:
+
+```sh
+.venv/bin/python tools/seed_course_curricula.py --sql-host 150.241.246.34
+.venv/bin/python tools/seed_course_curricula.py --sql-host 150.241.246.34 --apply
+```
+
+This uses the existing configured database name/login and does not edit `.env`. The remote SQL target was checked against the live API's public course codes before use. To run a local backend against that server, set `EDUNEXA_MSSQL_HOST=150.241.246.34` in the local process environment; the Windows backend should retain its own working settings.

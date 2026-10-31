@@ -249,6 +249,9 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
     if teaching(user):
         offered = {o["subject_code"] for o in rows(data,"subject_offerings") if o["teacher_code"] in own and (not section_code or o["section_code"] == section_code) and (not academic_year_code or o["section_code"] in {s["code"] for s in result["sections"]})}
         result["subjects"] = [s for s in result["subjects"] if s["subject_code"] in offered]
+    from .academic_progress import semester_state
+    year=data["records"].get("academic_years",{}).get(academic_year_code)
+    result["current_semester"]=semester_state(data,year)["current"] if year else None
     return result
 
 

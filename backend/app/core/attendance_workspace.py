@@ -65,6 +65,9 @@ class Register(StrictModel):
     session_date: date
     period: int = Field(ge=0, le=24, description="0 = whole day; 1–24 = teaching period")
     subject: str = Field(default="", max_length=160)
+    slot_code: str | None = Field(default=None,max_length=160)
+    subject_code: str | None = None
+    semester_number: int | None = Field(default=None,ge=1,le=16)
     revision: int = Field(default=0, ge=0)
     marks: list[Mark] = Field(min_length=1, max_length=2000)
 
@@ -277,6 +280,17 @@ def save(body: Register, request: Request, user=Depends(current_user)):
         if not {m.student_code for m in body.marks}.issubset(people):
             raise HTTPException(422, "The register contains students outside the selected class")
         record = body.model_dump(mode="json", exclude={"marks", "revision"})
+        if body.slot_code or aw.teaching(user):
+            from .academic_progress import today_classes,local_now
+            instant=local_now().replace(year=body.session_date.year,month=body.session_date.month,day=body.session_date.day)
+            classes=[c for c in today_classes(data,user,year,instant=instant) if c['section_code']==body.section_code]
+            session=next((c for c in classes if (c['code']==body.slot_code if body.slot_code else c['period']==body.period)),None)
+            scheduled_offerings={o['code'] for o in aw.rows(data,'subject_offerings') if o['section_code']==body.section_code}
+            scheduled=any(s['offering_code'] in scheduled_offerings for s in aw.rows(data,'timetable_slots'))
+            if (body.slot_code or classes or scheduled) and (not session or session['period']!=body.period): raise HTTPException(422,'Choose a scheduled teaching period for this class and date')
+            if session:
+                if aw.teaching(user) and body.session_date==local_now().date() and local_now().strftime('%H:%M')<session['start_time']: raise HTTPException(403,'Attendance opens when the scheduled class begins')
+                record.update(slot_code=session['code'],subject_code=session['subject_code'],semester_number=session['semester_number'],subject=session['subject_name'])
         existing = next((r for r in documents(data).values() if identity(r) == identity(record)), None)
         if existing and not allowed(data, user, "edit"):
             raise HTTPException(403, "Attendance edit permission required")

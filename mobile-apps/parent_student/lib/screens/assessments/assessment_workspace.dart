@@ -596,7 +596,14 @@ class _AssessmentComposerState extends State<AssessmentComposer> {
             )
             as Map,
       );
-      if (mounted && ticket == current) setState(() => options = result);
+      if (mounted && ticket == current) {
+        setState(() {
+          options = result;
+          if (widget.initial == null && result['current_semester'] is int) {
+            semester = result['current_semester'] as int;
+          }
+        });
+      }
     } catch (e) {
       if (mounted && ticket == current) setState(() => error = e.toString());
     } finally {

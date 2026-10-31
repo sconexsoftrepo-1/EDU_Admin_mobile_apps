@@ -1,6 +1,8 @@
 import { apiRequest, fileToBase64 } from "../../client";
 import { assignmentPath, type AssignmentFile } from "../assignments/service";
 export interface CurriculumItem {
+  code?: string;
+  credits?: string;
   subject_code: string;
   name: string;
   subject_type: string;
@@ -44,6 +46,7 @@ export interface Assessment {
   counts: { assigned: number; graded: number };
 }
 export interface AssessmentOptions {
+  current_semester?: number | null;
   courses: {
     code: string;
     name: string;
@@ -139,6 +142,45 @@ export const courseCurricula = {
     apiRequest<Curriculum>("academics/course-curricula/" + code),
   save: (code: string, body: unknown) =>
     apiRequest<Curriculum>("academics/course-curricula/" + code, {
+      method: "PUT",
+      body,
+    }),
+};
+
+export interface CourseWorkspace extends Curriculum {
+  can_edit: boolean;
+  can_assign: boolean;
+  allocation_revision: number;
+  academic_years: { code: string; name: string }[];
+  sections: {
+    code: string;
+    name: string;
+    academic_year_code: string;
+    semester_number?: number | null;
+  }[];
+  teachers: { code: string; name: string }[];
+  offerings: {
+    code: string;
+    subject_code: string;
+    section_code: string;
+    teacher_code: string;
+  }[];
+}
+export const courseWorkspace = {
+  get: (code: string) =>
+    apiRequest<CourseWorkspace>(`academics/course-curricula/${code}/workspace`),
+  edit: (code: string, link: string, body: unknown) =>
+    apiRequest<CourseWorkspace>(
+      `academics/course-curricula/${code}/subjects/${link}`,
+      { method: "PATCH", body },
+    ),
+  add: (code: string, body: unknown) =>
+    apiRequest<CourseWorkspace>(`academics/course-curricula/${code}/subjects`, {
+      method: "POST",
+      body,
+    }),
+  assign: (code: string, body: unknown) =>
+    apiRequest<CourseWorkspace>(`academics/course-curricula/${code}/faculty`, {
       method: "PUT",
       body,
     }),

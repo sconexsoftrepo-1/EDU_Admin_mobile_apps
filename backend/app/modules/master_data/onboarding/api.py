@@ -457,7 +457,9 @@ def inline_course_fee_schedule(data, values, actor):
     """Save a course's inline fee-head rows together; charged amounts remain immutable."""
     payload = CourseFeeScheduleInput.model_validate(values)
     program = table_service("programs").repo.get(data, payload.program_code)
-    table_service("academic_years").repo.get(data, payload.academic_year_code)
+    year=table_service("academic_years").repo.get(data, payload.academic_year_code)
+    if year.get("program_code") and year["program_code"]!=payload.program_code: raise HTTPException(422,"Choose an academic batch belonging to the selected course")
+    if payload.fee_basis=="semester" and payload.year_of_study>int(program.get("duration_semesters") or 0): raise HTTPException(422,"Semester must fall within the course duration")
     heads = data["records"].setdefault("fee_heads", {})
     structures = data["records"].setdefault("fee_structures", {})
     charged = {r["fee_structure_code"] for r in data["records"].get("student_fee_charges", {}).values()}
@@ -492,7 +494,8 @@ def inline_course_fee_schedule(data, values, actor):
                 and int(row["semester_number"]) == payload.year_of_study
                 and int(row.get("installment_number") or 1) == payload.installment_number
                 and row.get("billing_frequency", "annual") == payload.billing_frequency
-                and row.get("currency", "INR") == payload.currency)
+                and row.get("currency", "INR") == payload.currency
+                and row.get("fee_basis","annual")==payload.fee_basis)
         existing = structures.get(line.code) if line.code else next(
             (r for r in structures.values() if matches(r) and r["fee_head_code"] == head_code), None)
         if line.code and (not existing or not matches(existing) or existing["fee_head_code"] != head_code):

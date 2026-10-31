@@ -17,11 +17,13 @@ class AttendanceHub extends StatefulWidget {
     required this.role,
     this.title = 'Attendance',
     this.studentCode = '',
+    this.initialClass,
   });
   final CollegeApi api;
   final MobileRole role;
   final String title;
   final String studentCode;
+  final Json? initialClass;
   @override
   State<AttendanceHub> createState() => _AttendanceHubState();
 }
@@ -86,6 +88,15 @@ class _AttendanceHubState extends State<AttendanceHub> {
   @override
   void initState() {
     super.initState();
+    final c = widget.initialClass;
+    if (c != null) {
+      program = _asText(c['program_code']);
+      year = _asText(c['academic_year_code']);
+      section = _asText(c['section_code']);
+      day = DateTime.parse(_asText(c['session_date']));
+      period = c['period'] as int;
+      subject.text = _asText(c['subject_name']);
+    }
     initialize();
   }
 
@@ -104,6 +115,15 @@ class _AttendanceHubState extends State<AttendanceHub> {
       if (!mounted) return;
       setState(() {
         options = result;
+        if (widget.initialClass != null) {
+          final selected = _asRows(
+            result['courses'],
+          ).where((c) => c['code'] == program).firstOrNull;
+          if (selected != null) {
+            level = _asText(selected['course_level']);
+            course = _asText(selected['name']);
+          }
+        }
         final children = _asRows(result['students']);
         if (children.isNotEmpty) {
           child = children.any((s) => s['code'] == widget.studentCode)
@@ -202,6 +222,13 @@ class _AttendanceHubState extends State<AttendanceHub> {
         'program_code': program,
         'academic_year_code': year,
         'section_code': section.isEmpty ? null : section,
+        if (widget.initialClass != null &&
+            widget.initialClass!['program_code'] == program &&
+            widget.initialClass!['academic_year_code'] == year &&
+            widget.initialClass!['section_code'] == section &&
+            widget.initialClass!['period'] == period &&
+            widget.initialClass!['session_date'] == _attDate(day))
+          'slot_code': widget.initialClass!['code'],
         'session_date': _attDate(day),
         'period': period,
         'subject': subject.text.trim().isEmpty
@@ -833,9 +860,11 @@ class AttendanceOverview extends StatefulWidget {
     super.key,
     required this.api,
     this.studentCode = '',
+    this.initialClass,
   });
   final CollegeApi api;
   final String studentCode;
+  final Json? initialClass;
   @override
   State<AttendanceOverview> createState() => _AttendanceOverviewState();
 }

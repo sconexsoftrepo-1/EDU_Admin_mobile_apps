@@ -479,6 +479,7 @@ function AssignmentCreate({
       )
       .then((value) => {
         setOptions(value);
+        setSubject(value.subjects?.find(s => s.semester_number === value.current_semester)?.subject_code || "");
         setError("");
         setSelected(value.students.map((s) => s.code));
         if (value.teacher_locked) setTeacher(value.teachers[0]?.code || "");
