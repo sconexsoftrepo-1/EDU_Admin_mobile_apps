@@ -60,6 +60,16 @@ void main() {
                     'name': '2025–2027',
                     'course_name': 'Intermediate BPC',
                     'timeline': {'current': 3, 'semesters': []},
+                    'placements': [
+                      {
+                        'student_code': 'ST1',
+                        'student_name': 'Ananya Reddy',
+                        'section_name': 'Section B',
+                        'semester_number': 3,
+                        'roll_number': 'UNI001',
+                        'admission_number': 'ADM001',
+                      },
+                    ],
                     'semesters': [
                       for (final n in [1, 2, 3])
                         {
@@ -143,9 +153,14 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('Current semester 3'), findsOneWidget);
+        expect(find.text('Ananya Reddy · Section B'), findsOneWidget);
+        expect(find.text('Semester 3 · Roll UNI001'), findsOneWidget);
         await tester.tap(find.text('Subjects', skipOffstage: false));
         await tester.pumpAndSettle();
-        await tester.scrollUntilVisible(find.text('Semester 3 subjects & labs'), 100);
+        await tester.scrollUntilVisible(
+          find.text('Semester 3 subjects & labs'),
+          100,
+        );
         expect(find.text('Semester 3 subjects & labs'), findsOneWidget);
         expect(find.text('Botany I'), findsNothing);
         await tester.scrollUntilVisible(find.text('Semester 1'), -100);

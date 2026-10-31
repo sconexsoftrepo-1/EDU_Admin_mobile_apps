@@ -153,6 +153,9 @@ class _AcademicHubState extends State<AcademicHub> {
 
   Widget overview(Json? b) {
     final totals = Map<String, dynamic>.from(data?['totals'] as Map? ?? {});
+    final placements = _asRows(
+      b?['placements'],
+    ).where((p) => p['semester_number'] == term).toList();
     final terms = _asRows(b?['semesters']);
     final summary = terms
         .where((s) => s['semester_number'] == term)
@@ -160,6 +163,31 @@ class _AcademicHubState extends State<AcademicHub> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (data?['personal'] == true && placements.isNotEmpty) ...[
+          Text(
+            'Class & section',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          for (final placement in placements)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${placement['student_name']} · ${placement['section_name']}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Semester $term · Roll ${placement['roll_number']}'),
+                    Text('Admission ${placement['admission_number'] ?? ''}'),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 16),
+        ],
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -1084,6 +1112,16 @@ class _AcademicOverviewState extends State<AcademicOverview> {
                 Text(
                   '${b['course_name']} · ${(b['timeline'] as Map?)?['current'] == null ? _asText((b['timeline'] as Map?)?['state']) : 'Semester ${(b['timeline'] as Map)['current']}'}',
                 ),
+              if (data?['personal'] == true)
+                for (final cohort in _asRows(data!['batches']))
+                  for (final placement in _asRows(cohort['placements']).where(
+                    (p) =>
+                        p['semester_number'] ==
+                        (cohort['timeline'] as Map?)?['current'],
+                  ))
+                    Text(
+                      '${placement['student_name']} · ${placement['section_name']} · Roll ${placement['roll_number']}',
+                    ),
               const SizedBox(height: 8),
               Text(
                 '${totals?['backlog_students'] ?? 0} students with backlogs · ${totals?['all_clear_semester_results'] ?? 0} all-clear semester records',

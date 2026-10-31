@@ -3152,7 +3152,7 @@ export default function CollegePortal({
           aria-modal="true"
           aria-label="Manage college records"
         >
-          <div className="erp-api-drawer">
+          <div className={`erp-api-drawer ${(manageModule || activeModule) === "academics" ? "erp-academics-drawer" : ""}`}>
             <header>
               <h2>{labels[activeModule] || activeModule}</h2>
               <button
