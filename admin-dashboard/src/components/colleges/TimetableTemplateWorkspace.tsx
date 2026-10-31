@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -606,12 +607,12 @@ export default function TimetableTemplateWorkspace({
                 <h3>Saved timetables</h3>
                 <p>Reopen a draft or edit a published class timetable.</p>
               </div>
-              <input
+              <SearchField
                 aria-label="Search saved timetables"
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search course, batch or section"
+                value={search}
+                onValueChange={setSearch}
+                suggestions={searchValues(records.items, ["name", "course_name", "batch_name", "section"])}
               />
             </div>
             {!filtered.length ? (

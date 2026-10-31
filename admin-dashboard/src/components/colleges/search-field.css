@@ -1,0 +1,157 @@
+/* A single-line search control, independent of form label/grid styling. */
+.edu-search-field.edu-search-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  width: min(100%, 360px);
+  min-width: 0;
+  min-height: 42px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d9dfe5;
+  border-radius: 8px;
+  background: #fff;
+  color: #718092;
+  box-shadow: none;
+  flex: 0 1 360px;
+}
+.edu-search-field:focus-within {
+  border-color: #a46a27;
+  outline: 2px solid #a46a271a;
+  outline-offset: 1px;
+}
+.edu-search-field > svg {
+  flex: 0 0 auto;
+}
+.edu-search-field > input.edu-search-input,
+.college-erp .edu-search-field > input.edu-search-input,
+.edu-connected .edu-search-field > input.edu-search-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 40px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: #263747;
+  font: 400 14px/1.4 var(--sans, Arial, sans-serif);
+}
+.edu-search-input::placeholder {
+  color: #7b8794;
+  opacity: 1;
+}
+.edu-search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+.edu-search-field > button.edu-search-clear,
+.college-erp .edu-search-field > button.edu-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #718092;
+  box-shadow: none;
+}
+.edu-search-clear:hover {
+  background: #f1f4f6;
+}
+.edu-search-clear:focus-visible {
+  outline: 2px solid #a46a27;
+}
+.edu-search-suggestions {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid #d9dfe5;
+  border-radius: 8px;
+  background: #fff;
+  color: #263747;
+  box-shadow: 0 8px 24px #172a3b1a;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font: 400 14px/1.4 var(--sans, Arial, sans-serif);
+}
+.edu-search-suggestions [role="option"] {
+  padding: 10px;
+  border-radius: 5px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.edu-search-suggestions [role="option"]:hover,
+.edu-search-suggestions .is-active {
+  background: #f2f5f7;
+}
+.edu-search-suggestions p {
+  margin: 0;
+  padding: 10px;
+  color: #718092;
+}
+@media (max-width: 650px) {
+  .edu-search-field.edu-search-field {
+    flex-basis: 100%;
+    width: 100%;
+  }
+  .college-erp .edu-search-field > input.edu-search-input,
+  .edu-connected .edu-search-field > input.edu-search-input,
+  .edu-search-field > input.edu-search-input {
+    font-size: 16px;
+  }
+}
+
+/* Keep specialized dropdowns visually consistent with record searches. */
+.college-erp .erp-global-search.edu-search-field {
+  flex: 1 1 300px;
+  max-width: 560px;
+  border-radius: 8px;
+  background: #fff;
+}
+.edu-filter-search.edu-search-field,
+.cc-search.edu-search-field {
+  width: 100%;
+  flex: none;
+}
+.adm-list-toolbar {
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+.adm-list-toolbar > div:first-child {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.adm-list-toolbar > .edu-search-field {
+  flex-shrink: 0;
+}
+.as-toolbar:has(> .edu-search-field),
+.edu-toolbar:has(> .edu-search-field),
+.stf-dir-bar:has(> .edu-search-field) {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+@media (max-width: 650px) {
+  .edu-search-field.edu-search-field {
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+  }
+}
+@media (max-width: 760px) {
+  .adm-list-toolbar > div:first-child {
+    flex: none;
+  }
+}

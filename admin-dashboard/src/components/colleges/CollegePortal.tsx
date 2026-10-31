@@ -4,9 +4,14 @@ import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
+import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
+import { clearWorkspaceCache } from "@/lib/colleges/workspace-cache";
 import AssignmentWorkspace from "./AssignmentWorkspace";
 import SyllabusWorkspace from "./SyllabusWorkspace";
 import CalendarWorkspace from "./CalendarWorkspace";
+import "./tab-interactions.css";
+import AttendanceWorkspace from "./AttendanceWorkspace";
+import AssessmentWorkspace from "./AssessmentWorkspace";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
@@ -184,6 +189,8 @@ export default function CollegePortal({
     router = useRouter(),
     root = collegeRoot(c);
   const [apiOpen, setApiOpen] = useState(false);
+  const [studentEnrollmentOpen, setStudentEnrollmentOpen] = useState(false);
+  const [studentRevision, setStudentRevision] = useState(0);
   const [reloadingRecords, setReloadingRecords] = useState(false);
   const [feeStructureId, setFeeStructureId] = useState<string | null>(null);
   const [manageModule, setManageModule] = useState<string | null>(null);
@@ -242,7 +249,7 @@ export default function CollegePortal({
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
   /** Student directory list: its filters live inside the table card (Teaching staff layout). */
-  const studentDirectory = activeModule === "students" && !detail;
+  const recordDirectory = ["students", "admissions", "attendance", "assessments"].includes(activeModule) && !detail;
   const [confirmation, setConfirmation] = useState<DrawerAction | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const [preferencesReady, setPreferencesReady] = useState(false);
@@ -1152,6 +1159,10 @@ export default function CollegePortal({
     ];
   }
   function application() {
+    if (activeModule === "admissions" && !detail) {
+      window.dispatchEvent(new Event("edunexa:new-application"));
+      return;
+    }
     form("New admission application", "admission.create", [
       field("name", "Student name"),
       field("email", "Fictional email", "email"),
@@ -1176,6 +1187,10 @@ export default function CollegePortal({
     ]);
   }
   function studentForm(st?: Student) {
+    if (!st) {
+      setStudentEnrollmentOpen(true);
+      return;
+    }
     form(
       st ? "Edit student" : "Add student",
       "student.save",
@@ -1348,6 +1363,8 @@ export default function CollegePortal({
       ),
     );
   function content() {
+    if (activeModule === "assessments") return <AssessmentWorkspace />;
+    if (activeModule === "attendance") return <AttendanceWorkspace />;
     if (activeModule === "assignments") return <AssignmentWorkspace />;
     if (activeModule === "syllabus") return <SyllabusWorkspace />;
     if (activeModule === "calendar") return <CalendarWorkspace />;
@@ -1555,106 +1572,9 @@ export default function CollegePortal({
         </>
       );
     }
-    if (activeModule === "students")
-      return (
-        <>
-          {heading(
-            "Student directory",
-            "Manage the complete student lifecycle, while preserving financial history.",
-            <div className="erp-quick-actions erp-heading-actions">
-              <button
-                className="erp-primary"
-                onClick={() => {
-                  setManageModule(null);
-                  setFeeStructureId(null);
-                  setApiOpen(true);
-                }}
-              >
-                Manage {labels.students || "Students"} <Plus size={15} />
-              </button>
-              {allowed("Super Admin", "Admission Officer") &&
-                button("Add student", () => studentForm())}
-            </div>,
-          )}
-          {table(
-            "Students",
-            studentRows.map((st) => ({
-              ...st,
-              roll: st.id,
-              outstanding: balance(s, st),
-              hostel: s.allocations.some(
-                (a) => a.studentId === st.id && a.status === "Allocated",
-              )
-                ? "Allocated"
-                : "Day scholar",
-            })),
-            [
-              {
-                key: "name",
-                label: "Student name",
-                render: (r: TableRecord) => <strong>{String(r.name)}</strong>,
-              },
-              {
-                key: "courseLevel",
-                label: "Course level",
-                render: (r: TableRecord) => courseLevelLabel(r.courseLevel),
-              },
-              { key: "program", label: "Course / branch" },
-              {
-                key: "photo",
-                label: "Photo",
-                render: (r: TableRecord) => (
-                  <PersonPhoto
-                    value={(r.profile as { photo?: string } | undefined)?.photo}
-                    name={String(r.name)}
-                  />
-                ),
-              },
-              ...cols("id", "year", "date", "status", "hostel"),
-              {
-                key: "outstanding",
-                label: "Outstanding",
-                render: (r: TableRecord) => money(Number(r.outstanding)),
-              },
-            ].filter(
-              (column) => role !== "Faculty" || column.key !== "outstanding",
-            ),
-            (r) => (
-              <>
-                <Link href={`${nav("students")}/${r.id}`}>View profile</Link>
-                {allowed("Super Admin", "Admission Officer") && (
-                  <>
-                    <IconAction
-                      kind="edit"
-                      label={`Edit ${String(r.name ?? r.id)}`}
-                      onClick={() =>
-                        studentForm(s.students.find((st) => st.id === r.id))
-                      }
-                    />
-                    <button
-                      disabled={r.status === "Relieved"}
-                      onClick={() => {
-                        setConfirmation({
-                          title: "Relieve student",
-                          description:
-                            "Relieve this student? Their history will be preserved.",
-                          confirm: () => {
-                            run({ type: "student.archive", id: r.id });
-                          },
-                        });
-                      }}
-                    >
-                      Relieve
-                    </button>
-                  </>
-                )}
-              </>
-            ),
-            undefined,
-            <div className="erp-filters erp-card-filters">{filterFields}</div>,
-          )}
-        </>
-      );
+    if (activeModule === "students" || (activeModule === "admissions" && !detail))
+      return <ConnectedPortal key={`${activeModule}-${studentRevision}`} college={c} parts={parts} embedded />;
+
     if (activeModule === "admissions") {
       const a = detail
         ? s.applications.filter((x) => x.id === detail)
@@ -2799,7 +2719,7 @@ export default function CollegePortal({
         </>
       );
     if (activeModule === "settings")
-      return <ConnectedPortal college={c} parts={parts} embedded />;
+      return <ConnectedPortal key={studentRevision} college={c} parts={parts} embedded />;
     if (activeModule === "__legacy-settings")
       return (
         <>
@@ -2880,7 +2800,7 @@ export default function CollegePortal({
           </section>
         </>
       );
-    return <ConnectedPortal college={c} parts={parts} embedded />;
+    return <ConnectedPortal key={studentRevision} college={c} parts={parts} embedded />;
   }
   /** Academic year / department / date filters (top bar, or inside the Student directory card). */
   const filterFields = (
@@ -3123,7 +3043,7 @@ export default function CollegePortal({
         <main id="erp-content" className="erp-content">
           {activeModule !== "timetable" &&
             !entryScreens.includes(activeModule) &&
-            !studentDirectory && (
+            !recordDirectory && (
               <>
                 <button
                   className="erp-filter-toggle"
@@ -3176,7 +3096,7 @@ export default function CollegePortal({
           )}
           {activeModule !== "roles" &&
             activeModule !== "timetable" &&
-            !studentDirectory &&
+            !recordDirectory &&
             !entryScreens.includes(activeModule) && (
               <div className="erp-api-controls">
                 <span>College records</span>
@@ -3210,6 +3130,17 @@ export default function CollegePortal({
           {c.name} / Campus management <span>{c.name}</span>
         </footer>
       </div>
+      {studentEnrollmentOpen && (
+        <StudentEnrollmentWizard
+          college={c}
+          onClose={() => setStudentEnrollmentOpen(false)}
+          onEnrolled={() => {
+            clearWorkspaceCache();
+            setStudentRevision((revision) => revision + 1);
+            void refresh();
+          }}
+        />
+      )}
       {apiOpen && (
         <div
           className="erp-api-overlay"

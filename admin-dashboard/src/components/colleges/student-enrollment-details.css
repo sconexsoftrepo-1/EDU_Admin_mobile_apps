@@ -1,17 +1,18 @@
 dialog.edu-record-drawer {
   position: fixed;
-  inset: 10px 10px 10px auto;
+  inset: 0 0 0 auto;
   margin: 0;
   padding: 0;
   width: min(920px, calc(100vw - 48px));
   max-width: 100vw;
-  height: calc(100dvh - 20px);
-  max-height: calc(100dvh - 20px);
-  border: 1px solid #e7ddce;
-  border-radius: 22px;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  border-left: 1px solid #e7ddce;
+  border-radius: var(--edu-drawer-radius);
   background: #fcfaf6;
   color: #30251c;
-  box-shadow: 0 22px 70px #21160c30;
+  box-shadow: -24px 0 80px #21160c30;
   overflow: hidden;
 }
 dialog.edu-record-drawer-expanded {
@@ -155,7 +156,7 @@ dialog.edu-record-drawer[open] {
     border-color 150ms ease,
     background 150ms ease;
 }
-.edu-record-drawer .edu-detail-tabs button:hover,
+.edu-record-drawer .edu-detail-tabs button:hover:not(:disabled),
 .edu-connected
   .edu-record-drawer
   .edu-detail-tabs
@@ -364,11 +365,7 @@ dialog.edu-record-drawer[open] {
 @media (max-width: 680px) {
   dialog.edu-record-drawer,
   dialog.edu-record-drawer-expanded {
-    inset: 6px;
-    width: calc(100vw - 12px);
-    height: calc(100dvh - 12px);
-    max-height: calc(100dvh - 12px);
-    border-radius: 16px;
+    width: 100vw;
   }
   .edu-record-drawer-header {
     padding: 20px 18px;
@@ -560,3 +557,28 @@ dialog.edu-record-drawer[open] {
     transition: none;
   }
 }
+
+/* Keep headings and scrollable content clear of the rounded drawer edge. */
+.edu-record-drawer-header,
+.edu-record-drawer-body {
+  padding-inline: var(--edu-drawer-gutter);
+}
+
+.edu-record-drawer .edu-file-upload-form label {
+  font-size: 14.4px;
+}
+
+/* Keep selected and unselected detail-tab hover labels readable. */
+.edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled),
+.edu-connected .edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled) {
+  color: #fff;
+  background: #6b441b;
+  border-bottom-color: #6b441b;
+}
+.edu-record-drawer .edu-detail-tabs button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled),
+.edu-connected .edu-record-drawer .edu-detail-tabs button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled) {
+  color: #fff;
+  background: #4a2e12;
+  border-bottom-color: #4a2e12;
+}
+.edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled) :is(span, small, svg) { color: inherit; }

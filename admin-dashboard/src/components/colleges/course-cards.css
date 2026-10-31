@@ -688,6 +688,8 @@
   --crs-muted: #5f6f7e;
   width: min(560px, 100%);
   height: 100%;
+  border-radius: var(--edu-drawer-radius);
+  overflow: hidden;
   background: #f6f8fa;
   color: var(--crs-ink);
   display: grid;
@@ -923,8 +925,8 @@
     :hover,
     :focus-visible
   ):not(:disabled) {
-  color: #18344b;
-  background: #f4eadb;
+  color: #fff;
+  background: #6b441b;
   border-color: #b78b51;
 }
 .edu-connected .crs .crs-btn-delete:is(:hover, :focus-visible):not(:disabled) {
@@ -940,16 +942,16 @@
 .edu-connected
   .crs
   .crs-segment
-  button:not([aria-pressed="true"]):is(:hover, :focus-visible) {
-  color: #18344b;
-  background: #f4eadb;
+  button:not([aria-pressed="true"]):is(:hover, :focus-visible):not(:disabled) {
+  color: #fff;
+  background: #6b441b;
 }
 .edu-connected
   .crs
   .crs-segment
-  button[aria-pressed="true"]:is(:hover, :focus-visible) {
+  button[aria-pressed="true"]:is(:hover, :focus-visible):not(:disabled) {
   color: #fff;
-  background: #87511d;
+  background: #4a2e12;
 }
 .edu-connected
   .crs
@@ -984,13 +986,13 @@
   .edu-row-actions
   > button:not(.edu-primary):is(:hover, :focus-visible),
 .edu-course-workspace .crs-header-desktop button:is(:hover, :focus-visible) {
-  color: #18344b;
-  background: #f4eadb;
+  color: #fff;
+  background: #6b441b;
   border-color: #b78b51;
 }
 .edu-course-workspace .edu-heading .edu-primary:is(:hover, :focus-visible) {
   color: #fff;
-  background: #87511d;
+  background: #4a2e12;
   border-color: #87511d;
 }
 @media (max-width: 650px) {
@@ -1031,7 +1033,8 @@
   padding: 0;
   border: 0;
   border-left: 1px solid #e8e0d4;
-  border-radius: 16px 0 0 16px;
+  border-radius: var(--edu-drawer-radius);
+  overflow: hidden;
   color: var(--crs-ink);
   background: #faf9f6;
   box-shadow: -12px 0 48px #30201624;
@@ -1216,7 +1219,7 @@
   .crs-details-drawer
   .crs-panel-footer
   button:is(:hover, :focus-visible) {
-  background: #87511d;
+  background: #4a2e12;
   border-color: #87511d;
   color: #fff;
 }
@@ -1227,7 +1230,6 @@
 @media (max-width: 650px) {
   .college-erp .crs-details-drawer {
     width: 100vw;
-    border-radius: 0;
   }
   .college-erp .crs-details-drawer .crs-panel-head {
     padding: 20px;
@@ -1299,4 +1301,16 @@
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.crs-panel-head,
+.crs-panel-body,
+.college-erp .crs-details-drawer .crs-panel-head,
+.college-erp .crs-details-drawer .crs-panel-body,
+.college-erp .crs-details-drawer .crs-panel-footer {
+  padding-inline: var(--edu-drawer-gutter);
+}
+.edu-connected .crs .crs-segment button:is(:hover, :focus-visible):not(:disabled) > span {
+  color: #fff;
+  background: #ffffff26;
 }

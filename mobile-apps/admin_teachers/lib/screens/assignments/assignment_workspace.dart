@@ -296,6 +296,7 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
       year = '',
       section = '',
       teacher = '',
+      subject = '',
       progress = '';
   Set<String> recipients = {};
   DateTime? due;
@@ -432,6 +433,8 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
         'academic_year_code': year,
         'section_code': section.isEmpty ? null : section,
         'teacher_code': teacher,
+        'subject_code': subject.isEmpty ? null : subject,
+        'semester_number':_asRows(options?['subjects']).where((s)=>s['subject_code']==subject).firstOrNull?['semester_number'],
         'title': title.text.trim(),
         'description': description.text,
         'due_at': due!.toUtc().toIso8601String(),
@@ -537,6 +540,7 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
                 enabled: year.isNotEmpty && !loading,
               ),
               const SizedBox(height: 14),
+              if (_asRows(options?['subjects']).isNotEmpty) select('Subject / semester',_asRows(options?['subjects']).any((s)=>s['subject_code']==subject)?subject:'',_asRows(options?['subjects']).map((s)=>{...s,'code':s['subject_code'],'name':'Semester ${s['semester_number']} · ${s['name']}'}).toList(),(v)=>setState(()=>subject=v)),
               if (options?['teacher_locked'] == true)
                 InputDecorator(
                   decoration: const InputDecoration(labelText: 'Teacher'),

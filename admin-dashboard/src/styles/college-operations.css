@@ -123,6 +123,7 @@
   padding: 7px 0;
 }
 .ops-sheet {
+  border-radius: var(--edu-drawer-radius);
   position: fixed;
   inset: 0 0 0 auto;
   margin: 0;
@@ -660,6 +661,7 @@
   font-size: 11px;
 }
 .erp-pdf-preview {
+  border-radius: var(--edu-drawer-radius);
   --erp-ink: #251e18;
   --erp-surface: #fcf9f3;
   --erp-border: #e9dfcf;
@@ -853,4 +855,16 @@
   font-weight: 600;
   letter-spacing: normal;
   text-decoration: none;
+}
+
+.ops-sheet header,
+.ops-sheet-body,
+.ops-sheet footer,
+.erp-pdf-preview header {
+  padding-inline: var(--edu-drawer-gutter);
+}
+
+.ops-sheet .ops-fields label > span,
+.erp-pdf-preview .erp-pdf-page-controls label {
+  font-size: 14.4px;
 }

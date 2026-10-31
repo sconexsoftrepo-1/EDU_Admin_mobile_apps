@@ -18,6 +18,8 @@ part '../screens/workspace/mobile_workspace.dart';
 part '../screens/assignments/assignment_workspace.dart';
 part '../screens/syllabus/syllabus_workspace.dart';
 part '../screens/calendar/calendar_workspace.dart';
+part '../screens/attendance/attendance_workspace.dart';
+part '../screens/assessments/assessment_workspace.dart';
 part '../components/workspace/record_helpers.dart';
 part '../screens/certificates/certificate_workspace.dart';
 part '../components/workspace/widgets.dart';
@@ -752,6 +754,7 @@ IconData moduleIcon(String key) => switch (key) {
   'collections' => Icons.account_balance_wallet_outlined,
   'attendance' => Icons.fact_check_outlined,
   'assignments' || 'submissions' => Icons.assignment_outlined,
+  'assessments' => Icons.quiz_outlined,
   'results' => Icons.quiz_outlined,
   'messages' => Icons.chat_bubble_outline,
   'notifications' || 'announcements' => Icons.notifications_outlined,

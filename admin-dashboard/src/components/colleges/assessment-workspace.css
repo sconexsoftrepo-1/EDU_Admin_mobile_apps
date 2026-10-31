@@ -1,0 +1,172 @@
+.assessment-workspace {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.assessment-toolbar,
+.assessment-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.assessment-toolbar h2 {
+  margin: 0;
+  flex: 1;
+}
+.assessment-tabs button[aria-selected="true"] {
+  background: var(--edu-primary, #8f591f);
+  color: white;
+}
+.assessment-performance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.assessment-performance > div {
+  background: white;
+  border: 1px solid #e9e1d5;
+  border-radius: 16px;
+  padding: 18px 24px;
+  min-width: 180px;
+}
+.assessment-performance strong {
+  display: block;
+  font-size: 28px;
+}
+.assessment-table {
+  overflow: auto;
+  background: white;
+  border: 1px solid #e9e1d5;
+  border-radius: 16px;
+}
+.assessment-table table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+.assessment-table th,
+.assessment-table td {
+  text-align: left;
+  padding: 16px;
+  border-bottom: 1px solid #eee7dd;
+}
+.assessment-table th {
+  background: #f7f3ec;
+}
+.assessment-form {
+  display: grid;
+  gap: 24px;
+  padding: 28px clamp(20px, 3vw, 44px);
+  min-width: 0;
+}
+.assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.assessment-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  min-width: 0;
+}
+.assessment-form input,
+.assessment-form select,
+.assessment-form textarea {
+  font: inherit;
+  padding: 12px 14px;
+  border: 1px solid #ddd4c7;
+  border-radius: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  background: white;
+}
+.assessment-form textarea {
+  min-height: 110px;
+}
+.assessment-form fieldset {
+  border: 1px solid #e5ded3;
+  border-radius: 14px;
+  padding: 22px;
+  min-width: 0;
+}
+.assessment-form p {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.assessment-curriculum {
+  display: grid;
+  gap: 16px;
+}
+.assessment-curriculum > div {
+  padding: 14px;
+  background: #f8f5ef;
+  border-radius: 10px;
+}
+.assessment-curriculum span {
+  margin-left: 16px;
+  color: #687385;
+}
+.assessment-files {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.assessment-files button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.assessment-marks input[type="number"] {
+  min-width: 100px;
+  width: 110px;
+}
+.assessment-marks textarea {
+  min-width: 160px;
+}
+.assessment-form footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 16px 0;
+}
+.assessment-workspace button,
+.assessment-form button {
+  min-height: 40px;
+}
+.assessment-workspace .edu-search-field {
+  min-width: 230px;
+  flex: 1;
+}
+@media (max-width: 650px) {
+  .assessment-grid {
+    grid-template-columns: 1fr;
+  }
+  .assessment-toolbar {
+    align-items: stretch;
+  }
+  .assessment-toolbar h2 {
+    flex-basis: 100%;
+  }
+  .assessment-form {
+    padding: 22px 18px;
+  }
+  .assessment-form fieldset {
+    padding: 16px;
+  }
+  .assessment-performance > div {
+    min-width: 0;
+    flex: 1;
+  }
+  .assessment-performance strong {
+    font-size: 24px;
+  }
+}

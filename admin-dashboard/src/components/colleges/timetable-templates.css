@@ -849,3 +849,8 @@
     text-align: left;
   }
 }
+
+.ops-sheet .tt-create-fields label,
+.edu-record-drawer .tt-create-fields label {
+  font-size: 14.4px;
+}

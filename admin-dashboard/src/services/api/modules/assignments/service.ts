@@ -20,6 +20,9 @@ export interface Submission {
   attachments: AssignmentFile[];
 }
 export interface Assignment {
+  subject_code?: string;
+  subject_name?: string;
+  semester_number?: number;
   code: string;
   title: string;
   description: string;
@@ -65,6 +68,12 @@ export interface AssignmentList {
   students: { code: string; name: string }[];
 }
 export interface AssignmentOptions {
+  subjects?: {
+    subject_code: string;
+    name: string;
+    semester_number: number;
+    subject_type: string;
+  }[];
   courses: { code: string; name: string; course_level: string }[];
   academic_years: { code: string; name: string; program_code: string }[];
   teachers: { code: string; name: string }[];

@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import { useState, type ChangeEvent, type SyntheticEvent } from "react";
 import Image from "next/image";
 import { Camera, CheckCircle2, ArrowDown } from "lucide-react";
@@ -275,12 +276,12 @@ export default function ERPFormFields({
                     </label>
                     {f.key === "studentId" && (
                       <div className="erp-student-picker-search">
-                        <input
-                          type="search"
+                        <SearchField
                           aria-label="Find student by name or roll number"
                           placeholder="Find a student by name or roll number"
                           value={studentQuery}
-                          onChange={(e) => setStudentQuery(e.target.value)}
+                          onValueChange={setStudentQuery}
+                          suggestions={searchValues(state.students, ["name", "id"])}
                         />
                         <small>
                           The selected student remains in the list while you

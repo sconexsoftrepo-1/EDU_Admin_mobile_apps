@@ -26,6 +26,7 @@ SCREENS = {
         ("collections", "Collections and receipts", "payments"),
         ("expenses", "Expenditures", "expenses"),
         ("employees", "Employees", "employees"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Assignments and review", "assignments"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
@@ -43,6 +44,7 @@ SCREENS = {
         ("leave", "Student leave", "student_leave_requests"),
         ("results", "Exam results", "exam_results"),
         ("timetable", "Timetable", "timetable_slots"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Assignments and performance", "assignments"),
         ("syllabus", "Syllabus and resources", "learning_resources"),
         ("certificates", "Certificates", "certificates"),
@@ -57,6 +59,7 @@ SCREENS = {
         ("profile", "My profile", "profile"),
         ("timetable", "Timetable", "timetable_slots"),
         ("attendance", "Attendance", "student_attendance"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Assignments and submissions", "assignments"),
         ("syllabus", "Syllabus and resources", "learning_resources"),
         ("results", "Exam results", "exam_results"),
@@ -77,6 +80,7 @@ SCREENS = {
         ("classes", "Assigned classes", "subject_offerings"),
         ("timetable", "Timetable and period swap", "timetable_slots"),
         ("attendance", "Attendance entry", "student_attendance"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Homework and assignments", "assignments"),
         ("submissions", "Submissions and grading", "assignment_submissions"),
         ("syllabus", "Syllabus progress and resources", "learning_resources"),
@@ -457,6 +461,10 @@ def screen_data(
     if screen not in definitions:
         raise HTTPException(404, "Screen not available")
     data = request.app.state.store.snapshot()
+    if screen == "assessments":
+        from app.core.assessment_workspace import listing as assessment_listing
+        result = assessment_listing(request, student_code, user)
+        return {"screen":screen,"title":"Assessments","items":result["items"][offset:offset+limit],"total":len(result["items"]),"students":result["students"],"actions":[],"lookups":{},"summary":result["performance"],"selected_student_code":student_code}
     context = active_context(data, user, student_code)
     title, table = definitions[screen]
     selected = context["student"]
@@ -673,6 +681,12 @@ def screen_data(
                 items.append({"code": submission["code"], "title": assignment["title"], "assessment_type": "assignment",
                               "marks_obtained": submission["marks"], "marks": submission["marks"], "subject": assignment["title"], "max_marks": assignment["max_marks"],
                               "feedback": submission.get("feedback"), "reviewed_at": submission.get("reviewed_at")})
+    if table == "exam_results" and user.get("person_type") in {"student", "parent"}:
+        from app.core.assessment_workspace import listing as assessment_listing
+        for assessment in assessment_listing(request, student_code, user)["items"]:
+            for student, mark in assessment["marks"].items():
+                if mark.get("marks") is not None or mark.get("absent"):
+                    items.append({"code":assessment["code"]+"-"+student,"student_code":student,"title":assessment["title"],"assessment_type":"assessment","subject":assessment["subject_name"],"marks_obtained":mark.get("marks"),"marks":mark.get("marks"),"max_marks":assessment["max_marks"],"absent":mark.get("absent"),"feedback":mark.get("feedback"),"reviewed_at":mark.get("reviewed_at")})
     if table == "calendar_events":
         if from_date and to_date and (to_date < from_date or (to_date - from_date).days > 366):
             raise HTTPException(422, "Choose a calendar range of up to one year")

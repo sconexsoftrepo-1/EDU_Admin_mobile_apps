@@ -422,3 +422,18 @@
     min-height: 100vh;
   }
 }
+
+.erp-api-drawer .adm-create-form label {
+  font-size: 13.2px;
+}
+
+/* Application content keeps the shared drawer gutter without double padding. */
+.adm-application-drawer .edu-record-drawer-body {
+  padding: 0;
+}
+.adm-application-drawer .adm-create-form {
+  padding: 24px var(--edu-drawer-gutter);
+}
+.adm-application-drawer .adm-create-form label {
+  font-size: 13.2px;
+}

@@ -1,6 +1,7 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { BookOpen, Download, FileText, Plus, Search } from "lucide-react";
+import { BookOpen, Download, FileText, Plus } from "lucide-react";
 import SideDrawer from "./SideDrawer";
 import { useOptionalCollege } from "./CollegeStore";
 import { ApiError, errorText } from "@/services/api";
@@ -71,7 +72,7 @@ export default function SyllabusWorkspace({ studentCode }: { studentCode?: strin
     <header className="as-header"><div><span className="as-eyebrow">ACADEMIC LIBRARY</span><h1>Syllabus &amp; resources</h1><p>Publish course materials to the right academic year. Students and parents can preview and download every file.</p></div>{canCreate && <WorkspacePrimaryAction onClick={openComposer}><Plus size={17}/> Add shared resource</WorkspacePrimaryAction>}</header>
     <section className="as-metrics"><div><BookOpen/><span><b>{data?.items.length || 0}</b><small>Shared resources</small></span></div><div><FileText/><span><b>{data?.items.reduce((n, row) => n + row.attachments.length, 0) || 0}</b><small>Files available</small></span></div></section>
     {data?.role === "parent" && data.students.length > 1 && <label className="as-parent-select">Student<select value={child} onChange={(e) => { setChild(e.target.value); void load(e.target.value); }}><option value="">Choose a student</option>{data.students.map((student) => <option key={student.code} value={student.code}>{student.name}</option>)}</select></label>}
-    <div className="as-toolbar"><label><Search size={16}/><input placeholder="Search syllabus and files" value={search} onChange={(e) => setSearch(e.target.value)}/></label><button type="button" onClick={() => void load()} disabled={busy}>Refresh</button></div>
+    <div className="as-toolbar"><SearchField placeholder="Search syllabus and files" value={search} onValueChange={setSearch} suggestions={searchValues(data?.items || [], ["syllabus_name", "course_name", "specialization", "batch_name"])} /><button type="button" onClick={() => void load()} disabled={busy}>Refresh</button></div>
     {error && <div className="as-alert" role="status">{error}<button onClick={() => void load()}>Retry</button></div>}
     {busy && <div className="as-empty">Loading shared resources…</div>}
     {!busy && !error && items.length === 0 && <div className="as-empty"><BookOpen/><h2>No shared resources yet</h2><p>Published syllabus and course materials for your academic year will appear here.</p></div>}

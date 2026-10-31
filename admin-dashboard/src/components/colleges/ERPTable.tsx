@@ -1,5 +1,7 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import PDFActions from "./PDFActions";
+import IconAction from "./IconAction";
 import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
 import { Download, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -146,18 +148,13 @@ export default function ERPTable({
         </div>
       )}
       <div className="erp-table-tools">
-        <label className="erp-search">
-          <Search size={16} />
-          <input
-            aria-label={`Search ${title}`}
-            placeholder={`Search ${title.toLowerCase()}…`}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setPage(0);
-            }}
-          />
-        </label>
+        <SearchField
+          aria-label={`Search ${title}`}
+          placeholder={`Search ${title.toLowerCase()}…`}
+          value={query}
+          onValueChange={(value) => { setQuery(value); setPage(0); }}
+          suggestions={searchValues(rows)}
+        />
         <select
           aria-label="Status filter"
           value={status}
@@ -318,14 +315,14 @@ export default function ERPTable({
                   ))}
                 <td data-label="Actions">
                   <div className="erp-row-actions">
-                    <button
+                    <IconAction
+                      kind="info"
+                      label={`View details for ${String(r.name || r.id)}`}
                       onClick={() => {
                         setDetailId(r.id);
                         detailDialog.current?.showModal();
                       }}
-                    >
-                      View details
-                    </button>
+                    />
                     {actions?.(r)}
                   </div>
                 </td>

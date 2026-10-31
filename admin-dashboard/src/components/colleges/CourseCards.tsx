@@ -1,8 +1,11 @@
 "use client";
+import IconAction from "./IconAction";
+import SearchField, { searchValues } from "./SearchField";
 /** Compact, API-backed course catalog. Filtering state is shared by cards and table views. */
 import { useEffect, useRef, useState } from "react";
+import CourseCurriculum from "./CourseCurriculum";
 import {
-  ArrowRight,
+  Info,
   CalendarDays,
   Check,
   Clock3,
@@ -132,6 +135,7 @@ export default function CourseCards({
   onEdit: (row: Row) => void;
   onDelete: (row: Row) => Promise<void>;
 }) {
+  const [curriculumCourse, setCurriculumCourse] = useState<Row | null>(null);
   const [level, setLevel] = useState<"intermediate" | "degree">("intermediate");
   const [groupBy, setGroupBy] = useState<GroupBy>("years");
   const [active, setActive] = useState("");
@@ -368,6 +372,9 @@ export default function CourseCards({
       );
     return (
       <>
+        <button className="crs-btn" onClick={() => setCurriculumCourse(row)}>
+          Subjects & labs
+        </button>
         {canEdit && (
           <button
             className="crs-btn crs-btn-edit"
@@ -395,23 +402,35 @@ export default function CourseCards({
           title="View details"
           onClick={() => setInsights(row)}
         >
-          <ArrowRight size={19} />
+          <Info size={17} />
         </button>
       </>
     );
   }
   return (
     <div className="crs">
+      {curriculumCourse && (
+        <CourseCurriculum
+          program={text(curriculumCourse.code)}
+          name={text(curriculumCourse.name)}
+          semesters={Number(curriculumCourse.duration_semesters) || 4}
+          canEdit={canEdit}
+          onClose={() => setCurriculumCourse(null)}
+        />
+      )}
       <div className="crs-filters">
-        <div className="crs-search">
-          <Search size={18} />
-          <input
-            aria-label="Search courses"
-            placeholder="Search by course name or code…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        <SearchField
+          aria-label="Search courses"
+          placeholder="Search by course name or code…"
+          value={search}
+          onValueChange={setSearch}
+          suggestions={searchValues(base, [
+            "name",
+            "code",
+            "branch",
+            "qualification",
+          ])}
+        />
         <div className="crs-desktop-filters">{filters()}</div>
         <button className="crs-reset" onClick={reset}>
           <RotateCcw size={16} /> Reset
@@ -566,14 +585,14 @@ export default function CourseCards({
                                 role="group"
                                 aria-label="Course actions"
                               >
-                                <button
+                                <IconAction
+                                  kind="info"
+                                  label={`View details for ${text(row.name)}`}
                                   onClick={() => {
                                     setInsights(row);
                                     setMenu("");
                                   }}
-                                >
-                                  View details
-                                </button>
+                                />
                                 {canEdit && (
                                   <button
                                     onClick={() => {

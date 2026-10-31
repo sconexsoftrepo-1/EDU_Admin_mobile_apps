@@ -218,6 +218,9 @@ class ResourceService:
         ensure_references(data, self.table, record)
         self.business_validation(data, record)
         self.repo.save(data, record)
+        if self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
+            from .curriculum_workspace import insert, starter
+            insert(data, record, starter(record), generated=True)
         audit(data, actor, "create", self.table, record["code"])
         return record
 
@@ -500,6 +503,14 @@ class ResourceService:
                 409, "Retained record; update status or use a workflow instead"
             )
         self.repo.get(data, code)
+        if self.table == "programs" and code in data.get("documents", {}).get("course_curricula", {}):
+            if any(a["program_code"] == code for a in data.get("documents", {}).get("assessments", {}).values()):
+                raise HTTPException(409, "This course has assessments")
+            # Course-owned plans should not prevent deleting an otherwise unused course.
+            links = data["records"].get("curriculum_subjects", {})
+            for key in [k for k, value in links.items() if value["program_code"] == code]:
+                del links[key]
+            data["documents"]["course_curricula"].pop(code, None)
         if hasattr(self.repo, "referenced_by"):  # screen modules check with their own SQL
             table = self.repo.referenced_by(data, code)
             if table:

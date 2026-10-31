@@ -14,6 +14,9 @@ from app.core.timetable_templates import router as timetable_templates_router
 from app.core.assignment_workspace import router as assignment_workspace_router
 from app.core.syllabus_workspace import router as syllabus_workspace_router
 from app.core.calendar_workspace import router as calendar_workspace_router
+from app.core.assessment_workspace import router as assessment_workspace_router
+from app.core.curriculum_workspace import router as curriculum_workspace_router
+from app.core.attendance_workspace import router as attendance_workspace_router
 from app.core.certificate_workspace import router as certificate_workspace_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
@@ -152,6 +155,9 @@ def create_app(settings=None):
 
     for router in [
         calendar_workspace_router,
+        assessment_workspace_router,
+        curriculum_workspace_router,
+        attendance_workspace_router,
         certificate_workspace_router,
         syllabus_workspace_router,
         auth_api.router,

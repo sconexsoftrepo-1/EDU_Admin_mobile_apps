@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 
 import {
   useCallback,
@@ -8,7 +9,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Info, Plus, RefreshCw, Search, UserRoundCheck } from "lucide-react";
+import { Info, Plus, RefreshCw, UserRoundCheck } from "lucide-react";
 import type { College } from "@/data/colleges";
 import {
   api,
@@ -29,6 +30,8 @@ type Props = {
   canCreate: boolean;
   canConvert: boolean;
 };
+const isPlatformReference = (value: unknown) =>
+  ["social_media", "advertising"].includes(String(value));
 const admissionSnapshots = new Map<string, { rows: Row[]; lookups: Lookups; savedAt: number }>();
 const text = (value: unknown) =>
   value == null || value === "" ? "—" : String(value);
@@ -53,7 +56,7 @@ export default function AdmissionWorkspace({
   const snapshot = admissionSnapshots.get(path);
   const cached = snapshot && Date.now() - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
   const hasCachedData = useRef(Boolean(cached));
-  const [tab, setTab] = useState<"manage" | "create">("create");
+  const [creating, setCreating] = useState(false);
   const [rows, setRows] = useState<Row[]>(cached?.rows || []);
   const [lookups, setLookups] = useState<Lookups | null>(cached?.lookups || null);
   const [loading, setLoading] = useState(!cached);
@@ -67,9 +70,17 @@ export default function AdmissionWorkspace({
   const [programCode, setProgramCode] = useState("");
   const [referenceType, setReferenceType] = useState("walk_in");
   const [employeeCode, setEmployeeCode] = useState("");
+  const platformReference = isPlatformReference(referenceType);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [formError, setFormError] = useState("");
+
+  useEffect(() => {
+    if (!canCreate) return;
+    const open = () => { setFormError(""); setCreating(true); };
+    window.addEventListener("edunexa:new-application", open);
+    return () => window.removeEventListener("edunexa:new-application", open);
+  }, [canCreate]);
 
   const load = useCallback(async () => {
     if (!hasCachedData.current) setLoading(true);
@@ -134,6 +145,7 @@ export default function AdmissionWorkspace({
     const employee = lookups.employees.find(
       (item) => item.value === employeeCode,
     );
+    const referenceMobile = platformReference ? null : value("reference_mobile") || null;
     const follow = value("next_follow_up_at");
     const consent = form.get("communication_consent") === "on";
     setSaving(true);
@@ -149,7 +161,7 @@ export default function AdmissionWorkspace({
         parent_phone: value("second_phone") || null,
         assigned_employee_code: employeeCode || null,
         referrer_name: employee?.label || value("reference_name") || null,
-        campaign_reference: value("reference_mobile") || null,
+        campaign_reference: referenceMobile,
         status: "new",
         next_follow_up_at: follow ? new Date(follow).toISOString() : null,
         communication_consent: consent,
@@ -168,14 +180,14 @@ export default function AdmissionWorkspace({
         },
         reference_type: referenceType,
         reference_name: employee?.label || value("reference_name") || null,
-        reference_mobile: value("reference_mobile") || null,
+        reference_mobile: referenceMobile,
       });
       target.reset();
       setProgramCode("");
       setEmployeeCode("");
       setReferenceType("walk_in");
       setSuccess("Admission enquiry saved.");
-      setTab("manage");
+      setCreating(false);
       await load();
     } catch (e) {
       setFormError(errorText(e));
@@ -206,7 +218,7 @@ export default function AdmissionWorkspace({
       <header className="adm-heading">
         <div>
           <p>Admissions office</p>
-          <h1>Manage admission &amp; new application</h1>
+          <h1>Admissions</h1>
           <span>
             Capture enquiries, follow up, and continue into student enrollment.
           </span>
@@ -222,10 +234,10 @@ export default function AdmissionWorkspace({
           </button>
           <WorkspacePrimaryAction
             disabled={!canCreate}
-            onClick={() => setTab((current) => current === "create" ? "manage" : "create")}
-            title={tab === "create" ? "View admission enquiries" : "Create an application"}
+            onClick={() => { setFormError(""); setCreating(true); }}
+            title="Create an application"
           >
-            {tab === "create" ? <><Info size={16} /> Manage admissions <span>{rows.length}</span></> : <><Plus size={16} /> New application</>}
+            <Plus size={16} /> New application
           </WorkspacePrimaryAction>
         </div>
       </header>
@@ -241,8 +253,7 @@ export default function AdmissionWorkspace({
           <button onClick={() => setSuccess("")}>Dismiss</button>
         </div>
       )}
-      {tab === "manage" ? (
-        <div className="adm-list-panel">
+      <div className="adm-list-panel">
           <div className="adm-list-toolbar">
             <div>
               <h2>Admission enquiries</h2>
@@ -251,21 +262,13 @@ export default function AdmissionWorkspace({
                 enrollment.
               </p>
             </div>
-            <label className="adm-search">
-              <Search size={16} />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search applicants"
-              />
-            </label>
+            <SearchField
+              placeholder="Search applicants"
+              value={query}
+              onValueChange={setQuery}
+              suggestions={searchValues(rows, ["first_name", "last_name", "phone", "email", "program_code"])}
+            />
           </div>
-          {loading && <div className="adm-loading">Loading enquiries…</div>}
-          {!loading && visible.length === 0 && (
-            <div className="adm-empty">
-              No admission enquiries yet. Use “New application” to add one.
-            </div>
-          )}
           <div className="adm-table-wrap">
             <table>
               <thead>
@@ -279,6 +282,19 @@ export default function AdmissionWorkspace({
                 </tr>
               </thead>
               <tbody>
+                {(loading || visible.length === 0) && (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="adm-empty" role="status">
+                        {loading
+                          ? "Loading enquiries…"
+                          : query.trim()
+                            ? "No matching applicants. Try another name, phone number or email."
+                            : "No admission enquiries yet. Use “New application” to add one."}
+                      </div>
+                    </td>
+                  </tr>
+                )}
                 {visible.map((row) => (
                   <tr key={String(row.code)}>
                     <td>
@@ -333,7 +349,13 @@ export default function AdmissionWorkspace({
             </table>
           </div>
         </div>
-      ) : (
+      {creating && (
+        <SideDrawer
+          title="New application"
+          subtitle="Capture applicant, guardian, course and follow-up details."
+          className="adm-application-drawer"
+          onClose={() => { if (!saving) setCreating(false); }}
+        >
         <form className="adm-create-form" onSubmit={create}>
           <div className="adm-form-title">
             <div>
@@ -513,13 +535,19 @@ export default function AdmissionWorkspace({
                 referenceType !== "walk_in" && (
                   <>
                     <label>
-                      Reference name
-                      <input name="reference_name" />
+                      {platformReference ? "Platform name" : "Reference name"}
+                      <input
+                        key={referenceType}
+                        name="reference_name"
+                        placeholder={platformReference ? "e.g. Instagram, Facebook, Google Ads" : undefined}
+                      />
                     </label>
-                    <label>
-                      Reference mobile
-                      <input name="reference_mobile" type="tel" />
-                    </label>
+                    {!platformReference && (
+                      <label>
+                        Reference mobile
+                        <input name="reference_mobile" type="tel" />
+                      </label>
+                    )}
                   </>
                 )
               )}
@@ -556,6 +584,7 @@ export default function AdmissionWorkspace({
             </button>
           </footer>
         </form>
+        </SideDrawer>
       )}
       {detail && (
         <SideDrawer
@@ -588,12 +617,14 @@ export default function AdmissionWorkspace({
               State: text(detailAddress.state),
               "PIN code": text(detailAddress.postal_code),
               Reference: nice(detail.reference_type),
-              "Reference name": text(
+              [isPlatformReference(detail.reference_type) ? "Platform name" : "Reference name"]: text(
                 detail.reference_name || detail.referrer_name,
               ),
-              "Reference mobile": text(
-                detail.reference_mobile || detail.campaign_reference,
-              ),
+              ...(!isPlatformReference(detail.reference_type) ? {
+                "Reference mobile": text(
+                  detail.reference_mobile || detail.campaign_reference,
+                ),
+              } : {}),
               Status: nice(detail.workflow_status || detail.status),
               "Next follow up": dateTime(detail.next_follow_up_at),
               "Communication consent": detail.communication_consent

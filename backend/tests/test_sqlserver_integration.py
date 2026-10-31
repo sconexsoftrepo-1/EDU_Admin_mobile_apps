@@ -24,7 +24,7 @@ def test_sqlserver_login_courses_refresh_and_logout(tmp_path):
     admin = connect(settings)
     admin.autocommit = True
     raw = admin.raw.cursor()
-    tables = ['institutions','campuses','departments','programs','batches','users','roles','permissions',
+    tables = ['institutions','campuses','departments','programs','subjects','curriculum_subjects','batches','users','roles','permissions',
         'user_roles','role_permissions','refresh_tokens','login_attempts','audit_logs',
         'record_extras','form_definitions','form_submissions','admission_sources']
     store = None
