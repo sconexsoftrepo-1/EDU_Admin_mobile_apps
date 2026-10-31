@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
 import {
   useCallback,
@@ -351,7 +352,7 @@ export default function AssignmentWorkspace({
         )}
       </div>
       {busy && !data ? (
-        <p role="status">Loading assignments…</p>
+        <WorkspaceSkeleton compact label="Loading assignments" />
       ) : (
         <div className="as-register">
           {!items.length && (
@@ -724,7 +725,7 @@ function AssignmentCreate({
                 </label>
               </header>
               {loading ? (
-                <p role="status">Loading eligible students…</p>
+                <WorkspaceSkeleton compact label="Loading eligible students" />
               ) : !options?.students.length ? (
                 <p>
                   No active students are enrolled in this batch or selected

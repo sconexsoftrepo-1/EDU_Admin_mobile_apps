@@ -76,7 +76,7 @@ def populate(data,password):
     credentials=[]
     def account(code,login,role,kind,person,name,details):
         if login.casefold() in existing_logins:raise ValueError('A requested demo login already exists; existing accounts are never replaced')
-        clients=['admin-web',{'employee':'teacher-mobile' if role==PREFIX+'TEACH' else 'admin-mobile','student':'student-mobile','parent':'parent-mobile'}[kind]]
+        clients=(["admin-web", "teacher-mobile" if role==PREFIX+'TEACH' else "admin-mobile"] if kind=='employee' else ["student-mobile" if kind=='student' else "parent-mobile"])
         data['accounts'][code]={'code':code,'login_id':login,'password_hash':hasher.hash(password),'active':True,'person_type':kind,'person_code':person,'role_codes':[role],'clients':clients,'demo_run':RUN}
         existing_logins.add(login.casefold())
         credentials.append({'login':login,'name':name,'role':role,'person_code':person,**details})

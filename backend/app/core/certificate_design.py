@@ -18,7 +18,7 @@ FORMATS={
 }
 
 
-def render(title,student,kind,enrollment,data,code,issued,verify_url,issuer=None,academic_year_code=None):
+def render(title,student,kind,enrollment,data,code,issued,verify_url,issuer=None,academic_year_code=None,preview=False):
     def rows(table):return list(data['records'].get(table,{}).values())
     def get(table,key):return data['records'].get(table,{}).get(key,{})
     def name(p):return ' '.join(str(p.get(k) or '').strip() for k in ('first_name','middle_name','last_name')).strip()
@@ -105,6 +105,9 @@ def render(title,student,kind,enrollment,data,code,issued,verify_url,issuer=None
     from reportlab.graphics.barcode import qr
     from reportlab.graphics.shapes import Drawing
     from reportlab.graphics import renderPDF
+    if preview:
+        text('PREVIEW - NOT ISSUED',46,9,'Helvetica-Bold',accent)
+        c.save();return out.getvalue()
     mark=qr.QrCodeWidget(verify_url);bounds=mark.getBounds();size=28
     drawing=Drawing(size,size,transform=[size/(bounds[2]-bounds[0]),0,0,size/(bounds[3]-bounds[1]),0,0]);drawing.add(mark);renderPDF.draw(drawing,c,margin,32)
     text('Verify authenticity using the QR code or secure verification link',46,5.8 if compact else 7)

@@ -532,8 +532,9 @@ export default function ConnectedPortal({
       .signInRoles()
       .then(({ roles: list }) => {
         if (!active) return;
-        setSignInRoles(list);
-        setSignInRole((old) => old || list[0]?.code || "");
+        const webRoles = list.filter(role => role.scope !== "self");
+        setSignInRoles(webRoles);
+        setSignInRole((old) => webRoles.some(role => role.code === old) ? old : webRoles[0]?.code || "");
       })
       .catch(() => undefined);
     return () => {

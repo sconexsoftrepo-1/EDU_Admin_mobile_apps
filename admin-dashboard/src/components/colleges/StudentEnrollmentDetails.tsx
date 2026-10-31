@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 
 import { useEffect, useState } from "react";
 import { Pencil, UserRound } from "lucide-react";
@@ -7,6 +8,7 @@ import { headerLabel } from "@/lib/colleges/export-table";
 import { formatDate } from "./DateInput";
 import SideDrawer from "./SideDrawer";
 import { PersonFileList } from "./PersonFiles";
+import PersonLoginManagement from "./PersonLoginManagement";
 import RecordDetailTabs from "./RecordDetailTabs";
 import StudentAssignmentSummary from "./StudentAssignmentSummary";
 
@@ -110,7 +112,7 @@ export default function StudentEnrollmentDetails({
 }) {
   const [data, setData] = useState<Row | null>(null);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<"details" | "files">("details");
+  const [tab, setTab] = useState<"details" | "files" | "logins">("details");
   useEffect(() => {
     let active = true;
     api.masterData
@@ -207,7 +209,9 @@ export default function StudentEnrollmentDetails({
       )}
       {tab === "details" ? (
         <>
-          {!data && !error && <p role="status">Loading enrollment details…</p>}
+          {!data && !error && (
+            <WorkspaceSkeleton compact label="Loading enrollment details" />
+          )}
           <Section title="Student identity" value={pick(person, identity)} />
           <Section title="Contact & address" value={pick(person, contact)} />
           <Section title="Admission & registration" value={remaining} />
@@ -244,6 +248,12 @@ export default function StudentEnrollmentDetails({
             personCode={String(person.code)}
           />
         </>
+      ) : tab === "logins" ? (
+        <PersonLoginManagement
+          key={String(person.code)}
+          personType="student"
+          personCode={String(person.code)}
+        />
       ) : (
         <PersonFileList personKind="student" personCode={String(person.code)} />
       )}

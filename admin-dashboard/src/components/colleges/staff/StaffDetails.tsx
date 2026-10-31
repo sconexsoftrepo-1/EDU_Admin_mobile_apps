@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "../WorkspaceSkeleton";
 
 import { useEffect, useState } from "react";
 import { Pencil, UserRound } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 import SideDrawer from "../SideDrawer";
 import { RegisteredValues } from "../StudentEnrollmentDetails";
 import { PersonFileList } from "../PersonFiles";
+import PersonLoginManagement from "../PersonLoginManagement";
 import RecordDetailTabs from "../RecordDetailTabs";
 
 const labels = {
@@ -43,7 +45,7 @@ export default function StaffDetails({
 }) {
   const [data, setData] = useState<StaffDetail | null>(null);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<"details" | "files">("details");
+  const [tab, setTab] = useState<"details" | "files" | "logins">("details");
   useEffect(() => {
     let active = true;
     api.staff
@@ -114,7 +116,7 @@ export default function StaffDetails({
       )}
       {tab === "details" &&
         (!data ? (
-          !error && <p role="status">Loading staff details…</p>
+          !error && <WorkspaceSkeleton compact label="Loading staff details" />
         ) : (
           <>
             <Section
@@ -149,7 +151,16 @@ export default function StaffDetails({
             />
           </>
         ))}
-      <PersonFileList personKind="employee" personCode={staff.employee_id} />
+      {tab === "files" && (
+        <PersonFileList personKind="employee" personCode={staff.employee_id} />
+      )}
+      {tab === "logins" && (
+        <PersonLoginManagement
+          key={staff.employee_id}
+          personType="employee"
+          personCode={staff.employee_id}
+        />
+      )}
     </SideDrawer>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
@@ -584,7 +585,7 @@ export default function AttendanceWorkspace({
               </div>
             )}
             {busy ? (
-              <p role="status">Loading attendance…</p>
+              <WorkspaceSkeleton compact label="Loading attendance" />
             ) : (
               <div className="att-table-wrap">
                 <table>

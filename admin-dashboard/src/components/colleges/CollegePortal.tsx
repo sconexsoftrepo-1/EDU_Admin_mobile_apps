@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { api, errorText } from "@/services/api";
 import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
@@ -35,12 +36,12 @@ import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => (
-    <section className="erp-panel">Loading collection analytics…</section>
+    <WorkspaceSkeleton label="Loading collection analytics" />
   ),
 });
 const ERPInsights = dynamic(() => import("./ERPInsights"), {
   loading: () => (
-    <section className="erp-panel">Loading campus insights…</section>
+    <WorkspaceSkeleton label="Loading campus insights" />
   ),
 });
 import {

@@ -1,14 +1,14 @@
 "use client";
 
-import { FileText, FolderOpen } from "lucide-react";
+import { FileText, FolderOpen, KeyRound } from "lucide-react";
 
 export default function RecordDetailTabs({
   active,
   onChange,
   label,
 }: {
-  active: "details" | "files";
-  onChange: (tab: "details" | "files") => void;
+  active: "details" | "files" | "logins";
+  onChange: (tab: "details" | "files" | "logins") => void;
   label: string;
 }) {
   return (
@@ -30,6 +30,15 @@ export default function RecordDetailTabs({
       >
         <FolderOpen size={15} aria-hidden="true" />
         Documents & files
+      </button>
+      <button
+        type="button"
+        aria-current={active === "logins" ? "page" : undefined}
+        aria-pressed={active === "logins"}
+        onClick={() => onChange("logins")}
+      >
+        <KeyRound size={15} aria-hidden="true" />
+        Login management
       </button>
     </nav>
   );

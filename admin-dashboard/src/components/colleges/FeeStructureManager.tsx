@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 
 import { useEffect, useState, type FormEvent } from "react";
 import { ArrowLeft, Pencil, Plus, Save, Trash2 } from "lucide-react";
@@ -210,7 +211,7 @@ export default function FeeStructureManager({
       setSaving(false);
     }
   }
-  if (loading) return <p role="status">Loading course fee structures…</p>;
+  if (loading) return <WorkspaceSkeleton compact label="Loading course fee structures" />;
   if (!data)
     return (
       <p role="alert" className="edu-error">

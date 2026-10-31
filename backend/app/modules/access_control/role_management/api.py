@@ -155,12 +155,58 @@ def accounts(request: Request, user=Depends(require("accounts", "view"))):
     ]
 
 
+@router.get("/people/{person_type}/{person_code}/logins")
+def person_logins(person_type: str, person_code: str, request: Request, user=Depends(require("accounts", "view"))):
+    data = request.app.state.store.snapshot()
+    table = {"student": "students", "employee": "employees"}.get(person_type)
+    if not table or person_code not in data["records"].get(table, {}):
+        raise HTTPException(404, "Person not found")
+    people = [(person_type, data["records"][table][person_code], "Student" if person_type == "student" else "Teacher / staff")]
+    if person_type == "student":
+        seen = set()
+        for link in data["records"].get("student_parents", {}).values():
+            code = link.get("parent_code")
+            parent = data["records"].get("parents", {}).get(code)
+            if link.get("student_code") == person_code and parent and code not in seen:
+                seen.add(code)
+                people.append(("parent", parent, link.get("relationship") or "Guardian"))
+    result = []
+    for kind, person, relationship in people:
+        account = next((a for a in data["accounts"].values() if a.get("person_type") == kind and a.get("person_code") == person["code"]), None)
+        manageable = True
+        if account:
+            try:
+                valid_roles(data, account["role_codes"], user)
+            except HTTPException:
+                manageable = False
+        result.append({"person_type": kind, "person_code": person["code"], "name": " ".join(str(person.get(k) or "") for k in ("first_name", "middle_name", "last_name")).strip(), "relationship": relationship, "account": public_account(account) if account else None, "manageable": manageable})
+    grantable = []
+    for role in data["roles"].values():
+        try:
+            valid_roles(data, [role["code"]], user)
+        except HTTPException:
+            continue
+        grantable.append({"code": role["code"], "name": role["name"], "scope": role.get("scope", "college")})
+    return {"people": result, "roles": grantable, "can_create": has_permission(data, user, "accounts", "create"), "can_edit": has_permission(data, user, "accounts", "edit")}
+
+
+def personal_access(data, person_type):
+    role_code = {"student": "STUDENT", "parent": "PARENT"}.get(person_type)
+    if not role_code:
+        return None
+    role = data["roles"].get(role_code)
+    if not role or role.get("scope") != "self" or role.get("system_admin"):
+        raise HTTPException(409, "Configure the default Student and Parent self-service roles before creating mobile logins")
+    return {"role_codes": [role_code], "clients": ["student-mobile" if person_type == "student" else "parent-mobile"]}
+
+
 @router.post("/accounts", status_code=201)
 def create_account(
     body: AccountInput, request: Request, user=Depends(require("accounts", "create"))
 ):
     with request.app.state.store.transaction() as data:
-        valid_roles(data, body.role_codes, user)
+        access = personal_access(data, body.person_type)
+        valid_roles(data, access["role_codes"] if access else body.role_codes, user)
         table = {"employee": "employees", "student": "students", "parent": "parents"}[
             body.person_type
         ]
@@ -179,6 +225,7 @@ def create_account(
             raise HTTPException(409, "Person already has an account")
         account = {
             **body.model_dump(exclude={"password"}),
+            **(access or {}),
             "code": new_code("USR"),
             "active": True,
             "password_hash": hasher.hash(body.password),
@@ -204,9 +251,14 @@ def update_account(
         ):
             raise HTTPException(409, "Bootstrap account is protected")
         valid_roles(data, account["role_codes"], user)
-        if body.role_codes is not None:
+        access = personal_access(data, account["person_type"])
+        if access:
+            valid_roles(data, access["role_codes"], user)
+        elif body.role_codes is not None:
             valid_roles(data, body.role_codes, user)
-        account.update(body.model_dump(exclude_none=True))
+        if body.login_id is not None and any(a["code"] != code and a["login_id"].casefold() == body.login_id.casefold() for a in data["accounts"].values()):
+            raise HTTPException(409, "Login ID exists")
+        account.update({**body.model_dump(exclude_none=True), **(access or {})})
         revoke_user(data, code)
         audit(data, user["code"], "edit", "accounts", code)
         return public_account(account)

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "../WorkspaceSkeleton";
 /**
  * Staff onboarding form (side screen) for teaching staff, non-teaching staff and daily labour.
  * Every employee gets the next employee ID (EMP-PRA-005 ...). Teaching and non-teaching staff:
@@ -542,7 +543,7 @@ export default function StaffOnboardingForm({
         )}
 
         <div className="enw-body">
-          {loading && <p role="status">Loading staff record…</p>}
+          {loading && <WorkspaceSkeleton compact label="Loading staff record" />}
           {result ? (
             <div className="enw-success">
               <CheckCircle2 size={34} />

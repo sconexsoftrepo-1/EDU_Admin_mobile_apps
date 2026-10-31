@@ -19,7 +19,7 @@ def test_requires_authentication(client):
     assert client.get("/api/v1/academics/institutions").status_code == 401
 
 
-def test_rotation_replay_revokes_family(client):
+def test_rotation_replay_revokes_family(client, app):
     original = login(client).json()
     r = client.post(
         "/api/v1/auth/refresh",
@@ -34,6 +34,12 @@ def test_rotation_replay_revokes_family(client):
         ).status_code
         == 401
     )
+    # A short overlap intentionally supports parallel proxy refreshes. Replay
+    # outside that window must still revoke the entire session family.
+    with app.state.store.transaction() as data:
+        for session in data["sessions"].values():
+            if session.get("used"):
+                session["used_at_epoch"] = time.time() - 31
     assert (
         client.post(
             "/api/v1/auth/refresh",

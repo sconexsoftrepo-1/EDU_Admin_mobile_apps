@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
 
 import {
@@ -54,7 +55,8 @@ export default function AdmissionWorkspace({
   canConvert,
 }: Props) {
   const snapshot = admissionSnapshots.get(path);
-  const cached = snapshot && Date.now() - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
+  const [openedAt] = useState(() => Date.now());
+  const cached = snapshot && openedAt - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
   const hasCachedData = useRef(Boolean(cached));
   const [creating, setCreating] = useState(false);
   const [rows, setRows] = useState<Row[]>(cached?.rows || []);
@@ -287,7 +289,7 @@ export default function AdmissionWorkspace({
                     <td colSpan={6}>
                       <div className="adm-empty" role="status">
                         {loading
-                          ? "Loading enquiries…"
+                          ? <WorkspaceSkeleton compact label="Loading enquiries" />
                           : query.trim()
                             ? "No matching applicants. Try another name, phone number or email."
                             : "No admission enquiries yet. Use “New application” to add one."}

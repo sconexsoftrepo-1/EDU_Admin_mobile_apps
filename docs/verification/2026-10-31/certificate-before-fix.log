@@ -1,0 +1,36 @@
+/Users/sconex.ios.dev/Leads porjects/edunexa-college/backend/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+Actor type: system has employee record: False
+Starting rollback-only certificate issue with demo identity and in-memory file store
+HTTP status: 201
+Renderer/signature service passed; flushing rollback-only SQL changes
+Traceback (most recent call last):
+  File "src/pymssql/_pymssql.pyx", line 475, in pymssql._pymssql.Cursor.execute
+  File "src/pymssql/_mssql.pyx", line 1217, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1249, in pymssql._mssql.MSSQLConnection.execute_query
+  File "src/pymssql/_mssql.pyx", line 1483, in pymssql._mssql.MSSQLConnection.get_result
+  File "src/pymssql/_mssql.pyx", line 1976, in pymssql._mssql.check_cancel_and_raise
+  File "src/pymssql/_mssql.pyx", line 2022, in pymssql._mssql.raise_MSSQLDatabaseException
+pymssql._mssql.MSSQLDatabaseException: (547, b'The INSERT statement conflicted with the FOREIGN KEY constraint "certificates_issued_by_code_fkey". The conflict occurred in database "Edu Admin", table "dbo.employees", column \'code\'.DB-Lib error message 20018, severity 16:\nGeneral SQL Server error: Check messages from the SQL Server\n')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/private/tmp/repro-certificate-http-memory.py", line 38, in <module>
+    data.flush()
+    ~~~~~~~~~~^^
+  File "/Users/sconex.ios.dev/Leads porjects/edunexa-college/backend/app/core/sql_store.py", line 1187, in flush
+    cur.run()
+    ~~~~~~~^^
+  File "/Users/sconex.ios.dev/Leads porjects/edunexa-college/backend/app/core/sql_store.py", line 1256, in run
+    self.cur.execute(sql, params or None)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sconex.ios.dev/Leads porjects/edunexa-college/backend/app/core/sql_store.py", line 1228, in execute
+    return self.cur.execute(sql, params)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sconex.ios.dev/Leads porjects/edunexa-college/backend/app/core/sqlserver.py", line 61, in execute
+    self.raw.execute(query, params)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "src/pymssql/_pymssql.pyx", line 492, in pymssql._pymssql.Cursor.execute
+pymssql.exceptions.IntegrityError: (547, b'The INSERT statement conflicted with the FOREIGN KEY constraint "certificates_issued_by_code_fkey". The conflict occurred in database "Edu Admin", table "dbo.employees", column \'code\'.DB-Lib error message 20018, severity 16:\nGeneral SQL Server error: Check messages from the SQL Server\n')
+Diagnostic rolled back. No certificate or S3 object persisted.

@@ -59,6 +59,7 @@ export interface CreateAccountPayload {
 
 /** PATCH administration/accounts/{code}. */
 export interface UpdateAccountPayload {
+  login_id?: string;
   role_codes?: string[];
   clients?: ApiClient[];
   active?: boolean;

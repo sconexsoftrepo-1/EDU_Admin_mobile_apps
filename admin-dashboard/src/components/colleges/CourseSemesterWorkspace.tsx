@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   Pencil,
@@ -247,7 +248,7 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
         </p>
       )}
       {!data ? (
-        <p>{error ? "Use Refresh to retry." : "Loading semester subjects…"}</p>
+        error ? <p>Use Refresh to retry.</p> : <WorkspaceSkeleton compact label="Loading semester subjects" />
       ) : (
         <>
           <nav className="cs-tabs" role="tablist" aria-label="Course semesters">

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/services/api/client";
 import { errorText } from "@/services/api";
@@ -59,7 +60,7 @@ export default function StudentFeeSchedule({
     };
   }, [studentCode]);
   if (result?.code !== studentCode)
-    return <p role="status">Loading student fee schedule…</p>;
+    return <WorkspaceSkeleton compact label="Loading student fee schedule" />;
   if (!result.ledger)
     return <p role="alert">{result.error || "Unable to load fee schedule."}</p>;
   const { totals, course_plans = [] } = result.ledger;
