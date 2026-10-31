@@ -23,6 +23,30 @@ const collegeError = Color(0xffb64d42);
 const collegeNavy = collegeEspresso;
 const collegeBronze = collegeCaramel;
 
+/// Shared sizes, so every tile, button and bar lines up on every screen.
+abstract final class EduSizes {
+  static const double button = 52;
+  static const double compactButton = 48;
+  static const double moduleTile = 124;
+  static const double compactModuleTile = 112;
+  static const double metricTile = 128;
+  static const double navBar = 72;
+  static const double navIcon = 40;
+  static const double radius = 16;
+
+  /// [base] grown with the reader's text size, so enlarged text never clips inside a tile.
+  static double scaled(BuildContext context, double base) =>
+      base * (MediaQuery.textScalerOf(context).scale(16) / 16).clamp(1.0, 2.6);
+}
+
+/// Smooth, iOS-like scrolling everywhere; lists stay pullable for refresh even when short.
+class EduScrollBehavior extends MaterialScrollBehavior {
+  const EduScrollBehavior();
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+}
+
 ThemeData collegeTheme(Color accent) {
   final primary = accent == collegeCaramel ? collegeClayInk : collegePine;
   final scheme = ColorScheme.light(
@@ -90,9 +114,23 @@ ThemeData collegeTheme(Color accent) {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: collegeIvory,
-      selectedColor: scheme.secondaryContainer,
+      selectedColor: primary,
+      checkmarkColor: collegeIvory,
       side: const BorderSide(color: collegeLine),
-      labelStyle: const TextStyle(color: collegeEspresso, fontSize: 13),
+      // Selected chips read as clearly highlighted: filled accent with bold light text.
+      labelStyle: WidgetStateTextStyle.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? const TextStyle(
+                color: collegeIvory,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              )
+            : const TextStyle(
+                color: collegeEspresso,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
@@ -201,7 +239,7 @@ ThemeData collegeTheme(Color accent) {
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        minimumSize: const Size(48, 54),
+        minimumSize: const Size(48, EduSizes.button),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: const TextStyle(
@@ -213,8 +251,19 @@ ThemeData collegeTheme(Color accent) {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(48, 48),
+        minimumSize: const Size(48, EduSizes.button),
         side: const BorderSide(color: collegeLine),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        textStyle: const TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        minimumSize: const Size(48, EduSizes.compactButton),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
           fontFamily: 'Roboto',
@@ -225,7 +274,9 @@ ThemeData collegeTheme(Color accent) {
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll(Size(48, 50)),
+        minimumSize: const WidgetStatePropertyAll(
+          Size(48, EduSizes.compactButton),
+        ),
         visualDensity: VisualDensity.standard,
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -249,10 +300,6 @@ ThemeData collegeTheme(Color accent) {
         ),
       ),
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: collegeIvory,
-      surfaceTintColor: Colors.transparent,
-    ),
     listTileTheme: ListTileThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       selectedColor: primary,
@@ -260,18 +307,29 @@ ThemeData collegeTheme(Color accent) {
       iconColor: collegeMuted,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     ),
+    // The bar itself is drawn by EduFloatingNavBar; the selected item is its raised round icon.
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: collegeIvory,
+      backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
       elevation: 0,
-      height: 70,
-      indicatorColor: accent.withValues(alpha: 0.12),
-      labelTextStyle: const WidgetStatePropertyAll(
-        TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+      height: EduSizes.navBar,
+      indicatorColor: Colors.transparent,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      labelTextStyle: WidgetStateTextStyle.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: primary,
+              )
+            : const TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: collegeMuted,
+              ),
       ),
     ),
     dividerTheme: const DividerThemeData(color: collegeLine, space: 24),
@@ -296,7 +354,7 @@ class CollegeBrand extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'EduNexa',
+              'Edu-Pragathi',
               style: TextStyle(
                 fontFamily: 'Roboto',
                 fontSize: 23,
@@ -315,12 +373,12 @@ class CollegeBrand extends StatelessWidget {
   );
 }
 
-// Reuses the shield and mortarboard geometry of EduNexa's college crest.
+// Reuses the shield and mortarboard geometry of Edu-Pragathi's college crest.
 class CollegeCrest extends StatelessWidget {
   const CollegeCrest({super.key});
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'EduNexa college crest',
+    label: 'Edu-Pragathi college crest',
     child: const SizedBox(
       width: 40,
       height: 44,
@@ -471,10 +529,16 @@ class ModuleShortcut extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
+        child: Container(
+          // Every tile in a grid has the same height, whatever the title length.
+          height: EduSizes.scaled(
+            context,
+            compact ? EduSizes.compactModuleTile : EduSizes.moduleTile,
+          ),
           padding: EdgeInsets.all(compact ? 14 : 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
@@ -494,9 +558,10 @@ class ModuleShortcut extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   height: 1.3,
                   fontWeight: FontWeight.w600,
@@ -581,9 +646,16 @@ class EduArtwork extends StatelessWidget {
 class EduModuleIcon extends StatelessWidget {
   final IconData icon;
   final double size;
-  const EduModuleIcon({super.key, required this.icon, this.size = 24});
+  final Color? color;
+  const EduModuleIcon({
+    super.key,
+    required this.icon,
+    this.size = 24,
+    this.color,
+  });
   @override
   Widget build(BuildContext context) {
+    final tint = color ?? Theme.of(context).colorScheme.primary;
     final name = {
       Icons.home_outlined: 'dashboard',
       Icons.home_rounded: 'dashboard',
@@ -608,15 +680,12 @@ class EduModuleIcon extends StatelessWidget {
       Icons.chat_bubble_outline: 'communication',
     }[icon];
     return name == null
-        ? Icon(icon, size: size, color: Theme.of(context).colorScheme.primary)
+        ? Icon(icon, size: size, color: tint)
         : SvgPicture.asset(
             'assets/icons/$name.svg',
             width: size,
             height: size,
-            colorFilter: ColorFilter.mode(
-              Theme.of(context).colorScheme.primary,
-              BlendMode.srcIn,
-            ),
+            colorFilter: ColorFilter.mode(tint, BlendMode.srcIn),
           );
   }
 }
@@ -701,4 +770,107 @@ class EduGreeting extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// One bottom-bar destination: its icon, label and an optional unread badge.
+class EduNavItem {
+  final IconData icon;
+  final String label;
+  final int badge;
+  const EduNavItem(this.icon, this.label, {this.badge = 0});
+}
+
+/// iOS-style floating bottom bar: a rounded, raised capsule above the page edge. Each icon sits
+/// in a round chip; the selected one becomes a filled accent circle with a soft lift.
+class EduFloatingNavBar extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int>? onDestinationSelected;
+  final List<EduNavItem> items;
+  const EduFloatingNavBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    required this.items,
+  });
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    top: false,
+    minimum: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: collegeIvory,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: collegeLine),
+        boxShadow: [
+          BoxShadow(
+            color: collegeEspresso.withValues(alpha: .09),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: collegeEspresso.withValues(alpha: .05),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: NavigationBar(
+          selectedIndex: selectedIndex,
+          animationDuration: EduMotion.duration(context, EduMotion.tab),
+          onDestinationSelected: onDestinationSelected,
+          destinations: [
+            for (final item in items)
+              NavigationDestination(
+                icon: _EduNavIcon(item: item, selected: false),
+                selectedIcon: _EduNavIcon(item: item, selected: true),
+                label: item.label,
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _EduNavIcon extends StatelessWidget {
+  final EduNavItem item;
+  final bool selected;
+  const _EduNavIcon({required this.item, required this.selected});
+  @override
+  Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
+    return Badge(
+      isLabelVisible: item.badge > 0,
+      label: Text(item.badge > 99 ? '99+' : '${item.badge}'),
+      offset: const Offset(4, -2),
+      child: AnimatedContainer(
+        duration: EduMotion.duration(context, EduMotion.tab),
+        curve: Curves.easeOutCubic,
+        width: EduSizes.navIcon,
+        height: EduSizes.navIcon,
+        transform: Matrix4.translationValues(0, selected ? -2 : 0, 0),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: selected ? accent : collegeCanvas,
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: accent.withValues(alpha: .35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ]
+              : const [],
+        ),
+        alignment: Alignment.center,
+        child: EduModuleIcon(
+          icon: item.icon,
+          size: 21,
+          color: selected ? collegeIvory : collegeMuted,
+        ),
+      ),
+    );
+  }
 }

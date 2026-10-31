@@ -264,15 +264,53 @@ def add_subject(code: str, body: SubjectCreate, request: Request, user=Depends(c
 class FacultyInput(StrictModel):
     revision: int = Field(ge=0)
     academic_year_code: str
-    section_code: str
+    # Omitted for a batch with one class (or none yet): the allocation uses that class.
+    section_code: str | None = None
     subject_code: str
     teacher_code: str
     expected_teacher_code: str | None = None
 
 
+def batch_section(data, code, body, user):
+    """The class a section-less allocation belongs to.
+
+    A batch with a single section for the subject's semester uses it. A batch with no sections at
+    all gets one batch-wide section (named after the batch, not tied to a semester) so faculty can
+    be allocated; it then shows in every semester like any unlinked section.
+    """
+    year, codes, _ = aw.roster(data, body.academic_year_code, code)
+    item = next((s for s in curriculum(data, code)['items'] if s['subject_code'] == body.subject_code), None)
+    semesters = data['records'].get('semesters', {})
+    eligible = [c for c in codes
+                if not (term := semesters.get(data['records']['sections'][c].get('semester_code')))
+                or not item or term['semester_number'] == item['semester_number']]
+    if len(eligible) == 1:
+        return eligible[0]
+    if eligible:
+        raise HTTPException(422, 'Select the class section for this allocation')
+    if codes:
+        raise HTTPException(422, "No section of this batch belongs to the subject's semester; add one before allocating faculty")
+    if not has_permission(data, user, 'sections', 'create'):
+        raise HTTPException(403, 'Creating the batch section is not assigned to this role')
+    from app.modules.academics.academic_years.service import ensure_course_batch
+    from app.modules.master_data.onboarding.api import table_service
+    batch = ensure_course_batch(data, year, user['code'])
+    if not batch:
+        raise HTTPException(422, 'Link this academic batch to a course batch before allocating faculty')
+    section = table_service('sections').create(
+        data, {'code': new_code('SEC'), 'name': batch.get('name') or year.get('name') or batch['code'],
+               'batch_code': batch['code']}, user['code'])
+    return section['code']
+
+
 @router.put('/{code}/faculty')
 def assign_faculty(code: str, body: FacultyInput, request: Request, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
+        if not body.section_code:
+            revision = data.get('documents', {}).get('course_faculty_revisions', {}).get(code, 0)
+            if revision != body.revision:
+                raise HTTPException(409, 'Faculty allocation changed; refresh before saving')
+            body = body.model_copy(update={'section_code': batch_section(data, code, body, user)})
         offerings = data['records'].setdefault('subject_offerings', {})
         existing = [o for o in offerings.values() if o['section_code'] == body.section_code and o['subject_code'] == body.subject_code]
         action = 'edit' if existing else 'create'

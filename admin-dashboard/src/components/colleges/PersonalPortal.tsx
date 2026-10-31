@@ -173,7 +173,10 @@ export default function PersonalPortal({
                               student || data.selected_student_code || null,
                           },
                         );
-                        if (result.checkout_url) {
+                        if (
+                          result.checkout_url &&
+                          /^https?:\/\//i.test(String(result.checkout_url))
+                        ) {
                           window.location.assign(String(result.checkout_url));
                           return;
                         }

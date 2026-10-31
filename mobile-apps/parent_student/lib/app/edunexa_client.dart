@@ -159,6 +159,7 @@ class _EdunexaAppState extends State<EdunexaApp> {
     title: widget.title,
     debugShowCheckedModeBanner: false,
     theme: collegeTheme(role.accent),
+    scrollBehavior: const EduScrollBehavior(),
     themeAnimationDuration: Duration.zero,
     home: !splashFinished
         ? CinematicSplashScreen(

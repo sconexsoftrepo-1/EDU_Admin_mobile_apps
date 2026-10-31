@@ -24,11 +24,17 @@ class Settings(BaseSettings):
     payment_adapter_token: SecretStr | None = None
     payment_callback_secret: SecretStr | None = None
     public_api_url: str = "http://localhost:8010"
+    # Interactive API docs (/docs, /redoc, /openapi.json); set EDUNEXA_API_DOCS=false on public servers.
+    api_docs: bool = True
     issuer: str = "edunexa-api"
     audience: str = "edunexa-clients"
     access_minutes: int = Field(default=10, ge=1, le=30)
     refresh_days: int = Field(default=30, ge=1, le=30)
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3012"]
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3012",
+        "https://eduportal-beige.vercel.app",
+    ]
     # postgres uses EDUNEXA_DB_*; sqlserver uses EDUNEXA_MSSQL_*; local-json is offline storage.
     storage_backend: Literal["local-json", "postgres", "sqlserver"] = "local-json"
     public_portal_url: str = "http://localhost:3000"

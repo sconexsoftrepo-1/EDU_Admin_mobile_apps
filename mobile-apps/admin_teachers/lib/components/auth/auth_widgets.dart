@@ -102,8 +102,8 @@ class EduAuthBrandHeader extends StatelessWidget {
               cacheWidth: 384,
               fit: BoxFit.contain,
               semanticLabel: staff
-                  ? 'EduNexa Admin & Teacher app icon'
-                  : 'EduNexa Parent & Student app icon',
+                  ? 'Edu-Pragathi Admin & Teacher app icon'
+                  : 'Edu-Pragathi Parent & Student app icon',
             ),
           ),
           builder: (context, child) => Transform.scale(
@@ -120,7 +120,7 @@ class EduAuthBrandHeader extends StatelessWidget {
         start: .19,
         end: .59,
         child: const Text(
-          'EduNexa',
+          'Edu-Pragathi',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,

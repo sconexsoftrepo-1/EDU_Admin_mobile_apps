@@ -18,7 +18,7 @@ void main() {
           : [MobileRole.parent, MobileRole.student];
       await tester.pumpWidget(
         EdunexaApp(
-          title: 'EduNexa',
+          title: 'Edu-Pragathi',
           clientId: pair.first.clientId,
           roles: pair,
           apiFactory: (selected) => CollegeApi(
@@ -104,16 +104,8 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('module-profile')));
       await settleStartup(tester);
       expect(find.text('College user'), findsOneWidget);
-      await tester.tap(find.byTooltip('Open navigation menu'));
-      await settleStartup(tester);
-      await tester.tap(find.text('Dashboard'));
-      await settleStartup(tester);
-      await tester.tap(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.text('More'),
-        ),
-      );
+      // Back returns to the screen the module was opened from (More), not straight Home.
+      await tester.tap(find.byTooltip('Back'));
       await settleStartup(tester);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('module-profile')),
@@ -127,7 +119,14 @@ void main() {
       );
       expect(find.byKey(const ValueKey('module-profile')), findsOneWidget);
       expect(find.text('College user'), findsNothing);
+      // The Edu-Pragathi label returns Home, where there is no Back button.
+      await tester.tap(find.byTooltip('Go to home'));
+      await settleStartup(tester);
+      expect(find.byTooltip('Back'), findsNothing);
       await tester.tap(find.byTooltip('Sign out'));
+      await settleStartup(tester);
+      expect(find.text('Sign out of Edu-Pragathi?'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Sign out'));
       await settleStartup(tester);
       expect(find.text('Continue'), findsOneWidget);
       expect(
@@ -221,8 +220,8 @@ void main() {
         EdunexaApp(
           key: ValueKey(role),
           title: staff
-              ? 'EduNexa Admin & Teachers'
-              : 'EduNexa Parents & Students',
+              ? 'Edu-Pragathi Admin & Teachers'
+              : 'Edu-Pragathi Parents & Students',
           clientId: staff ? 'admin-mobile' : 'parent-mobile',
           roles: staff
               ? const [MobileRole.admin, MobileRole.teacher]

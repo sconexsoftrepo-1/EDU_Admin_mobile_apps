@@ -63,7 +63,7 @@ void main() {
   );
   Widget app({Future<void> Function()? initialize, bool expired = false}) =>
       EdunexaApp(
-        title: 'EduNexa',
+        title: 'Edu-Pragathi',
         clientId: primaryClient,
         roles: ownRoles,
         initialize: initialize ?? () async {},

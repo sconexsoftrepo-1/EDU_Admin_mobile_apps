@@ -12,7 +12,7 @@ export function csv(name: string, rows: Record<string, unknown>[]) {
   const escape = (v: unknown) =>
     '"' +
     String(v ?? "")
-      .replace(/^[=+@-]/, "'")
+      .replace(/^[=+@\t\r-]/, "'")
       .replaceAll('"', '""') +
     '"';
   download(

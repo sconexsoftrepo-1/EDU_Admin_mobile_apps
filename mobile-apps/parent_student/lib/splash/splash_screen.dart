@@ -162,7 +162,7 @@ class _CinematicSplashScreenState extends State<CinematicSplashScreen>
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          'EduNexa',
+          'Edu-Pragathi',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: compact ? 32 : 40,
@@ -302,7 +302,7 @@ class _CinematicSplashScreenState extends State<CinematicSplashScreen>
                   child: Transform.scale(
                     scale: reduced ? 1 : .88 + .12 * spring,
                     child: Semantics(
-                      label: 'EduNexa ${widget.configuration.subtitle} icon',
+                      label: 'Edu-Pragathi ${widget.configuration.subtitle} icon',
                       image: true,
                       child: Image(
                         key: const ValueKey('splash-app-icon'),

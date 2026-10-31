@@ -158,31 +158,42 @@ class MetricStrip extends StatelessWidget {
             .map(
               (m) => Container(
                 width: width,
+                // Same height for every metric tile; long amounts shrink instead of wrapping.
+                height: EduSizes.scaled(context, EduSizes.metricTile),
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: collegeIvory,
                   border: Border.all(color: collegeLine),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(EduSizes.radius),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Icon(
                       m.$3,
                       color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
-                    const SizedBox(height: 14),
                     AnimatedSwitcher(
                       duration: EduMotion.duration(context, EduMotion.tab),
-                      child: Text(
-                        m.$2,
+                      child: FittedBox(
                         key: ValueKey(m.$2),
-                        style: Theme.of(context).textTheme.headlineSmall,
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          m.$2,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 5),
-                    Text(m.$1, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      m.$1,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),

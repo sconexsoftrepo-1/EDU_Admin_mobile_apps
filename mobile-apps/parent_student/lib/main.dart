@@ -10,7 +10,7 @@ class EduNexaApp extends StatelessWidget {
   const EduNexaApp({super.key});
   @override
   Widget build(BuildContext context) => const EdunexaApp(
-    title: 'EduNexa Parents & Students',
+    title: 'Edu-Pragathi Parents & Students',
     clientId: ApiConfig.parentClient,
     roles: [MobileRole.parent, MobileRole.student],
   );
