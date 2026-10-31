@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import {
   useCallback,
   useEffect,
@@ -6,14 +7,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import {
-  Plus,
-  RefreshCw,
-  FileText,
-  Paperclip,
-  CheckCheck,
-  Search,
-} from "lucide-react";
+import { Plus, RefreshCw, FileText, Paperclip, CheckCheck } from "lucide-react";
 import {
   assignments,
   type Assignment,
@@ -29,7 +23,11 @@ import Image from "next/image";
 import Select from "./SearchSelect";
 import { toast } from "./toast";
 import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
-import { readWorkspaceCache, workspaceCacheKey, writeWorkspaceCache } from "@/lib/colleges/workspace-cache";
+import {
+  readWorkspaceCache,
+  workspaceCacheKey,
+  writeWorkspaceCache,
+} from "@/lib/colleges/workspace-cache";
 import "./assignment-workspace.css";
 
 const date = (value: string) =>
@@ -115,7 +113,11 @@ export default function AssignmentWorkspace({
 }) {
   const session = useOptionalCollege();
   const role = session?.activeRole;
-  const dataKey = workspaceCacheKey(session?.account?.code, role?.code, `special:assignments:${studentCode || "self"}`);
+  const dataKey = workspaceCacheKey(
+    session?.account?.code,
+    role?.code,
+    `special:assignments:${studentCode || "self"}`,
+  );
   const cachedData = readWorkspaceCache<AssignmentList>(dataKey);
   const sessionCanCreate =
     !!session?.account &&
@@ -325,15 +327,18 @@ export default function AssignmentWorkspace({
             </button>
           ))}
         </div>
-        <label className="as-search">
-          <Search size={16} />
-          <input
-            aria-label="Search assignments"
-            placeholder="Search assignments"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
+        <SearchField
+          aria-label="Search assignments"
+          placeholder="Search assignments"
+          value={query}
+          onValueChange={setQuery}
+          suggestions={searchValues(data?.items || [], [
+            "title",
+            "course_name",
+            "batch_name",
+            "teacher_name",
+          ])}
+        />
         {data?.can_review && (
           <label className="as-check">
             <input
@@ -450,6 +455,7 @@ function AssignmentCreate({
     [year, setYear] = useState(""),
     [section, setSection] = useState(""),
     [teacher, setTeacher] = useState("");
+  const [subject, setSubject] = useState("");
   const [selected, setSelected] = useState<string[]>([]),
     [title, setTitle] = useState(""),
     [description, setDescription] = useState(""),
@@ -515,6 +521,10 @@ function AssignmentCreate({
         academic_year_code: year,
         section_code: section || null,
         teacher_code: teacher,
+        subject_code: subject || null,
+        semester_number:
+          options?.subjects?.find((s) => s.subject_code === subject)
+            ?.semester_number || null,
         title,
         description,
         due_at: new Date(due).toISOString(),
@@ -664,6 +674,27 @@ function AssignmentCreate({
               )}
             </label>
           </div>
+          {!!options?.subjects?.length && (
+            <label>
+              Subject / semester *
+              <Select
+                required
+                value={
+                  options.subjects.some((s) => s.subject_code === subject)
+                    ? subject
+                    : ""
+                }
+                onChange={(e) => setSubject(e.target.value)}
+              >
+                <option value="">Select a subject</option>
+                {options.subjects.map((s) => (
+                  <option key={s.subject_code} value={s.subject_code}>
+                    Semester {s.semester_number} · {s.name}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          )}
           {year && (
             <section className="as-audience">
               <header>

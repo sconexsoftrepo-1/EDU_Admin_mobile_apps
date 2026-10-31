@@ -13,6 +13,8 @@
   --edu-surface: #fff;
   --edu-border: #dce5e3;
   --edu-radius: 12px;
+  --edu-drawer-radius: 22px 0 0 22px;
+  --edu-drawer-gutter: clamp(20px, 2.5vw, 32px);
   --edu-shadow: 0 8px 22px #49372418;
 }
 * {

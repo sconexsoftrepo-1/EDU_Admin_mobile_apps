@@ -72,6 +72,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
         if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
           open('certificates');
+        } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
+          open('assessments');
         } else {
           open('notifications');
         }
@@ -190,6 +192,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (widget.role == MobileRole.student ||
           widget.role == MobileRole.parent) ...[
         'attendance',
+        'assessments',
         'results',
         'assignments',
         'syllabus',
@@ -617,7 +620,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: selected == 'assignments' || selected == 'submissions'
+              child: selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
                   ? AssignmentHub(
                       key: ValueKey(
                         'assignment-$selected-$student-$generation',
@@ -626,6 +629,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                       role: widget.role,
                       title: title,
                     )
+                  : selected == 'attendance'
+                  ? AttendanceHub(key: ValueKey('attendance-$student-$generation'), api: widget.api, role: widget.role, title: title, studentCode: student ?? '')
                   : selected == 'calendar'
                   ? CalendarHub(api: widget.api, role: widget.role, title: title)
                   : selected == 'syllabus'
@@ -695,6 +700,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       MobileRole.admin => ['dues', 'collections', 'students', 'reports'],
       MobileRole.teacher => [
         'attendance',
+        'assessments',
         'assignments',
         'submissions',
         'results',
@@ -707,7 +713,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         'assignments',
         'messages',
       ],
-      MobileRole.student => ['syllabus', 'results', 'fees', 'messages'],
+      MobileRole.student => ['assessments', 'syllabus', 'results', 'fees', 'messages'],
     };
     List<Widget> records(String key, String heading, {int limit = 2}) =>
         has(key)
@@ -864,11 +870,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             ],
           ),
       ],
-      if ((family || learning) && cache['attendance'] != null) ...[
+      if (family) ...[
         SectionHeading(title: 'Academic snapshot'),
         EduReveal(
           order: 1,
-          child: AttendanceSummary(items: rows('attendance')),
+          child: AttendanceOverview(key: ValueKey('attendance-overview-$student-$generation'), api: widget.api, studentCode: student ?? ''),
         ),
       ],
       if (family || learning)

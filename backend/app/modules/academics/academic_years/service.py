@@ -64,6 +64,8 @@ class Service(ResourceService):
             body = {**body, "code": code, "name": name}
         record = super().create(data, body, actor)
         ensure_course_batch(data, record, actor)
+        from app.core.curriculum_workspace import initialize_batch
+        initialize_batch(data, record)
         return self.repo.save(data, record)
 
     def update(self, data, code, body, actor):
@@ -87,6 +89,8 @@ class Service(ResourceService):
 
     def delete(self, data, code, actor):
         year = self.repo.get(data, code)
+        from app.core.curriculum_workspace import remove_generated_semesters
+        remove_generated_semesters(data, year, actor)
         batch_code = year.get("batch_code")
         # Both deletes share the surrounding transaction: referenced batches are retained.
         if batch_code:

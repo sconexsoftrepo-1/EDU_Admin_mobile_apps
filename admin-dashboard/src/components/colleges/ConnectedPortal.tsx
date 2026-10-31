@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import PersonFiles from "./PersonFiles";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
@@ -29,7 +30,6 @@ import {
   Info,
   RefreshCw,
   Plus,
-  Search,
 } from "lucide-react";
 import { excelTable, headerLabel, pdfTable } from "@/lib/colleges/export-table";
 /** Admin / configuration screens: no Excel or PDF export (not record registers). */
@@ -88,6 +88,9 @@ import PersonalPortal from "./PersonalPortal";
 import AssignmentWorkspace from "./AssignmentWorkspace";
 import SyllabusWorkspace from "./SyllabusWorkspace";
 import CalendarWorkspace from "./CalendarWorkspace";
+import "./tab-interactions.css";
+import AttendanceWorkspace from "./AttendanceWorkspace";
+import AssessmentWorkspace from "./AssessmentWorkspace";
 import CertificateWorkspace from "./CertificateWorkspace";
 import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
@@ -167,16 +170,19 @@ type ScreenSnapshot = {
  */
 const PRIMARY_FORMS: Record<string, string> = {
   "student-enrollment": "enroll-student",
+  students: "enroll-student",
   "course-setup": "create-course",
   "fee-structures": "course-fee-structure",
 };
 /** Page size per table: the course catalog shows every course at once. */
 const pageSize = (table?: string) => (table === "programs" ? 200 : undefined);
 /** Screens that show only their data-entry form button (everything is inside that form). */
-const PRIMARY_ONLY = new Set(["student-enrollment"]);
+const PRIMARY_ONLY = new Set(["student-enrollment", "students"]);
 /** Screens whose forms sit in the page header (no table picker or search box). */
 const HEADER_ACTIONS = new Set<string>();
 const CUSTOM_WORKSPACES = new Set([
+  "assessments",
+  "attendance",
   "admissions",
   "assignments",
   "syllabus",
@@ -257,6 +263,7 @@ export default function ConnectedPortal({
       initial?: Row;
       save: (r: Row) => Promise<void>;
     } | null>(null);
+  const studentScreen = ["students", "student-enrollment"].includes(selected);
   const ActiveEntryForm =
     dialog?.resourceName === "academic_years" &&
     (!dialog.initial?.code || dialog.initial?.program_code)
@@ -567,7 +574,7 @@ export default function ConnectedPortal({
     const key = workspaceCacheKey(
       identityRef.current,
       activeRoleRef.current?.code,
-      `resource:${r.path}:${offset}:${selected === "student-enrollment" && r.name === "students" ? JSON.stringify({ column_filters: JSON.stringify(columnFilters), search: filter }) : ""}`,
+      `resource:${r.path}:${offset}:${studentScreen && r.name === "students" ? JSON.stringify({ column_filters: JSON.stringify(columnFilters), search: filter }) : ""}`,
     );
     const cached = readWorkspaceCache<{ items: Row[]; total: number }>(key);
     setResource(r);
@@ -584,7 +591,7 @@ export default function ConnectedPortal({
           r.path,
           offset,
           pageSize(r.name),
-          selected === "student-enrollment" && r.name === "students"
+          studentScreen && r.name === "students"
             ? { column_filters: JSON.stringify(columnFilters), search: filter }
             : {},
         );
@@ -629,7 +636,7 @@ export default function ConnectedPortal({
   const studentResourcePath =
     resource?.name === "students" ? resource.path : "";
   useEffect(() => {
-    if (selected !== "student-enrollment" || !studentResourcePath) return;
+    if (!studentScreen || !studentResourcePath) return;
     const query = JSON.stringify({ columnFilters, filter });
     if (studentFilterRequest.current.path !== studentResourcePath) {
       studentFilterRequest.current = { path: studentResourcePath, query: "" };
@@ -671,9 +678,9 @@ export default function ConnectedPortal({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [selected, studentResourcePath, columnFilters, filter]);
+  }, [selected, studentScreen, studentResourcePath, columnFilters, filter]);
   const edit = async (row?: Row) => {
-    if (!resource || (!row && selected === "student-enrollment")) return;
+    if (!resource || (!row && studentScreen)) return;
     const current = resource;
     try {
       const bound = await api.workspace.resourceForm(
@@ -877,7 +884,7 @@ export default function ConnectedPortal({
       </>
     );
   const studentRegister =
-    selected === "student-enrollment" && resource?.name === "students";
+    studentScreen && resource?.name === "students";
   const studentTable = resource?.name === "students";
   const studentHeaders: Record<string, string> = {
     student_name: "Student name",
@@ -1046,9 +1053,9 @@ export default function ConnectedPortal({
         </aside>
       )}
       <section
-        className={`edu-content ${selected === "student-enrollment" ? "edu-enroll" : ""}`}
+        className={`edu-content ${studentScreen ? "edu-enroll" : ""}`}
       >
-        {selected === "admissions" ? (
+        {selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : selected === "admissions" ? (
           <AdmissionWorkspace
             college={college}
             path={resource?.name === "admission_enquiries" ? resource.path : "/api/v1/admissions/admission-enquiries"}
@@ -1107,7 +1114,7 @@ export default function ConnectedPortal({
                         onClick={() => runAction(primaryForm)}
                       >
                         <Plus size={15} aria-hidden="true" />{" "}
-                        {primaryForm.label}
+                        {selected === "students" ? "Add student" : primaryForm.label}
                       </button>
                     )}
                     <div className="crs-header-desktop">
@@ -1172,7 +1179,7 @@ export default function ConnectedPortal({
                 <button
                   className="edu-icon-button"
                   onClick={() =>
-                    selected === "student-enrollment" && resource
+                    studentScreen && resource
                       ? refreshResource(resource)
                       : load(selected)
                   }
@@ -1215,7 +1222,7 @@ export default function ConnectedPortal({
               >
                 {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
                   <>
-                    <select
+                    {selected !== "students" && <select
                       aria-label="Screen resource"
                       value={resource.name}
                       onChange={(e) => {
@@ -1230,19 +1237,16 @@ export default function ConnectedPortal({
                           {r.title}
                         </option>
                       ))}
-                    </select>
-                    {selected === "student-enrollment" ? (
+                    </select>}
+                    {studentScreen ? (
                       <>
-                        <label className="stf-search">
-                          <Search size={15} aria-hidden="true" />
-                          <input
-                            type="search"
-                            aria-label="Search records"
-                            placeholder="Search by name, admission no. or email"
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                          />
-                        </label>
+                        <SearchField
+                          aria-label="Search records"
+                          placeholder="Search by name, admission no. or email"
+                          value={filter}
+                          onValueChange={setFilter}
+                          suggestions={searchValues(rows)}
+                        />
                         <p className="edu-count">
                           {visibleRows.length} of {total} records
                         </p>
@@ -1256,11 +1260,12 @@ export default function ConnectedPortal({
                         )}
                       </>
                     ) : (
-                      <input
+                      <SearchField
                         aria-label="Search records"
                         placeholder="Search this page"
                         value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
+                        onValueChange={setFilter}
+                        suggestions={searchValues(rows)}
                       />
                     )}
                     {primaryForm ? (
@@ -1269,10 +1274,10 @@ export default function ConnectedPortal({
                         onClick={() => runAction(primaryForm)}
                       >
                         <Plus size={15} aria-hidden="true" />{" "}
-                        {primaryForm.label}
+                        {selected === "students" ? "Add student" : primaryForm.label}
                       </button>
                     ) : (
-                      selected !== "student-enrollment" &&
+                      !studentScreen &&
                       resource.actions.includes("create") && (
                         <button className="edu-primary" onClick={() => edit()}>
                           <Plus size={15} aria-hidden="true" />{" "}
@@ -1537,8 +1542,7 @@ export default function ConnectedPortal({
                                       "students",
                                       "employees",
                                       "admission_applications",
-                                    ].includes(resource.name) &&
-                                      !studentRegister && (
+                                    ].includes(resource.name) && (
                                         <IconAction
                                           kind="files"
                                           label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
@@ -1564,18 +1568,13 @@ export default function ConnectedPortal({
                                       />
                                     )}
                                     {studentTable && (
-                                      <button
-                                        type="button"
-                                        className="icon-action"
-                                        aria-label={`View details for ${String(cellValue(row, "student_name"))}`}
-                                        title="Student information"
+                                      <IconAction
+                                        kind="info"
+                                        label={`View details for ${String(cellValue(row, "student_name"))}`}
                                         onClick={() => setStudentInfo(row)}
-                                      >
-                                        <Info size={16} />
-                                      </button>
+                                      />
                                     )}
-                                    {!studentRegister &&
-                                      resource.actions.includes("delete") && (
+                                    {resource.actions.includes("delete") && (
                                         <IconAction
                                           kind="delete"
                                           label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
@@ -1685,14 +1684,16 @@ export default function ConnectedPortal({
                     )}
                     {!cards && !busy && rows.length === 0 && (
                       <p className="edu-empty">
-                        {selected === "student-enrollment"
+                        {studentScreen
                           ? filter || Object.keys(columnFilters).length > 0
                             ? "No students match these filters. Clear the filters or change your search."
-                            : "No students enrolled yet. Use Student enrollment to add a student."
+                            : selected === "students"
+                              ? "No students yet. Use Add student to enroll a student."
+                              : "No students enrolled yet. Use Student enrollment to add a student."
                           : "No records yet. Use Create record or complete the preceding setup steps."}
                       </p>
                     )}
-                    {!cards && selected !== "student-enrollment" && (
+                    {!cards && !studentScreen && (
                       <p>
                         {rows.length} of {total} records
                       </p>

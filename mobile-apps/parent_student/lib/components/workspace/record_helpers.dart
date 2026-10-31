@@ -10,7 +10,7 @@ String _asDate(dynamic value) {
   return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 }
 
-Future<Json> _asUpload(CollegeApi api, XFile file, {String? assignment, bool resource = false, bool event = false}) async {
+Future<Json> _asUpload(CollegeApi api, XFile file, {String? assignment, bool resource = false, bool assessment = false, bool event = false}) async {
   final size = await file.length();
   if (size == 0 || size > 10 * 1024 * 1024) {
     throw const FormatException('Choose files up to 10 MB each.');
@@ -21,6 +21,7 @@ Future<Json> _asUpload(CollegeApi api, XFile file, {String? assignment, bool res
           sizeBytes: size,
           assignmentCode: assignment,
           resource: resource,
+          assessment: assessment,
           event: event,
         )
         as Map,

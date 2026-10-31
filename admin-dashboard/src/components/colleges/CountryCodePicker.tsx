@@ -1,4 +1,5 @@
 "use client";
+import "./search-field.css";
 /**
  * Country calling-code picker with flags (react-phone-number-input / libphonenumber-js data).
  * The list opens below, filters as you type (name or code) and closes once a country is picked.
@@ -143,9 +144,9 @@ export default function CountryCodePicker({
       </span>
       {open && (
         <span className="cc-panel">
-          <span className="cc-search">
+          <span className="cc-search edu-search-field">
             <Search size={14} aria-hidden="true" />
-            <input
+            <input className="edu-search-input"
               ref={search}
               aria-label="Search country"
               placeholder="Search country or code"

@@ -9,6 +9,7 @@ import {
   type LookupOption,
   type Row,
 } from "@/services/api";
+import { CurriculumSummary } from "./CourseCurriculum";
 import SideDrawer from "./SideDrawer";
 import Select from "./SearchSelect";
 import DateInput from "./DateInput";
@@ -35,9 +36,10 @@ export default function AcademicYearForm({
   onClose: () => void;
 }) {
   const editing = Boolean(initial.code);
-  const [courses, setCourses] = useState<(LookupOption & { years: number })[]>(
-    [],
-  );
+  const [courseLevel, setCourseLevel] = useState("");
+  const [courses, setCourses] = useState<
+    (LookupOption & { years: number; level: string })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [programCode, setProgramCode] = useState(
     String(initial.program_code || ""),
@@ -64,6 +66,11 @@ export default function AcademicYearForm({
         ];
         const values = registered.map((course) => ({
           ...course,
+          level: options.courses.intermediate.some(
+            (p) => p.code === course.value,
+          )
+            ? "intermediate"
+            : "degree",
           years: Math.max(
             1,
             Math.ceil(
@@ -72,8 +79,13 @@ export default function AcademicYearForm({
             ),
           ),
         }));
-        if (active)
+        if (active) {
           setCourses(values.toSorted((a, b) => a.label.localeCompare(b.label)));
+          setCourseLevel(
+            values.find((c) => c.value === String(initial.program_code || ""))
+              ?.level || "",
+          );
+        }
       })
       .catch((e) => {
         if (active)
@@ -85,7 +97,7 @@ export default function AcademicYearForm({
     return () => {
       active = false;
     };
-  }, []);
+  }, [initial.program_code]);
   const complete = programCode && startDate && endDate;
   const yearRange = complete
     ? `${startDate.slice(0, 4)}-${endDate.slice(0, 4)}`
@@ -155,6 +167,23 @@ export default function AcademicYearForm({
           <section className="edu-academic-year-section">
             <h3>Registered course</h3>
             <label>
+              <span>Course level *</span>
+              <Select
+                aria-label="Course level"
+                required
+                value={courseLevel}
+                disabled={loading || busy || editing}
+                onChange={(e) => {
+                  setCourseLevel(e.target.value);
+                  setProgramCode("");
+                }}
+              >
+                <option value="">Select course level</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="degree">Degree</option>
+              </Select>
+            </label>
+            <label>
               <span>Course *</span>
               <Select
                 name="program_code"
@@ -180,11 +209,13 @@ export default function AcademicYearForm({
                     ? "Loading registered courses…"
                     : "Select a registered course"}
                 </option>
-                {courses.map((course) => (
-                  <option key={course.value} value={course.value}>
-                    {course.label} ({course.value})
-                  </option>
-                ))}
+                {courses
+                  .filter((c) => c.level === courseLevel)
+                  .map((course) => (
+                    <option key={course.value} value={course.value}>
+                      {course.label} ({course.value})
+                    </option>
+                  ))}
                 {programCode && !selectedCourse && (
                   <option value={programCode}>{programCode}</option>
                 )}
@@ -245,6 +276,16 @@ export default function AcademicYearForm({
               the batch’s actual completion date.
             </p>
           </section>
+          {programCode && (
+            <section className="edu-academic-year-section">
+              <h3>Semester subjects & labs</h3>
+              <CurriculumSummary key={programCode} program={programCode} />
+              <p>
+                Edit this course’s semester plan in Courses & enrollment →
+                Subjects & labs.
+              </p>
+            </section>
+          )}
           <section className="edu-academic-year-section edu-academic-year-generated">
             <div className="edu-academic-year-section-title">
               <h3>Generated details</h3>

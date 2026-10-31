@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "../SearchField";
 import PersonFiles from "../PersonFiles";
 import { useErrorToast } from "../toast";
 /** Staff table of one kind (teaching, non-teaching or daily labour) with search. */
@@ -10,7 +11,6 @@ import {
   Info,
   Plus,
   RefreshCw,
-  Search,
 } from "lucide-react";
 import IconAction from "../IconAction";
 import StaffDetails from "./StaffDetails";
@@ -172,16 +172,13 @@ export default function StaffDirectory({
       </header>
       <div className="stf-card">
         <div className="stf-dir-bar">
-          <label className="stf-search">
-            <Search size={15} aria-hidden="true" />
-            <input
-              type="search"
-              aria-label="Search staff"
-              placeholder="Search by name, ID, role or phone"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </label>
+          <SearchField
+            aria-label="Search staff"
+            placeholder="Search by name, ID, role or phone"
+            value={query}
+            onValueChange={setQuery}
+            suggestions={searchValues(rows || [], ["name", "employee_id", "designation", "department", "phone"])}
+          />
           <p>
             {rows ? `${rows.length} ${STAFF_KIND_LABEL[kind]}` : "Loading…"}
           </p>

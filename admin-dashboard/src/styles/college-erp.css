@@ -1974,7 +1974,7 @@ body:has(.college-erp dialog[open]) {
   min-width: 0;
   height: 100dvh;
   max-height: 100dvh;
-  border-radius: 20px 0 0 20px;
+  border-radius: var(--edu-drawer-radius);
   border: 0;
   border-left: 1px solid var(--erp-border);
   padding: 28px;
@@ -2055,7 +2055,6 @@ body:has(.college-erp dialog[open]) {
     width: 100vw;
     height: 100dvh;
     max-height: 100dvh;
-    border-radius: 0;
     padding: 20px;
   }
   .college-erp
@@ -2713,6 +2712,7 @@ body:has(.college-erp dialog[open]) {
   justify-content: flex-end;
 }
 .erp-api-drawer {
+  border-radius: var(--edu-drawer-radius);
   width: min(1080px, 100%);
   height: 100%;
   overflow: auto;
@@ -3646,4 +3646,37 @@ body:has(.college-erp dialog[open]) {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+}
+
+/* Drawer gutters stay intact when a workspace is embedded inside a side screen. */
+.college-erp .erp-api-drawer .edu-embedded > .edu-content {
+  padding: 24px var(--edu-drawer-gutter) 32px;
+}
+.erp-api-drawer > header {
+  padding-inline: var(--edu-drawer-gutter);
+}
+.college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) {
+  padding-inline: var(--edu-drawer-gutter);
+}
+.college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) > .erp-panel-title,
+.college-erp :is(.erp-modal, .erp-record-drawer, .erp-notification-drawer) .erp-modal-actions {
+  margin-inline: calc(-1 * var(--edu-drawer-gutter));
+  padding-inline: var(--edu-drawer-gutter);
+}
+
+/* Side-screen field labels retain their scale with a 20% increase. */
+.college-erp .erp-modal label {
+  font-size: 14.4px;
+}
+.college-erp .erp-modal .erp-fee-line label {
+  font-size: 12px;
+}
+
+.college-erp .erp-modal .erp-form-field > label {
+  font-size: 13.2px;
+}
+@media (max-width: 650px) {
+  .college-erp .erp-modal .erp-form-field > label {
+    font-size: 14.4px;
+  }
 }

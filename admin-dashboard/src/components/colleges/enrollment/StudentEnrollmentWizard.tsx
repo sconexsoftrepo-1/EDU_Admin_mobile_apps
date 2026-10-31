@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "../SearchField";
 /**
  * Student enrollment wizard (the admission form of the college).
  *   Step 1  Student details: photo, student, last qualification, documents, guardian, Aadhaar,
@@ -1970,12 +1971,12 @@ export default function StudentEnrollmentWizard({
                     <>
                       {course.level === "degree" && (
                         <div className="enw-course-filter">
-                          <input
-                            type="search"
+                          <SearchField
                             aria-label="Search degree courses"
                             placeholder="Search courses, e.g. B.Com, Data Science"
                             value={courseQuery}
-                            onChange={(e) => setCourseQuery(e.target.value)}
+                            onValueChange={setCourseQuery}
+                            suggestions={searchValues(programs, ["name", "branch", "qualification"])}
                           />
                           <div
                             className="enw-chips"

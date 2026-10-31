@@ -335,3 +335,7 @@
   font-weight: 500;
   margin-top: 6px;
 }
+
+.erp-api-drawer .erp-fee-manager label {
+  font-size: 14.4px;
+}

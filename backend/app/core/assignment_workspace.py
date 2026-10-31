@@ -168,7 +168,8 @@ def present(data, user, record, student_code=None, values=None):
     year = data["records"].get("academic_years", {}).get(record.get("academic_year_code"), {})
     teacher = data["records"].get("teachers", {}).get(record.get("teacher_code"), {})
     employee = data["records"].get("employees", {}).get(teacher.get("employee_code"), {})
-    output = {**{k: record.get(k) for k in ("code", "title", "description", "due_at", "max_marks", "teacher_code", "program_code", "academic_year_code", "section_code", "created_by", "created_at", "revision", "allow_late", "legacy")},
+    output = {**{k: record.get(k) for k in ("code", "title", "description", "due_at", "max_marks", "teacher_code", "program_code", "academic_year_code", "section_code", "created_by", "created_at", "revision", "allow_late", "legacy", "subject_code", "semester_number")},
+        "subject_name": data["records"].get("subjects",{}).get(record.get("subject_code"),{}).get("name",""),
         "course_name": program.get("name", ""), "batch_name": year.get("name", ""), "teacher_name": name(employee),
         "attachments": [file_public(docs(data, "files")[k]) for k in record.get("attachments", []) if k in docs(data, "files")],
         "can_review": can_review(data, user, record), "can_grade": can_review(data, user, record) and permitted(data, user, "edit"), "can_submit": user.get("person_type") == "student",
@@ -195,6 +196,8 @@ class AssignmentInput(StrictModel):
     academic_year_code: str = Field(min_length=1, max_length=100)
     section_code: str | None = None
     teacher_code: str | None = None
+    subject_code: str | None = None
+    semester_number: int | None = Field(default=None, ge=1, le=16)
     title: str = Field(min_length=1, max_length=200)
     description: str = Field(default="", max_length=10000)
     due_at: datetime
@@ -241,6 +244,11 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
         result["sections"] = [{"code": s["code"], "name": s["name"]} for s in rows(data, "sections") if s["code"] in sections
                               and (not teaching(user) or s["code"] in sections_owned)]
         result["students"] = [{"code": s["code"], "name": name(s), "admission_number": s.get("admission_number")} for s in students.values()]
+    from .curriculum_workspace import curriculum
+    result["subjects"] = curriculum(data, program_code, academic_year_code)["items"] if program_code else []
+    if teaching(user):
+        offered = {o["subject_code"] for o in rows(data,"subject_offerings") if o["teacher_code"] in own and (not section_code or o["section_code"] == section_code) and (not academic_year_code or o["section_code"] in {s["code"] for s in result["sections"]})}
+        result["subjects"] = [s for s in result["subjects"] if s["subject_code"] in offered]
     return result
 
 
@@ -268,7 +276,7 @@ def dispatch_push(request, notice_codes):
             record = data["records"]["notifications"][code]
             tokens = [d["token"] for d in rows(data, "device_tokens") if d["user_code"] == record["user_code"]]
             payload = {"idempotency_key": code, "tokens": tokens, "title": record["title"], "body": record["body"],
-                       "data": {"assignment_code": record["assignment_code"], "notification_code": code, "screen": "assignments"}}
+                       "data": {**({"assessment_code": record["assessment_code"], "screen": "assessments"} if record.get("assessment_code") else {"assignment_code": record["assignment_code"], "screen": "assignments"}), "notification_code": code}}
         if not tokens:
             continue
         try:
@@ -310,6 +318,13 @@ def save_assignment(body, request, background, user, code=None):
             raise HTTPException(422, "Select a registered teacher")
         if teaching(user) and body.teacher_code and body.teacher_code not in own:
             raise HTTPException(403, "Assignments must use your own teacher profile")
+        if body.subject_code:
+            from .curriculum_workspace import curriculum
+            if not any(s['subject_code']==body.subject_code and s['semester_number']==body.semester_number for s in curriculum(data,body.program_code,body.academic_year_code)['items']):
+                raise HTTPException(422,'Select a subject from the course semester')
+            _, sections, _ = roster(data,body.academic_year_code,body.program_code,body.section_code)
+            if teaching(user) and not any(o['teacher_code']==teacher and o['subject_code']==body.subject_code and o['section_code'] in ({body.section_code} if body.section_code else sections) for o in rows(data,'subject_offerings')):
+                raise HTTPException(403,'This subject is outside your teaching allocation')
         if body.due_at <= datetime.now(timezone.utc):
             raise HTTPException(422, "Choose a future due date and time")
         validate_files(data, body.attachments, user, code)
@@ -455,6 +470,7 @@ class FileStart(StrictModel):
     assignment_code: str | None = None
     syllabus_code: str | None = None
     resource_upload: bool = False
+    assessment_upload: bool = False
     event_upload: bool = False
     event_code: str | None = None
 
@@ -467,9 +483,12 @@ class FileChunk(StrictModel):
 @router.post("/files/start", status_code=201)
 def start_file(body: FileStart, request: Request, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
-        if sum((bool(body.assignment_code), bool(body.syllabus_code), body.resource_upload, body.event_upload, bool(body.event_code))) > 1:
+        if sum((body.assessment_upload, bool(body.assignment_code), bool(body.syllabus_code), body.resource_upload, body.event_upload, bool(body.event_code))) > 1:
             raise HTTPException(422, "Choose one upload destination")
-        if body.event_upload:
+        if body.assessment_upload:
+            from .assessment_workspace import require
+            require(data, user, "create")
+        elif body.event_upload:
             from .calendar_workspace import staff_can
             if not staff_can(data, user, "create"):
                 raise HTTPException(403, "Calendar event publishing is not assigned to this role")
@@ -500,7 +519,7 @@ def start_file(body: FileStart, request: Request, user=Depends(current_user)):
         docs(data, "files")[code] = {"code": code, "owner": user["code"], "filename": filename,
             "size_bytes": body.size_bytes, "assignment_code": body.assignment_code,
             "syllabus_code": body.syllabus_code, "event_code": body.event_code,
-            "resource_upload": body.resource_upload, "event_upload": body.event_upload,
+            "assessment_upload": body.assessment_upload, "resource_upload": body.resource_upload, "event_upload": body.event_upload,
             "parts": {}, "ready": False, "created_at": now()}
         return {"code": code, "chunk_size": CHUNK_SIZE}
 
@@ -521,7 +540,7 @@ def chunk_file(code: str, body: FileChunk, request: Request, user=Depends(curren
         expected = min(CHUNK_SIZE, record["size_bytes"] - body.index * CHUNK_SIZE)
         if expected <= 0 or len(raw) != expected:
             raise HTTPException(422, "File chunk has an incorrect size")
-        folder = "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
+        folder = "Assessments" if record.get("assessment_upload") else "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
         key = f"{folder}/{code}/part-{body.index}-{new_code('P')}"
         request.app.state.files.put(key, raw, "application/octet-stream")
         pending.append(key)
@@ -547,7 +566,7 @@ def finish_file(code: str, request: Request, user=Depends(current_user)):
             mime = mime if mime in {"image/png", "image/jpeg", "image/webp"} else None
         if len(raw) != record["size_bytes"] or not mime:
             raise HTTPException(422, "Upload a valid PDF or supported image file")
-        folder = "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
+        folder = "Assessments" if record.get("assessment_upload") else "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
         key = f"{folder}/{code}/{new_code('FILE')}"
         request.app.state.files.put(key, raw, mime)
         pending.append(key)
@@ -571,7 +590,13 @@ def view_file(code: str, request: Request, user=Depends(current_user)):
     if not record or not record.get("ready"):
         raise HTTPException(404, "File not found")
     if record["owner"] != user["code"]:
-        if record.get("syllabus_code"):
+        if record.get("assessment_code"):
+            from .assessment_workspace import authorize, get
+            assessment = get(data, record["assessment_code"])
+            authorize(data, user, assessment)
+            if code not in assessment.get("attachments", []):
+                raise HTTPException(404, "File not found")
+        elif record.get("syllabus_code"):
             from .syllabus_workspace import authorize_syllabus, get_syllabus
             syllabus = get_syllabus(data, record["syllabus_code"])
             authorize_syllabus(data, user, syllabus)

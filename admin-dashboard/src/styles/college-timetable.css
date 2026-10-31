@@ -718,3 +718,10 @@
   line-height: 1.8;
   font-size: 12px;
 }
+
+.ops-sheet .academic-editor-fields label {
+  font-size: 14.4px;
+}
+.ops-sheet .academic-day-options label {
+  font-size: 13.2px;
+}

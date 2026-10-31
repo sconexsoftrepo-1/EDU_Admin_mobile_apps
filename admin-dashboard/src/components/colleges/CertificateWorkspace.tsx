@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
   FileCheck2,
   FileText,
   Plus,
-  Search,
 } from "lucide-react";
 import SideDrawer from "./SideDrawer";
 import {
@@ -204,14 +204,12 @@ export default function CertificateWorkspace({
       )}
 
       <div className="as-toolbar">
-        <label>
-          <Search size={16} />
-          <input
-            placeholder="Search certificates"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </label>
+        <SearchField
+          placeholder="Search certificates"
+          value={search}
+          onValueChange={setSearch}
+          suggestions={searchValues(items, ["student_name", "template_name", "status"])}
+        />
           <button onClick={() => void load(true)} disabled={busy}>
           Refresh
         </button>

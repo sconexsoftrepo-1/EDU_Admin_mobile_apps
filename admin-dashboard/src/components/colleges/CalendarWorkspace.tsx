@@ -1,6 +1,7 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { CalendarDays, Clock3, ImagePlus, MapPin, Plus, Search } from "lucide-react";
+import { CalendarDays, Clock3, ImagePlus, MapPin, Plus } from "lucide-react";
 import SideDrawer from "./SideDrawer";
 import Image from "next/image";
 import { useOptionalCollege } from "./CollegeStore";
@@ -96,7 +97,7 @@ export default function CalendarWorkspace({ studentCode }: { studentCode?: strin
   return <main className="as-workspace cal-workspace">
     <header className="as-header"><div><span className="as-eyebrow">CAMPUS PLANNING</span><h1>Add &amp; manage Academic calendar</h1><p>Create an event for the whole college or a specific student group. Students and linked parents see events that match their enrollment.</p></div><WorkspacePrimaryAction disabled={!canCreate || optionsLoading} busy={optionsLoading} onClick={() => void openCreate()}><Plus size={17}/> {optionsLoading ? "Loading options…" : "Add event"}</WorkspacePrimaryAction></header>
     {data?.role === "parent" && data.students.length > 1 && <label className="as-parent-select">Student<select value={child} onChange={(e) => { setChild(e.target.value); void load(e.target.value); }}><option value="">Choose a student</option>{data.students.map((s) => <option key={s.code} value={s.code}>{s.name}</option>)}</select></label>}
-    <div className="as-toolbar"><label><Search size={16}/><input placeholder="Search calendar events" value={query} onChange={(e) => setQuery(e.target.value)}/></label><button onClick={() => void load()} disabled={busy}>Refresh</button></div>
+    <div className="as-toolbar"><SearchField placeholder="Search calendar events" value={query} onValueChange={setQuery} suggestions={searchValues(data?.items || [], ["title", "place", "short_description", "description"])} /><button onClick={() => void load()} disabled={busy}>Refresh</button></div>
     {error && <div className="as-alert" role="status">{error}<button onClick={() => void load()}>Retry</button></div>}{busy && <div className="as-empty">Loading calendar…</div>}
     {!busy && !error && events.length === 0 && <div className="as-empty"><CalendarDays/><h2>No events in the calendar</h2><p>Published events for the selected audience will appear here.</p></div>}
     <div className="cal-event-list">{events.map((event) => <article className="cal-event-card" key={event.code}><button className="cal-event-info" aria-label={`View details for ${event.title}`} title="Event details" onClick={() => setDetail(event)}>i</button>{event.image && <span className="cal-image-mark"><ImagePlus size={17}/></span>}<div><span className="as-pill">{event.event_type}</span><h2>{event.title}</h2><p><Clock3 size={15}/>{showDate(event.starts_at)}{event.ends_at && new Date(event.ends_at).toDateString() !== new Date(event.starts_at).toDateString() ? ` – ${showDate(event.ends_at)}` : " · One day"}</p>{event.place && <p><MapPin size={15}/>{event.place}</p>}<small>{audienceText(event, options || undefined)}</small><p className="cal-short">{event.short_description}</p></div></article>)}</div>

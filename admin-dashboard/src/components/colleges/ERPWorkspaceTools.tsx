@@ -1,4 +1,5 @@
 "use client";
+import "./search-field.css";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -463,9 +464,9 @@ export function WorkspaceSearch({
         .slice(0, 8)
     : [];
   return (
-    <div ref={container} className="erp-global-search">
+    <div ref={container} className="erp-global-search edu-search-field">
       <Search size={17} />
-      <input
+      <input className="edu-search-input"
         ref={input}
         value={query}
         aria-label="Search portal modules"
