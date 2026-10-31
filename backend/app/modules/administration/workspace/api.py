@@ -139,6 +139,7 @@ def lookup(table: str, request: Request, user=Depends(current_user)):
     return [
         {
             "value": r["code"],
+            **({"duration_semesters":r.get("duration_semesters"),"course_level":r.get("course_level")} if table=="programs" else {"program_code":r.get("program_code")} if table=="academic_years" else {}),
             "label": r.get("name")
             or r.get("title")
             or " ".join(str(r.get(k, "")) for k in ["first_name", "last_name"]).strip()

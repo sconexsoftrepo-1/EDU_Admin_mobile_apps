@@ -1,5 +1,6 @@
 "use client";
 import { useErrorToast } from "./toast";
+import CourseSemesterWorkspace from "./CourseSemesterWorkspace";
 /**
  * Side panel of a course: its details and year-wise batches with student counts — total, by year
  * of study, hostel and bus users, gender split and fees raised.
@@ -170,25 +171,9 @@ export default function CourseInsightsPanel({
                 </div>
               </section>
             )}
-
-            {data.semester_labels.length > 0 && (
-              <section className="crs-panel-section">
-                <h3>Semester plan</h3>
-                <ul className="crs-terms crs-terms-plan">
-                  {data.semester_labels.map((label) => (
-                    <li key={label}>{label}</li>
-                  ))}
-                </ul>
-                {/^\d-\d$/.test(data.semester_labels[0]) && (
-                  <p className="crs-panel-empty">
-                    Year-semester: 1-2 is the 1st year, 2nd semester. Marks and
-                    backlogs are recorded against these semesters.
-                  </p>
-                )}
-              </section>
-            )}
           </>
         )}
+        <CourseSemesterWorkspace key={text(course.code)} course={course} />
         <section className="crs-panel-section">
           <h3>Course details</h3>
           <dl className="crs-details">

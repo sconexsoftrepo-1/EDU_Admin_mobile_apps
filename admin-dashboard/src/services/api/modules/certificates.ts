@@ -1,6 +1,6 @@
 import { apiDownload, apiRequest } from "../client";
 
-export type CertificateTemplate = { code: string; name: string; description: string };
+export type CertificateTemplate = { code: string; name: string; description: string; paper_size?: string };
 export type CertificateRow = Record<string, any> & { code: string; status: string };
 export type CertificateOptions = { templates: CertificateTemplate[]; courses: any[]; academic_years: any[]; students: any[] };
 export const certificates = {

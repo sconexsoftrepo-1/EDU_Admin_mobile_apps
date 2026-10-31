@@ -107,7 +107,7 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(target);
           await tester.pumpAndSettle();
-          expect(find.text(screen['title']), findsWidgets);
+          expect(find.text(['results','academics'].contains(screen['key']) ? 'Academic progress' : screen['title']), findsWidgets);
           expect(
             find.text('Couldn’t load this screen'),
             findsNothing,

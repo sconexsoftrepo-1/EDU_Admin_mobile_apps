@@ -82,6 +82,8 @@ import {
   invalidateWorkspaceDataCache,
 } from "@/lib/colleges/workspace-cache";
 import EntryForm from "./RecordFormDrawer";
+import FeeHeadManager from "./FeeHeadManager";
+import SideDrawer from "./SideDrawer";
 import { feeHeadForm } from "@/lib/colleges/fee-head-form";
 import ConfigurationEditor from "./ConfigurationEditor";
 import PersonalPortal from "./PersonalPortal";
@@ -91,6 +93,7 @@ import CalendarWorkspace from "./CalendarWorkspace";
 import "./tab-interactions.css";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import AssessmentWorkspace from "./AssessmentWorkspace";
+import AcademicProgressWorkspace, { AcademicProgressOverview } from "./AcademicProgressWorkspace";
 import CertificateWorkspace from "./CertificateWorkspace";
 import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
@@ -181,6 +184,8 @@ const PRIMARY_ONLY = new Set(["student-enrollment", "students"]);
 /** Screens whose forms sit in the page header (no table picker or search box). */
 const HEADER_ACTIONS = new Set<string>();
 const CUSTOM_WORKSPACES = new Set([
+  "academics",
+  "results",
   "assessments",
   "attendance",
   "admissions",
@@ -230,6 +235,7 @@ export default function ConnectedPortal({
   const [pageOffset, setPageOffset] = useState(0);
   const [validatingWorkbook, setValidatingWorkbook] = useState(false);
   const studentFilterRequest = useRef({ path: "", query: "" });
+  const [feeHeads, setFeeHeads] = useState<{initial?: Row} | null>(null);
   const [studentInfo, setStudentInfo] = useState<Row | null>(null);
   const [fileOwner, setFileOwner] = useState<{
     personKind: "student" | "employee" | "application";
@@ -682,6 +688,7 @@ export default function ConnectedPortal({
   const edit = async (row?: Row) => {
     if (!resource || (!row && studentScreen)) return;
     const current = resource;
+    if (current.name === "fee_heads") {setFeeHeads({initial:row});return;}
     try {
       const bound = await api.workspace.resourceForm(
         current.name,
@@ -1055,7 +1062,8 @@ export default function ConnectedPortal({
       <section
         className={`edu-content ${studentScreen ? "edu-enroll" : ""}`}
       >
-        {selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : selected === "admissions" ? (
+        {selected === "overview" && <AcademicProgressOverview onOpen={()=>setSelected(screens.some(s=>s.key==="academics")?"academics":"results")}/>}
+        {["academics","results"].includes(selected) ? <AcademicProgressWorkspace onNavigate={setSelected}/> : selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : selected === "admissions" ? (
           <AdmissionWorkspace
             college={college}
             path={resource?.name === "admission_enquiries" ? resource.path : "/api/v1/admissions/admission-enquiries"}
@@ -1281,7 +1289,7 @@ export default function ConnectedPortal({
                       resource.actions.includes("create") && (
                         <button className="edu-primary" onClick={() => edit()}>
                           <Plus size={15} aria-hidden="true" />{" "}
-                          {resource.name === "academic_years"
+                          {resource.name === "fee_heads" ? "Add fee head" : resource.name === "academic_years"
                             ? "Create batch"
                             : "Create record"}
                         </button>
@@ -1831,6 +1839,7 @@ export default function ConnectedPortal({
           </>
         )}
       </section>
+      {feeHeads && <SideDrawer title="Fee heads" expanded onClose={()=>setFeeHeads(null)}><FeeHeadManager initial={feeHeads.initial} onChanged={async()=>{if(resource)await refreshResource(resource)}}/></SideDrawer>}
       {configuration && (
         <ConfigurationEditor
           kind={configuration.kind}

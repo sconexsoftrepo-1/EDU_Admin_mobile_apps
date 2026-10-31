@@ -37,20 +37,36 @@ const empty = {
   excused: 0,
 };
 
-export default function AttendanceWorkspace() {
+export default function AttendanceWorkspace({
+  initialClass,
+}: {
+  initialClass?: {
+    code: string;
+    program_code: string;
+    academic_year_code: string;
+    section_code: string;
+    subject_code: string;
+    subject_name: string;
+    semester_number: number;
+    period: number;
+    session_date: string;
+  };
+} = {}) {
   const [options, setOptions] = useState<AttendanceOptions | null>(null),
     [data, setData] = useState<AttendanceData | null>(null);
   const [level, setLevel] = useState("intermediate"),
     [course, setCourse] = useState(""),
-    [program, setProgram] = useState(""),
-    [year, setYear] = useState(""),
-    [section, setSection] = useState(""),
+    [program, setProgram] = useState(initialClass?.program_code || ""),
+    [year, setYear] = useState(initialClass?.academic_year_code || ""),
+    [section, setSection] = useState(initialClass?.section_code || ""),
     [child, setChild] = useState("");
-  const [day, setDay] = useState(() => localDate(new Date())),
-    [period, setPeriod] = useState(1),
+  const [day, setDay] = useState(
+      () => initialClass?.session_date || localDate(new Date()),
+    ),
+    [period, setPeriod] = useState(initialClass?.period || 1),
     [scope, setScope] = useState("month"),
     [query, setQuery] = useState(""),
-    [subject, setSubject] = useState("");
+    [subject, setSubject] = useState(initialClass?.subject_name || "");
   const [draft, setDraft] = useState<Record<string, AttendanceStatus>>({}),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
@@ -67,13 +83,22 @@ export default function AttendanceWorkspace() {
       .then((value) => {
         if (!active) return;
         setOptions(value);
+        if (initialClass) {
+          const chosen = value.courses.find(
+            (p) => p.code === initialClass.program_code,
+          );
+          if (chosen) {
+            setLevel(chosen.course_level);
+            setCourse(chosen.name);
+          }
+        }
         if (value.students.length) setChild(value.students[0].code);
       })
       .catch((e) => active && setError(errorText(e)));
     return () => {
       active = false;
     };
-  }, [optionsRevision]);
+  }, [optionsRevision, initialClass]);
   const personal = !!options?.personal;
   useEffect(() => {
     if (!options || (!personal && (!program || !year))) return;
@@ -172,6 +197,15 @@ export default function AttendanceWorkspace() {
         program_code: program,
         academic_year_code: year,
         section_code: section || null,
+        slot_code:
+          initialClass &&
+          program === initialClass.program_code &&
+          year === initialClass.academic_year_code &&
+          section === initialClass.section_code &&
+          day === initialClass.session_date &&
+          period === initialClass.period
+            ? initialClass.code
+            : undefined,
         session_date: day,
         period,
         subject: subject || current?.subject || "",

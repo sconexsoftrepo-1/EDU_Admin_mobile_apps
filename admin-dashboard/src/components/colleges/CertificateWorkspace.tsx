@@ -431,7 +431,7 @@ export default function CertificateWorkspace({
                   </span>
                   <h3>{selectedStudent?.name || "Student name"}</h3>
                   <p>
-                    {options.templates.find((row) => row.code === template)?.description}
+                    {[options.templates.find((row) => row.code === template)?.description, options.templates.find((row) => row.code === template)?.paper_size].filter(Boolean).join(" · ")}
                   </p>
                   <div>
                     {selectedCourse?.name || "Course"}

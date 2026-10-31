@@ -348,7 +348,7 @@ function AssessmentComposer({
     assessments
       .options(program || undefined, year || undefined, section || undefined)
       .then((r) => {
-        if (active) setOptions(r);
+        if (active) { setOptions(r); if (!initial && r.current_semester) setSemester(r.current_semester); }
       })
       .catch((e) => {
         if (active) setError(errorText(e));
@@ -356,7 +356,7 @@ function AssessmentComposer({
     return () => {
       active = false;
     };
-  }, [program, year, section]);
+  }, [program, year, section, initial]);
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;

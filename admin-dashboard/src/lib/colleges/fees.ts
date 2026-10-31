@@ -18,26 +18,14 @@ export type InstitutionDetails = {
 };
 export function feeComponents(row: RecordRow): FeeComponent[] {
   if (row.components?.length) return row.components.map((c) => ({ ...c }));
-  const heads: [string, number][] = [
-    ["Tuition", 60],
-    ["Admission", 5],
-    ["Library", 3],
-    ["Laboratory", 8],
-    ["Examination", 6],
-    ["University", 5],
-    ["Student services", 3],
-    ["Hostel", 6],
-    ["Transport", 4],
+  return [
+    {
+      id: String(row.id),
+      name: "Saved fee amount (itemized breakdown not configured)",
+      amount: row.amount || 0,
+      gstRate: 0,
+    },
   ];
-  let assigned = 0;
-  return heads.map(([name, percent], i) => {
-    const amount =
-      i === heads.length - 1
-        ? (row.amount || 0) - assigned
-        : Math.floor(((row.amount || 0) * percent) / 100);
-    assigned += amount;
-    return { id: `fee-${i + 1}`, name, amount, gstRate: 0 };
-  });
 }
 export function feeTotals(components: FeeComponent[], mode: TaxMode) {
   const lines = components.map((c) => {

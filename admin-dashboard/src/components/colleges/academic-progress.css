@@ -1,0 +1,313 @@
+.ap-workspace {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.ap-heading,
+.ap-panel > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.ap-heading h2 {
+  margin: 8px 0;
+  font-size: clamp(24px, 3vw, 34px);
+}
+.ap-heading p,
+.ap-panel p {
+  color: #776b5b;
+  line-height: 1.6;
+}
+.ap-eyebrow {
+  color: #81511b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.ap-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+.ap-workspace label,
+.ap-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-weight: 600;
+  font-size: 16px;
+  min-width: 0;
+}
+.ap-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.ap-metrics article,
+.ap-panel {
+  background: white;
+  border: 1px solid #e7ddce;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 0;
+}
+.ap-metrics article span {
+  display: block;
+  color: #756855;
+  font-size: 13px;
+}
+.ap-metrics article strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 30px;
+}
+.ap-panel {
+  display: grid;
+  gap: 20px;
+}
+.ap-panel h3 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0;
+  font-size: 19px;
+}
+.ap-panel header p {
+  margin: 10px 0 0;
+}
+.ap-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ap-actions > .combo {
+  min-width: 160px;
+  max-width: 280px;
+}
+.ap-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ap-tabs button[aria-selected="true"] {
+  background: #81511b;
+  color: white;
+  border-color: #81511b;
+}
+.ap-classes,
+.ap-subjects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+.ap-classes article,
+.ap-subjects article {
+  border: 1px solid #e8e0d4;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ap-classes article.is-current {
+  border-color: #3e846b;
+  background: #f0f7f2;
+}
+.ap-classes strong {
+  font-size: 17px;
+}
+.ap-classes p {
+  font-size: 13px;
+  margin: 0;
+}
+.ap-status {
+  font-size: 12px;
+  color: #386c51;
+  text-transform: capitalize;
+}
+.ap-subjects article span {
+  font-size: 12px;
+  color: #776b5b;
+}
+.ap-comparison {
+  display: grid;
+  gap: 16px;
+}
+.ap-comparison > div {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(100px, 2fr) 80px;
+  gap: 16px;
+  align-items: center;
+  font-size: 14px;
+}
+.ap-bar-track {
+  height: 12px;
+  background: #f0e9de;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ap-bar-track i {
+  display: block;
+  height: 100%;
+  background: #91612e;
+  border-radius: 10px;
+}
+.ap-semester-chart {
+  display: flex;
+  gap: 18px;
+  align-items: end;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+.ap-semester-chart > button {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  background: transparent;
+  min-width: 70px;
+  border: 0;
+}
+.ap-semester-chart > button > div {
+  height: 110px;
+  width: 40px;
+  background: #f2ece2;
+  display: flex;
+  align-items: end;
+  border-radius: 7px;
+  overflow: hidden;
+}
+.ap-semester-chart i {
+  display: block;
+  width: 100%;
+  background: #3e846b;
+  border-radius: 7px;
+}
+.ap-semester-chart span {
+  font-size: 12px;
+}
+.ap-semester-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  background: #f8f5ef;
+  padding: 18px;
+  border-radius: 12px;
+}
+.ap-semester-stats span {
+  font-size: 12px;
+  color: #70624f;
+}
+.ap-semester-stats strong {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 5px;
+  color: #3b3024;
+}
+.ap-table {
+  overflow: auto;
+  min-width: 0;
+}
+.ap-table table {
+  border-collapse: collapse;
+  min-width: 650px;
+  width: 100%;
+}
+.ap-table th,
+.ap-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee6d9;
+  vertical-align: top;
+}
+.ap-table th {
+  background: #f8f5ef;
+  font-size: 13px;
+}
+.ap-table details p {
+  min-width: 250px;
+  font-size: 13px;
+}
+.ap-badge {
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: #f2eee6;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ap-badge.all_clear {
+  color: #286249;
+  background: #e9f4ed;
+}
+.ap-badge.backlogs,
+.ap-backlog {
+  color: #a33d31;
+  background: #fbefeb;
+}
+.ap-note {
+  padding: 15px;
+  border-left: 3px solid #bb8f40;
+  background: #fff8e7;
+}
+.ap-editor {
+  display: grid;
+  gap: 20px;
+  padding: 28px clamp(20px, 3vw, 42px);
+}
+.ap-editor input:not([type="checkbox"]) {
+  font: inherit;
+  border: 1px solid #ddd4c7;
+  border-radius: 8px;
+  padding: 11px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ap-editor fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  border: 1px solid #e7ddce;
+  border-radius: 12px;
+  padding: 20px;
+}
+.ap-editor .ap-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.ap-editor footer {
+  display: flex;
+  gap: 12px;
+  justify-content: end;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 15px;
+}
+.ap-editor input[type="checkbox"] {
+  width: auto;
+}
+.ap-workspace button {
+  min-height: 40px;
+}
+@media (max-width: 750px) {
+  .ap-metrics,
+  .ap-semester-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ap-panel {
+    padding: 18px;
+  }
+  .ap-comparison > div {
+    grid-template-columns: minmax(100px, 1fr) minmax(60px, 1fr) 60px;
+    gap: 9px;
+    font-size: 12px;
+  }
+  .ap-editor fieldset {
+    grid-template-columns: 1fr;
+  }
+  .ap-actions {
+    width: 100%;
+  }
+}

@@ -133,6 +133,9 @@ class CollegeApi {
     null,
   )).bodyBytes;
 
+  Future<dynamic> academicProgress({String program='',String year='',String student=''})=>get(_Endpoints.query('/academics/semester-workspace',{if(program.isNotEmpty)'program_code':program,if(year.isNotEmpty)'academic_year_code':year,if(student.isNotEmpty)'student_code':student}));
+  Future<dynamic> saveSemesterCalendar(Json body)=>_send('PUT','/academics/semester-workspace/calendar',body);
+  Future<dynamic> saveSemesterResults(Json body)=>_send('PUT','/academics/semester-workspace/results',body);
   static const _assessments = '/academics/assessment-workspace';
   Future<dynamic> assessments({String studentCode = ''}) => get(
     _Endpoints.query(_assessments, {

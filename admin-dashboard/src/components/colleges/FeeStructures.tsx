@@ -1,4 +1,7 @@
 "use client";
+import {useState} from "react";
+import FeeHeadManager from "./FeeHeadManager";
+import SideDrawer from "./SideDrawer";
 import { semesterAmounts } from "@/lib/colleges/program-fee-schedules";
 import PDFActions from "./PDFActions";
 import { Pencil, Download } from "lucide-react";
@@ -9,9 +12,11 @@ import { feeComponents, feeTotals, taxLabel } from "@/lib/colleges/fees";
 import { professionalPdf } from "@/lib/colleges/download";
 import { structureReport, tableReport } from "@/lib/colleges/reports";
 export default function FeeStructures({ college: c }: { college: College }) {
+  const [headsOpen,setHeadsOpen]=useState(false);
   const { state: s, role, run } = useCollege();
   return (
     <>
+      {headsOpen&&<SideDrawer title="Fee heads" expanded onClose={()=>setHeadsOpen(false)}><FeeHeadManager/></SideDrawer>}
       <div className="erp-welcome">
         <div>
           <h1>Fee structures</h1>
@@ -41,6 +46,7 @@ export default function FeeStructures({ college: c }: { college: College }) {
           <Download size={15} />
           Export all structures
         </PDFActions>
+        <button type="button" onClick={()=>setHeadsOpen(true)}>Fee heads & custom heads</button>
       </div>
       <p className="erp-help">
         Each card contains the saved fee breakdown for one course schedule.
@@ -85,7 +91,7 @@ export default function FeeStructures({ college: c }: { college: College }) {
                             scope.academicYear,
                             scope.basis === "full_course"
                               ? `${Math.ceil(scope.termCount / 2)} years · ${scope.termCount} semesters`
-                              : `${scope.frequency === "annual" ? "Year" : "Semester"} ${scope.studyYear}`,
+                              : `${scope.basis === "semester" || scope.frequency !== "annual" ? "Semester" : "Year"} ${scope.studyYear}`,
                             scope.installment > 1
                               ? `Installment ${scope.installment}`
                               : "",
@@ -127,9 +133,11 @@ export default function FeeStructures({ college: c }: { college: College }) {
                       <dt>
                         {scope?.basis === "full_course"
                           ? "Full course total"
-                          : !scope || scope.frequency === "annual"
-                            ? "Annual total"
-                            : "Schedule total"}
+                          : scope?.basis === "semester"
+                            ? "Semester total"
+                            : !scope || scope.frequency === "annual"
+                              ? "Annual total"
+                              : "Schedule total"}
                       </dt>
                       <dd>{money(total.total)}</dd>
                     </div>

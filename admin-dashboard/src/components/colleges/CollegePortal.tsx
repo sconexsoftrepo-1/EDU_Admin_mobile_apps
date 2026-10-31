@@ -12,6 +12,7 @@ import CalendarWorkspace from "./CalendarWorkspace";
 import "./tab-interactions.css";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import AssessmentWorkspace from "./AssessmentWorkspace";
+import AcademicProgressWorkspace, { AcademicProgressOverview } from "./AcademicProgressWorkspace";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
@@ -1363,6 +1364,7 @@ export default function CollegePortal({
       ),
     );
   function content() {
+    if (activeModule === "academics") return <AcademicProgressWorkspace onNavigate={screen=>router.push(nav(screen))}/>;
     if (activeModule === "assessments") return <AssessmentWorkspace />;
     if (activeModule === "attendance") return <AttendanceWorkspace />;
     if (activeModule === "assignments") return <AssignmentWorkspace />;
@@ -1374,6 +1376,7 @@ export default function CollegePortal({
     if (activeModule === "dashboard")
       return (
         <>
+          <AcademicProgressOverview onOpen={()=>router.push(nav("academics"))}/>
           <OperationsSummary college={c} />
           {dashboard()}
         </>
