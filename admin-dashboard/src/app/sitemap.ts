@@ -1,4 +1,3 @@
-import { colleges, publicRoutes, collegeRoot } from "@/data/colleges";
 import { restaurants, restaurantRoutes } from "@/data/restaurants";
 import type { MetadataRoute } from "next";
 import { schools, schoolRoutes } from "@/data/education";
@@ -13,7 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/hotels-resorts",
     "/education-schools",
     "/restaurants-food",
-    "/colleges-institutions",
     "/contact",
   ];
   const demoPaths =
@@ -58,21 +56,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
           ...r.menu.map((d) => `/restaurants-food/${r.slug}/menu/${d.slug}`),
         ])
       : [];
-  return [
-    ...publicPaths,
-    ...demoPaths,
-    ...schoolPaths,
-    ...restaurantPaths,
-    ...(process.env.NEXT_PUBLIC_INDEX_COLLEGE_DEMOS === "true"
-      ? colleges.flatMap((c) =>
-          publicRoutes
-            .filter((p) => p !== "admissions/apply")
-            .map((p) => collegeRoot(c) + (p ? "/" + p : "")),
-        )
-      : []),
-  ].map((p) => ({
-    url: origin + p,
-    changeFrequency: "monthly",
-    priority: p === "/" ? 1 : 0.7,
-  }));
+  return [...publicPaths, ...demoPaths, ...schoolPaths, ...restaurantPaths].map(
+    (p) => ({
+      url: origin + p,
+      changeFrequency: "monthly",
+      priority: p === "/" ? 1 : 0.7,
+    }),
+  );
 }

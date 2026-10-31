@@ -1,0 +1,4 @@
+*.exe
+*.download
+__pycache__/
+logs/

@@ -1,0 +1,101 @@
+/* Tab foregrounds follow their hover surface, including badges and icons. */
+:is(.college-erp, .edu-connected)
+  :is(
+    [role="tab"],
+    .erp-profile-tabs > button,
+    .erp-segmented > button,
+    .as-tabs > button,
+    .adm-tabs > button,
+    .att-tabs > button,
+    .assessment-tabs > button,
+    .crs-segment > button,
+    .edu-detail-tabs > button
+  ) {
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+:is(.college-erp, .edu-connected)
+  :is(
+    [role="tab"],
+    .erp-profile-tabs > button,
+    .erp-segmented > button,
+    .as-tabs > button,
+    .adm-tabs > button,
+    .att-tabs > button,
+    .assessment-tabs > button,
+    .crs-segment > button,
+    .edu-detail-tabs > button
+  ):is(:hover, :focus-visible):not(:disabled) {
+  color: #fff;
+  background-color: #6b441b;
+  border-color: #6b441b;
+}
+:is(.college-erp, .edu-connected)
+  :is(
+    [role="tab"],
+    .erp-profile-tabs > button,
+    .erp-segmented > button,
+    .as-tabs > button,
+    .adm-tabs > button,
+    .att-tabs > button,
+    .assessment-tabs > button,
+    .crs-segment > button,
+    .edu-detail-tabs > button
+  ):is(
+    [aria-selected="true"],
+    [aria-pressed="true"],
+    [aria-current="page"],
+    .active
+  ):is(:hover, :focus-visible):not(:disabled) {
+  color: #fff;
+  background-color: #4a2e12;
+  border-color: #4a2e12;
+}
+:is(.college-erp, .edu-connected)
+  :is(
+    [role="tab"],
+    .erp-profile-tabs > button,
+    .erp-segmented > button,
+    .as-tabs > button,
+    .adm-tabs > button,
+    .att-tabs > button,
+    .assessment-tabs > button,
+    .crs-segment > button,
+    .edu-detail-tabs > button
+  ):is(:hover, :focus-visible):not(:disabled)
+  :is(span, small, svg) {
+  color: inherit;
+}
+:is(.college-erp, .edu-connected)
+  :is(
+    [role="tab"],
+    .erp-profile-tabs > button,
+    .erp-segmented > button,
+    .as-tabs > button,
+    .adm-tabs > button,
+    .att-tabs > button,
+    .assessment-tabs > button,
+    .crs-segment > button,
+    .edu-detail-tabs > button
+  ):focus-visible {
+  outline: 2px solid #a46a27;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.college-erp, .edu-connected)
+    :is(
+      [role="tab"],
+      .erp-profile-tabs > button,
+      .erp-segmented > button,
+      .as-tabs > button,
+      .adm-tabs > button,
+      .att-tabs > button,
+      .assessment-tabs > button,
+      .crs-segment > button,
+      .edu-detail-tabs > button
+    ) {
+    transition: none;
+  }
+}

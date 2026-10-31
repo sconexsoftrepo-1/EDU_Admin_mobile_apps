@@ -1,5 +1,6 @@
+import 'helpers/splash_test_support.dart';
 import 'dart:convert';
-import 'package:edunexa_admin/src/edunexa_client.dart';
+import 'package:edunexa_admin/app/edunexa_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,14 +59,26 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       await tester.tap(find.text(role.label));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
+      if (find.text('Continue').evaluate().isNotEmpty) {
+        await tester.ensureVisible(find.text('Continue'));
+        await tester.tap(find.text('Continue'));
+        await settleStartup(tester);
+      }
       await tester.enterText(find.byType(TextFormField).first, 'college-user');
       await tester.enterText(find.byType(TextFormField).last, 'password');
       await tester.tap(find.text('Sign in'));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       expect(find.text('${role.label} dashboard'), findsWidgets);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('More'),
+        ),
+      );
+      await settleStartup(tester);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('module-profile')),
         200,
@@ -87,14 +100,21 @@ void main() {
         tester.element(find.byKey(const ValueKey('module-profile'))),
         alignment: 0.3,
       );
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       await tester.tap(find.byKey(const ValueKey('module-profile')));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       expect(find.text('College user'), findsOneWidget);
       await tester.tap(find.byTooltip('Open navigation menu'));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       await tester.tap(find.text('Dashboard'));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('More'),
+        ),
+      );
+      await settleStartup(tester);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('module-profile')),
         200,
@@ -108,8 +128,8 @@ void main() {
       expect(find.byKey(const ValueKey('module-profile')), findsOneWidget);
       expect(find.text('College user'), findsNothing);
       await tester.tap(find.byTooltip('Sign out'));
-      await tester.pumpAndSettle();
-      expect(find.text('Sign in'), findsOneWidget);
+      await settleStartup(tester);
+      expect(find.text('Continue'), findsOneWidget);
       expect(
         await const FlutterSecureStorage().read(
           key: 'edunexa-refresh-${role.clientId}',
@@ -146,7 +166,7 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleStartup(tester);
     expect(find.text('Teacher dashboard'), findsWidgets);
     expect(find.text('Sign in'), findsNothing);
   });
@@ -167,15 +187,17 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await settleStartup(tester);
+    await tester.tap(find.text('Continue'));
+    await settleStartup(tester);
     await tester.enterText(find.byType(TextFormField).first, 'parent');
     await tester.enterText(find.byType(TextFormField).last, 'secret');
     await tester.tap(find.text('Sign in'));
-    await tester.pumpAndSettle();
+    await settleStartup(tester);
     expect(find.text('Role is not allowed'), findsOneWidget);
     expect(find.byType(MobileWorkspace), findsNothing);
     await tester.tap(find.text('Student'));
-    await tester.pumpAndSettle();
+    await settleStartup(tester);
     expect(find.text('Role is not allowed'), findsNothing);
     expect(
       tester
@@ -223,15 +245,27 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       await tester.ensureVisible(find.text(role.label));
       await tester.tap(find.text(role.label));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
+      if (find.text('Continue').evaluate().isNotEmpty) {
+        await tester.ensureVisible(find.text('Continue'));
+        await tester.tap(find.text('Continue'));
+        await settleStartup(tester);
+      }
       await tester.enterText(find.byType(TextFormField).first, 'college-user');
       await tester.enterText(find.byType(TextFormField).last, 'password');
       await tester.ensureVisible(find.text('Sign in'));
       await tester.tap(find.text('Sign in'));
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('More'),
+        ),
+      );
+      await settleStartup(tester);
       await tester.scrollUntilVisible(
         find.byKey(const ValueKey('module-assignments')),
         200,
@@ -242,7 +276,7 @@ void main() {
             )
             .first,
       );
-      await tester.pumpAndSettle();
+      await settleStartup(tester);
       expect(tester.takeException(), isNull);
     }
   });

@@ -133,7 +133,11 @@ export default function TemplateSwitcher() {
       origin(),
     );
   }
-  if (path.startsWith("/colleges-institutions/") && path.includes("/portal"))
+  if (
+    path === "/portal" ||
+    path.startsWith("/portal/") ||
+    (path.startsWith("/colleges-institutions/") && path.includes("/portal"))
+  )
     return null;
   return (
     <>
@@ -352,7 +356,7 @@ export default function TemplateSwitcher() {
             <Link
               key={c.slug}
               className={`switch-option ${path.includes(c.slug) ? "selected" : ""}`}
-              href={`/colleges-institutions/${c.slug}`}
+              href="/portal/login"
               onClick={close}
               aria-current={path.includes(c.slug) ? "page" : undefined}
             >

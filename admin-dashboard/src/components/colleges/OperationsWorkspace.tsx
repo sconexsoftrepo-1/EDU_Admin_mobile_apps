@@ -1,6 +1,6 @@
 "use client";
 import TimetableOverview from "./TimetableOverview";
-import MobileAcademicCalendar from "./MobileAcademicCalendar";
+import AcademicCalendar from "./AcademicCalendar";
 import PDFActions from "./PDFActions";
 import { payslipReport } from "@/lib/colleges/operations-reports";
 import { preciseMoney as money } from "@/lib/colleges/operations";
@@ -27,7 +27,6 @@ import {
 import { professionalPdf, download } from "@/lib/colleges/download";
 import IconAction from "./IconAction";
 const Transport = dynamic(() => import("./TransportWorkspace"));
-const Mobile = dynamic(() => import("./MobileAppsWorkspace"));
 const Charts = dynamic(() => import("./OperationsCharts"));
 const transportModules = [
   "transport",
@@ -71,13 +70,11 @@ export function OperationsSummary({ college }: { college: College }) {
           ["Total employees", m.employees],
           ["Faculty", m.faculty],
           ["Payroll net", money(m.payroll)],
-          ["Passengers", `${m.occupied} / ${m.capacity}`],
           ["Purchase approvals", m.purchases],
-          ["Low stock", m.lowStock],
         ]}
       />
       <div className="ops-module-links">
-        {["payroll", "expense-dashboard", "transport", "mobile-apps"]
+        {["payroll", "expense-dashboard", "transport"]
           .filter((key) => permissions[role!].includes(key))
           .map((key) => (
             <Link
@@ -960,31 +957,6 @@ export default function OperationsWorkspace({
   );
   if (transportModules.includes(module))
     return <Transport college={college} module={module} />;
-  if (
-    [
-      "mobile-apps",
-      "admin-app",
-      "parent-app",
-      "student-app",
-      "teacher-app",
-    ].includes(module)
-  )
-    return (
-      <Mobile
-        college={college}
-        initialApp={
-          module === "admin-app"
-            ? "Admin"
-            : module === "parent-app"
-              ? "Parent"
-              : module === "student-app"
-                ? "Student"
-                : module === "teacher-app"
-                  ? "Teacher"
-                  : undefined
-        }
-      />
-    );
   if (module === "timetable" && role !== "Super Admin")
     return <TimetableOverview college={college} />;
   const payrollModules = ["payroll", "payslips", "payroll-reports"];
@@ -1440,7 +1412,7 @@ export default function OperationsWorkspace({
         )}{" "}
         {key === "calendar" && (
           <div
-            className="erp-panel admin-academic-calendar mobile-redesign"
+            className="erp-panel admin-academic-calendar academic-calendar-theme"
             data-institution={college.slug}
           >
             <h3>Shared academic calendar</h3>
@@ -1448,7 +1420,7 @@ export default function OperationsWorkspace({
               Published sessions and institution events. Changes update the
               connected mobile portals.
             </p>
-            <MobileAcademicCalendar
+            <AcademicCalendar
               periods={rows("timetable")}
               events={[...rows("calendar"), ...rows("assessments")]}
             />

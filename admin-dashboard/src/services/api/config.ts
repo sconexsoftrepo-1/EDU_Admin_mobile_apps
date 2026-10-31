@@ -10,8 +10,8 @@
  *     -> Next.js proxy route                     (src/app/api/college/[...path]/route.ts)
  *          keeps the access/refresh tokens in httpOnly cookies and refreshes them
  *     -> {API_CONFIG.backendUrl}{API_CONFIG.backendPrefix}/<path>
- *                                                e.g. http://185.193.19.156:8010/api/v1/auth/login
- *     -> FastAPI backend (backend/), PostgreSQL on Supabase
+ *                                                e.g. http://150.241.246.34:8010/api/v1/auth/login
+ *     -> FastAPI backend (backend/), SQL Server on the Windows backend server
  *
  * Endpoint paths in the module services are written WITHOUT the /api/v1 prefix
  * ("auth/login", "workspace/screens"); the proxy adds it. The full list of backend
@@ -20,13 +20,13 @@
  * Environment
  * -----------
  *   EDUNEXA_API_URL   Backend origin used by the server-side proxy (never sent to the browser).
- *                     Default http://185.193.19.156:8010 (the deployed backend);
+ *                     Default http://150.241.246.34:8010 (the deployed backend);
  *                     set EDUNEXA_API_URL=http://127.0.0.1:8010 in .env.local to use a local backend.
  */
 
 /** Origin of the FastAPI backend, read on the server only (proxy route). */
 const backendUrl = (
-  process.env.EDUNEXA_API_URL || "http://185.193.19.156:8010"
+  process.env.EDUNEXA_API_URL || "http://150.241.246.34:8010"
 ).replace(/\/+$/, "");
 
 export const API_CONFIG = {
@@ -56,7 +56,7 @@ export const API_CONFIG = {
     access: "edu_access",
     refresh: "edu_refresh",
     path: "/api/college",
-    refreshMaxAgeSeconds: 7 * 86_400,
+    refreshMaxAgeSeconds: 30 * 86_400,
   },
   /** Default page size of list endpoints (backend default 50, maximum 200). */
   pageSize: 50,

@@ -26,8 +26,11 @@ SCREENS = {
         ("collections", "Collections and receipts", "payments"),
         ("expenses", "Expenditures", "expenses"),
         ("employees", "Employees", "employees"),
+        ("assessments", "Assessments and marks", "exams"),
+        ("assignments", "Assignments and review", "assignments"),
         ("hostel", "Hostel allocations", "hostel_allocations"),
         ("calendar", "Calendar and events", "calendar_events"),
+        ("certificates", "Certificate approvals", "certificates"),
         ("announcements", "Announcements", "announcements"),
         ("notifications", "Notifications", "notifications"),
         ("profile", "My profile", "profile"),
@@ -41,6 +44,7 @@ SCREENS = {
         ("leave", "Student leave", "student_leave_requests"),
         ("results", "Exam results", "exam_results"),
         ("timetable", "Timetable", "timetable_slots"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Assignments and performance", "assignments"),
         ("syllabus", "Syllabus and resources", "learning_resources"),
         ("certificates", "Certificates", "certificates"),
@@ -55,6 +59,7 @@ SCREENS = {
         ("profile", "My profile", "profile"),
         ("timetable", "Timetable", "timetable_slots"),
         ("attendance", "Attendance", "student_attendance"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Assignments and submissions", "assignments"),
         ("syllabus", "Syllabus and resources", "learning_resources"),
         ("results", "Exam results", "exam_results"),
@@ -75,6 +80,7 @@ SCREENS = {
         ("classes", "Assigned classes", "subject_offerings"),
         ("timetable", "Timetable and period swap", "timetable_slots"),
         ("attendance", "Attendance entry", "student_attendance"),
+        ("assessments", "Assessments and marks", "exams"),
         ("assignments", "Homework and assignments", "assignments"),
         ("submissions", "Submissions and grading", "assignment_submissions"),
         ("syllabus", "Syllabus progress and resources", "learning_resources"),
@@ -455,6 +461,10 @@ def screen_data(
     if screen not in definitions:
         raise HTTPException(404, "Screen not available")
     data = request.app.state.store.snapshot()
+    if screen == "assessments":
+        from app.core.assessment_workspace import listing as assessment_listing
+        result = assessment_listing(request, student_code, user)
+        return {"screen":screen,"title":"Assessments","items":result["items"][offset:offset+limit],"total":len(result["items"]),"students":result["students"],"actions":[],"lookups":{},"summary":result["performance"],"selected_student_code":student_code}
     context = active_context(data, user, student_code)
     title, table = definitions[screen]
     selected = context["student"]
@@ -631,10 +641,19 @@ def screen_data(
             s = data["records"].get("students", {}).get(child, {})
             if s.get("campus_code"):
                 campus_codes.add(s["campus_code"])
+        scoped_students = set()
+        if user.get("person_type") == "student" and context.get("student"):
+            scoped_students = {context["student"]}
+        elif user.get("person_type") == "parent":
+            scoped_students = set(context.get("children", []))
+        from app.core.calendar_workspace import matches as event_matches
         items = [
             r
             for r in query_rows(data, table)
-            if r["campus_code"] in campus_codes
+            if (r["campus_code"] in campus_codes
+                or table == "calendar_events" and r.get("audience_type"))
+            and (table != "calendar_events" or user.get("person_type") not in {"student", "parent"}
+                 or event_matches(data, r, scoped_students))
             and (
                 table != "announcements"
                 or r.get("published_at")
@@ -650,22 +669,24 @@ def screen_data(
         items = [r for r in query_rows(data, table) if r["thread_code"] in threads]
     elif table == "notifications":
         items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
-    if table == "assignments" and not teacher:
-        items = [
-            {
-                **item,
-                "my_submission": next(
-                    (
-                        clean(r)
-                        for r in query_rows(data, "assignment_submissions")
-                        if r["assignment_code"] == item["code"]
-                        and r["student_code"] == selected
-                    ),
-                    None,
-                ),
-            }
-            for item in items
-        ]
+    if table == "assignments":
+        from app.core.assignment_workspace import listing as assignment_listing
+        items = assignment_listing(request, student_code, user)["items"]
+    if table == "exam_results" and user.get("person_type") in {"student", "parent"}:
+        from app.core.assignment_workspace import listing as assignment_listing
+        assignment_grades = assignment_listing(request, student_code, user)["items"]
+        for assignment in assignment_grades:
+            submission = assignment.get("my_submission")
+            if submission and submission.get("marks") is not None:
+                items.append({"code": submission["code"], "title": assignment["title"], "assessment_type": "assignment",
+                              "marks_obtained": submission["marks"], "marks": submission["marks"], "subject": assignment["title"], "max_marks": assignment["max_marks"],
+                              "feedback": submission.get("feedback"), "reviewed_at": submission.get("reviewed_at")})
+    if table == "exam_results" and user.get("person_type") in {"student", "parent"}:
+        from app.core.assessment_workspace import listing as assessment_listing
+        for assessment in assessment_listing(request, student_code, user)["items"]:
+            for student, mark in assessment["marks"].items():
+                if mark.get("marks") is not None or mark.get("absent"):
+                    items.append({"code":assessment["code"]+"-"+student,"student_code":student,"title":assessment["title"],"assessment_type":"assessment","subject":assessment["subject_name"],"marks_obtained":mark.get("marks"),"marks":mark.get("marks"),"max_marks":assessment["max_marks"],"absent":mark.get("absent"),"feedback":mark.get("feedback"),"reviewed_at":mark.get("reviewed_at")})
     if table == "calendar_events":
         if from_date and to_date and (to_date < from_date or (to_date - from_date).days > 366):
             raise HTTPException(422, "Choose a calendar range of up to one year")

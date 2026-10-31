@@ -1,6 +1,7 @@
-/** Private browser-memory cache. It never persists tokens, passwords or college records to disk. */
+/** Short lived tab cache for workspace responses. Auth tokens and passwords are never cached here. */
 const MAX_ENTRIES = 80;
 const MAX_AGE_MS = 5 * 60_000;
+const DATA_PREFIX = "edunexa-workspace-data:";
 type Entry = { value: unknown; updatedAt: number };
 const entries = new Map<string, Entry>();
 const pending = new Map<string, Promise<unknown>>();
@@ -14,10 +15,29 @@ export function workspaceCacheKey(
 }
 export function readWorkspaceCache<T>(key: string | null): T | undefined {
   if (!key) return undefined;
-  const entry = entries.get(key);
+  let entry = entries.get(key);
+  if (!entry && typeof window !== "undefined") {
+    try {
+      const raw = sessionStorage.getItem(DATA_PREFIX + key);
+      if (raw) {
+        const restored = JSON.parse(raw) as Entry;
+        if (restored && typeof restored.updatedAt === "number") {
+          entry = restored;
+          entries.set(key, restored);
+        }
+      }
+    } catch {
+      /* Storage may be disabled or full; requests remain authoritative. */
+    }
+  }
   if (!entry) return undefined;
   if (Date.now() - entry.updatedAt > MAX_AGE_MS) {
     entries.delete(key);
+    try {
+      sessionStorage.removeItem(DATA_PREFIX + key);
+    } catch {
+      /* Storage is optional. */
+    }
     return undefined;
   }
   return entry.value as T;
@@ -25,15 +45,29 @@ export function readWorkspaceCache<T>(key: string | null): T | undefined {
 export function writeWorkspaceCache<T>(key: string | null, value: T): T {
   if (!key) return value;
   entries.delete(key);
-  entries.set(key, { value, updatedAt: Date.now() });
-  while (entries.size > MAX_ENTRIES)
-    entries.delete(entries.keys().next().value!);
+  const entry = { value, updatedAt: Date.now() };
+  entries.set(key, entry);
+  try {
+    sessionStorage.setItem(DATA_PREFIX + key, JSON.stringify(entry));
+  } catch {
+    /* Memory cache still works. */
+  }
+  while (entries.size > MAX_ENTRIES) {
+    const oldest = entries.keys().next().value!;
+    entries.delete(oldest);
+    try {
+      sessionStorage.removeItem(DATA_PREFIX + oldest);
+    } catch {
+      /* Storage is optional. */
+    }
+  }
   return value;
 }
 /** Always revalidates; concurrent readers of the same account/role/resource share one request. */
 export function refreshWorkspaceCache<T>(
   key: string | null,
   loader: () => Promise<T>,
+  shouldCache: (value: T) => boolean = () => true,
 ): Promise<T> {
   if (!key) return loader();
   const existing = pending.get(key);
@@ -42,7 +76,8 @@ export function refreshWorkspaceCache<T>(
   const task = Promise.resolve()
     .then(loader)
     .then((value) => {
-      if (version === generation) writeWorkspaceCache(key, value);
+      if (version === generation && shouldCache(value))
+        writeWorkspaceCache(key, value);
       return value;
     })
     .finally(() => {
@@ -55,7 +90,25 @@ export function clearWorkspaceCache(): void {
   generation++;
   entries.clear();
   pending.clear();
+  clearWorkspaceDataStorage();
   forgetWorkspaceSession();
+}
+
+/** Invalidate cached API responses after any successful write while keeping login navigation. */
+export function invalidateWorkspaceDataCache(): void {
+  generation++;
+  entries.clear();
+  pending.clear();
+  clearWorkspaceDataStorage();
+}
+
+function clearWorkspaceDataStorage(): void {
+  try {
+    for (const key of Object.keys(sessionStorage))
+      if (key.startsWith(DATA_PREFIX)) sessionStorage.removeItem(key);
+  } catch {
+    /* Storage is optional. */
+  }
 }
 
 import type { AccountRole, MeResponse, ScreenSummary } from "@/services/api";

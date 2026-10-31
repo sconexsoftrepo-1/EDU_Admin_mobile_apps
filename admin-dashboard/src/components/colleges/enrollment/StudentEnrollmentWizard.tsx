@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "../SearchField";
 /**
  * Student enrollment wizard (the admission form of the college).
  *   Step 1  Student details: photo, student, last qualification, documents, guardian, Aadhaar,
@@ -472,10 +473,22 @@ export default function StudentEnrollmentWizard({
   college,
   onClose,
   onEnrolled,
+  initialApplicant,
 }: {
   college: College;
   onClose: () => void;
   onEnrolled?: (studentCode: string) => void;
+  initialApplicant?: {
+    first_name: string;
+    last_name: string;
+    email?: string;
+    phone?: string;
+    parent_name?: string;
+    parent_phone?: string;
+    program_code?: string;
+    academic_year_code?: string;
+    course_level?: "intermediate" | "degree";
+  };
 }) {
   const [step, setStep] = useState(0);
   const [options, setOptions] = useState<EnrollmentOptions | null>(null);
@@ -496,13 +509,13 @@ export default function StudentEnrollmentWizard({
   );
   const [files, setFiles] = useState<Files>({});
   const [student, setStudent] = useState({
-    first_name: "",
+    first_name: initialApplicant?.first_name || "",
     middle_name: "",
-    last_name: "",
+    last_name: initialApplicant?.last_name || "",
     date_of_birth: "",
     gender: "",
-    email: "",
-    phone: "",
+    email: initialApplicant?.email || "",
+    phone: String(initialApplicant?.phone || "").replace(/^\+?91\s*/, ""),
     aadhaar_number: "",
     blood_group: "",
     address: "",
@@ -534,9 +547,20 @@ export default function StudentEnrollmentWizard({
     number?.trim() ? `${code} ${number.trim()}` : "";
   const [guardian, setGuardian] = useState<Guardian>({
     relationship: "father",
-    first_name: "",
-    last_name: "",
-    phone: "",
+    first_name: String(initialApplicant?.parent_name || "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, -1)
+      .join(" "),
+    last_name:
+      String(initialApplicant?.parent_name || "")
+        .trim()
+        .split(/\s+/)
+        .slice(-1)[0] || "",
+    phone: String(initialApplicant?.parent_phone || "").replace(
+      /^\+?91\s*/,
+      "",
+    ),
     alternate_phone: "",
   });
   const [referred, setReferred] = useState(false);
@@ -548,9 +572,9 @@ export default function StudentEnrollmentWizard({
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [course, setCourse] = useState({
-    level: "intermediate" as CourseLevel,
-    program_code: "",
-    academic_year_code: "",
+    level: (initialApplicant?.course_level || "intermediate") as CourseLevel,
+    program_code: initialApplicant?.program_code || "",
+    academic_year_code: initialApplicant?.academic_year_code || "",
   });
   const [courseQuery, setCourseQuery] = useState("");
   const [courseFamily, setCourseFamily] = useState("");
@@ -567,13 +591,6 @@ export default function StudentEnrollmentWizard({
       .enrollmentOptions()
       .then((value) => {
         setOptions(value);
-        setCourse((c) => ({
-          ...c,
-          academic_year_code:
-            c.academic_year_code ||
-            value.academic_years.find((y) => !y.program_code)?.code ||
-            "",
-        }));
         if (value.campuses.length === 1)
           setStudent((s) => ({ ...s, campus_code: value.campuses[0].code }));
       })
@@ -623,13 +640,16 @@ export default function StudentEnrollmentWizard({
   );
   const program = programs.find((p) => p.code === course.program_code);
   const academicYears = (options?.academic_years || []).filter(
-    (y) => !y.program_code || y.program_code === course.program_code,
+    (y) =>
+      Boolean(course.program_code) && y.program_code === course.program_code,
   );
   const year = options?.academic_years.find(
     (y) => y.code === course.academic_year_code,
   );
   const startYear = Number(year?.start_date.slice(0, 4));
-  const batch = program?.batches.find((b) => b.entry_year === startYear);
+  const batch = program?.batches.find((b) =>
+    year?.batch_code ? b.code === year.batch_code : b.entry_year === startYear,
+  );
   const fees: FeeLine[] = useMemo(
     () =>
       (course.program_code ? quote?.fees_available || [] : []).filter(
@@ -729,6 +749,7 @@ export default function StudentEnrollmentWizard({
         course_level: course.level,
         program_code: course.program_code,
         academic_year_code: course.academic_year_code,
+        batch_code: batch?.code,
       },
       hostel_required: hostel,
       transport_required: transport,
@@ -758,10 +779,8 @@ export default function StudentEnrollmentWizard({
     if (step === 1) {
       if (!stepTwo.current?.reportValidity()) return;
       if (!program) return warn("Choose the course and specialization.");
-      if (!batch)
-        return warn(
-          `The ${startYear} batch of ${program.name} does not exist yet; create it in Courses & enrollment.`,
-        );
+      if (!year || year.program_code !== program.code)
+        return warn("Select a batch for the chosen course.");
       if (concession > academicFee)
         return warn(
           "Scholarship and special consideration cannot exceed the academic fee.",
@@ -835,7 +854,7 @@ export default function StudentEnrollmentWizard({
       fields: [
         ["Admission number", admissionNumber],
         ["Registration number", registrationNumber],
-        ["Academic year", year?.name || "—"],
+        ["Batch", year?.name || "—"],
         [
           "Course level",
           course.level === "intermediate" ? "Intermediate" : "Degree",
@@ -846,7 +865,7 @@ export default function StudentEnrollmentWizard({
             ? `${program.name}${program.branch ? ` (${program.branch})` : ""}`
             : "—",
         ],
-        ["Batch", batch?.name || "—"],
+
         ["Hostel", hostel ? "Required" : "Not required"],
         ["College bus", transport ? "Required" : "Not required"],
       ],
@@ -1909,39 +1928,6 @@ export default function StudentEnrollmentWizard({
                   title="Course selection"
                   icon={<GraduationCap size={17} />}
                 >
-                  <div className="enw-academic-year-actions">
-                    <Field label="Academic year *">
-                      <Select
-                        required
-                        value={course.academic_year_code}
-                        onChange={(e) =>
-                          setCourse({
-                            ...course,
-                            academic_year_code: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">
-                          {course.program_code
-                            ? "Select an academic year"
-                            : "Choose a course or shared academic year"}
-                        </option>
-                        {academicYears.map((y) => (
-                          <option key={y.code} value={y.code}>
-                            {y.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                    <button
-                      type="button"
-                      className="enw-manage-years"
-                      onClick={() => setAcademicYearFormOpen(true)}
-                    >
-                      <Plus size={14} aria-hidden="true" />
-                      Manage academic years
-                    </button>
-                  </div>
                   <div
                     className="enw-segmented"
                     role="radiogroup"
@@ -1963,10 +1949,7 @@ export default function StudentEnrollmentWizard({
                             ...course,
                             level: value as CourseLevel,
                             program_code: "",
-                            academic_year_code:
-                              options?.academic_years.find(
-                                (year) => !year.program_code,
-                              )?.code || "",
+                            academic_year_code: "",
                           });
                         }}
                       >
@@ -1988,12 +1971,12 @@ export default function StudentEnrollmentWizard({
                     <>
                       {course.level === "degree" && (
                         <div className="enw-course-filter">
-                          <input
-                            type="search"
+                          <SearchField
                             aria-label="Search degree courses"
                             placeholder="Search courses, e.g. B.Com, Data Science"
                             value={courseQuery}
-                            onChange={(e) => setCourseQuery(e.target.value)}
+                            onValueChange={setCourseQuery}
+                            suggestions={searchValues(programs, ["name", "branch", "qualification"])}
                           />
                           <div
                             className="enw-chips"
@@ -2034,19 +2017,16 @@ export default function StudentEnrollmentWizard({
                             onClick={() => {
                               const matching = (
                                 options?.academic_years || []
-                              ).filter(
-                                (y) =>
-                                  !y.program_code || y.program_code === p.code,
-                              );
-                              const preferred =
-                                matching.find(
-                                  (y) => y.program_code === p.code,
-                                ) || matching[0];
+                              ).filter((y) => y.program_code === p.code);
                               setQuote(null);
                               setCourse({
                                 ...course,
                                 program_code: p.code,
-                                academic_year_code: preferred?.code || "",
+                                academic_year_code: matching.some(
+                                  (y) => y.code === course.academic_year_code,
+                                )
+                                  ? course.academic_year_code
+                                  : "",
                               });
                             }}
                             aria-pressed={p.code === course.program_code}
@@ -2065,13 +2045,40 @@ export default function StudentEnrollmentWizard({
                       </div>
                     </>
                   )}
-                  {program && (
-                    <p className={batch ? "enw-muted" : "enw-warn"}>
-                      {batch
-                        ? `Batch ${batch.name}`
-                        : `No ${startYear} batch for ${program.name} yet — create it in Courses & enrollment.`}
-                    </p>
-                  )}
+                  <div className="enw-academic-year-actions">
+                    <Field label="Batch *">
+                      <Select
+                        required
+                        disabled={!course.program_code}
+                        value={course.academic_year_code}
+                        onChange={(e) =>
+                          setCourse({
+                            ...course,
+                            academic_year_code: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">
+                          {course.program_code
+                            ? "Select a batch"
+                            : "Choose a course first"}
+                        </option>
+                        {academicYears.map((y) => (
+                          <option key={y.code} value={y.code}>
+                            {y.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <button
+                      type="button"
+                      className="enw-manage-years"
+                      onClick={() => setAcademicYearFormOpen(true)}
+                    >
+                      <Plus size={14} aria-hidden="true" />
+                      Create batch
+                    </button>
+                  </div>
                 </Card>
 
                 <Card title="Facilities">
@@ -2330,7 +2337,7 @@ export default function StudentEnrollmentWizard({
       </div>
       {academicYearFormOpen && (
         <AcademicYearForm
-          title="Create Academic Years"
+          title="Create batch"
           initial={{ program_code: course.program_code }}
           onClose={() => setAcademicYearFormOpen(false)}
           onSave={async (values) => {
@@ -2341,6 +2348,9 @@ export default function StudentEnrollmentWizard({
               code: String(saved.code || values.code),
               name: String(saved.name || values.name),
               program_code: String(values.program_code),
+              batch_code: saved.batch_code
+                ? String(saved.batch_code)
+                : undefined,
               start_date: String(values.start_date),
               end_date: String(values.end_date),
             };
@@ -2369,12 +2379,12 @@ export default function StudentEnrollmentWizard({
               program_code: createdYear.program_code,
               academic_year_code: createdYear.code,
             }));
-            toast.success("Academic year created", createdYear.name);
+            toast.success("Batch created", createdYear.name);
             try {
               setOptions(await api.masterData.enrollmentOptions());
             } catch {
               toast.error(
-                "Academic year saved",
+                "Batch saved",
                 "Could not refresh all course options. The saved year is selected; reopen enrollment to refresh the remaining options.",
               );
             }

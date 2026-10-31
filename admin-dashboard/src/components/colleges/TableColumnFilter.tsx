@@ -1,4 +1,5 @@
 "use client";
+import "./search-field.css";
 
 import { useId, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
@@ -97,9 +98,9 @@ export default function TableColumnFilter({
                 <X size={16} />
               </button>
             </div>
-            <label className="edu-filter-search">
+            <label className="edu-filter-search edu-search-field">
               <Search size={14} aria-hidden="true" />
-              <input
+              <input className="edu-search-input"
                 ref={input}
                 type="search"
                 aria-label={`Search ${label} values`}

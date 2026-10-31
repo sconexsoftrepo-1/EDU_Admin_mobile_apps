@@ -121,3 +121,7 @@
     justify-content: flex-end;
   }
 }
+
+.edu-record-drawer .edu-academic-year-section label {
+  font-size: 14.4px;
+}

@@ -37,7 +37,7 @@ test("compact detail tabs fit a small mobile drawer and support keyboard selecti
   });
 });
 const root =
-  "/colleges-institutions/edunexa-college/portal/master-data-entry/teaching-staff";
+  "/portal/master-data-entry/teaching-staff";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend.");
 const code = "EMP-PRA-005";
 const employee = {

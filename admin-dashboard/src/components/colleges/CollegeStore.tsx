@@ -178,10 +178,7 @@ export function CollegeStore({
       const destination = allowed.some((s) => s.key === activeModule)
         ? activeModule
         : landing;
-      if (destination)
-        router.replace(
-          `/colleges-institutions/${slug}/portal/${ownArea}/${destination}`,
-        );
+      if (destination) router.replace(`/portal/${ownArea}/${destination}`);
       setReady(true);
       return;
     }
@@ -213,14 +210,41 @@ export function CollegeStore({
     const cached =
       readWorkspaceCache<Awaited<ReturnType<typeof loadTemplateState>>>(key);
     if (cached) setState(cached.state);
-    const result = await refreshWorkspaceCache(key, () =>
-      loadTemplateState(slug, allowed, activeModule),
-    );
+    const result = await refreshWorkspaceCache(
+      key,
+      () =>
+        loadTemplateState(
+          slug,
+          allowed,
+          activeModule,
+          workspaceCacheKey(
+            me.account.code,
+            active.code,
+            "student-course-labels",
+          ),
+        ),
+      (value) => value.errors.length === 0,
+    ).catch((error) => {
+      if (
+        error instanceof ApiError &&
+        error.status === 401 &&
+        sequence === dataRequest.current
+      ) {
+        clearWorkspaceCache();
+        sessionCache.current = null;
+        sessionPending.current = null;
+        setAccount(null);
+        setRole(null);
+        router.replace(`/portal/login`);
+      }
+      throw error;
+    });
     if (sequence !== dataRequest.current) return;
-    setState(result.state);
+    setState(result.errors.length && cached ? cached.state : result.state);
     setMessage(
       result.errors.length
-        ? "Some records could not be loaded: " + result.errors.join("; ")
+        ? "Some data requests failed. Reload records to try again: " +
+            result.errors.join("; ")
         : "",
     );
     if (result.errors.length)
@@ -261,7 +285,7 @@ export function CollegeStore({
           sessionCache.current = null;
           setAccount(null);
           setRole(null);
-          router.replace(`/colleges-institutions/${slug}/portal/login`);
+          router.replace(`/portal/login`);
         }
       });
   }, [slug, refresh, router]);
@@ -335,7 +359,7 @@ export function CollegeStore({
             setState(emptyTemplateState(slug));
             setAccount(null);
             setRole(null);
-            router.push(`/colleges-institutions/${slug}/portal/login`);
+            router.push(`/portal/login`);
           });
         },
         run: manage,

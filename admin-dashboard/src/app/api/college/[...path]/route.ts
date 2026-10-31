@@ -4,7 +4,19 @@ export const runtime = "nodejs";
 import { API_CONFIG, backendApiUrl } from "@/services/api/config";
 // Backend origin, timeouts, cookie names and public paths: src/services/api/config.ts.
 const { cookies } = API_CONFIG;
-const activeRefresh = new Map<string, Promise<Record<string, unknown>>>();
+// Share in-flight rotations across route reloads in the same server process.
+const sessionRuntime = globalThis as typeof globalThis & {
+  edunexaRefreshTasks?: Map<string, Promise<Record<string, unknown>>>;
+};
+const activeRefresh = (sessionRuntime.edunexaRefreshTasks ??= new Map());
+class SessionExpiredError extends Error {
+  constructor() {
+    super("Session expired");
+    this.name = "SessionExpiredError";
+  }
+}
+const expiredSession = (error: unknown) =>
+  error instanceof Error && error.name === "SessionExpiredError";
 function clear(response: NextResponse) {
   response.cookies.set(cookies.access, "", {
     path: cookies.path,
@@ -58,31 +70,45 @@ async function upstream(
     signal: AbortSignal.timeout(API_CONFIG.upstreamTimeoutMs),
   });
 }
-async function rotate(token: string) {
-  const key = createHash("sha256").update(token).digest("hex");
-  let task = activeRefresh.get(key);
-  if (!task) {
-    task = (async () => {
-      const response = await upstream(
-        "auth/refresh",
-        "POST",
-        JSON.stringify({ refresh_token: token, client: API_CONFIG.client }),
-      );
-      if (!response.ok) throw Error("Session expired");
-      return response.json();
-    })();
-    activeRefresh.set(key, task);
-    // Reuse the same rotation for requests already in flight with the old cookie.
-    // Their upstream 401 can arrive up to the upstream timeout after rotation.
-    void task
-      .finally(() =>
-        setTimeout(
-          () => activeRefresh.delete(key),
-          API_CONFIG.upstreamTimeoutMs + 5000,
-        ),
-      )
-      .catch(() => {});
-  }
+async function rotate(token: string): Promise<Record<string, unknown>> {
+  const key = createHash("sha256")
+    .update(backendApiUrl("auth/refresh") + ":" + token)
+    .digest("hex");
+  const existing = activeRefresh.get(key);
+  if (existing) return existing;
+  const task: Promise<Record<string, unknown>> = (async () => {
+    const response = await upstream(
+      "auth/refresh",
+      "POST",
+      JSON.stringify({ refresh_token: token, client: API_CONFIG.client }),
+    );
+    if (response.status === 401) throw new SessionExpiredError();
+    if (!response.ok) throw Error("Session renewal temporarily unavailable");
+    const value: unknown = await response.json();
+    if (!value || typeof value !== "object")
+      throw Error("Invalid session renewal response");
+    const pair = value as Record<string, unknown>;
+    if (
+      typeof pair.access_token !== "string" ||
+      typeof pair.refresh_token !== "string" ||
+      !Number.isFinite(Number(pair.expires_in)) ||
+      Number(pair.expires_in) <= 0
+    )
+      throw Error("Invalid session renewal response");
+    return pair;
+  })();
+  activeRefresh.set(key, task);
+  // Late requests with the old cookie share the completed rotation as well.
+  void task.then(
+    () => {
+      setTimeout(() => {
+        if (activeRefresh.get(key) === task) activeRefresh.delete(key);
+      }, API_CONFIG.upstreamTimeoutMs + 5000).unref?.();
+    },
+    () => {
+      if (activeRefresh.get(key) === task) activeRefresh.delete(key);
+    },
+  );
   return task;
 }
 /**
@@ -114,6 +140,7 @@ async function proxy(
       { detail: "Same-origin request required" },
       { status: 403 },
     );
+  let pair: Record<string, unknown> | undefined;
   try {
     let body = ["GET", "HEAD"].includes(request.method)
       ? undefined
@@ -150,14 +177,21 @@ async function proxy(
     }
     let access = request.cookies.get(cookies.access)?.value;
     const refresh = request.cookies.get(cookies.refresh)?.value;
-    let pair: Record<string, unknown> | undefined;
     if (path === "auth/login") {
       const parsed = JSON.parse(body || "{}");
       body = JSON.stringify({ ...parsed, client: API_CONFIG.client });
       const result = await upstream(path, "POST", body);
       const payload = await result.json();
       if (!result.ok)
-        return NextResponse.json(payload, { status: result.status });
+        return NextResponse.json(payload, {
+          status: result.status,
+          headers: {
+            "Cache-Control": "no-store",
+            ...(result.headers.has("retry-after")
+              ? { "Retry-After": result.headers.get("retry-after")! }
+              : {}),
+          },
+        });
       // Tokens stay in httpOnly cookies; the page gets the account and its roles (navigation).
       const response = NextResponse.json({
         account: payload.account,
@@ -170,7 +204,8 @@ async function proxy(
       try {
         pair = await rotate(refresh);
         access = String(pair.access_token);
-      } catch {
+      } catch (error) {
+        if (!expiredSession(error)) throw error;
         return clear(
           NextResponse.json(
             { detail: "Please sign in again" },
@@ -198,7 +233,8 @@ async function proxy(
           body,
           String(pair.access_token),
         );
-      } catch {
+      } catch (error) {
+        if (!expiredSession(error)) throw error;
         return clear(
           NextResponse.json({ detail: "Session expired" }, { status: 401 }),
         );
@@ -239,7 +275,7 @@ async function proxy(
     console.error(
       `EduNexa upstream request failed: ${path} (${error instanceof Error ? error.name : "unknown"})`,
     );
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         detail: timeout
           ? `The college API timed out while loading ${path}. Please retry.`
@@ -247,6 +283,10 @@ async function proxy(
       },
       { status: 503 },
     );
+    // Rotation may have succeeded before the resource request failed. Keep the new cookies
+    // so retrying never replays the now-consumed refresh token.
+    if (pair) tokens(response, pair, request);
+    return response;
   }
 }
 export {

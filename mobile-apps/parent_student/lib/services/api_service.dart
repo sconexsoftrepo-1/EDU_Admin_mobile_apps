@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'conts.dart';
-import 'constants.dart';
+import '../constants/api_config.dart';
+import '../models/api_models.dart';
 
-export 'conts.dart';
-export 'constants.dart';
+export '../constants/api_config.dart';
+export '../models/api_models.dart';
 
 /// The only REST endpoint registry for this application's API service.
 abstract final class _Endpoints {
@@ -19,12 +19,23 @@ abstract final class _Endpoints {
   static const unregisterDevice = '/mobile/devices/unregister';
   static const alerts = '/mobile/alerts';
   static const financeReport = '/reports/finance.pdf';
+  static const assignments = '/academics/assignment-workspace';
+  static const syllabus = '/academics/syllabus-workspace';
+  static const calendar = '/academics/calendar-workspace';
+  static const attendance = '/academics/attendance-workspace';
+  static const certificates = '/certificates/workspace';
   static String workspace(String screen) =>
       '/mobile/workspace/${Uri.encodeComponent(screen)}';
   static String action(String screen, String action) =>
       '${workspace(screen)}/actions/${Uri.encodeComponent(action)}';
   static String document(String kind, String code) =>
       '/documents/${Uri.encodeComponent(kind)}/${Uri.encodeComponent(code)}/download';
+  static String record(String root, String code) =>
+      '$root/${Uri.encodeComponent(code)}';
+  static String query(String path, Map<String, String> values) => Uri(
+    path: path,
+    queryParameters: values.isEmpty ? null : values,
+  ).toString();
 }
 
 class CollegeApi {
@@ -115,6 +126,177 @@ class CollegeApi {
       await clear();
     }
   }
+
+  Future<Uint8List> assignmentFile(String code) async => (await _response(
+    'GET',
+    '${_Endpoints.assignments}/files/${Uri.encodeComponent(code)}/view',
+    null,
+  )).bodyBytes;
+
+  static const _assessments = '/academics/assessment-workspace';
+  Future<dynamic> assessments({String studentCode = ''}) => get(
+    _Endpoints.query(_assessments, {
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+    }),
+  );
+  Future<dynamic> assessmentDetails(String code, {String studentCode = ''}) =>
+      get(
+        _Endpoints.query('$_assessments/${Uri.encodeComponent(code)}', {
+          if (studentCode.isNotEmpty) 'student_code': studentCode,
+        }),
+      );
+  Future<dynamic> assessmentOptions({
+    String program = '',
+    String year = '',
+    String section = '',
+  }) => get(
+    _Endpoints.query('$_assessments/options', {
+      if (program.isNotEmpty) 'program_code': program,
+      if (year.isNotEmpty) 'academic_year_code': year,
+      if (section.isNotEmpty) 'section_code': section,
+    }),
+  );
+  Future<dynamic> saveAssessment(Json body, {String? code}) => code == null
+      ? post(_assessments, body)
+      : _send('PUT', '$_assessments/${Uri.encodeComponent(code)}', body);
+  Future<dynamic> assessmentMarks(String code, Json body) =>
+      _send('PUT', '$_assessments/${Uri.encodeComponent(code)}/marks', body);
+  // Assignment API
+  Future<dynamic> assignments({String studentCode = ''}) => get(
+    _Endpoints.query(_Endpoints.assignments, {
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+    }),
+  );
+  Future<dynamic> assignmentOptions({
+    String programCode = '',
+    String academicYearCode = '',
+    String sectionCode = '',
+  }) => get(
+    _Endpoints.query('${_Endpoints.assignments}/options', {
+      if (programCode.isNotEmpty) 'program_code': programCode,
+      if (academicYearCode.isNotEmpty) 'academic_year_code': academicYearCode,
+      if (sectionCode.isNotEmpty) 'section_code': sectionCode,
+    }),
+  );
+  Future<dynamic> assignmentDetails(String code, {String studentCode = ''}) =>
+      get(
+        _Endpoints.query(_Endpoints.record(_Endpoints.assignments, code), {
+          if (studentCode.isNotEmpty) 'student_code': studentCode,
+        }),
+      );
+  Future<dynamic> createAssignment(Json body) =>
+      post(_Endpoints.assignments, body);
+  Future<dynamic> reviewAssignment(String code, Json body) =>
+      post('${_Endpoints.record(_Endpoints.assignments, code)}/review', body);
+  Future<dynamic> submitAssignment(String code, Json body) =>
+      post('${_Endpoints.record(_Endpoints.assignments, code)}/submit', body);
+
+  // Shared file upload API used by assignments, syllabus and calendar events.
+  Future<dynamic> startFileUpload({
+    required String filename,
+    required int sizeBytes,
+    String? assignmentCode,
+    bool assessment = false,
+    bool resource = false,
+    bool event = false,
+  }) => post('${_Endpoints.assignments}/files/start', {
+    'filename': filename,
+    'size_bytes': sizeBytes,
+    'assignment_code': assignmentCode,
+    if (assessment) 'assessment_upload': true,
+    if (resource) 'resource_upload': true,
+    if (event) 'event_upload': true,
+  });
+  Future<dynamic> uploadFileChunk(
+    String code,
+    int index,
+    String contentBase64,
+  ) => post(
+    '${_Endpoints.assignments}/files/${Uri.encodeComponent(code)}/chunk',
+    {'index': index, 'content_base64': contentBase64},
+  );
+  Future<dynamic> finishFileUpload(String code) => post(
+    '${_Endpoints.assignments}/files/${Uri.encodeComponent(code)}/finish',
+    {},
+  );
+
+  // Syllabus and shared resource API
+  Future<dynamic> syllabus({String studentCode = ''}) => get(
+    _Endpoints.query(_Endpoints.syllabus, {
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+    }),
+  );
+  Future<dynamic> syllabusDetails(String code) =>
+      get(_Endpoints.record(_Endpoints.syllabus, code));
+  Future<dynamic> syllabusOptions({
+    String courseLevel = '',
+    String programCode = '',
+  }) => get(
+    _Endpoints.query('${_Endpoints.syllabus}/options', {
+      if (courseLevel.isNotEmpty) 'course_level': courseLevel,
+      if (programCode.isNotEmpty) 'program_code': programCode,
+    }),
+  );
+  Future<dynamic> createSyllabus(Json body) => post(_Endpoints.syllabus, body);
+
+  // Shared attendance registers and server-calculated analytics.
+  Future<dynamic> attendanceOptions() =>
+      get('${_Endpoints.attendance}/options');
+  Future<dynamic> attendance({
+    String program = '',
+    String academicYear = '',
+    String section = '',
+    String studentCode = '',
+    String on = '',
+    int period = 1,
+  }) => get(
+    _Endpoints.query(_Endpoints.attendance, {
+      if (program.isNotEmpty) 'program_code': program,
+      if (academicYear.isNotEmpty) 'academic_year_code': academicYear,
+      if (section.isNotEmpty) 'section_code': section,
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+      if (on.isNotEmpty) 'on': on,
+      'period': '$period',
+    }),
+  );
+  Future<dynamic> saveAttendance(Json body) =>
+      _send('PUT', '${_Endpoints.attendance}/register', body);
+
+  // Academic calendar API
+  Future<dynamic> calendar({String studentCode = ''}) => get(
+    _Endpoints.query(_Endpoints.calendar, {
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+    }),
+  );
+  Future<dynamic> calendarDetails(String code) =>
+      get(_Endpoints.record(_Endpoints.calendar, code));
+  Future<dynamic> calendarOptions() => get('${_Endpoints.calendar}/options');
+  Future<dynamic> createCalendarEvent(Json body) =>
+      post(_Endpoints.calendar, body);
+
+  // Certificate request and approval API
+  Future<dynamic> certificates({String studentCode = ''}) => get(
+    _Endpoints.query(_Endpoints.certificates, {
+      if (studentCode.isNotEmpty) 'student_code': studentCode,
+    }),
+  );
+  Future<dynamic> certificateOptions() =>
+      get('${_Endpoints.certificates}/options');
+  Future<dynamic> requestCertificate(
+    String templateCode, {
+    String? studentCode,
+  }) => post('${_Endpoints.certificates}/requests', {
+    'template_code': templateCode,
+    if (studentCode != null) 'student_code': studentCode,
+  });
+  Future<dynamic> decideCertificate(
+    String code, {
+    required bool approve,
+    String message = '',
+  }) => post(
+    '${_Endpoints.certificates}/requests/${Uri.encodeComponent(code)}/${approve ? 'approve' : 'reject'}',
+    approve ? <String, dynamic>{} : {'message': message},
+  );
 
   Future<dynamic> get(String path) => _send('GET', path, null);
   Future<dynamic> post(String path, Json body) => _send('POST', path, body);

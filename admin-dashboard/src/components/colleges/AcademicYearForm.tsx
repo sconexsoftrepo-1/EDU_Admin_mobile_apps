@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Check, CalendarDays, LoaderCircle } from "lucide-react";
 import {
   api,
@@ -9,21 +9,21 @@ import {
   type LookupOption,
   type Row,
 } from "@/services/api";
+import { CurriculumSummary } from "./CourseCurriculum";
 import SideDrawer from "./SideDrawer";
 import Select from "./SearchSelect";
 import DateInput from "./DateInput";
 import "./academic-year-form.css";
 
-function defaultEndDate(start: string) {
+function defaultEndDate(start: string, years = 1) {
   if (!start) return "";
   const date = new Date(`${start}T00:00:00Z`);
-  date.setUTCFullYear(date.getUTCFullYear() + 1);
+  date.setUTCFullYear(date.getUTCFullYear() + years);
   date.setUTCDate(date.getUTCDate() - 1);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 }
 
 export default function AcademicYearForm({
-  title,
   initial = {},
   fields = [],
   onSave,
@@ -34,10 +34,12 @@ export default function AcademicYearForm({
   fields?: Field[];
   onSave: (values: Row) => Promise<void>;
   onClose: () => void;
-  renderBrowse?: (values: Row) => ReactNode;
 }) {
   const editing = Boolean(initial.code);
-  const [courses, setCourses] = useState<LookupOption[]>([]);
+  const [courseLevel, setCourseLevel] = useState("");
+  const [courses, setCourses] = useState<
+    (LookupOption & { years: number; level: string })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [programCode, setProgramCode] = useState(
     String(initial.program_code || ""),
@@ -53,11 +55,37 @@ export default function AcademicYearForm({
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    api.workspace
-      .lookup("programs")
-      .then((values) => {
-        if (active)
+    Promise.all([
+      api.workspace.lookup("programs"),
+      api.masterData.enrollmentOptions(),
+    ])
+      .then(([registered, options]) => {
+        const programs = [
+          ...options.courses.intermediate,
+          ...options.courses.degree,
+        ];
+        const values = registered.map((course) => ({
+          ...course,
+          level: options.courses.intermediate.some(
+            (p) => p.code === course.value,
+          )
+            ? "intermediate"
+            : "degree",
+          years: Math.max(
+            1,
+            Math.ceil(
+              (programs.find((program) => program.code === course.value)
+                ?.duration_semesters || 2) / 2,
+            ),
+          ),
+        }));
+        if (active) {
           setCourses(values.toSorted((a, b) => a.label.localeCompare(b.label)));
+          setCourseLevel(
+            values.find((c) => c.value === String(initial.program_code || ""))
+              ?.level || "",
+          );
+        }
       })
       .catch((e) => {
         if (active)
@@ -69,7 +97,7 @@ export default function AcademicYearForm({
     return () => {
       active = false;
     };
-  }, []);
+  }, [initial.program_code]);
   const complete = programCode && startDate && endDate;
   const yearRange = complete
     ? `${startDate.slice(0, 4)}-${endDate.slice(0, 4)}`
@@ -88,14 +116,12 @@ export default function AcademicYearForm({
       return;
     }
     if (code.length > 100) {
-      setError(
-        "This course code is too long to generate an academic year code.",
-      );
+      setError("This course code is too long to generate an batch code.");
       return;
     }
     if (editing && code !== initial.code) {
       setError(
-        "Changing the year range would change this record’s code. Create a new academic year for the new range.",
+        "Changing the year range would change this record’s code. Create a new batch for the new range.",
       );
       return;
     }
@@ -124,16 +150,39 @@ export default function AcademicYearForm({
   }
   return (
     <SideDrawer
-      title={title}
-      subtitle="Choose a registered course and its academic dates. Required fields are marked *."
+      title={editing ? "Edit batch" : "Create batch"}
+      subtitle="Choose a registered course and its batch start and end dates. Required fields are marked *."
       onClose={() => {
         if (!busy) onClose();
       }}
     >
       <form className="edu-academic-year-form" onSubmit={save}>
         <div className="edu-academic-year-content">
+          {initial.dates_need_review === true && (
+            <p role="status" className="edu-error">
+              This batch was imported with its original start and end years.
+              Confirm the actual day and month before saving.
+            </p>
+          )}
           <section className="edu-academic-year-section">
             <h3>Registered course</h3>
+            <label>
+              <span>Course level *</span>
+              <Select
+                aria-label="Course level"
+                required
+                value={courseLevel}
+                disabled={loading || busy || editing}
+                onChange={(e) => {
+                  setCourseLevel(e.target.value);
+                  setProgramCode("");
+                }}
+              >
+                <option value="">Select course level</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="degree">Degree</option>
+              </Select>
+            </label>
             <label>
               <span>Course *</span>
               <Select
@@ -142,18 +191,31 @@ export default function AcademicYearForm({
                 required
                 value={programCode}
                 disabled={loading || busy || editing}
-                onChange={(event) => setProgramCode(event.target.value)}
+                onChange={(event) => {
+                  setProgramCode(event.target.value);
+                  if (!endEdited)
+                    setEndDate(
+                      defaultEndDate(
+                        startDate,
+                        courses.find(
+                          (course) => course.value === event.target.value,
+                        )?.years,
+                      ),
+                    );
+                }}
               >
                 <option value="">
                   {loading
                     ? "Loading registered courses…"
                     : "Select a registered course"}
                 </option>
-                {courses.map((course) => (
-                  <option key={course.value} value={course.value}>
-                    {course.label} ({course.value})
-                  </option>
-                ))}
+                {courses
+                  .filter((c) => c.level === courseLevel)
+                  .map((course) => (
+                    <option key={course.value} value={course.value}>
+                      {course.label} ({course.value})
+                    </option>
+                  ))}
                 {programCode && !selectedCourse && (
                   <option value={programCode}>{programCode}</option>
                 )}
@@ -161,17 +223,17 @@ export default function AcademicYearForm({
             </label>
             <p>
               {editing
-                ? "The course is fixed for an existing academic year."
+                ? "The course is fixed for an existing batch."
                 : "Choose from the courses already registered in Courses & enrollment."}
             </p>
             {!loading && !courses.length && (
               <p className="edu-error">
-                Register a course before creating its academic year.
+                Register a course before creating its batch.
               </p>
             )}
           </section>
           <section className="edu-academic-year-section">
-            <h3>Academic calendar</h3>
+            <h3>Batch dates</h3>
             <div className="edu-academic-year-grid">
               <label>
                 <span>Start date *</span>
@@ -184,7 +246,12 @@ export default function AcademicYearForm({
                   onChange={(event) => {
                     setStartDate(event.target.value);
                     if (!endEdited)
-                      setEndDate(defaultEndDate(event.target.value));
+                      setEndDate(
+                        defaultEndDate(
+                          event.target.value,
+                          selectedCourse?.years,
+                        ),
+                      );
                   }}
                 />
               </label>
@@ -205,10 +272,20 @@ export default function AcademicYearForm({
               </label>
             </div>
             <p>
-              The end date initially follows a one-year calendar. Adjust it to
-              your course schedule.
+              The end date follows the registered course duration. Adjust it to
+              the batch’s actual completion date.
             </p>
           </section>
+          {programCode && (
+            <section className="edu-academic-year-section">
+              <h3>Semester subjects & labs</h3>
+              <CurriculumSummary key={programCode} program={programCode} />
+              <p>
+                Edit this course’s semester plan in Courses & enrollment →
+                Subjects & labs.
+              </p>
+            </section>
+          )}
           <section className="edu-academic-year-section edu-academic-year-generated">
             <div className="edu-academic-year-section-title">
               <h3>Generated details</h3>
@@ -216,20 +293,20 @@ export default function AcademicYearForm({
             </div>
             <div className="edu-academic-year-grid">
               <label>
-                <span>Academic year code</span>
+                <span>Batch code</span>
                 <input
                   name="code"
-                  aria-label="Academic year code"
+                  aria-label="Batch code"
                   readOnly
                   value={code}
                   placeholder="Select a course and dates"
                 />
               </label>
               <label>
-                <span>Academic year name</span>
+                <span>Batch name</span>
                 <input
                   name="name"
-                  aria-label="Academic year name"
+                  aria-label="Batch name"
                   readOnly
                   value={name}
                   placeholder="Generated automatically"
@@ -251,8 +328,8 @@ export default function AcademicYearForm({
         <footer className="edu-academic-year-footer">
           <span>
             {editing
-              ? "Update the academic calendar."
-              : "Save this academic year for the selected course."}
+              ? "Update the batch dates."
+              : "Save this batch for the selected course."}
           </span>
           <div>
             <button type="button" disabled={busy} onClick={onClose}>
@@ -268,11 +345,7 @@ export default function AcademicYearForm({
               ) : (
                 <Check size={16} />
               )}{" "}
-              {busy
-                ? "Saving…"
-                : editing
-                  ? "Save changes"
-                  : "Create academic year"}
+              {busy ? "Saving…" : editing ? "Save changes" : "Create batch"}
             </button>
           </div>
         </footer>

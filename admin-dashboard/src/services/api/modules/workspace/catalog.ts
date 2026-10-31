@@ -7,4 +7,24 @@
 import catalog from "./screens.json";
 import type { ScreenSummary } from "./consts";
 
-export const SCREEN_CATALOG: ScreenSummary[] = catalog;
+const hiddenTransportScreens = new Set([
+  "transport",
+  "buses",
+  "routes",
+  "route-stops",
+  "drivers",
+  "driver-allocation",
+  "student-allocation",
+  "faculty-allocation",
+  "bus-seating",
+  "trips",
+  "manifest",
+  "transport-attendance",
+  "vehicle-maintenance",
+  "fuel",
+  "transport-reports",
+  "module-transport",
+]);
+export const SCREEN_CATALOG: ScreenSummary[] = catalog.filter(
+  (screen) => !hiddenTransportScreens.has(screen.key),
+);

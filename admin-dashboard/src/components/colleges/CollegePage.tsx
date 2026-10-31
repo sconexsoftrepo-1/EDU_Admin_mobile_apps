@@ -3,7 +3,6 @@ import { useErrorToast } from "./toast";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Portal from "./CollegePortal";
-import CollegePublic from "./CollegePublic";
 import { collegeRoot, type College } from "@/data/colleges";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
@@ -56,8 +55,8 @@ function Verification({ college: c, id }: { college: College; id: string }) {
           </dl>
         </>
       )}
-      <Link className="college-button" href={collegeRoot(c)}>
-        Return to college
+      <Link className="college-button" href={`${collegeRoot(c)}/portal/login`}>
+        Return to login
       </Link>
     </main>
   );
@@ -74,5 +73,5 @@ export default function CollegePage({
   if (parts[0] === "portal") return <Portal college={college} parts={parts} />;
   if (parts[0] === "verify-certificate")
     return <Verification college={college} id={parts[1]} />;
-  return <CollegePublic college={college} parts={parts} />;
+  return <Login college={college} parts={["portal", "login"]} loginRedirect />;
 }

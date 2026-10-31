@@ -2958,7 +2958,11 @@
         "type": "text",
         "required": true,
         "reference": null,
-        "choices": []
+        "choices": [
+          "unpaid",
+          "paid",
+          "void"
+        ]
       },
       {
         "name": "paid_on",
@@ -5935,7 +5939,10 @@
         "type": "text",
         "required": true,
         "reference": null,
-        "choices": []
+        "choices": [
+          "fixed_amount",
+          "percentage"
+        ]
       },
       {
         "name": "award_percent",
@@ -7943,7 +7950,12 @@
         "type": "text",
         "required": true,
         "reference": null,
-        "choices": []
+        "choices": [
+          "in_app",
+          "email",
+          "sms",
+          "push"
+        ]
       },
       {
         "name": "body",

@@ -652,9 +652,6 @@
 .academic-week-table button[draggable="true"]:active {
   cursor: grabbing;
 }
-.college-erp .mobile-redesign .app-screen {
-  container-type: inline-size;
-}
 @container (max-width:600px) {
   .academic-mobile-week {
     display: grid;
@@ -720,4 +717,11 @@
   margin: 20px 0;
   line-height: 1.8;
   font-size: 12px;
+}
+
+.ops-sheet .academic-editor-fields label {
+  font-size: 14.4px;
+}
+.ops-sheet .academic-day-options label {
+  font-size: 13.2px;
 }

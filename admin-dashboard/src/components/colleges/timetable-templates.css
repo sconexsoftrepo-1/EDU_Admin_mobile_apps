@@ -1,0 +1,856 @@
+.college-erp .tt-workspace.tt-studio {
+  --tt-line: #dce4e8;
+  --tt-ink: #243842;
+  --tt-muted: #637580;
+  --tt-accent: #176c70;
+  --tt-theory: #eef7fc;
+  --tt-lab: #eee8fb;
+  --tt-activity: #dcf1e4;
+  --tt-pause: #f8f5e7;
+  color: var(--tt-ink);
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.college-erp .tt-workspace.tt-studio h2,
+.college-erp .tt-workspace.tt-studio h3,
+.college-erp .tt-workspace.tt-studio p {
+  margin: 0;
+}
+.tt-page-header,
+.tt-setup-heading,
+.tt-saved-heading,
+.tt-editor-toolbar,
+.tt-editor-toolbar > div,
+.tt-cell-tools,
+.tt-period-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.tt-page-header h2 {
+  font-size: 26px;
+  letter-spacing: -0.7px;
+}
+.tt-page-header p,
+.tt-setup-heading p,
+.tt-saved-heading p {
+  font-size: 13px;
+  color: var(--tt-muted);
+  margin-top: 5px;
+}
+.tt-record-count {
+  font-size: 12px;
+  color: var(--tt-muted);
+}
+.college-erp .tt-workspace.tt-studio button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--tt-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--tt-ink);
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.college-erp .tt-workspace.tt-studio button:hover {
+  border-color: var(--tt-accent);
+  background: #f4faf9;
+}
+.college-erp .tt-workspace.tt-studio button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.college-erp .tt-workspace.tt-studio button.tt-primary {
+  background: var(--tt-accent);
+  border-color: var(--tt-accent);
+  color: white;
+}
+.college-erp .tt-workspace.tt-studio :is(input, select, textarea) {
+  font-family: inherit;
+  color: inherit;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.college-erp
+  .tt-workspace.tt-studio
+  :is(button, input, select, textarea):focus-visible {
+  outline: 2px solid #177a87;
+  outline-offset: 2px;
+}
+.college-erp .tt-workspace.tt-studio :is(input, textarea)::placeholder {
+  color: #718491;
+  opacity: 0.85;
+}
+.college-erp .tt-workspace.tt-studio input:read-only,
+.college-erp .tt-workspace.tt-studio textarea:read-only {
+  cursor: default;
+}
+.tt-setup,
+.tt-saved {
+  background: #fff;
+  border: 1px solid var(--tt-line);
+  border-radius: 10px;
+  padding: 22px;
+}
+.tt-setup-heading h3,
+.tt-saved h3 {
+  font-size: 17px;
+}
+.tt-template-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+.college-erp .tt-workspace.tt-studio .tt-template-choice {
+  position: relative;
+  justify-content: flex-start;
+  padding: 16px;
+  text-align: left;
+  border-radius: 8px;
+  gap: 16px;
+}
+.college-erp .tt-workspace.tt-studio .tt-template-choice.is-active {
+  border: 2px solid var(--tt-accent);
+  padding: 15px;
+  background: #f5fbfa;
+}
+.tt-template-choice > span:nth-child(2) {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 5px 8px;
+}
+.tt-template-choice strong {
+  font-size: 15px;
+}
+.tt-template-choice small {
+  grid-column: 1/-1;
+  font-size: 12px;
+  color: var(--tt-muted);
+}
+.tt-template-check {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--tt-accent);
+}
+.tt-miniature {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  background: white;
+  border: 1px solid var(--tt-line);
+  width: 108px;
+  height: 68px;
+  padding: 5px;
+  flex-shrink: 0;
+}
+.tt-miniature i {
+  background: #dceef8;
+}
+.tt-miniature i:nth-child(n + 13):nth-child(-n + 18) {
+  background: #f0eacd;
+}
+.tt-miniature i:nth-child(21) {
+  background: #dcd0f5;
+}
+.tt-mini-degree i:nth-child(3n + 2) {
+  background: #dcd0f5;
+}
+.tt-mini-degree i:nth-child(7n) {
+  background: #c0e5d0;
+}
+.tt-create-fields {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) minmax(180px, 1fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+.tt-create-fields label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tt-create-fields select,
+.tt-saved-heading > input {
+  border: 1px solid var(--tt-line);
+  border-radius: 6px;
+  background: white;
+  padding: 10px 12px;
+  width: 100%;
+  height: 40px;
+}
+.tt-create-fields button {
+  height: 40px;
+}
+.tt-empty-hint {
+  font-size: 12px;
+  color: var(--tt-muted);
+  margin-top: 14px !important;
+}
+.tt-feedback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 6px;
+  padding: 13px 16px;
+  font-size: 13px;
+}
+.tt-error {
+  border: 1px solid #f0c8c3;
+  background: #fff4f2;
+  color: #963b32;
+}
+.tt-success {
+  background: #eaf7ef;
+  border: 1px solid #c0e2ce;
+  color: #276340;
+}
+.tt-feedback button {
+  margin-left: auto;
+}
+.tt-loading {
+  padding: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--tt-muted);
+}
+.tt-spinner {
+  animation: tt-spin 1s linear infinite;
+}
+@keyframes tt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.tt-editor {
+  min-width: 0;
+  border: 1px solid var(--tt-line);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.tt-editor-toolbar {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--tt-line);
+  background: #f8fafb;
+  font-size: 12px;
+  color: var(--tt-muted);
+}
+.tt-editor-toolbar > div {
+  justify-content: flex-start;
+  gap: 8px;
+}
+.tt-status {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 4px;
+  background: #fff1d9;
+  color: #835b17;
+}
+.tt-status-published {
+  background: #e0f2e7;
+  color: #286346;
+}
+.tt-sheet-heading {
+  padding: 26px 22px 18px;
+  text-align: center;
+  border-bottom: 1px solid var(--tt-line);
+}
+.tt-sheet-heading > span {
+  font-size: 12px;
+  color: var(--tt-muted);
+}
+.tt-sheet-heading > input {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  margin: 8px auto;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 23px;
+  font-weight: 650;
+  padding: 5px;
+}
+.tt-sheet-heading > input:hover {
+  border-color: var(--tt-line);
+}
+.tt-sheet-heading > p {
+  font-size: 13px;
+}
+.tt-sheet-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.tt-sheet-meta label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--tt-muted);
+}
+.tt-sheet-meta input {
+  width: 60px;
+  padding: 5px 4px;
+  border: 0;
+  border-bottom: 1px dashed #bdcbd2;
+  text-align: center;
+  background: transparent;
+  color: var(--tt-ink);
+}
+.tt-sheet-meta label:last-child input {
+  width: 160px;
+}
+.tt-instructions {
+  padding: 12px 18px;
+  background: #fbfcfd;
+  font-size: 12px;
+  color: var(--tt-muted);
+  border-bottom: 1px solid var(--tt-line);
+}
+.tt-cell-tools {
+  justify-content: flex-start;
+  min-height: 55px;
+  padding: 9px 18px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--tt-line);
+}
+.tt-cell-tools > span {
+  margin-right: auto;
+  color: var(--tt-muted);
+}
+.tt-cell-tools label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tt-cell-tools select {
+  padding: 6px;
+  border: 1px solid var(--tt-line);
+  border-radius: 4px;
+  background: white;
+}
+.tt-cell-tools button {
+  padding: 6px 9px;
+}
+.tt-grid-scroll {
+  overflow: auto;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+.tt-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(6, minmax(135px, 1fr));
+  min-width: 950px;
+  isolation: isolate;
+}
+.tt-grid > div {
+  border-right: 1px solid var(--tt-line);
+  border-bottom: 1px solid var(--tt-line);
+  min-width: 0;
+  box-sizing: border-box;
+}
+.tt-grid-corner,
+.tt-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 650;
+  background: #f6f8f8;
+}
+.tt-day small {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--tt-muted);
+  margin-top: 4px;
+}
+.tt-time {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: #fbfcfc;
+  font-size: 11px;
+}
+.tt-time input {
+  width: 98px;
+  font-size: 11px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 2px;
+  background: transparent;
+  text-align: center;
+}
+.tt-time input:hover {
+  border-color: var(--tt-line);
+  background: #fff;
+}
+.tt-time span {
+  font-size: 9px;
+  color: var(--tt-muted);
+}
+.tt-pause {
+  background: var(--tt-pause);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.tt-pause input {
+  width: 90%;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  padding: 7px;
+}
+.tt-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 9px 9px 18px;
+  text-align: center;
+  overflow: hidden;
+  background: var(--tt-theory);
+}
+.tt-cell.tt-lab {
+  background: var(--tt-lab);
+}
+.tt-cell.tt-activity {
+  background: var(--tt-activity);
+}
+.tt-cell.tt-selected {
+  box-shadow: inset 0 0 0 2px #39858a;
+  z-index: 1;
+}
+.tt-cell :is(input, textarea) {
+  display: block;
+  width: 100%;
+  margin: 0;
+  resize: none;
+  text-align: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 2px;
+  line-height: 1.3;
+}
+.tt-cell textarea {
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 35px;
+}
+.tt-cell .tt-subject-code {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.tt-cell :is(input, textarea):not(:read-only):hover {
+  border-color: #b6cbd4;
+  background: #ffffff70;
+}
+.college-erp .tt-workspace.tt-studio .tt-resize {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 16px;
+  width: 45px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: ns-resize;
+  touch-action: none;
+  color: #70939b;
+  opacity: 0.5;
+}
+.tt-cell:hover .tt-resize,
+.tt-resize:focus-visible {
+  opacity: 1;
+}
+.tt-span-label {
+  font-size: 9px;
+  color: var(--tt-muted);
+  margin-top: 7px;
+}
+.tt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 13px 18px;
+  font-size: 11px;
+  color: var(--tt-muted);
+}
+.tt-legend span:before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border: 1px solid #0000000c;
+  background: var(--tt-theory);
+}
+.tt-legend .lab:before {
+  background: var(--tt-lab);
+}
+.tt-legend .activity:before {
+  background: var(--tt-activity);
+}
+.tt-legend .pause:before {
+  background: var(--tt-pause);
+}
+.tt-period-settings {
+  border-top: 1px solid var(--tt-line);
+  padding: 14px 18px;
+}
+.tt-period-settings summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  list-style: none;
+}
+.tt-period-settings p {
+  font-size: 12px;
+  color: var(--tt-muted);
+  margin-top: 12px;
+}
+.tt-period-list {
+  display: grid;
+  gap: 6px;
+  margin: 15px 0;
+  max-width: 700px;
+}
+.tt-period-list > div {
+  display: grid;
+  grid-template-columns: 22px minmax(90px, 1fr) 100px 70px 32px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.tt-period-list input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--tt-line);
+  border-radius: 3px;
+}
+.tt-period-list button {
+  padding: 6px;
+}
+.tt-period-actions {
+  justify-content: flex-start;
+}
+.tt-saved-heading > input {
+  max-width: 280px;
+  font-size: 12px;
+}
+.tt-empty {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 9px;
+  padding: 36px 15px;
+  color: var(--tt-muted);
+}
+.tt-empty strong {
+  color: var(--tt-ink);
+  font-size: 14px;
+}
+.tt-empty p {
+  font-size: 12px;
+}
+.tt-records {
+  margin-top: 18px;
+  display: grid;
+}
+.college-erp .tt-workspace.tt-studio .tt-records > button {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 80px 90px 100px;
+  gap: 16px;
+  justify-content: stretch;
+  text-align: left;
+  padding: 17px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--tt-line);
+  border-radius: 0;
+}
+.tt-records > button.is-open {
+  background: #f0f8f6;
+}
+.tt-records strong {
+  display: block;
+  font-size: 13px;
+}
+.tt-records small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--tt-muted);
+}
+.tt-records .tt-status {
+  justify-self: start;
+}
+.tt-records > button > span:last-child {
+  font-size: 12px;
+  color: var(--tt-accent);
+}
+@media (max-width: 760px) {
+  .tt-page-header h2 {
+    font-size: 22px;
+  }
+  .tt-template-choices {
+    grid-template-columns: 1fr;
+  }
+  .tt-create-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tt-create-fields button {
+    grid-column: 1/-1;
+  }
+  .tt-setup,
+  .tt-saved {
+    padding: 16px;
+  }
+  .tt-miniature {
+    width: 84px;
+    height: 58px;
+  }
+  .tt-saved-heading > input {
+    max-width: none;
+  }
+  .college-erp .tt-workspace.tt-studio .tt-records > button {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .tt-records > button > small {
+    display: none;
+  }
+  .tt-editor-toolbar button {
+    padding: 8px;
+  }
+  .tt-sheet-heading {
+    padding: 20px 12px;
+  }
+  .tt-sheet-meta {
+    gap: 12px;
+  }
+  .tt-period-list > div {
+    grid-template-columns: 18px minmax(70px, 1fr) 85px 28px;
+    gap: 6px;
+  }
+  .tt-period-list > div > span:nth-last-child(2) {
+    display: none;
+  }
+  .tt-sheet-heading > input {
+    font-size: 19px;
+  }
+  .tt-cell-tools > span {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-spinner {
+    animation: none;
+  }
+}
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 10mm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .tt-editor,
+  .tt-editor * {
+    visibility: visible;
+  }
+  .tt-editor {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 0;
+    overflow: visible;
+  }
+  .tt-editor-toolbar,
+  .tt-instructions,
+  .tt-cell-tools,
+  .tt-period-settings,
+  .tt-resize {
+    display: none !important;
+  }
+  .tt-grid-scroll {
+    overflow: visible;
+  }
+  .tt-grid {
+    min-width: 0;
+    grid-template-columns: 90px repeat(6, 1fr);
+  }
+  .college-erp .tt-workspace.tt-studio input,
+  .college-erp .tt-workspace.tt-studio textarea {
+    border: 0 !important;
+    outline: 0 !important;
+  }
+  .tt-cell,
+  .tt-pause {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .tt-sheet-heading {
+    padding: 10px;
+  }
+  .tt-grid,
+  .tt-legend {
+    break-inside: avoid;
+  }
+}
+
+/* Keep the editor inside the portal; only the weekly grid scrolls horizontally. */
+.tt-studio > *,
+.tt-setup > *,
+.tt-saved > * {
+  min-width: 0;
+}
+.tt-studio,
+.tt-setup,
+.tt-saved,
+.tt-editor {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.tt-time {
+  overflow: hidden;
+  gap: 0;
+}
+.tt-time input {
+  height: 22px;
+  min-height: 0;
+  flex: 0 0 22px;
+  padding: 0 2px;
+  line-height: 20px;
+}
+.tt-time span {
+  line-height: 10px;
+}
+.tt-time input::-webkit-calendar-picker-indicator {
+  display: none;
+}
+.tt-time-pause {
+  background: #f8f5e7;
+}
+.college-erp .tt-workspace.tt-studio .tt-resize {
+  min-height: 14px;
+  height: 14px;
+  width: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+}
+.tt-cell :is(input, textarea) {
+  flex-shrink: 0;
+}
+.college-erp .tt-studio .tt-cell input {
+  min-height: 18px;
+  height: 18px;
+  font-size: 10px;
+  line-height: 14px;
+  padding: 1px 3px;
+}
+.college-erp .tt-studio .tt-cell textarea {
+  min-height: 34px;
+  height: 34px;
+  font-size: 11px;
+  line-height: 15px;
+  font-weight: 600;
+  padding: 2px 3px;
+  overflow-y: auto;
+}
+.college-erp .tt-studio .tt-cell .tt-subject-code {
+  font-size: 10px;
+  font-weight: 700;
+}
+.college-erp .tt-studio .tt-sheet-heading > input {
+  font-size: 22px;
+  font-weight: 650;
+}
+@media (max-width: 760px) {
+  .tt-create-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .tt-sheet-meta label {
+    max-width: 100%;
+  }
+  .tt-records {
+    min-width: 0;
+  }
+  .tt-records strong,
+  .tt-records small {
+    overflow-wrap: anywhere;
+  }
+}
+
+.college-erp .tt-workspace.tt-studio .tt-records > button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+.tt-records > button > div {
+  min-width: 0;
+}
+
+.tt-time,
+.tt-grid-corner {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+.tt-grid-corner {
+  z-index: 3;
+}
+@media (max-width: 760px) {
+  .tt-pause {
+    justify-content: flex-start;
+  }
+  .tt-pause input {
+    position: sticky;
+    left: 120px;
+    width: 190px;
+    margin-left: 14px;
+    text-align: left;
+  }
+}
+
+.ops-sheet .tt-create-fields label,
+.edu-record-drawer .tt-create-fields label {
+  font-size: 14.4px;
+}

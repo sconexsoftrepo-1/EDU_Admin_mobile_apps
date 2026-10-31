@@ -67,6 +67,7 @@ export interface EnrollmentOptions {
     start_date: string;
     end_date: string;
     program_code?: string | null;
+    batch_code?: string | null;
   }[];
   campuses: { code: string; name: string }[];
   documents: { key: string; label: string }[];

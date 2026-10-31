@@ -1,3 +1,5 @@
+import screenCatalog from "../../services/api/modules/workspace/screens.json";
+
 export type College = {
   slug: string;
   number: string;
@@ -52,25 +54,8 @@ export const colleges: College[] = [
 ];
 export const collegeBySlug = (slug: string) =>
   colleges.find((c) => c.slug === slug);
-export const collegeRoot = (c: College) => `/colleges-institutions/${c.slug}`;
-export const publicRoutes = [
-  "",
-  "about",
-  "leadership",
-  "academics",
-  "departments",
-  "faculty",
-  "admissions",
-  "admissions/apply",
-  "campus",
-  "facilities",
-  "student-life",
-  "achievements",
-  "placements",
-  "gallery",
-  "contact",
-  "faq",
-];
+// One institution is served directly at the domain root.
+export const collegeRoot = (_college: College) => "";
 // Operational screens; keys match backend screen contracts.
 export const operationLabels: Record<string, string> = {
   "campus-analytics": "Campus analytics",
@@ -110,11 +95,6 @@ export const operationLabels: Record<string, string> = {
   "vehicle-maintenance": "Vehicle maintenance",
   fuel: "Fuel records",
   "transport-reports": "Transport reports",
-  "mobile-apps": "Mobile apps emulator",
-  "admin-app": "Admin app preview",
-  "parent-app": "Parent app preview",
-  "student-app": "Student app preview",
-  "teacher-app": "Teacher app preview",
   accounts: "User accounts",
   credentials: "Credential provisioning",
   campaigns: "Notification campaigns",
@@ -146,7 +126,6 @@ export const modules = [
   "hostels",
   "hostel-permissions",
   "academics",
-  "staff",
   "roles",
   "notifications",
   "reports",
@@ -209,7 +188,7 @@ export const permissions: Record<Role, string[]> = {
     "imports",
   ],
   "Super Admin": modules,
-  Parent: ["dashboard", "parent-app", "timetable"],
+  Parent: ["dashboard", "timetable"],
   "HR Manager": [
     "dashboard",
     "employees",
@@ -266,7 +245,6 @@ export const permissions: Record<Role, string[]> = {
   Driver: ["dashboard", "trips", "manifest", "transport-attendance"],
   Principal: [
     "dashboard",
-    "admin-app",
     "timetable",
     "students",
     "admissions",
@@ -276,11 +254,9 @@ export const permissions: Record<Role, string[]> = {
     "scholarships",
     "hostels",
     "notifications",
-    "staff",
   ],
   "Accounts Manager": [
     "dashboard",
-    "admin-app",
     "fees",
     "fee-structures",
     "payments",
@@ -310,14 +286,12 @@ export const permissions: Record<Role, string[]> = {
     "academics",
     "students",
     "notifications",
-    "teacher-app",
     "assignments",
     "assessments",
     "attendance",
     "timetable",
   ],
   Student: [
-    "student-app",
     "timetable",
     "dashboard",
     "fees",
@@ -328,11 +302,7 @@ export const permissions: Record<Role, string[]> = {
     "notifications",
   ],
 };
-export function validCollegePath(c: College, parts: string[]) {
-  const p = parts.join("/");
-  if (publicRoutes.includes(p)) return true;
-  if (parts[0] === "academics" && parts.length === 2)
-    return c.programs.some((x) => x.slug === parts[1]);
+export function validCollegePath(_c: College, parts: string[]) {
   if (parts[0] === "verify-certificate")
     return parts.length === 2 && /^[A-Za-z0-9_-]{1,100}$/.test(parts[1]);
   if (parts[0] !== "portal") return false;
@@ -346,14 +316,16 @@ export function validCollegePath(c: College, parts: string[]) {
         "admin",
         "principal",
         "accounts",
-        "staff",
         "student",
         "certificates",
         "hostel",
       ].includes(parts[1])
     );
   if (parts.length === 3)
-    return safeArea(parts[1]) && /^[a-z0-9][a-z0-9-]{0,79}$/.test(parts[2]);
+    return (
+      safeArea(parts[1]) &&
+      screenCatalog.some((screen) => screen.key === parts[2])
+    );
   return (
     parts.length === 4 &&
     safeArea(parts[1]) &&

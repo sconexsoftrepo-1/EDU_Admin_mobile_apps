@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import { useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -9,7 +10,6 @@ import {
   Users,
   Pencil,
   Trash2,
-  Search,
   UserPlus,
 } from "lucide-react";
 import {
@@ -239,15 +239,13 @@ export default function RolesAccess() {
       )}
       <div className="erp-roles-grid">
         <aside className="erp-panel erp-role-directory">
-          <div className="erp-role-search">
-            <Search size={16} />
-            <input
-              aria-label="Search roles"
-              placeholder="Search roles…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+          <SearchField
+            aria-label="Search roles"
+            placeholder="Search roles…"
+            value={query}
+            onValueChange={setQuery}
+            suggestions={searchValues(roles, ["name", "code"])}
+          />
           <p>{roles.length} existing roles</p>
           <nav aria-label="Existing roles">
             {roles

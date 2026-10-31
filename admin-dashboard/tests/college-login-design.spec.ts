@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 const origin = process.env.EDUNEXA_TEST_BASE_URL;
-const path = "/colleges-institutions/edunexa-college/portal/login";
+const path = "/portal/login";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend.");
 const roles = [
   { code: "SYSTEM-ADMIN", name: "Super Admin" },
@@ -183,4 +183,41 @@ test("a reduced mobile viewport keeps password and submit reachable", async ({
   const submit = page.getByRole("button", { name: "Sign in", exact: true });
   await submit.scrollIntoViewIfNeeded();
   await expect(submit).toBeInViewport();
+});
+
+test("login is the landing page and removed website URLs return to sign in", async ({
+  page,
+}) => {
+  await openLogin(page);
+  for (const entry of [
+    "/",
+    "/colleges-institutions",
+    "/colleges-institutions/edunexa-college",
+    "/colleges-institutions/edunexa-college/about",
+    "/colleges-institutions/edunexa-college/admissions/apply",
+  ]) {
+    await page.goto(`${origin}${entry}`);
+    await expect(page).toHaveURL(`${origin}${path}`);
+    await expect(
+      page.getByRole("heading", { name: "Welcome to Pragathi College" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Back to website" }),
+    ).toHaveCount(0);
+  }
+});
+
+test("old portal links preserve their destination and query on the shorter URL", async ({
+  request,
+}) => {
+  for (const suffix of ["login", "admin/student-enrollment"]) {
+    const response = await request.get(
+      `${origin}/colleges-institutions/edunexa-college/portal/${suffix}?source=bookmark`,
+      { maxRedirects: 0 },
+    );
+    expect(response.status()).toBe(308);
+    expect(response.headers().location).toBe(
+      `/portal/${suffix}?source=bookmark`,
+    );
+  }
 });

@@ -1,0 +1,439 @@
+.adm-workspace {
+  --adm-ink: #18212d;
+  --adm-muted: #738092;
+  --adm-line: #e5eaf0;
+  --adm-accent: #157f72;
+  color: var(--adm-ink);
+  display: grid;
+  gap: 18px;
+  padding: 6px 0 36px;
+}
+.adm-heading,
+.adm-list-toolbar,
+.adm-form-title,
+.adm-form-actions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+.adm-heading-actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+.adm-heading p,
+.adm-form-title span {
+  color: var(--adm-accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+.adm-heading h1 {
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+.adm-heading > div > span,
+.adm-list-toolbar p,
+.adm-form-title p {
+  color: var(--adm-muted);
+  display: block;
+  font-size: 13px;
+  margin: 7px 0 0;
+}
+.adm-refresh,
+.adm-tabs button,
+.adm-actions button {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+.adm-refresh,
+.adm-tabs button,
+.adm-search,
+.adm-actions button,
+.adm-create-form input,
+.adm-create-form select,
+.adm-submit {
+  border: 1px solid var(--adm-line);
+  border-radius: 12px;
+}
+.adm-refresh {
+  background: white;
+  color: #344255;
+  padding: 10px 13px;
+}
+.adm-tabs {
+  background: #eff3f6;
+  border-radius: 15px;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  width: max-content;
+}
+.adm-tabs button {
+  background: transparent;
+  border: 0;
+  border-radius: 11px;
+  color: #637184;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px 15px;
+}
+.adm-tabs button[aria-selected="true"] {
+  background: #fff;
+  box-shadow: 0 2px 7px #1e293b12;
+  color: var(--adm-ink);
+}
+.adm-tabs button:disabled {
+  opacity: 0.45;
+}
+.adm-tabs span {
+  background: #e9f2f0;
+  border-radius: 20px;
+  color: var(--adm-accent);
+  font-size: 11px;
+  padding: 2px 7px;
+}
+.adm-workspace .adm-tabs {
+  background: transparent;
+  border-bottom: 1px solid #e2e8eb;
+  border-radius: 0;
+  gap: 4px;
+  padding: 0;
+  width: 100%;
+}
+.adm-workspace .adm-tabs button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #52626d;
+  justify-content: center;
+  margin-bottom: -1px;
+  padding: 11px 16px;
+}
+.adm-workspace .adm-tabs button[aria-selected="true"] {
+  background: #eef5f7;
+  border-bottom-color: #195e72;
+  box-shadow: none;
+  color: #164a5e;
+  font-weight: 700;
+}
+.adm-workspace .adm-tabs button:focus-visible {
+  outline: 2px solid #b77a20;
+  outline-offset: 2px;
+}
+.adm-list-panel,
+.adm-create-form {
+  background: white;
+  border: 1px solid var(--adm-line);
+  border-radius: 19px;
+  box-shadow: 0 10px 30px #17212c08;
+  overflow: hidden;
+}
+.adm-list-toolbar {
+  padding: 21px 22px;
+}
+.adm-list-toolbar h2,
+.adm-form-title h2 {
+  font-size: 19px;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+.adm-search {
+  align-items: center;
+  background: #fafbfd;
+  color: var(--adm-muted);
+  display: flex;
+  gap: 8px;
+  padding: 0 12px;
+}
+.adm-search input {
+  background: transparent;
+  border: 0;
+  min-width: 210px;
+  outline: none;
+  padding: 11px 0;
+}
+.adm-table-wrap {
+  overflow: auto;
+}
+.adm-table-wrap table {
+  border-collapse: collapse;
+  min-width: 820px;
+  width: 100%;
+}
+.adm-table-wrap th,
+.adm-table-wrap td {
+  border-top: 1px solid #edf0f4;
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+.adm-table-wrap th {
+  background: #fafbfd;
+  color: #778394;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.adm-table-wrap td {
+  font-size: 12px;
+}
+.adm-table-wrap td strong,
+.adm-table-wrap td small {
+  display: block;
+}
+.adm-table-wrap td strong {
+  font-size: 13px;
+}
+.adm-table-wrap td small {
+  color: var(--adm-muted);
+  margin-top: 4px;
+}
+.adm-status {
+  background: #f0f3f7;
+  border-radius: 20px;
+  color: #536175;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 9px;
+}
+.adm-status-new {
+  background: #edf4ff;
+  color: #305b9a;
+}
+.adm-status-joined {
+  background: #e7f7ee;
+  color: #25734b;
+}
+.adm-actions {
+  display: flex;
+  gap: 7px;
+  white-space: nowrap;
+}
+.adm-actions button {
+  background: white;
+  color: #344255;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 9px;
+}
+.adm-actions button.adm-convert {
+  background: #eaf7f4;
+  border-color: #cce9e2;
+  color: #087767;
+  font-size: 11px;
+  font-weight: 700;
+}
+.adm-loading,
+.adm-empty {
+  color: var(--adm-muted);
+  padding: 38px;
+  text-align: center;
+}
+.adm-create-form {
+  display: grid;
+  gap: 21px;
+  padding: 24px;
+}
+.adm-form-grid {
+  display: grid;
+  gap: 15px 17px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.adm-create-form label {
+  color: #566274;
+  display: grid;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 7px;
+}
+.adm-create-form input:not([type="checkbox"]),
+.adm-create-form select {
+  background: #fbfcfe;
+  color: #1c2937;
+  font: 500 13px inherit;
+  min-height: 43px;
+  outline: none;
+  padding: 10px 12px;
+  width: 100%;
+}
+.adm-create-form input:focus,
+.adm-create-form select:focus {
+  border-color: #69b5a9;
+  box-shadow: 0 0 0 3px #16847215;
+}
+.adm-address,
+.adm-referral,
+.adm-followup {
+  border: 1px solid var(--adm-line);
+  border-radius: 15px;
+  margin: 0;
+  padding: 16px;
+}
+.adm-address legend {
+  color: #4c596a;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 0 7px;
+}
+.adm-address .adm-form-grid {
+  padding-top: 6px;
+}
+.adm-span-2 {
+  grid-column: span 2;
+}
+.adm-referral h3,
+.adm-followup h3 {
+  font-size: 13px;
+  margin: 0 0 14px;
+}
+.adm-consent {
+  align-items: center;
+  display: flex !important;
+  flex-direction: row;
+  gap: 9px !important;
+  padding-top: 22px;
+}
+.adm-consent input {
+  accent-color: var(--adm-accent);
+  height: 16px;
+  width: 16px;
+}
+.adm-form-actions {
+  border-top: 1px solid var(--adm-line);
+  padding-top: 16px;
+}
+.adm-form-actions span {
+  color: var(--adm-muted);
+  font-size: 11px;
+}
+.adm-submit {
+  background: var(--adm-accent);
+  border-color: var(--adm-accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 750;
+  padding: 12px 17px;
+}
+.adm-alert,
+.adm-success {
+  align-items: center;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+.adm-alert {
+  background: #fff1ef;
+  color: #a13d32;
+}
+.adm-success {
+  background: #ecf8f0;
+  color: #267247;
+}
+.adm-alert button,
+.adm-success button {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-weight: 700;
+}
+.adm-detail-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.adm-detail-grid div {
+  background: #f7f9fb;
+  border-radius: 12px;
+  padding: 12px;
+}
+.adm-detail-grid span,
+.adm-detail-grid strong {
+  display: block;
+}
+.adm-detail-grid span {
+  color: var(--adm-muted);
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+.adm-detail-grid strong {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.adm-wizard-overlay {
+  background: #0d172566;
+  inset: 0;
+  overflow: auto;
+  position: fixed;
+  z-index: 1000;
+}
+.adm-wizard-overlay > .enw-shell {
+  margin: 20px auto;
+  max-width: 1200px;
+}
+.adm-wizard-overlay .enw-close {
+  position: sticky;
+  top: 10px;
+  z-index: 1;
+}
+@media (max-width: 720px) {
+  .adm-heading,
+  .adm-list-toolbar,
+  .adm-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .adm-heading-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .adm-tabs {
+    width: 100%;
+  }
+  .adm-tabs button {
+    flex: 1;
+    justify-content: center;
+  }
+  .adm-form-grid,
+  .adm-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .adm-span-2 {
+    grid-column: auto;
+  }
+  .adm-create-form {
+    padding: 17px;
+  }
+  .adm-search,
+  .adm-search input {
+    width: 100%;
+  }
+  .adm-wizard-overlay > .enw-shell {
+    margin: 0;
+    min-height: 100vh;
+  }
+}
+
+.erp-api-drawer .adm-create-form label {
+  font-size: 13.2px;
+}
+
+/* Application content keeps the shared drawer gutter without double padding. */
+.adm-application-drawer .edu-record-drawer-body {
+  padding: 0;
+}
+.adm-application-drawer .adm-create-form {
+  padding: 24px var(--edu-drawer-gutter);
+}
+.adm-application-drawer .adm-create-form label {
+  font-size: 13.2px;
+}

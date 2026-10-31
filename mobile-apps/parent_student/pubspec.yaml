@@ -7,6 +7,7 @@ environment:
   sdk: ^3.12.0
 
 dependencies:
+  flutter_svg: ^2.3.0
   firebase_core: ^5.1.0
   firebase_messaging: ^17.0.1
   url_launcher: ^6.3.0
@@ -14,6 +15,8 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   share_plus: ^13.0.0
   cross_file: ^0.3.4
+  file_selector: ^1.1.0
+  pdfrx: 1.3.5
   flutter:
     sdk: flutter
 
@@ -24,6 +27,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/illustrations/auth/
+    - assets/splash/
+    - assets/branding/
+    - assets/illustrations/
+    - assets/empty_states/
+    - assets/icons/
+    - assets/motion/
   fonts:
     - family: Roboto
       fonts:

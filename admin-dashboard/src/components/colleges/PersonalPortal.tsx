@@ -1,5 +1,11 @@
 "use client";
 import { useErrorToast } from "./toast";
+import AssignmentWorkspace from "./AssignmentWorkspace";
+import SyllabusWorkspace from "./SyllabusWorkspace";
+import CalendarWorkspace from "./CalendarWorkspace";
+import AttendanceWorkspace from "./AttendanceWorkspace";
+import AssessmentWorkspace from "./AssessmentWorkspace";
+import CertificateWorkspace from "./CertificateWorkspace";
 import { useCallback, useEffect, useState } from "react";
 import {
   api,
@@ -107,96 +113,113 @@ export default function PersonalPortal({
         <button onClick={signOut}>Sign out</button>
       </aside>
       <section className="edu-content">
-        <header className="edu-heading">
-          <h1>{data?.title || "My college workspace"}</h1>
-          <button onClick={load}>Refresh</button>
-        </header>
-        {data && data.students.length > 1 && (
-          <label>
-            Student
-            <select
-              value={student || data.selected_student_code || ""}
-              onChange={(e) => setStudent(e.target.value)}
-            >
-              {data.students.map((s) => (
-                <option key={s.code} value={s.code}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        {error && (
-          <p className="edu-error" role="alert">
-            {error}
-          </p>
-        )}
-        {busy && <p>Loading your college records…</p>}
-        {data?.summary && (
-          <article className="edu-special">{record(data.summary)}</article>
-        )}
-        <div className="edu-toolbar">
-          {data?.actions.map((action) => (
-            <button
-              key={action.key}
-              onClick={() =>
-                openForm({
-                  title: action.label,
-                  fields: action.fields,
-                  save: async (values) => {
-                    const result = await api.mobile.runAction(
-                      selected,
-                      action.key,
-                      {
-                        values,
-                        form_revision: action.form_revision,
-                        student_code:
-                          student || data.selected_student_code || null,
-                      },
-                    );
-                    if (result.checkout_url) {
-                      window.location.assign(String(result.checkout_url));
-                      return;
-                    }
-                    if (result.reauthenticate) {
-                      await signOut();
-                      return;
-                    }
-                    await load();
-                  },
-                })
-              }
-            >
-              {action.label}
-            </button>
-          ))}
-        </div>
-        {data?.items.map((row, i) => (
-          <article className="edu-special" key={String(row.code || i)}>
-            {record(row)}
-            {data.downloads && row.record_type !== "request" && (
-              <button
-                onClick={() => download(data.downloads!, String(row.code))}
-              >
-                Download PDF
-              </button>
+        {selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : ["assignments", "submissions"].includes(selected) ? (
+          <AssignmentWorkspace studentCode={student || undefined} />
+        ) : selected === "syllabus" ? (
+          <SyllabusWorkspace studentCode={student || undefined} />
+        ) : selected === "calendar" ? (
+          <CalendarWorkspace studentCode={student || undefined} />
+        ) : selected === "certificates" ? (
+          <CertificateWorkspace personal studentCode={student || undefined} />
+        ) : (
+          <>
+            <header className="edu-heading">
+              <h1>{data?.title || "My college workspace"}</h1>
+              <button onClick={load}>Refresh</button>
+            </header>
+            {data && data.students.length > 1 && (
+              <label>
+                Student
+                <select
+                  value={student || data.selected_student_code || ""}
+                  onChange={(e) => setStudent(e.target.value)}
+                >
+                  {data.students.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
             )}
-            {Array.isArray(row.receipts) &&
-              row.receipts.map((raw) => {
-                const receipt = raw as Row;
-                return (
+            {error && (
+              <p className="edu-error" role="alert">
+                {error}
+              </p>
+            )}
+            {busy && <p>Loading your college records…</p>}
+            {data?.summary && (
+              <article className="edu-special">{record(data.summary)}</article>
+            )}
+            <div className="edu-toolbar">
+              {data?.actions.map((action) => (
+                <button
+                  key={action.key}
+                  onClick={() =>
+                    openForm({
+                      title: action.label,
+                      fields: action.fields,
+                      save: async (values) => {
+                        const result = await api.mobile.runAction(
+                          selected,
+                          action.key,
+                          {
+                            values,
+                            form_revision: action.form_revision,
+                            student_code:
+                              student || data.selected_student_code || null,
+                          },
+                        );
+                        if (result.checkout_url) {
+                          window.location.assign(String(result.checkout_url));
+                          return;
+                        }
+                        if (result.reauthenticate) {
+                          await signOut();
+                          return;
+                        }
+                        await load();
+                      },
+                    })
+                  }
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+            {data?.items.map((row, i) => (
+              <article className="edu-special" key={String(row.code || i)}>
+                {record(row)}
+                {selected === "notifications" && Boolean(row.certificate_request_code || row.certificate_code) && (
+                  <button onClick={() => setSelected("certificates")}>View certificates</button>
+                )}
+                {data.downloads && row.record_type !== "request" && (
                   <button
-                    key={String(receipt.code)}
-                    onClick={() => download("receipt", String(receipt.code))}
+                    onClick={() => download(data.downloads!, String(row.code))}
                   >
-                    Download receipt {String(receipt.receipt_number)}
+                    Download PDF
                   </button>
-                );
-              })}
-          </article>
-        ))}
-        {!busy && data?.items.length === 0 && !data.summary && (
-          <p>No records are available yet.</p>
+                )}
+                {Array.isArray(row.receipts) &&
+                  row.receipts.map((raw) => {
+                    const receipt = raw as Row;
+                    return (
+                      <button
+                        key={String(receipt.code)}
+                        onClick={() =>
+                          download("receipt", String(receipt.code))
+                        }
+                      >
+                        Download receipt {String(receipt.receipt_number)}
+                      </button>
+                    );
+                  })}
+              </article>
+            ))}
+            {!busy && data?.items.length === 0 && !data.summary && (
+              <p>No records are available yet.</p>
+            )}
+          </>
         )}
       </section>
     </main>

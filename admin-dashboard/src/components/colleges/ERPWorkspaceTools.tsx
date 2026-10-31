@@ -1,4 +1,5 @@
 "use client";
+import "./search-field.css";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -20,7 +21,6 @@ import {
   LayoutDashboard,
   BarChart3,
   Bus,
-  Smartphone,
   Package,
   CalendarDays,
   BadgeIndianRupee,
@@ -34,10 +34,6 @@ const moduleIcons: Record<string, typeof BookOpen> = {
   transport: Bus,
   buses: Bus,
   "bus-seating": Bus,
-  "mobile-apps": Smartphone,
-  "parent-app": Smartphone,
-  "student-app": Smartphone,
-  "teacher-app": Smartphone,
   employees: Users,
   payroll: BadgeIndianRupee,
   "salary-structures": BadgeIndianRupee,
@@ -54,7 +50,6 @@ const moduleIcons: Record<string, typeof BookOpen> = {
   receipts: Receipt,
   hostels: Building2,
   certificates: FileCheck,
-  staff: Briefcase,
   roles: Shield,
   settings: Settings,
   reports: BarChart3,
@@ -93,7 +88,6 @@ export function WorkspaceNavigation({
     "HR & payroll": Briefcase,
     "Procurement & expenses": Package,
     "Transport & bus": Bus,
-    "Mobile apps": Smartphone,
     Certificates: FileCheck,
     Hostel: Building2,
     Communication: Bell,
@@ -111,7 +105,6 @@ export function WorkspaceNavigation({
         "teaching-staff",
         "non-teaching-staff",
         "daily-labour",
-        "staff",
         "timetable",
         "assignments",
         "syllabus",
@@ -191,10 +184,6 @@ export function WorkspaceNavigation({
         "fuel",
         "transport-reports",
       ],
-    ],
-    [
-      "Mobile apps",
-      ["mobile-apps", "admin-app", "parent-app", "student-app", "teacher-app"],
     ],
     ["Certificates", ["certificates", "certificate-requests"]],
     ["Hostel", ["hostels", "hostel-permissions"]],
@@ -475,9 +464,9 @@ export function WorkspaceSearch({
         .slice(0, 8)
     : [];
   return (
-    <div ref={container} className="erp-global-search">
+    <div ref={container} className="erp-global-search edu-search-field">
       <Search size={17} />
-      <input
+      <input className="edu-search-input"
         ref={input}
         value={query}
         aria-label="Search portal modules"

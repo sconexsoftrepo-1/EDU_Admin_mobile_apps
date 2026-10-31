@@ -1,0 +1,328 @@
+.att-workspace {
+  color: #263747;
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+.att-heading,
+.att-register > header,
+.att-register-actions,
+.att-calendar > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.att-heading h1 {
+  margin: 3px 0 8px;
+  font-size: 28px;
+  letter-spacing: -0.03em;
+}
+.att-heading p {
+  margin: 0;
+  color: #697b86;
+}
+.att-heading span,
+.att-register p {
+  color: #6c7b88;
+}
+.att-workspace button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 12px;
+  min-height: 38px;
+  border: 1px solid #dbe2e7;
+  border-radius: 8px;
+  background: white;
+  color: #334b59;
+  cursor: pointer;
+}
+.att-workspace button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.att-workspace button:focus-visible {
+  outline: 3px solid #af792c;
+  outline-offset: 2px;
+}
+.att-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 14px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e0e5e7;
+  border-radius: 14px;
+}
+.att-workspace label {
+  display: grid;
+  gap: 7px;
+  color: #536778;
+  font-size: 14px;
+  font-weight: 600;
+}
+.att-workspace :is(select, input):not(.edu-search-input) {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: 1px solid #d9e0e5;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 8px 12px;
+  color: #253e4c;
+  font: inherit;
+}
+.att-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.att-tabs button[aria-pressed="true"],
+.att-workspace .att-save {
+  background: #1e6470;
+  color: #fff;
+  border-color: #1e6470;
+}
+.att-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.att-metrics article {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid #dfe6e6;
+  border-radius: 12px;
+  background: #fff;
+}
+.att-metrics span {
+  color: #697b86;
+  font-size: 13px;
+}
+.att-metrics strong {
+  font-size: 26px;
+  color: #1d4f5b;
+}
+.att-overview {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  gap: 20px;
+}
+.att-calendar,
+.att-trend,
+.att-register {
+  border: 1px solid #dfe6e6;
+  border-radius: 14px;
+  background: #fff;
+  padding: 20px;
+  min-width: 0;
+}
+.att-workspace h2 {
+  font-size: 18px;
+  margin: 0;
+}
+.att-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 18px;
+}
+.att-calendar-grid > small {
+  text-align: center;
+  color: #778594;
+  padding-bottom: 8px;
+}
+.att-calendar-grid button {
+  display: grid;
+  gap: 4px;
+  min-height: 56px;
+  padding: 6px 2px;
+  border: 1px solid transparent;
+}
+.att-calendar-grid button small {
+  font-size: 10px;
+  color: #6c7b88;
+}
+.att-calendar-grid .has-presence {
+  background: #eff8f3;
+}
+.att-calendar-grid .has-absence {
+  background: #fff0ed;
+}
+.att-calendar-grid .has-leave {
+  background: #fff8e9;
+}
+.att-calendar-grid button[aria-pressed="true"] {
+  border-color: #1e6470;
+  box-shadow: 0 0 0 1px #1e6470;
+}
+.att-legend,
+.att-trend p {
+  font-size: 12px;
+  color: #71808c;
+  line-height: 1.6;
+}
+.att-bars {
+  display: flex;
+  align-items: stretch;
+  height: 170px;
+  gap: 3px;
+  margin: 24px 0;
+}
+.att-bars button {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 3px;
+}
+.att-bars button span {
+  display: block;
+  background: #39908d;
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+}
+.att-bars small {
+  font-size: 8px;
+  color: #6c7b88;
+}
+.att-register > header {
+  margin-bottom: 18px;
+}
+.att-register-actions {
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+.att-register-actions > label {
+  margin-right: auto;
+  max-width: 300px;
+}
+.att-register p {
+  margin: 7px 0;
+}
+.att-table-wrap {
+  overflow: auto;
+  max-height: 600px;
+  border: 1px solid #e1e6e8;
+  border-radius: 10px;
+}
+.att-workspace table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  font-size: 13px;
+}
+.att-workspace th,
+.att-workspace td {
+  padding: 9px;
+  border-bottom: 1px solid #e9edef;
+  border-right: 1px solid #edf0f1;
+  white-space: nowrap;
+  text-align: center;
+}
+.att-workspace thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f4f7f8;
+  color: #4f6775;
+}
+.att-workspace th:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+  min-width: 180px;
+}
+.att-workspace thead th:first-child {
+  z-index: 3;
+  background: #f4f7f8;
+}
+.att-workspace th small {
+  display: block;
+  font-weight: 400;
+  color: #7b8992;
+  margin-top: 5px;
+}
+.att-table-wrap button {
+  min-height: 28px;
+  padding: 4px;
+  min-width: 28px;
+  border: 0;
+}
+.att-workspace .att-cell-A {
+  background: #fff0ed;
+  color: #b04431;
+}
+.att-workspace .att-cell-P {
+  background: #eaf5ef;
+  color: #287453;
+}
+.att-workspace .att-cell-E {
+  background: #fff7e5;
+  color: #9b751b;
+}
+.att-workspace .att-cell-L {
+  background: #eef3ff;
+  color: #4b61a0;
+}
+.att-workspace .att-error {
+  padding: 14px;
+  background: #fff0ed;
+  color: #9f3427;
+  border-radius: 10px;
+}
+.att-success {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  background: #eaf5ef;
+  border-radius: 10px;
+}
+.att-empty {
+  text-align: center;
+  padding: 36px 16px;
+  color: #71818d;
+}
+@media (max-width: 900px) {
+  .att-overview {
+    grid-template-columns: 1fr;
+  }
+  .att-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 550px) {
+  .att-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 14px;
+  }
+  .att-heading h1 {
+    font-size: 24px;
+  }
+  .att-register,
+  .att-calendar,
+  .att-trend {
+    padding: 14px;
+  }
+  .att-register-actions > label {
+    max-width: none;
+    width: 100%;
+  }
+  .att-metrics article {
+    padding: 15px;
+  }
+  .att-workspace select,
+  .att-workspace input {
+    font-size: 16px;
+  }
+}

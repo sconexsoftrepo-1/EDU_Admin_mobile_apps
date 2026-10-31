@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import type { College } from "@/data/colleges";
 import type { RecordRow } from "@/lib/colleges/store";
 import type { OperationRecord } from "@/lib/colleges/operations";
-import MobileAcademicCalendar from "./MobileAcademicCalendar";
+import AcademicCalendar from "./AcademicCalendar";
 export default function AcademicCalendarDrawer({
   college,
   periods,
@@ -33,7 +33,7 @@ export default function AcademicCalendarDrawer({
   return (
     <dialog
       ref={dialog}
-      className="ops-sheet academic-calendar-drawer mobile-redesign"
+      className="ops-sheet academic-calendar-drawer academic-calendar-theme"
       data-panel-size="medium"
       data-institution={college.slug}
       aria-label="Shared academic calendar"
@@ -53,7 +53,7 @@ export default function AcademicCalendarDrawer({
         </button>
       </header>
       <div className="ops-sheet-body">
-        <MobileAcademicCalendar
+        <AcademicCalendar
           college={college}
           staff={staff}
           periods={periods}

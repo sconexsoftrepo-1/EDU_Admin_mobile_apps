@@ -187,19 +187,20 @@ def test_enrollment_wizard_end_to_end(client, app):
     course = run("create-course", {"program.code": "INT-MPC", "program.department_code": "DEP",
                                    "program.name": "Intermediate MPC", "program.qualification": "Intermediate",
                                    "program.duration_semesters": 4, "program.course_level": "intermediate",
-                                   "program.branch": "MPC", "batch.code": "INT-MPC-2026", "batch.name": "2026-28",
-                                   "batch.entry_year": 2026, "batch.graduation_year": 2028})
+                                   "program.branch": "MPC"})
     assert course.status_code == 201, course.text
-    section = run("create-batch", {"program_code": "INT-MPC", "batch.code": "INT-MPC-2027", "batch.name": "2027-29",
-                                   "batch.entry_year": 2027, "batch.graduation_year": 2029})
-    assert section.status_code == 201, section.text
-    fees = run("course-fee-structure", {"program_code": "INT-MPC", "academic_year_code": "AY", "year_of_study": 1,
+    year_code = "INT-MPC-2026-2028"
+    for start, end in [(2026, 2028), (2027, 2029)]:
+        made = client.post("/api/v1/workspace/resources/academic_years", headers=h, json={"values": {
+            "program_code": "INT-MPC", "start_date": f"{start}-06-01", "end_date": f"{end}-05-31"}})
+        assert made.status_code == 201, made.text
+    fees = run("course-fee-structure", {"program_code": "INT-MPC", "academic_year_code": year_code, "year_of_study": 1,
                                         "due_date": "2026-07-15", "amount.tuition": "40000", "amount.exam": "2000",
                                         "amount.hostel": "60000", "amount.transport": "15000"})
     assert fees.status_code == 201, fees.text
     assert len(fees.json()["fee_structures"]) == 4
 
-    options = client.get("/api/v1/master-data/enrollment/options?academic_year_code=AY&program_code=INT-MPC&hostel=true",
+    options = client.get("/api/v1/master-data/enrollment/options?academic_year_code=INT-MPC-2026-2028&program_code=INT-MPC&hostel=true",
                          headers=h).json()
     assert [c["branch"] for c in options["courses"]["intermediate"]] == ["MPC"]
     assert options["admission_number"] == "26INTMPC0001"
@@ -207,10 +208,11 @@ def test_enrollment_wizard_end_to_end(client, app):
     assert {f["category"] for f in options["fees"]} == {"academic", "hostel"}
 
     bad = client.post("/api/v1/master-data/enrollment", headers=h, json=wizard_student(
-        special_consideration={"amount": "500"}))
+        course={"course_level": "intermediate", "program_code": "INT-MPC", "academic_year_code": year_code}, special_consideration={"amount": "500"}))
     assert bad.status_code == 422  # a special consideration needs a reason
 
     result = client.post("/api/v1/master-data/enrollment", headers=h, json=wizard_student(
+        course={"course_level": "intermediate", "program_code": "INT-MPC", "academic_year_code": year_code},
         hostel_required=True, scholarship={"amount": "5000", "name": "Merit scholarship"},
         special_consideration={"amount": "1000", "reason": "Sibling studying in the college"}))
     assert result.status_code == 201, result.text
@@ -238,16 +240,14 @@ def test_enrollment_wizard_end_to_end(client, app):
     assert review["student"]["emergency_contact_phone"] == "9876500101"
 
     insights = client.get("/api/v1/master-data/enrollment/courses/INT-MPC/insights", headers=h).json()
-    assert [b["code"] for b in insights["batches"]] == ["INT-MPC-2027", "INT-MPC-2026"]
+    assert [b["code"] for b in insights["batches"]] == ["INT-MPC-2027-2029", "INT-MPC-2026-2028"]
     first = insights["batches"][1]
     assert first["students"] == 1 and first["hostel"] == 1 and first["net_fee"] == "96000.00"
     assert insights["totals"]["students"] == 1 and insights["totals"]["batches"] == 2 and insights["years"] == 2
     assert insights["semester_labels"] == ["1-1", "1-2", "2-1", "2-2"]
 
-    promoted = run("promote-batch", {"batch_code": "INT-MPC-2026", "to_year": 2})
-    assert promoted.status_code == 201, promoted.text
-    assert promoted.json()["students"] == 1
-    assert client.get(f"/api/v1/master-data/enrollment/{student['code']}", headers=h).json()["student"]["current_year"] == 2
+    assert run("promote-batch", {"batch_code": year_code, "to_year": 2}).status_code == 404
+    assert body["batch"]["code"] == year_code
 
 
 def test_create_course_registers_a_typed_department(client, app):
@@ -301,10 +301,10 @@ def test_batch_section_uses_first_semester_of_start_year(client, app):
             "code": "BSC-AUTO", "department_code": "DEP", "name": "B.Sc",
             "qualification": "B.Sc", "duration_semesters": 6,
         }
-    result = client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": {
-        "program_code": "BSC-AUTO", "batch.name": "2026–2029", "batch.entry_year": 2026,
-        "batch.graduation_year": 2029, "section.name": "A", "section.capacity": 60,
-    }})
+    result = client.post("/api/v1/master-data/courses/BSC-AUTO/batches", headers=h, json={
+        "batch": {"name": "2026–2029", "entry_year": 2026, "graduation_year": 2029},
+        "sections": [{"name": "A", "capacity": 60}],
+    })
     assert result.status_code == 201, result.text
     assert result.json()["sections"][0]["semester_code"] == "SEM1"
     assert result.json()["batch"]["graduation_year"] == 2029
@@ -317,10 +317,10 @@ def test_batch_section_can_be_created_before_calendar_setup(client, app):
             "code": "BSC-AUTO", "department_code": "DEP", "name": "B.Sc",
             "qualification": "B.Sc", "duration_semesters": 6,
         }
-    result = client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": {
-        "program_code": "BSC-AUTO", "batch.name": "2028–2031", "batch.entry_year": 2028,
-        "batch.graduation_year": 2031, "section.name": "A",
-    }})
+    result = client.post("/api/v1/master-data/courses/BSC-AUTO/batches", headers=h, json={
+        "batch": {"name": "2028–2031", "entry_year": 2028, "graduation_year": 2031},
+        "sections": [{"name": "A"}],
+    })
     assert result.status_code == 201, result.text
     assert result.json()["sections"][0].get("semester_code") is None
     assert result.json()["batch"]["entry_year"] == 2028
@@ -390,22 +390,40 @@ def test_batch_overview_and_atomic_section_rename(client, app):
     assert app.state.store.snapshot()['records']['sections']['VIEW-A']['name'] == 'Alpha'
 
 
-def test_year_based_batch_needs_start_and_end_year_and_names_itself(client, app):
-    h = master_data_user(app, client)
-    form = next(a for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]
-                if a["key"] == "create-batch")
-    batch = {f["key"]: f for f in form["fields"] if f["key"].startswith("batch.")}
-    assert list(batch) == ["batch.entry_year", "batch.graduation_year"]  # no name field
-    assert all(f["required"] for f in batch.values())
-    with app.state.store.transaction() as d:
-        d["records"].setdefault("programs", {})["BCOM"] = {
+def test_dated_course_batch_reuses_existing_cohort_and_retires_duplicate_actions(client, app, headers):
+    master_data_user(app, client)
+    actions = client.get("/api/v1/master-data/actions", headers=headers).json()["actions"]
+    assert not {"create-batch", "promote-batch"} & {a["key"] for a in actions}
+    course_form = next(a for a in actions if a["key"] == "create-course")
+    assert not any(f["key"].startswith("batch.") for f in course_form["fields"])
+    with app.state.store.transaction() as data:
+        data["records"].setdefault("programs", {})["BCOM"] = {
             "code": "BCOM", "department_code": "DEP", "name": "B.Com", "qualification": "B.Com", "duration_semesters": 6}
-    run = lambda values: client.post("/api/v1/master-data/actions/create-batch", headers=h, json={"values": values})
-    assert run({"program_code": "BCOM", "batch.entry_year": 2026}).status_code == 422
-    assert run({"program_code": "BCOM", "batch.entry_year": 2026, "batch.graduation_year": 2025}).status_code == 422
-    made = run({"program_code": "BCOM", "batch.entry_year": 2026, "batch.graduation_year": 2029})
+        data["records"].setdefault("batches", {})["EXISTING"] = {
+            "code": "EXISTING", "program_code": "BCOM", "name": "2026–2029", "entry_year": 2026, "graduation_year": 2029}
+    endpoint = "/api/v1/workspace/resources/academic_years"
+    values = {"program_code": "BCOM", "start_date": "2026-06-01", "end_date": "2029-05-31"}
+    made = client.post(endpoint, headers=headers, json={"values": values})
     assert made.status_code == 201, made.text
-    assert made.json()["batch"]["name"] == "2026-29"
+    assert made.json()["batch_code"] == "EXISTING"
+    code = made.json()["code"]
+    updated = client.patch(endpoint + "/" + code, headers=headers,
+                           json={"values": {"end_date": "2029-06-01"}})
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["batch_code"] == "EXISTING"
+    assert len(app.state.store.snapshot()["records"]["batches"]) == 1
+    from app.modules.master_data.enrollment.api import pick_batch
+    from app.modules.master_data.enrollment.schemas import CourseChoice
+    choice = CourseChoice(course_level="degree", program_code="BCOM", academic_year_code=code)
+    with app.state.store.transaction() as data:
+        assert pick_batch(data, choice, 2026, "ADMIN")["code"] == "EXISTING"
+    # A new dated batch creates its cohort without a second form.
+    new = client.post(endpoint, headers=headers, json={"values": {**values,
+                      "start_date": "2027-06-01", "end_date": "2030-05-31"}})
+    assert new.status_code == 201, new.text
+    assert new.json()["batch_code"] == new.json()["code"]
+    assert client.delete("/api/v1/academics/academic-years/" + new.json()["code"], headers=headers).status_code == 204
+    assert len(app.state.store.snapshot()["records"]["batches"]) == 1
 
 
 def staff_payload(kind, aadhaar, **extra):

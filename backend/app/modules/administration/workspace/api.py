@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.core.resources import CATALOG, IMMUTABLE, MANAGED, staff_only
+from app.core.resources import CATALOG, IMMUTABLE, MANAGED, RESOURCE_DEFAULTS, staff_only
 from app.core.security import current_user, has_permission, role_limit
 
 router = APIRouter(prefix="/workspace", tags=["Admin screen coverage"])
@@ -22,11 +22,25 @@ def permitted(data, user, screen):
     return has_permission(data, user, screen, "view")
 
 
+def lookup_permitted(data, user, table):
+    if permitted(data, user, table):
+        return True
+    # A record writer needs reference choices even when the role cannot open the
+    # related module. Expose only the code/label projection, never full records.
+    return any(
+        any(field.get("reference") == table for field in spec["fields"])
+        and any(has_permission(data, user, source, action) for action in ("create", "edit"))
+        for source, spec in CATALOG.items()
+        if source in RESOURCES and source not in MANAGED
+    )
+
+
 @router.get("/screens")
 def screens(request: Request, user=Depends(current_user)):
     staff_only(user)
     data = request.app.state.store.snapshot()
     allowed = role_limit(data, user, "screens")
+    system_admin = any(data["roles"].get(code, {}).get("system_admin") for code in user["role_codes"])
     items = []
     for screen in SCREENS:
         if allowed is not None and screen["key"] not in allowed:
@@ -46,16 +60,12 @@ def screens(request: Request, user=Depends(current_user)):
             data, user, special[screen["key"]]
         )
         if (
-            resources
+            system_admin
+            or resources
             or special_access
             or screen["key"]
             in {
                 "dashboard",
-                "mobile-apps",
-                "admin-app",
-                "parent-app",
-                "teacher-app",
-                "student-app",
             }
             and permitted(data, user, "reports")
         ):
@@ -92,7 +102,7 @@ def screen(key: str, request: Request, user=Depends(current_user)):
         output.append(
             {
                 "name": table,
-                "title": table.replace("_", " ").title(),
+                "title": ("Batches" if table == "academic_years" else table.replace("_", " ").title()),
                 "path": path,
                 "fields": CATALOG[table]["fields"],
                 "actions": actions,
@@ -124,7 +134,7 @@ def lookup(table: str, request: Request, user=Depends(current_user)):
             {"value": a["code"], "label": a["login_id"]}
             for a in data["accounts"].values()
         ]
-    if table not in RESOURCES or not permitted(data, user, table):
+    if table not in RESOURCES or not lookup_permitted(data, user, table):
         raise HTTPException(403, "Lookup denied")
     return [
         {
@@ -132,6 +142,8 @@ def lookup(table: str, request: Request, user=Depends(current_user)):
             "label": r.get("name")
             or r.get("title")
             or " ".join(str(r.get(k, "")) for k in ["first_name", "last_name"]).strip()
+            or r.get("registration_number")
+            or (f"{r.get('trip_date')} · {r.get('route_code')}" if table == "vehicle_trips" else None)
             or r["code"],
         }
         for r in data["records"].get(table, {}).values()
@@ -176,7 +188,18 @@ def resource_form(
         ),
         None,
     )
-    return {"form": form, "values": previous["values"] if previous else {}}
+    return {
+        "form": form,
+        "values": previous["values"] if previous else {},
+        "defaults": RESOURCE_DEFAULTS.get(table, {}) if not entity_code else {},
+        "resource": {
+            "name": table,
+            "title": ("Batches" if table == "academic_years" else table.replace("_", " ").title()),
+            "path": RESOURCES[table]["path"],
+            "fields": CATALOG[table]["fields"],
+            "actions": ["create"] if table not in MANAGED and has_permission(data, user, table, "create") else [],
+        },
+    }
 
 
 @router.post("/resources/{table}", status_code=201)

@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, LayoutDashboard } from "lucide-react";
 import "./portal-not-found.css";
 
-const collegeHome = "/colleges-institutions/edunexa-college";
+const collegeHome = "/portal/login";
 // The sign-in route restores the session and selects the user's authorized workspace.
-const dashboardEntry = `${collegeHome}/portal/login`;
+const dashboardEntry = collegeHome;
 
 export default function PortalNotFound() {
   const router = useRouter();
@@ -112,8 +112,8 @@ export default function PortalNotFound() {
       </section>
       <footer className="portal-missing-footer">
         <span>Learning. People. Possibilities.</span>
-        <Link href={collegeHome}>
-          Visit college website <ArrowRight size={14} />
+        <Link href={dashboardEntry}>
+          Return to login <ArrowRight size={14} />
         </Link>
       </footer>
     </main>

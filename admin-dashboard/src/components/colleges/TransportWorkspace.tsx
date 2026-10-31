@@ -1,4 +1,5 @@
 "use client";
+import SearchField, { searchValues } from "./SearchField";
 import { Component, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -610,11 +611,12 @@ export default function TransportWorkspace({
                 </label>
                 <label>
                   Search occupied passengers
-                  <input
+                  <SearchField
                     aria-label="Search occupied passengers"
-                    value={rosterQuery}
-                    onChange={(e) => setRosterQuery(e.target.value)}
                     placeholder="Name, ID or seat number"
+                    value={rosterQuery}
+                    onValueChange={setRosterQuery}
+                    suggestions={searchValues(passengers.map(p => ({ name: personName(p.personId), personId: p.personId, seatId: p.seatId })))}
                   />
                 </label>
                 <div

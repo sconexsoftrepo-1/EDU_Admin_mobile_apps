@@ -8,6 +8,7 @@ import { formatDate } from "./DateInput";
 import SideDrawer from "./SideDrawer";
 import { PersonFileList } from "./PersonFiles";
 import RecordDetailTabs from "./RecordDetailTabs";
+import StudentAssignmentSummary from "./StudentAssignmentSummary";
 
 const hidden = new Set([
   "code",
@@ -236,6 +237,7 @@ export default function StudentEnrollmentDetails({
                 value={parent as Row}
               />
             ))}
+          <StudentAssignmentSummary student={String(person.code)} />
           <Section title="Enrollment details & fee summary" value={profile} />
           <PersonFileList
             personKind="student"

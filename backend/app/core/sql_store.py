@@ -630,6 +630,8 @@ class Accounts(Mapped):
         account.update(code=row["code"], login_id=row["login_id"], password_hash=row["password_hash"],
                        active=bool(row["is_active"]), clients=row.get("allowed_clients", []),
                        role_codes=self.roles_of(row["code"]))
+        account.setdefault("person_type", "system")
+        account.setdefault("person_code", None)
         if row.get("email") is not None:
             account["email"] = row["email"]
         for person_type, column in self.PERSON.items():
@@ -735,7 +737,7 @@ class Roles(Mapped):
 
 class Sessions(Mapped):
     table = "refresh_tokens"
-    KNOWN = {"code", "user_code", "refresh_hash", "expires_at", "revoked", "used", "family", "client"}
+    KNOWN = {"code", "user_code", "refresh_hash", "expires_at", "revoked", "used", "used_at_epoch", "family", "client"}
 
     def __init__(self, session):
         super().__init__(session)
@@ -745,13 +747,16 @@ class Sessions(Mapped):
         session = {k: v for k, v in row.items() if k not in self.s.table(self.table).t.columns}
         session.update(code=row["code"], user_code=row["user_code"], refresh_hash=row["token_hash"],
                        expires_at=_epoch(row["expires_at"]), revoked=row.get("revoked_at") is not None,
-                       used=row.get("used_at") is not None, family=row["family_code"], client=row["client_id"])
+                       used=row.get("used_at") is not None, used_at_epoch=_epoch(row.get("used_at")),
+                       family=row["family_code"], client=row["client_id"])
         self.stamps[row["code"]] = (row.get("revoked_at"), row.get("used_at"))
         return session
 
     def encode(self, key, obj):
         stamp = datetime.now(timezone.utc).isoformat()
         revoked_at, used_at = self.stamps.get(key, (None, None))
+        if obj.get("used_at_epoch") is not None:
+            used_at = datetime.fromtimestamp(float(obj["used_at_epoch"]), timezone.utc).isoformat()
         return {"code": key, "user_code": obj["user_code"], "token_hash": obj["refresh_hash"],
                 "expires_at": obj["expires_at"], "family_code": obj["family"], "client_id": obj["client"],
                 "revoked_at": (revoked_at or stamp) if obj.get("revoked") else None,
@@ -960,7 +965,7 @@ class ImportMetadata(MutableMapping):
         self.orig = copy.deepcopy(self.tables)
 
     def clone(self, session):
-        other = ImportMetadata(session)
+        other = type(self)(session)
         other.tables, other.orig = copy.deepcopy(self.tables), copy.deepcopy(self.orig)
         return other
 
@@ -975,6 +980,12 @@ class ImportMetadata(MutableMapping):
                 if code in rows:
                     cur.execute(f"INSERT INTO {EXTRAS} (table_name, record_code, data) VALUES (%s, %s, %s)",
                                 (self.PREFIX + table, code, json.dumps(rows[code], ensure_ascii=False, sort_keys=True, default=str)))
+
+
+class Documents(ImportMetadata):
+    """Versioned workspace documents stored in the existing record_extras table."""
+
+    PREFIX = "document:"
 
 
 MAPPED = {"accounts": Accounts, "roles": Roles, "sessions": Sessions, "forms": Forms, "submissions": Submissions}
@@ -1025,6 +1036,8 @@ class Session(MutableMapping):
                 self.parts[key] = LoginAttempts(self)
             elif key == "import_metadata":
                 self.parts[key] = ImportMetadata(self)
+            elif key == "documents":
+                self.parts[key] = Documents(self)
             elif key in MAPPED:
                 self.parts[key] = MAPPED[key](self)
             else:
@@ -1033,7 +1046,7 @@ class Session(MutableMapping):
 
     # -- mapping protocol for the root -------------------------------------
     KEYS = ("records", "accounts", "roles", "sessions", "audit", "forms", "submissions", "login_attempts",
-            "import_metadata")
+            "import_metadata", "documents")
 
     def __getitem__(self, key):
         return self.part(key)
@@ -1168,7 +1181,7 @@ class Session(MutableMapping):
                 if not blocked[f] and f not in done:
                     heapq.heappush(ready, (ops[f][0], f))
 
-        for key in ("login_attempts", "import_metadata"):
+        for key in ("login_attempts", "import_metadata", "documents"):
             if key in self.parts:
                 self.parts[key].write(cur, self.schema)
         cur.run()

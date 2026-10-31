@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'src/edunexa_client.dart';
-import 'services/push_notifications.dart';
+import 'app/edunexa_client.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeCollegePush();
   runApp(const EduNexaAdminApp());
 }
 
