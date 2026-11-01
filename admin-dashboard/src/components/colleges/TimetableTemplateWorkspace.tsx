@@ -494,8 +494,39 @@ export default function TimetableTemplateWorkspace({
                       }
                     />
                   </label>
+                  <label>
+                    Repeats every week from
+                    <input
+                      type="date"
+                      aria-label="Weekly timetable starts"
+                      readOnly={readOnly}
+                      value={draft.valid_from || ""}
+                      onChange={(e) =>
+                        change({ ...draft, valid_from: e.target.value || null })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Until
+                    <input
+                      type="date"
+                      aria-label="Weekly timetable ends"
+                      readOnly={readOnly}
+                      value={draft.valid_to || ""}
+                      min={draft.valid_from || undefined}
+                      onChange={(e) =>
+                        change({ ...draft, valid_to: e.target.value || null })
+                      }
+                    />
+                  </label>
                 </div>
               </div>
+              {!readOnly && (
+                <p className="tt-instructions">
+                  This week repeats every week of the semester. Leave the dates
+                  empty to use the semester’s start and end dates.
+                </p>
+              )}
               {!readOnly && (
                 <p className="tt-instructions">
                   Click any text to edit. Change times on the left. Drag a box’s

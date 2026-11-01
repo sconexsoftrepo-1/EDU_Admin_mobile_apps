@@ -1,5 +1,22 @@
 part of '../../app/edunexa_client.dart';
 
+/// Workspace categories in display order. Every module key maps to exactly one of them through
+/// [moduleGroup], so counts, search and filters all come from the same registry.
+class WorkspaceCategory {
+  final String title;
+  final IconData icon;
+  const WorkspaceCategory(this.title, this.icon);
+}
+
+const workspaceCategories = [
+  WorkspaceCategory('People & administration', Icons.groups_2_outlined),
+  WorkspaceCategory('Academic life', Icons.school_outlined),
+  WorkspaceCategory('Finance', Icons.account_balance_wallet_outlined),
+  WorkspaceCategory('Services & account', Icons.manage_accounts_outlined),
+  WorkspaceCategory('College & communication', Icons.forum_outlined),
+  WorkspaceCategory('Campus & facilities', Icons.apartment_outlined),
+];
+
 String moduleGroup(String key) => switch (key) {
   'overview' ||
   'dues' ||
@@ -7,11 +24,14 @@ String moduleGroup(String key) => switch (key) {
   'expenses' ||
   'reports' ||
   'fees' ||
-  'payments' => 'Finance',
+  'payments' ||
+  'payslips' ||
+  'tax-documents' => 'Finance',
   'students' ||
   'admissions' ||
   'employees' ||
   'children' ||
+  'profile' ||
   'activity' => 'People & administration',
   'classes' ||
   'timetable' ||
@@ -19,12 +39,79 @@ String moduleGroup(String key) => switch (key) {
   'assignments' ||
   'submissions' ||
   'syllabus' ||
+  'assessments' ||
+  'academics' ||
+  'labs' ||
   'results' => 'Academic life',
   'calendar' ||
   'announcements' ||
   'notifications' ||
   'messages' => 'College & communication',
+  'hostel' || 'transport' || 'library' => 'Campus & facilities',
   _ => 'Services & account',
+};
+
+/// Icon used for a module on the workspace (More) screen.
+IconData workspaceIcon(String key) => switch (key) {
+  'children' || 'students' => Icons.groups_outlined,
+  'profile' => Icons.account_circle_outlined,
+  'employees' => Icons.badge_outlined,
+  'admissions' => Icons.how_to_reg_outlined,
+  'activity' => Icons.history_outlined,
+  'attendance' => Icons.fact_check_outlined,
+  'assessments' => Icons.task_outlined,
+  'results' => Icons.bar_chart_rounded,
+  'assignments' || 'submissions' => Icons.layers_outlined,
+  'academics' => Icons.insights_outlined,
+  'classes' => Icons.class_outlined,
+  'timetable' => Icons.calendar_view_week_outlined,
+  'syllabus' => Icons.menu_book_outlined,
+  'labs' => Icons.science_outlined,
+  'fees' || 'dues' => Icons.account_balance_wallet_outlined,
+  'payments' || 'collections' => Icons.receipt_long_outlined,
+  'overview' || 'reports' => Icons.analytics_outlined,
+  'expenses' => Icons.payments_outlined,
+  'payslips' => Icons.request_quote_outlined,
+  'tax-documents' => Icons.description_outlined,
+  'leave' => Icons.event_available_outlined,
+  'certificates' => Icons.workspace_premium_outlined,
+  'calendar' => Icons.event_outlined,
+  'announcements' => Icons.campaign_outlined,
+  'messages' => Icons.chat_bubble_outline_rounded,
+  'notifications' => Icons.notifications_none_rounded,
+  'hostel' => Icons.bed_outlined,
+  'transport' => Icons.directions_bus_outlined,
+  'library' => Icons.local_library_outlined,
+  _ => Icons.widgets_outlined,
+};
+
+/// Extra words people search for, so "exam" finds results and "bill" finds fees.
+const workspaceKeywords = <String, String>{
+  'children': 'kids son daughter ward family',
+  'profile': 'account me details',
+  'attendance': 'present absent classes',
+  'assessments': 'exam test marks internal',
+  'results': 'exam marks grades report card',
+  'assignments': 'homework tasks performance',
+  'submissions': 'homework submitted review',
+  'timetable': 'schedule periods classes',
+  'syllabus': 'resources notes course material',
+  'fees': 'pay bill dues balance',
+  'payments': 'receipts transactions paid fees',
+  'dues': 'fees balance pending',
+  'collections': 'payments receipts fees',
+  'payslips': 'salary pay',
+  'tax-documents': 'tax form16',
+  'leave': 'absence holiday apply',
+  'certificates': 'bonafide transfer documents',
+  'calendar': 'events holidays',
+  'announcements': 'notices news circular',
+  'messages': 'chat teacher parent contact',
+  'notifications': 'alerts inbox',
+  'hostel': 'pickup out pass permission',
+  'transport': 'bus route',
+  'library': 'books',
+  'labs': 'laboratory practical lab sessions students attendance',
 };
 
 /// A duration is displayed only when the returned same-day times are valid.

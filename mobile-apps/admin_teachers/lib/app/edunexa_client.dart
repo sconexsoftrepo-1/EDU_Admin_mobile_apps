@@ -766,6 +766,7 @@ IconData moduleIcon(String key) => switch (key) {
   'leave' => Icons.event_available_outlined,
   'hostel' => Icons.apartment_outlined,
   'transport' => Icons.directions_bus_outlined,
+  'labs' => Icons.science_outlined,
   'library' => Icons.local_library_outlined,
   'certificates' || 'tax-documents' => Icons.description_outlined,
   'payslips' => Icons.receipt_long_outlined,

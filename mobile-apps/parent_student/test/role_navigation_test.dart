@@ -220,8 +220,8 @@ void main() {
         EdunexaApp(
           key: ValueKey(role),
           title: staff
-              ? 'Edu-Pragathi Admin & Teachers'
-              : 'Edu-Pragathi Parents & Students',
+              ? 'EduDesk'
+              : 'EduNest',
           clientId: staff ? 'admin-mobile' : 'parent-mobile',
           roles: staff
               ? const [MobileRole.admin, MobileRole.teacher]

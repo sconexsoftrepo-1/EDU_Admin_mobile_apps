@@ -1,0 +1,202 @@
+/* Lab register and the Register lab dialog. */
+.lab-register {
+  margin-top: 18px;
+}
+.lab-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #1f2a37;
+}
+.lab-title p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+.lab-type {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 600;
+}
+.lab-muted {
+  color: #9ca3af;
+  font-style: italic;
+}
+.lab-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+.lab-dialog {
+  width: min(640px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  padding: 20px;
+}
+.lab-dialog header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.lab-dialog header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.lab-dialog header p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+.lab-dialog header > div {
+  flex: 1;
+}
+.lab-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+}
+.lab-close {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+}
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.lab-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.lab-grid input,
+.lab-grid select {
+  height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0 10px;
+  font: inherit;
+  font-weight: 400;
+}
+.lab-grid small,
+.lab-subjects p {
+  font-weight: 400;
+  color: #6b7280;
+  font-size: 12px;
+}
+.lab-wide {
+  grid-column: 1 / -1;
+}
+.lab-subjects {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 0;
+}
+.lab-subjects legend {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 4px;
+}
+.lab-subjects > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 12px;
+  max-height: 180px;
+  overflow: auto;
+}
+.lab-grid label.lab-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+.lab-grid label.lab-check input {
+  height: auto;
+}
+.lab-dialog footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.lab-dialog footer button {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+.lab-dialog footer .lab-primary {
+  border-color: transparent;
+  background: #1f2937;
+  color: #fff;
+}
+.lab-dialog footer .lab-primary:disabled {
+  opacity: 0.6;
+}
+@media (max-width: 560px) {
+  .lab-grid,
+  .lab-subjects > div {
+    grid-template-columns: 1fr;
+  }
+}
+/* Lab in-charge choice inside staff onboarding. */
+.lab-onboard {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+}
+.lab-onboard .lab-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.lab-onboard-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 24px;
+}
+.lab-onboard-picker p {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+.lab-onboard-add {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: #047857;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}

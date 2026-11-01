@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -288,10 +289,16 @@ class CollegeApi {
   Future<dynamic> requestCertificate(
     String templateCode, {
     String? studentCode,
+    String reason = '',
   }) => post('${_Endpoints.certificates}/requests', {
     'template_code': templateCode,
+    'reason': reason,
     if (studentCode != null) 'student_code': studentCode,
   });
+
+  /// Documents on a student's file: enrollment uploads, admission documents and certificates.
+  Future<dynamic> studentFiles(String studentCode) =>
+      get('/documents/files/student/${Uri.encodeComponent(studentCode)}');
   Future<dynamic> decideCertificate(
     String code, {
     required bool approve,
@@ -309,6 +316,7 @@ class CollegeApi {
     Json? body, {
     bool auth = true,
     bool retry = true,
+    bool resend = true,
   }) async {
     if (auth && _access == null) await refresh();
     final uri = Uri.parse(
@@ -344,7 +352,19 @@ class CollegeApi {
       return response;
     } on ApiException {
       rethrow;
+    } on TimeoutException {
+      // A slow first response is usually a cold server: reads are safe to ask for once more.
+      if (method == 'GET' && resend) {
+        return _response(method, path, body, auth: auth, retry: retry, resend: false);
+      }
+      throw ApiException(
+        'The college server is taking longer than usual. Pull down to try again.',
+        0,
+      );
     } catch (_) {
+      if (method == 'GET' && resend) {
+        return _response(method, path, body, auth: auth, retry: retry, resend: false);
+      }
       throw ApiException(
         'Cannot reach the college server. Check the connection and try again.',
         0,

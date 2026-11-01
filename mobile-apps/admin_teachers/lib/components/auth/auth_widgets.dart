@@ -1,7 +1,7 @@
 part of '../../app/edunexa_client.dart';
 
 abstract final class EduAuthPalette {
-  static const background = Color(0xfff8f2e9), surface = Color(0xfffffdf8);
+  static const background = Color(0xffffffff), surface = Color(0xfffffdf8);
   static const terracotta = Color(0xffc56f4e), clay = Color(0xffa34e35);
   static const forest = Color(0xff2f6b4f), sage = Color(0xffa7b89f);
   static const peach = Color(0xfff5d8c3), border = Color(0xffe9d9c6);
@@ -102,8 +102,8 @@ class EduAuthBrandHeader extends StatelessWidget {
               cacheWidth: 384,
               fit: BoxFit.contain,
               semanticLabel: staff
-                  ? 'Edu-Pragathi Admin & Teacher app icon'
-                  : 'Edu-Pragathi Parent & Student app icon',
+                  ? 'EduDesk app icon'
+                  : 'EduNest app icon',
             ),
           ),
           builder: (context, child) => Transform.scale(

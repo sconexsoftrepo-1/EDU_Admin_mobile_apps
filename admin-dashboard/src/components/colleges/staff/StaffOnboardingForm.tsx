@@ -22,11 +22,14 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import { LabForm } from "./LabRegistry";
 import {
+  LAB_INCHARGE_DESIGNATION,
   QUALIFICATION_LEVELS,
   STAFF_KIND_LABEL,
   api,
   errorText,
+  type LabRegister,
   type QualificationLevel,
   type StaffKind,
   type StaffOnboardingPayload,
@@ -140,6 +143,22 @@ export default function StaffOnboardingForm({
     postal_code: "",
   });
   const [phoneCode, setPhoneCode] = useState("+91");
+  // Non-teaching lab in-charges: the labs they run (and a quick "Register lab").
+  const [labIncharge, setLabIncharge] = useState(false);
+  const [labCodes, setLabCodes] = useState<string[]>([]);
+  const [labRegister, setLabRegister] = useState<LabRegister | null>(null);
+  const [registeringLab, setRegisteringLab] = useState(false);
+  useEffect(() => {
+    if (kind !== "non_teaching") return;
+    let active = true;
+    api.labs
+      .list()
+      .then((r) => active && setLabRegister(r))
+      .catch(() => active && setLabRegister(null));
+    return () => {
+      active = false;
+    };
+  }, [kind]);
   const [job, setJob] = useState({
     designation: "",
     department: "",
@@ -218,6 +237,15 @@ export default function StaffOnboardingForm({
         const phone = splitPhone(text(e.phone));
         setPhoneCode(phone.code);
         setPerson((old) => ({ ...old, phone: phone.number }));
+        if (data.labs?.length) {
+          setLabIncharge(true);
+          setLabCodes(data.labs.map((l) => l.code));
+        } else if (
+          text(e.designation).toLowerCase().includes("lab in-charge") ||
+          text(e.designation).toLowerCase().includes("lab incharge")
+        ) {
+          setLabIncharge(true);
+        }
         setJob({
           designation: text(e.designation),
           department: text(data.department || e.department_code),
@@ -405,6 +433,9 @@ export default function StaffOnboardingForm({
               year: num(a.year) || undefined,
               details: a.details || undefined,
             })),
+      ...(kind === "non_teaching" && labIncharge
+        ? { lab_codes: labCodes }
+        : {}),
       bank: {
         account_holder: bank.account_holder.trim(),
         account_number: bank.account_number.replace(/\s/g, ""),
@@ -669,6 +700,75 @@ export default function StaffOnboardingForm({
                       }
                     />
                   </Field>
+                  {kind === "non_teaching" && (
+                    <div className="lab-onboard">
+                      <label className="lab-check">
+                        <input
+                          type="checkbox"
+                          checked={labIncharge}
+                          onChange={(e) => {
+                            setLabIncharge(e.target.checked);
+                            if (e.target.checked && !job.designation.trim())
+                              setJob({
+                                ...job,
+                                designation: LAB_INCHARGE_DESIGNATION,
+                              });
+                          }}
+                        />
+                        Lab in-charge (runs one or more labs; signs in to the
+                        staff app for lab sessions, payslips and Form 16)
+                      </label>
+                      {labIncharge && (
+                        <div className="lab-onboard-picker">
+                          {labRegister?.items.length ? (
+                            labRegister.items.map((lab) => (
+                              <label key={lab.code} className="lab-check">
+                                <input
+                                  type="checkbox"
+                                  checked={labCodes.includes(lab.code)}
+                                  onChange={(e) =>
+                                    setLabCodes((codes) =>
+                                      e.target.checked
+                                        ? [...codes, lab.code]
+                                        : codes.filter((c) => c !== lab.code),
+                                    )
+                                  }
+                                />
+                                {lab.name} · {lab.floor}, Room{" "}
+                                {lab.room_number}
+                                {lab.incharge_name &&
+                                !labCodes.includes(lab.code)
+                                  ? ` (now: ${lab.incharge_name})`
+                                  : ""}
+                              </label>
+                            ))
+                          ) : (
+                            <p>No labs registered yet.</p>
+                          )}
+                          {labRegister?.can_manage && (
+                            <button
+                              type="button"
+                              className="lab-onboard-add"
+                              onClick={() => setRegisteringLab(true)}
+                            >
+                              + Register lab
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {registeringLab && labRegister && (
+                    <LabForm
+                      register={labRegister}
+                      onClose={() => setRegisteringLab(false)}
+                      onSaved={(lab) => {
+                        setRegisteringLab(false);
+                        setLabCodes((codes) => [...codes, lab.code]);
+                        void api.labs.list().then(setLabRegister);
+                      }}
+                    />
+                  )}
                   {!labour && (
                     <Field label="Department" hint="Pick or type a new one">
                       <ComboInput

@@ -84,7 +84,9 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(NavigationDestination), findsNWidgets(5));
         await capture(tester, '${role.name}-home');
-        for (final screen in routes['screens']['screens'] as List) {
+        for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
           await openModule(tester, screen['key'] as String);
           expect(find.text(['results','academics'].contains(screen['key']) ? 'Academic progress' : screen['title']), findsWidgets);
           expect(

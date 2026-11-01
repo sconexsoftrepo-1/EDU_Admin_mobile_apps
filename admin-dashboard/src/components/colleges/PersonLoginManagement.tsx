@@ -28,7 +28,7 @@ type Logins = {
 const clientNames: Partial<Record<ApiClient, string>> = {
   "student-mobile": "Student app",
   "parent-mobile": "Parent app",
-  "teacher-mobile": "Teacher app",
+  "teacher-mobile": "Staff app (teachers and lab in-charges)",
   "admin-web": "Web dashboard",
 };
 

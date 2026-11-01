@@ -126,20 +126,23 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Student'), findsOneWidget);
-      expect(find.text('Period'), findsOneWidget);
+      // One student: no student picker; ranges as pills; one analytics card.
+      expect(find.text('Student'), findsNothing);
+      expect(find.text('Day'), findsOneWidget);
       expect(find.text('Week'), findsOneWidget);
       expect(find.text('Month'), findsOneWidget);
       expect(find.text('Year'), findsOneWidget);
-      expect(find.text('100.0%'), findsWidgets);
-      expect(find.textContaining('Week leave days: 2'), findsOneWidget);
+      expect(find.text('100%'), findsOneWidget);
+      expect(find.text('Leave days'), findsOneWidget);
+      expect(find.text('Classes missed'), findsOneWidget);
       expect(find.text('Save attendance'), findsNothing);
       await tester.scrollUntilVisible(
-        find.text('Periods on this day'),
+        find.textContaining('Physics'),
         500,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
+      expect(find.text('Classes today'), findsOneWidget);
       expect(find.textContaining('Physics'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },

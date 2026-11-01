@@ -100,9 +100,11 @@ export default function TimetableCanvas({
                   value={active.kind}
                   onChange={(e) => update(active, "kind", e.target.value)}
                 >
-                  <option value="theory">Theory</option>
+                  <option value="theory">Class (theory)</option>
                   <option value="lab">Laboratory</option>
-                  <option value="activity">Activity / sports</option>
+                  <option value="sports">Sports</option>
+                  <option value="library">Library</option>
+                  <option value="activity">Other activity</option>
                 </select>
               </label>
               <button
@@ -257,9 +259,13 @@ export default function TimetableCanvas({
                     placeholder={
                       cell.kind === "lab"
                         ? "LAB"
-                        : cell.kind === "activity"
-                          ? "ACTIVITY"
-                          : "CODE"
+                        : cell.kind === "sports"
+                          ? "SPORTS"
+                          : cell.kind === "library"
+                            ? "LIBRARY"
+                            : cell.kind === "activity"
+                              ? "ACTIVITY"
+                              : "CODE"
                     }
                     readOnly={readOnly}
                     onChange={(e) =>
@@ -272,9 +278,13 @@ export default function TimetableCanvas({
                     placeholder={
                       cell.kind === "lab"
                         ? "Add laboratory"
-                        : cell.kind === "activity"
-                          ? "Add activity"
-                          : "Add subject"
+                        : cell.kind === "sports"
+                          ? "Add sports / games"
+                          : cell.kind === "library"
+                            ? "Add library hour"
+                            : cell.kind === "activity"
+                              ? "Add activity"
+                              : "Add subject"
                     }
                     readOnly={readOnly}
                     rows={2}
@@ -323,9 +333,11 @@ export default function TimetableCanvas({
         </div>
       </div>
       <div className="tt-legend">
-        <span className="theory">Theory</span>
+        <span className="theory">Class</span>
         <span className="lab">Laboratory</span>
-        <span className="activity">Sports / activity</span>
+        <span className="sports">Sports</span>
+        <span className="library">Library</span>
+        <span className="activity">Other activity</span>
         <span className="pause">Break / lunch</span>
       </div>
     </>

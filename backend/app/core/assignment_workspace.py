@@ -532,6 +532,37 @@ def start_file(body: FileStart, request: Request, user=Depends(current_user)):
         return {"code": code, "chunk_size": CHUNK_SIZE}
 
 
+EXTENSIONS = {"application/pdf": ".pdf", "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+
+
+def upload_key(data, user, record, mime):
+    """Where a finished upload is stored: in the uploader's own folder (students under their
+    admission number, staff under their employee number), grouped by what the file is for.
+    College calendar pictures belong to the college, not a person."""
+    from app.modules.documents.files.api import folder_segment, person_folder
+    name = new_code("FILE") + EXTENSIONS.get(mime, "")
+    if record.get("event_upload") or record.get("event_code"):
+        return f"College/Calendar/{folder_segment(record.get('event_code') or record['code'])}/{name}"
+    kind = ("Assessments" if record.get("assessment_upload")
+            else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code")
+            else "Assignment_Submissions" if user.get("person_type") == "student"
+            else "Assignments")
+    topic = folder_segment(record.get("assignment_code") or record.get("syllabus_code") or record["code"])
+    person = user.get("person_type")
+    try:
+        if person == "student":
+            owner = person_folder(data, "student_document", user["person_code"])
+        elif person == "employee":
+            owner = person_folder(data, "employee_document", user["person_code"])
+        elif person == "parent":
+            owner = f"Parents/{folder_segment(user['person_code'])}"
+        else:
+            owner = f"College/{folder_segment(user.get('code') or 'system')}"
+    except HTTPException:
+        owner = f"Unlinked_Users/{folder_segment(user.get('code') or 'unknown')}"
+    return f"{owner}/{kind}/{topic}/{name}"
+
+
 @router.post("/files/{code}/chunk")
 def chunk_file(code: str, body: FileChunk, request: Request, user=Depends(current_user)):
     from app.modules.documents.files.api import file_transaction
@@ -548,8 +579,8 @@ def chunk_file(code: str, body: FileChunk, request: Request, user=Depends(curren
         expected = min(CHUNK_SIZE, record["size_bytes"] - body.index * CHUNK_SIZE)
         if expected <= 0 or len(raw) != expected:
             raise HTTPException(422, "File chunk has an incorrect size")
-        folder = "Assessments" if record.get("assessment_upload") else "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
-        key = f"{folder}/{code}/part-{body.index}-{new_code('P')}"
+        # Parts are temporary; the finished file moves into the uploader's own folder.
+        key = f"Uploads_In_Progress/{code}/part-{body.index}-{new_code('P')}"
         request.app.state.files.put(key, raw, "application/octet-stream")
         pending.append(key)
         record["parts"][str(body.index)] = key
@@ -574,8 +605,7 @@ def finish_file(code: str, request: Request, user=Depends(current_user)):
             mime = mime if mime in {"image/png", "image/jpeg", "image/webp"} else None
         if len(raw) != record["size_bytes"] or not mime:
             raise HTTPException(422, "Upload a valid PDF or supported image file")
-        folder = "Assessments" if record.get("assessment_upload") else "Calendar" if record.get("event_upload") or record.get("event_code") else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code") else "Assignments"
-        key = f"{folder}/{code}/{new_code('FILE')}"
+        key = upload_key(data, user, record, mime)
         request.app.state.files.put(key, raw, mime)
         pending.append(key)
         record.update(ready=True, storage_key=key, mime_type=mime, sha256=hashlib.sha256(raw).hexdigest(),
