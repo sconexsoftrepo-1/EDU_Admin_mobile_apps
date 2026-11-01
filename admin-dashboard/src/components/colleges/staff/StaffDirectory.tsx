@@ -15,6 +15,7 @@ import {
 import IconAction from "../IconAction";
 import StaffDetails from "./StaffDetails";
 import StaffOnboardingForm from "./StaffOnboardingForm";
+import LabRegistry from "./LabRegistry";
 import {
   STAFF_KIND_LABEL,
   api,
@@ -60,6 +61,7 @@ const COLUMNS: Record<StaffKind, Column[]> = {
   ],
   non_teaching: [
     { label: "Department", cell: (r) => r.department || "—" },
+    { label: "Labs", cell: (r) => (r.labs?.length ? r.labs.join(", ") : "—") },
     { label: "Phone", cell: (r) => r.phone || "—" },
     { label: "Email", cell: (r) => r.email || "—" },
     { label: "Joined", cell: (r) => date(r.join_date) },
@@ -289,6 +291,9 @@ export default function StaffDirectory({
           )}
         </div>
       </div>
+      {kind === "non_teaching" && (
+        <LabRegistry reloadKey={reloadKey + revision} onChanged={onRefresh} />
+      )}
       {details && (
         <StaffDetails
           key={details.employee_id}

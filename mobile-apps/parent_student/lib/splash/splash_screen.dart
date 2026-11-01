@@ -405,7 +405,7 @@ class _CinematicSplashScreenState extends State<CinematicSplashScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: SplashColors.ivory,
+    backgroundColor: Colors.white,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, bounds) {

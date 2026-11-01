@@ -5,7 +5,7 @@ import copy
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import Field
 
 from app.core.resources import CATALOG, ensure_references, validate_record
@@ -95,6 +95,45 @@ SCREENS = {
         ("notifications", "Notifications", "notifications"),
     ],
 }
+
+
+# Lab in-charges sign in to the staff app; they see their labs instead of teaching screens.
+LAB_INCHARGE_SCREENS = [
+    ("profile", "My profile", "profile"),
+    ("labs", "My labs and sessions", "lab_sessions"),
+    ("timetable", "Lab timetable", "lab_timetable"),
+    ("leave", "Leave requests", "leave_requests"),
+    ("payslips", "Salary and payslips", "payslips"),
+    ("tax-documents", "Form 16 and tax documents", "employee_tax_documents"),
+    ("calendar", "Calendar and events", "calendar_events"),
+    ("announcements", "Announcements", "announcements"),
+    ("notifications", "Notifications", "notifications"),
+]
+
+
+def client_screens(data, user):
+    from app.core.lab_workspace import is_lab_incharge
+    client = effective_client(user)
+    if client == "teacher-mobile" and is_lab_incharge(data, user):
+        return LAB_INCHARGE_SCREENS
+    return SCREENS.get(client, [])
+
+
+def weekly_for(data, user, context, offerings):
+    """Published weekly timetable entries for the signed-in person's section(s)."""
+    from app.core.timetable_templates import weekly_timetable
+    if user.get("person_type") in {"student", "parent"}:
+        student = context.get("student")
+        sections = {e["section_code"] for e in query_rows(data, "student_enrollments")
+                    if e.get("student_code") == student and e.get("status") == "active"}
+        return weekly_timetable(data, sections) if sections else []
+    own = [o for o in query_rows(data, "subject_offerings") if o["code"] in offerings]
+    if not own:
+        return []
+    subjects = {}
+    for o in own:
+        subjects.setdefault(o["section_code"], set()).add(o["subject_code"])
+    return weekly_timetable(data, set(subjects), subjects_for=subjects)
 
 
 def query_rows(data, table):
@@ -219,6 +258,44 @@ def field(key, label, kind="text", required=True, options=None):
     }
 
 
+def contact_detail(data, account, context):
+    """Why a contact is listed: the subjects a teacher takes, or the student and class."""
+    records = data["records"]
+    section_names = {s["code"]: s.get("name", "") for s in query_rows(data, "sections")}
+    student_sections = {}
+    for e in query_rows(data, "student_enrollments"):
+        if e.get("status") == "active" and e["section_code"] in context["sections"]:
+            student_sections.setdefault(e["student_code"], set()).add(section_names.get(e["section_code"], ""))
+
+    def student_label(code):
+        s = records.get("students", {}).get(code, {})
+        name = f"{s.get('first_name', '')} {s.get('last_name', '')}".strip() or code
+        classes = ", ".join(sorted(n for n in student_sections.get(code, set()) if n))
+        return f"{name} · {classes}" if classes else name
+
+    if account["person_type"] == "employee":
+        teacher_codes = {t["code"] for t in query_rows(data, "teachers") if t["employee_code"] == account["person_code"]}
+        subjects = sorted({
+            records.get("subjects", {}).get(o["subject_code"], {}).get("name", o["subject_code"])
+            for o in query_rows(data, "subject_offerings")
+            if o["teacher_code"] in teacher_codes and o["code"] in context["offerings"]
+        })
+        return "Teacher · " + ", ".join(subjects) if subjects else "Teacher"
+    if account["person_type"] == "parent":
+        kids = [r["student_code"] for r in query_rows(data, "student_parents")
+                if r["parent_code"] == account["person_code"] and r["student_code"] in context["class_students"]]
+        return "Parent of " + "; ".join(student_label(k) for k in kids) if kids else "Parent"
+    return "Student · " + student_label(account["person_code"]).split(" · ", 1)[-1] if account["person_code"] in student_sections else "Student"
+
+
+def account_name(data, account_code):
+    """Display name of an account's person (falls back to the login ID)."""
+    account = data["accounts"].get(account_code) or {}
+    table = {"student": "students", "parent": "parents", "employee": "employees"}.get(account.get("person_type"))
+    person = data["records"].get(table, {}).get(account.get("person_code"), {}) if table else {}
+    return (f"{person.get('first_name', '')} {person.get('last_name', '')}").strip() or account.get("login_id") or account_code
+
+
 def contacts(data, user, context):
     people = set()
     if effective_client(user) == "teacher-mobile":
@@ -258,6 +335,8 @@ def contacts(data, user, context):
                     person.get("first_name", "") + " " + person.get("last_name", "")
                 ).strip()
                 or account["person_code"],
+                "role": {"employee": "teacher"}.get(account["person_type"], account["person_type"]),
+                "detail": contact_detail(data, account, context),
             }
         )
     return result
@@ -427,7 +506,7 @@ def screen_list(request: Request, user=Depends(current_user)):
     return {
         "screens": [
             {"key": k, "title": title, "resource": resource}
-            for k, title, resource in SCREENS[effective_client(user)]
+            for k, title, resource in client_screens(data, user)
             if effective_client(user) != "admin-mobile"
             or resource == "profile"
             or has_permission(
@@ -455,13 +534,29 @@ def screen_data(
     limit: int = Query(50, ge=1, le=200),
     user=Depends(current_user),
 ):
+    data = request.app.state.store.snapshot()
     definitions = {
         key: (title, resource)
-        for key, title, resource in SCREENS.get(effective_client(user), [])
+        for key, title, resource in client_screens(data, user)
     }
     if screen not in definitions:
         raise HTTPException(404, "Screen not available")
-    data = request.app.state.store.snapshot()
+    if definitions[screen][1] in {"lab_sessions", "lab_timetable"}:
+        from app.core.academic_progress import local_now
+        from app.core.lab_workspace import day_sessions, employee_labs, view, weekly_sessions
+        labs = employee_labs(data, user["person_code"])
+        if definitions[screen][1] == "lab_timetable":
+            items = weekly_sessions(data, user["person_code"], labs)
+            return {"screen": screen, "title": definitions[screen][0], "items": items, "total": len(items),
+                    "students": [], "actions": [], "lookups": {}, "summary": None}
+        day = from_date or local_now().date()
+        items = day_sessions(data, user["person_code"], day)
+        return {"screen": screen, "title": definitions[screen][0], "items": items, "total": len(items),
+                "students": [], "actions": [], "lookups": {"labs": [view(data, lab) for lab in labs]},
+                "summary": {"date": day.isoformat(), "labs": len(labs), "sessions": len(items),
+                            "students": sum(i["counts"]["total"] for i in items),
+                            "present": sum(i["counts"]["present"] + i["counts"]["late"] for i in items),
+                            "absent": sum(i["counts"]["absent"] for i in items)}}
     if screen == "academics":
         from app.core.academic_progress import overview as academic_overview
         result=academic_overview(request,student_code=student_code,user=user)
@@ -525,6 +620,9 @@ def screen_data(
             items = summary.pop("charges")
     elif table == "subject_offerings":
         items = [r for r in query_rows(data, table) if r["code"] in offerings]
+    elif table == "timetable_slots" and (weekly := weekly_for(data, user, context, offerings)):
+        # The published weekly timetable (repeats every week of the semester).
+        items = weekly
     elif table in {
         "timetable_slots",
         "assignments",
@@ -578,6 +676,22 @@ def screen_data(
             r for r in query_rows(data, table) if r.get("student_code") == selected
         ]
     elif table == "payments":
+        # Each payment also lists the fees it settled, so the app can show what was paid for.
+        charges = {c["code"]: c for c in query_rows(data, "student_fee_charges") if c.get("student_code") == selected}
+        structures = {s["code"]: s for s in query_rows(data, "fee_structures")}
+        heads = {h["code"]: h for h in query_rows(data, "fee_heads")}
+
+        def head_name(charge_code):
+            charge = charges.get(charge_code, {})
+            structure = structures.get(charge.get("fee_structure_code"), {})
+            return heads.get(structure.get("fee_head_code"), {}).get("name") or charge.get("description") or "Fee"
+
+        allocations = {}
+        for a in query_rows(data, "payment_allocations"):
+            if a.get("charge_code") in charges:
+                allocations.setdefault(a["payment_code"], []).append(
+                    {"charge_code": a["charge_code"], "amount": a["amount"], "fee_head": head_name(a["charge_code"]),
+                     "semester_number": charges[a["charge_code"]].get("semester_number")})
         items = [
             {
                 **r,
@@ -586,6 +700,7 @@ def screen_data(
                     for x in query_rows(data, "receipts")
                     if x["payment_code"] == r["code"]
                 ],
+                "allocations": allocations.get(r["code"], []),
             }
             for r in query_rows(data, table)
             if r["student_code"] == selected
@@ -671,7 +786,22 @@ def screen_data(
             for r in query_rows(data, "thread_members")
             if r["user_code"] == user["code"]
         }
-        items = [r for r in query_rows(data, table) if r["thread_code"] in threads]
+        subjects = {t["code"]: t.get("subject", "") for t in query_rows(data, "message_threads") if t["code"] in threads}
+        members = {}
+        for m in query_rows(data, "thread_members"):
+            if m["thread_code"] in threads:
+                members.setdefault(m["thread_code"], []).append(m["user_code"])
+        items = [
+            {
+                **r,
+                "thread_subject": subjects.get(r["thread_code"], ""),
+                "sender_name": account_name(data, r["sender_code"]),
+                "mine": r["sender_code"] == user["code"],
+                "with": [account_name(data, m) for m in members.get(r["thread_code"], []) if m != user["code"]],
+            }
+            for r in query_rows(data, table)
+            if r["thread_code"] in threads
+        ]
     elif table == "notifications":
         items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
     if table == "assignments":
@@ -824,6 +954,7 @@ def mobile_action(
     action: str,
     body: ActionInput,
     request: Request,
+    background: BackgroundTasks,
     user=Depends(current_user),
 ):
     if action not in allowed_actions(screen, user):
@@ -1166,4 +1297,20 @@ def mobile_action(
             submitted["entity_code"] = record["code"]
         query_save(data, table, record)
         audit(data, user["code"], action, table, key)
-        return {"record": clean(record)}
+        notices = []
+        if action in {"start_thread", "send_message"}:
+            sender = account_name(data, user["code"])
+            for member in query_rows(data, "thread_members"):
+                if member["thread_code"] == record["thread_code"] and member["user_code"] != user["code"]:
+                    code = new_code("MNOTICE")
+                    data["records"].setdefault("notifications", {})[code] = {
+                        "code": code, "user_code": member["user_code"], "title": f"New message from {sender}",
+                        "body": str(record.get("body", ""))[:160], "channel": "in_app", "status": "sent",
+                        "sent_at": now(), "screen": "messages", "thread_code": record["thread_code"],
+                    }
+                    notices.append(code)
+        result = {"record": clean(record)}
+    if notices:
+        from app.core.certificate_workspace import push
+        background.add_task(push, request, notices)
+    return result

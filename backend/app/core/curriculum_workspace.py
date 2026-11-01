@@ -136,11 +136,23 @@ def remove_generated_semesters(data,year,actor):
     data.get('documents',{}).get('academic_batch_curricula',{}).pop(year['code'],None)
 
 
+def lab_details(data,subject,employees):
+    """Where a lab subject is held and who runs the lab (None for theory subjects)."""
+    from .lab_workspace import lab_for_subject,lab_subject
+    if not lab_subject({**subject,'name':subject.get('name','')}): return None
+    lab=lab_for_subject(data,subject['subject_code'],subject.get('name',''))
+    if not lab: return None
+    return {'code':lab['code'],'name':lab['name'],'floor':lab.get('floor'),'room_number':lab.get('room_number'),
+            'lab_type':lab.get('lab_type'),'incharge_name':' '.join(aw.name(employees.get(lab.get('incharge_employee_code') or '',{})).split()) or None}
+
 def student_subjects(data,students):
     result=[]
     sections={s['code']:s for s in aw.rows(data,'sections')}
     batches={b['code']:b for b in aw.rows(data,'batches')}
+    programs={p['code']:p for p in aw.rows(data,'programs')}
+    employees={e['code']:e for e in aw.rows(data,'employees')}; teachers={t['code']:t for t in aw.rows(data,'teachers')}
     for student in sorted(students):
+        mine={e['section_code'] for e in aw.rows(data,'student_enrollments') if e['student_code']==student and e.get('status')=='active'}
         courses={(p['program_code'],p.get('academic_year_code')) for p in aw.rows(data,'student_admission_profiles') if p['student_code']==student and p.get('program_code')}
         for e in aw.rows(data,'student_enrollments'):
             if e['student_code']==student and e.get('status')=='active':
@@ -155,7 +167,17 @@ def student_subjects(data,students):
                 if current and subject['semester_number']!=current: continue
                 key=(subject['subject_code'],subject['semester_number'])
                 if key in seen: continue
-                seen.add(key);result.append({**subject,'student_code':student,'program_code':program})
+                seen.add(key)
+                offered=[o for o in aw.rows(data,'subject_offerings') if o['subject_code']==subject['subject_code'] and o['section_code'] in mine]
+                result.append({**subject,'student_code':student,'program_code':program,
+                               'program_name':programs.get(program,{}).get('name',''),
+                               'academic_year_code':year,'academic_year_name':(batch_year or {}).get('name',''),
+                               'current_semester':current,
+                               'section_name':', '.join(sorted({sections.get(c,{}).get('name','') for c in mine if sections.get(c,{}).get('name')})),
+                               # Faculty teaching this subject or lab in the student's own section(s).
+                               'faculty':[{'teacher_code':o['teacher_code'],'name':' '.join(aw.name(employees.get(teachers.get(o['teacher_code'],{}).get('employee_code'),{})).split()),
+                                           'section_name':sections.get(o['section_code'],{}).get('name','')} for o in offered],
+                               'lab':lab_details(data,subject,employees)})
     return result
 
 

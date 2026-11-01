@@ -41,6 +41,9 @@ class _AttendanceHubState extends State<AttendanceHub> {
       notice = '';
   DateTime day = DateUtils.dateOnly(DateTime.now());
   int period = 1, sequence = 0;
+
+  /// Parent/student tab: 0 classes on the selected day, 1 missed classes, 2 calendar.
+  int view = 0;
   bool busy = true, saving = false;
   final Map<String, String> draft = {};
   final search = TextEditingController(), subject = TextEditingController();
@@ -604,59 +607,237 @@ class _AttendanceHubState extends State<AttendanceHub> {
     );
   }
 
+  /// Bar colour for a day's attendance: green 90%+, gold 75–89%, clay below 75%.
+  Color trendColor(num? pct) => pct == null
+      ? collegeLine
+      : EduTints.ink(
+          pct >= 90
+              ? EduTints.sage
+              : pct >= 75
+              ? EduTints.gold
+              : EduTints.clay,
+        ).withValues(alpha: .8);
+
   Widget trend() {
+    final text = Theme.of(context).textTheme;
     final days = _asRows(data?['calendar']);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Monthly attendance pattern',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 120,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: days
-                    .map(
-                      (d) => Expanded(
-                        child: Tooltip(
-                          message:
-                              '${d['date']}: ${d['percentage'] ?? 'Not recorded'}',
-                          child: InkWell(
-                            onTap: () => change(
-                              () => day = DateTime.parse(d['date'] as String),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 1,
-                              ),
-                              child: Container(
-                                height:
-                                    ((d['percentage'] as num?)?.toDouble() ??
-                                        0) +
-                                    3,
-                                decoration: BoxDecoration(
-                                  color: d['percentage'] == null
-                                      ? collegeLine
-                                      : collegePine,
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                              ),
-                            ),
+    final recorded = days.where((d) => d['percentage'] != null).toList();
+    final average = recorded.isEmpty
+        ? null
+        : recorded.fold<num>(0, (sum, d) => sum + (d['percentage'] as num)) /
+              recorded.length;
+    final lowest = recorded.isEmpty
+        ? null
+        : recorded.reduce(
+            (a, b) =>
+                (a['percentage'] as num) <= (b['percentage'] as num) ? a : b,
+          );
+    final selected = days.where((d) => d['date'] == _attDate(day)).firstOrNull;
+    const chart = 140.0;
+    final axis = EduSizes.scaled(context, 38);
+    String short(String iso) {
+      final date = DateTime.parse(iso);
+      return '${date.day} ${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month - 1]}';
+    }
+
+    // Day numbers on the axis: the 1st, every 5th day and the last day.
+    bool labelled(int i) =>
+        i == 0 ||
+        (i + 1) % 5 == 0 && i + 1 < days.length - 1 ||
+        i == days.length - 1;
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: collegeIvory,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: collegeLine),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Monthly attendance pattern', style: text.titleMedium),
+          const SizedBox(height: 2),
+          Text(
+            average == null
+                ? 'No classes recorded this month yet.'
+                : 'Average ${average.toStringAsFixed(0)}% · lowest ${lowest!['percentage']}% on ${short('${lowest['date']}')}',
+            style: text.bodySmall,
+          ),
+          // Room above and below so the 100% and 0% labels are not clipped.
+          const SizedBox(height: 26),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Percentage axis: each label centred on its gridline.
+              SizedBox(
+                width: axis,
+                height: chart,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    for (final (value, top) in [
+                      ('100%', 0.0),
+                      ('50%', chart / 2),
+                      ('0%', chart),
+                    ])
+                      Positioned(
+                        top: top,
+                        right: 6,
+                        child: FractionalTranslation(
+                          translation: const Offset(0, -.5),
+                          child: Text(
+                            value,
+                            maxLines: 1,
+                            style: text.labelSmall,
                           ),
                         ),
                       ),
-                    )
-                    .toList(),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: chart,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          for (final top in [0.0, chart / 2, chart])
+                            Positioned(
+                              top: top,
+                              left: 0,
+                              right: 0,
+                              child: Container(height: 1, color: collegeLine),
+                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              for (final d in days)
+                                Expanded(
+                                  child: Semantics(
+                                    button: true,
+                                    label:
+                                        '${short('${d['date']}')}: ${d['percentage'] == null ? 'not recorded' : '${d['percentage']} percent'}',
+                                    excludeSemantics: true,
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () => change(
+                                        () => day = DateTime.parse(
+                                          d['date'] as String,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 1.2,
+                                        ),
+                                        child: Container(
+                                          height: d['percentage'] == null
+                                              ? 4
+                                              : (chart *
+                                                        (d['percentage']
+                                                            as num) /
+                                                        100)
+                                                    .clamp(4, chart)
+                                                    .toDouble(),
+                                          decoration: BoxDecoration(
+                                            color: d == selected
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary
+                                                : trendColor(
+                                                    d['percentage'] as num?,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // Day numbers under their bars (a fixed-height row so labels can overhang narrow bars).
+                    SizedBox(
+                      height: EduSizes.scaled(context, 16),
+                      child: Row(
+                        children: [
+                          for (final (i, d) in days.indexed)
+                            Expanded(
+                              child: labelled(i) || d == selected
+                                  ? OverflowBox(
+                                      maxWidth: 40,
+                                      child: Text(
+                                        '${i + 1}',
+                                        textAlign: TextAlign.center,
+                                        style: text.labelSmall?.copyWith(
+                                          color: d == selected
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : collegeMuted,
+                                          fontWeight: d == selected
+                                              ? FontWeight.w800
+                                              : FontWeight.w500,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (selected != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: collegeCanvas,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                selected['percentage'] == null
+                    ? '${short('${selected['date']}')} · no classes recorded'
+                    : '${short('${selected['date']}')} · ${selected['percentage']}% · ${selected['attended'] ?? '—'} of ${selected['recorded'] ?? '—'} classes',
+                style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
               ),
             ),
-          ],
-        ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 14,
+            runSpacing: 4,
+            children: [
+              for (final (label, pct) in [
+                ('90%+', 95),
+                ('75–89%', 80),
+                ('Below 75%', 50),
+                ('Not recorded', null),
+              ])
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, size: 9, color: trendColor(pct)),
+                    const SizedBox(width: 5),
+                    Text(label, style: text.labelMedium),
+                  ],
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text('Tap a bar to open that day.', style: text.bodySmall),
+        ],
       ),
     );
   }
@@ -800,25 +981,525 @@ class _AttendanceHubState extends State<AttendanceHub> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Parent / student view: one analytics card, then classes, missed classes and calendar.
+
+  static const _ranges = ['day', 'week', 'month', 'year'];
+  static const _months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  String get _student => child.isNotEmpty
+      ? child
+      : _asText(_asRows(options?['students']).firstOrNull?['code']);
+
+  String? statusIn(Json register) {
+    final marks = Map<String, dynamic>.from(register['marks'] as Map? ?? {});
+    final status =
+        marks[_student] ?? (marks.length == 1 ? marks.values.first : null);
+    return status?.toString();
+  }
+
+  String periodText(Map<String, dynamic> stats) {
+    final start = DateTime.tryParse('${stats['start'] ?? ''}');
+    final end = DateTime.tryParse('${stats['end'] ?? ''}');
+    if (start == null) return '';
+    return switch (range) {
+      'day' => prettyDate(start),
+      'week' =>
+        'Week of ${start.day} ${_months[start.month - 1].substring(0, 3)}${end == null ? '' : ' – ${end.day} ${_months[end.month - 1].substring(0, 3)}'}',
+      'month' => '${_months[start.month - 1]} ${start.year}',
+      _ => '${start.year}',
+    };
+  }
+
+  Future<void> pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: day,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(DateTime.now().year + 2),
+    );
+    if (picked != null && mounted) change(() => day = picked);
+  }
+
+  ({Color tint, String label}) statusStyle(String? status) => switch (status) {
+    'present' => (tint: EduTints.sage, label: 'Present'),
+    'late' => (tint: EduTints.gold, label: 'Late'),
+    'absent' => (tint: EduTints.clay, label: 'Absent'),
+    'excused' => (tint: EduTints.mist, label: 'Leave'),
+    _ => (tint: collegeCard, label: 'Not recorded'),
+  };
+
+  Widget analyticsCard(Map<String, dynamic> stats) {
+    final text = Theme.of(context).textTheme;
+    final pct = stats['percentage'] as num?;
+    final recorded = stats['recorded'] as num? ?? 0;
+    final counts = [
+      ('Present', stats['present'] as num? ?? 0, EduTints.sage),
+      ('Late', stats['late'] as num? ?? 0, EduTints.gold),
+      ('Absent', stats['absent'] as num? ?? 0, EduTints.clay),
+      ('Leave', stats['excused'] as num? ?? 0, EduTints.mist),
+    ];
+    final missed = stats['absent'] as num? ?? 0;
+    Widget line(
+      IconData icon,
+      Color tint,
+      String label,
+      String value, {
+      VoidCallback? onTap,
+    }) => InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+        child: Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+              child: Icon(icon, size: 16, color: EduTints.ink(tint)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(label, style: text.bodyMedium)),
+            Text(
+              value,
+              style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            if (onTap != null)
+              const Icon(Icons.chevron_right, size: 18, color: collegeMuted),
+          ],
+        ),
+      ),
+    );
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: collegeIvory,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: collegeLine),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 10,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 120),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Attendance', style: text.titleLarge),
+                    Text(periodText(stats), style: text.bodySmall),
+                  ],
+                ),
+              ),
+              Material(
+                color: collegeCanvas,
+                shape: const StadiumBorder(
+                  side: BorderSide(color: collegeLine),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  key: const ValueKey('attendance-date'),
+                  onTap: saving ? null : pickDate,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.calendar_month_outlined, size: 18),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            '${day.day} ${_months[day.month - 1].substring(0, 3)} ${day.year}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Ring beside the figures; stacked when the card is narrow or the text is large.
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final ringWidget = EduRing(
+                value: pct == null ? null : pct / 100,
+                size: 104,
+                color: collegePine,
+                center: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      pct == null ? '—' : '${pct.round()}%',
+                      style: text.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text('attended', style: text.labelSmall),
+                  ],
+                ),
+              );
+              final figures = Column(
+                children: [
+                  line(
+                    Icons.check_rounded,
+                    EduTints.sage,
+                    'Attended',
+                    '${stats['attended'] ?? 0} of $recorded',
+                  ),
+                  line(
+                    Icons.event_busy_outlined,
+                    EduTints.mist,
+                    'Leave days',
+                    '${stats['leave_days'] ?? 0}',
+                  ),
+                  line(
+                    Icons.close_rounded,
+                    EduTints.clay,
+                    'Classes missed',
+                    '$missed',
+                    onTap: missed > 0 ? () => setState(() => view = 1) : null,
+                  ),
+                ],
+              );
+              return constraints.maxWidth < 290
+                  ? Column(
+                      children: [
+                        ringWidget,
+                        const SizedBox(height: 12),
+                        figures,
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        ringWidget,
+                        const SizedBox(width: 14),
+                        Expanded(child: figures),
+                      ],
+                    );
+            },
+          ),
+          if (recorded > 0) ...[
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: SizedBox(
+                height: 10,
+                child: Row(
+                  children: [
+                    for (final c in counts)
+                      if (c.$2 > 0)
+                        Expanded(
+                          flex: c.$2.toInt(),
+                          child: Container(
+                            color: EduTints.ink(c.$3).withValues(alpha: .75),
+                          ),
+                        ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 14,
+              runSpacing: 4,
+              children: [
+                for (final c in counts)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        size: 9,
+                        color: EduTints.ink(c.$3).withValues(alpha: .75),
+                      ),
+                      const SizedBox(width: 5),
+                      Text('${c.$1} ${c.$2}', style: text.labelMedium),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          Text(
+            recorded == 0
+                ? 'No classes have been recorded in this period yet.'
+                : 'Each class period counts as one session. Classes missed are sessions marked absent; leave days are approved leave.',
+            style: text.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// One class: time, subject and period, with its attendance status.
+  Widget classCard(Json r) {
+    final text = Theme.of(context).textTheme;
+    final style = statusStyle(statusIn(r));
+    final start = _asText(r['start_time']), end = _asText(r['end_time']);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: collegeIvory,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: collegeLine),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: 62,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    start.isEmpty
+                        ? (r['period'] == 0 ? 'All day' : 'P${r['period']}')
+                        : start.substring(0, start.length.clamp(0, 5)),
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (end.isNotEmpty)
+                    Text(
+                      end.substring(0, end.length.clamp(0, 5)),
+                      style: text.bodySmall,
+                    ),
+                ],
+              ),
+            ),
+            Container(
+              width: 4,
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: EduTints.ink(style.tint).withValues(alpha: .6),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _asText(r['subject']).isEmpty
+                        ? 'Class'
+                        : _asText(r['subject']),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    r['period'] == 0 ? 'Whole day' : 'Period ${r['period']}',
+                    style: text.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: style.tint,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+                child: Text(
+                  style.label,
+                  style: text.labelMedium?.copyWith(
+                    color: EduTints.ink(style.tint),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> personalBody(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final students = _asRows(options?['students']);
+    final summaries = Map<String, dynamic>.from(
+      data?['summaries'] as Map? ?? {},
+    );
+    final stats = Map<String, dynamic>.from(summaries[range] as Map? ?? {});
+    final loading = data == null && error.isEmpty;
+    final registers = _asRows(data?['registers']);
+    final today = DateUtils.isSameDay(day, DateTime.now());
+    final dayClasses =
+        registers.where((r) => r['session_date'] == _attDate(day)).toList()
+          ..sort((a, b) => '${a['period']}'.compareTo('${b['period']}'));
+    final from = '${stats['start'] ?? ''}', to = '${stats['end'] ?? ''}';
+    final missed =
+        registers
+            .where(
+              (r) =>
+                  statusIn(r) == 'absent' &&
+                  from.compareTo('${r['session_date']}') <= 0 &&
+                  '${r['session_date']}'.compareTo(to) <= 0,
+            )
+            .toList()
+          ..sort(
+            (a, b) => '${b['session_date']}${b['period']}'.compareTo(
+              '${a['session_date']}${a['period']}',
+            ),
+          );
+    final missedByDay = <String, List<Json>>{};
+    for (final r in missed) {
+      missedByDay.putIfAbsent('${r['session_date']}', () => []).add(r);
+    }
+    return [
+      if (students.length > 1) ...[
+        // Only parents with more than one child choose a student.
+        DropdownButtonFormField<String>(
+          key: ValueKey('attendance-student-$child'),
+          initialValue: child.isEmpty ? null : child,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Student',
+            prefixIcon: Icon(Icons.person_outline),
+          ),
+          items: [
+            for (final s in students)
+              DropdownMenuItem(
+                value: _asText(s['code']),
+                child: Text(_asText(s['name'])),
+              ),
+          ],
+          onChanged: saving
+              ? null
+              : (v) {
+                  if (v != null) change(() => child = v);
+                },
+        ),
+        const SizedBox(height: 12),
+      ],
+      EduPillTabs(
+        labels: const ['Day', 'Week', 'Month', 'Year'],
+        selected: _ranges.indexOf(range).clamp(0, 3),
+        onSelected: (i) => setState(() => range = _ranges[i]),
+      ),
+      const SizedBox(height: 14),
+      if (loading) const EduCardSkeleton(height: 250) else analyticsCard(stats),
+      const SizedBox(height: 18),
+      EduPillTabs(
+        labels: [
+          today
+              ? 'Classes today'
+              : 'Classes · ${day.day} ${_months[day.month - 1].substring(0, 3)}',
+          loading ? 'Missed' : 'Missed (${missed.length})',
+          'Calendar',
+        ],
+        selected: view,
+        onSelected: (i) => setState(() => view = i),
+      ),
+      const SizedBox(height: 14),
+      if (loading)
+        const EduLoadingSkeleton()
+      else if (view == 0)
+        ...(dayClasses.isEmpty
+            ? [
+                QuietEmpty(
+                  icon: Icons.event_available_outlined,
+                  title: today
+                      ? 'No classes recorded today'
+                      : 'No classes recorded on this day',
+                  message: 'Choose another date from the attendance card.',
+                ),
+              ]
+            : dayClasses.map(classCard))
+      else if (view == 1)
+        ...(missed.isEmpty
+            ? [
+                QuietEmpty(
+                  icon: Icons.verified_outlined,
+                  title: 'No classes missed',
+                  message:
+                      'Nothing marked absent ${range == 'day' ? 'on this day' : 'in this $range'}.',
+                ),
+              ]
+            : [
+                for (final entry in missedByDay.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 6, 4, 8),
+                    child: Text(
+                      prettyDate(DateTime.parse(entry.key)),
+                      style: text.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  ...entry.value.map(classCard),
+                ],
+              ])
+      else ...[
+        calendar(),
+        const SizedBox(height: 12),
+        trend(),
+      ],
+    ];
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text(widget.title),
-      automaticallyImplyLeading: false,
-      actions: [
-        IconButton(
-          tooltip: 'Refresh',
-          onPressed: busy || saving ? null : () => change(() {}),
-          icon: const Icon(Icons.refresh),
-        ),
-      ],
-    ),
+    // Parents and students: the workspace header names the screen; pull down to refresh.
+    appBar: personal
+        ? null
+        : AppBar(
+            title: Text(widget.title),
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                tooltip: 'Refresh',
+                onPressed: busy || saving ? null : () => change(() {}),
+                icon: const Icon(Icons.refresh),
+              ),
+            ],
+          ),
     body: RefreshIndicator(
       onRefresh: () => change(() {}),
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
-          if (busy) const LinearProgressIndicator(),
+          if (busy && !personal) const LinearProgressIndicator(),
           if (error.isNotEmpty)
             Card(
               child: Padding(
@@ -833,21 +1514,31 @@ class _AttendanceHubState extends State<AttendanceHub> {
                 child: Text(notice),
               ),
             ),
-          filters(),
-          if (!ready)
-            const Padding(
-              padding: EdgeInsets.all(24),
-              child: Text(
-                'Select a course, branch and academic batch to load the class register.',
+          if (personal) ...[
+            if (error.isNotEmpty)
+              TextButton.icon(
+                onPressed: () => change(() {}),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Try again'),
               ),
-            )
-          else if (data != null) ...[
-            overview(),
-            const SizedBox(height: 18),
-            calendar(),
-            trend(),
-            const SizedBox(height: 18),
-            register(),
+            ...personalBody(context),
+          ] else ...[
+            filters(),
+            if (!ready)
+              const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Select a course, branch and academic batch to load the class register.',
+                ),
+              )
+            else if (data != null) ...[
+              overview(),
+              const SizedBox(height: 18),
+              calendar(),
+              trend(),
+              const SizedBox(height: 18),
+              register(),
+            ],
           ],
         ],
       ),
@@ -861,10 +1552,14 @@ class AttendanceOverview extends StatefulWidget {
     required this.api,
     this.studentCode = '',
     this.initialClass,
+    this.studentName,
+    this.onOpen,
   });
   final CollegeApi api;
   final String studentCode;
   final Json? initialClass;
+  final String? studentName;
+  final VoidCallback? onOpen;
   @override
   State<AttendanceOverview> createState() => _AttendanceOverviewState();
 }
@@ -905,41 +1600,111 @@ class _AttendanceOverviewState extends State<AttendanceOverview> {
           ),
         );
       }
-      if (!snapshot.hasData) return const LinearProgressIndicator();
+      if (!snapshot.hasData) return const EduCardSkeleton(height: 170);
       final summaries = Map<String, dynamic>.from(
         (snapshot.data as Map)['summaries'] as Map? ?? {},
       );
       final month = Map<String, dynamic>.from(summaries['month'] as Map? ?? {});
-      final pct = month['percentage'];
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Attendance overview',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                pct == null
-                    ? 'No attendance recorded this month'
-                    : '$pct% this month',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 10),
-              LinearProgressIndicator(
-                value: pct == null ? 0 : (pct as num).toDouble() / 100,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Week leave days: ${(summaries['week'] as Map?)?['leave_days'] ?? 0} · Month leave days: ${month['leave_days'] ?? 0}',
-              ),
-              Text(
-                'Attended ${month['attended'] ?? 0} of ${month['recorded'] ?? 0} recorded sessions',
-              ),
-            ],
+      final day = Map<String, dynamic>.from(summaries['day'] as Map? ?? {});
+      final pct = month['percentage'] as num?;
+      final who = widget.studentName?.split(' ').first ?? 'Your child';
+      // Today's status comes from the day's recorded sessions and approved leave.
+      final (todayText, todayTint) = (day['leave_days'] as num? ?? 0) > 0
+          ? ('$who is on leave today', EduTints.gold)
+          : (day['recorded'] as num? ?? 0) == 0
+          ? ('Attendance not marked yet today', EduTints.mist)
+          : (day['attended'] as num? ?? 0) > 0
+          ? ('$who is present today', EduTints.sage)
+          : ('$who is absent today', EduTints.clay);
+      final text = Theme.of(context).textTheme;
+      return Material(
+        color: collegeIvory,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: const BorderSide(color: collegeLine),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: widget.onOpen,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    EduRing(
+                      value: pct == null ? null : pct / 100,
+                      size: 88,
+                      color: collegePine,
+                      center: Text(
+                        pct == null ? '—' : '${pct.round()}%',
+                        style: text.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Attendance this month',
+                            style: text.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            pct == null
+                                ? 'No sessions recorded this month'
+                                : 'Attended ${month['attended'] ?? 0} of ${month['recorded'] ?? 0} sessions',
+                            style: text.bodySmall,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Leave · ${(summaries['week'] as Map?)?['leave_days'] ?? 0} this week · ${month['leave_days'] ?? 0} this month',
+                            style: text.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (widget.onOpen != null)
+                      const Icon(Icons.chevron_right, color: collegeMuted),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: todayTint,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        size: 10,
+                        color: EduTints.ink(todayTint),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          todayText,
+                          style: text.titleSmall?.copyWith(
+                            color: EduTints.ink(todayTint),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

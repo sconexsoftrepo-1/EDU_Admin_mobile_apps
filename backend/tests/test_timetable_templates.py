@@ -109,3 +109,46 @@ def test_document_sql_namespace_survives_cloning():
     assert isinstance(cloned, Documents)
     cloned["timetables"]["TT-TEST"]["revision"] = 2
     assert docs["timetables"]["TT-TEST"]["revision"] == 1
+
+
+def test_published_week_repeats_for_the_semester_in_the_student_app(client, headers, app):
+    from datetime import date, timedelta
+    from tests.test_lab_workspace import seed
+    from tests.test_screen_workflows import mobile_login
+    seed(app)
+    data = app.state.store.snapshot()
+    enrollment = next(e for e in data["records"]["student_enrollments"].values() if e.get("status") == "active")
+    section = data["records"]["sections"][enrollment["section_code"]]
+    batch = data["records"]["batches"][section["batch_code"]]
+    program = data["records"]["programs"][batch["program_code"]]
+    today = date.today()
+    periods = [{"start": "09:00", "end": "10:00", "label": "Period 1"},
+               {"start": "10:00", "end": "10:15", "kind": "break", "label": "Short break"},
+               {"start": "10:15", "end": "11:15", "label": "Period 2"},
+               {"start": "11:15", "end": "12:00", "kind": "lunch", "label": "Lunch"},
+               {"start": "12:00", "end": "13:00", "label": "Period 3"}]
+    kinds = ["theory", "lab", "sports", "library"]
+    cells = [{"day": d, "row": r, "kind": kinds[(d + r) % 4], "title": f"{kinds[(d + r) % 4].title()} {d}{r}"}
+             for d in range(6) for r in (0, 2, 4)]
+    body = {"name": "Week", "template": program["course_level"], "program_code": program["code"],
+            "batch_code": batch["code"], "section": section["name"], "status": "Published",
+            "periods": periods, "cells": cells,
+            "valid_from": (today - timedelta(days=30)).isoformat(), "valid_to": (today + timedelta(days=60)).isoformat()}
+    saved = client.post(BASE, headers=headers, json=body)
+    assert saved.status_code == 201, saved.text
+    assert saved.json()["valid_from"] == body["valid_from"]
+
+    student = mobile_login(client, app, "student", enrollment["student_code"], "student-mobile")
+    items = client.get("/api/v1/mobile/workspace/timetable", headers=student).json()["items"]
+    kinds_seen = {i["kind"] for i in items}
+    assert {"theory", "lab", "sports", "library", "break", "lunch"} <= kinds_seen
+    monday = [i for i in items if i["weekday"] == 1]
+    assert [i["start_time"] for i in monday] == ["09:00", "10:00", "10:15", "11:15", "12:00"]
+    assert all(i["valid_to"] == body["valid_to"] for i in items)
+
+    # After the semester ends the week is no longer offered.
+    ended = {**body, "revision": 1, "valid_from": (today - timedelta(days=90)).isoformat(),
+             "valid_to": (today - timedelta(days=1)).isoformat()}
+    assert client.put(f"{BASE}/{saved.json()['code']}", headers=headers, json=ended).status_code == 200
+    items = client.get("/api/v1/mobile/workspace/timetable", headers=student).json()["items"]
+    assert not any(i.get("timetable_code") == saved.json()["code"] for i in items)

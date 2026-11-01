@@ -19,7 +19,7 @@ export type TimetableCell = {
   day: number;
   row: number;
   span: number;
-  kind: "theory" | "lab" | "activity";
+  kind: "theory" | "lab" | "sports" | "library" | "activity";
   title: string;
   subject_code: string;
   faculty: string;
@@ -38,6 +38,9 @@ export type TimetableDraft = {
   revision: number;
   periods: Period[];
   cells: TimetableCell[];
+  /** The week repeats between these dates; empty = the semester's start and end. */
+  valid_from?: string | null;
+  valid_to?: string | null;
 };
 export type TimetableRecord = TimetableDraft & {
   code: string;

@@ -39,8 +39,7 @@ class _AssignmentHubState extends State<AssignmentHub> {
     });
     try {
       final result = Map<String, dynamic>.from(
-        await widget.api.assignments(studentCode: child)
-            as Map,
+        await widget.api.assignments(studentCode: child) as Map,
       );
       if (!mounted) return;
       final children = _asRows(result['students']);
@@ -90,7 +89,11 @@ class _AssignmentHubState extends State<AssignmentHub> {
           ),
         ],
       ),
-      floatingActionButton: (data?['can_create'] == true || data == null && (widget.role == MobileRole.admin || widget.role == MobileRole.teacher))
+      floatingActionButton:
+          (data?['can_create'] == true ||
+              data == null &&
+                  (widget.role == MobileRole.admin ||
+                      widget.role == MobileRole.teacher))
           ? FloatingActionButton.extended(
               onPressed: () async {
                 final saved = await Navigator.of(context).push<bool>(
@@ -324,15 +327,20 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
     try {
       final value = Map<String, dynamic>.from(
         await widget.api.assignmentOptions(
-          programCode: course,
-          academicYearCode: year,
-          sectionCode: section,
-        ) as Map,
+              programCode: course,
+              academicYearCode: year,
+              sectionCode: section,
+            )
+            as Map,
       );
       if (!mounted || current != ticket) return;
       setState(() {
         options = value;
-        subject = _asText(_asRows(value['subjects']).where((s) => s['semester_number'] == value['current_semester']).firstOrNull?['subject_code']);
+        subject = _asText(
+          _asRows(value['subjects'])
+              .where((s) => s['semester_number'] == value['current_semester'])
+              .firstOrNull?['subject_code'],
+        );
         recipients = _asRows(
           value['students'],
         ).map((s) => _asText(s['code'])).toSet();
@@ -435,7 +443,9 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
         'section_code': section.isEmpty ? null : section,
         'teacher_code': teacher,
         'subject_code': subject.isEmpty ? null : subject,
-        'semester_number':_asRows(options?['subjects']).where((s)=>s['subject_code']==subject).firstOrNull?['semester_number'],
+        'semester_number': _asRows(options?['subjects'])
+            .where((s) => s['subject_code'] == subject)
+            .firstOrNull?['semester_number'],
         'title': title.text.trim(),
         'description': description.text,
         'due_at': due!.toUtc().toIso8601String(),
@@ -541,7 +551,26 @@ class _AssignmentComposerState extends State<AssignmentComposer> {
                 enabled: year.isNotEmpty && !loading,
               ),
               const SizedBox(height: 14),
-              if (_asRows(options?['subjects']).isNotEmpty) select('Subject / semester',_asRows(options?['subjects']).any((s)=>s['subject_code']==subject)?subject:'',_asRows(options?['subjects']).map((s)=>{...s,'code':s['subject_code'],'name':'Semester ${s['semester_number']} · ${s['name']}'}).toList(),(v)=>setState(()=>subject=v)),
+              if (_asRows(options?['subjects']).isNotEmpty)
+                select(
+                  'Subject / semester',
+                  _asRows(
+                        options?['subjects'],
+                      ).any((s) => s['subject_code'] == subject)
+                      ? subject
+                      : '',
+                  _asRows(options?['subjects'])
+                      .map(
+                        (s) => {
+                          ...s,
+                          'code': s['subject_code'],
+                          'name':
+                              'Semester ${s['semester_number']} · ${s['name']}',
+                        },
+                      )
+                      .toList(),
+                  (v) => setState(() => subject = v),
+                ),
               if (options?['teacher_locked'] == true)
                 InputDecorator(
                   decoration: const InputDecoration(labelText: 'Teacher'),
@@ -740,7 +769,10 @@ class _AssignmentReviewState extends State<AssignmentReview> {
     setState(() => busy = true);
     try {
       final value = Map<String, dynamic>.from(
-        await widget.api.assignmentDetails(widget.code, studentCode: widget.student)
+        await widget.api.assignmentDetails(
+              widget.code,
+              studentCode: widget.student,
+            )
             as Map,
       );
       if (mounted) {
@@ -809,19 +841,33 @@ class _AssignmentReviewState extends State<AssignmentReview> {
               Text('Due: ${_asDate(data?['due_at'])}'),
               const SizedBox(height: 12),
               const Text('Files to post'),
-              ...files.map((file) => ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.description_outlined),
-                title: Text(file.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              )),
-              const Text('After posting, your teacher can review these files and add marks and feedback.'),
+              ...files.map(
+                (file) => ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.description_outlined),
+                  title: Text(
+                    file.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const Text(
+                'After posting, your teacher can review these files and add marks and feedback.',
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Go back')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Post submission')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Go back'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Post submission'),
+          ),
         ],
       ),
     );
@@ -859,9 +905,94 @@ class _AssignmentReviewState extends State<AssignmentReview> {
     }
   }
 
+  Widget _pill(BuildContext context, String label, Color tint, IconData icon) =>
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: tint,
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: EduTints.ink(tint)),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: EduTints.ink(tint),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _panel({required Widget child, Color color = collegeIvory}) =>
+      Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: EduWorkspace.border),
+        ),
+        child: child,
+      );
+
+  Widget _heading(BuildContext context, String title, IconData icon) => Row(
+    children: [
+      Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+      ),
+    ],
+  );
+
+  /// Status of the signed-in student's work, used for the header pill.
+  ({String label, Color tint, IconData icon}) _myStatus(Json a, dynamic sub) {
+    final due = DateTime.tryParse(_asText(a['due_at']))?.toLocal();
+    if (sub?['completed'] == true) {
+      return (
+        label: sub?['marks'] == null ? 'Reviewed' : 'Marks given',
+        tint: EduTints.sage,
+        icon: Icons.verified_outlined,
+      );
+    }
+    if (sub?['submitted_at'] != null) {
+      return (
+        label: sub?['late'] == true ? 'Submitted late' : 'Submitted',
+        tint: EduTints.mist,
+        icon: Icons.upload_file_outlined,
+      );
+    }
+    if (due != null && due.isBefore(DateTime.now())) {
+      return (
+        label: 'Past due',
+        tint: EduTints.clay,
+        icon: Icons.error_outline,
+      );
+    }
+    return (
+      label: 'To do',
+      tint: EduTints.gold,
+      icon: Icons.pending_actions_outlined,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final a = data, submission = a?['my_submission'];
+    final text = Theme.of(context).textTheme;
     final students = _asRows(a?['students']).where((s) {
       final v = s['submission'];
       return filter == 'All' ||
@@ -890,25 +1021,134 @@ class _AssignmentReviewState extends State<AssignmentReview> {
           child: ListView(
             padding: const EdgeInsets.all(18),
             children: [
-              if (busy) const LinearProgressIndicator(),
-              if (error != null) Text(error!),
-              if (a != null) ...[
-                Text(
-                  '${a['course_name']} · ${a['batch_name']}',
-                  style: Theme.of(context).textTheme.titleMedium,
+              if (busy && a == null) ...[
+                const EduCardSkeleton(height: 170),
+                const SizedBox(height: 14),
+                const EduCardSkeleton(height: 120),
+              ] else if (busy)
+                const LinearProgressIndicator(minHeight: 3),
+              if (error != null)
+                WorkspaceMessage(
+                  icon: Icons.cloud_off_outlined,
+                  title: 'Could not load this assignment',
+                  message: error!,
+                  onRetry: load,
                 ),
-                const SizedBox(height: 8),
-                Text('Due ${_asDate(a['due_at'])}'),
-                Text('${a['teacher_name']} · Maximum ${a['max_marks']} marks'),
-                const SizedBox(height: 18),
-                SelectableText(_asText(a['description'])),
-                const SizedBox(height: 12),
-                _asAttachments(context, widget.api, a['attachments']),
+              if (a != null) ...[
+                // Summary: subject/class, due date, marks and the current status.
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xffeef3ea), Color(0xffe6eef1)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: EduWorkspace.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _asText(a['title']),
+                        style: text.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${a['course_name']} · ${a['batch_name']}',
+                        style: text.bodyMedium,
+                      ),
+                      const SizedBox(height: 10),
+                      if (a['can_review'] != true)
+                        Builder(
+                          builder: (context) {
+                            final st = _myStatus(a, submission);
+                            return _pill(context, st.label, st.tint, st.icon);
+                          },
+                        ),
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: .8),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Wrap(
+                          spacing: 18,
+                          runSpacing: 10,
+                          children: [
+                            for (final (icon, label, value) in [
+                              (
+                                Icons.event_outlined,
+                                'Due',
+                                _asDate(a['due_at']),
+                              ),
+                              (
+                                Icons.grade_outlined,
+                                'Maximum marks',
+                                _asText(a['max_marks']),
+                              ),
+                              if (_asText(a['teacher_name']).isNotEmpty)
+                                (
+                                  Icons.person_outline,
+                                  'Teacher',
+                                  _asText(a['teacher_name']),
+                                ),
+                            ])
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(icon, size: 18, color: collegeMuted),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(label, style: text.labelSmall),
+                                        Text(
+                                          value,
+                                          style: text.titleSmall?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _panel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _heading(context, 'Instructions', Icons.subject_rounded),
+                      const SizedBox(height: 8),
+                      SelectableText(
+                        _asText(a['description']),
+                        style: text.bodyMedium?.copyWith(height: 1.5),
+                      ),
+                      if (_asRows(a['attachments']).isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        _asAttachments(context, widget.api, a['attachments']),
+                      ],
+                    ],
+                  ),
+                ),
                 if (a['can_review'] == true) ...[
-                  const SizedBox(height: 20),
-                  Text(
+                  const SizedBox(height: 22),
+                  _heading(
+                    context,
                     'Student review',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    Icons.rate_review_outlined,
                   ),
                   const Text(
                     'Check completed work, including paper submissions, and allocate marks.',
@@ -937,8 +1177,13 @@ class _AssignmentReviewState extends State<AssignmentReview> {
                     final value = draft(student),
                         code = _asText(student['code']),
                         s = student['submission'];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: collegeIvory,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: EduWorkspace.border),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -946,13 +1191,27 @@ class _AssignmentReviewState extends State<AssignmentReview> {
                           children: [
                             Text(
                               _asText(student['name']),
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: text.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                            Text(_asText(student['admission_number'])),
+                            Text(
+                              _asText(student['admission_number']),
+                              style: text.bodySmall,
+                            ),
+                            const SizedBox(height: 6),
                             Text(
                               s?['submitted_at'] == null
                                   ? 'Not uploaded'
                                   : 'Submitted ${_asDate(s['submitted_at'])}${s['late'] == true ? ' · Late' : ''}',
+                              style: text.labelMedium?.copyWith(
+                                color: s?['submitted_at'] == null
+                                    ? collegeMuted
+                                    : s['late'] == true
+                                    ? EduTints.ink(EduTints.clay)
+                                    : EduTints.ink(EduTints.sage),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             _asAttachments(
                               context,
@@ -1041,80 +1300,189 @@ class _AssignmentReviewState extends State<AssignmentReview> {
                       label: Text(saving ? 'Saving…' : 'Save review and marks'),
                     ),
                 ] else ...[
-                  const SizedBox(height: 20),
-                  Text(
-                    'Your submission',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  if (submission?['submitted_at'] != null)
-                    Text(
-                      'Submitted ${_asDate(submission['submitted_at'])}${submission['late'] == true ? ' · Late' : ''}',
-                    ),
-                  _asAttachments(
-                    context,
-                    widget.api,
-                    submission?['attachments'],
-                  ),
                   if (submission?['completed'] == true)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              submission?['marks'] == null
-                                  ? 'Completed'
-                                  : '${submission['marks']} / ${a['max_marks']}',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                    _panel(
+                      color: const Color(0xfff1f6ee),
+                      child: Row(
+                        children: [
+                          EduRing(
+                            value: () {
+                              final m = num.tryParse(
+                                _asText(submission?['marks']),
+                              );
+                              final max = num.tryParse(_asText(a['max_marks']));
+                              return m == null || max == null || max == 0
+                                  ? 1.0
+                                  : (m / max).toDouble();
+                            }(),
+                            size: 76,
+                            color: collegePine,
+                            center: const Icon(
+                              Icons.emoji_events_outlined,
+                              color: collegePine,
                             ),
-                            Text(_asText(submission?['feedback'])),
-                          ],
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Result', style: text.labelLarge),
+                                Text(
+                                  submission?['marks'] == null
+                                      ? 'Completed'
+                                      : '${submission['marks']} / ${a['max_marks']}',
+                                  style: text.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                if (_asText(
+                                  submission?['feedback'],
+                                ).isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    '“${_asText(submission?['feedback'])}”',
+                                    style: text.bodyMedium?.copyWith(
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  _panel(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _heading(
+                          context,
+                          'Your submission',
+                          Icons.assignment_turned_in_outlined,
                         ),
-                      ),
-                    ),
-                  if (a['can_submit'] == true &&
-                      submission?['completed'] != true &&
-                      submission?['marks'] == null) ...[
-                    OutlinedButton.icon(
-                      onPressed: saving
-                          ? null
-                          : () async {
-                              try {
-                                final picked = await _asPickFiles();
-                                if (mounted && picked.isNotEmpty) {
-                                  setState(() => files = picked);
-                                }
-                              } catch (e) {
-                                if (context.mounted) _asError(context, e);
-                              }
-                            },
-                      icon: const Icon(Icons.upload_file),
-                      label: const Text('Choose PDF or multiple images'),
-                    ),
-                    const Text('Up to 10 files, 10 MB each.'),
-                    ...files.map(
-                      (f) => ListTile(
-                        title: Text(f.name),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: saving
-                              ? null
-                              : () => setState(() => files.remove(f)),
+                        const SizedBox(height: 8),
+                        if (submission?['submitted_at'] != null)
+                          Text(
+                            'Submitted ${_asDate(submission['submitted_at'])}${submission['late'] == true ? ' · Late' : ''}',
+                            style: text.bodyMedium,
+                          )
+                        else
+                          Text(
+                            a['can_submit'] == true
+                                ? 'Nothing submitted yet. Upload a PDF or photos of your work.'
+                                : 'Nothing submitted yet.',
+                            style: text.bodyMedium?.copyWith(
+                              color: collegeMuted,
+                            ),
+                          ),
+                        _asAttachments(
+                          context,
+                          widget.api,
+                          submission?['attachments'],
                         ),
-                      ),
+                        if (a['can_submit'] == true &&
+                            submission?['completed'] != true &&
+                            submission?['marks'] == null) ...[
+                          const SizedBox(height: 10),
+                          // Upload area.
+                          Material(
+                            color: collegeCanvas,
+                            borderRadius: BorderRadius.circular(16),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              onTap: saving
+                                  ? null
+                                  : () async {
+                                      try {
+                                        final picked = await _asPickFiles();
+                                        if (mounted && picked.isNotEmpty) {
+                                          setState(() => files = picked);
+                                        }
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          _asError(context, e);
+                                        }
+                                      }
+                                    },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                  horizontal: 14,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.cloud_upload_outlined,
+                                      size: 30,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Choose PDF or multiple images',
+                                      textAlign: TextAlign.center,
+                                      style: text.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Up to 10 files, 10 MB each.',
+                                      style: text.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          for (final f in files)
+                            Container(
+                              margin: const EdgeInsets.only(top: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: EduWorkspace.border),
+                              ),
+                              child: ListTile(
+                                dense: true,
+                                leading: const Icon(Icons.description_outlined),
+                                title: Text(
+                                  f.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: IconButton(
+                                  tooltip: 'Remove file',
+                                  icon: const Icon(Icons.close),
+                                  onPressed: saving
+                                      ? null
+                                      : () => setState(() => files.remove(f)),
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              onPressed: saving || files.isEmpty
+                                  ? null
+                                  : submit,
+                              icon: const Icon(Icons.send_rounded),
+                              label: Text(
+                                saving
+                                    ? 'Uploading…'
+                                    : submission?['submitted_at'] != null
+                                    ? 'Replace submission'
+                                    : 'Submit assignment',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    FilledButton(
-                      onPressed: saving || files.isEmpty ? null : submit,
-                      child: Text(
-                        saving
-                            ? 'Uploading…'
-                            : submission?['submitted_at'] != null
-                            ? 'Replace submission'
-                            : 'Submit assignment',
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
                 if (progress.isNotEmpty) Text(progress),
                 const SizedBox(height: 30),
@@ -1126,4 +1494,3 @@ class _AssignmentReviewState extends State<AssignmentReview> {
     );
   }
 }
-

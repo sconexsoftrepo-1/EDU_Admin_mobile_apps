@@ -102,6 +102,8 @@ export interface StaffOnboardingPayload {
     ctc_annual?: string;
     in_hand_monthly?: string;
   };
+  /** Non-teaching lab in-charges: registered labs this person runs. */
+  lab_codes?: string[];
 }
 
 export interface StaffOnboardingResult {
@@ -118,6 +120,7 @@ export interface StaffDetail {
   profile: Row | null;
   role?: Row | null;
   department?: string | null;
+  labs?: { code: string; name: string; floor?: string; room_number?: string; lab_type?: string }[];
   salary_components: Row[];
 }
 
@@ -145,4 +148,6 @@ export interface StaffRow {
   bank?: string | null;
   documents_uploaded: number;
   documents_expected: number;
+  /** Labs this person is in-charge of (non-teaching staff). */
+  labs?: string[];
 }

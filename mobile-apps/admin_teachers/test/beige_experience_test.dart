@@ -188,7 +188,9 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          for (final screen in routes['screens']['screens'] as List) {
+          for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
             await openModule(tester, screen['key'] as String);
             expect(
               tester.takeException(),
@@ -219,7 +221,9 @@ void main() {
             }
           }
           await tester.pumpWidget(const SizedBox());
-          for (final screen in routes['screens']['screens'] as List) {
+          for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
             final d = routes[screen['key']] as Json;
             for (final action in d['actions'] as List? ?? []) {
               if (action['key'] == 'read_notification') continue;

@@ -245,6 +245,12 @@ def listing(request: Request, program_code: str | None = None, academic_year_cod
         if marks:
             registers.append({**row, "marks": marks})
     registers.sort(key=lambda r: (r["session_date"], r["period"]))
+    # Class timings for each register, so a missed class can be shown with its time.
+    slots = {s["code"]: s for s in aw.rows(data, "timetable_slots")}
+    for row in registers:
+        slot = slots.get(row.get("slot_code")) or {}
+        row.setdefault("start_time", slot.get("start_time"))
+        row.setdefault("end_time", slot.get("end_time"))
     leaves = approved_leaves(data, students)
     week = anchor - timedelta(days=anchor.weekday())
     month = anchor.replace(day=1)
@@ -254,9 +260,12 @@ def listing(request: Request, program_code: str | None = None, academic_year_cod
     summaries = {key: summarize(registers, students, leaves, a.isoformat(), b.isoformat()) for key, (a, b) in spans.items()}
     summaries["period"] = summarize([r for r in registers if r["period"] == period], students, leaves, anchor.isoformat(), anchor.isoformat())
     calendar = []
+    by_day = {}
+    for row in registers:  # one pass instead of re-reading every register for each day
+        by_day.setdefault(row["session_date"], []).append(row)
     for offset in range(month_end.day):
         day = month + timedelta(days=offset)
-        stats = summarize(registers, students, leaves, day.isoformat(), day.isoformat())
+        stats = summarize(by_day.get(day.isoformat(), []), students, leaves, day.isoformat(), day.isoformat())
         calendar.append({"date": day.isoformat(), **stats})
     return {"date": anchor.isoformat(), "registers": registers, "summaries": summaries, "calendar": calendar,
             "leave_dates": {s: sorted(d for d in leaves.get(s, set()) if d[:4] == str(anchor.year)) for s in students},

@@ -126,6 +126,19 @@ export default function StaffDetails({
                 department: data.department || staff.department,
               }}
             />
+            {!!data.labs?.length && (
+              <section className="edu-student-section">
+                <h3>Lab in-charge of</h3>
+                <ul>
+                  {data.labs.map((lab) => (
+                    <li key={lab.code}>
+                      <strong>{lab.name}</strong> · {lab.lab_type} ·{" "}
+                      {lab.floor}, Room {lab.room_number}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             {data.role && (
               <Section
                 title={
