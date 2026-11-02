@@ -79,7 +79,7 @@ def push(request, notices):
                 continue
             tokens = [r["token"] for r in rows(data, "device_tokens") if r["user_code"] == item["user_code"]]
             payload = {"idempotency_key": code, "tokens": tokens, "title": item["title"], "body": item["body"],
-                       "data": {k: item.get(k) for k in ("screen", "certificate_request_code", "certificate_code", "academic_year_code", "semester_number", "charge_code")}}
+                       "data": {k: item.get(k) for k in ("screen", "certificate_request_code", "certificate_code", "academic_year_code", "semester_number", "charge_code", "thread_code")}}
         if tokens:
             try:
                 adapter_post(settings.push_adapter_url, settings.push_adapter_token, payload)

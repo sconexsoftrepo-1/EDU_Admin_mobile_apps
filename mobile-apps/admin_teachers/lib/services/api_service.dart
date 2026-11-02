@@ -378,6 +378,18 @@ class CollegeApi {
         : jsonDecode(response.body);
   }
 
+  /// A college report as a formatted PDF (finance, outstanding, collections, cashbook, expenses, payroll).
+  /// Receipts & cash ledger PDF grouped by day, week, month or year (mode: all or cash).
+  Future<Uint8List> ledgerPdf(String period, {String mode = 'all'}) async =>
+      (await _response('GET', '/finance/ledger/pdf?period=${Uri.encodeComponent(period)}&mode=${Uri.encodeComponent(mode)}', null)).bodyBytes;
+
+  /// Receipts & cash ledger grouped by period, with counts by mode and running balance.
+  Future<dynamic> ledger(String period, {String mode = 'all'}) =>
+      get('/finance/ledger?period=${Uri.encodeComponent(period)}&mode=${Uri.encodeComponent(mode)}&entries_limit=0');
+
+  Future<Uint8List> reportPdf(String name) async =>
+      (await _response('GET', '/reports/${Uri.encodeComponent(name)}.pdf', null)).bodyBytes;
+
   Future<Uint8List> download(String kind, String code) async =>
       (await _response('GET', _Endpoints.document(kind, code), null)).bodyBytes;
 

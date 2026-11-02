@@ -5,6 +5,21 @@ import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
 import ConnectedPortal from "./ConnectedPortal";
+import PayslipsWorkspace from "./PayslipsWorkspace";
+import StaffHRWorkspace from "./StaffHRWorkspace";
+import CashLedgerPanel from "./CashLedgerPanel";
+
+/** HR & payroll screens served by the live workspaces (no generic record manager). */
+const LIVE_HR_SCREENS = new Set([
+  "payslips",
+  "salary-structures",
+  "payroll",
+  "payroll-reports",
+  "employee-attendance",
+  "employee-leave",
+  "bonuses",
+  "reimbursements",
+]);
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import { clearWorkspaceCache } from "@/lib/colleges/workspace-cache";
 import AssignmentWorkspace from "./AssignmentWorkspace";
@@ -13,7 +28,9 @@ import CalendarWorkspace from "./CalendarWorkspace";
 import "./tab-interactions.css";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import AssessmentWorkspace from "./AssessmentWorkspace";
-import AcademicProgressWorkspace, { AcademicProgressOverview } from "./AcademicProgressWorkspace";
+import AcademicProgressWorkspace, {
+  AcademicProgressOverview,
+} from "./AcademicProgressWorkspace";
 import PersonPhoto from "./PersonPhoto";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import PDFActions from "./PDFActions";
@@ -35,14 +52,10 @@ import {
 import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
-  loading: () => (
-    <WorkspaceSkeleton label="Loading collection analytics" />
-  ),
+  loading: () => <WorkspaceSkeleton label="Loading collection analytics" />,
 });
 const ERPInsights = dynamic(() => import("./ERPInsights"), {
-  loading: () => (
-    <WorkspaceSkeleton label="Loading campus insights" />
-  ),
+  loading: () => <WorkspaceSkeleton label="Loading campus insights" />,
 });
 import {
   WorkspaceNavigation,
@@ -201,7 +214,10 @@ function instantPortalNavigation(event: React.MouseEvent) {
   )
     return;
   event.preventDefault();
-  if (url.pathname + url.search === window.location.pathname + window.location.search)
+  if (
+    url.pathname + url.search ===
+    window.location.pathname + window.location.search
+  )
     return window.scrollTo({ top: 0, behavior: "instant" });
   // Like next/link, start the new screen at the top (once it has rendered).
   scrollTopAfterNavigation = true;
@@ -300,7 +316,10 @@ export default function CollegePortal({
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [area, activeModule, detail]);
   /** Student directory list: its filters live inside the table card (Teaching staff layout). */
-  const recordDirectory = ["students", "admissions", "attendance", "assessments"].includes(activeModule) && !detail;
+  const recordDirectory =
+    ["students", "admissions", "attendance", "assessments"].includes(
+      activeModule,
+    ) && !detail;
   const [confirmation, setConfirmation] = useState<DrawerAction | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const [preferencesReady, setPreferencesReady] = useState(false);
@@ -561,10 +580,10 @@ export default function CollegePortal({
       );
   }
   function receipt(row: RecordRow, mode: "view" | "download" = "download") {
-    void mode;
-    void api.documents
-      .download("receipt", row.reference || row.id)
-      .catch((e) => toast.error("Could not download receipt", errorText(e)));
+    const code = String(row.reference || row.id);
+    return api.documents
+      .open("receipt", code, `fee-receipt-${code}.pdf`, mode)
+      .catch((e) => toast.error("Could not open receipt", errorText(e)));
   }
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -1321,6 +1340,39 @@ export default function CollegePortal({
       {button}
     </div>
   );
+  /** View / download the whole register as a formatted PDF (logo, scope, totals). */
+  const registerPdf = (
+    title: string,
+    file: string,
+    rows: { id: string; [key: string]: unknown }[],
+    columns: { key: string; label: string }[],
+  ) => (
+    <PDFActions
+      onAction={(mode) =>
+        professionalPdf(
+          file,
+          tableReport(
+            c,
+            s,
+            title,
+            rows,
+            columns,
+            role,
+            `Academic year: ${year}; Department: ${department}; Period: ${from || "all"} to ${to || "all"}`,
+          ),
+          mode,
+        )
+      }
+    >
+      {title} PDF
+    </PDFActions>
+  );
+  const withPdf = (pdfAction: ReactNode, extra?: ReactNode) => (
+    <div className="erp-quick-actions">
+      {pdfAction}
+      {extra}
+    </div>
+  );
   const button = (label: string, onClick: () => void) => (
     <button className="erp-primary" onClick={onClick}>
       <Plus size={15} />
@@ -1415,19 +1467,39 @@ export default function CollegePortal({
       ),
     );
   function content() {
-    if (activeModule === "academics") return <AcademicProgressWorkspace onNavigate={screen=>router.push(nav(screen))}/>;
+    if (activeModule === "academics")
+      return (
+        <AcademicProgressWorkspace
+          onNavigate={(screen) => router.push(nav(screen))}
+        />
+      );
     if (activeModule === "assessments") return <AssessmentWorkspace />;
     if (activeModule === "attendance") return <AttendanceWorkspace />;
     if (activeModule === "assignments") return <AssignmentWorkspace />;
     if (activeModule === "syllabus") return <SyllabusWorkspace />;
     if (activeModule === "calendar") return <CalendarWorkspace />;
     if (activeModule === "roles") return <RolesAccess />;
+    // HR & payroll uses the live staff screens (backend hr_workspace / payroll_workspace).
+    if (
+      ["payslips", "salary-structures", "payroll", "payroll-reports"].includes(
+        activeModule,
+      )
+    )
+      return <PayslipsWorkspace />;
+    if (activeModule === "employee-attendance")
+      return <StaffHRWorkspace view="attendance" />;
+    if (activeModule === "employee-leave")
+      return <StaffHRWorkspace view="leave" />;
+    if (["bonuses", "reimbursements"].includes(activeModule))
+      return <StaffHRWorkspace view="bonuses" />;
     if (operationLabels[activeModule])
       return <OperationsWorkspace college={c} module={activeModule} />;
     if (activeModule === "dashboard")
       return (
         <>
-          <AcademicProgressOverview onOpen={()=>router.push(nav("academics"))}/>
+          <AcademicProgressOverview
+            onOpen={() => router.push(nav("academics"))}
+          />
           <OperationsSummary college={c} />
           {dashboard()}
         </>
@@ -1633,7 +1705,14 @@ export default function CollegePortal({
       activeModule === "certificates" ||
       activeModule === "certificate-requests"
     )
-      return <ConnectedPortal key={`${activeModule}-${studentRevision}`} college={c} parts={parts} embedded />;
+      return (
+        <ConnectedPortal
+          key={`${activeModule}-${studentRevision}`}
+          college={c}
+          parts={parts}
+          embedded
+        />
+      );
 
     if (activeModule === "admissions") {
       const a = detail
@@ -1848,11 +1927,55 @@ export default function CollegePortal({
             labels[activeModule],
             activeModule === "fees"
               ? "All amounts derive from fee assignments, scholarships, and completed payments."
-              : "Simulated transactions only. No real money is transferred.",
-            allowed("Super Admin", "Accounts Manager", "Student")
-              ? button("Record payment", () => collect())
-              : undefined,
+              : "Every payment has a formatted fee receipt you can view or download.",
+            withPdf(
+              activeModule === "fees"
+                ? registerPdf(
+                    "Student fee ledgers",
+                    "student-fee-ledgers",
+                    studentRows.map((st) => ({
+                      id: st.id,
+                      name: st.name,
+                      program: st.program,
+                      fee: st.fee,
+                      scholarship: st.scholarship,
+                      paid: paid(s, st.id),
+                      outstanding: balance(s, st),
+                    })),
+                    [
+                      { key: "id", label: "Student ID" },
+                      { key: "name", label: "Student" },
+                      { key: "program", label: "Program" },
+                      { key: "fee", label: "Assigned fee" },
+                      { key: "scholarship", label: "Scholarship" },
+                      { key: "paid", label: "Paid" },
+                      { key: "outstanding", label: "Outstanding" },
+                    ],
+                  )
+                : registerPdf(
+                    activeModule === "receipts"
+                      ? "Receipt register"
+                      : "Payment transactions",
+                    activeModule === "receipts"
+                      ? "receipt-register"
+                      : "payment-transactions",
+                    payments as unknown as { id: string }[],
+                    [
+                      { key: "id", label: "Reference" },
+                      { key: "studentId", label: "Student" },
+                      { key: "date", label: "Date" },
+                      { key: "method", label: "Method" },
+                      { key: "category", label: "Category" },
+                      { key: "status", label: "Status" },
+                      { key: "amount", label: "Amount" },
+                    ],
+                  ),
+              allowed("Super Admin", "Accounts Manager", "Student")
+                ? button("Record payment", () => collect())
+                : undefined,
+            ),
           )}
+          {activeModule !== "fees" && <CashLedgerPanel />}
           {activeModule === "fees"
             ? table(
                 "Student fee ledgers",
@@ -1946,7 +2069,7 @@ export default function CollegePortal({
                       receipt(r as unknown as RecordRow, mode)
                     }
                   >
-                    Download receipt
+                    Receipt
                   </PDFActions>
                 ),
               )}
@@ -1981,6 +2104,21 @@ export default function CollegePortal({
                 )
               : undefined,
           )}
+          <div className="erp-quick-actions erp-register-pdf">
+            {registerPdf(
+              "Scholarship awards",
+              "scholarship-awards",
+              s.scholarships as unknown as { id: string }[],
+              [
+                { key: "id", label: "Award" },
+                { key: "studentId", label: "Student" },
+                { key: "name", label: "Award type" },
+                { key: "status", label: "Status" },
+                { key: "note", label: "Eligibility & reason" },
+                { key: "amount", label: "Amount" },
+              ],
+            )}
+          </div>
           {table(
             "Scholarship awards",
             s.scholarships,
@@ -2177,7 +2315,24 @@ export default function CollegePortal({
           {heading(
             "Cashbook",
             `Closing balance: ${money(entries.at(-1)?.running || 0)}. Running balances include all earlier transactions.`,
+            withPdf(
+              registerPdf(
+                "Cashbook",
+                "cashbook",
+                entries as unknown as { id: string }[],
+                [
+                  { key: "date", label: "Date" },
+                  { key: "reference", label: "Reference" },
+                  { key: "name", label: "Particulars" },
+                  { key: "category", label: "Category" },
+                  { key: "direction", label: "In / Out" },
+                  { key: "amount", label: "Amount" },
+                  { key: "running", label: "Running balance" },
+                ],
+              ),
+            ),
           )}
+          <CashLedgerPanel defaultMode="cash" />
           {table("Cashbook entries", entries, [
             ...cols(
               "date",
@@ -2779,7 +2934,14 @@ export default function CollegePortal({
         </>
       );
     if (activeModule === "settings")
-      return <ConnectedPortal key={studentRevision} college={c} parts={parts} embedded />;
+      return (
+        <ConnectedPortal
+          key={studentRevision}
+          college={c}
+          parts={parts}
+          embedded
+        />
+      );
     if (activeModule === "__legacy-settings")
       return (
         <>
@@ -2860,7 +3022,14 @@ export default function CollegePortal({
           </section>
         </>
       );
-    return <ConnectedPortal key={studentRevision} college={c} parts={parts} embedded />;
+    return (
+      <ConnectedPortal
+        key={studentRevision}
+        college={c}
+        parts={parts}
+        embedded
+      />
+    );
   }
   /** Academic year / department / date filters (top bar, or inside the Student directory card). */
   const filterFields = (
@@ -3157,6 +3326,7 @@ export default function CollegePortal({
           )}
           {activeModule !== "roles" &&
             activeModule !== "timetable" &&
+            !LIVE_HR_SCREENS.has(activeModule) &&
             !recordDirectory &&
             !entryScreens.includes(activeModule) && (
               <div className="erp-api-controls">
@@ -3209,7 +3379,9 @@ export default function CollegePortal({
           aria-modal="true"
           aria-label="Manage college records"
         >
-          <div className={`erp-api-drawer ${(manageModule || activeModule) === "academics" ? "erp-academics-drawer" : ""}`}>
+          <div
+            className={`erp-api-drawer ${(manageModule || activeModule) === "academics" ? "erp-academics-drawer" : ""}`}
+          >
             <header>
               <h2>{labels[activeModule] || activeModule}</h2>
               <button

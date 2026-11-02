@@ -12,7 +12,6 @@ from openpyxl import Workbook
 
 from app.core.security import current_user, has_permission
 from app.core.storage import audit, now
-from app.modules.documents.files.api import pdf
 from app.modules.finance.transactions.api import calculate_ledger
 
 router = APIRouter(prefix="/reports", tags=["Reports and exports"])
@@ -204,17 +203,8 @@ def export(
         raw = buffer.getvalue()
         mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     else:
-        raw = pdf(
-            name.replace("_", " ").title() + " report",
-            [
-                "Generated: " + now(),
-                "Reporting period: " + str(start or "All") + " to " + str(end or "All"),
-                *[
-                    " | ".join(f"{k}: {row.get(k, '')}" for k in columns)
-                    for row in rows
-                ],
-            ],
-        )
+        from app.core.finance_pdfs import report_pdf
+        raw = report_pdf(data, name, rows, start, end)
         mime = "application/pdf"
     with request.app.state.store.transaction() as data:
         audit(data, user["code"], "export", "reports", name)

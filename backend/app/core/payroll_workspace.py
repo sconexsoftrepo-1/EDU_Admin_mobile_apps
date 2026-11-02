@@ -5,18 +5,29 @@
 * ``payslip_view`` — one month's payslip with readable period, employee details and grouped lines.
 * ``payslip_pdf`` — the same payslip as a professionally laid-out A4 PDF.
 
+* ``run_payroll`` — creates a month's payroll run per campus, calculates every active employee's
+  payslip from their salary components (staff without a salary structure are skipped and listed,
+  not a reason to fail the whole run) and publishes it.
+* ``form16_pdf`` / ``issue_form16`` — Form 16 Part B (salary and tax statement) for a financial
+  year built from that year's published payslips, stored like an uploaded Form 16.
+
 Dashboard: ``GET /api/v1/hr/salary-workspace`` lists employees (payslip viewers) and
 ``GET /api/v1/hr/salary-workspace/{employee_code}`` returns one employee's structure and payslips.
-Staff see only their own.
+``POST /api/v1/hr/salary-workspace/runs`` runs payroll for a month and
+``POST /api/v1/hr/salary-workspace/{employee_code}/form16`` generates Form 16. Staff see only their own.
 """
+import hashlib
 import io
-from datetime import date
+import re
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import Field
 
 from . import assignment_workspace as aw
-from .security import current_user, has_permission
+from .security import StrictModel, current_user, has_permission
+from .storage import audit, new_code, now
 
 router = APIRouter(prefix="/hr/salary-workspace", tags=["Salary and payslips"])
 
@@ -135,13 +146,19 @@ def payslip_view(data, slip):
             "net_amount": str(amount(slip.get("net_amount"))), "net_in_words": words(slip.get("net_amount"))}
 
 
+def staff_kind(data, employee):
+    from .hr_workspace import staff_kind as kind
+    return kind(data, employee)
+
+
 def employee_summary(data, code):
     employee, profile, department = employee_details(data, code)
     return {"code": code, "name": " ".join(aw.name(employee).split()) or code, "designation": employee.get("designation"),
             "department": department.get("name"), "employee_type": employee.get("employee_type"),
             "join_date": employee.get("join_date"), "status": employee.get("status"),
             "pan": mask(profile.get("pan_number")), "bank": f"{profile.get('bank_name') or ''} {mask(profile.get('bank_account_number'))}".strip(),
-            "net_monthly": str(amount(profile.get("net_monthly")))}
+            "net_monthly": str(amount(profile.get("net_monthly")) or amount(salary_structure(data, code)["net_monthly"])),
+            "staff_kind": staff_kind(data, employee)}
 
 
 def employee_payslips(data, code, published_only=True):
@@ -169,7 +186,8 @@ def list_employees(request: Request, user=Depends(current_user)):
         counts[slip.get("employee_code")] = counts.get(slip.get("employee_code"), 0) + 1
     items = [{**employee_summary(data, e["code"]), "payslips": counts.get(e["code"], 0)}
              for e in aw.rows(data, "employees") if e.get("status", "active") == "active"]
-    return {"items": sorted(items, key=lambda r: r["name"]), "can_manage": True}
+    return {"items": sorted(items, key=lambda r: r["name"]), "can_manage": True, "runs": run_summaries(data),
+            "can_run": can_run(data, user), "can_publish_tax": can_publish_tax(data, user)}
 
 
 @router.get("/{employee_code}")
@@ -194,110 +212,311 @@ def college_header(data, employee):
 
 
 def payslip_pdf(data, slip):
-    """A4 payslip: college header, employee details, earnings / deductions table and net pay."""
-    from reportlab.lib.colors import HexColor, white
-    from reportlab.lib.pagesizes import A4
-    from reportlab.pdfgen.canvas import Canvas
+    """A4 payslip with the college logo (layout in hr_workspace / pdf_kit)."""
+    from .hr_workspace import payslip_document
+    return payslip_document(data, slip)
 
-    view = payslip_view(data, slip)
-    employee, profile, department = employee_details(data, slip["employee_code"])
-    college, campus, address = college_header(data, employee)
-    ink, muted, line, band, accent = HexColor("#1f2937"), HexColor("#6b7280"), HexColor("#d9dee5"), HexColor("#f3f6f8"), HexColor("#365b45")
-    out = io.BytesIO()
-    c = Canvas(out, pagesize=A4)
-    width, height = A4
-    left, right = 40, width - 40
-    c.setTitle(f"Payslip {view['period']} - {aw.name(employee)}")
 
-    # Header band.
-    c.setFillColor(accent)
-    c.rect(0, height - 92, width, 92, stroke=0, fill=1)
-    c.setFillColor(white)
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(left, height - 44, college)
-    c.setFont("Helvetica", 9.5)
-    c.drawString(left, height - 60, " · ".join(x for x in (campus, address) if x)[:110])
-    c.setFont("Helvetica-Bold", 13)
-    c.drawRightString(right, height - 44, "PAYSLIP")
-    c.setFont("Helvetica", 10)
-    c.drawRightString(right, height - 60, view["period"])
+# ---- Payroll runs -------------------------------------------------------------------------
+EARNING = {"earning", "earnings", "allowance"}
+DEDUCTION = {"deduction", "deductions"}
 
-    # Employee details (two columns).
-    y = height - 122
-    c.setFillColor(ink)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(left, y, "Employee details")
-    y -= 8
-    c.setStrokeColor(line)
-    c.line(left, y, right, y)
-    details = [
-        ("Employee name", " ".join(aw.name(employee).split())), ("Employee ID", employee.get("code", "")),
-        ("Designation", employee.get("designation") or "—"), ("Department", department.get("name") or "—"),
-        ("Date of joining", str(employee.get("join_date") or "—")[:10]), ("Pay period", view["period"]),
-        ("PAN", mask(profile.get("pan_number")) or "—"),
-        ("Bank account", f"{profile.get('bank_name') or ''} {mask(profile.get('bank_account_number'))}".strip() or "—"),
-    ]
-    y -= 18
-    for i, (label, value) in enumerate(details):
-        x = left if i % 2 == 0 else width / 2 + 10
-        c.setFont("Helvetica", 9)
-        c.setFillColor(muted)
-        c.drawString(x, y, label)
-        c.setFont("Helvetica-Bold", 10)
-        c.setFillColor(ink)
-        c.drawString(x + 100, y, str(value)[:38])
-        if i % 2 == 1:
-            y -= 18
 
-    # Earnings | Deductions table.
-    y -= 14
-    col = (right - left) / 2
-    c.setFillColor(band)
-    c.rect(left, y - 6, right - left, 22, stroke=0, fill=1)
-    c.setFillColor(ink)
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(left + 8, y + 1, "Earnings")
-    c.drawRightString(left + col - 8, y + 1, "Amount (INR)")
-    c.drawString(left + col + 8, y + 1, "Deductions")
-    c.drawRightString(right - 8, y + 1, "Amount (INR)")
-    rows = max(len(view["earnings"]), len(view["deductions"]), 1)
-    c.setFont("Helvetica", 10)
-    for i in range(rows):
-        y -= 20
-        if i < len(view["earnings"]):
-            c.drawString(left + 8, y, view["earnings"][i]["component"][:34])
-            c.drawRightString(left + col - 8, y, inr(view["earnings"][i]["amount"]))
-        if i < len(view["deductions"]):
-            c.drawString(left + col + 8, y, view["deductions"][i]["component"][:34])
-            c.drawRightString(right - 8, y, inr(view["deductions"][i]["amount"]))
-    y -= 14
-    c.setStrokeColor(line)
-    c.line(left, y, right, y)
-    c.line(left + col, y, left + col, y + 20 * rows + 34)
-    y -= 16
-    c.setFont("Helvetica-Bold", 10)
-    c.drawString(left + 8, y, "Gross earnings")
-    c.drawRightString(left + col - 8, y, inr(view["gross_amount"]))
-    c.drawString(left + col + 8, y, "Total deductions")
-    c.drawRightString(right - 8, y, inr(view["deduction_amount"]))
+def can_run(data, user):
+    return not aw.personal(user) and has_permission(data, user, "payroll_runs", "create")
 
-    # Net pay.
-    y -= 54
-    c.setFillColor(HexColor("#e8efe2"))
-    c.roundRect(left, y - 18, right - left, 50, 8, stroke=0, fill=1)
-    c.setFillColor(accent)
-    c.setFont("Helvetica-Bold", 12)
-    c.drawString(left + 14, y + 12, "Net pay")
-    c.setFont("Helvetica-Bold", 16)
-    c.drawRightString(right - 14, y + 10, f"INR {inr(view['net_amount'])}")
-    c.setFont("Helvetica", 9)
-    c.setFillColor(ink)
-    c.drawString(left + 14, y - 6, view["net_in_words"][:110])
 
-    # Footer.
-    c.setFont("Helvetica", 8)
-    c.setFillColor(muted)
-    c.drawString(left, 44, "This is a computer-generated payslip and does not require a signature.")
-    c.drawRightString(right, 44, f"Payslip {slip['code']}")
-    c.save()
-    return out.getvalue()
+def can_publish_tax(data, user):
+    return not aw.personal(user) and has_permission(data, user, "employee_tax_documents", "create")
+
+
+def month_bounds(month: str):
+    start = date.fromisoformat(month + "-01")
+    end = (start.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+    return start.isoformat(), end.isoformat()
+
+
+def run_summaries(data):
+    records = data["records"]
+    counts, net = {}, {}
+    for slip in aw.rows(data, "payslips"):
+        run = slip.get("payroll_run_code")
+        counts[run] = counts.get(run, 0) + 1
+        net[run] = net.get(run, Decimal("0.00")) + amount(slip.get("net_amount"))
+    items = [{"code": r["code"], "period": period_label(r), "period_start": r.get("period_start"),
+              "campus": records.get("campuses", {}).get(r.get("campus_code"), {}).get("name") or r.get("campus_code"),
+              "status": r.get("status"), "payslips": counts.get(r["code"], 0), "net_total": str(net.get(r["code"], Decimal("0.00")))}
+             for r in aw.rows(data, "payroll_runs")]
+    return sorted(items, key=lambda r: str(r.get("period_start") or ""), reverse=True)
+
+
+def components_for(data, employee_code, start, end):
+    return [c for c in aw.rows(data, "employee_salary_components") if c.get("employee_code") == employee_code
+            and str(c.get("effective_from") or "")[:10] <= end and (not c.get("effective_to") or str(c["effective_to"])[:10] >= start)]
+
+
+def calculate_run(data, run):
+    """Payslips for every active employee of the run's campus. Returns (created, skipped)."""
+    if run.get("status") not in {"draft", "pending"}:
+        raise HTTPException(409, "This payroll run is already calculated")
+    if any(p.get("payroll_run_code") == run["code"] for p in aw.rows(data, "payslips")):
+        raise HTTPException(409, "Payslips were already calculated for this run")
+    start, end = str(run["period_start"])[:10], str(run["period_end"])[:10]
+    records = data["records"]
+    created, skipped = 0, []
+    for employee in aw.rows(data, "employees"):
+        if employee.get("campus_code") != run.get("campus_code") or employee.get("status", "active") != "active":
+            continue
+        if str(employee.get("join_date") or "")[:10] > end:
+            continue
+        label = " ".join(aw.name(employee).split()) or employee["code"]
+        components = components_for(data, employee["code"], start, end)
+        if not components:
+            skipped.append({"code": employee["code"], "name": label, "reason": "No salary structure"})
+            continue
+        adjustments = [a for a in aw.rows(data, "payroll_adjustments") if a.get("employee_code") == employee["code"]
+                       and a.get("payroll_run_code") == run["code"] and a.get("status") == "approved"]
+        lines = components + adjustments
+        gross = sum((amount(c["amount"]) for c in lines if c.get("component_type") in EARNING), Decimal("0.00"))
+        less = sum((amount(c["amount"]) for c in lines if c.get("component_type") in DEDUCTION), Decimal("0.00"))
+        if less > gross:
+            skipped.append({"code": employee["code"], "name": label, "reason": "Deductions exceed earnings"})
+            continue
+        slip_code = new_code("SLIP")
+        records.setdefault("payslips", {})[slip_code] = {
+            "code": slip_code, "payroll_run_code": run["code"], "employee_code": employee["code"],
+            "gross_amount": str(gross), "deduction_amount": str(less), "net_amount": str(gross - less)}
+        for line in lines:
+            line_code = new_code("LINE")
+            records.setdefault("payslip_lines", {})[line_code] = {
+                "code": line_code, "payslip_code": slip_code, "component": line["component"],
+                "component_type": "deduction" if line.get("component_type") in DEDUCTION else "earning",
+                "amount": str(amount(line["amount"]))}
+        created += 1
+    run["status"] = "calculated"
+    return created, skipped
+
+
+def run_payroll(data, month, campus_code=None, publish=True, actor=None):
+    """Create (or continue) the month's payroll run for each campus with active staff."""
+    start, end = month_bounds(month)
+    campuses = sorted({e.get("campus_code") for e in aw.rows(data, "employees")
+                       if e.get("status", "active") == "active" and e.get("campus_code")})
+    if campus_code:
+        campuses = [c for c in campuses if c == campus_code]
+    if not campuses:
+        raise HTTPException(409, "No active employees to pay")
+    results = []
+    for campus in campuses:
+        run = next((r for r in aw.rows(data, "payroll_runs") if r.get("campus_code") == campus
+                    and str(r.get("period_start") or "")[:10] == start), None)
+        fresh = not run
+        if fresh:
+            code = new_code("PAYRUN")
+            run = data["records"].setdefault("payroll_runs", {})[code] = {
+                "code": code, "campus_code": campus, "period_start": start, "period_end": end, "status": "draft"}
+        created, skipped = 0, []
+        if run["status"] in {"draft", "pending"}:
+            created, skipped = calculate_run(data, run)
+        if fresh and not created:
+            # Nobody at this campus could be paid: leave no empty run behind.
+            del data["records"]["payroll_runs"][run["code"]]
+            if skipped:
+                results.append({"code": None, "campus": data["records"].get("campuses", {}).get(campus, {}).get("name") or campus,
+                                "status": "not_run", "payslips": 0, "skipped": skipped})
+            continue
+        if publish and run["status"] == "calculated":
+            run["status"] = "published"
+        audit(data, actor, "payroll_run", "payroll_runs", run["code"])
+        results.append({"code": run["code"], "campus": data["records"].get("campuses", {}).get(campus, {}).get("name") or campus,
+                        "status": run["status"], "payslips": created, "skipped": skipped})
+    return {"period": period_label({"period_start": start}), "runs": results}
+
+
+class RunInput(StrictModel):
+    month: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+    campus_code: str | None = Field(default=None, max_length=60)
+    publish: bool = True
+
+
+@router.post("/runs")
+def create_run(body: RunInput, request: Request, user=Depends(current_user)):
+    with request.app.state.store.transaction() as data:
+        if not can_run(data, user):
+            raise HTTPException(403, "Running payroll is not assigned to this role")
+        if body.publish and not has_permission(data, user, "payroll_runs", "approve"):
+            raise HTTPException(403, "Publishing payroll is not assigned to this role")
+        return run_payroll(data, body.month, body.campus_code, body.publish, user.get("code"))
+
+
+# ---- Form 16 ------------------------------------------------------------------------------
+def fy_bounds(financial_year: str):
+    first, second = (int(x) for x in financial_year.split("-"))
+    if second != first + 1:
+        raise HTTPException(422, "Financial year must be like 2025-2026")
+    return f"{first}-04-01", f"{second}-03-31"
+
+
+def is_tax(component):
+    return bool(re.search(r"\b(tds|income ?tax)\b", str(component or ""), re.I))
+
+
+def form16_statement(data, employee_code, financial_year):
+    start, end = fy_bounds(financial_year)
+    slips = [s for s in employee_payslips(data, employee_code, published_only=True)
+             if start <= str(s.get("period_start") or "")[:10] <= end]
+    if not slips:
+        raise HTTPException(409, f"No published payslips in financial year {financial_year}")
+    earnings, deductions = {}, {}
+    for slip in slips:
+        for line in slip["earnings"]:
+            earnings[line["component"]] = earnings.get(line["component"], Decimal("0.00")) + amount(line["amount"])
+        for line in slip["deductions"]:
+            deductions[line["component"]] = deductions.get(line["component"], Decimal("0.00")) + amount(line["amount"])
+    gross = sum(earnings.values(), Decimal("0.00"))
+    tax = sum((v for k, v in deductions.items() if is_tax(k)), Decimal("0.00"))
+    other = sum((v for k, v in deductions.items() if not is_tax(k)), Decimal("0.00"))
+    months = sorted(slips, key=lambda s: str(s.get("period_start") or ""))
+    return {"financial_year": financial_year, "assessment_year": f"{int(financial_year[:4]) + 1}-{int(financial_year[:4]) + 2}",
+            "period_from": str(months[0]["period_start"])[:10], "period_to": str(months[-1]["period_end"] or end)[:10],
+            "months": len(slips), "earnings": earnings, "deductions": deductions, "gross": gross,
+            "tax": tax, "other_deductions": other, "net": gross - tax - other,
+            "quarters": quarter_tax(months)}
+
+
+def quarter_tax(slips):
+    quarters = {"Q1 (Apr–Jun)": Decimal("0.00"), "Q2 (Jul–Sep)": Decimal("0.00"),
+                "Q3 (Oct–Dec)": Decimal("0.00"), "Q4 (Jan–Mar)": Decimal("0.00")}
+    keys = list(quarters)
+    for slip in slips:
+        month = int(str(slip["period_start"])[5:7])
+        index = 3 if month <= 3 else (month - 4) // 3
+        quarters[keys[index]] += sum((amount(l["amount"]) for l in slip["deductions"] if is_tax(l["component"])), Decimal("0.00"))
+    return quarters
+
+
+def form16_pdf(data, employee_code, financial_year):
+    """Form 16 Part B: employer and employee details, salary paid, deductions and tax deducted."""
+    from .hr_workspace import person_block
+    from .pdf_kit import Document
+
+    st = form16_statement(data, employee_code, financial_year)
+    employee = data["records"]["employees"][employee_code]
+    doc = Document(data, "FORM 16 — PART B", f"FY {financial_year} · AY {st['assessment_year']}",
+                   campus_code=employee.get("campus_code"),
+                   reference="Certificate under section 203 of the Income-tax Act, 1961")
+    person_block(doc, data, employee_code, [("Period of employment", f"{st['period_from']} to {st['period_to']}"),
+                                            ("Months paid", st["months"])])
+    doc.section("1. Salary paid during the year")
+    doc.table(["Component", "Amount (INR)"], [[k, inr(v)] for k, v in sorted(st["earnings"].items())],
+              widths=[4, 1.5], align="LR", totals=["Gross salary", inr(st["gross"])])
+    doc.section("2. Deductions from salary")
+    doc.table(["Deduction", "Amount (INR)"], [[k, inr(v)] for k, v in sorted(st["deductions"].items()) if not is_tax(k)],
+              widths=[4, 1.5], align="LR", totals=["Total deductions (other than tax)", inr(st["other_deductions"])])
+    doc.section("3. Tax deducted at source")
+    doc.table(["Quarter", "TDS (INR)"], [[q, inr(v)] for q, v in st["quarters"].items()],
+              widths=[4, 1.5], align="LR", totals=["Total tax deducted", inr(st["tax"])])
+    doc.highlight("Net salary paid", f"INR {inr(st['net'])}", words(st["net"]))
+    doc.note("Prepared from the payslips published for this financial year. Part A (TDS deposited, TAN and challan "
+             "details) is issued from the TRACES portal.")
+    doc.signature("Employee", "Employer / authorised signatory")
+    return doc.finish(), st
+
+
+def issue_form16(data, files, employee_code, financial_year, actor_user=None, actor_employee=None):
+    """Store the generated Form 16 PDF and record it as the employee's tax document (new revision)."""
+    from app.modules.documents.files.api import folder_segment, person_folder
+
+    if employee_code not in data["records"].get("employees", {}):
+        raise HTTPException(404, "Employee not found")
+    if not actor_employee:
+        raise HTTPException(422, "Sign in with an employee account to publish Form 16")
+    raw, st = form16_pdf(data, employee_code, financial_year)
+    key = f"{person_folder(data, 'form_16', employee_code)}/{folder_segment('form_16')}/{new_code('FILE')}.pdf"
+    table = data["records"].setdefault("employee_tax_documents", {})
+    revision = 1 + max((r.get("revision") or 0 for r in table.values() if r.get("employee_code") == employee_code
+                        and r.get("financial_year") == financial_year and r.get("document_type") == "form_16"), default=0)
+    code = new_code("TAX")
+    employee = data["records"]["employees"][employee_code]
+    filename = f"Form16-{financial_year}-{folder_segment(employee.get('employee_number') or employee_code)}.pdf"
+    stored = files.metadata(key) if hasattr(files, "metadata") else {"storage_provider": "local"}
+    sha = hashlib.sha256(raw).hexdigest()
+    record = {"code": code, "employee_code": employee_code, "financial_year": financial_year, "document_type": "form_16",
+              "revision": revision, "storage_key": key, "sha256": sha,
+              "published_by_employee_code": actor_employee, "published_at": now(), "original_filename": filename,
+              "mime_type": "application/pdf", "size_bytes": len(raw), "document_url": f"/api/v1/documents/tax-document/{code}/view",
+              "uploaded_at": now(), "uploaded_by_user_code": actor_user, "generated": True, **stored}
+    files.put(key, raw, "application/pdf")
+    table[code] = record
+    data["records"].setdefault("file_storage_objects", {})[code] = {
+        **{k: record.get(k) for k in ("original_filename", "mime_type", "size_bytes", "sha256", "document_url", "uploaded_at",
+                                      "storage_provider", "s3_bucket", "s3_key", "s3_uri")},
+        "code": code, "owner_type": "employee", "owner_code": employee_code, "document_table": "employee_tax_documents",
+        "document_code": code, "storage_key": key, "uploaded_by_user_code": actor_user, "deleted_at": None}
+    audit(data, actor_user, "form16_generate", "employee_tax_documents", code)
+    return key, {k: v for k, v in record.items() if k != "storage_key"}
+
+
+class Form16Input(StrictModel):
+    financial_year: str = Field(pattern=r"^\d{4}-\d{4}$")
+
+
+@router.post("/{employee_code}/form16", status_code=201)
+def generate_form16(employee_code: str, body: Form16Input, request: Request, user=Depends(current_user)):
+    files = request.app.state.files
+    key = None
+    try:
+        with request.app.state.store.transaction() as data:
+            if not can_publish_tax(data, user):
+                raise HTTPException(403, "Publishing Form 16 is not assigned to this role")
+            key, record = issue_form16(data, files, employee_code, body.financial_year, user.get("code"),
+                                       user.get("person_code") if user.get("person_type") == "employee" else None)
+            return record
+    except Exception:
+        if key:
+            try:
+                files.delete(key)
+            except Exception:
+                pass
+        raise
+
+
+@router.get("/{employee_code}/tax-documents")
+def employee_tax_documents(employee_code: str, request: Request, user=Depends(current_user)):
+    data = request.app.state.store.snapshot()
+    if not can_manage(data, user) and not (user.get("person_type") == "employee" and user.get("person_code") == employee_code):
+        raise HTTPException(404, "Employee not found")
+    items = [{k: v for k, v in r.items() if k != "storage_key"} for r in aw.rows(data, "employee_tax_documents")
+             if r.get("employee_code") == employee_code and not r.get("deleted_at")]
+    return sorted(items, key=lambda r: (str(r.get("financial_year")), r.get("revision") or 0), reverse=True)
+
+
+class PaidInput(StrictModel):
+    paid_on: date | None = None
+    payment_mode: str = Field(default="bank_transfer", pattern="^(bank_transfer|cheque|cash|upi)$")
+
+
+def mark_paid(data, run, paid_on, mode="bank_transfer"):
+    """Every payslip of the run gets a payment reference and receipt number."""
+    if run.get("status") not in PUBLISHED:
+        raise HTTPException(409, "Publish the payroll before marking it paid")
+    period = str(run.get("period_start") or "")[:7].replace("-", "")
+    for i, slip in enumerate(sorted((s for s in aw.rows(data, "payslips") if s.get("payroll_run_code") == run["code"]),
+                                    key=lambda s: s.get("employee_code") or ""), 1):
+        if not slip.get("paid_on"):
+            slip.update(paid_on=str(paid_on), payment_mode=mode, receipt_number=f"SAL-{period}-{i:04d}",
+                        transaction_reference=f"NEFT{period}{int(hashlib.sha256(slip['code'].encode()).hexdigest()[:8], 16) % 10**8:08d}")
+    run.update(status="paid", paid_on=str(paid_on))
+
+
+@router.post("/runs/{code}/paid")
+def run_paid(code: str, body: PaidInput, request: Request, user=Depends(current_user)):
+    with request.app.state.store.transaction() as data:
+        if not has_permission(data, user, "payroll_runs", "approve"):
+            raise HTTPException(403, "Paying payroll is not assigned to this role")
+        run = data["records"].get("payroll_runs", {}).get(code)
+        if not run:
+            raise HTTPException(404, "Payroll run not found")
+        mark_paid(data, run, body.paid_on or date.today(), body.payment_mode)
+        audit(data, user.get("code"), "payroll_paid", "payroll_runs", code)
+        return {"code": code, "status": run["status"]}

@@ -1,0 +1,133 @@
+/* Cash ledger & receipts register (dashboard template colours). */
+.cl-panel {
+  padding: 18px;
+  margin: 16px 0;
+  display: grid;
+  gap: 14px;
+}
+.cl-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cl-head h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.cl-head p {
+  margin: 2px 0 0;
+  color: #756b60;
+  font-size: 13px;
+}
+.cl-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cl-controls label {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  color: #756b60;
+}
+.cl-controls input {
+  height: 34px;
+  border: 1px solid #e0d6c6;
+  border-radius: 10px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 13px;
+  color: #251e18;
+  background: #fff;
+}
+.cl-tabs {
+  display: inline-flex;
+  border: 1px solid #e9dfcf;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.cl-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #756b60;
+  cursor: pointer;
+}
+.cl-tabs button.on {
+  background: #a46a27;
+  color: #fff;
+  font-weight: 700;
+}
+.cl-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.cl-tiles > div {
+  border: 1px solid #e9dfcf;
+  background: #fcf9f3;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+}
+.cl-tiles dt {
+  font-size: 11.5px;
+  color: #756b60;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.cl-tiles dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #251e18;
+}
+.cl-tiles small {
+  color: #756b60;
+  font-size: 12px;
+}
+.cl-tiles .cl-strong {
+  background: #7a4a1c;
+  border-color: #7a4a1c;
+}
+.cl-tiles .cl-strong dt,
+.cl-tiles .cl-strong dd,
+.cl-tiles .cl-strong small {
+  color: #fff;
+}
+.cl-modes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cl-modes li {
+  display: grid;
+  border: 1px solid #e9dfcf;
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 12.5px;
+}
+.cl-modes span {
+  color: #756b60;
+}
+.cl-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cl-entries summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 0;
+}

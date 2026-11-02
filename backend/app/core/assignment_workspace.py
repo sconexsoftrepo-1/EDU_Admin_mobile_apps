@@ -481,6 +481,26 @@ class FileStart(StrictModel):
     assessment_upload: bool = False
     event_upload: bool = False
     event_code: str | None = None
+    chat_thread_code: str | None = None
+
+
+AUDIO = {".m4a", ".aac", ".mp3", ".ogg", ".oga", ".opus", ".webm", ".wav", ".mp4"}
+
+
+def sniff_audio(raw):
+    if raw[4:8] == b"ftyp":
+        return "audio/mp4"
+    if raw.startswith(b"\x1aE\xdf\xa3"):
+        return "audio/webm"
+    if raw.startswith(b"OggS"):
+        return "audio/ogg"
+    if raw.startswith(b"RIFF") and raw[8:12] == b"WAVE":
+        return "audio/wav"
+    if raw.startswith(b"ID3") or raw[:2] in {b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"}:
+        return "audio/mpeg"
+    if raw[:2] in {b"\xff\xf1", b"\xff\xf9"}:
+        return "audio/aac"
+    return None
 
 
 class FileChunk(StrictModel):
@@ -491,9 +511,12 @@ class FileChunk(StrictModel):
 @router.post("/files/start", status_code=201)
 def start_file(body: FileStart, request: Request, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
-        if sum((body.assessment_upload, bool(body.assignment_code), bool(body.syllabus_code), body.resource_upload, body.event_upload, bool(body.event_code))) > 1:
+        if sum((body.assessment_upload, bool(body.assignment_code), bool(body.syllabus_code), body.resource_upload, body.event_upload, bool(body.event_code), bool(body.chat_thread_code))) > 1:
             raise HTTPException(422, "Choose one upload destination")
-        if body.assessment_upload:
+        if body.chat_thread_code:
+            from .chat_workspace import ensure_member_for_upload
+            ensure_member_for_upload(data, user, body.chat_thread_code)
+        elif body.assessment_upload:
             from .assessment_workspace import require
             require(data, user, "create")
         elif body.event_upload:
@@ -521,18 +544,21 @@ def start_file(body: FileStart, request: Request, user=Depends(current_user)):
         else:
             staff(data, user, "create")
         filename = Path(body.filename.replace("\\", "/")).name
-        if Path(filename).suffix.lower() not in {".pdf", ".png", ".jpg", ".jpeg", ".webp"}:
-            raise HTTPException(422, "Choose PDF, JPG, PNG or WebP files")
+        allowed = {".pdf", ".png", ".jpg", ".jpeg", ".webp"} | (AUDIO if body.chat_thread_code else set())
+        if Path(filename).suffix.lower() not in allowed:
+            raise HTTPException(422, "Choose PDF, JPG, PNG or WebP files" + (" or a voice note" if body.chat_thread_code else ""))
         code = new_code("AFILE")
         docs(data, "files")[code] = {"code": code, "owner": user["code"], "filename": filename,
             "size_bytes": body.size_bytes, "assignment_code": body.assignment_code,
-            "syllabus_code": body.syllabus_code, "event_code": body.event_code,
+            "syllabus_code": body.syllabus_code, "event_code": body.event_code, "chat_thread_code": body.chat_thread_code,
             "assessment_upload": body.assessment_upload, "resource_upload": body.resource_upload, "event_upload": body.event_upload,
             "parts": {}, "ready": False, "created_at": now()}
         return {"code": code, "chunk_size": CHUNK_SIZE}
 
 
-EXTENSIONS = {"application/pdf": ".pdf", "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+EXTENSIONS = {"application/pdf": ".pdf", "image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp",
+              "audio/mp4": ".m4a", "audio/webm": ".webm", "audio/ogg": ".ogg", "audio/wav": ".wav", "audio/mpeg": ".mp3",
+              "audio/aac": ".aac"}
 
 
 def upload_key(data, user, record, mime):
@@ -543,6 +569,8 @@ def upload_key(data, user, record, mime):
     name = new_code("FILE") + EXTENSIONS.get(mime, "")
     if record.get("event_upload") or record.get("event_code"):
         return f"College/Calendar/{folder_segment(record.get('event_code') or record['code'])}/{name}"
+    if record.get("chat_thread_code"):
+        return f"Chats/{folder_segment(record['chat_thread_code'])}/{name}"
     kind = ("Assessments" if record.get("assessment_upload")
             else "Syllabus" if record.get("resource_upload") or record.get("syllabus_code")
             else "Assignment_Submissions" if user.get("person_type") == "student"
@@ -603,6 +631,8 @@ def finish_file(code: str, request: Request, user=Depends(current_user)):
         mime = "application/pdf" if raw.startswith(b"%PDF-") else "image/png" if raw.startswith(b"\x89PNG\r\n\x1a\n") else "image/jpeg" if raw.startswith(b"\xff\xd8\xff") else "image/webp" if raw.startswith(b"RIFF") and raw[8:12] == b"WEBP" else None
         if record.get("event_upload") or record.get("event_code"):
             mime = mime if mime in {"image/png", "image/jpeg", "image/webp"} else None
+        if record.get("chat_thread_code") and not mime:
+            mime = sniff_audio(raw)
         if len(raw) != record["size_bytes"] or not mime:
             raise HTTPException(422, "Upload a valid PDF or supported image file")
         key = upload_key(data, user, record, mime)
@@ -628,6 +658,9 @@ def view_file(code: str, request: Request, user=Depends(current_user)):
     if not record or not record.get("ready"):
         raise HTTPException(404, "File not found")
     if record["owner"] != user["code"]:
+        if record.get("chat_thread_code"):
+            from .chat_workspace import attachment
+            return attachment(code, request, user)
         if record.get("assessment_code"):
             from .assessment_workspace import authorize, get
             assessment = get(data, record["assessment_code"])
