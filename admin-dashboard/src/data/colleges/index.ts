@@ -137,6 +137,7 @@ export const modules = [
   "student-enrollment",
   "teaching-staff",
   "non-teaching-staff",
+  "labs",
   "daily-labour",
   "course-setup",
 ];
@@ -184,6 +185,7 @@ export const permissions: Record<Role, string[]> = {
     "student-enrollment",
     "teaching-staff",
     "non-teaching-staff",
+    "labs",
     "daily-labour",
     "imports",
   ],

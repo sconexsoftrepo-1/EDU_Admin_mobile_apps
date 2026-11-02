@@ -525,186 +525,222 @@ class CampusRecord extends StatelessWidget {
       'profile',
     }.contains(screen);
     final audit = screen == 'activity';
+    // One pastel tint per screen, so each module keeps its colour across lists.
+    final tint =
+        EduTints.all[screen.codeUnits.fold<int>(0, (a, b) => a + b) %
+            EduTints.all.length];
+    final ink = EduTints.ink(tint);
     return EduPress(
-      child: Card(
-        child: InkWell(
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
-          onTap: onTap ?? () => showDetails(context),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (directory)
-                      CircleAvatar(
-                        backgroundColor: collegeCard,
-                        foregroundColor: collegePine,
-                        child: Text(
-                          title.isEmpty
-                              ? '?'
-                              : title.substring(0, 1).toUpperCase(),
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: audit ? const Color(0xffe1e7d9) : collegeCard,
-                          borderRadius: BorderRadius.circular(audit ? 24 : 12),
-                        ),
-                        child: EduModuleIcon(
-                          icon: moduleIcon(screen),
-                          size: 21,
-                        ),
-                      ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  fontSize: 15,
-                                  fontWeight: unread
-                                      ? FontWeight.w800
-                                      : FontWeight.w600,
-                                ),
+          boxShadow: EduWorkspace.shadow,
+        ),
+        child: Material(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(
+              color: unread
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: .45)
+                  : EduWorkspace.border,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap ?? () => showDetails(context),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (directory)
+                        CircleAvatar(
+                          radius: 21,
+                          backgroundColor: tint,
+                          foregroundColor: ink,
+                          child: Text(
+                            title.trim().isEmpty
+                                ? '?'
+                                : title
+                                      .trim()
+                                      .split(RegExp(r'\s+'))
+                                      .where((w) => w.isNotEmpty)
+                                      .take(2)
+                                      .map((w) => w[0].toUpperCase())
+                                      .join(),
+                            style: const TextStyle(fontWeight: FontWeight.w800),
                           ),
-                          if (date != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                friendlyValue(date),
+                        )
+                      else
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: tint,
+                            borderRadius: BorderRadius.circular(
+                              audit ? 21 : 12,
+                            ),
+                          ),
+                          child: Icon(moduleIcon(screen), size: 21, color: ink),
+                        ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontSize: 15,
+                                    fontWeight: unread
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                                  ),
+                            ),
+                            if (date != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  friendlyValue(date),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                            if (directory)
+                              Text(
+                                '${record['admission_number'] ?? record['employee_type'] ?? record['email'] ?? ''}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
-                            ),
-                          if (directory)
+                            if (audit)
+                              Text(
+                                '${record['action'] ?? ''} ${record['resource'] ?? ''}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      if (unread)
+                        const Badge()
+                      else
+                        const Icon(
+                          Icons.chevron_right,
+                          size: 18,
+                          color: collegeMuted,
+                        ),
+                    ],
+                  ),
+                  if (detail != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        '$detail',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: collegeMuted,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  if (record['start_time'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          const Icon(
+                            Icons.schedule_outlined,
+                            size: 17,
+                            color: collegePine,
+                          ),
+                          Text(
+                            '${record['start_time']} – ${record['end_time'] ?? ''}',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          if (periodDuration(record) != null)
                             Text(
-                              '${record['admission_number'] ?? record['employee_type'] ?? record['email'] ?? ''}',
-                              style: Theme.of(context).textTheme.bodySmall,
+                              periodDuration(record)!,
+                              style: const TextStyle(color: collegeMuted),
                             ),
-                          if (audit)
+                          if (record['section_code'] != null)
                             Text(
-                              '${record['action'] ?? ''} ${record['resource'] ?? ''}',
-                              style: Theme.of(context).textTheme.bodySmall,
+                              '${record['section_code']}',
+                              style: const TextStyle(color: collegeMuted),
                             ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    if (unread)
-                      const Badge()
-                    else
-                      const Icon(
-                        Icons.chevron_right,
-                        size: 18,
-                        color: collegeMuted,
+                  if (screen == 'results' && record['marks'] != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        'Marks  ${record['marks']}',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
-                  ],
-                ),
-                if (detail != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
-                      '$detail',
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: collegeMuted, height: 1.5),
                     ),
-                  ),
-                if (record['start_time'] != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        const Icon(
-                          Icons.schedule_outlined,
-                          size: 17,
-                          color: collegePine,
-                        ),
-                        Text(
-                          '${record['start_time']} – ${record['end_time'] ?? ''}',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        if (periodDuration(record) != null)
-                          Text(
-                            periodDuration(record)!,
-                            style: const TextStyle(color: collegeMuted),
-                          ),
-                        if (record['section_code'] != null)
-                          Text(
-                            '${record['section_code']}',
-                            style: const TextStyle(color: collegeMuted),
-                          ),
-                      ],
+                  if (screen == 'assignments' &&
+                      record['my_submission'] != null)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: StatusBadge(status: 'submitted'),
                     ),
-                  ),
-                if (screen == 'results' && record['marks'] != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
-                      'Marks  ${record['marks']}',
-                      style: Theme.of(context).textTheme.titleLarge,
+                  if (amount != null || status != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          if (amount != null)
+                            Text(
+                              money(amount),
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                          if (status != null)
+                            StatusBadge(status: status.toString()),
+                        ],
+                      ),
                     ),
-                  ),
-                if (screen == 'assignments' && record['my_submission'] != null)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 10),
-                    child: StatusBadge(status: 'submitted'),
-                  ),
-                if (amount != null || status != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        if (amount != null)
-                          Text(
-                            money(amount),
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        if (status != null)
-                          StatusBadge(status: status.toString()),
-                      ],
+                  if (onDownload != null || onRead != null || onPrimary != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (onPrimary != null)
+                            FilledButton.tonal(
+                              onPressed: onPrimary,
+                              child: Text(primaryLabel ?? 'Continue'),
+                            ),
+                          if (onRead != null)
+                            TextButton.icon(
+                              onPressed: onRead,
+                              icon: const Icon(Icons.done_all, size: 18),
+                              label: const Text('Mark as read'),
+                            ),
+                          if (onDownload != null)
+                            OutlinedButton.icon(
+                              onPressed: onDownload,
+                              icon: const Icon(
+                                Icons.download_outlined,
+                                size: 18,
+                              ),
+                              label: const Text('Download / share PDF'),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                if (onDownload != null || onRead != null || onPrimary != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (onPrimary != null)
-                          FilledButton.tonal(
-                            onPressed: onPrimary,
-                            child: Text(primaryLabel ?? 'Continue'),
-                          ),
-                        if (onRead != null)
-                          TextButton.icon(
-                            onPressed: onRead,
-                            icon: const Icon(Icons.done_all, size: 18),
-                            label: const Text('Mark as read'),
-                          ),
-                        if (onDownload != null)
-                          OutlinedButton.icon(
-                            onPressed: onDownload,
-                            icon: const Icon(Icons.download_outlined, size: 18),
-                            label: const Text('Download / share PDF'),
-                          ),
-                      ],
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

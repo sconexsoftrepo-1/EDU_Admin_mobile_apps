@@ -88,15 +88,28 @@ void main() {
     };
   }
 
-  Future<CollegeApi> api(bool personal, List<Json> saves) async {
+  Future<CollegeApi> api(
+    bool personal,
+    List<Json> saves, {
+    bool onLeave = false,
+  }) async {
     final api = CollegeApi(
       baseUrl: 'http://localhost',
       clientId: personal ? 'student-mobile' : 'teacher-mobile',
       httpClient: MockClient((request) async {
         final body = request.url.path.endsWith('/options')
             ? options(personal)
-            : payload();
-        if (request.method == 'PUT') {
+            : {
+                ...payload(),
+                if (onLeave) ...{
+                  // ST1 has approved leave today and no register exists yet.
+                  'registers': [],
+                  'leave_dates': {
+                    'ST1': [payload()['date']],
+                  },
+                },
+              };
+        if (request.method == 'PUT' || request.method == 'POST') {
           saves.add(Map<String, dynamic>.from(jsonDecode(request.body) as Map));
         }
         return http.Response(
@@ -189,7 +202,17 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Mark all present'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save attendance'));
+      // Tapping a student's tile switches them to absent.
+      await tester.tap(find.byKey(const ValueKey('att-ST1')));
+      await tester.pumpAndSettle();
+      expect(find.text('Absent'), findsWidgets);
+      final save = find.textContaining('Save attendance');
+      await tester.scrollUntilVisible(
+        save,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(save);
       await tester.pumpAndSettle();
       expect(saves, hasLength(1));
       expect(saves.single['program_code'], 'P1');
@@ -197,9 +220,57 @@ void main() {
       expect(saves.single['revision'], 1);
       expect((saves.single['marks'] as List).single, {
         'student_code': 'ST1',
-        'status': 'present',
+        'status': 'absent',
       });
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('A student on approved leave starts absent in a new register', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final saves = <Json>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AttendanceHub(
+          api: await api(false, saves, onLeave: true),
+          role: MobileRole.teacher,
+          initialClass: {
+            'program_code': 'P1',
+            'academic_year_code': 'Y1',
+            'section_code': 'S1',
+            'session_date': payload()['date'],
+            'period': 1,
+            'subject_name': 'Physics',
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('att-ST1')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('On leave'), findsWidgets);
+    final save = find.textContaining('Save attendance');
+    await tester.scrollUntilVisible(
+      save,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining('0 present, 1 absent'), findsOneWidget);
+    await tester.ensureVisible(save);
+    await tester.pumpAndSettle();
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect((saves.single['marks'] as List).single, {
+      'student_code': 'ST1',
+      'status': 'absent',
+    });
+    expect(tester.takeException(), isNull);
+  });
 }

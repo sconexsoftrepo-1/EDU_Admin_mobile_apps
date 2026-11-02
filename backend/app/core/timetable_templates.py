@@ -147,6 +147,30 @@ def save(body, request, user, code=None):
     return record
 
 
+@router.post("/generate")
+def generate(request: Request, preview: bool = False, user=Depends(current_user)):
+    """Create a semester timetable for every current-semester section that has none.
+
+    ``preview=true`` only reports what would be created. Existing timetables are never changed."""
+    from .timetable_generator import apply, plan
+
+    def summary(made):
+        return [{"code": t["code"], "name": t["name"], "section": t["section"], "semester": t["semester"],
+                 "valid_from": t["valid_from"], "valid_to": t["valid_to"],
+                 "replaces_demo": len(t.get("replaces", [])),
+                 "periods": sum(1 for c in t["cells"] if c["kind"] in {"theory", "lab"})} for t in made]
+
+    if preview:
+        data = request.app.state.store.snapshot()
+        access(data, user, "create")
+        made = summary(plan(data))
+        return {"created": made, "count": len(made), "preview": True}
+    with request.app.state.store.transaction() as data:
+        access(data, user, "create")
+        made = summary(apply(data, plan(data), user["code"]))
+    return {"created": made, "count": len(made), "preview": False}
+
+
 @router.post("", status_code=201)
 def create(body: Timetable, request: Request, user=Depends(current_user)):
     return save(body, request, user)
@@ -194,13 +218,27 @@ def weekly_timetable(data, sections, on=None, subjects_for=None):
     subjects = records.get("subjects", {})
     # Each section follows its most recently published timetable for the date.
     chosen = {}
+    batches = records.get("batches", {})
+    programs = records.get("programs", {})
     for timetable in documents(data).values():
         if timetable.get("status") != "Published":
             continue
-        if timetable.get("valid_from") and anchor < str(timetable["valid_from"])[:10]:
+        valid_from, valid_to = timetable.get("valid_from"), timetable.get("valid_to")
+        if not (valid_from and valid_to):
+            # Older timetables carry no dates: they apply during their own semester.
+            term = semester_term(data, batches.get(timetable.get("batch_code")), timetable.get("semester", 1))
+            if term:
+                valid_from = valid_from or str(term["start_date"])[:10]
+                valid_to = valid_to or str(term["end_date"])[:10]
+        if valid_from and anchor < str(valid_from)[:10]:
             continue
-        if timetable.get("valid_to") and anchor > str(timetable["valid_to"])[:10]:
+        if valid_to and anchor > str(valid_to)[:10]:
             continue
+        timetable = {**timetable, "valid_from": valid_from, "valid_to": valid_to,
+                     "course_name": timetable.get("course_name")
+                     or programs.get(timetable.get("program_code"), {}).get("name"),
+                     "batch_name": timetable.get("batch_name")
+                     or batches.get(timetable.get("batch_code"), {}).get("name")}
         for c, s in section_rows.items():
             if s.get("batch_code") == timetable.get("batch_code") and s.get("name") == timetable.get("section"):
                 if c not in chosen or str(timetable.get("updated_at", "")) > str(chosen[c].get("updated_at", "")):

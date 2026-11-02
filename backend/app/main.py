@@ -105,8 +105,23 @@ async def semester_reminder_worker(app):
         await asyncio.sleep(3600)
 
 
+def ensure_builtin_roles(app):
+    """Roles the product relies on (e.g. "Lab In-charge"), created once when missing."""
+    from app.core.lab_workspace import LAB_ROLE, ensure_lab_role
+    store = app.state.store
+    try:
+        with store.request_scope() if hasattr(store, 'request_scope') else nullcontext():
+            if LAB_ROLE in store.snapshot().get('roles', {}):
+                return
+            with store.transaction() as data:
+                ensure_lab_role(data)
+    except Exception:
+        logging.getLogger(__name__).exception('Could not create the built-in roles; they are created when first needed')
+
+
 @asynccontextmanager
 async def application_lifespan(app):
+    await asyncio.to_thread(ensure_builtin_roles, app)
     enabled=app.state.settings.semester_reminders_enabled and app.state.settings.storage_backend!='local-json'
     worker=asyncio.create_task(semester_reminder_worker(app)) if enabled else None
     try:

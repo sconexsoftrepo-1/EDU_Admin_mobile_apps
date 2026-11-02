@@ -237,10 +237,16 @@ class _AttendanceHubState extends State<AttendanceHub> {
         'revision': existing?['legacy'] == true
             ? 0
             : existing?['revision'] ?? 0,
+        // Every student is saved: changed marks, earlier marks (late stays late), otherwise the
+        // register default — present, or absent for a student on approved leave.
         'marks': roster
-            .where((s) => values[s['code']] != null)
             .map(
-              (s) => {'student_code': s['code'], 'status': values[s['code']]},
+              (s) => {
+                'student_code': s['code'],
+                'status': draft[s['code']] ??
+                    values[s['code']] ??
+                    effective(_asText(s['code'])),
+              },
             )
             .toList(),
       });
@@ -661,8 +667,29 @@ class _AttendanceHubState extends State<AttendanceHub> {
     );
   }
 
+  /// Students with approved leave on the selected day (they default to absent).
+  Set<String> get onLeave {
+    final dates = Map<String, dynamic>.from(data?['leave_dates'] as Map? ?? {});
+    final today = _attDate(day);
+    return {
+      for (final e in dates.entries)
+        if ((e.value as List? ?? []).contains(today)) e.key,
+    };
+  }
+
+  /// Present / absent as shown in the register: saved or changed marks, otherwise present —
+  /// or absent for a student on approved leave.
+  String effective(String code) {
+    final value = marks[code] as String?;
+    if (value == 'present' || value == 'late') return 'present';
+    if (value == 'absent' || value == 'excused') return 'absent';
+    return onLeave.contains(code) ? 'absent' : 'present';
+  }
+
   Widget register() {
+    final text = Theme.of(context).textTheme;
     final roster = _asRows(data?['students']);
+    final leave = onLeave;
     final shown = roster
         .where(
           (s) => '${s['name']} ${s['admission_number']}'.toLowerCase().contains(
@@ -670,17 +697,68 @@ class _AttendanceHubState extends State<AttendanceHub> {
           ),
         )
         .toList();
-    final values = marks;
     final registers = _asRows(
       data?['registers'],
     ).where((r) => r['session_date'] == _attDate(day)).toList();
+    final saved = current != null;
+    final presentCount = roster.where((s) => effective(_asText(s['code'])) == 'present').length;
+    final leaveCount = roster.where((s) => leave.contains(_asText(s['code']))).length;
+    final absentCount = roster.length - presentCount;
+    // Unsaved registers are saved with the defaults; saved ones when something changed.
+    final canSave = canMark && !saving && roster.isNotEmpty && (draft.isNotEmpty || !saved);
+    Widget count(String label, int value, Color tint, IconData icon) => Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(color: tint, borderRadius: BorderRadius.circular(14)),
+        child: Column(children: [
+          Icon(icon, size: 18, color: EduTints.ink(tint)),
+          const SizedBox(height: 4),
+          Text('$value', style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: EduTints.ink(tint))),
+          FittedBox(fit: BoxFit.scaleDown, child: Text(label, style: text.labelSmall?.copyWith(color: EduTints.ink(tint), fontWeight: FontWeight.w600))),
+        ]),
+      ),
+    );
+    void setAll(String status) => setState(() {
+      for (final s in roster) {
+        final code = _asText(s['code']);
+        // "All present" keeps students on approved leave absent.
+        draft[code] = status == 'present' && leave.contains(code) ? 'absent' : status;
+      }
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '${_attDate(day)} · ${period == 0 ? 'Whole day' : 'Period $period'}',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Row(children: [
+          Expanded(
+            child: Text(
+              '${prettyDate(day)} · ${period == 0 ? 'Whole day' : 'Period $period'}',
+              style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ),
+          if (canMark)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: saved && draft.isEmpty ? EduTints.sage : EduTints.gold,
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                saved && draft.isEmpty ? 'Saved' : draft.isNotEmpty ? '${draft.length} unsaved' : 'Not saved yet',
+                style: text.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+        ]),
+        const SizedBox(height: 12),
+        // Register overview.
+        Row(children: [
+          count('Students', roster.length, EduTints.mist, Icons.groups_outlined),
+          const SizedBox(width: 8),
+          count('Present', presentCount, EduTints.sage, Icons.check_circle_outline),
+          const SizedBox(width: 8),
+          count('Absent', absentCount, EduTints.clay, Icons.cancel_outlined),
+          const SizedBox(width: 8),
+          count('On leave', leaveCount, EduTints.gold, Icons.event_busy_outlined),
+        ]),
         const SizedBox(height: 12),
         if (canMark) ...[
           TextField(
@@ -688,32 +766,28 @@ class _AttendanceHubState extends State<AttendanceHub> {
             decoration: const InputDecoration(
               labelText: 'Subject / class note',
               hintText: 'Optional subject',
+              isDense: true,
             ),
             maxLength: 160,
           ),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
-              OutlinedButton(
-                onPressed: saving
-                    ? null
-                    : () => setState(
-                        () => draft.addAll({
-                          for (final s in roster) _asText(s['code']): 'present',
-                        }),
-                      ),
-                child: const Text('Mark all present'),
+              OutlinedButton.icon(
+                key: const ValueKey('mark-all-present'),
+                onPressed: saving ? null : () => setAll('present'),
+                icon: const Icon(Icons.done_all_rounded, size: 18),
+                label: const Text('Mark all present'),
+              ),
+              OutlinedButton.icon(
+                onPressed: saving ? null : () => setAll('absent'),
+                icon: const Icon(Icons.remove_done_rounded, size: 18),
+                label: const Text('All absent'),
               ),
               TextButton(
-                onPressed: draft.isEmpty || saving
-                    ? null
-                    : () => setState(draft.clear),
+                onPressed: draft.isEmpty || saving ? null : () => setState(draft.clear),
                 child: const Text('Reset changes'),
-              ),
-              FilledButton.icon(
-                onPressed: draft.isEmpty || saving ? null : save,
-                icon: const Icon(Icons.save_outlined),
-                label: Text(saving ? 'Saving…' : 'Save attendance'),
               ),
             ],
           ),
@@ -724,58 +798,122 @@ class _AttendanceHubState extends State<AttendanceHub> {
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.search),
             hintText: 'Search student or admission number',
+            isDense: true,
           ),
           onChanged: (_) => setState(() {}),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+        if (canMark)
+          Text('Tap a student to switch between present and absent.', style: text.bodySmall),
+        const SizedBox(height: 10),
         if (shown.isEmpty) const Text('No students in this selection.'),
-        ...shown.map(
-          (s) => Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _asText(s['name']),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(_asText(s['admission_number'])),
-                  const SizedBox(height: 10),
-                  if (canMark)
-                    DropdownButtonFormField<String>(
-                      key: ValueKey(
-                        '${s['code']}-${values[s['code']]}-${_attDate(day)}',
+        // The register grid: one compact tile per student.
+        LayoutBuilder(builder: (context, constraints) {
+          final columns = MediaQuery.textScalerOf(context).scale(16) > 22
+              ? 2
+              : constraints.maxWidth >= 720
+              ? 5
+              : constraints.maxWidth >= 520
+              ? 4
+              : 3;
+          final width = (constraints.maxWidth - (columns - 1) * 8) / columns;
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (i, s) in shown.indexed)
+                Builder(builder: (context) {
+                  final code = _asText(s['code']);
+                  final present = effective(code) == 'present';
+                  final leaveToday = leave.contains(code);
+                  final tint = present ? EduTints.sage : EduTints.clay;
+                  final ink = EduTints.ink(tint);
+                  final raw = marks[code] as String?;
+                  return SizedBox(
+                    width: width,
+                    child: Semantics(
+                      button: canMark,
+                      toggled: present,
+                      label: '${_asText(s['name'])}: ${present ? 'present' : 'absent'}${leaveToday ? ', on approved leave' : ''}',
+                      excludeSemantics: true,
+                      child: Material(
+                        key: ValueKey('att-$code'),
+                        color: tint.withValues(alpha: present ? .55 : .75),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: BorderSide(
+                            color: draft.containsKey(code) ? Theme.of(context).colorScheme.primary : ink.withValues(alpha: .25),
+                            width: draft.containsKey(code) ? 1.6 : 1,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: !canMark || saving
+                              ? null
+                              : () => setState(() => draft[code] = present ? 'absent' : 'present'),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Row(children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: .8), shape: BoxShape.circle),
+                                  child: Text('${i + 1}', style: text.labelSmall?.copyWith(fontWeight: FontWeight.w800, color: ink)),
+                                ),
+                                const Spacer(),
+                                Icon(present ? Icons.check_circle_rounded : Icons.cancel_rounded, size: 20, color: ink),
+                              ]),
+                              const SizedBox(height: 6),
+                              Text(
+                                _asText(s['name']),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.labelLarge?.copyWith(fontWeight: FontWeight.w700, height: 1.15),
+                              ),
+                              Text(
+                                _asText(s['admission_number']),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: text.labelSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                leaveToday
+                                    ? 'On leave'
+                                    : raw == 'late'
+                                    ? 'Late'
+                                    : present
+                                    ? 'Present'
+                                    : 'Absent',
+                                style: text.labelSmall?.copyWith(fontWeight: FontWeight.w800, color: ink),
+                              ),
+                            ]),
+                          ),
+                        ),
                       ),
-                      initialValue: values[s['code']] as String?,
-                      decoration: const InputDecoration(
-                        labelText: 'Attendance',
-                      ),
-                      items: _attNames.entries
-                          .map(
-                            (e) => DropdownMenuItem(
-                              value: e.key,
-                              child: Text(e.value),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: saving
-                          ? null
-                          : (v) {
-                              if (v != null) {
-                                setState(() => draft[_asText(s['code'])] = v);
-                              }
-                            },
-                    )
-                  else
-                    Text(
-                      _attNames[_asText(values[s['code']])] ?? 'Not recorded',
                     ),
-                ],
+                  );
+                }),
+            ],
+          );
+        }),
+        if (canMark) ...[
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: canSave ? save : null,
+              icon: const Icon(Icons.save_outlined),
+              label: Text(
+                saving
+                    ? 'Saving…'
+                    : 'Save attendance · $presentCount present, $absentCount absent',
               ),
             ),
           ),
-        ),
+        ],
         if (personal) ...[
           const SizedBox(height: 16),
           Text(

@@ -72,6 +72,26 @@ const endpoint = "academics/timetable-templates";
 export const timetableApi = {
   list: () => apiRequest<TimetableList>(endpoint),
   options: () => apiRequest<TimetableOptions>(`${endpoint}/options`),
+  /** Create a semester timetable for every current-semester section that has none. */
+  generate: (preview = false) =>
+    apiRequest<{
+      created: {
+        code: string;
+        name: string;
+        section: string;
+        semester: number;
+        valid_from: string | null;
+        valid_to: string | null;
+        periods: number;
+        /** Seeded demo timetables this one replaces. */
+        replaces_demo?: number;
+      }[];
+      count: number;
+      preview: boolean;
+    }>(`${endpoint}/generate`, {
+      method: "POST",
+      query: preview ? { preview: "true" } : undefined,
+    }),
   save: (draft: TimetableDraft, code?: string) =>
     apiRequest<TimetableRecord>(
       code ? `${endpoint}/${encodeURIComponent(code)}` : endpoint,

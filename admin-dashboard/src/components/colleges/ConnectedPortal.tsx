@@ -98,6 +98,7 @@ import CertificateWorkspace from "./CertificateWorkspace";
 import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
+import LabRegistry from "./staff/LabRegistry";
 import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
 import { toast, useErrorToast } from "./toast";
@@ -321,7 +322,7 @@ export default function ConnectedPortal({
           : rawSpec;
         const first = spec.resources[0] || null;
         const [records, totals, extra] = await Promise.all([
-          first && !STAFF_SCREENS[name]
+          first && !STAFF_SCREENS[name] && name !== "labs"
             ? api.workspace.list(first.path, 0, pageSize(first.name))
             : Promise.resolve({ items: [], total: 0 }),
           FINANCE_SUMMARY_SCREENS.includes(name)
@@ -382,7 +383,7 @@ export default function ConnectedPortal({
       const spec = activeRoleRef.current ? roleScreen(rawSpec, activeRoleRef.current) : rawSpec;
       const first = spec.resources[0] || null;
       const [records, totals, extra] = await Promise.all([
-        first && !STAFF_SCREENS[name] ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
+        first && !STAFF_SCREENS[name] && name !== "labs" ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
         FINANCE_SUMMARY_SCREENS.includes(name) ? api.finance.summary().catch(() => null) : Promise.resolve(null),
         specialRows(name),
       ]);
@@ -1093,6 +1094,8 @@ export default function ConnectedPortal({
           <SyllabusWorkspace />
         ) : selected === "calendar" ? (
           <CalendarWorkspace />
+        ) : selected === "labs" ? (
+          <LabRegistry standalone />
         ) : selected === "certificates" || selected === "certificate-requests" ? (
           <CertificateWorkspace />
         ) : (
