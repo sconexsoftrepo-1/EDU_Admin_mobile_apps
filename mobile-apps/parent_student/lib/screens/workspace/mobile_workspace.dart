@@ -29,6 +29,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   DateTime calendarDay = DateUtils.dateOnly(DateTime.now());
   DateTime calendarMonth = DateTime(DateTime.now().year, DateTime.now().month);
   PushNotifications? push;
+  /// Unread chat messages (Chats tab badge) and a conversation to open from a notification.
+  int chatUnread = 0;
+  String? chatThread;
+  Timer? chatTimer;
   String pushStatus = 'Enable device alerts for important college updates.';
   bool pushBusy = false;
   Json? get data => cache[selected];
@@ -49,16 +53,32 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   };
   /// Academic progress screen key (parents and students see their own progress there).
   String get progress => has('academics') ? 'academics' : 'results';
-  // Bottom bar order: primary, Progress, Home (centre), Calendar, More. Inbox lives on the bell.
+  // Bottom bar order: primary, Progress, Home (centre), Chats, More. Inbox lives on the bell.
   int get tab => selected == null
       ? 2
       : selected == primary
       ? 0
       : selected == progress
       ? 1
-      : selected == 'calendar'
+      : selected == 'messages'
       ? 3
       : 4;
+
+  Future<void> refreshChatBadge() async {
+    try {
+      final count = await ChatApi(widget.api).unread();
+      if (mounted && count != chatUnread) setState(() => chatUnread = count);
+    } catch (_) {
+      /* The badge refreshes on the next tick. */
+    }
+  }
+
+  /// Opens the Chats tab, optionally straight into one conversation.
+  void openChat([String? thread]) {
+    chatThread = thread;
+    history.clear();
+    open('messages', remember: false);
+  }
   int get unread =>
       rows('notifications').where((r) => r['status'] != 'read').length;
 
@@ -67,12 +87,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     loadScreens();
+    refreshChatBadge();
+    chatTimer = Timer.periodic(const Duration(seconds: 30), (_) => refreshChatBadge());
     push = PushNotifications(
       onOpen: (code) async {
         if (!mounted || !has('notifications')) return;
         await fetchSection('notifications');
         final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
-        if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
+        if (notice != null && notice['thread_code'] != null) {
+          openChat(notice['thread_code'].toString());
+        } else if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
           open('certificates');
         } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
           open('assessments');
@@ -94,6 +118,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
         );
         fetchSection('notifications');
+        refreshChatBadge();
       },
     );
     resumePush();
@@ -114,13 +139,15 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     push?.dispose();
+    chatTimer?.cancel();
     search.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && !busy) load();
+    if (state == AppLifecycleState.resumed) refreshChatBadge();
+    if (state == AppLifecycleState.resumed && !busy && selected != 'messages') load();
   }
 
   WorkspaceQuery workspaceQuery(String key, {int? offset}) {
@@ -235,6 +262,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       await loadScreens();
       return;
     }
+    if (selected == 'messages') return; // Chats load themselves (ChatHome).
     final ticket = ++generation;
     final key = selected!;
     setState(() {
@@ -634,7 +662,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     has(primary) ? primary : '_more',
                     has(progress) ? progress : '_more',
                     null,
-                    has('calendar') ? 'calendar' : '_more',
+                    'messages',
                     '_more',
                   ][i],
                 ),
@@ -642,7 +670,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             EduNavItem(moduleIcon(primary), primaryLabel),
             const EduNavItem(Icons.insights_rounded, 'Progress'),
             const EduNavItem(Icons.house_rounded, 'Home'),
-            const EduNavItem(Icons.calendar_month_outlined, 'Calendar'),
+            EduNavItem(Icons.forum_rounded, 'Chats', badge: chatUnread),
             const EduNavItem(Icons.grid_view_rounded, 'More'),
           ],
         ),
@@ -652,7 +680,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
+              child: selected == 'messages' ? ChatHome(key: ValueKey('chats-${chatThread ?? ''}'), api: widget.api, openThread: chatThread, onUnread: (n) { chatThread = null; if (mounted && n != chatUnread) setState(() => chatUnread = n); }) : selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
                   ? AssignmentHub(
                       key: ValueKey(
                         'assignment-$selected-$student-$generation',
@@ -1167,13 +1195,13 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           fold: 3,
           spacing: 10,
           children: [
-            for (final (i, key) in priorities.where(has).indexed)
+            for (final (i, key) in ['messages', ...priorities.where((k) => k != 'messages' && has(k))].take(6).indexed)
               EduQuickAction(
                 key: ValueKey('quick-$key'),
-                label: '${screens.firstWhere((s) => s['key'] == key)['title']}',
-                icon: moduleIcon(key),
+                label: key == 'messages' ? (chatUnread > 0 ? 'Chats · $chatUnread new' : 'Chats') : '${screens.firstWhere((s) => s['key'] == key)['title']}',
+                icon: key == 'messages' ? Icons.forum_rounded : moduleIcon(key),
                 tint: EduTints.all[i % EduTints.all.length],
-                onTap: () => open(key),
+                onTap: key == 'messages' ? openChat : () => open(key),
               ),
           ],
         ),
@@ -2136,6 +2164,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: r['assignment_code'].toString())));
     }
     if (r['assessment_code'] != null && has('assessments')) return () => open('assessments');
+    if (r['thread_code'] != null || screen == 'messages') return () => openChat(r['thread_code']?.toString());
     if (screen.isNotEmpty && has(screen)) return () => open(screen);
     return null;
   }

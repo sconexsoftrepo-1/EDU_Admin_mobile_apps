@@ -110,7 +110,7 @@ void main() {
             await capture(tester, '${role.name}-${screen['key']}');
           }
         }
-        // Bottom bar: primary, Progress, Home (centre), Calendar, More; Inbox is the header bell.
+        // Bottom bar: primary, Progress, Home (centre), Chats, More; Inbox is the header bell.
         for (final label in [
           role == MobileRole.admin
               ? 'Finance'
@@ -121,7 +121,7 @@ void main() {
               : 'Study',
           'Progress',
           'Home',
-          'Calendar',
+          'Chats',
           'More',
         ]) {
           await tester.tap(

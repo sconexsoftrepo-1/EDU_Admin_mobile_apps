@@ -70,7 +70,7 @@ def payslips(request: Request, user=Depends(current_user)):
     published = {
         p["code"]
         for p in data["records"].get("payroll_runs", {}).values()
-        if p["status"] == "published"
+        if p["status"] in {"published", "paid"}
     }
     return [
         {

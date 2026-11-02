@@ -27,6 +27,8 @@ export interface UploadPayload {
 /** Download kinds: GET documents/{kind}/{code}/download. */
 export type DownloadKind =
   | "payslip"
+  | "salary-receipt"
+  | "salary-structure"
   | "tax-document"
   | "certificate"
   | "receipt"

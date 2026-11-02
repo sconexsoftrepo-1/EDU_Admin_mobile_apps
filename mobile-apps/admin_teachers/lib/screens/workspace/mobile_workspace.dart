@@ -29,6 +29,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   DateTime calendarDay = DateUtils.dateOnly(DateTime.now());
   DateTime calendarMonth = DateTime(DateTime.now().year, DateTime.now().month);
   PushNotifications? push;
+  /// Unread chat messages (Chats tab badge) and a conversation to open from a notification.
+  int chatUnread = 0;
+  String? chatThread;
+  Timer? chatTimer;
   String pushStatus = 'Enable device alerts for important college updates.';
   bool pushBusy = false;
   Json? get data => cache[selected];
@@ -56,16 +60,32 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   String get secondaryLabel => widget.role == MobileRole.admin
       ? (has('students') ? 'Students' : 'Reports')
       : 'Timetable';
-  // Bottom bar order: primary, secondary, Home (centre), Calendar, More. Inbox lives on the bell.
+  // Bottom bar order: primary, secondary, Home (centre), Chats, More. Inbox lives on the bell.
   int get tab => selected == null
       ? 2
       : selected == primary
       ? 0
       : selected == secondary
       ? 1
-      : selected == 'calendar'
+      : selected == 'messages'
       ? 3
       : 4;
+
+  Future<void> refreshChatBadge() async {
+    try {
+      final count = await ChatApi(widget.api).unread();
+      if (mounted && count != chatUnread) setState(() => chatUnread = count);
+    } catch (_) {
+      /* The badge refreshes on the next tick. */
+    }
+  }
+
+  /// Opens the Chats tab, optionally straight into one conversation.
+  void openChat([String? thread]) {
+    chatThread = thread;
+    history.clear();
+    open('messages', remember: false);
+  }
   int get unread =>
       rows('notifications').where((r) => r['status'] != 'read').length;
 
@@ -74,12 +94,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     loadScreens();
+    refreshChatBadge();
+    chatTimer = Timer.periodic(const Duration(seconds: 30), (_) => refreshChatBadge());
     push = PushNotifications(
       onOpen: (code) async {
         if (!mounted || !has('notifications')) return;
         await fetchSection('notifications');
         final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
-        if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
+        if (notice != null && notice['thread_code'] != null) {
+          openChat(notice['thread_code'].toString());
+        } else if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
           open('certificates');
         } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
           open('assessments');
@@ -101,6 +125,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
         );
         fetchSection('notifications');
+        refreshChatBadge();
       },
     );
     resumePush();
@@ -121,13 +146,15 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     push?.dispose();
+    chatTimer?.cancel();
     search.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && !busy) load();
+    if (state == AppLifecycleState.resumed) refreshChatBadge();
+    if (state == AppLifecycleState.resumed && !busy && selected != 'messages') load();
   }
 
   WorkspaceQuery workspaceQuery(String key, {int? offset}) {
@@ -244,6 +271,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       await loadScreens();
       return;
     }
+    if (selected == 'messages') return; // Chats load themselves (ChatHome).
     final ticket = ++generation;
     final key = selected!;
     setState(() {
@@ -419,6 +447,80 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
         ),
       );
+
+  /// Opens a college PDF (logo, formatted) in the app; the viewer can share or save it.
+  Future<void> openDocument(String kind, String code, String title) async {
+    if (downloading) return;
+    setState(() => downloading = true);
+    toast('Opening $title…');
+    try {
+      final bytes = await widget.api.download(kind, code);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => CertificatePdfScreen(bytes: bytes, title: title)));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        toast(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
+    }
+  }
+
+  /// A college report PDF opened in the app (view, save or share from the viewer).
+  Future<void> openReport(String name, String title) async {
+    if (downloading) return;
+    setState(() => downloading = true);
+    toast('Preparing $title…');
+    try {
+      final bytes = name.startsWith('ledger-')
+          ? await widget.api.ledgerPdf(name.split('-')[1], mode: name.endsWith('-cash') ? 'cash' : 'all')
+          : await widget.api.reportPdf(name);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => CertificatePdfScreen(bytes: bytes, title: '$title report')));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        toast(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
+    }
+  }
+
+  /// Taken | pending | remaining bar for one leave type (Paid leave 12, Sick leave 8 …).
+  Widget leaveBar(BuildContext context, Json b) {
+    final text = Theme.of(context).textTheme;
+    final allowed = (b['allowed'] as num?)?.toInt() ?? 0, taken = (b['taken'] as num?)?.toInt() ?? 0;
+    final pending = (b['pending'] as num?)?.toInt() ?? 0, left = (b['remaining'] as num?)?.toInt() ?? 0;
+    final total = [allowed, taken + pending, 1].reduce((a, c) => a > c ? a : c);
+    final accent = Theme.of(context).colorScheme.primary;
+    return Semantics(
+      label: '${b['name']}: $taken taken, $pending pending, $left remaining of $allowed',
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Expanded(child: Text('${b['name']}', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
+          Text('$left of $allowed left', style: text.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w800)),
+        ]),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 12,
+            child: Row(children: [
+              if (taken > 0) Expanded(flex: taken, child: Container(color: accent)),
+              if (pending > 0) Expanded(flex: pending, child: Container(color: collegeGold)),
+              if (total - taken - pending > 0) Expanded(flex: total - taken - pending, child: Container(color: collegeCard)),
+            ]),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text('$taken taken · $pending pending', style: text.bodySmall),
+      ]),
+    );
+  }
 
   Future<void> download(String kind, String code) async {
     if (downloading) return;
@@ -640,7 +742,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     has(primary) ? primary : '_more',
                     has(secondary) ? secondary : '_more',
                     null,
-                    has('calendar') ? 'calendar' : '_more',
+                    'messages',
                     '_more',
                   ][i],
                 ),
@@ -651,7 +753,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               secondaryLabel,
             ),
             const EduNavItem(Icons.house_rounded, 'Home'),
-            const EduNavItem(Icons.calendar_month_outlined, 'Calendar'),
+            EduNavItem(Icons.forum_rounded, 'Chats', badge: chatUnread),
             const EduNavItem(Icons.grid_view_rounded, 'More'),
           ],
         ),
@@ -661,7 +763,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
+              child: selected == 'messages' ? ChatHome(key: ValueKey('chats-${chatThread ?? ''}'), api: widget.api, openThread: chatThread, onUnread: (n) { chatThread = null; if (mounted && n != chatUnread) setState(() => chatUnread = n); }) : selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
                   ? AssignmentHub(
                       key: ValueKey(
                         'assignment-$selected-$student-$generation',
@@ -1377,13 +1479,13 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           fold: 3,
           spacing: 10,
           children: [
-            for (final (i, key) in <String>{...priorities, if (!admin) ...['leave', 'payslips', 'tax-documents']}.where(has).take(admin ? 6 : 8).indexed)
+            for (final (i, key) in ['messages', ...<String>{...priorities, if (!admin) ...['leave', 'payslips', 'tax-documents']}.where((k) => k != 'messages' && has(k))].take(admin ? 6 : 8).indexed)
               EduQuickAction(
                 key: ValueKey('quick-$key'),
-                label: '${screens.firstWhere((s) => s['key'] == key)['title']}',
-                icon: moduleIcon(key),
+                label: key == 'messages' ? (chatUnread > 0 ? 'Chats · $chatUnread new' : 'Chats') : '${screens.firstWhere((s) => s['key'] == key)['title']}',
+                icon: key == 'messages' ? Icons.forum_rounded : moduleIcon(key),
                 tint: EduTints.all[i % EduTints.all.length],
-                onTap: () => open(key),
+                onTap: key == 'messages' ? openChat : () => open(key),
               ),
           ],
         ),
@@ -1906,6 +2008,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: r['assignment_code'].toString())));
     }
     if (r['assessment_code'] != null && has('assessments')) return () => open('assessments');
+    if (r['thread_code'] != null || screen == 'messages') return () => openChat(r['thread_code']?.toString());
     if (screen.isNotEmpty && has(screen)) return () => open(screen);
     return null;
   }
@@ -2705,7 +2808,38 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       return sum + (from == null || to == null ? 0 : DateUtils.dateOnly(to).difference(DateUtils.dateOnly(from)).inDays + 1);
     });
     const filters = ['All', 'Pending', 'Approved', 'Declined'];
+    final summary = Map<String, dynamic>.from(data?['summary'] as Map? ?? {});
+    final balances = (summary['leave_balances'] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    final att = Map<String, dynamic>.from(summary['attendance'] as Map? ?? {});
     return [
+      if (balances.isNotEmpty) ...[
+        SectionHeading(title: 'Leave balance ${DateTime.now().year}'),
+        staffCard(context, child: Column(children: [
+          for (final (i, b) in balances.indexed) ...[
+            if (i > 0) const Divider(height: 22),
+            leaveBar(context, b),
+          ],
+        ])),
+      ],
+      if (att.isNotEmpty) ...[
+        SectionHeading(title: 'Attendance · ${att['label'] ?? 'this month'}'),
+        staffCard(context, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Expanded(child: Text(att['percent'] == null ? 'Not marked yet' : '${att['percent']}% attendance',
+                style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            Text('${att['working_days'] ?? 0} working days', style: text.bodySmall),
+          ]),
+          const SizedBox(height: 10),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            pill(context, '${att['present'] ?? 0} present', EduTints.sage),
+            pill(context, '${att['half_day'] ?? 0} half day', EduTints.gold),
+            pill(context, '${att['leave'] ?? 0} leave', EduTints.mist),
+            pill(context, '${att['absent'] ?? 0} absent', EduTints.clay),
+            pill(context, '${att['holiday'] ?? 0} holidays', EduTints.plum),
+          ]),
+        ])),
+      ],
+      const SizedBox(height: 12),
       EduGrid(phone: 3, fold: 3, tablet: 3, spacing: 10, children: [
         EduStatCard(label: 'Pending', value: '${all.where((r) => !approved(r) && !rejected(r)).length}', icon: Icons.hourglass_top_rounded, tint: EduTints.gold, onTap: () => setState(() => staffLeaveFilter = 'Pending')),
         EduStatCard(label: 'Days approved', value: '$days', icon: Icons.check_circle_outline, tint: EduTints.sage, onTap: () => setState(() => staffLeaveFilter = 'Approved')),
@@ -2883,6 +3017,20 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ],
                 ]),
               ),
+              if (r['paid_on'] != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(color: collegeCanvas, borderRadius: BorderRadius.circular(14)),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Salary credited', style: text.labelLarge?.copyWith(fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 4),
+                    Text('Paid ${prettyDate(DateTime.tryParse('${r['paid_on']}') ?? DateTime.now())} · ${'${r['payment_mode'] ?? 'bank_transfer'}'.replaceAll('_', ' ')}',
+                        style: text.bodySmall),
+                    Text('Receipt ${r['receipt_number'] ?? '—'} · Ref ${r['transaction_reference'] ?? '—'}', style: text.bodySmall),
+                  ]),
+                ),
+              ],
               const SizedBox(height: 16),
               FilledButton.icon(
                 key: const ValueKey('download-payslip'),
@@ -2890,11 +3038,25 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     ? null
                     : () {
                         Navigator.pop(sheet);
-                        download(kind, '${r['code']}');
+                        openDocument(kind, '${r['code']}', 'Payslip ${r['period'] ?? ''}'.trim());
                       },
                 icon: const Icon(Icons.picture_as_pdf_outlined),
-                label: const Text('Download PDF'),
+                label: const Text('View payslip PDF'),
               ),
+              if (r['paid_on'] != null) ...[
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('salary-receipt'),
+                  onPressed: downloading
+                      ? null
+                      : () {
+                          Navigator.pop(sheet);
+                          openDocument('salary-receipt', '${r['code']}', 'Salary receipt ${r['period'] ?? ''}'.trim());
+                        },
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  label: const Text('Salary payment receipt'),
+                ),
+              ],
             ],
           ),
         );
@@ -2909,6 +3071,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     List<Json> part(String key) => (structure[key] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     final latest = all.firstOrNull;
     final paid = all.fold<num>(0, (sum, r) => sum + (num.tryParse('${r['net_amount'] ?? 0}') ?? 0));
+    final bonuses = ((data?['summary'] as Map?)?['adjustments'] as List? ?? [])
+        .whereType<Map>()
+        .map((m) => Map<String, dynamic>.from(m))
+        .where((b) => b['status'] == 'approved')
+        .toList();
     return [
       summaryBand(
         context,
@@ -2944,8 +3111,42 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               Expanded(child: Text('Net salary', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
               Text.rich(TextSpan(text: money(structure['net_monthly'])), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: collegePine)),
             ]),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const ValueKey('salary-structure-pdf'),
+              onPressed: downloading || structure['employee_code'] == null
+                  ? null
+                  : () => openDocument('salary-structure', '${structure['employee_code']}', 'Salary structure'),
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: const Text('Salary structure PDF'),
+            ),
           ]),
         ),
+      ],
+      if (bonuses.isNotEmpty) ...[
+        SectionHeading(title: 'Bonuses & incentives'),
+        staffCard(context, child: Column(children: [
+          for (final (i, b) in bonuses.indexed) ...[
+            if (i > 0) const Divider(height: 18),
+            Row(children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(11)),
+                child: Icon(b['category'] == 'Reimbursement' ? Icons.receipt_outlined : Icons.card_giftcard_rounded,
+                    color: EduTints.ink(EduTints.gold), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('${b['component']}', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('${b['category'] ?? ''} · ${b['period'] ?? ''}', style: text.bodySmall),
+                ]),
+              ),
+              Text.rich(TextSpan(text: money(b['amount'])), style: text.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
+            ]),
+          ],
+        ])),
       ],
       SectionHeading(title: 'Monthly payslips'),
       if (all.isEmpty)
@@ -2973,8 +3174,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     ]),
                   ),
                   IconButton(
-                    tooltip: 'Download PDF',
-                    onPressed: downloading ? null : () => download('${data?['downloads'] ?? 'payslip'}', '${r['code']}'),
+                    tooltip: 'Payslip PDF',
+                    onPressed: downloading ? null : () => openDocument('${data?['downloads'] ?? 'payslip'}', '${r['code']}', 'Payslip ${r['period'] ?? ''}'.trim()),
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                   ),
                 ]),
@@ -2982,6 +3183,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 Wrap(spacing: 6, runSpacing: 6, children: [
                   pill(context, 'Gross ${money(r['gross_amount'])}', EduTints.mist),
                   pill(context, 'Deductions ${money(r['deduction_amount'])}', EduTints.clay),
+                  if (r['paid_on'] != null) pill(context, 'Paid', EduTints.sage, icon: Icons.check_circle_rounded),
                 ]),
                 const SizedBox(height: 8),
                 Row(children: [
@@ -2994,48 +3196,97 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     ];
   }
 
-  /// Form 16 and other tax documents, one card per financial year with download.
+  /// Form 16 and other tax documents: per financial year the Part B figures (salary, deductions,
+  /// TDS by quarter, net) with the PDF to view, save or share.
   List<Widget> taxDocumentsView(BuildContext context, List<Json> all) {
     final text = Theme.of(context).textTheme;
+    final accent = Theme.of(context).colorScheme.primary;
     final sorted = [...all]..sort((a, b) => '${b['financial_year'] ?? ''}'.compareTo('${a['financial_year'] ?? ''}'));
+    List<Json> list(Json st, String key) => (st[key] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    Widget line(String label, Object? value, {bool strong = false}) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(children: [
+        Expanded(child: Text(label, style: strong ? text.titleSmall?.copyWith(fontWeight: FontWeight.w800) : text.bodySmall)),
+        Text.rich(TextSpan(text: money(value)), style: (strong ? text.titleSmall : text.bodySmall)?.copyWith(fontWeight: FontWeight.w800)),
+      ]),
+    );
+    final latest = sorted.firstOrNull;
+    final latestSt = Map<String, dynamic>.from(latest?['statement'] as Map? ?? {});
     return [
-      summaryBand(context, 'Tax documents', '${all.length}', [
-        ('Latest year', '${sorted.firstOrNull?['financial_year'] ?? '—'}'),
+      summaryBand(context, 'Form 16', latest == null ? '—' : 'FY ${latest['financial_year']}', [
+        ('Gross salary', latestSt.isEmpty ? '—' : money(latestSt['gross'])),
+        ('Tax deducted', latestSt.isEmpty ? '—' : money(latestSt['tax'])),
+        ('Documents', '${all.length}'),
       ], icon: Icons.description_outlined),
       SectionHeading(title: 'Form 16 and tax documents'),
       if (sorted.isEmpty)
         const QuietEmpty(icon: Icons.description_outlined, title: 'No tax documents yet', message: 'Form 16 appears here once the college publishes it.')
       else
         for (final r in sorted)
-          staffCard(
-            context,
-            child: Row(children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(13)),
-                child: Icon(Icons.description_outlined, color: EduTints.ink(EduTints.gold)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
-                    RegExp(r'^form[\s_-]?16', caseSensitive: false).hasMatch('${r['document_type'] ?? ''}') || r['document_type'] == null
-                        ? 'Form 16'
-                        : '${r['document_type']}'.replaceAll('_', ' '),
-                    style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          Builder(builder: (context) {
+            final st = Map<String, dynamic>.from(r['statement'] as Map? ?? {});
+            final title = RegExp(r'^form[\s_-]?16a', caseSensitive: false).hasMatch('${r['document_type'] ?? ''}') ? 'Form 16A' : 'Form 16';
+            return staffCard(
+              context,
+              key: ValueKey('tax-${r['code']}'),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(13)),
+                    child: Icon(Icons.description_outlined, color: EduTints.ink(EduTints.gold)),
                   ),
-                  Text('Financial year ${r['financial_year'] ?? '—'}', style: text.bodySmall),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('$title · FY ${r['financial_year'] ?? '—'}', style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                      Text([
+                        if (st['assessment_year'] != null) 'AY ${st['assessment_year']}',
+                        'Revision ${r['revision'] ?? 1}',
+                        if (st['months'] != null) '${st['months']} months',
+                      ].join(' · '), style: text.bodySmall),
+                    ]),
+                  ),
                 ]),
-              ),
-              if (data?['downloads'] != null)
-                IconButton(
-                  tooltip: 'Download',
-                  onPressed: downloading ? null : () => download('${data!['downloads']}', '${r['code']}'),
-                  icon: const Icon(Icons.download_rounded),
-                ),
-            ]),
-          ),
+                if (st.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: collegeCanvas, borderRadius: BorderRadius.circular(14)),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('Salary paid', style: text.labelLarge?.copyWith(fontWeight: FontWeight.w800, color: accent)),
+                      for (final e in list(st, 'earnings')) line('${e['component']}', e['amount']),
+                      line('Gross salary', st['gross'], strong: true),
+                      const Divider(height: 16),
+                      Text('Deductions', style: text.labelLarge?.copyWith(fontWeight: FontWeight.w800, color: accent)),
+                      line('Other than tax', st['other_deductions']),
+                      for (final q in list(st, 'quarters')) line('TDS ${q['quarter']}', q['amount']),
+                      line('Total tax deducted', st['tax'], strong: true),
+                      const Divider(height: 16),
+                      line('Net salary paid', st['net'], strong: true),
+                    ]),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Row(children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: downloading ? null : () => openDocument('tax-document', '${r['code']}', '$title FY ${r['financial_year']}'),
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: const Text('View PDF'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton.outlined(
+                    tooltip: 'Save or share',
+                    onPressed: downloading ? null : () => download('tax-document', '${r['code']}'),
+                    icon: const Icon(Icons.ios_share_rounded),
+                  ),
+                ]),
+              ]),
+            );
+          }),
     ];
   }
 
@@ -3177,15 +3428,45 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           compact: true,
         ),
       ],
-      if (selected == 'reports')
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: FilledButton.icon(
-            onPressed: () => download('finance-report', 'college'),
-            icon: const Icon(Icons.download_outlined),
-            label: const Text('Download finance report'),
-          ),
-        ),
+      if (selected == 'reports') ...[
+        LedgerSummary(api: widget.api, onPdf: (period) => openReport('ledger-$period', '${period[0].toUpperCase()}${period.substring(1)}ly receipts & cash ledger'.replaceAll('Dayly', 'Daily'))),
+        const SectionHeading(title: 'Report PDFs'),
+        EduGrid(phone: 1, fold: 2, tablet: 2, spacing: 10, children: [
+          for (final (key, title, icon) in const [
+            ('finance', 'Student fee ledgers', Icons.account_balance_wallet_outlined),
+            ('outstanding', 'Outstanding fees', Icons.pending_actions_outlined),
+            ('collections', 'Fee collections', Icons.payments_outlined),
+            ('cashbook', 'Cashbook', Icons.menu_book_outlined),
+            ('expenses', 'Expenses', Icons.receipt_long_outlined),
+            ('payroll', 'Payroll', Icons.badge_outlined),
+            ('ledger-day', 'Daily receipts & cash ledger', Icons.today_outlined),
+            ('ledger-week', 'Weekly receipts & cash ledger', Icons.view_week_outlined),
+            ('ledger-month', 'Monthly receipts & cash ledger', Icons.calendar_month_outlined),
+            ('ledger-year', 'Yearly receipts & cash ledger', Icons.event_note_outlined),
+            ('ledger-month-cash', 'Cash ledger (cash only)', Icons.payments_outlined),
+          ])
+            staffCard(
+              context,
+              key: ValueKey('report-$key'),
+              onTap: downloading ? null : () => openReport(key, title),
+              child: Row(children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(icon, color: EduTints.ink(EduTints.gold), size: 21),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('Formatted PDF · view, save or share', style: Theme.of(context).textTheme.bodySmall),
+                ])),
+                const Icon(Icons.picture_as_pdf_outlined, color: collegeMuted),
+              ]),
+            ),
+        ]),
+        const SizedBox(height: 12),
+      ],
       if (selected == 'calendar')
         AnimatedSwitcher(
           duration: EduMotion.duration(context, EduMotion.tab),
@@ -3322,7 +3603,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   : null,
               onDownload:
                   data?['downloads'] != null && r['record_type'] != 'request'
-                  ? () => download(data!['downloads'], r['code'])
+                  ? () => data!['downloads'] == 'receipt'
+                        ? openDocument('receipt', '${r['code']}', 'Fee receipt')
+                        : download(data!['downloads'], r['code'])
                   : null,
               onRead: selected == 'notifications' && r['status'] != 'read'
                   ? () => markRead(r)
@@ -3696,5 +3979,122 @@ class _MessageThreadScreenState extends State<MessageThreadScreen> {
         ),
       ]),
     );
+  }
+}
+
+
+/// Admin app: receipts & cash ledger by day / week / month / year — receipts count, money in by
+/// mode, money out and closing balance per period, with the formatted PDF.
+class LedgerSummary extends StatefulWidget {
+  const LedgerSummary({super.key, required this.api, required this.onPdf});
+  final CollegeApi api;
+  final ValueChanged<String> onPdf;
+  @override
+  State<LedgerSummary> createState() => _LedgerSummaryState();
+}
+
+class _LedgerSummaryState extends State<LedgerSummary> {
+  static const periods = ['day', 'week', 'month', 'year'];
+  String period = 'month';
+  Json? data;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  Future<void> load() async {
+    setState(() => error = null);
+    try {
+      final r = Map<String, dynamic>.from(await widget.api.ledger(period) as Map);
+      if (mounted) setState(() => data = r);
+    } catch (e) {
+      if (mounted) setState(() => error = e is ApiException ? e.message : 'Could not load the ledger.');
+    }
+  }
+
+  String inr(Object? v) {
+    final n = num.tryParse('${v ?? 0}') ?? 0;
+    final whole = n.round().abs().toString();
+    final last = whole.length > 3 ? whole.substring(whole.length - 3) : whole;
+    var head = whole.length > 3 ? whole.substring(0, whole.length - 3) : '';
+    final groups = <String>[];
+    while (head.length > 2) {
+      groups.insert(0, head.substring(head.length - 2));
+      head = head.substring(0, head.length - 2);
+    }
+    if (head.isNotEmpty) groups.insert(0, head);
+    return '${n < 0 ? '-' : ''}₹${[...groups, last].join(',')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final accent = Theme.of(context).colorScheme.primary;
+    final totals = Map<String, dynamic>.from(data?['totals'] as Map? ?? {});
+    final groups = (data?['groups'] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList().reversed.toList();
+    final modes = (data?['by_mode'] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      SectionHeading(title: 'Receipts & cash ledger', action: 'PDF', onAction: () => widget.onPdf(period)),
+      EduPillTabs(
+        labels: const ['Daily', 'Weekly', 'Monthly', 'Yearly'],
+        selected: periods.indexOf(period),
+        onSelected: (i) {
+          setState(() {
+            period = periods[i];
+            data = null;
+          });
+          load();
+        },
+      ),
+      const SizedBox(height: 12),
+      if (error != null)
+        QuietEmpty(icon: Icons.wifi_off_rounded, title: 'Ledger unavailable', message: error!)
+      else if (data == null)
+        const EduLoadingSkeleton()
+      else ...[
+        EduGrid(phone: 2, fold: 4, tablet: 4, spacing: 10, children: [
+          EduStatCard(label: 'Receipts', value: '${totals['receipts'] ?? 0}', icon: Icons.receipt_long_outlined, tint: EduTints.sage),
+          EduStatCard(label: 'Received', value: inr(totals['received']), icon: Icons.south_west_rounded, tint: EduTints.gold),
+          EduStatCard(label: 'Paid out', value: inr(totals['paid_out']), icon: Icons.north_east_rounded, tint: EduTints.clay),
+          EduStatCard(label: 'Closing balance', value: inr(totals['closing']), icon: Icons.account_balance_outlined, tint: EduTints.mist),
+        ]),
+        if (modes.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final m in modes)
+              Chip(
+                visualDensity: VisualDensity.compact,
+                label: Text('${m['label']} · ${m['count']} · ${inr(m['amount'])}'),
+              ),
+          ]),
+        ],
+        const SizedBox(height: 10),
+        for (final g in groups.take(12))
+          Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: EduWorkspace.border)),
+            child: Row(children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('${g['label']}', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('${g['receipts']} receipts · ${g['payments']} payments', style: text.bodySmall),
+                ]),
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('+${inr(g['received'])}', style: text.labelLarge?.copyWith(color: accent, fontWeight: FontWeight.w800)),
+                if ((num.tryParse('${g['paid_out']}') ?? 0) > 0)
+                  Text('−${inr(g['paid_out'])}', style: text.labelMedium?.copyWith(color: collegeError)),
+                Text('Bal ${inr(g['closing'])}', style: text.bodySmall),
+              ]),
+            ]),
+          ),
+        if (groups.isEmpty)
+          const QuietEmpty(icon: Icons.receipt_long_outlined, title: 'No receipts in this range', message: 'Receipts appear here once fees are collected.'),
+      ],
+    ]);
   }
 }

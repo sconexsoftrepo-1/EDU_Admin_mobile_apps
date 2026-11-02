@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import CollegePage from "@/components/colleges/CollegePage";
+import ChatBubble from "@/components/colleges/chat/ChatCenter";
 import { colleges, validCollegePath } from "@/data/colleges";
 type Props = { params: Promise<{ slug?: string[] }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -14,5 +15,10 @@ export default async function PortalPage({ params }: Props) {
   if (!slug.length) redirect("/portal/login");
   const parts = ["portal", ...slug];
   if (!validCollegePath(colleges[0], parts)) notFound();
-  return <CollegePage college={colleges[0]} parts={parts} />;
+  return (
+    <>
+      <CollegePage college={colleges[0]} parts={parts} />
+      {slug[0] !== "login" && <ChatBubble />}
+    </>
+  );
 }

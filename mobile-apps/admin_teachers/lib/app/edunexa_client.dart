@@ -14,6 +14,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../screens/chat/chat_screens.dart';
+
 part '../screens/workspace/mobile_workspace.dart';
 part '../screens/assignments/assignment_workspace.dart';
 part '../screens/syllabus/syllabus_workspace.dart';
