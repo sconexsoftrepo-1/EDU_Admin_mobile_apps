@@ -7,6 +7,7 @@ import { studentCourseLabels } from "@/lib/colleges/student-course-labels";
 import AcademicYearForm from "./AcademicYearForm";
 import TableColumnFilter from "./TableColumnFilter";
 import StudentEnrollmentDetails from "./StudentEnrollmentDetails";
+import PDFActions from "./PDFActions";
 import {
   studentEditForm,
   studentEditValues,
@@ -1079,15 +1080,14 @@ export default function ConnectedPortal({
     visibleRows.map((row) => exportKeys.map((k) => text(cellValue(row, k))));
   const exportExcel = () =>
     excelTable(exportFile, exportTitle, exportColumns, exportRows());
-  const exportPdf = async () => {
+  const exportPdf = async (mode: "view" | "download" = "download") => {
     try {
       await pdfTable(
         exportFile,
         exportTitle,
         `${visibleRows.length} of ${total} records`,
         exportColumns,
-        exportRows(),
-      );
+        exportRows(), mode);
     } catch (e) {
       setError(errorText(e));
     }
@@ -1433,14 +1433,14 @@ export default function ConnectedPortal({
                         >
                           <Download size={14} aria-hidden="true" /> Excel
                         </button>
-                        <button
-                          type="button"
+                        <PDFActions
+                          viewLabel="View PDF"
                           className="edu-export"
-                          onClick={() => void exportPdf()}
-                          disabled={!visibleRows.length}
+                          onAction={(mode) => exportPdf(mode)}
                         >
-                          <FileText size={14} aria-hidden="true" /> PDF
-                        </button>
+                          <FileText size={14} aria-hidden="true" /> Download
+                          PDF
+                        </PDFActions>
                       </>
                     )}
                   </>

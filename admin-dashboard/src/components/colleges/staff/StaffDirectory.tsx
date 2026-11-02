@@ -1,4 +1,5 @@
 "use client";
+import PDFActions from "../PDFActions";
 import SearchField, { searchValues } from "../SearchField";
 import PersonFiles from "../PersonFiles";
 import { useErrorToast } from "../toast";
@@ -142,15 +143,14 @@ export default function StaffDirectory({
   const exportName = `${kind.replaceAll("_", "-")}-staff`;
   const exportExcel = () =>
     excelTable(exportName, "Staff", exportColumns, exportRows);
-  const exportPdf = async () => {
+  const exportPdf = async (mode: "view" | "download" = "download") => {
     try {
       await pdfTable(
         exportName,
         `${STAFF_KIND_LABEL[kind]} directory`,
         `${visible.length} ${STAFF_KIND_LABEL[kind]}`,
         exportColumns,
-        exportRows,
-      );
+        exportRows, mode);
     } catch (e) {
       setError(errorText(e));
     }
@@ -193,10 +193,9 @@ export default function StaffDirectory({
               <Download size={14} aria-hidden="true" />
               Excel
             </button>
-            <button type="button" onClick={() => void exportPdf()}>
-              <FileText size={14} aria-hidden="true" />
-              PDF
-            </button>
+            <PDFActions viewLabel="View PDF" onAction={(mode) => exportPdf(mode)}>
+              <FileText size={14} aria-hidden="true" /> Download PDF
+            </PDFActions>
           </div>
         </div>
         {error && (

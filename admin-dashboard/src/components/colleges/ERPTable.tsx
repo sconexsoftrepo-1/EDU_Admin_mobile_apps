@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useRef, useState, type ReactNode } from "react";
 import { Download, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { professionalPdf } from "@/lib/colleges/download";
-import { excelTable } from "@/lib/colleges/export-table";
+import { excelTable, pdfTable } from "@/lib/colleges/export-table";
 import { useCollege } from "./CollegeStore";
 import { collegeBySlug } from "@/data/colleges";
 import { tableReport } from "@/lib/colleges/reports";
@@ -101,30 +101,46 @@ export default function ERPTable({
         <Download size={14} /> Excel
       </button>
       <PDFActions
-        onAction={(mode) =>
-          professionalPdf(
+        onAction={(mode) => {
+          const scope = `Search: ${query || "all"} · Status: ${status || "all"} · ${(() => {
+            try {
+              const filters = JSON.parse(
+                sessionStorage.getItem(`kc-filters-${state.slug}`) || "{}",
+              );
+              return `Academic year: ${filters.year || "all"} · Department: ${filters.department || "all"} · Dates: ${filters.from || "all"} to ${filters.to || "all"}`;
+            } catch {
+              return "Current selection";
+            }
+          })()}`;
+          const report = tableReport(
+            college,
+            state,
             title,
-            tableReport(
-              college,
-              state,
+            filtered,
+            columns.filter((c) => !hidden.includes(c.key)),
+            role,
+            scope,
+          );
+          const section = report.sections.find(
+            (x) => x.columns?.length && x.rows,
+          );
+          // Formatted table in the college layout (same as the fee receipt); the
+          // browser report remains for anything the table form cannot carry.
+          if (section?.columns && section.rows)
+            return pdfTable(
+              title.toLowerCase().replaceAll(" ", "-"),
               title,
-              filtered,
-              columns.filter((c) => !hidden.includes(c.key)),
-              role,
-              `Search: ${query || "all"}; Status: ${status || "all"}; ${(() => {
-                try {
-                  const filters = JSON.parse(
-                    sessionStorage.getItem(`kc-filters-${state.slug}`) || "{}",
-                  );
-                  return `Academic year: ${filters.year || "all"}; Department: ${filters.department || "all"}; Dates: ${filters.from || "all"} to ${filters.to || "all"}`;
-                } catch {
-                  return "Current selection";
-                }
-              })()}`,
-            ),
-            mode,
-          )
-        }
+              scope,
+              section.columns,
+              section.rows
+                .filter((r) => r[0] !== "Grand total")
+                .map((r) =>
+                  r.map((cell) => String(cell).replaceAll("\n", " · ")),
+                ),
+              mode,
+            );
+          return professionalPdf(title, report, mode);
+        }}
       >
         PDF report
       </PDFActions>
@@ -152,7 +168,10 @@ export default function ERPTable({
           aria-label={`Search ${title}`}
           placeholder={`Search ${title.toLowerCase()}…`}
           value={query}
-          onValueChange={(value) => { setQuery(value); setPage(0); }}
+          onValueChange={(value) => {
+            setQuery(value);
+            setPage(0);
+          }}
           suggestions={searchValues(rows)}
         />
         <select

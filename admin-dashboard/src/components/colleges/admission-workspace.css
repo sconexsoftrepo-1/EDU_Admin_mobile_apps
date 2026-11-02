@@ -437,3 +437,23 @@
 .adm-application-drawer .adm-create-form label {
   font-size: 13.2px;
 }
+.adm-next-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e9dfcf;
+  border-radius: 14px;
+  background: #fcf9f3;
+}
+.adm-next-step div {
+  display: grid;
+  gap: 2px;
+}
+.adm-next-step span {
+  color: #756b60;
+  font-size: 13px;
+}

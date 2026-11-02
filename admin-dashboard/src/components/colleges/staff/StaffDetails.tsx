@@ -12,6 +12,8 @@ import {
   type StaffKind,
 } from "@/services/api";
 import SideDrawer from "../SideDrawer";
+import PrintButtons from "../PrintButtons";
+import AppointmentLetters from "./AppointmentLetters";
 import { RegisteredValues } from "../StudentEnrollmentDetails";
 import { PersonFileList } from "../PersonFiles";
 import PersonLoginManagement from "../PersonLoginManagement";
@@ -84,12 +86,19 @@ export default function StaffDetails({
       subtitle={`${staff.employee_id} · ${labels[kind]} details`}
       onClose={onClose}
       actions={
-        onEdit && (
-          <button type="button" onClick={onEdit} disabled={!data}>
-            <Pencil size={15} aria-hidden="true" />
-            Edit
-          </button>
-        )
+        <>
+          <PrintButtons
+            path={`employee/${encodeURIComponent(staff.employee_id)}`}
+            filename={`staff-${staff.name.replaceAll(" ", "-")}`}
+            viewLabel="View as PDF"
+          />
+          {onEdit && (
+            <button type="button" onClick={onEdit} disabled={!data}>
+              <Pencil size={15} aria-hidden="true" />
+              Edit
+            </button>
+          )}
+        </>
       }
     >
       <div className="edu-student-summary">
@@ -126,14 +135,19 @@ export default function StaffDetails({
                 department: data.department || staff.department,
               }}
             />
+            <AppointmentLetters
+              employeeCode={staff.employee_id}
+              name={staff.name}
+              joinDate={String(data.employee?.join_date || "") || null}
+            />
             {!!data.labs?.length && (
               <section className="edu-student-section">
                 <h3>Lab in-charge of</h3>
                 <ul>
                   {data.labs.map((lab) => (
                     <li key={lab.code}>
-                      <strong>{lab.name}</strong> · {lab.lab_type} ·{" "}
-                      {lab.floor}, Room {lab.room_number}
+                      <strong>{lab.name}</strong> · {lab.lab_type} · {lab.floor}
+                      , Room {lab.room_number}
                     </li>
                   ))}
                 </ul>

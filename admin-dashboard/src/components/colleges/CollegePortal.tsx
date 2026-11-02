@@ -8,6 +8,18 @@ import ConnectedPortal from "./ConnectedPortal";
 import PayslipsWorkspace from "./PayslipsWorkspace";
 import StaffHRWorkspace from "./StaffHRWorkspace";
 import CashLedgerPanel from "./CashLedgerPanel";
+import PrintButtons from "./PrintButtons";
+import ScholarshipSchemes from "./ScholarshipSchemes";
+import { pdfTable } from "@/lib/colleges/export-table";
+
+const REGISTER_MONEY = new Set([
+  "amount",
+  "fee",
+  "scholarship",
+  "paid",
+  "outstanding",
+  "running",
+]);
 
 /** HR & payroll screens served by the live workspaces (no generic record manager). */
 const LIVE_HR_SCREENS = new Set([
@@ -1348,23 +1360,32 @@ export default function CollegePortal({
     columns: { key: string; label: string }[],
   ) => (
     <PDFActions
+      viewLabel={`View ${title.toLowerCase()}`}
       onAction={(mode) =>
-        professionalPdf(
+        pdfTable(
           file,
-          tableReport(
-            c,
-            s,
-            title,
-            rows,
-            columns,
-            role,
-            `Academic year: ${year}; Department: ${department}; Period: ${from || "all"} to ${to || "all"}`,
+          title,
+          `Academic year: ${year} · Department: ${department} · Period: ${from || "all"} to ${to || "all"}`,
+          columns.map((col) =>
+            REGISTER_MONEY.has(col.key) ? `${col.label} (INR)` : col.label,
+          ),
+          rows.map((row) =>
+            columns.map((col) => {
+              const value = row[col.key];
+              if (REGISTER_MONEY.has(col.key))
+                return money(Number(value || 0)).replace("₹", "");
+              if (col.key === "studentId") {
+                const st = s.students.find((x) => x.id === value);
+                return st ? `${st.name} (${st.id})` : String(value ?? "");
+              }
+              return value == null ? "" : String(value);
+            }),
           ),
           mode,
         )
       }
     >
-      {title} PDF
+      Download PDF
     </PDFActions>
   );
   const withPdf = (pdfAction: ReactNode, extra?: ReactNode) => (
@@ -2005,19 +2026,11 @@ export default function CollegePortal({
                 ],
                 (r) => (
                   <>
-                    <PDFActions
-                      onAction={(mode) => {
-                        const st = s.students.find((st) => st.id === r.id);
-                        if (st)
-                          return professionalPdf(
-                            `${st.id}-fee-statement`,
-                            ledgerReport(c, s, st, role),
-                            mode,
-                          );
-                      }}
-                    >
-                      Detailed fee statement PDF
-                    </PDFActions>
+                    <PrintButtons
+                      path={`fee-statement/${encodeURIComponent(String(r.id))}`}
+                      filename={`${String(r.id)}-fee-statement`}
+                      viewLabel="View fee statement"
+                    />
                     {allowed("Super Admin", "Accounts Manager", "Student") && (
                       <button
                         onClick={() =>
@@ -2104,6 +2117,7 @@ export default function CollegePortal({
                 )
               : undefined,
           )}
+          <ScholarshipSchemes />
           <div className="erp-quick-actions erp-register-pdf">
             {registerPdf(
               "Scholarship awards",
@@ -2164,30 +2178,46 @@ export default function CollegePortal({
           {heading(
             labels[activeModule],
             "Draft → Submitted → Approved → Paid. Paid expenses automatically appear in the cashbook.",
-            allowed("Super Admin", "Accounts Manager")
-              ? button("Create " + (isExpense ? "expense" : "invoice"), () =>
-                  form("Create " + prefix, prefix + ".create", [
-                    field("name", "Vendor / payee"),
-                    field("amount", "Amount (INR)", "number"),
-                    field("category", "Category", "select", [
-                      "Library",
-                      "Laboratory",
-                      "Salary",
-                      "Hostel",
-                      "University",
-                      "Examination",
-                      "External",
-                      "Operations",
+            withPdf(
+              registerPdf(
+                isExpense ? "Expense register" : "Invoice register",
+                isExpense ? "expense-register" : "invoice-register",
+                records as unknown as { id: string }[],
+                [
+                  { key: "id", label: "Reference" },
+                  { key: "date", label: "Date" },
+                  { key: "name", label: "Vendor / payee" },
+                  { key: "category", label: "Category" },
+                  { key: "method", label: "Mode" },
+                  { key: "status", label: "Status" },
+                  { key: "amount", label: "Amount" },
+                ],
+              ),
+              allowed("Super Admin", "Accounts Manager")
+                ? button("Create " + (isExpense ? "expense" : "invoice"), () =>
+                    form("Create " + prefix, prefix + ".create", [
+                      field("name", "Vendor / payee"),
+                      field("amount", "Amount (INR)", "number"),
+                      field("category", "Category", "select", [
+                        "Library",
+                        "Laboratory",
+                        "Salary",
+                        "Hostel",
+                        "University",
+                        "Examination",
+                        "External",
+                        "Operations",
+                      ]),
+                      field("method", "Payment method", "select", [
+                        "Cash",
+                        "Bank Transfer demo",
+                        "UPI demo",
+                      ]),
+                      field("note", "Supporting document reference"),
                     ]),
-                    field("method", "Payment method", "select", [
-                      "Cash",
-                      "Bank Transfer demo",
-                      "UPI demo",
-                    ]),
-                    field("note", "Supporting document reference"),
-                  ]),
-                )
-              : undefined,
+                  )
+                : undefined,
+            ),
           )}
           {table(
             labels[activeModule],
@@ -2264,23 +2294,31 @@ export default function CollegePortal({
                     Mark paid
                   </button>
                 ) : null}
-                <PDFActions
-                  onAction={(mode) =>
-                    professionalPdf(
-                      r.id,
-                      financialRecordReport(
-                        c,
-                        s,
-                        r as unknown as RecordRow,
-                        prefix,
-                        role,
-                      ),
-                      mode,
-                    )
-                  }
-                >
-                  PDF
-                </PDFActions>
+                {isExpense ? (
+                  <PrintButtons
+                    path={`expense/${encodeURIComponent(String(r.id))}`}
+                    filename={`expense-voucher-${String(r.id)}`}
+                    viewLabel="View voucher"
+                  />
+                ) : (
+                  <PDFActions
+                    onAction={(mode) =>
+                      professionalPdf(
+                        r.id,
+                        financialRecordReport(
+                          c,
+                          s,
+                          r as unknown as RecordRow,
+                          prefix,
+                          role,
+                        ),
+                        mode,
+                      )
+                    }
+                  >
+                    PDF
+                  </PDFActions>
+                )}
               </>
             ),
           )}

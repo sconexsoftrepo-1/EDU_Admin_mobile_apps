@@ -416,3 +416,68 @@
     grid-column: 1 / -1;
   }
 }
+/* Appointment letters (offer / acceptance / joining). */
+.stf-letters-note {
+  margin: -4px 0 12px;
+  color: #756b60;
+  font-size: 13px;
+}
+.stf-letter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.stf-letter {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  border: 1px solid #e9dfcf;
+  border-radius: 14px;
+  padding: 14px;
+  background: linear-gradient(180deg, #fcf9f3, #fff);
+}
+.stf-letter header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #7a4a1c;
+}
+.stf-letter header strong {
+  color: #251e18;
+}
+.stf-letter p {
+  margin: 0;
+  color: #756b60;
+  font-size: 12.5px;
+}
+.stf-letter-signed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #2f7d4f;
+  background: #e6f3ea;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.stf-letter-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  border: 1px dashed #dcc29d;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12.5px;
+  color: #7a4a1c;
+  cursor: pointer;
+  background: #fff;
+}
+.stf-letter label.stf-letter-upload {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  width: auto;
+}

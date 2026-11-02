@@ -14,6 +14,8 @@ export const DOCUMENT_ENDPOINTS = {
   upload: "documents/upload",
   download: (kind: DownloadKind | string, code: string) =>
     `documents/${kind}/${encodeURIComponent(code)}/download`,
+  view: (kind: DownloadKind | string, code: string) =>
+    `documents/${kind}/${encodeURIComponent(code)}/view`,
   issueCertificate: "documents/certificates/issue",
   verifyCertificate: (token: string) =>
     `documents/certificates/verify/${encodeURIComponent(token)}`,
@@ -50,8 +52,9 @@ export class DocumentService {
     mode: "view" | "download" = "download",
   ) {
     if (mode === "download") return this.download(kind, code, filename);
+    // View opens the document inline (GET documents/{kind}/{code}/view), not the download.
     return this.openPath(
-      DOCUMENT_ENDPOINTS.download(kind, code),
+      DOCUMENT_ENDPOINTS.view(kind, code),
       filename,
       mode,
     );
