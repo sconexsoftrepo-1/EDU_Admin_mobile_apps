@@ -30,6 +30,7 @@ from app.core.student_leave_workspace import router as student_leave_workspace_r
 from app.core.chat_workspace import router as chat_workspace_router
 from app.core.hr_workspace import router as hr_workspace_router
 from app.core.finance_ledger import router as finance_ledger_router
+from app.core.print_pdfs import router as print_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
 from app.core.settings import Settings
@@ -228,6 +229,7 @@ def create_app(settings=None):
         chat_workspace_router,
         hr_workspace_router,
         finance_ledger_router,
+        print_router,
         syllabus_workspace_router,
         auth_api.router,
         timetable_templates_router,

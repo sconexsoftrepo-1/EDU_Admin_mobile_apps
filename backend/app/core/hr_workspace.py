@@ -61,17 +61,25 @@ def leave_days(request):
     return sum(1 for _ in working_days(start, end))
 
 
+def days_of(value):
+    """Whole days from a stored number: SQL Server returns NUMERIC columns as text ("12.00")."""
+    try:
+        return int(Decimal(str(value or 0)))
+    except (ArithmeticError, ValueError):
+        return 0
+
+
 def leave_balances(data, employee_code, year=None):
     """Per leave type: allowed per year, taken (approved), pending and remaining."""
     year = year or date.today().year
     requests = [r for r in aw.rows(data, "leave_requests") if r.get("employee_code") == employee_code
                 and str(r.get("start_date") or "")[:4] == str(year)]
     result = []
-    for kind in sorted(aw.rows(data, "leave_types"), key=lambda t: -int(t.get("annual_days") or 0)):
+    for kind in sorted(aw.rows(data, "leave_types"), key=lambda t: -days_of(t.get("annual_days"))):
         mine = [r for r in requests if r.get("leave_type_code") == kind["code"]]
         taken = sum(leave_days(r) for r in mine if r.get("status") == "approved")
         pending = sum(leave_days(r) for r in mine if r.get("status") == "pending")
-        allowed = int(kind.get("annual_days") or 0)
+        allowed = days_of(kind.get("annual_days"))
         result.append({"code": kind["code"], "name": kind.get("name") or kind["code"], "allowed": allowed, "taken": taken,
                        "pending": pending, "remaining": max(0, allowed - taken)})
     return result

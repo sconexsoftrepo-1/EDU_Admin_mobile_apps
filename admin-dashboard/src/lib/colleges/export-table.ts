@@ -4,6 +4,7 @@
  * amounts as real numbers.
  */
 import { download, professionalPdf } from "./download";
+import { apiUrl } from "@/services/api/config";
 
 /** Columns that hold money (by their header), e.g. "Amount", "Net pay / month", "Fee (INR)". */
 export function isCurrencyColumn(label: string) {
@@ -125,25 +126,60 @@ export function excelTable(
 }
 
 /** Landscape PDF of the table (Pragathi logo header), with the same "Grand total" row. */
-export function pdfTable(
+/**
+ * Formatted PDF of an on-screen table in the college layout (logo header, totals, page numbers)
+ * from the backend (POST print/table). "view" opens the in-app preview, "download" saves it.
+ * Falls back to the in-browser report when the backend cannot produce it (e.g. a very large table).
+ */
+export async function pdfTable(
   name: string,
   title: string,
   subtitle: string,
   columns: string[],
   rows: string[][],
+  mode: "view" | "download" = "download",
 ) {
   const total = totalsRow(columns, rows);
-  return professionalPdf(name, {
-    title,
-    landscape: true,
-    sections: [
-      {
-        title: subtitle,
-        columns,
-        rows: total ? [...rows, total] : rows,
-      },
-    ],
-  });
+  const body = total ? [...rows, total] : rows;
+  try {
+    const response = await fetch(apiUrl("print/table"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        title: title.slice(0, 120),
+        subtitle: subtitle.slice(0, 200),
+        columns: columns.slice(0, 20),
+        rows: body.map((r) => r.slice(0, 20).map((c) => String(c ?? ""))),
+        filename: name.slice(0, 80),
+      }),
+    });
+    if (!response.ok) throw new Error(String(response.status));
+    const blob = await response.blob();
+    if (mode === "view") {
+      const trigger =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      window.dispatchEvent(
+        new CustomEvent("college:pdf-preview", {
+          detail: { name, blob, trigger },
+        }),
+      );
+    } else download(`${name}.pdf`, blob, "application/pdf");
+    return;
+  } catch {
+    // Fall back to the in-browser report below.
+  }
+  return professionalPdf(
+    name,
+    {
+      title,
+      landscape: true,
+      sections: [{ title: subtitle, columns, rows: body }],
+    },
+    mode,
+  );
 }
 
 /** Table header from a field key: "emergency_contact_name" → "Emergency Contact Name". */

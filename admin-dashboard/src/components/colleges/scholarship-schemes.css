@@ -1,0 +1,113 @@
+/* Scholarship schemes (dashboard template colours). */
+.sch-panel {
+  margin: 16px 0;
+  display: grid;
+  gap: 12px;
+}
+.sch-panel header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.sch-panel header p {
+  margin: 2px 0 0;
+  color: #756b60;
+  font-size: 13px;
+}
+.sch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+}
+.sch-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 16px;
+  border: 1px solid #e9dfcf;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fcf9f3, #fff 60%);
+}
+.sch-top {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.sch-top div {
+  display: grid;
+}
+.sch-top small {
+  color: #756b60;
+  font-size: 12px;
+}
+.sch-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #a46a27;
+  color: #fff;
+  flex: none;
+}
+.sch-award {
+  margin: 0;
+  font-weight: 800;
+  color: #7a4a1c;
+}
+.sch-desc {
+  margin: 0;
+  color: #4b4038;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.sch-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0;
+}
+.sch-stats div {
+  border: 1px solid #efe6d8;
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: #fff;
+}
+.sch-stats dt {
+  font-size: 11px;
+  color: #756b60;
+}
+.sch-stats dd {
+  margin: 0;
+  font-weight: 800;
+}
+.sch-more {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: #7a4a1c;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.sch-rules {
+  display: grid;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #4b4038;
+}
+.sch-rules h4 {
+  margin: 0 0 2px;
+  font-size: 12.5px;
+  color: #251e18;
+}
+.sch-rules ul {
+  margin: 0;
+  padding-left: 18px;
+}
+.sch-rules p {
+  margin: 0;
+}

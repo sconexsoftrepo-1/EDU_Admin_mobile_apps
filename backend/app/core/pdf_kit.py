@@ -58,6 +58,21 @@ def college(data, campus_code=None):
     return institution.get("name") or "Pragathi College", " · ".join(p for p in parts if p)
 
 
+def wrap(text, face, size, width):
+    """Lines that fit `width`; words longer than the column (codes, emails) are broken too."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    out = []
+    for line in simpleSplit(text, face, size, width) or [""]:
+        while stringWidth(line, face, size) > width and len(line) > 1:
+            cut = len(line)
+            while cut > 1 and stringWidth(line[:cut], face, size) > width:
+                cut -= 1
+            out.append(line[:cut])
+            line = line[cut:]
+        out.append(line)
+    return out
+
+
 class _Numbered(Canvas):
     """Canvas that writes "Page x of y" on every page once the total is known."""
 
@@ -191,7 +206,7 @@ class Document:
 
         def draw_row(values, bold=False, shade=False):
             face = "Helvetica-Bold" if bold else "Helvetica"
-            lines = [simpleSplit(str(v if v is not None else ""), face, font, cols[i] - 10) or [""] for i, v in enumerate(values)]
+            lines = [wrap(str(v if v is not None else ""), face, font, cols[i] - 10) for i, v in enumerate(values)]
             height = max(len(x) for x in lines) * (font + 3) + 6
             if self.y - height < 48:
                 self.c.showPage()
@@ -295,12 +310,21 @@ class Document:
             self.c.setFont("Helvetica", 7.8)
             self.c.drawString(x + 10, top - 15, str(label).upper()[:34])
             self.c.setFillColor(white if highlight else INK)
-            self.c.setFont("Helvetica-Bold", 13.5 if len(str(value)) < 16 else 11)
-            self.c.drawString(x + 10, top - 34, str(value)[:24])
+            room = width - 20
+            text, size = str(value), 13.5
+            while size > 8.5 and self.c.stringWidth(text, "Helvetica-Bold", size) > room:
+                size -= 0.5
+            while len(text) > 3 and self.c.stringWidth(text, "Helvetica-Bold", size) > room:
+                text = text[:-2] + "…"
+            self.c.setFont("Helvetica-Bold", size)
+            self.c.drawString(x + 10, top - 34, text)
             if note:
+                note = str(note)
+                while len(note) > 3 and self.c.stringWidth(note, "Helvetica", 7.5) > room:
+                    note = note[:-2] + "…"
                 self.c.setFont("Helvetica", 7.5)
                 self.c.setFillColor(SOFT if highlight else MUTED)
-                self.c.drawString(x + 10, top - 47, str(note)[:40])
+                self.c.drawString(x + 10, top - 47, note)
         self.y = top - 74
 
     def panels(self, blocks):
@@ -352,6 +376,32 @@ class Document:
         self.c.setFont("Helvetica-Bold", 18)
         self.c.drawCentredString(0, -4, text)
         self.c.restoreState()
+
+    def para(self, text, size=10, bold=False, color=None, gap=6):
+        """Body text that wraps to the page width (letters, terms)."""
+        face = "Helvetica-Bold" if bold else "Helvetica"
+        for line in simpleSplit(str(text), face, size, self.right - self.left) or [""]:
+            self.ensure(size + 6)
+            self.c.setFont(face, size)
+            self.c.setFillColor(color or INK)
+            self.c.drawString(self.left, self.y, line)
+            self.y -= size + 4
+        self.y -= gap
+
+    def bullets(self, items, size=9.5, numbered=False):
+        for i, item in enumerate(items, 1):
+            lines = simpleSplit(str(item), "Helvetica", size, self.right - self.left - 18) or [""]
+            self.ensure(len(lines) * (size + 4) + 4)
+            self.c.setFillColor(ACCENT)
+            self.c.setFont("Helvetica-Bold", size)
+            self.c.drawString(self.left + 2, self.y, f"{i}." if numbered else "•")
+            self.c.setFillColor(INK)
+            self.c.setFont("Helvetica", size)
+            for k, line in enumerate(lines):
+                self.c.drawString(self.left + 18, self.y, line)
+                self.y -= size + 4
+            self.y -= 2
+        self.y -= 6
 
     def page_break(self, title=None, subtitle=None):
         self.c.showPage()

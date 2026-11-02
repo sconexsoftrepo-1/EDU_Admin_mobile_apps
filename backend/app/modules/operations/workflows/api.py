@@ -648,7 +648,7 @@ def perform(
                     and r["status"] == "approved"
                     and r["start_date"][:4] == record["start_date"][:4]
                 )
-                if used + days > int(kind["annual_days"]):
+                if used + days > int(Decimal(str(kind["annual_days"] or 0))):
                     raise HTTPException(409, "Annual leave allowance exceeded")
             record.update(status=v["status"], approved_by_code=actor)
             result = record

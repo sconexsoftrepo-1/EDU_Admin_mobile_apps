@@ -20,6 +20,9 @@ import {
   type Row,
 } from "@/services/api";
 import SideDrawer from "./SideDrawer";
+import PrintButtons from "./PrintButtons";
+import PDFActions from "./PDFActions";
+import { pdfTable } from "@/lib/colleges/export-table";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./admission-workspace.css";
@@ -33,7 +36,10 @@ type Props = {
 };
 const isPlatformReference = (value: unknown) =>
   ["social_media", "advertising"].includes(String(value));
-const admissionSnapshots = new Map<string, { rows: Row[]; lookups: Lookups; savedAt: number }>();
+const admissionSnapshots = new Map<
+  string,
+  { rows: Row[]; lookups: Lookups; savedAt: number }
+>();
 const text = (value: unknown) =>
   value == null || value === "" ? "—" : String(value);
 const nice = (value: unknown) =>
@@ -56,11 +62,14 @@ export default function AdmissionWorkspace({
 }: Props) {
   const snapshot = admissionSnapshots.get(path);
   const [openedAt] = useState(() => Date.now());
-  const cached = snapshot && openedAt - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
+  const cached =
+    snapshot && openedAt - snapshot.savedAt < 5 * 60_000 ? snapshot : undefined;
   const hasCachedData = useRef(Boolean(cached));
   const [creating, setCreating] = useState(false);
   const [rows, setRows] = useState<Row[]>(cached?.rows || []);
-  const [lookups, setLookups] = useState<Lookups | null>(cached?.lookups || null);
+  const [lookups, setLookups] = useState<Lookups | null>(
+    cached?.lookups || null,
+  );
   const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -79,7 +88,10 @@ export default function AdmissionWorkspace({
 
   useEffect(() => {
     if (!canCreate) return;
-    const open = () => { setFormError(""); setCreating(true); };
+    const open = () => {
+      setFormError("");
+      setCreating(true);
+    };
     window.addEventListener("edunexa:new-application", open);
     return () => window.removeEventListener("edunexa:new-application", open);
   }, [canCreate]);
@@ -95,7 +107,11 @@ export default function AdmissionWorkspace({
       ]);
       setRows(page.items);
       setLookups({ employees, options });
-      admissionSnapshots.set(path, { rows: page.items, lookups: { employees, options }, savedAt: Date.now() });
+      admissionSnapshots.set(path, {
+        rows: page.items,
+        lookups: { employees, options },
+        savedAt: Date.now(),
+      });
       hasCachedData.current = true;
     } catch (e) {
       setError(errorText(e));
@@ -147,7 +163,9 @@ export default function AdmissionWorkspace({
     const employee = lookups.employees.find(
       (item) => item.value === employeeCode,
     );
-    const referenceMobile = platformReference ? null : value("reference_mobile") || null;
+    const referenceMobile = platformReference
+      ? null
+      : value("reference_mobile") || null;
     const follow = value("next_follow_up_at");
     const consent = form.get("communication_consent") === "on";
     setSaving(true);
@@ -236,7 +254,10 @@ export default function AdmissionWorkspace({
           </button>
           <WorkspacePrimaryAction
             disabled={!canCreate}
-            onClick={() => { setFormError(""); setCreating(true); }}
+            onClick={() => {
+              setFormError("");
+              setCreating(true);
+            }}
             title="Create an application"
           >
             <Plus size={16} /> New application
@@ -256,336 +277,383 @@ export default function AdmissionWorkspace({
         </div>
       )}
       <div className="adm-list-panel">
-          <div className="adm-list-toolbar">
-            <div>
-              <h2>Admission enquiries</h2>
-              <p>
-                Review applicant details and convert an enquiry through
-                enrollment.
-              </p>
-            </div>
-            <SearchField
-              placeholder="Search applicants"
-              value={query}
-              onValueChange={setQuery}
-              suggestions={searchValues(rows, ["first_name", "last_name", "phone", "email", "program_code"])}
-            />
+        <div className="adm-list-toolbar">
+          <div>
+            <h2>Admission enquiries</h2>
+            <p>
+              Review applicant details and convert an enquiry through
+              enrollment.
+            </p>
           </div>
-          <div className="adm-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Applicant</th>
-                  <th>Course</th>
-                  <th>Phone</th>
-                  <th>Follow up</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(loading || visible.length === 0) && (
-                  <tr>
-                    <td colSpan={6}>
-                      <div className="adm-empty" role="status">
-                        {loading
-                          ? <WorkspaceSkeleton compact label="Loading enquiries" />
-                          : query.trim()
-                            ? "No matching applicants. Try another name, phone number or email."
-                            : "No admission enquiries yet. Use “New application” to add one."}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                {visible.map((row) => (
-                  <tr key={String(row.code)}>
-                    <td>
-                      <strong>
-                        {text(row.first_name)} {text(row.last_name)}
-                      </strong>
-                      <small>{text(row.email)}</small>
-                    </td>
-                    <td>
-                      {text(row.course_level && nice(row.course_level))}
-                      <small>
-                        {text(row.program_code)}
-                        {row.academic_year_code
-                          ? ` · ${row.academic_year_code}`
-                          : ""}
-                      </small>
-                    </td>
-                    <td>
-                      {text(row.phone)}
-                      <small>Parent: {text(row.parent_phone)}</small>
-                    </td>
-                    <td>{dateTime(row.next_follow_up_at)}</td>
-                    <td>
-                      <span
-                        className={`adm-status adm-status-${String(row.workflow_status || row.status || "new")}`}
-                      >
-                        {nice(row.workflow_status || row.status || "new")}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="adm-actions">
-                        <button
-                          title="View enquiry details"
-                          aria-label={`View ${text(row.first_name)} details`}
-                          onClick={() => setDetail(row)}
-                        >
-                          <Info size={17} />
-                        </button>
-                        {canConvert && row.workflow_status !== "joined" && (
-                          <button
-                            className="adm-convert"
-                            onClick={() => setConvert(row)}
-                          >
-                            <UserRoundCheck size={15} /> Convert to student
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <PDFActions
+            viewLabel="View list"
+            onAction={(mode) =>
+              pdfTable(
+                "admission-enquiries",
+                "Admission enquiries",
+                `${visible.length} applicants`,
+                [
+                  "Applicant",
+                  "Phone",
+                  "Email",
+                  "Course",
+                  "Academic year",
+                  "Guardian",
+                  "Follow up",
+                  "Status",
+                ],
+                visible.map((row) => [
+                  `${text(row.first_name)} ${text(row.last_name)}`,
+                  text(row.phone),
+                  text(row.email),
+                  `${nice(row.course_level)} ${text(row.program_code)}`,
+                  text(row.academic_year_code),
+                  `${text(row.parent_name)} ${row.parent_phone ? `(${String(row.parent_phone)})` : ""}`,
+                  dateTime(row.next_follow_up_at),
+                  nice(row.workflow_status || row.status || "new"),
+                ]),
+                mode,
+              )
+            }
+          >
+            Download PDF
+          </PDFActions>
+          <SearchField
+            placeholder="Search applicants"
+            value={query}
+            onValueChange={setQuery}
+            suggestions={searchValues(rows, [
+              "first_name",
+              "last_name",
+              "phone",
+              "email",
+              "program_code",
+            ])}
+          />
         </div>
+        <div className="adm-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Course</th>
+                <th>Phone</th>
+                <th>Follow up</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(loading || visible.length === 0) && (
+                <tr>
+                  <td colSpan={6}>
+                    <div className="adm-empty" role="status">
+                      {loading ? (
+                        <WorkspaceSkeleton compact label="Loading enquiries" />
+                      ) : query.trim() ? (
+                        "No matching applicants. Try another name, phone number or email."
+                      ) : (
+                        "No admission enquiries yet. Use “New application” to add one."
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {visible.map((row) => (
+                <tr key={String(row.code)}>
+                  <td>
+                    <strong>
+                      {text(row.first_name)} {text(row.last_name)}
+                    </strong>
+                    <small>{text(row.email)}</small>
+                  </td>
+                  <td>
+                    {text(row.course_level && nice(row.course_level))}
+                    <small>
+                      {text(row.program_code)}
+                      {row.academic_year_code
+                        ? ` · ${row.academic_year_code}`
+                        : ""}
+                    </small>
+                  </td>
+                  <td>
+                    {text(row.phone)}
+                    <small>Parent: {text(row.parent_phone)}</small>
+                  </td>
+                  <td>{dateTime(row.next_follow_up_at)}</td>
+                  <td>
+                    <span
+                      className={`adm-status adm-status-${String(row.workflow_status || row.status || "new")}`}
+                    >
+                      {nice(row.workflow_status || row.status || "new")}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="adm-actions">
+                      <button
+                        title="View enquiry details"
+                        aria-label={`View ${text(row.first_name)} details`}
+                        onClick={() => setDetail(row)}
+                      >
+                        <Info size={17} />
+                      </button>
+                      {canConvert && row.workflow_status !== "joined" && (
+                        <button
+                          className="adm-convert"
+                          onClick={() => setConvert(row)}
+                        >
+                          <UserRoundCheck size={15} /> Convert to student
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
       {creating && (
         <SideDrawer
           title="New application"
           subtitle="Capture applicant, guardian, course and follow-up details."
           className="adm-application-drawer"
-          onClose={() => { if (!saving) setCreating(false); }}
+          onClose={() => {
+            if (!saving) setCreating(false);
+          }}
         >
-        <form className="adm-create-form" onSubmit={create}>
-          <div className="adm-form-title">
-            <div>
-              <span>NEW ENQUIRY</span>
-              <h2>Applicant information</h2>
-              <p>
-                Choose the course first; the form will keep the enquiry, family
-                and follow-up details together.
-              </p>
+          <form className="adm-create-form" onSubmit={create}>
+            <div className="adm-form-title">
+              <div>
+                <span>NEW ENQUIRY</span>
+                <h2>Applicant information</h2>
+                <p>
+                  Choose the course first; the form will keep the enquiry,
+                  family and follow-up details together.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="adm-form-grid">
-            <label>
-              Course level *
-              <select
-                value={courseLevel}
-                onChange={(e) => {
-                  setCourseLevel(e.target.value as typeof courseLevel);
-                  setProgramCode("");
-                }}
-              >
-                <option value="intermediate">Intermediate</option>
-                <option value="degree">Degree</option>
-              </select>
-            </label>
-            <label>
-              Course / branch *
-              <select
-                required
-                value={programCode}
-                onChange={(e) => setProgramCode(e.target.value)}
-              >
-                <option value="">
-                  Select{" "}
-                  {courseLevel === "intermediate"
-                    ? "an Intermediate group"
-                    : "a Degree course"}
-                </option>
-                {courses.map((course) => (
-                  <option key={course.code} value={course.code}>
-                    {course.name}
-                    {course.branch ? ` · ${course.branch}` : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Academic year
-              <select name="academic_year_code" disabled={!programCode}>
-                <option value="">Select academic year</option>
-                {years.map((year) => (
-                  <option key={year.code} value={year.code}>
-                    {year.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              First name *
-              <input required name="first_name" autoComplete="given-name" />
-            </label>
-            <label>
-              Last name *
-              <input required name="last_name" autoComplete="family-name" />
-            </label>
-            <label>
-              Phone number *
-              <input required name="phone" type="tel" autoComplete="tel" />
-            </label>
-            <label>
-              Second phone · parent
-              <input name="second_phone" type="tel" />
-            </label>
-            <label>
-              Guardian name
-              <input name="guardian_name" />
-            </label>
-            <label>
-              Guardian relationship
-              <select name="guardian_relationship">
-                <option value="">Choose relationship</option>
-                {["Father", "Mother", "Guardian", "Sibling", "Other"].map(
-                  (x) => (
-                    <option key={x} value={x.toLowerCase()}>
-                      {x}
-                    </option>
-                  ),
-                )}
-              </select>
-            </label>
-            <label>
-              Guardian mobile number
-              <input name="guardian_mobile" type="tel" />
-            </label>
-            <label>
-              Email address
-              <input name="email" type="email" autoComplete="email" />
-            </label>
-          </div>
-          <fieldset className="adm-address">
-            <legend>Address</legend>
-            <div className="adm-form-grid">
-              <label className="adm-span-2">
-                Street
-                <input name="street" autoComplete="address-line1" />
-              </label>
-              <label>
-                Area
-                <input name="area" />
-              </label>
-              <label>
-                City
-                <input name="city" autoComplete="address-level2" />
-              </label>
-              <label>
-                State
-                <input name="state" autoComplete="address-level1" />
-              </label>
-              <label>
-                PIN code
-                <input
-                  name="postal_code"
-                  inputMode="numeric"
-                  autoComplete="postal-code"
-                />
-              </label>
-            </div>
-          </fieldset>
-          <section className="adm-referral">
-            <h3>Reference</h3>
             <div className="adm-form-grid">
               <label>
-                How did they hear about us?
+                Course level *
                 <select
-                  value={referenceType}
+                  value={courseLevel}
                   onChange={(e) => {
-                    setReferenceType(e.target.value);
-                    setEmployeeCode("");
+                    setCourseLevel(e.target.value as typeof courseLevel);
+                    setProgramCode("");
                   }}
                 >
-                  <option value="walk_in">Walk-in / direct</option>
-                  <option value="employee">Employee reference</option>
-                  <option value="staff">Staff reference</option>
-                  <option value="relative">Relative reference</option>
-                  <option value="advertising">Advertising</option>
-                  <option value="post">Post / mail</option>
-                  <option value="social_media">Social media</option>
-                  <option value="other">Other</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="degree">Degree</option>
                 </select>
               </label>
-              {["employee", "staff"].includes(referenceType) ? (
-                <>
-                  <label>
-                    Employee / staff name
-                    <select
-                      value={employeeCode}
-                      onChange={(e) => setEmployeeCode(e.target.value)}
-                      required
-                    >
-                      <option value="">Select employee</option>
-                      {(lookups?.employees || []).map((item) => (
-                        <option
-                          key={String(item.value)}
-                          value={String(item.value)}
-                        >
-                          {String(item.label)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Reference mobile
-                    <input name="reference_mobile" type="tel" />
-                  </label>
-                </>
-              ) : (
-                referenceType !== "walk_in" && (
+              <label>
+                Course / branch *
+                <select
+                  required
+                  value={programCode}
+                  onChange={(e) => setProgramCode(e.target.value)}
+                >
+                  <option value="">
+                    Select{" "}
+                    {courseLevel === "intermediate"
+                      ? "an Intermediate group"
+                      : "a Degree course"}
+                  </option>
+                  {courses.map((course) => (
+                    <option key={course.code} value={course.code}>
+                      {course.name}
+                      {course.branch ? ` · ${course.branch}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Academic year
+                <select name="academic_year_code" disabled={!programCode}>
+                  <option value="">Select academic year</option>
+                  {years.map((year) => (
+                    <option key={year.code} value={year.code}>
+                      {year.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                First name *
+                <input required name="first_name" autoComplete="given-name" />
+              </label>
+              <label>
+                Last name *
+                <input required name="last_name" autoComplete="family-name" />
+              </label>
+              <label>
+                Phone number *
+                <input required name="phone" type="tel" autoComplete="tel" />
+              </label>
+              <label>
+                Second phone · parent
+                <input name="second_phone" type="tel" />
+              </label>
+              <label>
+                Guardian name
+                <input name="guardian_name" />
+              </label>
+              <label>
+                Guardian relationship
+                <select name="guardian_relationship">
+                  <option value="">Choose relationship</option>
+                  {["Father", "Mother", "Guardian", "Sibling", "Other"].map(
+                    (x) => (
+                      <option key={x} value={x.toLowerCase()}>
+                        {x}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </label>
+              <label>
+                Guardian mobile number
+                <input name="guardian_mobile" type="tel" />
+              </label>
+              <label>
+                Email address
+                <input name="email" type="email" autoComplete="email" />
+              </label>
+            </div>
+            <fieldset className="adm-address">
+              <legend>Address</legend>
+              <div className="adm-form-grid">
+                <label className="adm-span-2">
+                  Street
+                  <input name="street" autoComplete="address-line1" />
+                </label>
+                <label>
+                  Area
+                  <input name="area" />
+                </label>
+                <label>
+                  City
+                  <input name="city" autoComplete="address-level2" />
+                </label>
+                <label>
+                  State
+                  <input name="state" autoComplete="address-level1" />
+                </label>
+                <label>
+                  PIN code
+                  <input
+                    name="postal_code"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <section className="adm-referral">
+              <h3>Reference</h3>
+              <div className="adm-form-grid">
+                <label>
+                  How did they hear about us?
+                  <select
+                    value={referenceType}
+                    onChange={(e) => {
+                      setReferenceType(e.target.value);
+                      setEmployeeCode("");
+                    }}
+                  >
+                    <option value="walk_in">Walk-in / direct</option>
+                    <option value="employee">Employee reference</option>
+                    <option value="staff">Staff reference</option>
+                    <option value="relative">Relative reference</option>
+                    <option value="advertising">Advertising</option>
+                    <option value="post">Post / mail</option>
+                    <option value="social_media">Social media</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                {["employee", "staff"].includes(referenceType) ? (
                   <>
                     <label>
-                      {platformReference ? "Platform name" : "Reference name"}
-                      <input
-                        key={referenceType}
-                        name="reference_name"
-                        placeholder={platformReference ? "e.g. Instagram, Facebook, Google Ads" : undefined}
-                      />
+                      Employee / staff name
+                      <select
+                        value={employeeCode}
+                        onChange={(e) => setEmployeeCode(e.target.value)}
+                        required
+                      >
+                        <option value="">Select employee</option>
+                        {(lookups?.employees || []).map((item) => (
+                          <option
+                            key={String(item.value)}
+                            value={String(item.value)}
+                          >
+                            {String(item.label)}
+                          </option>
+                        ))}
+                      </select>
                     </label>
-                    {!platformReference && (
-                      <label>
-                        Reference mobile
-                        <input name="reference_mobile" type="tel" />
-                      </label>
-                    )}
+                    <label>
+                      Reference mobile
+                      <input name="reference_mobile" type="tel" />
+                    </label>
                   </>
-                )
-              )}
-            </div>
-          </section>
-          <section className="adm-followup">
-            <h3>Follow-up &amp; consent</h3>
-            <div className="adm-form-grid">
-              <label>
-                Status
-                <select value="new" disabled>
-                  <option value="new">New</option>
-                </select>
-              </label>
-              <label>
-                Next follow up at
-                <input name="next_follow_up_at" type="datetime-local" />
-              </label>
-              <label className="adm-consent">
-                <input name="communication_consent" type="checkbox" />{" "}
-                Communication consent recorded
-              </label>
-            </div>
-          </section>
-          {formError && (
-            <div className="adm-alert" role="alert">
-              {formError}
-            </div>
-          )}
-          <footer className="adm-form-actions">
-            <span>Campus and enquiry source are assigned automatically.</span>
-            <button className="adm-submit" disabled={saving || !programCode}>
-              {saving ? "Saving…" : "Save admission enquiry"}
-            </button>
-          </footer>
-        </form>
+                ) : (
+                  referenceType !== "walk_in" && (
+                    <>
+                      <label>
+                        {platformReference ? "Platform name" : "Reference name"}
+                        <input
+                          key={referenceType}
+                          name="reference_name"
+                          placeholder={
+                            platformReference
+                              ? "e.g. Instagram, Facebook, Google Ads"
+                              : undefined
+                          }
+                        />
+                      </label>
+                      {!platformReference && (
+                        <label>
+                          Reference mobile
+                          <input name="reference_mobile" type="tel" />
+                        </label>
+                      )}
+                    </>
+                  )
+                )}
+              </div>
+            </section>
+            <section className="adm-followup">
+              <h3>Follow-up &amp; consent</h3>
+              <div className="adm-form-grid">
+                <label>
+                  Status
+                  <select value="new" disabled>
+                    <option value="new">New</option>
+                  </select>
+                </label>
+                <label>
+                  Next follow up at
+                  <input name="next_follow_up_at" type="datetime-local" />
+                </label>
+                <label className="adm-consent">
+                  <input name="communication_consent" type="checkbox" />{" "}
+                  Communication consent recorded
+                </label>
+              </div>
+            </section>
+            {formError && (
+              <div className="adm-alert" role="alert">
+                {formError}
+              </div>
+            )}
+            <footer className="adm-form-actions">
+              <span>Campus and enquiry source are assigned automatically.</span>
+              <button className="adm-submit" disabled={saving || !programCode}>
+                {saving ? "Saving…" : "Save admission enquiry"}
+              </button>
+            </footer>
+          </form>
         </SideDrawer>
       )}
       {detail && (
@@ -594,7 +662,57 @@ export default function AdmissionWorkspace({
           title="Admission enquiry details"
           subtitle={`${text(detail.first_name)} ${text(detail.last_name)} · ${text(detail.code)}`}
           onClose={() => setDetail(null)}
+          actions={
+            <>
+              <PrintButtons
+                path={`enquiry/${encodeURIComponent(String(detail.code))}`}
+                filename={`enquiry-${text(detail.first_name)}-${text(detail.last_name)}`}
+                viewLabel="View as PDF"
+              />
+              {canConvert && detail.workflow_status !== "joined" && (
+                <button
+                  type="button"
+                  className="adm-convert"
+                  onClick={() => {
+                    const row = detail;
+                    setDetail(null);
+                    setConvert(row);
+                  }}
+                >
+                  <UserRoundCheck size={15} /> Continue to enrollment
+                </button>
+              )}
+            </>
+          }
         >
+          {detail.workflow_status === "joined" ? (
+            <p className="adm-success" role="status">
+              This applicant has joined and is enrolled as a student.
+            </p>
+          ) : (
+            canConvert && (
+              <div className="adm-next-step">
+                <div>
+                  <strong>Ready to admit?</strong>
+                  <span>
+                    Continue into student enrollment with these details filled
+                    in.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="adm-convert"
+                  onClick={() => {
+                    const row = detail;
+                    setDetail(null);
+                    setConvert(row);
+                  }}
+                >
+                  <UserRoundCheck size={15} /> Enroll as student
+                </button>
+              </div>
+            )
+          )}
           <div className="adm-detail-grid">
             {Object.entries({
               "Course level": nice(detail.course_level),
@@ -619,14 +737,18 @@ export default function AdmissionWorkspace({
               State: text(detailAddress.state),
               "PIN code": text(detailAddress.postal_code),
               Reference: nice(detail.reference_type),
-              [isPlatformReference(detail.reference_type) ? "Platform name" : "Reference name"]: text(
+              [isPlatformReference(detail.reference_type)
+                ? "Platform name"
+                : "Reference name"]: text(
                 detail.reference_name || detail.referrer_name,
               ),
-              ...(!isPlatformReference(detail.reference_type) ? {
-                "Reference mobile": text(
-                  detail.reference_mobile || detail.campaign_reference,
-                ),
-              } : {}),
+              ...(!isPlatformReference(detail.reference_type)
+                ? {
+                    "Reference mobile": text(
+                      detail.reference_mobile || detail.campaign_reference,
+                    ),
+                  }
+                : {}),
               Status: nice(detail.workflow_status || detail.status),
               "Next follow up": dateTime(detail.next_follow_up_at),
               "Communication consent": detail.communication_consent
