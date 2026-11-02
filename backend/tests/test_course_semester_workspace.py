@@ -98,3 +98,42 @@ def test_assigning_new_course_subject_extends_selected_batch_plan(client,headers
     assert assigned.status_code==200,assigned.text
     batch=curriculum(app.state.store.snapshot(),'INT-BPC','Y')
     assert any(s['subject_code']==subject['subject_code'] for s in batch['items'])
+
+
+def test_single_section_batch_allocates_without_choosing_a_section(client,headers,plan,app):
+    body={'revision':0,'academic_year_code':'Y','subject_code':plan['subject_code'],'teacher_code':'T1'}
+    r=client.put(BASE+'/faculty',headers=headers,json=body)
+    assert r.status_code==200,r.text
+    assert [(o['section_code'],o['teacher_code']) for o in r.json()['offerings']]==[('A','T1')]
+
+
+def test_batch_without_sections_gets_one_batch_wide_section(client,headers,plan,app):
+    with app.state.store.transaction() as d:
+        for code in ('A','SECOND'): del d['records']['sections'][code]
+        del d['records']['student_enrollments']['EN']
+    body={'revision':0,'academic_year_code':'Y','subject_code':plan['subject_code'],'teacher_code':'T1'}
+    r=client.put(BASE+'/faculty',headers=headers,json=body)
+    assert r.status_code==200,r.text
+    created=[s for s in app.state.store.snapshot()['records']['sections'].values() if s['batch_code']=='B']
+    assert len(created)==1 and not created[0].get('semester_code')
+    w=r.json()
+    assert [s['code'] for s in w['sections']]==[created[0]['code']]
+    assert w['offerings'][0]['section_code']==created[0]['code']
+    # Later semesters reuse the same batch-wide section instead of creating another.
+    later=next(s for s in w['items'] if s['semester_number']==3)
+    again=client.put(BASE+'/faculty',headers=headers,json={**body,'revision':1,'subject_code':later['subject_code']})
+    assert again.status_code==200,again.text
+    assert len([s for s in app.state.store.snapshot()['records']['sections'].values() if s['batch_code']=='B'])==1
+
+
+def test_section_less_allocation_never_guesses_a_semester_or_bypasses_permissions(client,headers,plan,app):
+    later=next(s for s in curriculum(app.state.store.snapshot(),'INT-BPC')['items'] if s['semester_number']==3)
+    body={'revision':0,'academic_year_code':'Y','subject_code':later['subject_code'],'teacher_code':'T1'}
+    r=client.put(BASE+'/faculty',headers=headers,json=body)
+    assert r.status_code==422 and 'semester' in r.json()['detail']
+    with app.state.store.transaction() as d:
+        for code in ('A','SECOND'): del d['records']['sections'][code]
+        d['roles']['ROOT']={'code':'ROOT','scope':'college','permissions':{'programs':['view'],'subject_offerings':['create','edit','view']}}
+    r=client.put(BASE+'/faculty',headers=headers,json={**body,'subject_code':plan['subject_code']})
+    assert r.status_code==403,r.text
+    assert not [s for s in app.state.store.snapshot()['records']['sections'].values() if s['batch_code']=='B']

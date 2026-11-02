@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useRef, useState } from "react";
 import {
   ChevronLeft,
@@ -160,6 +161,22 @@ export default function AttendanceWorkspace({
       (personal || (r.section_code || "") === section),
   );
   const marks = { ...current?.marks, ...draft };
+  /** Students with approved leave on the selected day: they default to absent. */
+  const onLeave = new Set(
+    Object.entries(data?.leave_dates || {})
+      .filter(([, dates]) => (dates as string[]).includes(day))
+      .map(([code]) => code),
+  );
+  /** Present / absent as shown in the register (late counts as present, leave as absent). */
+  const effective = (code: string): "present" | "absent" => {
+    const value = marks[code];
+    if (value === "present" || value === "late") return "present";
+    if (value === "absent" || value === "excused") return "absent";
+    return onLeave.has(code) ? "absent" : "present";
+  };
+  const roster = data?.students || [];
+  const presentCount = roster.filter((s) => effective(s.code) === "present").length;
+  const leaveCount = roster.filter((s) => onLeave.has(s.code)).length;
   const students = (data?.students || []).filter((s) =>
     `${s.name} ${s.admission_number}`
       .toLowerCase()
@@ -210,9 +227,14 @@ export default function AttendanceWorkspace({
         period,
         subject: subject || current?.subject || "",
         revision: current?.legacy ? 0 : current?.revision || 0,
-        marks: data.students
-          .filter((s) => marks[s.code])
-          .map((s) => ({ student_code: s.code, status: marks[s.code] })),
+        // Every student is saved: changes, earlier marks, otherwise the register default
+        // (present, or absent for a student on approved leave).
+        marks: data.students.map((s) => ({
+          student_code: s.code,
+          status: (draft[s.code] ||
+            current?.marks?.[s.code] ||
+            effective(s.code)) as AttendanceStatus,
+        })),
       });
       setDraft({});
       setNotice(
@@ -560,12 +582,25 @@ export default function AttendanceWorkspace({
                   onClick={() =>
                     setDraft(
                       Object.fromEntries(
-                        (data?.students || []).map((s) => [s.code, "present"]),
+                        roster.map((s) => [
+                          s.code,
+                          onLeave.has(s.code) ? "absent" : "present",
+                        ]),
                       ),
                     )
                   }
                 >
                   Mark all present
+                </button>
+                <button
+                  disabled={saving || busy}
+                  onClick={() =>
+                    setDraft(
+                      Object.fromEntries(roster.map((s) => [s.code, "absent"])),
+                    )
+                  }
+                >
+                  All absent
                 </button>
                 <button
                   disabled={saving || busy || !pending}
@@ -575,16 +610,41 @@ export default function AttendanceWorkspace({
                 </button>
                 <button
                   className="att-save"
-                  disabled={saving || busy || !pending}
+                  disabled={saving || busy || !roster.length || (!pending && !!current)}
                   onClick={() => void save()}
                 >
                   <Save size={16} />
-                  {saving ? "Saving…" : "Save attendance"}
+                  {saving
+                    ? "Saving…"
+                    : `Save attendance · ${presentCount} present, ${roster.length - presentCount} absent`}
                 </button>
               </div>
             )}
+            {!busy && !!roster.length && (
+              <div className="att-register-overview" aria-label="Register overview">
+                <span className="att-ov-total">
+                  <strong>{roster.length}</strong> Students
+                </span>
+                <span className="att-ov-present">
+                  <strong>{presentCount}</strong> Present
+                </span>
+                <span className="att-ov-absent">
+                  <strong>{roster.length - presentCount}</strong> Absent
+                </span>
+                <span className="att-ov-leave">
+                  <strong>{leaveCount}</strong> On leave
+                </span>
+                <span className="att-ov-state">
+                  {current && !pending
+                    ? "Saved"
+                    : pending
+                      ? `${Object.keys(draft).length} unsaved change${Object.keys(draft).length === 1 ? "" : "s"}`
+                      : "Not saved yet"}
+                </span>
+              </div>
+            )}
             {busy ? (
-              <p role="status">Loading attendance…</p>
+              <WorkspaceSkeleton compact label="Loading attendance" />
             ) : (
               <div className="att-table-wrap">
                 <table>
@@ -613,25 +673,30 @@ export default function AttendanceWorkspace({
                         </th>
                         <td>
                           {canMark ? (
-                            <select
+                            <div
+                              className="att-toggle"
+                              role="radiogroup"
                               aria-label={`Attendance for ${s.name}`}
-                              value={marks[s.code] || ""}
-                              onChange={(e) => {
-                                if (e.target.value)
-                                  setDraft((d) => ({
-                                    ...d,
-                                    [s.code]: e.target
-                                      .value as AttendanceStatus,
-                                  }));
-                              }}
                             >
-                              <option value="">Not recorded</option>
-                              {Object.entries(statusNames).map(([v, label]) => (
-                                <option key={v} value={v}>
-                                  {label}
-                                </option>
+                              {(["present", "absent"] as const).map((v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  role="radio"
+                                  aria-checked={effective(s.code) === v}
+                                  className={`att-toggle-${v}${effective(s.code) === v ? " is-on" : ""}${draft[s.code] ? " is-changed" : ""}`}
+                                  disabled={saving}
+                                  onClick={() =>
+                                    setDraft((d) => ({ ...d, [s.code]: v }))
+                                  }
+                                >
+                                  {v === "present" ? "P" : "A"}
+                                </button>
                               ))}
-                            </select>
+                              {onLeave.has(s.code) && (
+                                <span className="att-leave-tag">On leave</span>
+                              )}
+                            </div>
                           ) : (
                             statusNames[marks[s.code]] || "Not recorded"
                           )}

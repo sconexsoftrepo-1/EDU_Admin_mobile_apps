@@ -42,7 +42,7 @@ void main() {
   ) => RepaintBoundary(
     key: const ValueKey('auth-capture'),
     child: EdunexaApp(
-      title: 'EduNexa',
+      title: 'Edu-Pragathi',
       clientId: client,
       roles: roles,
       initialize: () async {},

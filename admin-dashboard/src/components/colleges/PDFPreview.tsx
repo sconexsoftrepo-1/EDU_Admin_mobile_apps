@@ -1,10 +1,11 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Download, ExternalLink, X } from "lucide-react";
 const PDFCanvasViewer = dynamic(() => import("./PDFCanvasViewer"), {
   ssr: false,
-  loading: () => <p role="status">Loading PDF viewer…</p>,
+  loading: () => <WorkspaceSkeleton compact label="Loading PDF viewer" />,
 });
 /** One listener per college page; generated reports keep the same preview/download bytes. */
 export default function PDFPreview() {

@@ -1,3 +1,4 @@
+import 'helpers/workspace_navigation.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -187,30 +188,10 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          for (final screen in routes['screens']['screens'] as List) {
-            await tester.tap(find.byTooltip('Open navigation menu'));
-            await tester.pumpAndSettle();
-            final target = find.descendant(
-              of: find.byType(Drawer),
-              matching: find.text(screen['title']),
-            );
-            await tester.scrollUntilVisible(
-              target,
-              180,
-              scrollable: find
-                  .descendant(
-                    of: find.byType(Drawer),
-                    matching: find.byType(Scrollable),
-                  )
-                  .first,
-            );
-            await Scrollable.ensureVisible(
-              tester.element(target),
-              alignment: .4,
-            );
-            await tester.pumpAndSettle();
-            await tester.tap(target);
-            await tester.pumpAndSettle();
+          for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
+            await openModule(tester, screen['key'] as String);
             expect(
               tester.takeException(),
               isNull,
@@ -240,7 +221,9 @@ void main() {
             }
           }
           await tester.pumpWidget(const SizedBox());
-          for (final screen in routes['screens']['screens'] as List) {
+          for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
             final d = routes[screen['key']] as Json;
             for (final action in d['actions'] as List? ?? []) {
               if (action['key'] == 'read_notification') continue;

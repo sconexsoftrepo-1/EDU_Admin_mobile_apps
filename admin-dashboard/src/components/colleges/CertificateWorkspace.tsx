@@ -1,14 +1,10 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
+import dynamic from "next/dynamic";
 import SearchField, { searchValues } from "./SearchField";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  BadgeCheck,
-  Download,
-  FileCheck2,
-  FileText,
-  Plus,
-} from "lucide-react";
+import { BadgeCheck, Download, FileCheck2, FileText, Plus } from "lucide-react";
 import SideDrawer from "./SideDrawer";
 import {
   api,
@@ -19,8 +15,19 @@ import {
 import { toast } from "./toast";
 import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import { useOptionalCollege } from "./CollegeStore";
-import { readWorkspaceCache, workspaceCacheKey, writeWorkspaceCache } from "@/lib/colleges/workspace-cache";
+import {
+  readWorkspaceCache,
+  workspaceCacheKey,
+  writeWorkspaceCache,
+} from "@/lib/colleges/workspace-cache";
 import "./assignment-workspace.css";
+
+const PDFCanvasViewer = dynamic(() => import("./PDFCanvasViewer"), {
+  ssr: false,
+  loading: () => (
+    <WorkspaceSkeleton compact label="Loading certificate viewer" />
+  ),
+});
 
 export default function CertificateWorkspace({
   personal = false,
@@ -30,11 +37,21 @@ export default function CertificateWorkspace({
   studentCode?: string;
 }) {
   const session = useOptionalCollege();
-  const dataKey = workspaceCacheKey(session?.account?.code, session?.activeRole?.code, `special:certificates:${studentCode || "self"}`);
-  const cached = readWorkspaceCache<{ items: CertificateRow[]; issued: CertificateRow[]; options: CertificateOptions }>(dataKey);
+  const dataKey = workspaceCacheKey(
+    session?.account?.code,
+    session?.activeRole?.code,
+    `special:certificates:${studentCode || "self"}`,
+  );
+  const cached = readWorkspaceCache<{
+    items: CertificateRow[];
+    issued: CertificateRow[];
+    options: CertificateOptions;
+  }>(dataKey);
   const [items, setItems] = useState<CertificateRow[]>(cached?.items || []);
   const [issued, setIssued] = useState<CertificateRow[]>(cached?.issued || []);
-  const [options, setOptions] = useState<CertificateOptions | null>(cached?.options || null);
+  const [options, setOptions] = useState<CertificateOptions | null>(
+    cached?.options || null,
+  );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(!cached);
   const [drawer, setDrawer] = useState(false);
@@ -45,39 +62,95 @@ export default function CertificateWorkspace({
   const [student, setStudent] = useState(studentCode || "");
   const [template, setTemplate] = useState("study_certificate");
   const [saving, setSaving] = useState(false);
+  const [issuer, setIssuer] = useState("");
+  const [preview, setPreview] = useState<{ key: string; url: string } | null>(
+    null,
+  );
+  const [previewError, setPreviewError] = useState<{
+    key: string;
+    message: string;
+  } | null>(null);
+  const [previewAttempt, setPreviewAttempt] = useState(0);
+  const previewKey = [
+    student,
+    template,
+    program,
+    year,
+    issuer,
+    previewAttempt,
+  ].join(":");
+  const selectionReady =
+    !!student && !!program && !!year && (!options?.issuer_required || !!issuer);
+  useEffect(() => {
+    if (!drawer || !selectionReady) return;
+    const abort = new AbortController();
+    let url = "";
+    api.certificates
+      .preview(
+        {
+          student_code: student,
+          template_code: template,
+          program_code: program,
+          academic_year_code: year,
+          issuer_employee_code: issuer || undefined,
+        },
+        abort.signal,
+      )
+      .then((blob) => {
+        if (abort.signal.aborted) return;
+        url = URL.createObjectURL(blob);
+        setPreview({ key: previewKey, url });
+      })
+      .catch((e) => {
+        if (!abort.signal.aborted)
+          setPreviewError({ key: previewKey, message: errorText(e) });
+      });
+    return () => {
+      abort.abort();
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [
+    drawer,
+    selectionReady,
+    student,
+    template,
+    program,
+    year,
+    issuer,
+    previewKey,
+    previewAttempt,
+  ]);
 
-  async function load(force = false) {
-    if (force || !cached) setBusy(true);
-    try {
-      const [list, resultOptions] = await Promise.all([
-        api.certificates.list(studentCode || undefined),
-        api.certificates.options(),
-      ]);
-      setItems(list.items);
-      setIssued(list.certificates);
-      setOptions(resultOptions);
-      writeWorkspaceCache(dataKey, { items: list.items, issued: list.certificates, options: resultOptions });
-      setError("");
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
-    }
+  function load() {
+    return Promise.all([
+      api.certificates.list(studentCode || undefined),
+      api.certificates.options(),
+    ])
+      .then(([list, resultOptions]) => {
+        setItems(list.items);
+        setIssued(list.certificates);
+        setOptions(resultOptions);
+        writeWorkspaceCache(dataKey, {
+          items: list.items,
+          issued: list.certificates,
+          options: resultOptions,
+        });
+        setError("");
+      })
+      .catch((e) => setError(errorText(e)))
+      .finally(() => setBusy(false));
   }
 
   useEffect(() => {
-    void load(false);
+    void load();
     // Each personal portal child selection owns a separately scoped list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [studentCode, dataKey]);
 
   const courses =
     options?.courses.filter((course) => course.course_level === level) || [];
-  const selectedCourse = courses.find((course) => course.code === program);
   const years =
     options?.academic_years.filter((row) => row.program_code === program) || [];
-  const selectedStudent = options?.students.find((row) => row.code === student);
-  const selectedYear = years.find((row) => row.code === year);
   const filtered = useMemo(
     () =>
       items.filter((row) =>
@@ -90,7 +163,7 @@ export default function CertificateWorkspace({
 
   async function decide(row: CertificateRow, accept: boolean) {
     try {
-      if (accept) await api.certificates.approve(row.code);
+      if (accept) await api.certificates.approve(row.code, issuer || undefined);
       else await api.certificates.reject(row.code);
       toast.success(accept ? "Certificate approved" : "Request rejected");
       await load();
@@ -103,7 +176,13 @@ export default function CertificateWorkspace({
     if (!student || !template || !program || !year) return;
     setSaving(true);
     try {
-      await api.certificates.issue(student, template, program, year);
+      await api.certificates.issue(
+        student,
+        template,
+        program,
+        year,
+        issuer || undefined,
+      );
       toast.success(
         "Certificate issued",
         "The student and linked parents have been notified.",
@@ -150,7 +229,13 @@ export default function CertificateWorkspace({
           </p>
         </div>
         {!personal && (
-          <WorkspacePrimaryAction onClick={() => setDrawer(true)}>
+          <WorkspacePrimaryAction
+            onClick={() => {
+              setPreview(null);
+              setPreviewError(null);
+              setDrawer(true);
+            }}
+          >
             <Plus size={17} /> Issue certificate
           </WorkspacePrimaryAction>
         )}
@@ -208,9 +293,19 @@ export default function CertificateWorkspace({
           placeholder="Search certificates"
           value={search}
           onValueChange={setSearch}
-          suggestions={searchValues(items, ["student_name", "template_name", "status"])}
+          suggestions={searchValues(items, [
+            "student_name",
+            "template_name",
+            "status",
+          ])}
         />
-          <button onClick={() => void load(true)} disabled={busy}>
+        <button
+          onClick={() => {
+            setBusy(true);
+            void load();
+          }}
+          disabled={busy}
+        >
           Refresh
         </button>
       </div>
@@ -218,10 +313,17 @@ export default function CertificateWorkspace({
       {error && (
         <div className="as-alert" role="alert">
           {error}
-          <button onClick={() => void load(true)}>Retry</button>
+          <button
+            onClick={() => {
+              setBusy(true);
+              void load();
+            }}
+          >
+            Retry
+          </button>
         </div>
       )}
-      {busy && <div className="as-empty">Loading certificates…</div>}
+      {busy && <WorkspaceSkeleton compact label="Loading certificates" />}
       {!busy && filtered.length === 0 && (
         <div className="as-empty">
           <FileText />
@@ -232,7 +334,9 @@ export default function CertificateWorkspace({
 
       <div className="as-cards">
         {filtered.map((row) => {
-          const certificate = issued.find((item) => item.request_code === row.code);
+          const certificate = issued.find(
+            (item) => item.request_code === row.code,
+          );
           return (
             <article className="as-card" key={row.code}>
               <div className="as-card-top">
@@ -293,6 +397,28 @@ export default function CertificateWorkspace({
         </section>
       )}
 
+      {!personal && (
+        <section className="edu-student-section">
+          {options?.issuer_required && (
+            <label>
+              Authorized certificate issuer
+              <select
+                required
+                value={issuer}
+                onChange={(e) => setIssuer(e.target.value)}
+              >
+                <option value="">Select issuing employee</option>
+                {options.issuers?.map((e) => (
+                  <option key={e.code} value={e.code}>
+                    {e.name}
+                    {e.designation ? ` · ${e.designation}` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </section>
+      )}
       {!personal && drawer && (
         <SideDrawer
           title="Issue a certificate"
@@ -302,9 +428,11 @@ export default function CertificateWorkspace({
             <button
               form="cert-issue-form"
               className="as-primary"
-              disabled={saving || !student || !program || !year}
+              disabled={
+                saving || !selectionReady || preview?.key !== previewKey
+              }
             >
-              {saving ? "Issuing…" : "Preview and issue"}
+              {saving ? "Issuing…" : "Issue certificate"}
             </button>
           }
           onClose={() => !saving && setDrawer(false)}
@@ -319,6 +447,24 @@ export default function CertificateWorkspace({
           >
             <fieldset>
               <legend>Student and course</legend>
+              {options?.issuer_required && (
+                <label>
+                  Authorized certificate issuer
+                  <select
+                    required
+                    value={issuer}
+                    onChange={(e) => setIssuer(e.target.value)}
+                  >
+                    <option value="">Select issuing employee</option>
+                    {options.issuers?.map((e) => (
+                      <option key={e.code} value={e.code}>
+                        {e.name}
+                        {e.designation ? ` · ${e.designation}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label>
                 Course level
                 <select
@@ -424,30 +570,36 @@ export default function CertificateWorkspace({
                   ))}
                 </select>
               </label>
-              {options?.templates.find((row) => row.code === template) && (
-                <article className={`as-cert-preview as-cert-${template}`}>
-                  <span className="as-eyebrow">
-                    {options.templates.find((row) => row.code === template)?.name}
-                  </span>
-                  <h3>{selectedStudent?.name || "Student name"}</h3>
-                  <p>
-                    {[options.templates.find((row) => row.code === template)?.description, options.templates.find((row) => row.code === template)?.paper_size].filter(Boolean).join(" · ")}
-                  </p>
-                  <div>
-                    {selectedCourse?.name || "Course"}
-                    {selectedCourse?.specialization
-                      ? ` · ${selectedCourse.specialization}`
-                      : ""}
-                  </div>
-                  <div>
-                    {selectedYear?.name || "Academic year"} · Admission{" "}
-                    {selectedStudent?.admission_number || "number"}
-                  </div>
-                  <footer>
-                    <span>Official college seal</span>
-                    <span>Authorized signature</span>
-                  </footer>
-                </article>
+              <p>
+                {
+                  options?.templates.find((row) => row.code === template)
+                    ?.paper_size
+                }{" "}
+                · Preview uses the issued PDF design.
+              </p>
+              {!selectionReady ? (
+                <p>
+                  Select the student, course, academic year and authorized
+                  issuer to preview.
+                </p>
+              ) : previewError?.key === previewKey ? (
+                <div role="alert">
+                  <p>{previewError.message}</p>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewAttempt((n) => n + 1)}
+                  >
+                    Retry preview
+                  </button>
+                </div>
+              ) : preview?.key === previewKey ? (
+                <PDFCanvasViewer
+                  key={preview.url}
+                  url={preview.url}
+                  name="Certificate preview"
+                />
+              ) : (
+                <WorkspaceSkeleton label="Preparing certificate preview" />
               )}
             </fieldset>
           </form>

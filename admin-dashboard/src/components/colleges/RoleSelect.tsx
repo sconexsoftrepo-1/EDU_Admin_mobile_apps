@@ -5,6 +5,7 @@ import {
   Check,
   ChevronDown,
   Crown,
+  FlaskConical,
   GraduationCap,
   Settings,
   ShieldCheck,
@@ -19,13 +20,15 @@ function RoleIcon({ name }: { name: string }) {
     ? Crown
     : /admin/i.test(name)
       ? Settings
-      : /faculty|teacher|principal/i.test(name)
-        ? GraduationCap
-        : /parent/i.test(name)
-          ? UsersRound
-          : /student/i.test(name)
-            ? UserRound
-            : ShieldCheck;
+      : /lab/i.test(name)
+        ? FlaskConical
+        : /faculty|teacher|principal/i.test(name)
+          ? GraduationCap
+          : /parent/i.test(name)
+            ? UsersRound
+            : /student/i.test(name)
+              ? UserRound
+              : ShieldCheck;
   return <Icon size={18} strokeWidth={1.7} aria-hidden="true" />;
 }
 

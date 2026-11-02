@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
@@ -17,7 +18,7 @@ import { errorText } from "@/services/api/client";
 
 const PDFCanvasViewer = dynamic(() => import("./PDFCanvasViewer"), {
   ssr: false,
-  loading: () => <p role="status">Loading PDF viewer…</p>,
+  loading: () => <WorkspaceSkeleton compact label="Loading PDF viewer" />,
 });
 export type StoredFile = {
   code: string;

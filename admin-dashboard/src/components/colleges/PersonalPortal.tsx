@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useErrorToast } from "./toast";
 import AssignmentWorkspace from "./AssignmentWorkspace";
 import SyllabusWorkspace from "./SyllabusWorkspace";
@@ -149,7 +150,7 @@ export default function PersonalPortal({
                 {error}
               </p>
             )}
-            {busy && <p>Loading your college records…</p>}
+            {busy && <WorkspaceSkeleton compact label="Loading your college records" />}
             {data?.summary && (
               <article className="edu-special">{record(data.summary)}</article>
             )}
@@ -172,7 +173,10 @@ export default function PersonalPortal({
                               student || data.selected_student_code || null,
                           },
                         );
-                        if (result.checkout_url) {
+                        if (
+                          result.checkout_url &&
+                          /^https?:\/\//i.test(String(result.checkout_url))
+                        ) {
                           window.location.assign(String(result.checkout_url));
                           return;
                         }

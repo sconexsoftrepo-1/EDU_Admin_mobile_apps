@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState, type FormEvent } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import {
@@ -465,7 +466,7 @@ export default function FeeHeadManager({
                 <td colSpan={5}>
                   {resource
                     ? "No fee heads match your search."
-                    : "Loading fee heads…"}
+                    : <WorkspaceSkeleton compact label="Loading fee heads" />}
                 </td>
               </tr>
             )}

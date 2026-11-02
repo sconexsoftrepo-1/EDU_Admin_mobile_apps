@@ -51,6 +51,7 @@ export interface AcademicStudent {
   backlogs: Backlog[];
 }
 export interface AcademicBatch {
+  placements?: {student_code: string; student_name: string; admission_number?: string; roll_number: string; section_code: string; section_name: string; semester_number: number | null; status: string}[];
   code: string;
   name: string;
   program_code: string;
@@ -117,6 +118,7 @@ export interface SemesterFee {
   reminder_state: string;
 }
 export interface AcademicProgress {
+  can_manage_batches?: boolean;
   generated_at: string;
   personal: boolean;
   teacher: boolean;

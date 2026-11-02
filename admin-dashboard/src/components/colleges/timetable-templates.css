@@ -6,6 +6,8 @@
   --tt-theory: #eef7fc;
   --tt-lab: #eee8fb;
   --tt-activity: #dcf1e4;
+  --tt-sports: #fde7d6;
+  --tt-library: #fbf0c9;
   --tt-pause: #f8f5e7;
   color: var(--tt-ink);
   display: grid;
@@ -444,6 +446,12 @@
 .tt-cell.tt-activity {
   background: var(--tt-activity);
 }
+.tt-cell.tt-sports {
+  background: var(--tt-sports);
+}
+.tt-cell.tt-library {
+  background: var(--tt-library);
+}
 .tt-cell.tt-selected {
   box-shadow: inset 0 0 0 2px #39858a;
   z-index: 1;
@@ -521,6 +529,12 @@
 }
 .tt-legend .activity:before {
   background: var(--tt-activity);
+}
+.tt-legend .sports:before {
+  background: var(--tt-sports);
+}
+.tt-legend .library:before {
+  background: var(--tt-library);
 }
 .tt-legend .pause:before {
   background: var(--tt-pause);

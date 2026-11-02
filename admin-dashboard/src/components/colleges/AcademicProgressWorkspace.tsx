@@ -1,4 +1,6 @@
 "use client";
+import AcademicBatchManager from "./AcademicBatchManager";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   CalendarDays,
@@ -109,9 +111,10 @@ export default function AcademicProgressWorkspace({
           {error}
         </p>
       )}
-      {!data && !error && <p role="status">Loading academic progress…</p>}
+      {!data && !error && <WorkspaceSkeleton compact label="Loading academic progress" />}
       {data && (
         <>
+          {data.can_manage_batches && <AcademicBatchManager onSelect={code => {setYear(code);setBatchCode(code);setProgram("");setSemester(0);}} onChanged={()=>setRefresh(n=>n+1)}/>}
           <div className="ap-filters">
             <label>
               Course

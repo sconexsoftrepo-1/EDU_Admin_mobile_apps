@@ -151,8 +151,229 @@ class _AcademicHubState extends State<AcademicHub> {
     if (mounted) await load();
   }
 
+  /// Parents and students see one student's own progress: no course/batch pickers or comparisons.
+  bool get personal => data?['personal'] == true;
+
+  /// Who the student is and where they study, in place of the course and batch selectors.
+  Widget studentCard(Json b) {
+    final placements = _asRows(b['placements']);
+    final placement =
+        placements.where((p) => p['semester_number'] == term).firstOrNull ??
+        placements.firstOrNull;
+    final name = _asText(
+      placement?['student_name'] ??
+          _asRows(
+            data?['children'],
+          ).where((c) => c['code'] == child).firstOrNull?['name'],
+    );
+    final timeline = b['timeline'] as Map?;
+    final status = timeline?['current'] == null
+        ? _asText(timeline?['state']).replaceAll('_', ' ')
+        : 'Current semester ${timeline!['current']}';
+    final accent = Theme.of(context).colorScheme.primary;
+    final initials = name
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0].toUpperCase())
+        .join();
+    final text = Theme.of(context).textTheme;
+    Widget fact(String label, Object? value) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: text.labelMedium?.copyWith(
+            color: collegeIvory.withValues(alpha: .75),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value == null || '$value'.isEmpty ? '—' : '$value',
+          style: text.titleSmall?.copyWith(
+            color: collegeIvory,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [accent, Color.lerp(accent, collegeEspresso, .45)!],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: .25),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: collegeIvory.withValues(alpha: .2),
+                child: Text(
+                  initials.isEmpty ? '?' : initials,
+                  style: text.titleMedium?.copyWith(
+                    color: collegeIvory,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name.isEmpty ? 'Student' : name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.titleLarge?.copyWith(color: collegeIvory),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: collegeIvory.withValues(alpha: .18),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: Text(
+                        status,
+                        style: text.labelMedium?.copyWith(
+                          color: collegeIvory,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            _asText(b['course_name']),
+            style: text.titleMedium?.copyWith(
+              color: collegeIvory,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            'Batch ${_asText(b['name'])}',
+            style: text.bodyMedium?.copyWith(
+              color: collegeIvory.withValues(alpha: .85),
+            ),
+          ),
+          Divider(color: collegeIvory.withValues(alpha: .2), height: 28),
+          Wrap(
+            spacing: 28,
+            runSpacing: 12,
+            children: [
+              fact('Section', placement?['section_name']),
+              fact('Roll no.', placement?['roll_number']),
+              fact('Admission no.', placement?['admission_number']),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The student's own scores and standing (the batch rows hold only this student here).
+  Widget personalInsights(Json? b) {
+    final terms = _asRows(b?['semesters']);
+    final standing = _asRows(
+      b?['students'],
+    ).where((s) => s['semester_number'] == term).firstOrNull;
+    final backlogs = {
+      for (final s in _asRows(b?['students']))
+        for (final r in _asRows(s['backlogs']))
+          _asText(r['subject_code'] ?? r['subject_name']),
+    }.length;
+    final graded = terms.where((t) => t['percentage'] != null).length;
+    final score = data?['college_percentage'];
+    return EduGrid(
+      fold: 4,
+      children: [
+        EduStatCard(
+          label: 'Overall score',
+          value: score == null ? 'Pending' : '$score%',
+          icon: Icons.insights_outlined,
+          tint: EduTints.clay,
+        ),
+        EduStatCard(
+          label: 'Semester $term status',
+          value: switch (standing?['status']) {
+            'all_clear' => 'All clear',
+            'backlogs' => 'Backlogs',
+            _ => 'Pending',
+          },
+          icon: Icons.flag_outlined,
+          tint: standing?['status'] == 'backlogs'
+              ? EduTints.gold
+              : EduTints.sage,
+        ),
+        EduStatCard(
+          label: 'Active backlogs',
+          value: '$backlogs',
+          icon: Icons.error_outline,
+          tint: EduTints.mist,
+          onTap: () => setState(() => tab = 'Results'),
+        ),
+        EduStatCard(
+          label: 'Semesters graded',
+          value: '$graded of ${terms.length}',
+          icon: Icons.task_alt_outlined,
+          tint: EduTints.plum,
+        ),
+      ],
+    );
+  }
+
+  Widget classState(String state) {
+    final tint = switch (state) {
+      'ongoing' => EduTints.sage,
+      'completed' => EduTints.mist,
+      _ => EduTints.gold,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: tint,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Text(
+        state.isEmpty
+            ? 'Scheduled'
+            : state[0].toUpperCase() + state.substring(1),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: EduTints.ink(tint),
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
   Widget overview(Json? b) {
     final totals = Map<String, dynamic>.from(data?['totals'] as Map? ?? {});
+    final placements = _asRows(
+      b?['placements'],
+    ).where((p) => p['semester_number'] == term).toList();
     final terms = _asRows(b?['semesters']);
     final summary = terms
         .where((s) => s['semester_number'] == term)
@@ -160,24 +381,53 @@ class _AcademicHubState extends State<AcademicHub> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            metric('Students', totals['students'] ?? 0),
-            metric('With backlogs', totals['backlog_students'] ?? 0),
-            metric(
-              'All-clear semesters',
-              totals['all_clear_semester_results'] ?? 0,
+        if (personal) ...[personalInsights(b), const SizedBox(height: 20)],
+        if (!personal &&
+            data?['personal'] == true &&
+            placements.isNotEmpty) ...[
+          Text(
+            'Class & section',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          for (final placement in placements)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${placement['student_name']} · ${placement['section_name']}',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Semester $term · Roll ${placement['roll_number']}'),
+                    Text('Admission ${placement['admission_number'] ?? ''}'),
+                  ],
+                ),
+              ),
             ),
-            metric(
-              'Academic performance',
-              data?['college_percentage'] == null
-                  ? 'Pending'
-                  : '${data!['college_percentage']}%',
-            ),
-          ],
-        ),
+          const SizedBox(height: 16),
+        ],
+        if (!personal)
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              metric('Students', totals['students'] ?? 0),
+              metric('With backlogs', totals['backlog_students'] ?? 0),
+              metric(
+                'All-clear semesters',
+                totals['all_clear_semester_results'] ?? 0,
+              ),
+              metric(
+                'Academic performance',
+                data?['college_percentage'] == null
+                    ? 'Pending'
+                    : '${data!['college_percentage']}%',
+              ),
+            ],
+          ),
         const SizedBox(height: 20),
         Text('Today’s classes', style: Theme.of(context).textTheme.titleLarge),
         const Text('India Standard Time · status refreshes every minute.'),
@@ -189,12 +439,19 @@ class _AcademicHubState extends State<AcademicHub> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _asText(c['subject_name']),
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _asText(c['subject_name']),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      classState(_asText(c['state'])),
+                    ],
                   ),
                   Text(
-                    '${c['start_time']}–${c['end_time']} · Period ${c['period']} · ${c['state']}',
+                    '${c['start_time']}–${c['end_time']} · Period ${c['period']}',
                   ),
                   Text(
                     '${c['teacher_name']} · Semester ${c['semester_number']}',
@@ -225,126 +482,89 @@ class _AcademicHubState extends State<AcademicHub> {
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Text('No classes scheduled today in the active semester.'),
           ),
-        const SizedBox(height: 20),
-        Text(
-          'Course comparison',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        for (final c in _asRows(data?['course_comparison']))
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${c['name']} · ${c['percentage'] == null ? 'Pending' : '${c['percentage']}%'}',
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: ((c['percentage'] as num? ?? 0) / 100).clamp(0, 1),
-                  minHeight: 9,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ],
+        if (!personal) ...[
+          const SizedBox(height: 20),
+          Text(
+            'Course comparison',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          for (final c in _asRows(data?['course_comparison']))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${c['name']} · ${c['percentage'] == null ? 'Pending' : '${c['percentage']}%'}',
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: ((c['percentage'] as num? ?? 0) / 100).clamp(0, 1),
+                    minHeight: 9,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ],
+              ),
             ),
+          const SizedBox(height: 20),
+          Text(
+            'Batch comparison · Semester $term',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-        const SizedBox(height: 20),
-        Text(
-          'Batch comparison · Semester $term',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        for (final cohort in _asRows(data?['batches']))
-          Builder(
-            builder: (context) {
-              final score = _asRows(cohort['semesters'])
-                  .where((s) => s['semester_number'] == term)
-                  .firstOrNull?['percentage'];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${cohort['course_name']} · ${cohort['name']} · ${score == null ? 'Pending' : '$score%'}',
-                    ),
-                    const SizedBox(height: 8),
-                    LinearProgressIndicator(
-                      value: ((score as num? ?? 0) / 100).clamp(0, 1),
-                      minHeight: 9,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          for (final cohort in _asRows(data?['batches']))
+            Builder(
+              builder: (context) {
+                final score = _asRows(cohort['semesters'])
+                    .where((s) => s['semester_number'] == term)
+                    .firstOrNull?['percentage'];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${cohort['course_name']} · ${cohort['name']} · ${score == null ? 'Pending' : '$score%'}',
+                      ),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: ((score as num? ?? 0) / 100).clamp(0, 1),
+                        minHeight: 9,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
         if (b != null) ...[
           const SizedBox(height: 20),
           Text(
-            'Semester performance',
+            personal ? 'Semester scores' : 'Semester performance',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const Text('Tap a semester to view its subjects and results.'),
-          SizedBox(
-            height: 150 + 50 * MediaQuery.textScalerOf(context).scale(1),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
+          const SizedBox(height: 14),
+          EduPillBars(
+            bars: [
+              for (final s in terms)
+                ('S${s['semester_number']}', s['percentage'] as num?),
+            ],
+            selected: terms.indexWhere((s) => s['semester_number'] == term),
+            onSelected: (i) =>
+                setState(() => semester = terms[i]['semester_number'] as int),
+          ),
+          const SizedBox(height: 16),
+          if (!personal)
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
-                for (final s in terms)
-                  InkWell(
-                    onTap: () =>
-                        setState(() => semester = s['semester_number'] as int),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            s['percentage'] == null
-                                ? 'Pending'
-                                : '${s['percentage']}%',
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 38,
-                            height: 105,
-                            alignment: Alignment.bottomCenter,
-                            decoration: BoxDecoration(
-                              color: const Color(0xffeee7dc),
-                              borderRadius: BorderRadius.circular(7),
-                            ),
-                            child: FractionallySizedBox(
-                              heightFactor:
-                                  ((s['percentage'] as num? ?? 0) / 100).clamp(
-                                    0,
-                                    1,
-                                  ),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(7),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('S${s['semester_number']}'),
-                        ],
-                      ),
-                    ),
-                  ),
+                metric('All clear', summary?['all_clear'] ?? 0),
+                metric('With backlogs', summary?['backlog_students'] ?? 0),
+                metric('Pending results', summary?['pending_students'] ?? 0),
               ],
             ),
-          ),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              metric('All clear', summary?['all_clear'] ?? 0),
-              metric('With backlogs', summary?['backlog_students'] ?? 0),
-              metric('Pending results', summary?['pending_students'] ?? 0),
-            ],
-          ),
           if (_asRows(
             (b['timeline'] as Map?)?['semesters'],
           ).any((s) => s['estimated'] == true))
@@ -521,34 +741,38 @@ class _AcademicHubState extends State<AcademicHub> {
   @override
   Widget build(BuildContext context) {
     final b = batch;
+    final own =
+        widget.role == MobileRole.parent || widget.role == MobileRole.student;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Academic progress',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        automaticallyImplyLeading: false,
-        actions: [
-          if (data?['can_manage_calendar'] == true && b != null)
-            IconButton(
-              onPressed: calendar,
-              tooltip: 'Semester calendar',
-              icon: const Icon(Icons.calendar_month_outlined),
+      appBar: own
+          ? null
+          : AppBar(
+              title: const Text(
+                'Academic progress',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              automaticallyImplyLeading: false,
+              actions: [
+                if (data?['can_manage_calendar'] == true && b != null)
+                  IconButton(
+                    onPressed: calendar,
+                    tooltip: 'Semester calendar',
+                    icon: const Icon(Icons.calendar_month_outlined),
+                  ),
+              ],
             ),
-          IconButton(
-            onPressed: busy ? null : load,
-            tooltip: 'Refresh academic progress',
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: load,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
-            if (busy) const LinearProgressIndicator(),
+            if (busy && data != null) const LinearProgressIndicator(),
+            if (data == null && error.isEmpty) ...[
+              const EduCardSkeleton(height: 190),
+              const SizedBox(height: 14),
+              const EduLoadingSkeleton(),
+            ],
             if (error.isNotEmpty)
               Card(
                 child: Padding(
@@ -562,32 +786,34 @@ class _AcademicHubState extends State<AcademicHub> {
                 ),
               ),
             if (data != null) ...[
-              select('Course', program, _asRows(data!['courses']), (v) {
-                setState(() {
-                  program = v;
-                  year = '';
-                  batchCode = '';
-                  semester = 0;
-                });
-                load();
-              }),
-              select(
-                'Academic batch',
-                year,
-                _asRows(data!['academic_years'])
-                    .where(
-                      (y) => program.isEmpty || y['program_code'] == program,
-                    )
-                    .toList(),
-                (v) {
+              if (!personal) ...[
+                select('Course', program, _asRows(data!['courses']), (v) {
                   setState(() {
-                    year = v;
-                    batchCode = v;
+                    program = v;
+                    year = '';
+                    batchCode = '';
                     semester = 0;
                   });
                   load();
-                },
-              ),
+                }),
+                select(
+                  'Academic batch',
+                  year,
+                  _asRows(data!['academic_years'])
+                      .where(
+                        (y) => program.isEmpty || y['program_code'] == program,
+                      )
+                      .toList(),
+                  (v) {
+                    setState(() {
+                      year = v;
+                      batchCode = v;
+                      semester = 0;
+                    });
+                    load();
+                  },
+                ),
+              ],
               if (_asRows(data!['children']).length > 1)
                 select('Student', child, _asRows(data!['children']), (v) {
                   setState(() {
@@ -615,52 +841,57 @@ class _AcademicHubState extends State<AcademicHub> {
                     }),
                     all: false,
                   ),
-                Text(
-                  '${b['course_name']} · ${b['name']}',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(
-                  (b['timeline'] as Map?)?['current'] == null
-                      ? _asText(
-                          (b['timeline'] as Map?)?['state'],
-                        ).replaceAll('_', ' ')
-                      : 'Current semester ${(b['timeline'] as Map)['current']}',
-                ),
+                if (personal)
+                  studentCard(b)
+                else ...[
+                  Text(
+                    '${b['course_name']} · ${b['name']}',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  Text(
+                    (b['timeline'] as Map?)?['current'] == null
+                        ? _asText(
+                            (b['timeline'] as Map?)?['state'],
+                          ).replaceAll('_', ' ')
+                        : 'Current semester ${(b['timeline'] as Map)['current']}',
+                  ),
+                ],
                 const SizedBox(height: 14),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final s in _asRows(b['semesters']))
-                      ChoiceChip(
-                        label: Text('Semester ${s['semester_number']}'),
-                        selected: term == s['semester_number'],
-                        onSelected: (_) => setState(
-                          () => semester = s['semester_number'] as int,
-                        ),
+                Builder(
+                  builder: (context) {
+                    final terms = _asRows(b['semesters']);
+                    return EduPillTabs(
+                      labels: [
+                        for (final s in terms)
+                          'Semester ${s['semester_number']}',
+                      ],
+                      selected: terms.indexWhere(
+                        (s) => s['semester_number'] == term,
                       ),
-                  ],
+                      onSelected: (i) => setState(
+                        () => semester = terms[i]['semester_number'] as int,
+                      ),
+                    );
+                  },
                 ),
               ],
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final t in [
+              Builder(
+                builder: (context) {
+                  final tabs = [
                     'Overview',
                     'Subjects',
                     'Results',
                     if (data?['personal'] == true ||
                         widget.role == MobileRole.admin)
                       'Fees',
-                  ])
-                    ChoiceChip(
-                      label: Text(t),
-                      selected: tab == t,
-                      onSelected: (_) => setState(() => tab = t),
-                    ),
-                ],
+                  ];
+                  return EduPillTabs(
+                    labels: tabs,
+                    selected: tabs.indexOf(tab),
+                    onSelected: (i) => setState(() => tab = tabs[i]),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               if (tab == 'Overview') overview(b),
@@ -1058,8 +1289,107 @@ class _AcademicOverviewState extends State<AcademicOverview> {
     }
   }
 
+  /// Parent/student card: the student's own score ring, course and backlog standing.
+  Widget personalCard(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final batch = _asRows(data?['batches']).firstOrNull;
+    final timeline = batch?['timeline'] as Map?;
+    final score = data?['college_percentage'] as num?;
+    final backlogs =
+        (data?['totals'] as Map?)?['backlog_students'] as num? ?? 0;
+    final tint = backlogs == 0 ? EduTints.sage : EduTints.clay;
+    return Material(
+      color: collegeIvory,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: const BorderSide(color: collegeLine),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: widget.onOpen,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final ring = EduRing(
+                value: score == null ? null : score / 100,
+                size: 88,
+                center: Text(
+                  score == null ? '—' : '${score.round()}%',
+                  style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                ),
+              );
+              final info = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Academic progress', style: text.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    batch == null
+                        ? 'No academic batch linked yet'
+                        : '${_asText(batch['course_name'])} · ${timeline?['current'] == null ? _asText(timeline?['state']).replaceAll('_', ' ') : 'Semester ${timeline!['current']}'}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tint,
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: Text(
+                          backlogs == 0 ? 'No backlogs' : 'Has backlogs',
+                          style: text.labelMedium?.copyWith(
+                            color: EduTints.ink(tint),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        score == null ? 'Score pending' : 'Overall score',
+                        style: text.labelMedium,
+                      ),
+                    ],
+                  ),
+                ],
+              );
+              if (constraints.maxWidth < 300 ||
+                  MediaQuery.textScalerOf(context).scale(16) > 22) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [ring, const SizedBox(height: 12), info],
+                );
+              }
+              return Row(
+                children: [
+                  ring,
+                  const SizedBox(width: 16),
+                  Expanded(child: info),
+                  const Icon(Icons.chevron_right, color: collegeMuted),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (data == null && error.isEmpty) {
+      return const EduCardSkeleton(height: 124);
+    }
+    if (data?['personal'] == true) return personalCard(context);
     final totals = data?['totals'] as Map?;
     return Card(
       child: Padding(
@@ -1084,14 +1414,31 @@ class _AcademicOverviewState extends State<AcademicOverview> {
                 Text(
                   '${b['course_name']} · ${(b['timeline'] as Map?)?['current'] == null ? _asText((b['timeline'] as Map?)?['state']) : 'Semester ${(b['timeline'] as Map)['current']}'}',
                 ),
+              if (data?['personal'] == true)
+                for (final cohort in _asRows(data!['batches']))
+                  for (final placement in _asRows(cohort['placements']).where(
+                    (p) =>
+                        p['semester_number'] ==
+                        (cohort['timeline'] as Map?)?['current'],
+                  ))
+                    Text(
+                      '${placement['student_name']} · ${placement['section_name']} · Roll ${placement['roll_number']}',
+                    ),
               const SizedBox(height: 8),
               Text(
-                '${totals?['backlog_students'] ?? 0} students with backlogs · ${totals?['all_clear_semester_results'] ?? 0} all-clear semester records',
+                data?['personal'] == true
+                    // One student: their own score and backlogs, not cohort counts.
+                    ? '${data?['college_percentage'] == null ? 'Score pending' : 'Overall score ${data!['college_percentage']}%'} · ${(totals?['backlog_students'] ?? 0) == 0 ? 'No backlogs' : 'Has backlogs'}'
+                    : '${totals?['backlog_students'] ?? 0} students with backlogs · ${totals?['all_clear_semester_results'] ?? 0} all-clear semester records',
               ),
               TextButton.icon(
                 onPressed: widget.onOpen,
                 icon: const Icon(Icons.school_outlined),
-                label: const Text('Open academic dashboard'),
+                label: Text(
+                  data?['personal'] == true
+                      ? 'View progress & scores'
+                      : 'Open academic dashboard',
+                ),
               ),
             ],
           ],

@@ -1,9 +1,11 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BookOpen,
+  CalendarRange,
   Check,
   ChevronDown,
   Copy,
@@ -61,6 +63,44 @@ export default function TimetableTemplateWorkspace({
   const [search, setSearch] = useState("");
   const [history, setHistory] = useState<TimetableDraft[]>([]);
   const pristine = useRef<TimetableDraft | null>(null);
+  const [generating, setGenerating] = useState(false);
+  async function generateAll() {
+    setGenerating(true);
+    setError("");
+    setNotice("");
+    try {
+      const preview = await timetableApi.generate(true);
+      if (!preview.count) {
+        setNotice(
+          "Every current-semester section already has a timetable. Nothing to generate.",
+        );
+        return;
+      }
+      if (
+        !window.confirm(
+          `Create ${preview.count} semester timetable${preview.count === 1 ? "" : "s"}?\n\n` +
+            preview.created
+              .slice(0, 12)
+              .map((t) => `• ${t.name}`)
+              .join("\n") +
+            (preview.count > 12 ? `\n… and ${preview.count - 12} more` : "") +
+            (preview.created.some((t) => t.replaces_demo)
+              ? "\n\nSeeded demo timetables for these classes are replaced by full weeks."
+              : ""),
+        )
+      )
+        return;
+      const made = await timetableApi.generate();
+      setNotice(
+        `Created ${made.count} semester timetable${made.count === 1 ? "" : "s"}. They are published to students and faculty.`,
+      );
+      await load();
+    } catch (e) {
+      setError(`Could not generate timetables. ${errorText(e)}`);
+    } finally {
+      setGenerating(false);
+    }
+  }
   const canWrite = code ? records.can_edit : records.can_create;
   const readOnly = saving || !canWrite;
   const load = useCallback(async () => {
@@ -209,12 +249,34 @@ export default function TimetableTemplateWorkspace({
         </div>
       )}
       {loading ? (
-        <div className="tt-loading">
-          <LoaderCircle className="tt-spinner" size={20} />
-          Loading courses and saved timetables…
-        </div>
+        <WorkspaceSkeleton label="Loading courses and saved timetables" />
       ) : (
         <>
+          {records.can_create && (
+            <section className="tt-setup" aria-label="Generate semester timetables">
+              <div className="tt-setup-heading">
+                <h3>Semester timetables</h3>
+                <p>
+                  Build a weekly timetable for every section of the current
+                  semester that has none — classes with their faculty, labs in
+                  their registered lab, break, lunch, sports and library. Each
+                  week repeats until the semester ends; no teacher is booked in
+                  two places at once. Existing timetables are not changed.
+                </p>
+              </div>
+              <div className="tt-create-fields">
+                <button
+                  type="button"
+                  className="tt-primary"
+                  disabled={saving || generating}
+                  onClick={() => void generateAll()}
+                >
+                  <CalendarRange size={17} />
+                  {generating ? "Generating…" : "Generate semester timetables"}
+                </button>
+              </div>
+            </section>
+          )}
           {records.can_create && (
             <section className="tt-setup" aria-label="Create a timetable">
               <div className="tt-setup-heading">
@@ -496,8 +558,39 @@ export default function TimetableTemplateWorkspace({
                       }
                     />
                   </label>
+                  <label>
+                    Repeats every week from
+                    <input
+                      type="date"
+                      aria-label="Weekly timetable starts"
+                      readOnly={readOnly}
+                      value={draft.valid_from || ""}
+                      onChange={(e) =>
+                        change({ ...draft, valid_from: e.target.value || null })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Until
+                    <input
+                      type="date"
+                      aria-label="Weekly timetable ends"
+                      readOnly={readOnly}
+                      value={draft.valid_to || ""}
+                      min={draft.valid_from || undefined}
+                      onChange={(e) =>
+                        change({ ...draft, valid_to: e.target.value || null })
+                      }
+                    />
+                  </label>
                 </div>
               </div>
+              {!readOnly && (
+                <p className="tt-instructions">
+                  This week repeats every week of the semester. Leave the dates
+                  empty to use the semester’s start and end dates.
+                </p>
+              )}
               {!readOnly && (
                 <p className="tt-instructions">
                   Click any text to edit. Change times on the left. Drag a box’s

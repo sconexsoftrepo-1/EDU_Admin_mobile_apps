@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from app.core.security import (
     DUMMY_HASH,
+    account_client_allowed,
     LoginInput,
     PasswordInput,
     RefreshInput,
@@ -58,7 +59,7 @@ def login(body: LoginInput, request: Request, response: Response):
                 account
                 and valid
                 and account["active"]
-                and body.client in account["clients"]
+                and account_client_allowed(account, body.client)
             )
             wrong_role = (
                 not denied
@@ -126,7 +127,7 @@ def refresh(body: RefreshInput, request: Request, response: Response):
                     and successor_exists
                     and account
                     and account["active"]
-                    and body.client in account["clients"]
+                    and account_client_allowed(account, body.client)
                 ):
                     result = issue(
                         data,
@@ -151,7 +152,7 @@ def refresh(body: RefreshInput, request: Request, response: Response):
                 and session["expires_at"] > time.time()
                 and account
                 and account["active"]
-                and body.client in account["clients"]
+                and account_client_allowed(account, body.client)
             ):
                 session["used"] = True
                 session["revoked"] = True

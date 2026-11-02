@@ -331,6 +331,37 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
 
 class CertificateInput(StrictModel):
     request_code: str
+    issuer_employee_code: str | None = None
+
+
+def certificate_issuer(data, user, selected=None):
+    code = user.get("person_code")
+    if user.get("person_type") == "system":
+        code = selected
+    elif selected and selected != code:
+        raise HTTPException(403, "Certificates must be issued under your own employee identity")
+    issuer = data["records"].get("employees", {}).get(code)
+    if not issuer:
+        raise HTTPException(409, "Select the authorized employee issuing this certificate, or link your administrator login to an employee record")
+    return issuer
+
+
+def certificate_enrollment(data, student, kind, req):
+    acceptable = {"active", "completed"} if kind.get("code") == "course_completion" else {"active"}
+    for enrollment in query_rows(data, "student_enrollments"):
+        if enrollment.get("student_code") != student["code"] or enrollment.get("status") not in acceptable:
+            continue
+        section = data["records"].get("sections", {}).get(enrollment.get("section_code"), {})
+        batch = data["records"].get("batches", {}).get(section.get("batch_code"), {})
+        if req.get("program_code") and batch.get("program_code") != req["program_code"]:
+            continue
+        year_code = req.get("academic_year_code")
+        if year_code and batch.get("academic_year_code") != year_code:
+            year = data["records"].get("academic_years", {}).get(year_code, {})
+            if not (str(batch.get("entry_year")) == str(year.get("start_date", ""))[:4] and str(batch.get("graduation_year")) == str(year.get("end_date", ""))[:4]):
+                continue
+        return enrollment
+    raise HTTPException(409, "Active enrollment and roll number required for the selected course and academic year")
 
 
 def signing_key(request):
@@ -358,6 +389,10 @@ def signing_key(request):
 
 @router.post("/certificates/issue", status_code=201)
 def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
+    return issue_certificate(body, request, user)
+
+
+def issue_certificate(body, request, user, prepare_request=None):
     if request.app.state.settings.file_storage != "s3":
         raise HTTPException(503, "Certificate issuance requires EDUNEXA_FILE_STORAGE=s3 and configured S3 access")
     with file_transaction(request) as (data, pending):
@@ -365,29 +400,17 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
             data, user, "certificates", "approve"
         ):
             raise HTTPException(403, "Certificate authorization required")
+        issuer = certificate_issuer(data, user, body.issuer_employee_code)
+        if prepare_request:
+            prepare_request(data)
         req = query_get(data, "certificate_requests", body.request_code)
         if req["status"] != "pending":
             raise HTTPException(409, "Request already processed")
         student = query_get(data, "students", req["student_code"])
         kind = query_get(data, "certificate_types", req["type_code"])
-        acceptable_status = {"active", "completed"} if kind.get("code") == "course_completion" else {"active"}
-        candidate_enrollments = [e for e in query_rows(data, "student_enrollments")
-                                 if e["student_code"] == student["code"] and e["status"] in acceptable_status]
-        required_program, required_year = req.get("program_code"), req.get("academic_year_code")
-        def matches_selection(enrollment):
-            section = data["records"].get("sections", {}).get(enrollment.get("section_code"), {})
-            batch = data["records"].get("batches", {}).get(section.get("batch_code"), {})
-            if required_program and batch.get("program_code") != required_program: return False
-            if required_year and batch.get("academic_year_code") != required_year:
-                year = data["records"].get("academic_years", {}).get(required_year, {})
-                if not (str(batch.get("entry_year")) == str(year.get("start_date", ""))[:4] and str(batch.get("graduation_year")) == str(year.get("end_date", ""))[:4]): return False
-            return True
-        enrollment = next((e for e in candidate_enrollments if matches_selection(e)), None)
-        if not enrollment:
-            raise HTTPException(409, "Active enrollment and roll number required")
+        enrollment = certificate_enrollment(data, student, kind, req)
         code = new_code("CERT")
         token = secrets.token_urlsafe(32)
-        issuer = data["records"].get("employees", {}).get(user.get("person_code"), {})
         raw = certificate_pdf(kind["name"], student, kind, enrollment, data, code,
                               date.today().isoformat(), request.app.state.settings.public_portal_url.rstrip("/")
                               + "/verify-certificate/" + token, issuer, req.get("academic_year_code"))
@@ -410,7 +433,7 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
                 "request_code": req["code"],
                 "certificate_number": code,
                 "issued_on": date.today().isoformat(),
-                "issued_by_code": user["person_code"],
+                "issued_by_code": issuer["code"],
                 "verification_token": token,
                 "storage_key": storage,
                 **file_metadata(request, storage, code + ".pdf", "application/pdf", raw, "certificate", code),
@@ -435,7 +458,7 @@ def issue(body: CertificateInput, request: Request, user=Depends(current_user)):
                 "public_key": public,
                 "signed_document_storage_key": storage,
                 "document_sha256": sha,
-                "signed_by_employee_code": user["person_code"],
+                "signed_by_employee_code": issuer["code"],
                 "signed_at": now(),
                 "revoked_at": None,
             },

@@ -3,8 +3,9 @@ import { useErrorToast } from "./toast";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import Portal from "./CollegePortal";
-import { collegeRoot, type College } from "@/data/colleges";
+import { collegeRoot, validCollegePath, type College } from "@/data/colleges";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { api, errorText, type CertificateVerification } from "@/services/api";
 const Login = dynamic(() => import("./ConnectedPortal"));
@@ -63,11 +64,23 @@ function Verification({ college: c, id }: { college: College; id: string }) {
 }
 export default function CollegePage({
   college,
-  parts,
+  parts: serverParts,
 }: {
   college: College;
   parts: string[];
 }) {
+  // Follow the browser URL so in-portal links can switch screens without a server round trip
+  // (see instantPortalNavigation in CollegePortal); the server's parts cover the first render.
+  const pathname = usePathname();
+  let live: string[] = [];
+  try {
+    live = pathname
+      .split("/")
+      .filter(Boolean)
+      .map((part) => decodeURIComponent(part));
+  } catch {}
+  const parts =
+    live.length && validCollegePath(college, live) ? live : serverParts;
   if (parts[0] === "portal" && parts[1] === "login")
     return <Login college={college} parts={parts} loginRedirect />;
   if (parts[0] === "portal") return <Portal college={college} parts={parts} />;

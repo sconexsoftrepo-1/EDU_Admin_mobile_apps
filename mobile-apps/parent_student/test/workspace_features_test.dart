@@ -1,3 +1,4 @@
+import 'helpers/workspace_navigation.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -83,31 +84,11 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(NavigationDestination), findsNWidgets(5));
         await capture(tester, '${role.name}-home');
-        for (final screen in routes['screens']['screens'] as List) {
-          await tester.tap(find.byTooltip('Open navigation menu'));
-          await tester.pumpAndSettle();
-          final target = find.descendant(
-            of: find.byType(Drawer),
-            matching: find.text(screen['title']),
-          );
-          await tester.scrollUntilVisible(
-            target,
-            180,
-            scrollable: find
-                .descendant(
-                  of: find.byType(Drawer),
-                  matching: find.byType(Scrollable),
-                )
-                .first,
-          );
-          await Scrollable.ensureVisible(
-            tester.element(target),
-            alignment: 0.4,
-          );
-          await tester.pumpAndSettle();
-          await tester.tap(target);
-          await tester.pumpAndSettle();
-          expect(find.text(['results','academics'].contains(screen['key']) ? 'Academic progress' : screen['title']), findsWidgets);
+        for (final screen in (routes['screens']['screens'] as List).where(
+            (s) => s['key'] != 'transport', // Bus & route is hidden in the app.
+          )) {
+          await openModule(tester, screen['key'] as String);
+          expect(find.text(screen['title']), findsWidgets);
           expect(
             find.text('Couldn’t load this screen'),
             findsNothing,
@@ -129,8 +110,8 @@ void main() {
             await capture(tester, '${role.name}-${screen['key']}');
           }
         }
+        // Bottom bar: primary, Progress, Home (centre), Calendar, More; Inbox is the header bell.
         for (final label in [
-          'Home',
           role == MobileRole.admin
               ? 'Finance'
               : role == MobileRole.teacher
@@ -138,8 +119,9 @@ void main() {
               : role == MobileRole.parent
               ? 'Fees'
               : 'Study',
+          'Progress',
+          'Home',
           'Calendar',
-          'Inbox',
           'More',
         ]) {
           await tester.tap(
@@ -150,6 +132,12 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
+        }
+        if (role == MobileRole.parent || role == MobileRole.student) {
+          await tester.tap(find.byTooltip('Notifications'));
+          await tester.pumpAndSettle();
+          expect(find.text('Notifications'), findsWidgets);
+          expect(find.byTooltip('Refresh'), findsNothing);
         }
         await tester.pumpWidget(const SizedBox());
       },
@@ -320,7 +308,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(requests.last, 'STU1');
-    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    // Home switches child from the "Viewing … / Switch" pill's slide-up list.
+    await tester.tap(find.byKey(const ValueKey('child-switcher')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Second child').last);
     await tester.pumpAndSettle();

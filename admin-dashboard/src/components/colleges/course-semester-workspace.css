@@ -1,7 +1,8 @@
 .cs-workspace {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   min-width: 0;
+  container-type: inline-size;
 }
 .cs-workspace .cs-heading {
   display: flex;
@@ -10,7 +11,7 @@
   gap: 16px;
 }
 .cs-heading h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 .cs-heading p,
 .cs-note {
@@ -18,41 +19,126 @@
   color: #706655;
   line-height: 1.6;
 }
-.cs-tabs {
+.cs-note {
+  font-size: 13px;
+}
+
+/* Semester tabs: one horizontal strip that scrolls when a course has many semesters. */
+.cs-workspace .cs-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.cs-tabs button {
-  min-width: 64px;
-}
-.cs-tabs button[aria-selected="true"] {
-  background: #81511b;
-  color: white;
-  border-color: #81511b;
-}
-.cs-summary {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 16px 18px;
+  gap: 4px;
+  padding: 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
   background: #f4eee3;
+  border: 1px solid #e8e0d4;
   border-radius: 12px;
-  color: #514332;
+  scroll-snap-type: x proximity;
 }
-.cs-faculty-scope {
+.cs-workspace .cs-tabs button {
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #5b4a35;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.cs-workspace .cs-tabs button small {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e8dcc8;
+  color: #5b4a35;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+}
+.cs-workspace .cs-tabs button:is(:hover, :focus-visible):not(:disabled) {
+  background: #fffaf2;
+  color: #4a2e12;
+}
+.cs-workspace .cs-tabs button[aria-selected="true"] {
+  background: #81511b;
+  border-color: #81511b;
+  color: #fff;
+  box-shadow: 0 2px 8px #81511b40;
+}
+.cs-workspace .cs-tabs button[aria-selected="true"] small {
+  background: #ffffff33;
+  color: #fff;
+}
+.cs-workspace .cs-tabs button:disabled {
+  cursor: default;
+}
+.cs-panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Batch and class scope. */
+.cs-scope {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
-.cs-workspace label {
+.cs-workspace label,
+.cs-scope-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 1.05rem;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
+  color: #4b3d2c;
   min-width: 0;
+}
+.cs-scope-static {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px dashed #d8ccb8;
+  border-radius: 8px;
+  background: #faf6ef;
+  color: #706655;
+  font-weight: 600;
+}
+.cs-scope-static strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cs-scope-static.is-active {
+  border-style: solid;
+  border-color: #c9a46e;
+  background: #fffaf2;
+  color: #4a2e12;
+}
+.cs-scope-static em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e5f2e8;
+  color: #275d43;
 }
 .cs-workspace input {
   width: 100%;
@@ -81,42 +167,89 @@
   max-height: 220px;
   overflow-y: auto;
 }
+
+/* Summary chips and list tools on one row when there is room. */
+.cs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cs-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #514332;
+  font-size: 13px;
+}
+.cs-summary span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f4eee3;
+  white-space: nowrap;
+}
+.cs-summary .cs-summary-progress {
+  background: #e5f2e8;
+  color: #275d43;
+}
 .cs-tools {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 320px;
+  justify-content: flex-end;
+  min-width: 0;
 }
 .cs-tools .edu-search-field {
   flex: 1;
-  min-width: 200px;
+  min-width: 180px;
+  max-width: 340px;
 }
+.cs-tools > button {
+  white-space: nowrap;
+}
+
+/* Subject rows: details, faculty picker, edit. */
 .cs-subjects {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 .cs-subjects > li {
-  padding: 18px;
-  border: 1px solid #e7dece;
-  border-radius: 14px;
-  background: white;
   display: grid;
-  gap: 16px;
-  min-width: 0;
-}
-.cs-subject-main {
-  display: flex;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 300px) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #e7dece;
+  border-radius: 12px;
+  background: white;
+  min-width: 0;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.cs-subjects > li:hover {
+  border-color: #d6c3a4;
+  box-shadow: 0 2px 10px #3020160d;
+}
+.cs-subjects > li:has(.cs-inline-form) {
+  grid-template-columns: 1fr;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
 }
 .cs-subject-name {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
+}
+.cs-subject-name > div {
   min-width: 0;
 }
 .cs-subject-name svg {
@@ -124,22 +257,60 @@
   color: #916427;
 }
 .cs-subject-name strong {
-  font-size: 16px;
+  display: block;
+  font-size: 14px;
   overflow-wrap: anywhere;
+}
+.cs-subject-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 3px;
 }
 .cs-subject-name small {
   display: block;
-  margin-top: 5px;
   color: #766a58;
   font-size: 12px;
+  text-transform: capitalize;
+}
+.cs-pill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f4eee3;
+  color: #8a6a3c;
+  font-size: 11px;
+  font-weight: 700;
+}
+.cs-pill.is-assigned {
+  background: #e5f2e8;
+  color: #275d43;
 }
 .cs-faculty-row {
   display: flex;
-  align-items: end;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
-.cs-faculty-row label {
+.cs-faculty-row > :first-child {
   flex: 1;
+  min-width: 0;
+}
+.cs-faculty-row > button {
+  flex-shrink: 0;
+  min-width: 76px;
+}
+.cs-faculty-readonly {
+  color: #4b3d2c;
+  font-weight: 600;
+}
+.cs-workspace .cs-edit {
+  width: 36px;
+  min-height: 36px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
 }
 .cs-workspace button {
   min-height: 40px;
@@ -171,25 +342,49 @@
   padding: 14px;
   border-radius: 9px;
 }
-@media (max-width: 650px) {
-  .cs-faculty-scope,
+
+/* Narrow drawer (phones, small windows): stack each subject row. */
+@container (max-width: 700px) {
+  .cs-workspace .cs-tabs .cs-tab-long {
+    display: none;
+  }
+  .cs-workspace .cs-tabs button {
+    gap: 6px;
+    padding: 8px 9px;
+    font-size: 13px;
+  }
+}
+@container (max-width: 540px) {
+  .cs-subjects > li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .cs-faculty-row {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .cs-tools {
+    flex-basis: 100%;
+    justify-content: stretch;
+  }
+  .cs-tools .edu-search-field {
+    max-width: none;
+  }
+}
+@container (max-width: 440px) {
+  .cs-scope,
   .cs-inline-form {
     grid-template-columns: 1fr;
   }
-  .cs-faculty-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .cs-subjects > li {
-    padding: 16px;
-  }
-  .cs-faculty-row button {
-    align-self: flex-start;
-  }
-  .cs-summary {
-    gap: 12px;
+  .cs-tabs button {
+    flex: 0 0 auto;
   }
   .cs-edit-actions {
     grid-column: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs-workspace .cs-tabs button,
+  .cs-subjects > li {
+    transition: none;
   }
 }

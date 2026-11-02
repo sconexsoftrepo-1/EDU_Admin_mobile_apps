@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from app.core.fee_plans import semester_ledger
 from app.core.resources import staff_only
 from app.core.security import require
-from app.core.storage import audit, new_code
+from app.core.storage import audit, new_code, now
 from app.workflows.schemas import AdjustmentInput, PaymentInput, ScholarshipInput
 
 ZERO = Decimal("0.00")
@@ -161,6 +161,8 @@ def record_payment(data, body, key, actor):
         "status": "settled",
         "idempotency_key": key,
         "request": signature,
+        # When the payment was recorded (paid_on is the date only); kept with the record's extras.
+        "recorded_at": now(),
     }
     query_rows(data, "payments")[payment["code"]] = payment
     for code, amount in body.allocations.items():

@@ -190,6 +190,11 @@ def onboard(data, body: StaffOnboardingInput, actor, employee_code=None):
     }
     data["records"].setdefault(PROFILES, {})[profile["code"]] = profile
     audit(data, actor, "edit" if existing else "create", PROFILES, profile["code"])
+    if body.lab_codes:
+        if body.kind != "non_teaching":
+            raise HTTPException(422, "Only non-teaching staff can be lab in-charges")
+        from app.core.lab_workspace import assign_incharge
+        assign_incharge(data, employee["code"], body.lab_codes, actor)
     return {"employee": employee, "role": role, "profile": profile, "salary_components": components}
 
 
@@ -228,6 +233,10 @@ def list_staff(request: Request, kind: str = Query("teaching", pattern="^(teachi
     need(data, user, ("employees", "view"))
     profiles = {p["employee_code"]: p for p in rows(data, PROFILES)}
     departments = {d["code"]: d["name"] for d in rows(data, "departments")}
+    labs = {}
+    for lab in data.get("documents", {}).get("labs", {}).values():
+        if lab.get("incharge_employee_code") and lab.get("status", "active") == "active":
+            labs.setdefault(lab["incharge_employee_code"], []).append(lab["name"])
     out = []
     for e in sorted(rows(data, "employees"), key=lambda e: e["code"]):
         if e.get("employee_type") != EMPLOYEE_TYPE[kind]:
@@ -247,6 +256,7 @@ def list_staff(request: Request, kind: str = Query("teaching", pattern="^(teachi
             "bank": f"{p.get('bank_name')} {mask(p.get('bank_account_number'))}" if p.get("bank_name") else None,
             "documents_uploaded": sum(1 for d in docs.values() if d.get("uploaded")),
             "documents_expected": len(docs),
+            "labs": sorted(labs.get(e["code"], [])),
         })
     return {"items": out, "total": len(out)}
 
@@ -264,8 +274,12 @@ def staff_detail(employee_code: str, request: Request, user=Depends(current_user
     role = next((r for table in ("teachers", "staff_profiles") for r in rows(data, table)
                  if r["employee_code"] == employee_code), None)
     department = data["records"].get("departments", {}).get(employee.get("department_code"), {})
+    labs = [{"code": lab["code"], "name": lab["name"], "floor": lab.get("floor"), "room_number": lab.get("room_number"),
+             "lab_type": lab.get("lab_type")}
+            for lab in data.get("documents", {}).get("labs", {}).values()
+            if lab.get("incharge_employee_code") == employee_code and lab.get("status", "active") == "active"]
     return {"employee": employee, "profile": profile, "salary_components": components,
-            "role": role, "department": department.get("name")}
+            "role": role, "department": department.get("name"), "labs": labs}
 
 
 @router.put("/{employee_code}")

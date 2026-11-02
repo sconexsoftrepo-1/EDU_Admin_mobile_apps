@@ -18,11 +18,13 @@ from app.core.timetable_templates import router as timetable_templates_router
 from app.core.assignment_workspace import router as assignment_workspace_router
 from app.core.syllabus_workspace import router as syllabus_workspace_router
 from app.core.calendar_workspace import router as calendar_workspace_router
+from app.core.academic_sections import router as academic_sections_router
 from app.core.academic_progress import router as academic_progress_router
 from app.core.assessment_workspace import router as assessment_workspace_router
 from app.core.curriculum_workspace import router as curriculum_workspace_router
 from app.core.attendance_workspace import router as attendance_workspace_router
 from app.core.certificate_workspace import router as certificate_workspace_router
+from app.core.lab_workspace import router as lab_workspace_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
 from app.core.settings import Settings
@@ -103,8 +105,23 @@ async def semester_reminder_worker(app):
         await asyncio.sleep(3600)
 
 
+def ensure_builtin_roles(app):
+    """Roles the product relies on (e.g. "Lab In-charge"), created once when missing."""
+    from app.core.lab_workspace import LAB_ROLE, ensure_lab_role
+    store = app.state.store
+    try:
+        with store.request_scope() if hasattr(store, 'request_scope') else nullcontext():
+            if LAB_ROLE in store.snapshot().get('roles', {}):
+                return
+            with store.transaction() as data:
+                ensure_lab_role(data)
+    except Exception:
+        logging.getLogger(__name__).exception('Could not create the built-in roles; they are created when first needed')
+
+
 @asynccontextmanager
 async def application_lifespan(app):
+    await asyncio.to_thread(ensure_builtin_roles, app)
     enabled=app.state.settings.semester_reminders_enabled and app.state.settings.storage_backend!='local-json'
     worker=asyncio.create_task(semester_reminder_worker(app)) if enabled else None
     try:
@@ -122,6 +139,7 @@ def create_app(settings=None):
         lifespan=application_lifespan,
         version="0.1.0",
         description="EduNexa College backend. PostgreSQL or Microsoft SQL Server persistence (local JSON for development).",
+        **({} if settings.api_docs else {"docs_url": None, "redoc_url": None, "openapi_url": None}),
     )
     app.state.settings = settings
     if settings.storage_backend == "postgres":
@@ -168,6 +186,9 @@ def create_app(settings=None):
         request._body = b"".join(chunks)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'none'")
+        response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = uuid4().hex
         return response
@@ -191,10 +212,12 @@ def create_app(settings=None):
     for router in [
         calendar_workspace_router,
         academic_progress_router,
+        academic_sections_router,
         assessment_workspace_router,
         curriculum_workspace_router,
         attendance_workspace_router,
         certificate_workspace_router,
+        lab_workspace_router,
         syllabus_workspace_router,
         auth_api.router,
         timetable_templates_router,

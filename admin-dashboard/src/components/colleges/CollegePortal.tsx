@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { api, errorText } from "@/services/api";
 import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
@@ -35,12 +36,12 @@ import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => (
-    <section className="erp-panel">Loading collection analytics…</section>
+    <WorkspaceSkeleton label="Loading collection analytics" />
   ),
 });
 const ERPInsights = dynamic(() => import("./ERPInsights"), {
   loading: () => (
-    <section className="erp-panel">Loading campus insights…</section>
+    <WorkspaceSkeleton label="Loading campus insights" />
   ),
 });
 import {
@@ -115,6 +116,7 @@ const entryScreens = [
   "admission-forms",
   "teaching-staff",
   "non-teaching-staff",
+  "labs",
   "daily-labour",
   "course-setup",
   "course-enrollment",
@@ -145,6 +147,7 @@ const labels: Record<string, string> = {
   "course-setup": "Courses & enrollment",
   "teaching-staff": "Teaching staff",
   "non-teaching-staff": "Non-teaching staff",
+  labs: "Labs & lab in-charges",
   "daily-labour": "Daily labour",
   settings: "Settings",
   forms: "Form builder",
@@ -163,6 +166,46 @@ const cols = (...names: string[]) =>
       : {}),
   }));
 const toRows = (r: object[]) => r as TableRecord[];
+/**
+ * Portal screens are client components selected from the URL, so a portal link only needs the
+ * URL to change. Switching it with history.pushState (Next.js keeps usePathname in sync) shows
+ * the screen at once instead of waiting for the server to answer a page request. The link's
+ * own onClick still runs; next/link skips its navigation because the click is handled here.
+ */
+let scrollTopAfterNavigation = false;
+function instantPortalNavigation(event: React.MouseEvent) {
+  if (
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const link = (event.target as Element).closest?.("a[href]");
+  if (
+    !(link instanceof HTMLAnchorElement) ||
+    (link.target && link.target !== "_self") ||
+    link.hasAttribute("download")
+  )
+    return;
+  const url = new URL(link.href);
+  if (
+    url.origin !== window.location.origin ||
+    url.hash ||
+    !url.pathname.startsWith("/portal/") ||
+    url.pathname === "/portal/login"
+  )
+    return;
+  event.preventDefault();
+  if (url.pathname + url.search === window.location.pathname + window.location.search)
+    return window.scrollTo({ top: 0, behavior: "instant" });
+  // Like next/link, start the new screen at the top (once it has rendered).
+  scrollTopAfterNavigation = true;
+  window.history.pushState(null, "", url.pathname + url.search);
+}
+
 export default function CollegePortal({
   college: c,
   parts,
@@ -249,6 +292,11 @@ export default function CollegePortal({
   const area = parts[1] || "admin",
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
+  useEffect(() => {
+    if (!scrollTopAfterNavigation) return;
+    scrollTopAfterNavigation = false;
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [area, activeModule, detail]);
   /** Student directory list: its filters live inside the table card (Teaching staff layout). */
   const recordDirectory = ["students", "admissions", "attendance", "assessments"].includes(activeModule) && !detail;
   const [confirmation, setConfirmation] = useState<DrawerAction | null>(null);
@@ -2858,6 +2906,7 @@ export default function CollegePortal({
     <div
       className={`college-erp ${!compact ? "erp-rail-expanded" : ""} ${compact ? "erp-compact" : ""} ${""}`}
       style={{ "--college-accent": c.accent } as React.CSSProperties}
+      onClickCapture={instantPortalNavigation}
     >
       <a href="#erp-content" className="erp-skip">
         Skip to content
@@ -3151,7 +3200,7 @@ export default function CollegePortal({
           aria-modal="true"
           aria-label="Manage college records"
         >
-          <div className="erp-api-drawer">
+          <div className={`erp-api-drawer ${(manageModule || activeModule) === "academics" ? "erp-academics-drawer" : ""}`}>
             <header>
               <h2>{labels[activeModule] || activeModule}</h2>
               <button

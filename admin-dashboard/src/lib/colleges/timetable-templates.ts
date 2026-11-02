@@ -19,7 +19,7 @@ export type TimetableCell = {
   day: number;
   row: number;
   span: number;
-  kind: "theory" | "lab" | "activity";
+  kind: "theory" | "lab" | "sports" | "library" | "activity";
   title: string;
   subject_code: string;
   faculty: string;
@@ -38,6 +38,9 @@ export type TimetableDraft = {
   revision: number;
   periods: Period[];
   cells: TimetableCell[];
+  /** The week repeats between these dates; empty = the semester's start and end. */
+  valid_from?: string | null;
+  valid_to?: string | null;
 };
 export type TimetableRecord = TimetableDraft & {
   code: string;
@@ -69,6 +72,26 @@ const endpoint = "academics/timetable-templates";
 export const timetableApi = {
   list: () => apiRequest<TimetableList>(endpoint),
   options: () => apiRequest<TimetableOptions>(`${endpoint}/options`),
+  /** Create a semester timetable for every current-semester section that has none. */
+  generate: (preview = false) =>
+    apiRequest<{
+      created: {
+        code: string;
+        name: string;
+        section: string;
+        semester: number;
+        valid_from: string | null;
+        valid_to: string | null;
+        periods: number;
+        /** Seeded demo timetables this one replaces. */
+        replaces_demo?: number;
+      }[];
+      count: number;
+      preview: boolean;
+    }>(`${endpoint}/generate`, {
+      method: "POST",
+      query: preview ? { preview: "true" } : undefined,
+    }),
   save: (draft: TimetableDraft, code?: string) =>
     apiRequest<TimetableRecord>(
       code ? `${endpoint}/${encodeURIComponent(code)}` : endpoint,

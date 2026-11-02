@@ -1025,7 +1025,8 @@
   --crs-muted: #617086;
   position: fixed;
   inset: 0 0 0 auto;
-  width: min(720px, calc(100vw - 40px));
+  /* Half the screen, never narrower than 720px (the subject and faculty layout needs it). */
+  width: min(max(50vw, 720px), calc(100vw - 40px));
   max-width: none;
   height: 100dvh;
   max-height: 100dvh;

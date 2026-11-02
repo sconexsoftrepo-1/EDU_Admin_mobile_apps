@@ -326,3 +326,84 @@
     font-size: 16px;
   }
 }
+
+/* Register: overview strip and present / absent toggles. */
+.att-register-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 12px;
+}
+.att-register-overview > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eef2f5;
+  color: #3b5966;
+}
+.att-register-overview strong {
+  font-size: 16px;
+}
+.att-register-overview .att-ov-present {
+  background: #e2eadb;
+  color: #365b45;
+}
+.att-register-overview .att-ov-absent {
+  background: #f6e3d9;
+  color: #98482f;
+}
+.att-register-overview .att-ov-leave {
+  background: #f6ecd3;
+  color: #7a5a22;
+}
+.att-register-overview .att-ov-state {
+  margin-left: auto;
+  background: transparent;
+  color: #6e645b;
+}
+.att-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.att-toggle button {
+  width: 34px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #ddd3c4;
+  background: #fff;
+  color: #6e645b;
+  font-weight: 800;
+  cursor: pointer;
+}
+.att-toggle button.att-toggle-present.is-on {
+  background: #365b45;
+  border-color: #365b45;
+  color: #fff;
+}
+.att-toggle button.att-toggle-absent.is-on {
+  background: #b64d42;
+  border-color: #b64d42;
+  color: #fff;
+}
+.att-toggle button.is-changed.is-on {
+  box-shadow: 0 0 0 2px #f6ecd3;
+}
+.att-toggle button:disabled {
+  opacity: 0.6;
+}
+.att-leave-tag {
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f6ecd3;
+  color: #7a5a22;
+  font-size: 11px;
+  font-weight: 700;
+}

@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useErrorToast } from "./toast";
 import CourseSemesterWorkspace from "./CourseSemesterWorkspace";
 /**
@@ -105,12 +106,7 @@ export default function CourseInsightsPanel({
           </p>
         )}
         {!data && !error && (
-          <div className="crs-panel-loading" role="status">
-            <span />
-            <span />
-            <span />
-            Loading enrollment summary…
-          </div>
+          <WorkspaceSkeleton compact label="Loading enrollment summary" />
         )}
 
         {data && totals && (

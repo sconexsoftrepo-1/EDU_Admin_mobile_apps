@@ -97,3 +97,5 @@ class StaffOnboardingInput(StrictModel):
     achievements: list[Achievement] = Field(default_factory=list, max_length=30)
     bank: Bank
     salary: Salary
+    # Non-teaching lab in-charges: registered labs (GET /academics/labs) this person runs.
+    lab_codes: list[str] = Field(default_factory=list, max_length=20)

@@ -228,6 +228,18 @@ def fee_progress(data, students):
     return items
 
 
+def enrollment_placements(data, year, members):
+    _, section_codes, _ = aw.roster(data, year['code'], year['program_code'])
+    sections = {s['code']:s for s in aw.rows(data,'sections') if s['code'] in section_codes}
+    terms = {t['code']:t['semester_number'] for t in calendar(data,year)}
+    current = semester_state(data,year)['current']
+    return [{'student_code':e['student_code'], 'student_name':aw.name(members[e['student_code']]),
+             'admission_number':members[e['student_code']].get('admission_number'), 'roll_number':e.get('roll_number') or members[e['student_code']].get('admission_number',''),
+             'section_code':e['section_code'], 'section_name':sections[e['section_code']]['name'],
+             'semester_number':terms.get(sections[e['section_code']].get('semester_code'), current), 'status':e['status']}
+            for e in aw.rows(data,'student_enrollments') if e['student_code'] in members and e['section_code'] in sections and e.get('status') in {'active','completed'}]
+
+
 @router.get('')
 def overview(request: Request, program_code: str|None=None, academic_year_code: str|None=None, student_code: str|None=None, semester_number: int|None=None, user=Depends(current_user)):
     data=request.app.state.store.snapshot(); years,members=eligible_batches(data,user,student_code)
@@ -239,7 +251,7 @@ def overview(request: Request, program_code: str|None=None, academic_year_code: 
     for year in selected:
         progress=progress_for_batch(data,year,members[year['code']],user)
         output.append({'code':year['code'],'name':year['name'],'program_code':year['program_code'],'course_name':data['records']['programs'][year['program_code']]['name'],
-                       'timeline':semester_state(data,year),'calendar_revision':revision_value(data.get('documents',{}).get('semester_calendar_revisions',{}).get(year['code'])),'sections':[{'code':s['code'],'name':s['name']} for s in aw.rows(data,'sections') if s['code'] in aw.roster(data,year['code'],year['program_code'])[1]],**progress})
+                       'placements':enrollment_placements(data,year,members[year['code']]), 'timeline':semester_state(data,year),'calendar_revision':revision_value(data.get('documents',{}).get('semester_calendar_revisions',{}).get(year['code'])),'sections':[{'code':s['code'],'name':s['name']} for s in aw.rows(data,'sections') if s['code'] in aw.roster(data,year['code'],year['program_code'])[1]],**progress})
         classes+=today_classes(data,user,year,set(members[year['code']]) if aw.personal(user) else None)
     selected_students={s for y in selected for s in members[y['code']]}
     financial=aw.personal(user) or has_permission(data,user,'student_fee_charges','view')
@@ -250,7 +262,7 @@ def overview(request: Request, program_code: str|None=None, academic_year_code: 
         earned=sum(Decimal(t['earned_marks']) for t in values); maximum=sum(Decimal(t['max_marks']) for t in values)
         comparisons.append({'code':program,'name':data['records']['programs'][program]['name'],'percentage':round(float(earned/maximum*100),2) if maximum else None,'earned_marks':str(earned),'max_marks':str(maximum)})
     earned=sum(Decimal(c['earned_marks']) for c in comparisons);maximum=sum(Decimal(c['max_marks']) for c in comparisons)
-    return {'course_comparison':comparisons,'college_percentage':round(float(earned/maximum*100),2) if maximum else None,'can_manage_calendar':not aw.personal(user) and has_permission(data,user,'academic_years','edit'), 'generated_at':local_now().isoformat(),'personal':aw.personal(user),'teacher':aw.teaching(user),'can_grade':can_grade(data,user),
+    return {'can_manage_batches':not aw.personal(user) and not aw.teaching(user) and has_permission(data,user,'academic_years','view'),'course_comparison':comparisons,'college_percentage':round(float(earned/maximum*100),2) if maximum else None,'can_manage_calendar':not aw.personal(user) and has_permission(data,user,'academic_years','edit'), 'generated_at':local_now().isoformat(),'personal':aw.personal(user),'teacher':aw.teaching(user),'can_grade':can_grade(data,user),
             'courses':[{'code':p['code'],'name':p['name'],'course_level':p.get('course_level'),'branch':p.get('branch')} for p in aw.rows(data,'programs') if p['code'] in {y['program_code'] for y in options}],
             'academic_years':[{'code':y['code'],'name':y['name'],'program_code':y['program_code']} for y in options],
             'children':[{'code':s,'name':aw.name(data['records']['students'].get(s,{}))} for s in sorted(own)],'batches':output,'today_classes':classes,'fees':[f for f in fees if not semester_number or f['semester_number']==semester_number or f['semester_number'] is None],

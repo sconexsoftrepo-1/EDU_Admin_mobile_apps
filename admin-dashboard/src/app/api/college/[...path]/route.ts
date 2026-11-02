@@ -178,7 +178,17 @@ async function proxy(
     let access = request.cookies.get(cookies.access)?.value;
     const refresh = request.cookies.get(cookies.refresh)?.value;
     if (path === "auth/login") {
-      const parsed = JSON.parse(body || "{}");
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(body || "{}");
+      } catch {
+        parsed = undefined;
+      }
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+        return NextResponse.json(
+          { detail: "Invalid sign-in request" },
+          { status: 400, headers: { "Cache-Control": "no-store" } },
+        );
       body = JSON.stringify({ ...parsed, client: API_CONFIG.client });
       const result = await upstream(path, "POST", body);
       const payload = await result.json();
@@ -193,10 +203,13 @@ async function proxy(
           },
         });
       // Tokens stay in httpOnly cookies; the page gets the account and its roles (navigation).
-      const response = NextResponse.json({
-        account: payload.account,
-        roles: payload.roles,
-      });
+      const response = NextResponse.json(
+        {
+          account: payload.account,
+          roles: payload.roles,
+        },
+        { headers: { "Cache-Control": "no-store" } },
+      );
       tokens(response, payload, request);
       return response;
     }
@@ -240,15 +253,23 @@ async function proxy(
         );
       }
     }
+    const contentType =
+      result.headers.get("content-type") || "application/json";
     const response = new NextResponse(
       result.status === 204 ? null : await result.arrayBuffer(),
       {
         status: result.status,
         headers: {
-          "Content-Type":
-            result.headers.get("content-type") || "application/json",
+          "Content-Type": contentType,
           "Cache-Control": "no-store",
           "X-Content-Type-Options": "nosniff",
+          // Uploaded files are served inline from this origin; an HTML or SVG upload must not
+          // run script with the signed-in session. PDFs are left alone for the browser viewer.
+          "Content-Security-Policy": contentType
+            .toLowerCase()
+            .startsWith("application/pdf")
+            ? "frame-ancestors 'self'"
+            : "sandbox; frame-ancestors 'self'",
           ...(result.headers.has("content-disposition")
             ? {
                 "Content-Disposition": result.headers.get(
