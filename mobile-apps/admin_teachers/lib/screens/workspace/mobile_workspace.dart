@@ -49,13 +49,21 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     MobileRole.parent => 'Fees',
     MobileRole.student => 'Study',
   };
+  /// Second bottom-bar destination: the week for teaching staff, students for administrators.
+  String get secondary => widget.role == MobileRole.admin
+      ? (has('students') ? 'students' : 'reports')
+      : 'timetable';
+  String get secondaryLabel => widget.role == MobileRole.admin
+      ? (has('students') ? 'Students' : 'Reports')
+      : 'Timetable';
+  // Bottom bar order: primary, secondary, Home (centre), Calendar, More. Inbox lives on the bell.
   int get tab => selected == null
-      ? 0
+      ? 2
       : selected == primary
+      ? 0
+      : selected == secondary
       ? 1
       : selected == 'calendar'
-      ? 2
-      : selected == 'notifications'
       ? 3
       : 4;
   int get unread =>
@@ -589,21 +597,33 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             ),
           ),
           actions: [
+            // Inbox: a highlighted round bell, filled while the inbox is open.
             if (has('notifications'))
-              IconButton(
-                tooltip: 'Notifications',
-                onPressed: () => open('notifications'),
-                icon: Badge(
-                  isLabelVisible: unread > 0,
-                  label: Text('$unread'),
-                  child: const Icon(Icons.notifications_outlined),
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: IconButton(
+                  tooltip: 'Notifications',
+                  onPressed: saving ? null : () => open('notifications'),
+                  style: IconButton.styleFrom(
+                    backgroundColor: selected == 'notifications'
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.primary.withValues(alpha: .12),
+                    foregroundColor: selected == 'notifications'
+                        ? collegeIvory
+                        : Theme.of(context).colorScheme.primary,
+                    shape: const CircleBorder(),
+                  ),
+                  icon: Badge(
+                    isLabelVisible: unread > 0,
+                    label: Text(unread > 99 ? '99+' : '$unread'),
+                    child: Icon(
+                      selected == 'notifications'
+                          ? Icons.notifications_rounded
+                          : Icons.notifications_outlined,
+                    ),
+                  ),
                 ),
               ),
-            IconButton(
-              tooltip: 'Refresh',
-              onPressed: busy || saving ? null : load,
-              icon: const Icon(Icons.refresh),
-            ),
             IconButton(
               tooltip: 'Sign out',
               onPressed: saving ? null : confirmLogout,
@@ -617,18 +637,21 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               ? null
               : (i) => openTab(
                   [
-                    null,
                     has(primary) ? primary : '_more',
+                    has(secondary) ? secondary : '_more',
+                    null,
                     has('calendar') ? 'calendar' : '_more',
-                    has('notifications') ? 'notifications' : '_more',
                     '_more',
                   ][i],
                 ),
           items: [
-            const EduNavItem(Icons.house_rounded, 'Home'),
             EduNavItem(moduleIcon(primary), primaryLabel),
+            EduNavItem(
+              widget.role == MobileRole.admin ? moduleIcon(secondary) : Icons.view_week_outlined,
+              secondaryLabel,
+            ),
+            const EduNavItem(Icons.house_rounded, 'Home'),
             const EduNavItem(Icons.calendar_month_outlined, 'Calendar'),
-            EduNavItem(Icons.inbox_outlined, 'Inbox', badge: unread),
             const EduNavItem(Icons.grid_view_rounded, 'More'),
           ],
         ),
@@ -806,6 +829,19 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ),
           ]
         : <Widget>[];
+    if (teaching || role == MobileRole.admin) {
+      return staffHome(
+        context,
+        name: name,
+        greeting: greeting,
+        today: today,
+        events: events,
+        announcements: announcements,
+        summary: summary,
+        priorities: priorities,
+        records: records,
+      );
+    }
     return [
       EduReveal(
         key: ValueKey('greeting-${role.name}-$student'),
@@ -1023,6 +1059,379 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             onTap: () => open('notifications'),
           ),
         ),
+      const SizedBox(height: 20),
+      OutlinedButton.icon(
+        onPressed: () => open('_more'),
+        icon: const Icon(Icons.grid_view_outlined),
+        label: const Text('Explore your workspace'),
+      ),
+    ];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Staff home (teachers, lab in-charges and administrators): the same layout language as the
+  // parent / student home — one hero card with today's figures, a timeline, quick actions,
+  // notices and events.
+
+  /// Teaching periods (no break / lunch) for one weekday, in time order.
+  List<Json> periodsOn(int weekday) =>
+      rows(labIncharge ? 'labs' : 'timetable')
+          .where((r) => '${r['weekday']}' == '$weekday' || (labIncharge && r['weekday'] == null))
+          .where((r) => r['kind'] != 'break' && r['kind'] != 'lunch')
+          .toList()
+        ..sort((a, b) => '${a['start_time'] ?? ''}'.compareTo('${b['start_time'] ?? ''}'));
+
+  /// Today's periods, or the next class day's when today has none (e.g. Sunday).
+  ({DateTime day, List<Json> periods, bool today}) nextClassDay() {
+    final now = DateUtils.dateOnly(DateTime.now());
+    final todays = periodsOn(now.weekday);
+    if (todays.isNotEmpty || labIncharge) return (day: now, periods: todays, today: true);
+    for (var i = 1; i <= 7; i++) {
+      final day = now.add(Duration(days: i));
+      final found = periodsOn(day.weekday);
+      if (found.isNotEmpty) return (day: day, periods: found, today: false);
+    }
+    return (day: now, periods: const [], today: true);
+  }
+
+  Widget staffHeroCard(BuildContext context, {required String name, required String greeting, required DateTime today, Json? summary}) {
+    final text = Theme.of(context).textTheme;
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final admin = widget.role == MobileRole.admin;
+    final totals = summary?['totals'] is Map ? Map<String, dynamic>.from(summary!['totals'] as Map) : summary;
+    final todays = periodsOn(today.weekday);
+    final tiles = admin
+        ? [
+            (Icons.groups_outlined, EduTints.mist, 'Students', '${cache['students']?['total'] ?? '—'}', cache['students'] == null && busy, has('students') ? () => open('students') : null),
+            (Icons.account_balance_wallet_outlined, EduTints.clay, 'Outstanding', totals?['outstanding'] == null ? '—' : money(totals!['outstanding']), cache[primary] == null && busy, has('dues') ? () => open('dues') : null),
+            (Icons.notifications_none_rounded, EduTints.plum, unread == 1 ? 'Alert' : 'Alerts', '$unread', cache['notifications'] == null && busy, has('notifications') ? () => open('notifications') : null),
+          ]
+        : labIncharge
+        ? [
+            (Icons.science_outlined, EduTints.mist, 'Lab sessions', '${rows('labs').length}', cache['labs'] == null && busy, () => open('labs')),
+            (Icons.groups_outlined, EduTints.gold, 'Students', '${rows('labs').fold<num>(0, (sum, r) => sum + (((r['counts'] as Map?)?['total'] as num?) ?? 0))}', cache['labs'] == null && busy, () => open('labs')),
+            (Icons.notifications_none_rounded, EduTints.plum, unread == 1 ? 'Alert' : 'Alerts', '$unread', cache['notifications'] == null && busy, has('notifications') ? () => open('notifications') : null),
+          ]
+        : [
+            (Icons.schedule_rounded, EduTints.gold, 'Today', '${todays.length}', cache['timetable'] == null && busy, has('timetable') ? () => open('timetable') : null),
+            (Icons.class_outlined, EduTints.mist, 'My classes', '${cache['classes']?['total'] ?? '—'}', cache['classes'] == null && busy, has('classes') ? () => open('classes') : null),
+            (Icons.notifications_none_rounded, EduTints.plum, unread == 1 ? 'Alert' : 'Alerts', '$unread', cache['notifications'] == null && busy, has('notifications') ? () => open('notifications') : null),
+          ];
+    Widget tile((IconData, Color, String, String, bool, VoidCallback?) t) {
+      final (icon, tint, label, value, loading, onTap) = t;
+      final ink = EduTints.ink(tint);
+      return Expanded(
+        child: Semantics(
+          button: onTap != null,
+          label: loading ? '$label: loading' : '$label: $value',
+          excludeSemantics: true,
+          child: Material(
+            color: tint,
+            borderRadius: BorderRadius.circular(18),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: .7), shape: BoxShape.circle),
+                    child: Icon(icon, size: 17, color: ink),
+                  ),
+                  const SizedBox(height: 10),
+                  loading
+                      ? const EduShimmer(child: EduSkeletonBox(width: 40, height: 18))
+                      : FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(value, style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800, color: ink)),
+                        ),
+                  Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: text.labelMedium?.copyWith(color: ink, fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [Color(0xffe8efe2), Color(0xffe3ebee)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: collegeLine),
+        boxShadow: [BoxShadow(color: collegeEspresso.withValues(alpha: .06), blurRadius: 18, offset: const Offset(0, 8))],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('$greeting · ${weekdays[today.weekday - 1]}, ${today.day} ${months[today.month - 1]}', maxLines: 1, overflow: TextOverflow.ellipsis, style: text.labelMedium),
+              const SizedBox(height: 2),
+              Row(children: [
+                Flexible(
+                  child: Text(name.isEmpty ? 'Welcome' : name, maxLines: 1, overflow: TextOverflow.ellipsis, style: text.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+                ),
+                if (has('profile'))
+                  IconButton(
+                    tooltip: 'Profile',
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => open('profile'),
+                    icon: const Icon(Icons.person_outline_rounded, size: 20),
+                  ),
+              ]),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: collegeIvory, borderRadius: BorderRadius.circular(99), border: Border.all(color: collegeLine)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(admin ? Icons.admin_panel_settings_outlined : labIncharge ? Icons.science_outlined : Icons.school_outlined, size: 16),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      admin ? 'College administration' : labIncharge ? 'Lab in-charge' : 'Faculty',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ]),
+              ),
+            ]),
+          ),
+          if (MediaQuery.sizeOf(context).width >= 340 && MediaQuery.textScalerOf(context).scale(16) <= 22) ...[
+            const SizedBox(width: 8),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * .3, maxHeight: 92),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: EduArtwork(name: admin ? 'illustrations/academic_campus' : 'illustrations/teacher_workspace', height: 92),
+              ),
+            ),
+          ],
+        ]),
+        const SizedBox(height: 14),
+        LayoutBuilder(builder: (context, constraints) {
+          final stacked = constraints.maxWidth < 300 || MediaQuery.textScalerOf(context).scale(16) > 22;
+          return stacked
+              ? Column(children: [
+                  for (final t in tiles) ...[Row(children: [tile(t)]), const SizedBox(height: 8)],
+                ])
+              : Row(children: [tile(tiles[0]), const SizedBox(width: 8), tile(tiles[1]), const SizedBox(width: 8), tile(tiles[2])]);
+        }),
+      ]),
+    );
+  }
+
+  /// A period on the home timeline: time, coloured type, title, class and room; "Now" when live.
+  Widget timelinePeriod(BuildContext context, Json r, {required bool live, VoidCallback? onTap}) {
+    final text = Theme.of(context).textTheme;
+    final style = periodStyle('${r['kind'] ?? 'theory'}');
+    final details = [
+      if ('${r['section_name'] ?? ''}'.isNotEmpty) 'Section ${r['section_name']}',
+      if ('${r['course_name'] ?? r['program_name'] ?? ''}'.isNotEmpty) '${r['course_name'] ?? r['program_name']}',
+      if ('${r['room'] ?? r['room_number'] ?? ''}'.isNotEmpty) 'Room ${r['room'] ?? r['room_number']}',
+    ].join(' · ');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(
+          width: 62,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(hm('${r['start_time']}'), style: text.labelMedium?.copyWith(fontWeight: FontWeight.w800)),
+              Text(hm('${r['end_time']}'), style: text.labelSmall),
+            ]),
+          ),
+        ),
+        Expanded(
+          child: Material(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: live ? Theme.of(context).colorScheme.primary : EduWorkspace.border, width: live ? 1.6 : 1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(color: style.tint, borderRadius: BorderRadius.circular(10)),
+                    child: Icon(style.icon, size: 19, color: EduTints.ink(style.tint)),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [
+                        Expanded(
+                          child: Text('${r['title'] ?? r['subject_name'] ?? style.label}', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(color: style.tint, borderRadius: BorderRadius.circular(99)),
+                          child: Text(live ? 'Now' : style.label, style: text.labelSmall?.copyWith(fontWeight: FontWeight.w700, color: EduTints.ink(style.tint))),
+                        ),
+                      ]),
+                      if (details.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text(details, style: text.bodySmall),
+                      ],
+                    ]),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  List<Widget> staffHome(
+    BuildContext context, {
+    required String name,
+    required String greeting,
+    required DateTime today,
+    required List<Json> events,
+    required List<Json> announcements,
+    required Json? summary,
+    required List<String> priorities,
+    required List<Widget> Function(String key, String heading, {int limit}) records,
+  }) {
+    final admin = widget.role == MobileRole.admin;
+    final next = nextClassDay();
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final now = DateTime.now();
+    final minutesNow = now.hour * 60 + now.minute;
+    int minutes(Object? v) {
+      final p = '${v ?? ''}'.split(':');
+      return (int.tryParse(p.first) ?? 0) * 60 + (int.tryParse(p.length > 1 ? p[1] : '') ?? 0);
+    }
+    final scheduleKey = labIncharge ? 'labs' : 'timetable';
+    return [
+      EduReveal(
+        key: ValueKey('staff-hero-${widget.role.name}'),
+        child: staffHeroCard(context, name: name, greeting: greeting, today: today, summary: summary),
+      ),
+      if (!admin && has(scheduleKey)) ...[
+        SectionHeading(
+          title: labIncharge
+              ? 'Today’s lab sessions'
+              : next.today
+              ? 'Today’s classes'
+              : '${dayNames[next.day.weekday - 1]}’s classes',
+          action: labIncharge ? 'Labs' : 'Timetable',
+          onAction: () => open(scheduleKey),
+        ),
+        if (!next.today)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text(
+              today.weekday == 7 ? 'No classes on Sunday — here is your next class day.' : 'No classes today — here is your next class day.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        if (sectionErrors[scheduleKey] != null)
+          sectionFailure(scheduleKey)
+        else if (cache[scheduleKey] == null && busy)
+          const EduCardSkeleton(height: 120)
+        else if (next.periods.isEmpty)
+          QuietEmpty(
+            icon: labIncharge ? Icons.science_outlined : Icons.wb_sunny_outlined,
+            title: labIncharge ? 'No lab sessions today' : 'No classes in your timetable yet',
+            message: labIncharge
+                ? 'Open Labs to see another day.'
+                : 'Your weekly timetable appears here once the college publishes it.',
+          )
+        else
+          for (final r in next.periods.take(labIncharge ? 3 : 6))
+            labIncharge
+                ? labSessionCard(context, r, compact: true)
+                : timelinePeriod(
+                    context,
+                    r,
+                    live: next.today && minutes(r['start_time']) <= minutesNow && minutesNow < minutes(r['end_time']),
+                    onTap: () => open('timetable'),
+                  ),
+      ],
+      if (admin) ...[
+        SectionHeading(title: 'College finances', action: 'Finance', onAction: () => open('overview')),
+        if (summary != null)
+          EduReveal(order: 1, child: SummaryPanel(summary: summary, financial: true, compact: true)),
+        if (sectionErrors[primary] != null) sectionFailure(primary),
+        if (summary != null) FinanceComposition(summary: summary),
+      ],
+      SectionHeading(title: 'Quick actions', action: 'View all', onAction: () => open('_more')),
+      EduReveal(
+        order: 2,
+        child: EduGrid(
+          fold: 3,
+          spacing: 10,
+          children: [
+            for (final (i, key) in <String>{...priorities, if (!admin) ...['leave', 'payslips', 'tax-documents']}.where(has).take(admin ? 6 : 8).indexed)
+              EduQuickAction(
+                key: ValueKey('quick-$key'),
+                label: '${screens.firstWhere((s) => s['key'] == key)['title']}',
+                icon: moduleIcon(key),
+                tint: EduTints.all[i % EduTints.all.length],
+                onTap: () => open(key),
+              ),
+          ],
+        ),
+      ),
+      if (!admin && !labIncharge) ...records('assignments', 'Assignments & grading', limit: 1),
+      if (admin) ...records('activity', 'Recent activity', limit: 3),
+      if (has('announcements')) ...[
+        SectionHeading(title: 'Updates', action: 'View all', onAction: () => open('announcements')),
+        if (sectionErrors['announcements'] != null)
+          sectionFailure('announcements')
+        else if (announcements.isEmpty)
+          const QuietEmpty(icon: Icons.campaign_outlined, title: 'No announcements yet', message: 'College news and notices will appear here.')
+        else
+          LayoutBuilder(
+            builder: (context, constraints) => SizedBox(
+              height: EduSizes.scaled(context, 170),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: announcements.take(6).length,
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                itemBuilder: (context, i) {
+                  final notice = announcements[i];
+                  final published = DateTime.tryParse('${notice['published_at'] ?? ''}');
+                  return SizedBox(
+                    width: (constraints.maxWidth * .82).clamp(240.0, 340.0),
+                    child: EduUpdateCard(
+                      title: '${notice['title'] ?? 'College notice'}',
+                      body: '${notice['body'] ?? ''}',
+                      date: published == null ? '' : prettyDate(published),
+                      category: 'Notice',
+                      tint: EduTints.all[(i + 1) % EduTints.all.length],
+                      onTap: () => open('announcements'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+      ],
+      if (has('calendar')) ...[
+        SectionHeading(title: 'Upcoming events', action: 'Calendar', onAction: () => open('calendar')),
+        if (sectionErrors['calendar'] != null)
+          sectionFailure('calendar')
+        else if (events.isEmpty)
+          const QuietEmpty(icon: Icons.event_available_outlined, title: 'No upcoming events', message: 'Published college events will appear here.')
+        else
+          ...events.take(2).map((r) => CampusRecord(record: r, screen: 'calendar', onTap: () => open('calendar'))),
+      ],
       const SizedBox(height: 20),
       OutlinedButton.icon(
         onPressed: () => open('_more'),
@@ -1975,6 +2384,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     final day = all.where((r) => '${r['weekday']}' == '$weekday').toList()
       ..sort((a, b) => '${a['start_time']}'.compareTo('${b['start_time']}'));
     final first = all.firstOrNull ?? {};
+    final sectionCount = all.map((r) => r['section_code']).whereType<Object>().toSet().length;
     DateTime? from = DateTime.tryParse('${first['valid_from'] ?? ''}'), to = DateTime.tryParse('${first['valid_to'] ?? ''}');
     final counts = <String, int>{};
     for (final r in all.where((r) => r['kind'] != 'break' && r['kind'] != 'lunch')) {
@@ -2003,10 +2413,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ]),
           const SizedBox(height: 4),
           Text(
-            [
-              if ('${first['course_name'] ?? ''}'.isNotEmpty) '${first['course_name']}',
-              if ('${first['section_name'] ?? ''}'.isNotEmpty) 'Section ${first['section_name']}',
-            ].join(' · '),
+            sectionCount > 1
+                ? '$sectionCount classes you teach'
+                : [
+                    if ('${first['course_name'] ?? ''}'.isNotEmpty) '${first['course_name']}',
+                    if ('${first['section_name'] ?? ''}'.isNotEmpty) 'Section ${first['section_name']}',
+                  ].join(' · '),
             style: text.bodySmall,
           ),
           const SizedBox(height: 8),
@@ -2086,7 +2498,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               );
             }
             final details = [
-              if ('${r['faculty'] ?? ''}'.isNotEmpty) '${r['faculty']}',
+              // Teachers see which class it is; students see who teaches it.
+              if (sectionCount > 1 && '${r['section_name'] ?? ''}'.isNotEmpty)
+                '${r['course_name'] ?? ''} · Section ${r['section_name']}'.replaceFirst(RegExp(r'^ · '), '')
+              else if ('${r['faculty'] ?? ''}'.isNotEmpty)
+                '${r['faculty']}',
               if ('${r['room'] ?? ''}'.isNotEmpty) 'Room ${r['room']}',
             ].join(' · ');
             return Padding(
@@ -2133,6 +2549,365 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               ]),
             );
           }),
+    ];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Staff self-service screens: assigned classes, leave, payslips and Form 16 — styled like the
+  // parent / student screens (summary card, pastel tiles, white cards with status pills).
+
+  Widget staffCard(BuildContext context, {required Widget child, VoidCallback? onTap, Key? key}) => Container(
+    key: key,
+    margin: const EdgeInsets.only(bottom: 12),
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), boxShadow: EduWorkspace.shadow),
+    child: Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: EduWorkspace.border)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(onTap: onTap, child: Padding(padding: const EdgeInsets.all(16), child: child)),
+    ),
+  );
+
+  Widget pill(BuildContext context, String label, Color tint, {IconData? icon}) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+    decoration: BoxDecoration(color: tint, borderRadius: BorderRadius.circular(99)),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      if (icon != null) ...[Icon(icon, size: 14, color: EduTints.ink(tint)), const SizedBox(width: 5)],
+      Flexible(
+        child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: EduTints.ink(tint), fontWeight: FontWeight.w700)),
+      ),
+    ]),
+  );
+
+  Widget summaryBand(BuildContext context, String title, String value, List<(String, String)> facts, {IconData icon = Icons.insights_rounded}) {
+    final text = Theme.of(context).textTheme;
+    return EduReveal(
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [Color(0xffe8efe2), Color(0xffe3ebee)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: collegeLine),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(icon, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title, style: text.labelLarge?.copyWith(fontWeight: FontWeight.w700))),
+          ]),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text.rich(TextSpan(text: value), style: text.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
+          ),
+          if (facts.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: collegeIvory.withValues(alpha: .75), borderRadius: BorderRadius.circular(16)),
+              child: Row(children: [
+                for (final (label, v) in facts)
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(label, style: text.labelMedium),
+                      FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                          child: Text.rich(TextSpan(text: v), style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
+                    ]),
+                  ),
+              ]),
+            ),
+          ],
+        ]),
+      ),
+    );
+  }
+
+  /// Teacher: the classes they teach, with batch, section, semester and class size.
+  List<Widget> classesView(BuildContext context, List<Json> all) {
+    final text = Theme.of(context).textTheme;
+    final students = all.fold<int>(0, (sum, r) => sum + ((r['students'] as num?)?.toInt() ?? 0));
+    final weekly = rows('timetable').where((r) => r['kind'] == 'theory' || r['kind'] == 'lab').length;
+    return [
+      summaryBand(context, 'Assigned classes', '${all.length}', [
+        ('Students', '$students'),
+        ('Periods / week', weekly == 0 ? '—' : '$weekly'),
+        ('Labs', '${all.where((r) => '${r['subject_type']}' == 'practical' || '${r['subject_name'] ?? ''}'.toLowerCase().contains('lab') || '${r['subject_name'] ?? ''}'.toLowerCase().contains('practical')).length}'),
+      ], icon: Icons.class_outlined),
+      SectionHeading(title: 'My classes'),
+      if (all.isEmpty)
+        const QuietEmpty(icon: Icons.class_outlined, title: 'No classes assigned yet', message: 'Classes appear here once the college assigns you to a subject.')
+      else
+        EduGrid(phone: 1, fold: 2, tablet: 2, children: [
+          for (final (i, r) in all.indexed)
+            Builder(builder: (context) {
+              final name = '${r['subject_name'] ?? r['subject'] ?? r['subject_code'] ?? 'Subject'}';
+              final lab = '${r['subject_type']}' == 'practical' || name.toLowerCase().contains('lab') || name.toLowerCase().contains('practical');
+              final tint = lab ? EduTints.mist : EduTints.all[i % EduTints.all.length];
+              return staffCard(
+                context,
+                key: ValueKey('class-${r['code']}'),
+                onTap: has('attendance') ? () => open('attendance') : null,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(color: tint, borderRadius: BorderRadius.circular(13)),
+                      child: Icon(lab ? Icons.science_outlined : Icons.menu_book_outlined, color: EduTints.ink(tint)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(name, style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                        Text(
+                          [
+                            if ('${r['course_name'] ?? ''}'.isNotEmpty) '${r['course_name']}',
+                            if ('${r['academic_year_name'] ?? ''}'.isNotEmpty) '${r['academic_year_name']}',
+                          ].join(' · '),
+                          style: text.bodySmall,
+                        ),
+                      ]),
+                    ),
+                  ]),
+                  const SizedBox(height: 10),
+                  Wrap(spacing: 6, runSpacing: 6, children: [
+                    if ('${r['section_name'] ?? ''}'.isNotEmpty) pill(context, 'Section ${r['section_name']}', EduTints.sage, icon: Icons.groups_outlined),
+                    if (r['semester_number'] != null) pill(context, 'Semester ${r['semester_number']}', EduTints.gold),
+                    if (r['students'] != null) pill(context, '${r['students']} students', EduTints.plum, icon: Icons.person_outline),
+                    pill(context, lab ? 'Lab' : 'Theory', tint),
+                  ]),
+                ]),
+              );
+            }),
+        ]),
+    ];
+  }
+
+  /// Employee leave: counts, request button, filters and request cards.
+  String staffLeaveFilter = 'All';
+  List<Widget> staffLeaveView(BuildContext context, List<Json> all, List<Json> actions) {
+    final text = Theme.of(context).textTheme;
+    String state(Json r) => '${r['status'] ?? 'pending'}'.toLowerCase();
+    bool approved(Json r) => const {'approved', 'completed'}.contains(state(r));
+    bool rejected(Json r) => const {'rejected', 'declined', 'cancelled'}.contains(state(r));
+    final shown = all.where((r) => switch (staffLeaveFilter) {
+      'Pending' => !approved(r) && !rejected(r),
+      'Approved' => approved(r),
+      'Declined' => rejected(r),
+      _ => true,
+    }).toList()
+      ..sort((a, b) => '${b['start_date'] ?? ''}'.compareTo('${a['start_date'] ?? ''}'));
+    final descriptor = actions.where((a) => a['key'] == 'request_leave').firstOrNull;
+    final days = all.where(approved).fold<int>(0, (sum, r) {
+      final from = DateTime.tryParse('${r['start_date'] ?? ''}'), to = DateTime.tryParse('${r['end_date'] ?? ''}');
+      return sum + (from == null || to == null ? 0 : DateUtils.dateOnly(to).difference(DateUtils.dateOnly(from)).inDays + 1);
+    });
+    const filters = ['All', 'Pending', 'Approved', 'Declined'];
+    return [
+      EduGrid(phone: 3, fold: 3, tablet: 3, spacing: 10, children: [
+        EduStatCard(label: 'Pending', value: '${all.where((r) => !approved(r) && !rejected(r)).length}', icon: Icons.hourglass_top_rounded, tint: EduTints.gold, onTap: () => setState(() => staffLeaveFilter = 'Pending')),
+        EduStatCard(label: 'Days approved', value: '$days', icon: Icons.check_circle_outline, tint: EduTints.sage, onTap: () => setState(() => staffLeaveFilter = 'Approved')),
+        EduStatCard(label: 'Declined', value: '${all.where(rejected).length}', icon: Icons.block_outlined, tint: EduTints.clay, onTap: () => setState(() => staffLeaveFilter = 'Declined')),
+      ]),
+      if (descriptor != null) ...[
+        const SizedBox(height: 14),
+        FilledButton.icon(
+          key: const ValueKey('request-leave'),
+          onPressed: saving ? null : () => action(descriptor),
+          icon: const Icon(Icons.event_available_outlined),
+          label: const Text('Request leave'),
+        ),
+      ],
+      const SizedBox(height: 18),
+      EduPillTabs(
+        labels: filters,
+        selected: filters.indexOf(staffLeaveFilter),
+        onSelected: (i) => setState(() => staffLeaveFilter = filters[i]),
+      ),
+      const SizedBox(height: 14),
+      if (shown.isEmpty)
+        QuietEmpty(
+          icon: Icons.event_available_outlined,
+          title: staffLeaveFilter == 'All' ? 'No leave requests yet' : 'Nothing ${staffLeaveFilter.toLowerCase()}',
+          message: 'Request leave with the dates and the reason.',
+        )
+      else
+        for (final r in shown)
+          Builder(builder: (context) {
+            final status = approved(r)
+                ? (label: 'Approved', tint: EduTints.sage, icon: Icons.check_circle_rounded)
+                : rejected(r)
+                ? (label: 'Declined', tint: EduTints.clay, icon: Icons.cancel_rounded)
+                : (label: 'Pending', tint: EduTints.gold, icon: Icons.hourglass_top_rounded);
+            final from = DateTime.tryParse('${r['start_date'] ?? ''}'), to = DateTime.tryParse('${r['end_date'] ?? ''}');
+            final n = from == null || to == null ? null : DateUtils.dateOnly(to).difference(DateUtils.dateOnly(from)).inDays + 1;
+            return staffCard(
+              context,
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(color: status.tint, shape: BoxShape.circle),
+                    child: Icon(Icons.event_busy_outlined, color: EduTints.ink(status.tint), size: 21),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(n == null ? 'Leave' : '$n day${n == 1 ? '' : 's'} ${r['leave_type_name'] ?? 'leave'}'.trim(),
+                          style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 6),
+                      pill(context, status.label, status.tint, icon: status.icon),
+                    ]),
+                  ),
+                ]),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: collegeCanvas, borderRadius: BorderRadius.circular(14)),
+                  child: Row(children: [
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('From', style: text.labelSmall),
+                      Text(from == null ? '—' : prettyDate(from), style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                    ])),
+                    const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_forward_rounded, size: 18, color: collegeMuted)),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('To', style: text.labelSmall),
+                      Text(to == null ? '—' : prettyDate(to), style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+                    ])),
+                  ]),
+                ),
+                if ('${r['reason'] ?? ''}'.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text('Reason', style: text.labelSmall),
+                  Text('${r['reason']}', style: text.bodyMedium),
+                ],
+              ]),
+            );
+          }),
+    ];
+  }
+
+  /// Payslips: latest net pay, then one card per month with earnings, deductions and download.
+  List<Widget> payslipsView(BuildContext context, List<Json> all) {
+    final text = Theme.of(context).textTheme;
+    final latest = all.firstOrNull;
+    String period(Json r) {
+      final from = DateTime.tryParse('${r['period_start'] ?? ''}');
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return from == null ? 'Salary statement' : '${months[from.month - 1]} ${from.year}';
+    }
+    final year = all.fold<num>(0, (sum, r) => sum + (num.tryParse('${r['net_amount'] ?? 0}') ?? 0));
+    return [
+      summaryBand(
+        context,
+        latest == null ? 'Net pay' : 'Net pay · ${period(latest)}',
+        latest == null ? '—' : money(latest['net_amount']),
+        [
+          ('Payslips', '${all.length}'),
+          ('Gross', latest == null ? '—' : money(latest['gross_amount'])),
+          ('Paid so far', money(year)),
+        ],
+        icon: Icons.request_quote_outlined,
+      ),
+      SectionHeading(title: 'Payslips'),
+      if (all.isEmpty)
+        const QuietEmpty(icon: Icons.receipt_long_outlined, title: 'No payslips yet', message: 'Published payslips appear here every month.')
+      else
+        for (final r in all)
+          staffCard(
+            context,
+            key: ValueKey('payslip-${r['code']}'),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(color: EduTints.sage, borderRadius: BorderRadius.circular(13)),
+                  child: Icon(Icons.request_quote_outlined, color: EduTints.ink(EduTints.sage)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(period(r), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                    Text.rich(TextSpan(text: 'Net ${money(r['net_amount'])}'), style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
+                  ]),
+                ),
+                if (data?['downloads'] != null)
+                  IconButton(
+                    tooltip: 'Download payslip',
+                    onPressed: downloading ? null : () => download('${data!['downloads']}', '${r['code']}'),
+                    icon: const Icon(Icons.download_rounded),
+                  ),
+              ]),
+              const SizedBox(height: 10),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                pill(context, 'Gross ${money(r['gross_amount'])}', EduTints.mist),
+                pill(context, 'Deductions ${money(r['deduction_amount'])}', EduTints.clay),
+              ]),
+              if ((r['lines'] as List? ?? []).isNotEmpty) ...[
+                const SizedBox(height: 10),
+                for (final line in (r['lines'] as List).whereType<Map>())
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(children: [
+                      Expanded(child: Text('${line['component']}', style: text.bodySmall)),
+                      Text.rich(
+                        TextSpan(text: '${line['component_type'] == 'deduction' ? '− ' : ''}${money(line['amount'])}'),
+                        style: text.bodySmall?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ]),
+                  ),
+              ],
+            ]),
+          ),
+    ];
+  }
+
+  /// Form 16 and other tax documents, one card per financial year with download.
+  List<Widget> taxDocumentsView(BuildContext context, List<Json> all) {
+    final text = Theme.of(context).textTheme;
+    final sorted = [...all]..sort((a, b) => '${b['financial_year'] ?? ''}'.compareTo('${a['financial_year'] ?? ''}'));
+    return [
+      summaryBand(context, 'Tax documents', '${all.length}', [
+        ('Latest year', '${sorted.firstOrNull?['financial_year'] ?? '—'}'),
+      ], icon: Icons.description_outlined),
+      SectionHeading(title: 'Form 16 and tax documents'),
+      if (sorted.isEmpty)
+        const QuietEmpty(icon: Icons.description_outlined, title: 'No tax documents yet', message: 'Form 16 appears here once the college publishes it.')
+      else
+        for (final r in sorted)
+          staffCard(
+            context,
+            child: Row(children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(13)),
+                child: Icon(Icons.description_outlined, color: EduTints.ink(EduTints.gold)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    RegExp(r'^form[\s_-]?16', caseSensitive: false).hasMatch('${r['document_type'] ?? ''}') || r['document_type'] == null
+                        ? 'Form 16'
+                        : '${r['document_type']}'.replaceAll('_', ' '),
+                    style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  Text('Financial year ${r['financial_year'] ?? '—'}', style: text.bodySmall),
+                ]),
+              ),
+              if (data?['downloads'] != null)
+                IconButton(
+                  tooltip: 'Download',
+                  onPressed: downloading ? null : () => download('${data!['downloads']}', '${r['code']}'),
+                  icon: const Icon(Icons.download_rounded),
+                ),
+            ]),
+          ),
     ];
   }
 
@@ -2191,6 +2966,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (selected == 'messages') return messagesView(context, all, actions);
     if (selected == 'timetable' && !labIncharge && all.any((r) => r['kind'] != null)) return weeklyTimetableView(context, all);
     if (selected == 'labs') return labsView(context, all);
+    if (selected == 'classes') return classesView(context, all);
+    if (selected == 'leave') return staffLeaveView(context, all, actions);
+    if (selected == 'payslips') return payslipsView(context, all);
+    if (selected == 'tax-documents') return taxDocumentsView(context, all);
     if (selected == 'timetable' && labIncharge) return labTimetableView(context, all);
     return [
       if (students.length > 1) ...[

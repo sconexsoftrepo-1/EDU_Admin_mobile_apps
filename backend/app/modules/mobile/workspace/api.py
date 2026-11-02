@@ -136,6 +136,24 @@ def weekly_for(data, user, context, offerings):
     return weekly_timetable(data, set(subjects), subjects_for=subjects)
 
 
+def describe_offering(data, offering):
+    """An assigned class with readable names: subject, section, course, batch and class size."""
+    records = data["records"]
+    subject = records.get("subjects", {}).get(offering.get("subject_code"), {})
+    section = records.get("sections", {}).get(offering.get("section_code"), {})
+    batch = records.get("batches", {}).get(section.get("batch_code"), {})
+    program = records.get("programs", {}).get(batch.get("program_code"), {})
+    semester = records.get("semesters", {}).get(section.get("semester_code"), {})
+    from app.core.timetable_templates import year_for_batch
+    year = year_for_batch(data, batch) or {}
+    students = sum(1 for e in query_rows(data, "student_enrollments")
+                   if e.get("section_code") == offering.get("section_code") and e.get("status") == "active")
+    return {**offering, "subject_name": subject.get("name"), "subject_type": subject.get("subject_type"),
+            "section_name": section.get("name"), "course_name": program.get("name"),
+            "academic_year_name": year.get("name") or batch.get("name"),
+            "semester_number": semester.get("semester_number"), "students": students}
+
+
 def query_rows(data, table):
     return list(data["records"].get(table, {}).values())
 
@@ -619,7 +637,7 @@ def screen_data(
             summary = calculate_ledger(data, selected)
             items = summary.pop("charges")
     elif table == "subject_offerings":
-        items = [r for r in query_rows(data, table) if r["code"] in offerings]
+        items = [describe_offering(data, r) for r in query_rows(data, table) if r["code"] in offerings]
     elif table == "timetable_slots" and (weekly := weekly_for(data, user, context, offerings)):
         # The published weekly timetable (repeats every week of the semester).
         items = weekly
@@ -719,8 +737,9 @@ def screen_data(
             and not any(c["request_code"] == r["code"] for c in items)
         ]
     elif table == "leave_requests":
+        types = {t["code"]: t for t in query_rows(data, "leave_types")}
         items = [
-            r
+            {**r, "leave_type_name": types.get(r.get("leave_type_code"), {}).get("name")}
             for r in query_rows(data, table)
             if r["employee_code"] == user["person_code"]
         ]
@@ -743,6 +762,10 @@ def screen_data(
             if r["employee_code"] == user["person_code"]
             and r["payroll_run_code"] in published
         ]
+        runs = {r["code"]: r for r in query_rows(data, "payroll_runs")}
+        items = [{**r, "period_start": runs.get(r["payroll_run_code"], {}).get("period_start"),
+                  "period_end": runs.get(r["payroll_run_code"], {}).get("period_end")} for r in items]
+        items.sort(key=lambda r: str(r.get("period_start") or ""), reverse=True)
     elif table == "employee_tax_documents":
         items = [
             r

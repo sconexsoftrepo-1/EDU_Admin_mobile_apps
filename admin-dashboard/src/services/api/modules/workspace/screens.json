@@ -853,6 +853,14 @@
     ]
   },
   {
+    "key": "labs",
+    "title": "Labs & lab in-charges",
+    "resources": [
+      "staff_profiles",
+      "subject_offerings"
+    ]
+  },
+  {
     "key": "daily-labour",
     "title": "Daily labour",
     "resources": [

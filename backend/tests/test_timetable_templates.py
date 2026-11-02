@@ -152,3 +152,64 @@ def test_published_week_repeats_for_the_semester_in_the_student_app(client, head
     assert client.put(f"{BASE}/{saved.json()['code']}", headers=headers, json=ended).status_code == 200
     items = client.get("/api/v1/mobile/workspace/timetable", headers=student).json()["items"]
     assert not any(i.get("timetable_code") == saved.json()["code"] for i in items)
+
+
+def test_generate_semester_timetables_for_sections_without_one(client, headers, app):
+    from tests.test_lab_workspace import seed
+    from tests.test_screen_workflows import mobile_login
+    seed(app)
+    with app.state.store.transaction() as d:
+        d["documents"]["timetables"] = {}  # no timetables yet
+    preview = client.post(BASE + "/generate?preview=true", headers=headers).json()
+    assert preview["preview"] and preview["count"] > 0
+    assert app.state.store.snapshot()["documents"]["timetables"] == {}
+    made = client.post(BASE + "/generate", headers=headers).json()
+    assert made["count"] == preview["count"]
+    timetables = app.state.store.snapshot()["documents"]["timetables"]
+    for t in timetables.values():
+        kinds = {c["kind"] for c in t["cells"]}
+        assert {"theory", "sports", "library"} <= kinds and t["valid_from"] and t["valid_to"]
+        filled = {(c["day"], r) for c in t["cells"] for r in range(c["row"], c["row"] + c["span"])}
+        teaching = [r for r, p in enumerate(t["periods"]) if p["kind"] == "teaching"]
+        assert all((d, r) in filled for d in range(6) for r in teaching)
+    # No teacher is in two places at once.
+    seen = {}
+    for t in timetables.values():
+        for c in t["cells"]:
+            if c["faculty"]:
+                for r in range(c["row"], c["row"] + c["span"]):
+                    key = (c["faculty"], c["day"], t["periods"][r]["start"])
+                    assert key not in seen, key
+                    seen[key] = t["code"]
+    # Running again creates nothing, and a teacher now sees their week.
+    assert client.post(BASE + "/generate", headers=headers).json()["count"] == 0
+    data = app.state.store.snapshot()
+    teacher = next(iter(data["records"]["teachers"].values()))
+    staff = mobile_login(client, app, "teacher", teacher["employee_code"], "teacher-mobile")
+    week = client.get("/api/v1/mobile/workspace/timetable", headers=staff).json()["items"]
+    assert any(i["kind"] in {"theory", "lab"} for i in week)
+    assert {i["kind"] for i in week} >= {"break", "lunch"}
+
+
+def test_generator_replaces_seeded_demo_timetables_with_a_real_week(client, headers, app):
+    from tests.test_lab_workspace import seed
+    from tests.test_screen_workflows import mobile_login
+    seed(app)
+    before = app.state.store.snapshot()["documents"]["timetables"]
+    assert any(code.startswith("DEMO-TT-") for code in before)
+    made = client.post(BASE + "/generate", headers=headers).json()
+    assert made["count"] > 0 and any(t["replaces_demo"] for t in made["created"])
+    after = app.state.store.snapshot()["documents"]["timetables"]
+    current = {(t["batch_code"], t["section"], t["semester"]) for t in after.values() if not t["code"].startswith("DEMO-TT-")}
+    assert not any((t["batch_code"], t["section"], t["semester"]) in current
+                   for t in after.values() if t["code"].startswith("DEMO-TT-"))
+    # A demo teacher now has different periods on different days, one section at a time.
+    data = app.state.store.snapshot()
+    teacher = next(iter(data["records"]["teachers"].values()))
+    staff = mobile_login(client, app, "teacher", teacher["employee_code"], "teacher-mobile")
+    week = [i for i in client.get("/api/v1/mobile/workspace/timetable?limit=200", headers=staff).json()["items"]
+            if i["kind"] in {"theory", "lab"}]
+    by_day = {d: sorted((i["start_time"], i["title"]) for i in week if i["weekday"] == d) for d in range(1, 7)}
+    assert len({tuple(v) for v in by_day.values()}) > 1, by_day
+    starts = [(i["weekday"], i["start_time"]) for i in week]
+    assert len(starts) == len(set(starts)), "a teacher is never in two classes at once"

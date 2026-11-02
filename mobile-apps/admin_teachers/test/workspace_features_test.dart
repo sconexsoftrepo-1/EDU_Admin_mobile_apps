@@ -120,7 +120,7 @@ void main() {
               ? 'Fees'
               : 'Study',
           'Calendar',
-          'Inbox',
+          if (role == MobileRole.admin) 'Students' else 'Timetable',
           'More',
         ]) {
           await tester.tap(

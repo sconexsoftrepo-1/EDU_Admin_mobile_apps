@@ -54,6 +54,9 @@ function loginDefaults(role: Role): Row {
     return { person_type: "parent", clients: ["parent-mobile", "admin-web"] };
   if (role.scope === "self")
     return { person_type: "student", clients: ["student-mobile", "admin-web"] };
+  // Lab in-charges use the Staff app (lab sessions, timetable, payslips, Form 16).
+  if (role.code === "LAB_INCHARGE" || /lab in-?charge/.test(name))
+    return { person_type: "employee", clients: ["teacher-mobile"] };
   if (role.scope === "teaching")
     return {
       person_type: "employee",
