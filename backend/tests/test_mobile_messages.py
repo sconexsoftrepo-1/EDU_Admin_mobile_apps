@@ -42,3 +42,42 @@ def test_parent_and_teacher_see_who_they_message_and_are_notified(client, seeded
     theirs = next(m for m in messages if m["body"] == "Please submit the lab record.")
     assert mine["mine"] and not theirs["mine"]
     assert theirs["thread_subject"] == "Lab record" and theirs["with"]
+
+
+def test_fee_reminder_notifications_can_be_marked_read(client, seeded):
+    classroom(seeded)
+    parent = mobile_login(client, seeded, "parent", "P1", "parent-mobile")
+    with seeded.state.store.transaction() as d:
+        d["records"].setdefault("notifications", {})["FEE-NOTICE"] = {
+            "code": "FEE-NOTICE", "user_code": "parent", "title": "Fee due soon", "body": "Semester 2 fees are due.",
+            "channel": "in_app", "status": "sent", "sent_at": "2026-11-01T09:00:00+00:00", "screen": "fees",
+            "charge_code": "CH1", "academic_year_code": "Y1", "semester_number": 2,
+        }
+    read = client.post("/api/v1/mobile/workspace/notifications/actions/read_notification", headers=parent,
+                       json={"values": {"notification_code": "FEE-NOTICE"}})
+    assert read.status_code == 201, read.text
+    stored = seeded.state.store.snapshot()["records"]["notifications"]["FEE-NOTICE"]
+    assert stored["status"] == "read" and stored["charge_code"] == "CH1"
+
+
+def test_teachers_can_view_but_not_create_calendar_events(client, seeded):
+    classroom(seeded)
+    teacher = mobile_login(client, seeded, "teacher", "E1", "teacher-mobile")
+    listing = client.get("/api/v1/academics/calendar-workspace", headers=teacher)
+    assert listing.status_code == 200, listing.text
+    assert listing.json()["can_create"] is False
+
+
+def test_finance_overview_opens_for_admins_with_fee_access(client, seeded):
+    from tests.test_screen_workflows import mobile_login as login
+    with seeded.state.store.transaction() as d:
+        d["roles"]["FIN"] = {"code": "FIN", "name": "Finance admin", "scope": "college", "system_admin": False,
+                             "permissions": {"student_fee_charges": ["view"], "payments": ["view"]}}
+    headers = login(client, seeded, "finadmin", "E1", "admin-mobile")
+    with seeded.state.store.transaction() as d:
+        d["accounts"]["finadmin"]["role_codes"] = ["FIN"]
+    keys = [s["key"] for s in client.get("/api/v1/mobile/workspace/screens", headers=headers).json()["screens"]]
+    assert "overview" in keys
+    overview = client.get("/api/v1/mobile/workspace/overview", headers=headers)
+    assert overview.status_code == 200, overview.text
+    assert overview.json()["summary"] is not None

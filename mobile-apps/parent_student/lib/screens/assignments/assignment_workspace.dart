@@ -1218,21 +1218,25 @@ class _AssignmentReviewState extends State<AssignmentReview> {
                               widget.api,
                               s?['attachments'],
                             ),
-                            CheckboxListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: const Text('Completed'),
-                              value: value['completed'] == true,
-                              onChanged: saving || a['can_grade'] != true
-                                  ? null
-                                  : (v) => setState(
-                                      () => edits[code] = {
-                                        ...value,
-                                        'completed': v ?? false,
-                                        'marks': v == true
-                                            ? value['marks']
-                                            : null,
-                                      },
-                                    ),
+                            // Own Material so the tile's ink is not hidden by the card colour.
+                            Material(
+                              type: MaterialType.transparency,
+                              child: CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text('Completed'),
+                                value: value['completed'] == true,
+                                onChanged: saving || a['can_grade'] != true
+                                    ? null
+                                    : (v) => setState(
+                                        () => edits[code] = {
+                                          ...value,
+                                          'completed': v ?? false,
+                                          'marks': v == true
+                                              ? value['marks']
+                                              : null,
+                                        },
+                                      ),
+                              ),
                             ),
                             TextFormField(
                               key: ValueKey(

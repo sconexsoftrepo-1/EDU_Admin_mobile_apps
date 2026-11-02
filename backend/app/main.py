@@ -25,6 +25,8 @@ from app.core.curriculum_workspace import router as curriculum_workspace_router
 from app.core.attendance_workspace import router as attendance_workspace_router
 from app.core.certificate_workspace import router as certificate_workspace_router
 from app.core.lab_workspace import router as lab_workspace_router
+from app.core.payroll_workspace import router as payroll_workspace_router
+from app.core.student_leave_workspace import router as student_leave_workspace_router
 from app.core.resources import CATALOG
 from app.core.files import files_for
 from app.core.settings import Settings
@@ -218,6 +220,8 @@ def create_app(settings=None):
         attendance_workspace_router,
         certificate_workspace_router,
         lab_workspace_router,
+        payroll_workspace_router,
+        student_leave_workspace_router,
         syllabus_workspace_router,
         auth_api.router,
         timetable_templates_router,

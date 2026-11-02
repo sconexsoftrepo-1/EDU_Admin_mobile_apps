@@ -170,6 +170,37 @@ def summarize(registers, students, leaves, start, end):
             "start": start, "end": end}
 
 
+def section_option(data, section):
+    """A section for the class picker, with its class size and whether its semester is running."""
+    from .academic_progress import semester_state
+    term = data["records"].get("semesters", {}).get(section.get("semester_code"), {})
+    students = sum(1 for e in aw.rows(data, "student_enrollments")
+                   if e.get("section_code") == section["code"] and e.get("status") == "active")
+    current = False
+    year = data["records"].get("academic_years", {}).get(term.get("academic_year_code"))
+    if year and term:
+        try:
+            current = semester_state(data, year)["current"] == term.get("semester_number")
+        except Exception:
+            current = False
+    return {"code": section["code"], "name": section.get("name", section["code"]), "batch_code": section.get("batch_code"),
+            "students": students, "semester_number": term.get("semester_number"), "current": current or not term}
+
+
+def default_class(data, years, section_codes):
+    options = [section_option(data, data["records"]["sections"][c]) for c in sorted(section_codes)
+               if c in data["records"].get("sections", {})]
+    best = next((o for o in options if o["current"] and o["students"]), None) or next((o for o in options if o["students"]), None)
+    if not best:
+        return None
+    year = next((y for y in years if best["code"] in y.get("section_codes", [])), None)
+    if not year:
+        return None
+    program = data["records"].get("programs", {}).get(year["program_code"], {})
+    return {"course_level": program.get("course_level"), "program_code": year["program_code"],
+            "academic_year_code": year["code"], "section_code": best["code"]}
+
+
 @router.get("/options")
 def options(request: Request, user=Depends(current_user)):
     data = request.app.state.store.snapshot()
@@ -202,8 +233,10 @@ def options(request: Request, user=Depends(current_user)):
                          "branch": r.get("branch") or r.get("specialization") or "General"}
                         for r in aw.rows(data, "programs") if r["code"] in course_codes],
             "academic_years": years,
-            "sections": [{"code": r["code"], "name": r.get("name", r["code"]), "batch_code": r.get("batch_code")}
-                         for r in aw.rows(data, "sections") if r["code"] in section_codes] if not personal else [],
+            "sections": [section_option(data, r) for r in aw.rows(data, "sections") if r["code"] in section_codes]
+                        if not personal else [],
+            # The class to open first: the current-semester section with students (teachers: their own).
+            "default_class": default_class(data, years, section_codes) if not personal else None,
             "students": [{"code": r["code"], "name": aw.name(r)} for r in aw.rows(data, "students") if r["code"] in own],
             "can_mark": allowed(data, user, "create"), "teacher": aw.teaching(user), "personal": personal,
             "statuses": list(STATUSES), "periods": [{"value": 0, "label": "Whole day"}] +

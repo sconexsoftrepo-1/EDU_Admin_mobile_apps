@@ -132,6 +132,7 @@ export function WorkspaceNavigation({
         "admissions",
         "student-enrollment",
         "attendance",
+        "student-leave",
         "assessments",
       ],
     ],

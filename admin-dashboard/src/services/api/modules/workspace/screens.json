@@ -25,6 +25,13 @@
     ]
   },
   {
+    "key": "student-leave",
+    "title": "Student leave",
+    "resources": [
+      "student_leave_requests"
+    ]
+  },
+  {
     "key": "employee-leave",
     "title": "Leave management",
     "resources": [

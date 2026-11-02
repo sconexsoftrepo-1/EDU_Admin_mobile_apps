@@ -95,7 +95,22 @@ def public_request(data, row):
     profile = next((p for p in rows(data, "student_admission_profiles") if p.get("student_code") == row.get("student_code")), {})
     result["program_code"] = profile.get("program_code")
     result["academic_year_code"] = profile.get("academic_year_code")
+    result["course_name"] = data["records"].get("programs", {}).get(profile.get("program_code"), {}).get("name")
+    result["academic_year_name"] = data["records"].get("academic_years", {}).get(profile.get("academic_year_code"), {}).get("name")
+    result["reference"] = short_reference(data, row)
     return result
+
+
+def short_reference(data, row):
+    """Readable request number: CREQ-<admission number>-<n> (new requests are stored this way)."""
+    code = str(row.get("code", ""))
+    if not code.startswith("CREQ-") or len(code) <= 32:
+        return code
+    student = data["records"].get("students", {}).get(row.get("student_code"), {})
+    mine = sorted((r for r in rows(data, "certificate_requests") if r.get("student_code") == row.get("student_code")),
+                  key=lambda r: (str(r.get("requested_on") or ""), r["code"]))
+    position = next((i for i, r in enumerate(mine, 1) if r["code"] == code), 1)
+    return f"CREQ-{student.get('admission_number') or row.get('student_code')}-{position}"
 
 
 def seed_types(data):
@@ -192,7 +207,15 @@ def create_request(body: RequestInput, request: Request, background: BackgroundT
             raise HTTPException(422, "Select a supported certificate template")
         if any(r.get("student_code") == student_code and r.get("type_code") == body.template_code and r.get("status") in {"pending", "approved"} for r in rows(data, "certificate_requests")):
             raise HTTPException(409, "A request for this certificate is already awaiting review")
-        code = new_code("CREQ")
+        # Short, unique request number: CREQ-<admission number>-<n>.
+        import re
+        admission = re.sub(r"[^A-Za-z0-9-]", "", str(data["records"].get("students", {}).get(student_code, {}).get("admission_number") or "")) or student_code
+        existing = data["records"].get("certificate_requests", {})
+        n = 1 + sum(1 for r in existing.values() if r.get("student_code") == student_code)
+        code = f"CREQ-{admission}-{n}"
+        while code in existing:
+            n += 1
+            code = f"CREQ-{admission}-{n}"
         record = {"code": code, "student_code": student_code, "type_code": body.template_code,
                   "requested_on": now(), "reason": body.reason.strip(), "status": "pending", "decision_message": ""}
         data["records"].setdefault("certificate_requests", {})[code] = record

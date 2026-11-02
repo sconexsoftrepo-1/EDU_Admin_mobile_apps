@@ -124,6 +124,16 @@ class _AttendanceHubState extends State<AttendanceHub> {
             course = _asText(selected['name']);
           }
         }
+        // Open the teacher's current class straight away (any device, no saved selection).
+        final first = result['default_class'];
+        if (widget.initialClass == null && program.isEmpty && first is Map) {
+          level = _asText(first['course_level']).isEmpty ? level : _asText(first['course_level']);
+          program = _asText(first['program_code']);
+          year = _asText(first['academic_year_code']);
+          section = _asText(first['section_code']);
+          final chosen = _asRows(result['courses']).where((c) => c['code'] == program).firstOrNull;
+          if (chosen != null) course = _asText(chosen['name']);
+        }
         final children = _asRows(result['students']);
         if (children.isNotEmpty) {
           child = children.any((s) => s['code'] == widget.studentCode)
@@ -359,7 +369,16 @@ class _AttendanceHubState extends State<AttendanceHub> {
           section,
           [
             if (options?['teacher'] != true) ('', 'All sections'),
-            ...sections.map((r) => (_asText(r['code']), _asText(r['name']))),
+            ...sections.map(
+              (r) => (
+                _asText(r['code']),
+                [
+                  _asText(r['name']),
+                  if (r['students'] != null) '${r['students']} students',
+                  if (r['current'] == true) 'current',
+                ].join(' · '),
+              ),
+            ),
           ],
           (v) => section = v,
           enabled: year.isNotEmpty,

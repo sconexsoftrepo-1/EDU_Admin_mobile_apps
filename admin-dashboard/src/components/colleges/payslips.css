@@ -1,0 +1,217 @@
+/* Salary & payslips screen. */
+.pay-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.pay-layout.pay-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.pay-people {
+  padding: 0;
+  overflow: hidden;
+}
+.pay-people-search {
+  padding: 12px;
+  border-bottom: 1px solid #eee6da;
+}
+.pay-people ul {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: 640px;
+  overflow-y: auto;
+}
+.pay-people li button {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  cursor: pointer;
+  color: #30251c;
+}
+.pay-people li button:hover {
+  background: #faf7f1;
+}
+.pay-people li button[aria-pressed="true"] {
+  background: #e8efe2;
+}
+.pay-people small,
+.pay-people span,
+.pay-muted {
+  color: #827564;
+  font-size: 12px;
+}
+.pay-detail {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.pay-summary {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background: linear-gradient(135deg, #e8efe2, #e3ebee);
+}
+.pay-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pay-person h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.pay-person p {
+  margin: 2px 0 0;
+  color: #62513c;
+  font-size: 13px;
+}
+.pay-avatar {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fff;
+  color: #365b45;
+}
+.pay-figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.pay-figures > div {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.pay-figures dt {
+  font-size: 12px;
+  color: #6e645b;
+}
+.pay-figures dd {
+  margin: 2px 0 0;
+  font-weight: 800;
+  font-size: 16px;
+  color: #30251c;
+}
+.pay-figures .pay-net dd {
+  color: #365b45;
+}
+.pay-section {
+  padding: 18px;
+}
+.pay-section h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.pay-statement {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.pay-statement th,
+.pay-statement td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee6da;
+  text-align: left;
+}
+.pay-statement thead th {
+  background: #f6f3ee;
+  font-weight: 700;
+}
+.pay-statement td:nth-child(2),
+.pay-statement th:nth-child(2) {
+  border-right: 1px solid #eee6da;
+}
+.pay-statement .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pay-statement tfoot th {
+  font-weight: 800;
+  border-bottom: 0;
+}
+.pay-slips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.pay-slip {
+  border: 1px solid #e9dfcf;
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+  display: grid;
+  gap: 4px;
+}
+.pay-slip header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pay-slip-net {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #365b45;
+}
+.pay-slip p {
+  margin: 0;
+}
+.pay-sheet {
+  display: grid;
+  gap: 16px;
+}
+.pay-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0;
+}
+.pay-meta dt {
+  font-size: 12px;
+  color: #827564;
+}
+.pay-meta dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+.pay-net-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #e8efe2;
+}
+.pay-net-box span {
+  font-weight: 700;
+  color: #365b45;
+}
+.pay-net-box strong {
+  font-size: 20px;
+  color: #365b45;
+}
+.pay-net-box small {
+  grid-column: 1 / -1;
+  color: #62513c;
+}
+@media (max-width: 860px) {
+  .pay-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pay-people ul {
+    max-height: 260px;
+  }
+}
