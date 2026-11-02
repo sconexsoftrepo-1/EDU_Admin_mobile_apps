@@ -86,6 +86,16 @@ def leave_history(data, employee_code):
     return sorted(rows, key=lambda r: str(r.get("start_date") or ""), reverse=True)
 
 
+def hhmm(value):
+    """"08:45" from a time or a timestamp ("2026-10-05T08:45:00+05:30", "1900-01-01 08:45:00")."""
+    text = str(value or "")
+    if not text:
+        return None
+    if "T" in text or " " in text:
+        text = text.replace("T", " ").split(" ", 1)[1]
+    return text[:5]
+
+
 def month_attendance(data, employee_code, month):
     start, end = (date.fromisoformat(x) for x in month_bounds(month))
     end = min(end, date.today()) if start <= date.today() else end
@@ -97,7 +107,7 @@ def month_attendance(data, employee_code, month):
         mark = marks.get(day.isoformat())
         status = mark.get("status") if mark else ("holiday" if day.weekday() == 6 else None)
         days.append({"date": day.isoformat(), "weekday": day.strftime("%a"), "status": status,
-                     "check_in": (mark or {}).get("check_in"), "check_out": (mark or {}).get("check_out")})
+                     "check_in": hhmm((mark or {}).get("check_in")), "check_out": hhmm((mark or {}).get("check_out"))})
         day += timedelta(days=1)
     counts = {s: sum(1 for d in days if d["status"] == s) for s in ("present", "absent", "leave", "half_day", "holiday")}
     workdays = sum(1 for d in days if d["status"] not in {"holiday", None})

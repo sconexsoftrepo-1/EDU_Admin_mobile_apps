@@ -167,6 +167,8 @@ def attendance(data, employees, today):
                     status, cin, cout = "half_day", f"08:{50 + (n + i) % 10:02d}:00", "12:45:00"
                 else:
                     status, cin, cout = "present", f"08:{40 + (n * 3 + i) % 20:02d}:00", f"16:{30 + (n + i * 2) % 25:02d}:00"
+                # check_in / check_out are timestamps in the database (India time).
+                cin, cout = (f"{key}T{t}+05:30" if t else None for t in (cin, cout))
                 code = new_code("EATT")
                 table[code] = {"code": code, "employee_code": employee["code"], "attendance_date": key, "check_in": cin,
                                "check_out": cout, "status": status, "demo_run": RUN}
