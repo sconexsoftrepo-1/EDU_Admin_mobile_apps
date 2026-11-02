@@ -99,6 +99,8 @@ import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import LabRegistry from "./staff/LabRegistry";
+import PayslipsWorkspace from "./PayslipsWorkspace";
+import StudentLeaveWorkspace from "./StudentLeaveWorkspace";
 import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
 import { toast, useErrorToast } from "./toast";
@@ -172,6 +174,14 @@ type ScreenSnapshot = {
  * Screens whose "create" is a complete data-entry form (several tables in one step) rather than a
  * single-table record: the value is the master data form's key.
  */
+/** Records created only through the Student enrollment screen. */
+const STUDENT_RECORDS = new Set([
+  "students",
+  "parents",
+  "student_parents",
+  "student_enrollments",
+  "student_admission_profiles",
+]);
 const PRIMARY_FORMS: Record<string, string> = {
   "student-enrollment": "enroll-student",
   students: "enroll-student",
@@ -322,7 +332,7 @@ export default function ConnectedPortal({
           : rawSpec;
         const first = spec.resources[0] || null;
         const [records, totals, extra] = await Promise.all([
-          first && !STAFF_SCREENS[name] && name !== "labs"
+          first && !STAFF_SCREENS[name] && name !== "labs" && name !== "payslips" && name !== "student-leave"
             ? api.workspace.list(first.path, 0, pageSize(first.name))
             : Promise.resolve({ items: [], total: 0 }),
           FINANCE_SUMMARY_SCREENS.includes(name)
@@ -383,7 +393,7 @@ export default function ConnectedPortal({
       const spec = activeRoleRef.current ? roleScreen(rawSpec, activeRoleRef.current) : rawSpec;
       const first = spec.resources[0] || null;
       const [records, totals, extra] = await Promise.all([
-        first && !STAFF_SCREENS[name] && name !== "labs" ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
+        first && !STAFF_SCREENS[name] && name !== "labs" && name !== "payslips" && name !== "student-leave" ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
         FINANCE_SUMMARY_SCREENS.includes(name) ? api.finance.summary().catch(() => null) : Promise.resolve(null),
         specialRows(name),
       ]);
@@ -690,6 +700,11 @@ export default function ConnectedPortal({
   const edit = async (row?: Row) => {
     if (!resource || (!row && studentScreen)) return;
     const current = resource;
+    // Students, parents and enrollments are only created through the Student enrollment screen.
+    if (!row && STUDENT_RECORDS.has(current.name)) {
+      openEnrollment();
+      return;
+    }
     if (current.name === "fee_heads") {setFeeHeads({initial:row});return;}
     try {
       const bound = await api.workspace.resourceForm(
@@ -734,14 +749,21 @@ export default function ConnectedPortal({
       setDialog({
         resourceName: current.name,
         title: (row ? "Edit " : "Create ") + current.title,
-        fields: configured.fields,
+        // A record's code is its permanent identifier (other records link to it): it is not
+        // editable, and edits never send it.
+        fields: row
+          ? configured.fields.filter((f) => (f.name || f.key) !== "code")
+          : configured.fields,
         initial: configured.initial,
         save: async (values) => {
+          const { code: _code, ...changes } = values as Row;
+          void _code;
+          const edited = row ? changes : values;
           const payload = {
             values:
               current.name === "students"
-                ? studentEditValues(values, configured.initial)
-                : values,
+                ? studentEditValues(edited, configured.initial)
+                : edited,
             form_code: form?.code,
             form_revision: form?.revision,
           };
@@ -762,7 +784,25 @@ export default function ConnectedPortal({
       : actions.find((a) => a.key === PRIMARY_FORMS[selected]);
   const primaryOpened = useRef(false);
   /** Student enrollment uses the full wizard (student, guardian, course, fees, review). */
-  const [wizard, setWizard] = useState(false);
+  // ?enroll=1 opens the enrollment form on arrival (from "Add student" on other screens).
+  const [wizard, setWizard] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("enroll") === "1",
+  );
+  /** Open the Student enrollment screen with its enrollment form. */
+  const openEnrollment = () => {
+    if (selected !== "student-enrollment" && parts.length > 2) {
+      const path = "/" + [...parts.slice(0, -1), "student-enrollment"].join("/");
+      window.history.pushState(null, "", `${path}?enroll=1`);
+      if (!embedded) {
+        setSelected("student-enrollment");
+        setWizard(true);
+      }
+      return;
+    }
+    setWizard(true);
+  };
   async function saveAction(action: Action, values: Row) {
     await api.workflows.run(action, values);
     if (values.administrator_employee_code) {
@@ -780,7 +820,7 @@ export default function ConnectedPortal({
   }
   const runAction = (action: Action) =>
     action.key === "enroll-student"
-      ? setWizard(true)
+      ? openEnrollment()
       : setDialog({
           title: action.label,
           fields: action.fields,
@@ -1096,6 +1136,10 @@ export default function ConnectedPortal({
           <CalendarWorkspace />
         ) : selected === "labs" ? (
           <LabRegistry standalone />
+        ) : selected === "payslips" ? (
+          <PayslipsWorkspace />
+        ) : selected === "student-leave" ? (
+          <StudentLeaveWorkspace />
         ) : selected === "certificates" || selected === "certificate-requests" ? (
           <CertificateWorkspace />
         ) : (
@@ -1895,6 +1939,9 @@ export default function ConnectedPortal({
           onClose={() => {
             setWizard(false);
             setWizardDismissed(true);
+            // Drop ?enroll=1 so a refresh does not reopen the form.
+            if (new URLSearchParams(window.location.search).has("enroll"))
+              window.history.replaceState(null, "", window.location.pathname);
           }}
           onEnrolled={() => {
             clearWorkspaceCache();

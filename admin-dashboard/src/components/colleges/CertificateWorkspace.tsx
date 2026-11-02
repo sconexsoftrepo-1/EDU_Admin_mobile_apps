@@ -154,7 +154,7 @@ export default function CertificateWorkspace({
   const filtered = useMemo(
     () =>
       items.filter((row) =>
-        `${row.student_name} ${row.template_name} ${row.status}`
+        `${row.student_name} ${row.admission_number || ""} ${row.reference || ""} ${row.course_name || ""} ${row.template_name} ${row.status}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
@@ -162,6 +162,14 @@ export default function CertificateWorkspace({
   );
 
   async function decide(row: CertificateRow, accept: boolean) {
+    if (accept && options?.issuer_required && !issuer) {
+      toast.error(
+        "Choose the issuing employee",
+        "Select the authorized certificate issuer above the requests, then approve again.",
+      );
+      document.getElementById("certificate-issuer")?.focus();
+      return;
+    }
     try {
       if (accept) await api.certificates.approve(row.code, issuer || undefined);
       else await api.certificates.reject(row.code);
@@ -332,6 +340,27 @@ export default function CertificateWorkspace({
         </div>
       )}
 
+      {!personal && options?.issuer_required && (
+        <section className="edu-student-section certificate-issuer-bar">
+          <label>
+            Authorized certificate issuer (signs approved certificates)
+            <select
+              id="certificate-issuer"
+              required
+              value={issuer}
+              onChange={(e) => setIssuer(e.target.value)}
+            >
+              <option value="">Select issuing employee</option>
+              {options.issuers?.map((e) => (
+                <option key={e.code} value={e.code}>
+                  {e.name}
+                  {e.designation ? ` · ${e.designation}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+      )}
       <div className="as-cards">
         {filtered.map((row) => {
           const certificate = issued.find(
@@ -349,10 +378,21 @@ export default function CertificateWorkspace({
               </div>
               <h2>{row.template_name}</h2>
               <p className="as-audience">
-                {row.student_name}
+                <strong>{row.student_name}</strong>
                 {row.admission_number
                   ? ` · Admission ${row.admission_number}`
                   : ""}
+              </p>
+              {(row.course_name || row.academic_year_name) && (
+                <p className="as-audience">
+                  {[row.course_name, row.academic_year_name]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+              <p className="as-audience">
+                <code>{row.reference || row.code}</code>
+                {row.reason ? ` · ${row.reason}` : ""}
               </p>
               {row.decision_message && <p>{row.decision_message}</p>}
               <div className="as-actions">
@@ -397,28 +437,6 @@ export default function CertificateWorkspace({
         </section>
       )}
 
-      {!personal && (
-        <section className="edu-student-section">
-          {options?.issuer_required && (
-            <label>
-              Authorized certificate issuer
-              <select
-                required
-                value={issuer}
-                onChange={(e) => setIssuer(e.target.value)}
-              >
-                <option value="">Select issuing employee</option>
-                {options.issuers?.map((e) => (
-                  <option key={e.code} value={e.code}>
-                    {e.name}
-                    {e.designation ? ` · ${e.designation}` : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </section>
-      )}
       {!personal && drawer && (
         <SideDrawer
           title="Issue a certificate"

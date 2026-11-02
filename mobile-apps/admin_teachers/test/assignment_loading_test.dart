@@ -8,7 +8,7 @@ import 'package:http/testing.dart';
 
 void main() {
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
-  Future<CollegeApi> api() async {
+  Future<CollegeApi> api({bool review = false}) async {
     final value = CollegeApi(
       baseUrl: 'http://localhost',
       clientId: 'admin-mobile',
@@ -23,10 +23,24 @@ void main() {
           'batch_name': '2026–2028',
           'teacher_name': 'Teacher Rao',
           'max_marks': '20',
-          'can_review': false,
+          'can_review': review,
+          'can_grade': review,
           'can_submit': false,
           'attachments': [],
-          'students': [],
+          'students': review
+              ? [
+                  {
+                    'code': 'ST1',
+                    'name': 'Ananya Rao',
+                    'admission_number': 'ADM1',
+                    'submission': {
+                      'submitted_at': '2030-05-30T09:00:00Z',
+                      'completed': false,
+                      'attachments': [],
+                    },
+                  },
+                ]
+              : [],
           'bucket': 'upcoming',
         };
         return http.Response(
@@ -77,4 +91,23 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets('Teacher review cards mark completion without ink errors', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AssignmentReview(api: await api(review: true), code: 'A1'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final completed = find.text('Completed');
+    await tester.scrollUntilVisible(
+      completed,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(completed);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }

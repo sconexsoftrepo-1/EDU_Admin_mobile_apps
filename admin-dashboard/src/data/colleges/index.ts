@@ -140,6 +140,7 @@ export const modules = [
   "labs",
   "daily-labour",
   "course-setup",
+  "student-leave",
 ];
 export const roles = [
   "Master Data Entry",

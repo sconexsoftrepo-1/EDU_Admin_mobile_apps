@@ -20,6 +20,12 @@ def rows(data, table):
     return list(data["records"].get(table, {}).values())
 
 
+def staff_can_view(data, user):
+    """Every staff member (teachers, lab in-charges, office staff) may read the college calendar;
+    creating or editing events still needs the calendar permission."""
+    return user.get("person_type") in {"employee", "system"} or staff_can(data, user)
+
+
 def staff_can(data, user, action="view"):
     if aw.personal(user):
         return False
@@ -87,7 +93,7 @@ def authorize_event(data, user, event):
     if aw.personal(user):
         if not matches(data, event, personal_students(data, user)):
             raise HTTPException(404, "Event not found")
-    elif not staff_can(data, user):
+    elif not staff_can_view(data, user):
         raise HTTPException(404, "Event not found")
 
 
@@ -127,7 +133,7 @@ def options(request: Request, user=Depends(current_user)):
 @router.get("")
 def listing(request: Request, student_code: str | None = None, user=Depends(current_user)):
     data = request.app.state.store.snapshot()
-    if not aw.personal(user) and not staff_can(data, user):
+    if not aw.personal(user) and not staff_can_view(data, user):
         raise HTTPException(403, "Calendar access is not assigned to this role")
     all_students = personal_students(data, user)
     if student_code and student_code not in all_students:

@@ -528,15 +528,8 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user),
                 data, user, "employee", slip["employee_code"]
             ) and not has_permission(data, user, "payslips", "view"):
                 raise HTTPException(404, "Payslip not found")
-            raw = pdf(
-                "Salary payslip",
-                [f"{k.replace('_', ' ').title()}: {v}" for k, v in slip.items()]
-                + [
-                    f"{r['component']} ({r['component_type']}): INR {r['amount']}"
-                    for r in query_rows(data, "payslip_lines")
-                    if r["payslip_code"] == code
-                ],
-            )
+            from app.core.payroll_workspace import payslip_pdf
+            raw = payslip_pdf(data, slip)
             mime = "application/pdf"
         elif kind in {"tax-document", "document", "admission-document", "certificate", "import-workbook"}:
             table = {

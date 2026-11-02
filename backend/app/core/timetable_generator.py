@@ -23,7 +23,7 @@ from .lab_workspace import lab_for_subject, lab_subject, person
 from .storage import new_code, now
 from .timetable_templates import documents, semester_term
 
-PERIODS = [
+DEFAULT_PERIODS = [
     {"start": "09:00", "end": "09:50", "kind": "teaching", "label": "Period 1"},
     {"start": "09:50", "end": "10:40", "kind": "teaching", "label": "Period 2"},
     {"start": "10:40", "end": "10:55", "kind": "break", "label": "Short break"},
@@ -33,9 +33,20 @@ PERIODS = [
     {"start": "13:20", "end": "14:10", "kind": "teaching", "label": "Period 5"},
     {"start": "14:10", "end": "15:00", "kind": "teaching", "label": "Period 6"},
 ]
-TEACHING_ROWS = [i for i, p in enumerate(PERIODS) if p["kind"] == "teaching"]
-LAB_ROWS = (6, 7)  # P5–P6
 DAYS = range(6)  # Monday … Saturday
+
+
+def bell_schedule(data):
+    """The college's bell schedule, stored in the database (documents.timetable_settings).
+
+    It is saved with the defaults the first time it is needed, and can be changed through
+    PUT /academics/timetable-templates/bell-schedule; generated timetables follow it."""
+    settings = data.setdefault("documents", {}).setdefault("timetable_settings", {})
+    current = settings.get("bell_schedule")
+    if not current or not current.get("periods"):
+        current = {"code": "bell_schedule", "periods": [dict(p) for p in DEFAULT_PERIODS], "updated_at": now()}
+        settings["bell_schedule"] = current
+    return [dict(p) for p in current["periods"]]
 
 
 def seeded_demo(timetable):
@@ -79,6 +90,11 @@ def plan(data, on=None):
     for o in aw.rows(data, "subject_offerings"):
         offerings[(o["section_code"], o["subject_code"])] = o
     busy = busy_teachers(data)
+    PERIODS = bell_schedule(data)
+    TEACHING_ROWS = [i for i, p in enumerate(PERIODS) if p["kind"] == "teaching"]
+    # Labs take the last two consecutive teaching periods of the day.
+    LAB_ROWS = next(((a, b) for a, b in zip(TEACHING_ROWS[::-1][1:], TEACHING_ROWS[::-1]) if b == a + 1),
+                    tuple(TEACHING_ROWS[-2:]))
     created = []
     for year in sorted(aw.rows(data, "academic_years"), key=lambda y: y["code"]):
         if not year.get("program_code"):
@@ -138,7 +154,7 @@ def plan(data, on=None):
                         break
             # Library: one period a week (Wednesday P6 if free).
             library_done = False
-            for day, row in [(2, 7), (3, 7), (1, 7), (4, 4)]:
+            for day, row in [(2, TEACHING_ROWS[-1]), (3, TEACHING_ROWS[-1]), (1, TEACHING_ROWS[-1]), (4, TEACHING_ROWS[len(TEACHING_ROWS) // 2])]:
                 if (day, row) not in taken:
                     place(day, [row], {"kind": "library", "title": "Library", "subject_code": "", "faculty": "",
                                        "room": "Library"})

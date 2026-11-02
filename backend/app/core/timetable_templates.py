@@ -147,6 +147,41 @@ def save(body, request, user, code=None):
     return record
 
 
+class BellSchedule(StrictModel):
+    periods: list[Period] = Field(min_length=2, max_length=24)
+
+    @model_validator(mode="after")
+    def ordered(self):
+        for i, period in enumerate(self.periods):
+            if period.start >= period.end:
+                raise ValueError(f"Period {i + 1}: end must be after start")
+            if i and period.start < self.periods[i - 1].end:
+                raise ValueError(f"Period {i + 1} overlaps the previous period")
+        if sum(1 for p in self.periods if p.kind == "teaching") < 2:
+            raise ValueError("Keep at least two teaching periods")
+        return self
+
+
+@router.get("/bell-schedule")
+def get_bell_schedule(request: Request, user=Depends(current_user)):
+    from .timetable_generator import DEFAULT_PERIODS
+    data = request.app.state.store.snapshot()
+    access(data, user)
+    saved = data.get("documents", {}).get("timetable_settings", {}).get("bell_schedule")
+    return {"periods": (saved or {}).get("periods") or DEFAULT_PERIODS, "saved": bool(saved)}
+
+
+@router.put("/bell-schedule")
+def put_bell_schedule(body: BellSchedule, request: Request, user=Depends(current_user)):
+    with request.app.state.store.transaction() as data:
+        access(data, user, "edit")
+        settings = data.setdefault("documents", {}).setdefault("timetable_settings", {})
+        settings["bell_schedule"] = {"code": "bell_schedule", "periods": [p.model_dump() for p in body.periods],
+                                     "updated_at": now(), "updated_by": user["code"]}
+        audit(data, user["code"], "bell_schedule_update", "timetable_templates", "bell_schedule")
+        return {"periods": settings["bell_schedule"]["periods"], "saved": True}
+
+
 @router.post("/generate")
 def generate(request: Request, preview: bool = False, user=Depends(current_user)):
     """Create a semester timetable for every current-semester section that has none.
