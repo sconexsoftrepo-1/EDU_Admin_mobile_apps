@@ -431,6 +431,10 @@ def issue_form16(data, files, employee_code, financial_year, actor_user=None, ac
         raise HTTPException(404, "Employee not found")
     if not actor_employee:
         raise HTTPException(422, "Sign in with an employee account to publish Form 16")
+    # file_storage_objects.uploaded_by_user_code is required: use the publisher's login when no
+    # signed-in user (one-time scripts), else a system marker.
+    uploader = actor_user or next((a["code"] for a in data.get("accounts", {}).values()
+                                     if a.get("person_type") == "employee" and a.get("person_code") == actor_employee), None) or "system"
     raw, st = form16_pdf(data, employee_code, financial_year)
     key = f"{person_folder(data, 'form_16', employee_code)}/{folder_segment('form_16')}/{new_code('FILE')}.pdf"
     table = data["records"].setdefault("employee_tax_documents", {})
@@ -445,14 +449,14 @@ def issue_form16(data, files, employee_code, financial_year, actor_user=None, ac
               "revision": revision, "storage_key": key, "sha256": sha,
               "published_by_employee_code": actor_employee, "published_at": now(), "original_filename": filename,
               "mime_type": "application/pdf", "size_bytes": len(raw), "document_url": f"/api/v1/documents/tax-document/{code}/view",
-              "uploaded_at": now(), "uploaded_by_user_code": actor_user, "generated": True, **stored}
+              "uploaded_at": now(), "uploaded_by_user_code": uploader, "generated": True, **stored}
     files.put(key, raw, "application/pdf")
     table[code] = record
     data["records"].setdefault("file_storage_objects", {})[code] = {
         **{k: record.get(k) for k in ("original_filename", "mime_type", "size_bytes", "sha256", "document_url", "uploaded_at",
                                       "storage_provider", "s3_bucket", "s3_key", "s3_uri")},
         "code": code, "owner_type": "employee", "owner_code": employee_code, "document_table": "employee_tax_documents",
-        "document_code": code, "storage_key": key, "uploaded_by_user_code": actor_user, "deleted_at": None}
+        "document_code": code, "storage_key": key, "uploaded_by_user_code": uploader, "deleted_at": None}
     audit(data, actor_user, "form16_generate", "employee_tax_documents", code)
     return key, {k: v for k, v in record.items() if k != "storage_key"}
 
