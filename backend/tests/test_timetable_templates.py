@@ -213,3 +213,19 @@ def test_generator_replaces_seeded_demo_timetables_with_a_real_week(client, head
     assert len({tuple(v) for v in by_day.values()}) > 1, by_day
     starts = [(i["weekday"], i["start_time"]) for i in week]
     assert len(starts) == len(set(starts)), "a teacher is never in two classes at once"
+
+
+def test_bell_schedule_is_stored_and_used_by_the_generator(client, headers, app):
+    from tests.test_lab_workspace import seed
+    seed(app)
+    with app.state.store.transaction() as d:
+        d["documents"]["timetables"] = {}
+    periods = [{"start": "08:30", "end": "09:30", "label": "P1"}, {"start": "09:30", "end": "10:30", "label": "P2"},
+               {"start": "10:30", "end": "11:00", "kind": "lunch", "label": "Lunch"},
+               {"start": "11:00", "end": "12:00", "label": "P3"}, {"start": "12:00", "end": "13:00", "label": "P4"}]
+    saved = client.put(BASE + "/bell-schedule", headers=headers, json={"periods": periods})
+    assert saved.status_code == 200, saved.text
+    assert client.get(BASE + "/bell-schedule", headers=headers).json()["saved"] is True
+    assert client.post(BASE + "/generate", headers=headers).json()["count"] > 0
+    made = next(iter(app.state.store.snapshot()["documents"]["timetables"].values()))
+    assert [p["start"] for p in made["periods"]] == ["08:30", "09:30", "10:30", "11:00", "12:00"]

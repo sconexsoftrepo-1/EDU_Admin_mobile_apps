@@ -92,13 +92,23 @@ void main() {
     bool personal,
     List<Json> saves, {
     bool onLeave = false,
+    bool autoClass = false,
   }) async {
     final api = CollegeApi(
       baseUrl: 'http://localhost',
       clientId: personal ? 'student-mobile' : 'teacher-mobile',
       httpClient: MockClient((request) async {
         final body = request.url.path.endsWith('/options')
-            ? options(personal)
+            ? {
+                ...options(personal),
+                if (autoClass)
+                  'default_class': {
+                    'course_level': 'degree',
+                    'program_code': 'P1',
+                    'academic_year_code': 'Y1',
+                    'section_code': 'S1',
+                  },
+              }
             : {
                 ...payload(),
                 if (onLeave) ...{
@@ -271,6 +281,30 @@ void main() {
       'student_code': 'ST1',
       'status': 'absent',
     });
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('A teacher opens straight into their current class register', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AttendanceHub(
+          api: await api(false, [], autoClass: true),
+          role: MobileRole.teacher,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('att-ST1')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Ananya Rao'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 }

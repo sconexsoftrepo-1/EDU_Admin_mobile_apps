@@ -111,6 +111,17 @@ LAB_INCHARGE_SCREENS = [
 ]
 
 
+def admin_can_view(data, user, resource):
+    """Admin app screens. The college finance overview and reports are fee totals, so anyone who
+    may view fee charges or payments sees them as well as holders of the reports permission."""
+    if resource == "audit":
+        return has_permission(data, user, "audit", "view")
+    if resource in {"summary", "reports"}:
+        return any(has_permission(data, user, table, "view")
+                   for table in ("reports", "student_fee_charges", "payments"))
+    return has_permission(data, user, resource, "view")
+
+
 def client_screens(data, user):
     from app.core.lab_workspace import is_lab_incharge
     client = effective_client(user)
@@ -527,16 +538,7 @@ def screen_list(request: Request, user=Depends(current_user)):
             for k, title, resource in client_screens(data, user)
             if effective_client(user) != "admin-mobile"
             or resource == "profile"
-            or has_permission(
-                data,
-                user,
-                "audit"
-                if resource == "audit"
-                else "reports"
-                if resource in {"summary", "reports"}
-                else resource,
-                "view",
-            )
+            or admin_can_view(data, user, resource)
         ]
     }
 
@@ -592,14 +594,7 @@ def screen_data(
     summary = None
     items = []
     if admin:
-        permission = (
-            "audit"
-            if table == "audit"
-            else "reports"
-            if table in {"summary", "reports"}
-            else table
-        )
-        if table != "profile" and not has_permission(data, user, permission, "view"):
+        if table != "profile" and not admin_can_view(data, user, table):
             raise HTTPException(403, "Screen permission denied")
         if table in {"summary", "reports"}:
             summary = calculate_summary(data)
@@ -762,10 +757,10 @@ def screen_data(
             if r["employee_code"] == user["person_code"]
             and r["payroll_run_code"] in published
         ]
-        runs = {r["code"]: r for r in query_rows(data, "payroll_runs")}
-        items = [{**r, "period_start": runs.get(r["payroll_run_code"], {}).get("period_start"),
-                  "period_end": runs.get(r["payroll_run_code"], {}).get("period_end")} for r in items]
+        from app.core.payroll_workspace import payslip_view, salary_structure
+        items = [{**payslip_view(data, r), "lines": r["lines"]} for r in items]
         items.sort(key=lambda r: str(r.get("period_start") or ""), reverse=True)
+        summary = {"structure": salary_structure(data, user["person_code"])}
     elif table == "employee_tax_documents":
         items = [
             r
@@ -1299,7 +1294,9 @@ def mobile_action(
             key = record["code"]
             table = "notifications"
         record["code"] = key
-        if table in CATALOG:
+        # Marking read only changes the status; notifications may carry extra links (fee reminders
+        # keep charge / semester details), so they are not re-validated against the base schema.
+        if table in CATALOG and action != "read_notification":
             record = validate_record(table, record)
             ensure_references(data, table, record)
         if form:

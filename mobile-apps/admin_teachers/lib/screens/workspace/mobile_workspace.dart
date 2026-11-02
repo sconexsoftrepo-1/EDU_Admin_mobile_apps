@@ -1363,7 +1363,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     onTap: () => open('timetable'),
                   ),
       ],
-      if (admin) ...[
+      if (admin && has('overview')) ...[
         SectionHeading(title: 'College finances', action: 'Finance', onAction: () => open('overview')),
         if (summary != null)
           EduReveal(order: 1, child: SummaryPanel(summary: summary, financial: true, compact: true)),
@@ -2790,79 +2790,207 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     ];
   }
 
-  /// Payslips: latest net pay, then one card per month with earnings, deductions and download.
+  /// Two-column statement rows (component · amount) used by the salary structure and payslips.
+  Widget statementTable(BuildContext context, List<Json> earnings, List<Json> deductions, {String? gross, String? less}) {
+    final text = Theme.of(context).textTheme;
+    Widget column(String title, List<Json> rows, String? total, Color tint, String totalLabel) => Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: tint.withValues(alpha: .45), borderRadius: BorderRadius.circular(14)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: text.labelLarge?.copyWith(fontWeight: FontWeight.w800, color: EduTints.ink(tint))),
+          const SizedBox(height: 6),
+          if (rows.isEmpty) Text('—', style: text.bodySmall),
+          for (final r in rows)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 3),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: Text('${r['component']}', style: text.bodySmall)),
+                const SizedBox(width: 6),
+                Text.rich(TextSpan(text: money(r['amount'])), style: text.bodySmall?.copyWith(fontWeight: FontWeight.w700)),
+              ]),
+            ),
+          if (total != null) ...[
+            const Divider(height: 14),
+            Row(children: [
+              Expanded(child: Text(totalLabel, style: text.labelMedium?.copyWith(fontWeight: FontWeight.w800))),
+              Text.rich(TextSpan(text: money(total)), style: text.labelMedium?.copyWith(fontWeight: FontWeight.w800)),
+            ]),
+          ],
+        ]),
+      ),
+    );
+    final narrow = MediaQuery.textScalerOf(context).scale(16) > 22 || MediaQuery.sizeOf(context).width < 360;
+    final earn = column('Earnings', earnings, gross, EduTints.sage, 'Gross');
+    final ded = column('Deductions', deductions, less, EduTints.clay, 'Total');
+    return narrow
+        ? Column(children: [Row(children: [earn]), const SizedBox(height: 8), Row(children: [ded])])
+        : IntrinsicHeight(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [earn, const SizedBox(width: 8), ded]));
+  }
+
+  /// One month's payslip, formatted like the PDF, with download.
+  Future<void> showPayslip(Json r) async {
+    final kind = '${data?['downloads'] ?? 'payslip'}';
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      backgroundColor: Colors.white,
+      builder: (sheet) {
+        final text = Theme.of(sheet).textTheme;
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: .85,
+          maxChildSize: .95,
+          builder: (context, controller) => ListView(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: collegePine, borderRadius: BorderRadius.circular(18)),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('PAYSLIP', style: text.labelLarge?.copyWith(color: Colors.white70, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
+                      Text('${r['period'] ?? 'Salary statement'}', style: text.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
+                    ]),
+                  ),
+                  const Icon(Icons.request_quote_outlined, color: Colors.white, size: 30),
+                ]),
+              ),
+              const SizedBox(height: 16),
+              statementTable(
+                context,
+                (r['earnings'] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList(),
+                (r['deductions'] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList(),
+                gross: '${r['gross_amount']}',
+                less: '${r['deduction_amount']}',
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: EduTints.sage, borderRadius: BorderRadius.circular(16)),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Expanded(child: Text('Net pay', style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+                    Text.rich(TextSpan(text: money(r['net_amount'])), style: text.titleLarge?.copyWith(fontWeight: FontWeight.w900, color: collegePine)),
+                  ]),
+                  if ('${r['net_in_words'] ?? ''}'.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text('${r['net_in_words']}', style: text.bodySmall),
+                  ],
+                ]),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                key: const ValueKey('download-payslip'),
+                onPressed: downloading
+                    ? null
+                    : () {
+                        Navigator.pop(sheet);
+                        download(kind, '${r['code']}');
+                      },
+                icon: const Icon(Icons.picture_as_pdf_outlined),
+                label: const Text('Download PDF'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Salary and payslips: take-home summary, the salary structure, then one card per month.
   List<Widget> payslipsView(BuildContext context, List<Json> all) {
     final text = Theme.of(context).textTheme;
+    final structure = Map<String, dynamic>.from((data?['summary'] as Map?)?['structure'] as Map? ?? {});
+    List<Json> part(String key) => (structure[key] as List? ?? []).whereType<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     final latest = all.firstOrNull;
-    String period(Json r) {
-      final from = DateTime.tryParse('${r['period_start'] ?? ''}');
-      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-      return from == null ? 'Salary statement' : '${months[from.month - 1]} ${from.year}';
-    }
-    final year = all.fold<num>(0, (sum, r) => sum + (num.tryParse('${r['net_amount'] ?? 0}') ?? 0));
+    final paid = all.fold<num>(0, (sum, r) => sum + (num.tryParse('${r['net_amount'] ?? 0}') ?? 0));
     return [
       summaryBand(
         context,
-        latest == null ? 'Net pay' : 'Net pay · ${period(latest)}',
-        latest == null ? '—' : money(latest['net_amount']),
+        'Monthly take-home',
+        structure.isEmpty ? (latest == null ? '—' : money(latest['net_amount'])) : money(structure['in_hand_monthly'] ?? structure['net_monthly']),
         [
-          ('Payslips', '${all.length}'),
-          ('Gross', latest == null ? '—' : money(latest['gross_amount'])),
-          ('Paid so far', money(year)),
+          ('Gross / month', structure.isEmpty ? '—' : money(structure['gross_monthly'])),
+          ('Annual CTC', structure.isEmpty ? '—' : money(structure['ctc_annual'])),
+          ('Paid so far', money(paid)),
         ],
-        icon: Icons.request_quote_outlined,
+        icon: Icons.account_balance_wallet_outlined,
       ),
-      SectionHeading(title: 'Payslips'),
+      if (structure.isNotEmpty) ...[
+        SectionHeading(title: 'Salary structure'),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: EduWorkspace.border),
+            boxShadow: EduWorkspace.shadow,
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(
+              'Monthly${'${structure['effective_from'] ?? ''}'.isEmpty ? '' : ' · effective ${prettyDate(DateTime.tryParse('${structure['effective_from']}') ?? DateTime.now())}'}',
+              style: text.bodySmall,
+            ),
+            const SizedBox(height: 10),
+            statementTable(context, part('earnings'), part('deductions'),
+                gross: '${structure['gross_monthly']}', less: '${structure['deductions_monthly']}'),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(child: Text('Net salary', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
+              Text.rich(TextSpan(text: money(structure['net_monthly'])), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: collegePine)),
+            ]),
+          ]),
+        ),
+      ],
+      SectionHeading(title: 'Monthly payslips'),
       if (all.isEmpty)
         const QuietEmpty(icon: Icons.receipt_long_outlined, title: 'No payslips yet', message: 'Published payslips appear here every month.')
       else
-        for (final r in all)
-          staffCard(
-            context,
-            key: ValueKey('payslip-${r['code']}'),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(color: EduTints.sage, borderRadius: BorderRadius.circular(13)),
-                  child: Icon(Icons.request_quote_outlined, color: EduTints.ink(EduTints.sage)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(period(r), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
-                    Text.rich(TextSpan(text: 'Net ${money(r['net_amount'])}'), style: text.bodySmall?.copyWith(fontWeight: FontWeight.w600)),
-                  ]),
-                ),
-                if (data?['downloads'] != null)
-                  IconButton(
-                    tooltip: 'Download payslip',
-                    onPressed: downloading ? null : () => download('${data!['downloads']}', '${r['code']}'),
-                    icon: const Icon(Icons.download_rounded),
+        EduGrid(phone: 1, fold: 2, tablet: 2, children: [
+          for (final r in all)
+            staffCard(
+              context,
+              key: ValueKey('payslip-${r['code']}'),
+              onTap: () => showPayslip(r),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(color: EduTints.sage, borderRadius: BorderRadius.circular(13)),
+                    child: Icon(Icons.request_quote_outlined, color: EduTints.ink(EduTints.sage)),
                   ),
-              ]),
-              const SizedBox(height: 10),
-              Wrap(spacing: 6, runSpacing: 6, children: [
-                pill(context, 'Gross ${money(r['gross_amount'])}', EduTints.mist),
-                pill(context, 'Deductions ${money(r['deduction_amount'])}', EduTints.clay),
-              ]),
-              if ((r['lines'] as List? ?? []).isNotEmpty) ...[
-                const SizedBox(height: 10),
-                for (final line in (r['lines'] as List).whereType<Map>())
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Row(children: [
-                      Expanded(child: Text('${line['component']}', style: text.bodySmall)),
-                      Text.rich(
-                        TextSpan(text: '${line['component_type'] == 'deduction' ? '− ' : ''}${money(line['amount'])}'),
-                        style: text.bodySmall?.copyWith(fontWeight: FontWeight.w700),
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text('${r['period'] ?? 'Salary statement'}', style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                      Text.rich(TextSpan(text: 'Net ${money(r['net_amount'])}'), style: text.bodySmall?.copyWith(fontWeight: FontWeight.w700)),
                     ]),
                   ),
-              ],
-            ]),
-          ),
+                  IconButton(
+                    tooltip: 'Download PDF',
+                    onPressed: downloading ? null : () => download('${data?['downloads'] ?? 'payslip'}', '${r['code']}'),
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                  ),
+                ]),
+                const SizedBox(height: 10),
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  pill(context, 'Gross ${money(r['gross_amount'])}', EduTints.mist),
+                  pill(context, 'Deductions ${money(r['deduction_amount'])}', EduTints.clay),
+                ]),
+                const SizedBox(height: 8),
+                Row(children: [
+                  Text('View payslip', style: text.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w700)),
+                  Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.primary),
+                ]),
+              ]),
+            ),
+        ]),
     ];
   }
 

@@ -147,6 +147,8 @@ const labels: Record<string, string> = {
   "course-setup": "Courses & enrollment",
   "teaching-staff": "Teaching staff",
   "non-teaching-staff": "Non-teaching staff",
+  "student-leave": "Student leave",
+  "employee-leave": "Employee leave",
   labs: "Labs & lab in-charges",
   "daily-labour": "Daily labour",
   settings: "Settings",
@@ -1237,7 +1239,8 @@ export default function CollegePortal({
   }
   function studentForm(st?: Student) {
     if (!st) {
-      setStudentEnrollmentOpen(true);
+      // New students are created only on the Student enrollment screen.
+      router.push(`${nav("student-enrollment")}?enroll=1`);
       return;
     }
     form(
@@ -1623,7 +1626,13 @@ export default function CollegePortal({
         </>
       );
     }
-    if (activeModule === "students" || (activeModule === "admissions" && !detail))
+    if (
+      activeModule === "students" ||
+      (activeModule === "admissions" && !detail) ||
+      // Certificates use the live certificate workspace (names, course, year, issuer).
+      activeModule === "certificates" ||
+      activeModule === "certificate-requests"
+    )
       return <ConnectedPortal key={`${activeModule}-${studentRevision}`} college={c} parts={parts} embedded />;
 
     if (activeModule === "admissions") {
