@@ -68,23 +68,9 @@ def personal_accounts(data, student_code):
 
 
 def push(request, notices):
-    settings = request.app.state.settings
-    if not settings.push_adapter_url or not settings.push_adapter_token:
-        return
-    from app.core.integrations_api import adapter_post
-    for code in notices:
-        with request.app.state.store.transaction() as data:
-            item = data["records"]["notifications"].get(code)
-            if not item:
-                continue
-            tokens = [r["token"] for r in rows(data, "device_tokens") if r["user_code"] == item["user_code"]]
-            payload = {"idempotency_key": code, "tokens": tokens, "title": item["title"], "body": item["body"],
-                       "data": {k: item.get(k) for k in ("screen", "certificate_request_code", "certificate_code", "academic_year_code", "semester_number", "charge_code", "thread_code")}}
-        if tokens:
-            try:
-                adapter_post(settings.push_adapter_url, settings.push_adapter_token, payload)
-            except Exception:
-                pass
+    """Push inbox notifications to the recipients' devices (Firebase or the push adapter)."""
+    from .push_delivery import deliver
+    deliver(request, notices)
 
 
 def public_request(data, row):

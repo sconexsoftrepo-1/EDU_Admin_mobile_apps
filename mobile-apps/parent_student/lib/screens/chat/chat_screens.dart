@@ -15,6 +15,7 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:record/record.dart';
 
 import '../../services/api_service.dart';
+import '../../services/push_notifications.dart';
 import '../../theme/mobile_design.dart';
 
 // Colours follow the app template: the role accent from the theme on ivory / card tones.
@@ -955,6 +956,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    PushNotifications.activeThread = widget.code; // no notification for the chat on screen
     input.addListener(() => setState(() {}));
     scroll.addListener(() {
       if (scroll.position.pixels > scroll.position.maxScrollExtent - 200) loadOlder();
@@ -977,6 +979,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (PushNotifications.activeThread == widget.code) PushNotifications.activeThread = null;
     poll?.cancel();
     recordTimer?.cancel();
     _recorder?.dispose();
