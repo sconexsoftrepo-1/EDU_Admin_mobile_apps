@@ -119,7 +119,7 @@ void main() {
               : role == MobileRole.parent
               ? 'Fees'
               : 'Study',
-          'Calendar',
+          'Chats',
           if (role == MobileRole.admin) 'Students' else 'Timetable',
           'More',
         ]) {

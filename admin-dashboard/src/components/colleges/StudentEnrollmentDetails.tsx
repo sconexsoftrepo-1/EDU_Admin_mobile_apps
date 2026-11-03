@@ -7,6 +7,7 @@ import { api, errorText, type Row } from "@/services/api";
 import { headerLabel } from "@/lib/colleges/export-table";
 import { formatDate } from "./DateInput";
 import SideDrawer from "./SideDrawer";
+import PrintButtons from "./PrintButtons";
 import { PersonFileList } from "./PersonFiles";
 import PersonLoginManagement from "./PersonLoginManagement";
 import RecordDetailTabs from "./RecordDetailTabs";
@@ -171,12 +172,19 @@ export default function StudentEnrollmentDetails({
       subtitle={String(person.admission_number || "Enrollment record")}
       onClose={onClose}
       actions={
-        onEdit && (
-          <button type="button" onClick={onEdit}>
-            <Pencil size={15} />
-            Edit
-          </button>
-        )
+        <>
+          <PrintButtons
+            path={`student/${encodeURIComponent(String(student.code))}`}
+            filename={`student-${String(person.admission_number || student.code)}`}
+            viewLabel="View as PDF"
+          />
+          {onEdit && (
+            <button type="button" onClick={onEdit}>
+              <Pencil size={15} />
+              Edit
+            </button>
+          )}
+        </>
       }
     >
       <div className="edu-student-summary">

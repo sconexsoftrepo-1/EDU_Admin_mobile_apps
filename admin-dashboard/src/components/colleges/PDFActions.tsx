@@ -7,10 +7,13 @@ export default function PDFActions({
   onAction,
   children,
   className,
+  viewLabel = "View PDF",
 }: {
   onAction: (mode: PDFMode) => unknown;
   children: ReactNode;
   className?: string;
+  /** Text of the preview button (default "View PDF"). */
+  viewLabel?: string;
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -34,7 +37,7 @@ export default function PDFActions({
   return (
     <span className="erp-pdf-actions" aria-busy={busy}>
       <button type="button" onClick={() => act("view")} disabled={busy}>
-        <Eye size={14} /> View PDF
+        <Eye size={14} /> {viewLabel}
       </button>
       <button
         type="button"

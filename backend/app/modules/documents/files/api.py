@@ -531,6 +531,21 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user),
             from app.core.payroll_workspace import payslip_pdf
             raw = payslip_pdf(data, slip)
             mime = "application/pdf"
+        elif kind == "salary-receipt":
+            slip = query_get(data, "payslips", code)
+            if not permitted_person(data, user, "employee", slip["employee_code"]) and not has_permission(data, user, "payslips", "view"):
+                raise HTTPException(404, "Receipt not found")
+            from app.core.hr_workspace import salary_receipt_pdf
+            raw = salary_receipt_pdf(data, slip)
+            mime = "application/pdf"
+        elif kind == "salary-structure":
+            query_get(data, "employees", code)
+            if not permitted_person(data, user, "employee", code) and not (
+                    has_permission(data, user, "payslips", "view") or has_permission(data, user, "employee_salary_components", "view")):
+                raise HTTPException(404, "Employee not found")
+            from app.core.hr_workspace import salary_structure_pdf
+            raw = salary_structure_pdf(data, code)
+            mime = "application/pdf"
         elif kind in {"tax-document", "document", "admission-document", "certificate", "import-workbook"}:
             table = {
                 "tax-document": "employee_tax_documents",
@@ -587,21 +602,18 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user),
                     },
                 )
         elif kind == "receipt":
-            receipt = query_get(data, "receipts", code)
-            payment = query_get(data, "payments", receipt["payment_code"])
+            # Accepts a receipt code or the payment's code (registers list payments).
+            receipt = data["records"].get("receipts", {}).get(code) or next(
+                (r for r in query_rows(data, "receipts") if r.get("payment_code") == code), None)
+            payment = query_get(data, "payments", receipt["payment_code"] if receipt else code)
+            receipt = receipt or {"code": payment["code"], "payment_code": payment["code"], "receipt_number": None,
+                                  "issued_on": payment.get("paid_on")}
             if not permitted_person(
                 data, user, "student", payment["student_code"]
             ) and not has_permission(data, user, "receipts", "view"):
                 raise HTTPException(404, "Receipt not found")
-            raw = pdf(
-                "Fee receipt",
-                [f"{k}: {v}" for k, v in receipt.items()]
-                + [
-                    f"{k}: {v}"
-                    for k, v in payment.items()
-                    if k not in {"request", "idempotency_key"}
-                ],
-            )
+            from app.core.finance_pdfs import fee_receipt_pdf
+            raw = fee_receipt_pdf(data, receipt, payment)
             mime = "application/pdf"
         else:
             raise HTTPException(404, "Download type not found")

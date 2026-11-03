@@ -464,7 +464,10 @@ class CampusRecord extends StatelessWidget {
     if (screen == 'leave') return 'Leave request';
     if (screen == 'payslips') return 'Salary statement';
     if (screen == 'payments' || screen == 'collections') {
-      return 'Payment ${record['transaction_reference'] ?? record['code'] ?? ''}';
+      final who = record['student_name'] ?? record['title'];
+      return who != null && '$who'.isNotEmpty
+          ? '$who'
+          : 'Payment ${record['transaction_reference'] ?? record['code'] ?? ''}';
     }
     if (screen == 'attendance') {
       return (record['student_name'] ??

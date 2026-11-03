@@ -21,6 +21,17 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   final search = TextEditingController();
   List<Json> screens = [];
   final Map<String, Json> cache = {};
+  /// When each screen's data was fetched; screens reuse it until a save, pull-to-refresh or
+  /// it is older than [staleAfter] when the app comes back to the foreground.
+  final Map<String, DateTime> fetchedAt = {};
+  static const staleAfter = Duration(minutes: 10);
+  /// Screens whose request depends on the date being viewed: always fetched when opened.
+  static const dateScoped = {'calendar', 'labs'};
+  /// Changes only when the selected student changes; older responses are then ignored.
+  int studentEpoch = 0;
+  /// One scroll controller per screen, remembering its position for Back.
+  final Map<String, _RememberedScroll> scrolls = {};
+  ScrollController pageScroll(String key) => scrolls.putIfAbsent(key, _RememberedScroll.new);
   final Map<String, String> sectionErrors = {};
   String? selected, student, error;
   String query = '', filter = 'All';
@@ -29,6 +40,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   DateTime calendarDay = DateUtils.dateOnly(DateTime.now());
   DateTime calendarMonth = DateTime(DateTime.now().year, DateTime.now().month);
   PushNotifications? push;
+  /// Unread chat messages (Chats tab badge) and a conversation to open from a notification.
+  int chatUnread = 0;
+  String? chatThread;
+  Timer? chatTimer;
   String pushStatus = 'Enable device alerts for important college updates.';
   bool pushBusy = false;
   Json? get data => cache[selected];
@@ -49,16 +64,32 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   };
   /// Academic progress screen key (parents and students see their own progress there).
   String get progress => has('academics') ? 'academics' : 'results';
-  // Bottom bar order: primary, Progress, Home (centre), Calendar, More. Inbox lives on the bell.
+  // Bottom bar order: primary, Progress, Home (centre), Chats, More. Inbox lives on the bell.
   int get tab => selected == null
       ? 2
       : selected == primary
       ? 0
       : selected == progress
       ? 1
-      : selected == 'calendar'
+      : selected == 'messages'
       ? 3
       : 4;
+
+  Future<void> refreshChatBadge() async {
+    try {
+      final count = await ChatApi(widget.api).unread();
+      if (mounted && count != chatUnread) setState(() => chatUnread = count);
+    } catch (_) {
+      /* The badge refreshes on the next tick. */
+    }
+  }
+
+  /// Opens the Chats tab, optionally straight into one conversation.
+  void openChat([String? thread]) {
+    chatThread = thread;
+    history.clear();
+    open('messages', remember: false);
+  }
   int get unread =>
       rows('notifications').where((r) => r['status'] != 'read').length;
 
@@ -67,12 +98,24 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     loadScreens();
+    refreshChatBadge();
+    chatTimer = Timer.periodic(const Duration(seconds: 30), (_) => refreshChatBadge());
     push = PushNotifications(
-      onOpen: (code) async {
-        if (!mounted || !has('notifications')) return;
+      onOpen: (data) async {
+        if (!mounted) return;
+        // Chat pushes open the conversation straight away.
+        final thread = data['thread_code']?.toString();
+        if (thread != null && thread.isNotEmpty) {
+          openChat(thread);
+          return;
+        }
+        final code = data['notification_code']?.toString();
+        if (!has('notifications')) return;
         await fetchSection('notifications');
         final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
-        if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
+        if (notice != null && notice['thread_code'] != null) {
+          openChat(notice['thread_code'].toString());
+        } else if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
           open('certificates');
         } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
           open('assessments');
@@ -82,8 +125,20 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           open('notifications');
         }
       },
-      onForeground: (title, body) {
+      onForeground: (title, body, data) {
         if (!mounted) return;
+        if (data['kind'] == 'chat' || data['screen'] == 'messages') {
+          refreshChatBadge();
+          final thread = data['thread_code']?.toString();
+          // Android shows a notification; on iOS show a banner unless that chat is open.
+          if (Theme.of(context).platform == TargetPlatform.iOS && thread != PushNotifications.activeThread) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('$title\n$body', maxLines: 3, overflow: TextOverflow.ellipsis),
+              action: SnackBarAction(label: 'Open', onPressed: () => openChat(thread)),
+            ));
+          }
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$title\n$body'),
@@ -94,6 +149,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ),
         );
         fetchSection('notifications');
+        refreshChatBadge();
       },
     );
     resumePush();
@@ -104,7 +160,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       final enabled = await widget.api.storage.read(
         key: ApiConfig.pushPreferenceKey(widget.api.clientId),
       );
-      if (enabled == 'true' && mounted) await enablePush();
+      // On by default: the first sign-in asks for notification permission once.
+      if ((enabled == 'true' || enabled == null) && mounted) await enablePush();
     } catch (_) {
       /* Optional device alerts never block sign-in. */
     }
@@ -113,14 +170,22 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    for (final c in scrolls.values) {
+      c.dispose();
+    }
     push?.dispose();
+    chatTimer?.cancel();
     search.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && !busy) load();
+    if (state == AppLifecycleState.resumed) refreshChatBadge();
+    if (state == AppLifecycleState.resumed && !busy && selected != 'messages') {
+      final at = fetchedAt[selected ?? primary];
+      if (at == null || DateTime.now().difference(at) > staleAfter) load();
+    }
   }
 
   WorkspaceQuery workspaceQuery(String key, {int? offset}) {
@@ -144,19 +209,21 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   Future<Json> fetch(String key) async =>
       (await widget.api.workspace(key, query: workspaceQuery(key))).toJson();
 
-  Future<void> fetchSection(String key) async {
+  Future<void> fetchSection(String key, {bool force = true}) async {
     if (!has(key)) return;
-    final ticket = generation;
+    if (!force && cache[key] != null) return;
+    final ticket = studentEpoch;
     try {
       final result = await fetch(key);
-      if (!mounted || ticket != generation) return;
+      if (!mounted || ticket != studentEpoch) return;
       setState(() {
         cache[key] = result;
+        fetchedAt[key] = DateTime.now();
         student ??= result['selected_student_code'] as String?;
         sectionErrors.remove(key);
       });
     } catch (e) {
-      if (!mounted || ticket != generation) return;
+      if (!mounted || ticket != studentEpoch) return;
       if (e is ApiException && e.status == 401) {
         widget.onLogout();
         return;
@@ -165,7 +232,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     }
   }
 
-  Future<void> loadScreens() async {
+  Future<void> loadScreens({bool force = true}) async {
     final ticket = ++generation;
     setState(() {
       busy = true;
@@ -181,14 +248,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             .where((screen) => screen['key'] != 'transport')
             .toList(),
       );
-      await loadHome(ticket);
+      await loadHome(ticket, force: force);
       if (mounted && ticket == generation) setState(() => busy = false);
     } catch (e) {
       fail(e, ticket);
     }
   }
 
-  Future<void> loadHome(int ticket) async {
+  /// Home sections load in the background and are kept even if you open another screen
+  /// meanwhile (only switching the student discards them). [force] false loads only missing ones.
+  Future<void> loadHome(int ticket, {bool force = true}) async {
     final keys = <String>{
       'profile',
       primary,
@@ -213,11 +282,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (widget.role == MobileRole.teacher) 'assignments',
     };
     // Establish the selected child before loading independent dashboard sections.
-    if (has('profile')) await fetchSection('profile');
+    if (has('profile')) await fetchSection('profile', force: force);
     final pending = keys.where((key) => has(key) && key != 'profile').toList();
     for (var start = 0; start < pending.length; start += 3) {
-      if (!mounted || ticket != generation) return;
-      await Future.wait(pending.skip(start).take(3).map(fetchSection));
+      if (!mounted) return;
+      await Future.wait(pending.skip(start).take(3).map((key) => fetchSection(key, force: force)));
     }
   }
 
@@ -230,24 +299,42 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (e is ApiException && e.status == 401) widget.onLogout();
   }
 
-  Future<void> load() async {
+  /// Loads the open screen. [force] false (just navigating) reuses data already loaded; saves,
+  /// pull-to-refresh and the first visit fetch from the server.
+  Future<void> load({bool force = true}) async {
     if (selected == null || selected == '_more') {
-      await loadScreens();
+      if (!force && screens.isNotEmpty) {
+        unawaited(loadHome(generation, force: false));
+        return;
+      }
+      await loadScreens(force: force);
+      return;
+    }
+    if (selected == 'messages') return; // Chats load themselves (ChatHome).
+    final key = selected!;
+    if (!force && cache[key] != null && !dateScoped.contains(key)) {
+      setState(() {
+        busy = false;
+        error = null;
+      });
+      if (key == 'fees' && has('payments')) unawaited(fetchSection('payments', force: false));
       return;
     }
     final ticket = ++generation;
-    final key = selected!;
+    final epoch = studentEpoch;
     setState(() {
       busy = true;
       error = null;
     });
     try {
       final result = await fetch(key);
-      if (!mounted || ticket != generation) return;
+      if (!mounted || epoch != studentEpoch) return;
+      // Keep the data even if another screen was opened meanwhile; it is shown when you return.
       setState(() {
         cache[key] = result;
+        fetchedAt[key] = DateTime.now();
         student ??= result['selected_student_code'] as String?;
-        busy = false;
+        if (ticket == generation) busy = false;
         sectionErrors.remove(key);
       });
       if (key == 'fees' && has('payments')) unawaited(fetchSection('payments'));
@@ -261,8 +348,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   /// Opens [key] (null is Home). [remember] keeps the current screen for Back; bottom-bar tabs
   /// pass false because they are top-level destinations whose Back returns Home.
-  void open(String? key, {bool remember = true}) {
+  void open(String? key, {bool remember = true, bool restore = false}) {
     if (saving) return;
+    if (!restore) scrolls[key ?? 'home']?.saved = 0;
     if (key == null) {
       history.clear();
     } else if (remember && key != selected) {
@@ -279,12 +367,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       search.clear();
       busy = false;
     });
-    if (key != null && key != '_more') load();
+    if (key == null) {
+      if (screens.isNotEmpty) unawaited(loadHome(generation, force: false));
+    } else if (key != '_more') {
+      load(force: false);
+    }
   }
 
   void goBack() {
     if (saving) return;
-    open(history.isEmpty ? null : history.removeLast(), remember: false);
+    open(history.isEmpty ? null : history.removeLast(), remember: false, restore: true);
   }
 
   void openTab(String? key) {
@@ -317,6 +409,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   }
 
   Future<void> refreshWorkspace() async {
+    ApiFreshness.epoch++; // pull-to-refresh always reads fresh data
     await load();
     if (!mounted) return;
     if (error != null ||
@@ -328,6 +421,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   Future<void> changeStudent(String value) async {
     generation++;
+    studentEpoch++;
+    fetchedAt.clear();
     setState(() {
       student = value;
       cache.clear();
@@ -412,6 +507,55 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
       );
 
+  /// Opens a college PDF in the app (the viewer can save or share it) or, with [view] false,
+  /// goes straight to save / share.
+  Future<void> pdfDocument(Future<Uint8List> Function() load, String title, {bool view = true}) async {
+    if (downloading) return;
+    setState(() => downloading = true);
+    toast(view ? 'Opening $title…' : 'Preparing $title…');
+    try {
+      final bytes = await load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (view) {
+        await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => CertificatePdfScreen(bytes: bytes, title: title)));
+      } else {
+        final box = context.findRenderObject() as RenderBox?;
+        await SharePlus.instance.share(ShareParams(
+          files: [XFile.fromData(bytes, mimeType: 'application/pdf')],
+          fileNameOverrides: ['${title.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}.pdf'],
+          sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        toast(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
+    }
+  }
+
+  /// "View" and "Download" for one PDF; wraps on narrow screens and large text.
+  Widget pdfButtons(String title, Future<Uint8List> Function() load, {String view = 'View', String save = 'Download', Key? key}) => Wrap(
+    key: key,
+    spacing: 8,
+    runSpacing: 8,
+    children: [
+      FilledButton.tonalIcon(
+        onPressed: downloading ? null : () => pdfDocument(load, title),
+        icon: const Icon(Icons.visibility_outlined, size: 18),
+        label: Text(view),
+      ),
+      OutlinedButton.icon(
+        onPressed: downloading ? null : () => pdfDocument(load, title, view: false),
+        icon: const Icon(Icons.download_outlined, size: 18),
+        label: Text(save),
+      ),
+    ],
+  );
+
   Future<void> download(String kind, String code) async {
     if (downloading) return;
     setState(() => downloading = true);
@@ -457,6 +601,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         await widget.api.storage.write(
           key: ApiConfig.pushPreferenceKey(widget.api.clientId),
           value: 'true',
+        );
+      } else if (status.startsWith('Notifications are blocked')) {
+        // Don't ask again at every launch; the switch in the inbox still turns alerts on.
+        await widget.api.storage.write(
+          key: ApiConfig.pushPreferenceKey(widget.api.clientId),
+          value: 'false',
         );
       }
       if (mounted) setState(() => pushStatus = status);
@@ -634,7 +784,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                     has(primary) ? primary : '_more',
                     has(progress) ? progress : '_more',
                     null,
-                    has('calendar') ? 'calendar' : '_more',
+                    'messages',
                     '_more',
                   ][i],
                 ),
@@ -642,7 +792,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             EduNavItem(moduleIcon(primary), primaryLabel),
             const EduNavItem(Icons.insights_rounded, 'Progress'),
             const EduNavItem(Icons.house_rounded, 'Home'),
-            const EduNavItem(Icons.calendar_month_outlined, 'Calendar'),
+            EduNavItem(Icons.forum_rounded, 'Chats', badge: chatUnread),
             const EduNavItem(Icons.grid_view_rounded, 'More'),
           ],
         ),
@@ -652,7 +802,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 900),
-              child: selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
+              child: selected == 'messages' ? ChatHome(key: ValueKey('chats-${chatThread ?? ''}'), api: widget.api, openThread: chatThread, onUnread: (n) { chatThread = null; if (mounted && n != chatUnread) setState(() => chatUnread = n); }) : selected == 'academics' || selected == 'results' ? AcademicHub(key:ValueKey('academic-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'',onOpenFees:()=>open('fees')) : selected == 'assessments' ? AssessmentHub(key:ValueKey('assessments-$student-$generation'),api:widget.api,role:widget.role,studentCode:student??'') : selected == 'assignments' || selected == 'submissions'
                   ? AssignmentHub(
                       key: ValueKey(
                         'assignment-$selected-$student-$generation',
@@ -673,6 +823,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                         duration: EduMotion.duration(context, EduMotion.tab),
                         child: ListView.builder(
                           key: ValueKey('page-${selected ?? 'home'}'),
+                          // Back returns to where you were; opening a screen afresh starts at the top.
+                          controller: pageScroll(selected ?? 'home'),
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                           itemCount: pageWidgets.length,
@@ -1167,13 +1319,13 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           fold: 3,
           spacing: 10,
           children: [
-            for (final (i, key) in priorities.where(has).indexed)
+            for (final (i, key) in ['messages', ...priorities.where((k) => k != 'messages' && has(k))].take(6).indexed)
               EduQuickAction(
                 key: ValueKey('quick-$key'),
-                label: '${screens.firstWhere((s) => s['key'] == key)['title']}',
-                icon: moduleIcon(key),
+                label: key == 'messages' ? (chatUnread > 0 ? 'Chats · $chatUnread new' : 'Chats') : '${screens.firstWhere((s) => s['key'] == key)['title']}',
+                icon: key == 'messages' ? Icons.forum_rounded : moduleIcon(key),
                 tint: EduTints.all[i % EduTints.all.length],
-                onTap: () => open(key),
+                onTap: key == 'messages' ? openChat : () => open(key),
               ),
           ],
         ),
@@ -2006,10 +2158,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               ...(r['receipts'] as List).map(
                 (receipt) => Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                    onPressed: () => download('receipt', receipt['code']),
-                    icon: const Icon(Icons.receipt_long_outlined),
-                    label: Text('Receipt ${receipt['receipt_number']}'),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: pdfButtons('Receipt ${receipt['receipt_number'] ?? ''}'.trim(), () => widget.api.download('receipt', '${receipt['code']}'),
+                        view: 'View receipt'),
                   ),
                 ),
               ),
@@ -2136,6 +2288,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: r['assignment_code'].toString())));
     }
     if (r['assessment_code'] != null && has('assessments')) return () => open('assessments');
+    if (r['thread_code'] != null || screen == 'messages') return () => openChat(r['thread_code']?.toString());
     if (screen.isNotEmpty && has(screen)) return () => open(screen);
     return null;
   }
@@ -2432,13 +2585,20 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   Text('Receipts', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 6),
                   for (final r in receipts)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: OutlinedButton.icon(
-                        onPressed: () => download('receipt', r['code']),
-                        icon: const Icon(Icons.download_outlined),
-                        label: Text('Download receipt ${r['receipt_number'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(color: collegeCanvas, borderRadius: BorderRadius.circular(14)),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Icon(Icons.receipt_long_outlined, size: 18, color: Theme.of(context).colorScheme.primary),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text('Receipt ${r['receipt_number'] ?? ''}', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800))),
+                        ]),
+                        const SizedBox(height: 8),
+                        pdfButtons('Receipt ${r['receipt_number'] ?? ''}'.trim(), () => widget.api.download('receipt', '${r['code']}'),
+                            key: ValueKey('receipt-pdf-${r['code']}')),
+                      ]),
                     ),
                 ],
               ],
@@ -2724,7 +2884,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 ),
               for (final receipt in receipts)
                 OutlinedButton.icon(
-                  onPressed: () => download('receipt', receipt['code']),
+                  onPressed: downloading
+                      ? null
+                      : () => pdfDocument(() => widget.api.download('receipt', '${receipt['code']}'), 'Receipt ${receipt['receipt_number'] ?? ''}'.trim()),
                   icon: const Icon(Icons.receipt_long_outlined, size: 18),
                   label: Text('Receipt ${receipt['receipt_number'] ?? ''}'),
                 ),
@@ -2747,6 +2909,33 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         const SizedBox(height: 16),
       ],
       EduReveal(child: hero),
+      if (student != null && all.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Container(
+          key: const ValueKey('fee-statement'),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18), border: Border.all(color: collegeLine)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(color: EduTints.gold, borderRadius: BorderRadius.circular(12)),
+                child: Icon(Icons.description_outlined, color: EduTints.ink(EduTints.gold), size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Fee statement', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+                  Text('Every fee, concession, receipt and the balance due — as a PDF', style: text.bodySmall),
+                ]),
+              ),
+            ]),
+            const SizedBox(height: 10),
+            pdfButtons('Fee statement', () => widget.api.printPdf('fee-statement/${Uri.encodeComponent(student!)}')),
+          ]),
+        ),
+      ],
       if (terms.isNotEmpty) ...[
         SectionHeading(title: 'Semester plan'),
         SizedBox(
@@ -3914,4 +4103,17 @@ class _MessageThreadScreenState extends State<MessageThreadScreen> {
       ]),
     );
   }
+}
+
+
+/// Scroll controller that remembers its offset so a screen reopened with Back resumes there.
+class _RememberedScroll extends ScrollController {
+  _RememberedScroll() {
+    addListener(() {
+      if (positions.isNotEmpty) saved = positions.last.pixels;
+    });
+  }
+  double saved = 0;
+  @override
+  double get initialScrollOffset => saved;
 }

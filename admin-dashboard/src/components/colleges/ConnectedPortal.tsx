@@ -7,6 +7,7 @@ import { studentCourseLabels } from "@/lib/colleges/student-course-labels";
 import AcademicYearForm from "./AcademicYearForm";
 import TableColumnFilter from "./TableColumnFilter";
 import StudentEnrollmentDetails from "./StudentEnrollmentDetails";
+import PDFActions from "./PDFActions";
 import {
   studentEditForm,
   studentEditValues,
@@ -93,13 +94,16 @@ import CalendarWorkspace from "./CalendarWorkspace";
 import "./tab-interactions.css";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import AssessmentWorkspace from "./AssessmentWorkspace";
-import AcademicProgressWorkspace, { AcademicProgressOverview } from "./AcademicProgressWorkspace";
+import AcademicProgressWorkspace, {
+  AcademicProgressOverview,
+} from "./AcademicProgressWorkspace";
 import CertificateWorkspace from "./CertificateWorkspace";
 import AdmissionWorkspace from "./AdmissionWorkspace";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import StaffOnboardingForm from "./staff/StaffOnboardingForm";
 import LabRegistry from "./staff/LabRegistry";
 import PayslipsWorkspace from "./PayslipsWorkspace";
+import StaffHRWorkspace from "./StaffHRWorkspace";
 import StudentLeaveWorkspace from "./StudentLeaveWorkspace";
 import StaffDirectory from "./staff/StaffDirectory";
 import CourseCards from "./CourseCards";
@@ -205,6 +209,16 @@ const CUSTOM_WORKSPACES = new Set([
   "calendar",
   "certificates",
   "certificate-requests",
+  "payslips",
+  "salary-structures",
+  "payroll",
+  "payroll-reports",
+  "employee-attendance",
+  "employee-leave",
+  "bonuses",
+  "reimbursements",
+  "student-leave",
+  "labs",
 ]);
 export default function ConnectedPortal({
   college,
@@ -246,7 +260,7 @@ export default function ConnectedPortal({
   const [pageOffset, setPageOffset] = useState(0);
   const [validatingWorkbook, setValidatingWorkbook] = useState(false);
   const studentFilterRequest = useRef({ path: "", query: "" });
-  const [feeHeads, setFeeHeads] = useState<{initial?: Row} | null>(null);
+  const [feeHeads, setFeeHeads] = useState<{ initial?: Row } | null>(null);
   const [studentInfo, setStudentInfo] = useState<Row | null>(null);
   const [fileOwner, setFileOwner] = useState<{
     personKind: "student" | "employee" | "application";
@@ -332,7 +346,7 @@ export default function ConnectedPortal({
           : rawSpec;
         const first = spec.resources[0] || null;
         const [records, totals, extra] = await Promise.all([
-          first && !STAFF_SCREENS[name] && name !== "labs" && name !== "payslips" && name !== "student-leave"
+          first && !STAFF_SCREENS[name] && !CUSTOM_WORKSPACES.has(name)
             ? api.workspace.list(first.path, 0, pageSize(first.name))
             : Promise.resolve({ items: [], total: 0 }),
           FINANCE_SUMMARY_SCREENS.includes(name)
@@ -386,18 +400,36 @@ export default function ConnectedPortal({
   }, []);
   const prefetchScreen = useCallback((name: string) => {
     if (CUSTOM_WORKSPACES.has(name)) return;
-    const key = workspaceCacheKey(identityRef.current, activeRoleRef.current?.code, `screen:${name}`);
+    const key = workspaceCacheKey(
+      identityRef.current,
+      activeRoleRef.current?.code,
+      `screen:${name}`,
+    );
     if (!key || readWorkspaceCache<ScreenSnapshot>(key)) return;
     void refreshWorkspaceCache(key, async () => {
       const rawSpec = await api.workspace.screen(name);
-      const spec = activeRoleRef.current ? roleScreen(rawSpec, activeRoleRef.current) : rawSpec;
+      const spec = activeRoleRef.current
+        ? roleScreen(rawSpec, activeRoleRef.current)
+        : rawSpec;
       const first = spec.resources[0] || null;
       const [records, totals, extra] = await Promise.all([
-        first && !STAFF_SCREENS[name] && name !== "labs" && name !== "payslips" && name !== "student-leave" ? api.workspace.list(first.path, 0, pageSize(first.name)) : Promise.resolve({ items: [], total: 0 }),
-        FINANCE_SUMMARY_SCREENS.includes(name) ? api.finance.summary().catch(() => null) : Promise.resolve(null),
+        first && !STAFF_SCREENS[name] && !CUSTOM_WORKSPACES.has(name)
+          ? api.workspace.list(first.path, 0, pageSize(first.name))
+          : Promise.resolve({ items: [], total: 0 }),
+        FINANCE_SUMMARY_SCREENS.includes(name)
+          ? api.finance.summary().catch(() => null)
+          : Promise.resolve(null),
         specialRows(name),
       ]);
-      if (first?.name === "students") records.items = await studentCourseLabels(records.items, workspaceCacheKey(identityRef.current, activeRoleRef.current?.code, "student-course-labels"));
+      if (first?.name === "students")
+        records.items = await studentCourseLabels(
+          records.items,
+          workspaceCacheKey(
+            identityRef.current,
+            activeRoleRef.current?.code,
+            "student-course-labels",
+          ),
+        );
       return { spec, first, records, totals: totals as Row | null, extra };
     }).catch(() => undefined);
   }, []);
@@ -543,9 +575,13 @@ export default function ConnectedPortal({
       .signInRoles()
       .then(({ roles: list }) => {
         if (!active) return;
-        const webRoles = list.filter(role => role.scope !== "self");
+        const webRoles = list.filter((role) => role.scope !== "self");
         setSignInRoles(webRoles);
-        setSignInRole((old) => webRoles.some(role => role.code === old) ? old : webRoles[0]?.code || "");
+        setSignInRole((old) =>
+          webRoles.some((role) => role.code === old)
+            ? old
+            : webRoles[0]?.code || "",
+        );
       })
       .catch(() => undefined);
     return () => {
@@ -705,7 +741,10 @@ export default function ConnectedPortal({
       openEnrollment();
       return;
     }
-    if (current.name === "fee_heads") {setFeeHeads({initial:row});return;}
+    if (current.name === "fee_heads") {
+      setFeeHeads({ initial: row });
+      return;
+    }
     try {
       const bound = await api.workspace.resourceForm(
         current.name,
@@ -793,7 +832,8 @@ export default function ConnectedPortal({
   /** Open the Student enrollment screen with its enrollment form. */
   const openEnrollment = () => {
     if (selected !== "student-enrollment" && parts.length > 2) {
-      const path = "/" + [...parts.slice(0, -1), "student-enrollment"].join("/");
+      const path =
+        "/" + [...parts.slice(0, -1), "student-enrollment"].join("/");
       window.history.pushState(null, "", `${path}?enroll=1`);
       if (!embedded) {
         setSelected("student-enrollment");
@@ -932,8 +972,7 @@ export default function ConnectedPortal({
         )}
       </>
     );
-  const studentRegister =
-    studentScreen && resource?.name === "students";
+  const studentRegister = studentScreen && resource?.name === "students";
   const studentTable = resource?.name === "students";
   const studentHeaders: Record<string, string> = {
     student_name: "Student name",
@@ -1041,15 +1080,14 @@ export default function ConnectedPortal({
     visibleRows.map((row) => exportKeys.map((k) => text(cellValue(row, k))));
   const exportExcel = () =>
     excelTable(exportFile, exportTitle, exportColumns, exportRows());
-  const exportPdf = async () => {
+  const exportPdf = async (mode: "view" | "download" = "download") => {
     try {
       await pdfTable(
         exportFile,
         exportTitle,
         `${visibleRows.length} of ${total} records`,
         exportColumns,
-        exportRows(),
-      );
+        exportRows(), mode);
     } catch (e) {
       setError(errorText(e));
     }
@@ -1101,15 +1139,37 @@ export default function ConnectedPortal({
           </button>
         </aside>
       )}
-      <section
-        className={`edu-content ${studentScreen ? "edu-enroll" : ""}`}
-      >
-        {selected === "overview" && <AcademicProgressOverview onOpen={()=>setSelected(screens.some(s=>s.key==="academics")?"academics":"results")}/>}
-        {["academics","results"].includes(selected) ? <AcademicProgressWorkspace onNavigate={setSelected}/> : selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : selected === "admissions" ? (
+      <section className={`edu-content ${studentScreen ? "edu-enroll" : ""}`}>
+        {selected === "overview" && (
+          <AcademicProgressOverview
+            onOpen={() =>
+              setSelected(
+                screens.some((s) => s.key === "academics")
+                  ? "academics"
+                  : "results",
+              )
+            }
+          />
+        )}
+        {["academics", "results"].includes(selected) ? (
+          <AcademicProgressWorkspace onNavigate={setSelected} />
+        ) : selected === "assessments" ? (
+          <AssessmentWorkspace />
+        ) : selected === "attendance" ? (
+          <AttendanceWorkspace />
+        ) : selected === "admissions" ? (
           <AdmissionWorkspace
             college={college}
-            path={resource?.name === "admission_enquiries" ? resource.path : "/api/v1/admissions/admission-enquiries"}
-            canCreate={!!displayRole && (displayRole.system_admin || displayRole.permissions.admission_enquiries?.includes("create"))}
+            path={
+              resource?.name === "admission_enquiries"
+                ? resource.path
+                : "/api/v1/admissions/admission-enquiries"
+            }
+            canCreate={
+              !!displayRole &&
+              (displayRole.system_admin ||
+                displayRole.permissions.admission_enquiries?.includes("create"))
+            }
             canConvert={
               !!displayRole &&
               (displayRole.system_admin ||
@@ -1136,11 +1196,23 @@ export default function ConnectedPortal({
           <CalendarWorkspace />
         ) : selected === "labs" ? (
           <LabRegistry standalone />
-        ) : selected === "payslips" ? (
+        ) : [
+            "payslips",
+            "salary-structures",
+            "payroll",
+            "payroll-reports",
+          ].includes(selected) ? (
           <PayslipsWorkspace />
+        ) : selected === "employee-attendance" ? (
+          <StaffHRWorkspace view="attendance" />
+        ) : selected === "employee-leave" ? (
+          <StaffHRWorkspace view="leave" />
+        ) : ["bonuses", "reimbursements"].includes(selected) ? (
+          <StaffHRWorkspace view="bonuses" />
         ) : selected === "student-leave" ? (
           <StudentLeaveWorkspace />
-        ) : selected === "certificates" || selected === "certificate-requests" ? (
+        ) : selected === "certificates" ||
+          selected === "certificate-requests" ? (
           <CertificateWorkspace />
         ) : (
           <>
@@ -1170,7 +1242,9 @@ export default function ConnectedPortal({
                         onClick={() => runAction(primaryForm)}
                       >
                         <Plus size={15} aria-hidden="true" />{" "}
-                        {selected === "students" ? "Add student" : primaryForm.label}
+                        {selected === "students"
+                          ? "Add student"
+                          : primaryForm.label}
                       </button>
                     )}
                     <div className="crs-header-desktop">
@@ -1278,22 +1352,24 @@ export default function ConnectedPortal({
               >
                 {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
                   <>
-                    {selected !== "students" && <select
-                      aria-label="Screen resource"
-                      value={resource.name}
-                      onChange={(e) => {
-                        const r = screen?.resources.find(
-                          (r) => r.name === e.target.value,
-                        );
-                        if (r) void refreshResource(r);
-                      }}
-                    >
-                      {screen?.resources.map((r) => (
-                        <option key={r.name} value={r.name}>
-                          {r.title}
-                        </option>
-                      ))}
-                    </select>}
+                    {selected !== "students" && (
+                      <select
+                        aria-label="Screen resource"
+                        value={resource.name}
+                        onChange={(e) => {
+                          const r = screen?.resources.find(
+                            (r) => r.name === e.target.value,
+                          );
+                          if (r) void refreshResource(r);
+                        }}
+                      >
+                        {screen?.resources.map((r) => (
+                          <option key={r.name} value={r.name}>
+                            {r.title}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                     {studentScreen ? (
                       <>
                         <SearchField
@@ -1330,16 +1406,20 @@ export default function ConnectedPortal({
                         onClick={() => runAction(primaryForm)}
                       >
                         <Plus size={15} aria-hidden="true" />{" "}
-                        {selected === "students" ? "Add student" : primaryForm.label}
+                        {selected === "students"
+                          ? "Add student"
+                          : primaryForm.label}
                       </button>
                     ) : (
                       !studentScreen &&
                       resource.actions.includes("create") && (
                         <button className="edu-primary" onClick={() => edit()}>
                           <Plus size={15} aria-hidden="true" />{" "}
-                          {resource.name === "fee_heads" ? "Add fee head" : resource.name === "academic_years"
-                            ? "Create batch"
-                            : "Create record"}
+                          {resource.name === "fee_heads"
+                            ? "Add fee head"
+                            : resource.name === "academic_years"
+                              ? "Create batch"
+                              : "Create record"}
                         </button>
                       )
                     )}
@@ -1353,14 +1433,14 @@ export default function ConnectedPortal({
                         >
                           <Download size={14} aria-hidden="true" /> Excel
                         </button>
-                        <button
-                          type="button"
+                        <PDFActions
+                          viewLabel="View PDF"
                           className="edu-export"
-                          onClick={() => void exportPdf()}
-                          disabled={!visibleRows.length}
+                          onAction={(mode) => exportPdf(mode)}
                         >
-                          <FileText size={14} aria-hidden="true" /> PDF
-                        </button>
+                          <FileText size={14} aria-hidden="true" /> Download
+                          PDF
+                        </PDFActions>
                       </>
                     )}
                   </>
@@ -1589,33 +1669,39 @@ export default function ConnectedPortal({
                                 ))}
                                 <td>
                                   <div className="edu-row-actions">
-                                    {resource.name === "notifications" && Boolean(row.certificate_request_code) && (
-                                      <button type="button" className="edu-primary" onClick={() => setSelected("certificate-requests")}>
-                                        Review certificate
-                                      </button>
-                                    )}
+                                    {resource.name === "notifications" &&
+                                      Boolean(row.certificate_request_code) && (
+                                        <button
+                                          type="button"
+                                          className="edu-primary"
+                                          onClick={() =>
+                                            setSelected("certificate-requests")
+                                          }
+                                        >
+                                          Review certificate
+                                        </button>
+                                      )}
                                     {[
                                       "students",
                                       "employees",
                                       "admission_applications",
                                     ].includes(resource.name) && (
-                                        <IconAction
-                                          kind="files"
-                                          label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
-                                          onClick={() =>
-                                            setFileOwner({
-                                              personKind:
-                                                resource.name === "students"
-                                                  ? "student"
-                                                  : resource.name ===
-                                                      "employees"
-                                                    ? "employee"
-                                                    : "application",
-                                              personCode: String(row.code),
-                                            })
-                                          }
-                                        />
-                                      )}
+                                      <IconAction
+                                        kind="files"
+                                        label={`Files for ${String(cellValue(row, "student_name") || row.name || row.first_name || row.code)}`}
+                                        onClick={() =>
+                                          setFileOwner({
+                                            personKind:
+                                              resource.name === "students"
+                                                ? "student"
+                                                : resource.name === "employees"
+                                                  ? "employee"
+                                                  : "application",
+                                            personCode: String(row.code),
+                                          })
+                                        }
+                                      />
+                                    )}
                                     {resource.actions.includes("edit") && (
                                       <IconAction
                                         kind="edit"
@@ -1631,45 +1717,45 @@ export default function ConnectedPortal({
                                       />
                                     )}
                                     {resource.actions.includes("delete") && (
-                                        <IconAction
-                                          kind="delete"
-                                          label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
-                                          onClick={async () => {
-                                            if (!confirm("Delete this record?"))
-                                              return;
-                                            try {
-                                              const kind =
-                                                DOWNLOAD_KIND_BY_TABLE[
-                                                  resource.name
-                                                ];
-                                              if (
-                                                [
-                                                  "document",
-                                                  "tax-document",
-                                                  "admission-document",
-                                                  "import-workbook",
-                                                ].includes(kind)
-                                              ) {
-                                                await api.documents.remove(
-                                                  kind,
-                                                  String(row.code),
-                                                );
-                                              } else {
-                                                await api.workspace.remove(
-                                                  resource.path,
-                                                  String(row.code),
-                                                );
-                                              }
-                                              toast.success(
-                                                `${String(row.name ?? row.code)} deleted successfully`,
+                                      <IconAction
+                                        kind="delete"
+                                        label={`Delete ${String(row.name ?? row.first_name ?? row.code ?? "record")}`}
+                                        onClick={async () => {
+                                          if (!confirm("Delete this record?"))
+                                            return;
+                                          try {
+                                            const kind =
+                                              DOWNLOAD_KIND_BY_TABLE[
+                                                resource.name
+                                              ];
+                                            if (
+                                              [
+                                                "document",
+                                                "tax-document",
+                                                "admission-document",
+                                                "import-workbook",
+                                              ].includes(kind)
+                                            ) {
+                                              await api.documents.remove(
+                                                kind,
+                                                String(row.code),
                                               );
-                                              await refreshResource(resource);
-                                            } catch (e) {
-                                              setError(errorText(e));
+                                            } else {
+                                              await api.workspace.remove(
+                                                resource.path,
+                                                String(row.code),
+                                              );
                                             }
-                                          }}
-                                        />
-                                      )}
+                                            toast.success(
+                                              `${String(row.name ?? row.code)} deleted successfully`,
+                                            );
+                                            await refreshResource(resource);
+                                          } catch (e) {
+                                            setError(errorText(e));
+                                          }
+                                        }}
+                                      />
+                                    )}
                                     {DOWNLOAD_KIND_BY_TABLE[resource.name] && (
                                       <button
                                         onClick={() =>
@@ -1887,7 +1973,20 @@ export default function ConnectedPortal({
           </>
         )}
       </section>
-      {feeHeads && <SideDrawer title="Fee heads" expanded onClose={()=>setFeeHeads(null)}><FeeHeadManager initial={feeHeads.initial} onChanged={async()=>{if(resource)await refreshResource(resource)}}/></SideDrawer>}
+      {feeHeads && (
+        <SideDrawer
+          title="Fee heads"
+          expanded
+          onClose={() => setFeeHeads(null)}
+        >
+          <FeeHeadManager
+            initial={feeHeads.initial}
+            onChanged={async () => {
+              if (resource) await refreshResource(resource);
+            }}
+          />
+        </SideDrawer>
+      )}
       {configuration && (
         <ConfigurationEditor
           kind={configuration.kind}

@@ -188,6 +188,9 @@ def detail(code: str, request: Request, user=Depends(current_user)):
 
 def dispatch_resource_push(request, notice_codes):
     settings = request.app.state.settings
+    from .push_delivery import _service_account, deliver
+    if _service_account(settings):
+        return deliver(request, notice_codes)
     if not (settings.push_adapter_url and settings.push_adapter_token):
         return
     from .integrations_api import adapter_post

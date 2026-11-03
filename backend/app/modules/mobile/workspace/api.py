@@ -111,6 +111,36 @@ LAB_INCHARGE_SCREENS = [
 ]
 
 
+def admin_collections(data):
+    """Payments for the admin app: student, course, receipt number and the fees they settled."""
+    from app.core.finance_pdfs import METHODS
+    from app.core.student_leave_workspace import student_context
+    records = data["records"]
+    receipts = {r.get("payment_code"): r for r in query_rows(data, "receipts")}
+    heads = {}
+    for a in query_rows(data, "payment_allocations"):
+        charge = records.get("student_fee_charges", {}).get(a.get("charge_code"), {})
+        structure = records.get("fee_structures", {}).get(charge.get("fee_structure_code"), {})
+        name = records.get("fee_heads", {}).get(structure.get("fee_head_code"), {}).get("name")
+        if name:
+            heads.setdefault(a.get("payment_code"), []).append(name)
+    items = []
+    for p in query_rows(data, "payments"):
+        student = records.get("students", {}).get(p.get("student_code"), {})
+        place = student_context(data, p.get("student_code")) if student else {}
+        receipt = receipts.get(p["code"], {})
+        items.append({**{k: v for k, v in p.items() if k not in {"request", "idempotency_key"}},
+                      "title": place.get("student_name") or p.get("student_code"), "student_name": place.get("student_name"),
+                      "admission_number": student.get("admission_number"), "course_name": place.get("course_name"),
+                      "receipt_number": receipt.get("receipt_number"),
+                      "fee_heads": ", ".join(dict.fromkeys(heads.get(p["code"], []))),
+                      "body": " · ".join(x for x in (student.get("admission_number"), place.get("course_name"),
+                                                     receipt.get("receipt_number") and f"Receipt {receipt['receipt_number']}",
+                                                     ", ".join(dict.fromkeys(heads.get(p["code"], []))),
+                                                     METHODS.get(p.get("method"), p.get("method"))) if x)})
+    return sorted(items, key=lambda r: str(r.get("paid_on") or ""), reverse=True)
+
+
 def admin_can_view(data, user, resource):
     """Admin app screens. The college finance overview and reports are fee totals, so anyone who
     may view fee charges or payments sees them as well as holders of the reports permission."""
@@ -605,16 +635,32 @@ def screen_data(
         elif table == "notifications":
             items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
         elif screen == "dues":
+            from app.core.student_leave_workspace import student_context
             for student in query_rows(data, "students"):
                 ledger = calculate_ledger(data, student["code"])
                 if Decimal(ledger["totals"]["outstanding"]) > 0:
+                    place = student_context(data, student["code"])
                     items.append(
                         {
                             "student_code": student["code"],
                             "name": student["first_name"] + " " + student["last_name"],
+                            "admission_number": student.get("admission_number"),
+                            "course_name": place.get("course_name"),
+                            "body": " · ".join(x for x in (student.get("admission_number"), place.get("course_name"),
+                                                         place.get("academic_year_name"),
+                                                         f"Paid ₹{ledger['totals']['paid']} of ₹{ledger['totals']['gross']}") if x),
                             **ledger["totals"],
                         }
                     )
+            items.sort(key=lambda r: -Decimal(r["outstanding"]))
+        elif screen == "collections":
+            items = admin_collections(data)
+        elif screen == "expenses":
+            vendors = data["records"].get("vendors", {})
+            items = sorted(({**r, "title": vendors.get(r.get("vendor_code"), {}).get("name") or r.get("description") or r.get("category"),
+                             "body": " · ".join(str(x) for x in (r.get("category"), r.get("description"),
+                                                                 str(r.get("payment_status") or "").title()) if x)}
+                            for r in query_rows(data, "expenses")), key=lambda r: str(r.get("expense_date") or ""), reverse=True)
         else:
             items = query_rows(data, table)
     elif table == "profile":
@@ -732,6 +778,11 @@ def screen_data(
             and not any(c["request_code"] == r["code"] for c in items)
         ]
     elif table == "leave_requests":
+        from app.core.hr_workspace import leave_balances
+        from app.core.hr_workspace import month_attendance
+        from datetime import date as _date
+        summary = {"leave_balances": leave_balances(data, user["person_code"]),
+                   "attendance": month_attendance(data, user["person_code"], _date.today().strftime("%Y-%m"))}
         types = {t["code"]: t for t in query_rows(data, "leave_types")}
         items = [
             {**r, "leave_type_name": types.get(r.get("leave_type_code"), {}).get("name")}
@@ -760,13 +811,31 @@ def screen_data(
         from app.core.payroll_workspace import payslip_view, salary_structure
         items = [{**payslip_view(data, r), "lines": r["lines"]} for r in items]
         items.sort(key=lambda r: str(r.get("period_start") or ""), reverse=True)
-        summary = {"structure": salary_structure(data, user["person_code"])}
+        from app.core.hr_workspace import adjustments, staff_kind
+        employee = data["records"].get("employees", {}).get(user["person_code"], {})
+        summary = {"structure": salary_structure(data, user["person_code"]),
+                   "adjustments": adjustments(data, user["person_code"]),
+                   "staff_kind": staff_kind(data, employee)}
     elif table == "employee_tax_documents":
-        items = [
-            r
-            for r in query_rows(data, table)
-            if r["employee_code"] == user["person_code"] and r.get("published_at")
-        ]
+        from app.core.payroll_workspace import form16_statement
+        items = []
+        for r in query_rows(data, table):
+            if r["employee_code"] != user["person_code"] or not r.get("published_at") or r.get("deleted_at"):
+                continue
+            row = {k: v for k, v in r.items() if k != "storage_key"}
+            try:  # Part B figures for the financial year, shown above the download
+                st = form16_statement(data, r["employee_code"], r["financial_year"])
+                row["statement"] = {"assessment_year": st["assessment_year"], "months": st["months"],
+                                    "period_from": st["period_from"], "period_to": st["period_to"],
+                                    "gross": str(st["gross"]), "tax": str(st["tax"]),
+                                    "other_deductions": str(st["other_deductions"]), "net": str(st["net"]),
+                                    "earnings": [{"component": k, "amount": str(v)} for k, v in sorted(st["earnings"].items())],
+                                    "deductions": [{"component": k, "amount": str(v)} for k, v in sorted(st["deductions"].items())],
+                                    "quarters": [{"quarter": k, "amount": str(v)} for k, v in st["quarters"].items()]}
+            except Exception:
+                pass
+            items.append(row)
+        items.sort(key=lambda r: (str(r.get("financial_year")), r.get("revision") or 0), reverse=True)
     elif table in {"calendar_events", "announcements"}:
         campus_codes = set()
         entity = {"employee": "employees", "student": "students", "parent": "parents"}[
@@ -956,6 +1025,8 @@ def screen_data(
             "payslips": "payslip",
             "tax-documents": "tax-document",
             "certificates": "certificate",
+            "collections": "receipt",
+            "payments": "receipt",
         }.get(screen),
     }
 

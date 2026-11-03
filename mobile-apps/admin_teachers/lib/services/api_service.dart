@@ -39,7 +39,35 @@ abstract final class _Endpoints {
   ).toString();
 }
 
+/// Pull-to-refresh and refresh buttons bump [epoch] so the next reads skip cached responses.
+abstract final class ApiFreshness {
+  static int epoch = 0;
+
+  /// Runs [load] with fresh data from the server (pull-to-refresh, refresh button).
+  static Future<void> refresh(Future<void> Function() load) {
+    epoch++;
+    return load();
+  }
+}
+
 class CollegeApi {
+  /// Screen reads are reused for [readTtl]; any save clears them, pull-to-refresh skips them.
+  static const readTtl = Duration(minutes: 10);
+  final Map<String, ({DateTime at, int epoch, String body})> _reads = {};
+
+  /// Live data (chats, alerts, sign-in) and files are always fetched.
+  static bool _cacheable(String path) =>
+      !path.startsWith('/chat') &&
+      !path.startsWith('/auth') &&
+      !path.startsWith('/documents') &&
+      !path.startsWith('/print') &&
+      !path.startsWith('/mobile/alerts') &&
+      !path.contains('/notifications') &&
+      !path.endsWith('.pdf');
+
+  /// Forget cached reads (after saves, sign-out).
+  void clearReads() => _reads.clear();
+
   final String baseUrl, clientId;
   final http.Client httpClient;
   final FlutterSecureStorage storage;
@@ -115,6 +143,7 @@ class CollegeApi {
   }
 
   Future<void> clear() async {
+    _reads.clear();
     _access = null;
     _webRefresh = null;
     if (!kIsWeb) await storage.delete(key: _key);
@@ -372,11 +401,40 @@ class CollegeApi {
     Json? body, {
     bool auth = true,
   }) async {
+    final cacheable = method == 'GET' && auth && _cacheable(path);
+    if (cacheable) {
+      final hit = _reads[path];
+      if (hit != null && hit.epoch == ApiFreshness.epoch && DateTime.now().difference(hit.at) < readTtl) {
+        return hit.body.isEmpty ? <String, dynamic>{} : jsonDecode(hit.body);
+      }
+    } else if (method != 'GET') {
+      _reads.clear(); // a save changes what screens show
+    }
     final response = await _response(method, path, body, auth: auth);
+    if (cacheable) {
+      _reads[path] = (at: DateTime.now(), epoch: ApiFreshness.epoch, body: response.body);
+    }
     return response.body.isEmpty
         ? <String, dynamic>{}
         : jsonDecode(response.body);
   }
+
+
+  /// A college report as a formatted PDF (finance, outstanding, collections, cashbook, expenses, payroll).
+  /// Receipts & cash ledger PDF grouped by day, week, month or year (mode: all or cash).
+  Future<Uint8List> ledgerPdf(String period, {String mode = 'all'}) async =>
+      (await _response('GET', '/finance/ledger/pdf?period=${Uri.encodeComponent(period)}&mode=${Uri.encodeComponent(mode)}', null)).bodyBytes;
+
+  /// Receipts & cash ledger grouped by period, with counts by mode and running balance.
+  Future<dynamic> ledger(String period, {String mode = 'all'}) =>
+      get('/finance/ledger?period=${Uri.encodeComponent(period)}&mode=${Uri.encodeComponent(mode)}&entries_limit=0');
+
+  Future<Uint8List> reportPdf(String name) async =>
+      (await _response('GET', '/reports/${Uri.encodeComponent(name)}.pdf', null)).bodyBytes;
+
+  /// A college document PDF from GET /print/{path} (fee statement, letters, profiles).
+  Future<Uint8List> printPdf(String path) async =>
+      (await _response('GET', '/print/$path', null)).bodyBytes;
 
   Future<Uint8List> download(String kind, String code) async =>
       (await _response('GET', _Endpoints.document(kind, code), null)).bodyBytes;

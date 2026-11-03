@@ -1495,7 +1495,7 @@ class _AttendanceHubState extends State<AttendanceHub> {
             ],
           ),
     body: RefreshIndicator(
-      onRefresh: () => change(() {}),
+      onRefresh: () => ApiFreshness.refresh(() async => change(() {})),
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [

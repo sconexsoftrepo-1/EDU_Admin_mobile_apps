@@ -215,3 +215,147 @@
     max-height: 260px;
   }
 }
+.pay-run {
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  display: grid;
+  gap: 12px;
+}
+.pay-run-bar,
+.pay-tax-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+.pay-run-bar > div:first-child,
+.pay-tax-head > div:first-child {
+  flex: 1 1 260px;
+}
+.pay-run h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.pay-field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: #6e645b;
+}
+.pay-field input,
+.pay-field select {
+  height: 36px;
+  border: 1px solid #e0d6c6;
+  border-radius: 10px;
+  padding: 0 10px;
+  background: #fff;
+  color: #30251c;
+  font: inherit;
+  font-size: 14px;
+}
+.pay-run-button {
+  height: 36px;
+}
+.pay-runs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.pay-runs li {
+  display: grid;
+  gap: 2px;
+  border: 1px solid #eee6da;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fffdf9;
+}
+.pay-runs li .stf-docs-badge {
+  justify-self: start;
+}
+.pay-runs small {
+  color: #827564;
+  font-size: 12px;
+}
+.pay-tax-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pay-tax-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.pay-tax-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #eee6da;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.pay-tax-list li div {
+  display: grid;
+  gap: 2px;
+}
+.pay-tax-list small {
+  color: #827564;
+  font-size: 12px;
+}
+.pay-kinds {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.pay-kinds button {
+  border: 1px solid #e9dfcf;
+  background: #fff;
+  border-radius: 14px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #756b60;
+  cursor: pointer;
+}
+.pay-kinds button.on {
+  background: #f3e6d3;
+  border-color: #dcc29d;
+  color: #7a4a1c;
+  font-weight: 700;
+}
+.pay-run-paid {
+  justify-self: start;
+  border: 1px solid #dcc29d;
+  background: #fff;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #7a4a1c;
+  cursor: pointer;
+}
+.pay-slip .erp-pdf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pay-people ul {
+  overflow-x: hidden;
+}
+.pay-people li button {
+  min-width: 0;
+}
+.pay-people li button strong,
+.pay-people li button small,
+.pay-people li button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

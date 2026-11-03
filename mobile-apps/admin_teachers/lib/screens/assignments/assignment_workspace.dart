@@ -108,7 +108,7 @@ class _AssignmentHubState extends State<AssignmentHub> {
             )
           : null,
       body: RefreshIndicator(
-        onRefresh: load,
+        onRefresh: () => ApiFreshness.refresh(load),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           children: [

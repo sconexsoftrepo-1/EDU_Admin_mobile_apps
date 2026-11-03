@@ -8,8 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
-import 'helpers/workspace_navigation.dart';
-
 void main() {
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   final routes =
@@ -17,7 +15,7 @@ void main() {
               as Map)['teacher']
           as Map;
 
-  testWidgets('teacher reads a parent conversation and replies', (
+  testWidgets('Chats tab: unread badge, open a conversation and reply', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 1200);
@@ -27,56 +25,73 @@ void main() {
     final messages = <Map<String, dynamic>>[
       {
         'code': 'M1',
-        'thread_code': 'T1',
-        'thread_subject': 'Lab record',
-        'sender_name': 'Meera Rao',
+        'kind': 'text',
+        'sender_code': 'U-T1',
+        'sender_name': 'Rohan Varma',
+        'sender_role': 'teacher',
         'mine': false,
-        'with': ['Meera Rao'],
         'body': 'Please submit the lab record.',
         'sent_at': '2026-10-30T09:00:00Z',
       },
     ];
     final sent = <Map<String, dynamic>>[];
+    var unread = 1;
+    Map<String, dynamic> conversation() => {
+      'code': 'T1',
+      'kind': 'direct',
+      'title': 'Rohan Varma',
+      'subtitle': 'Lecturer · Physics',
+      'role': 'teacher',
+      'can_post': true,
+      'members': 2,
+      'last_message': messages.last['body'],
+      'last_sender': '',
+      'last_mine': messages.last['mine'],
+      'last_at': messages.last['sent_at'],
+      'unread': unread,
+    };
     final api = CollegeApi(
       baseUrl: 'http://localhost',
       clientId: 'teacher-mobile',
       httpClient: MockClient((req) async {
-        final key = req.url.pathSegments.last;
-        if (key == 'send_message') {
-          final values = Map<String, dynamic>.from(
-            (jsonDecode(req.body) as Map)['values'] as Map,
-          );
+        final path = req.url.path;
+        Object? body;
+        if (path.endsWith('/chat/unread')) {
+          body = {'unread': unread};
+        } else if (path.endsWith('/chat/conversations')) {
+          body = {
+            'items': [conversation()],
+            'unread': unread,
+            'can_create_groups': false,
+          };
+        } else if (path.endsWith('/chat/conversations/T1')) {
+          body = conversation();
+        } else if (path.endsWith('/chat/conversations/T1/messages') &&
+            req.method == 'POST') {
+          final values = Map<String, dynamic>.from(jsonDecode(req.body) as Map);
           sent.add(values);
-          messages.add({
+          final message = {
             'code': 'M2',
-            'thread_code': values['thread_code'],
-            'thread_subject': 'Lab record',
-            'sender_name': 'Teacher',
+            'kind': 'text',
+            'sender_code': 'U-P1',
+            'sender_name': 'You',
             'mine': true,
-            'with': ['Meera Rao'],
+            'status': 'delivered',
+            'client_id': values['client_id'],
             'body': values['body'],
             'sent_at': '2026-10-30T10:00:00Z',
-          });
-          return http.Response(
-            jsonEncode({
-              'record': {'code': 'M2'},
-            }),
-            201,
-            headers: {'content-type': 'application/json'},
-          );
+          };
+          messages.add(message);
+          return http.Response(jsonEncode(message), 201,
+              headers: {'content-type': 'application/json'});
+        } else if (path.endsWith('/chat/conversations/T1/messages')) {
+          unread = 0;
+          body = {'items': messages, 'has_more': false};
+        } else {
+          body = routes[req.url.pathSegments.last] ?? {};
         }
-        final body = key == 'messages'
-            ? {
-                ...Map<String, dynamic>.from(routes['messages'] as Map),
-                'items': messages,
-                'total': messages.length,
-              }
-            : routes[key] ?? {};
-        return http.Response(
-          jsonEncode(body),
-          200,
-          headers: {'content-type': 'application/json; charset=utf-8'},
-        );
+        return http.Response(jsonEncode(body), 200,
+            headers: {'content-type': 'application/json; charset=utf-8'});
       }),
     );
     await api.accept({'access_token': 't', 'refresh_token': 't'});
@@ -92,22 +107,28 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await openModule(tester, 'messages');
-
-    expect(find.text('Meera Rao'), findsOneWidget);
-    expect(find.text('Lab record'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('thread-T1')));
+    // Home has a Chats quick action with the unread count; the bottom bar has a Chats tab.
+    expect(find.text('Chats · 1 new'), findsOneWidget);
+    await tester.tap(
+      find.descendant(of: find.byType(NavigationBar), matching: find.text('Chats')),
+    );
     await tester.pumpAndSettle();
+    expect(find.text('Rohan Varma'), findsOneWidget);
     expect(find.text('Please submit the lab record.'), findsOneWidget);
 
-    await tester.enterText(
-      find.byKey(const ValueKey('reply-field')),
-      'Will do.',
-    );
-    await tester.tap(find.byKey(const ValueKey('send-reply')));
+    await tester.tap(find.text('Rohan Varma'));
     await tester.pumpAndSettle();
-    expect(sent.single, {'thread_code': 'T1', 'body': 'Will do.'});
+    expect(find.text('Lecturer · Physics'), findsOneWidget);
+    expect(find.text('Please submit the lab record.'), findsOneWidget);
+    expect(find.byTooltip('Record voice message'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).last, 'Will do.');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Send'));
+    await tester.pumpAndSettle();
+    expect(sent.single['body'], 'Will do.');
     expect(find.text('Will do.'), findsOneWidget);
     expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
   });
 }

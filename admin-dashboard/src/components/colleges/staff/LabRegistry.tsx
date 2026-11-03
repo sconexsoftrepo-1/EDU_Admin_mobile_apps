@@ -1,5 +1,6 @@
 "use client";
 /** Lab register: every lab with its floor, room, type, lab in-charge and the lab subjects held there. */
+import PDFActions from "../PDFActions";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -400,15 +401,14 @@ export default function LabRegistry({
     lab.subjects.map((x) => x.name).join(", "),
     lab.status === "inactive" ? "Inactive" : "Active",
   ]);
-  const exportPdf = async () => {
+  const exportPdf = async (mode: "view" | "download" = "download") => {
     try {
       await pdfTable(
         "labs",
         "Lab register",
         `${visible.length} labs`,
         exportColumns,
-        exportRows,
-      );
+        exportRows, mode);
     } catch (e) {
       setError(errorText(e));
     }
@@ -463,14 +463,9 @@ export default function LabRegistry({
             <Download size={14} aria-hidden="true" />
             Excel
           </button>
-          <button
-            type="button"
-            onClick={() => void exportPdf()}
-            disabled={!visible.length}
-          >
-            <FileText size={14} aria-hidden="true" />
-            PDF
-          </button>
+          <PDFActions viewLabel="View PDF" onAction={(mode) => exportPdf(mode)}>
+            <FileText size={14} aria-hidden="true" /> Download PDF
+          </PDFActions>
         </div>
       </div>
       <div className="stf-table-wrap">
