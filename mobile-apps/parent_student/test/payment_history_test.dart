@@ -83,7 +83,11 @@ void main() {
     expect(find.text('DEMO-COLLECTION-1'), findsOneWidget);
     expect(find.text('Payment mode'), findsOneWidget);
     expect(find.text('Paid for'), findsOneWidget);
-    expect(find.textContaining('Download receipt'), findsOneWidget);
+    // Each receipt can be viewed in the app or downloaded / shared.
+    final receipt = find.byWidgetPredicate((w) => w.key is ValueKey && '${(w.key as ValueKey).value}'.startsWith('receipt-pdf-'));
+    expect(receipt, findsOneWidget);
+    expect(find.descendant(of: receipt, matching: find.text('View')), findsOneWidget);
+    expect(find.descendant(of: receipt, matching: find.text('Download')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

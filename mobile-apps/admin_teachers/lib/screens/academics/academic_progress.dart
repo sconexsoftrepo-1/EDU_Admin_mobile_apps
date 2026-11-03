@@ -566,7 +566,7 @@ class _AcademicHubState extends State<AcademicHub> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: load,
+        onRefresh: () => ApiFreshness.refresh(load),
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [

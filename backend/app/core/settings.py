@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     semester_reminders_enabled: bool = True
     push_adapter_url: str | None = None
     push_adapter_token: SecretStr | None = None
+    # Firebase service-account JSON (Project settings → Service accounts → Generate key). When set,
+    # pushes go straight to Firebase Cloud Messaging; otherwise through the push adapter above.
+    fcm_service_account_file: str | None = None
     sms_adapter_url: str | None = None
     sms_adapter_token: SecretStr | None = None
     payment_adapter_url: str | None = None

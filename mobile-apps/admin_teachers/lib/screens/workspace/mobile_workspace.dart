@@ -21,6 +21,17 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   final search = TextEditingController();
   List<Json> screens = [];
   final Map<String, Json> cache = {};
+  /// When each screen's data was fetched; screens reuse it until a save, pull-to-refresh or
+  /// it is older than [staleAfter] when the app comes back to the foreground.
+  final Map<String, DateTime> fetchedAt = {};
+  static const staleAfter = Duration(minutes: 10);
+  /// Screens whose request depends on the date being viewed: always fetched when opened.
+  static const dateScoped = {'calendar', 'labs'};
+  /// Changes only when the selected student changes; older responses are then ignored.
+  int studentEpoch = 0;
+  /// One scroll controller per screen, remembering its position for Back.
+  final Map<String, _RememberedScroll> scrolls = {};
+  ScrollController pageScroll(String key) => scrolls.putIfAbsent(key, _RememberedScroll.new);
   final Map<String, String> sectionErrors = {};
   String? selected, student, error;
   String query = '', filter = 'All';
@@ -97,8 +108,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     refreshChatBadge();
     chatTimer = Timer.periodic(const Duration(seconds: 30), (_) => refreshChatBadge());
     push = PushNotifications(
-      onOpen: (code) async {
-        if (!mounted || !has('notifications')) return;
+      onOpen: (data) async {
+        if (!mounted) return;
+        // Chat pushes open the conversation straight away.
+        final thread = data['thread_code']?.toString();
+        if (thread != null && thread.isNotEmpty) {
+          openChat(thread);
+          return;
+        }
+        final code = data['notification_code']?.toString();
+        if (!has('notifications')) return;
         await fetchSection('notifications');
         final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
         if (notice != null && notice['thread_code'] != null) {
@@ -113,8 +132,20 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           open('notifications');
         }
       },
-      onForeground: (title, body) {
+      onForeground: (title, body, data) {
         if (!mounted) return;
+        if (data['kind'] == 'chat' || data['screen'] == 'messages') {
+          refreshChatBadge();
+          final thread = data['thread_code']?.toString();
+          // Android shows a notification; on iOS show a banner unless that chat is open.
+          if (Theme.of(context).platform == TargetPlatform.iOS && thread != PushNotifications.activeThread) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('$title\n$body', maxLines: 3, overflow: TextOverflow.ellipsis),
+              action: SnackBarAction(label: 'Open', onPressed: () => openChat(thread)),
+            ));
+          }
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$title\n$body'),
@@ -136,7 +167,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       final enabled = await widget.api.storage.read(
         key: ApiConfig.pushPreferenceKey(widget.api.clientId),
       );
-      if (enabled == 'true' && mounted) await enablePush();
+      // On by default: the first sign-in asks for notification permission once.
+      if ((enabled == 'true' || enabled == null) && mounted) await enablePush();
     } catch (_) {
       /* Optional device alerts never block sign-in. */
     }
@@ -145,6 +177,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    for (final c in scrolls.values) {
+      c.dispose();
+    }
     push?.dispose();
     chatTimer?.cancel();
     search.dispose();
@@ -154,7 +189,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) refreshChatBadge();
-    if (state == AppLifecycleState.resumed && !busy && selected != 'messages') load();
+    if (state == AppLifecycleState.resumed && !busy && selected != 'messages') {
+      final at = fetchedAt[selected ?? primary];
+      if (at == null || DateTime.now().difference(at) > staleAfter) load();
+    }
   }
 
   WorkspaceQuery workspaceQuery(String key, {int? offset}) {
@@ -180,19 +218,21 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   Future<Json> fetch(String key) async =>
       (await widget.api.workspace(key, query: workspaceQuery(key))).toJson();
 
-  Future<void> fetchSection(String key) async {
+  Future<void> fetchSection(String key, {bool force = true}) async {
     if (!has(key)) return;
-    final ticket = generation;
+    if (!force && cache[key] != null) return;
+    final ticket = studentEpoch;
     try {
       final result = await fetch(key);
-      if (!mounted || ticket != generation) return;
+      if (!mounted || ticket != studentEpoch) return;
       setState(() {
         cache[key] = result;
+        fetchedAt[key] = DateTime.now();
         student ??= result['selected_student_code'] as String?;
         sectionErrors.remove(key);
       });
     } catch (e) {
-      if (!mounted || ticket != generation) return;
+      if (!mounted || ticket != studentEpoch) return;
       if (e is ApiException && e.status == 401) {
         widget.onLogout();
         return;
@@ -201,7 +241,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     }
   }
 
-  Future<void> loadScreens() async {
+  Future<void> loadScreens({bool force = true}) async {
     final ticket = ++generation;
     setState(() {
       busy = true;
@@ -217,14 +257,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             .where((screen) => screen['key'] != 'transport')
             .toList(),
       );
-      await loadHome(ticket);
+      await loadHome(ticket, force: force);
       if (mounted && ticket == generation) setState(() => busy = false);
     } catch (e) {
       fail(e, ticket);
     }
   }
 
-  Future<void> loadHome(int ticket) async {
+  /// Home sections load in the background and are kept even if you open another screen
+  /// meanwhile (only switching the student discards them). [force] false loads only missing ones.
+  Future<void> loadHome(int ticket, {bool force = true}) async {
     final keys = <String>{
       'profile',
       primary,
@@ -249,11 +291,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (widget.role == MobileRole.teacher) 'assignments',
     };
     // Establish the selected child before loading independent dashboard sections.
-    if (has('profile')) await fetchSection('profile');
+    if (has('profile')) await fetchSection('profile', force: force);
     final pending = keys.where((key) => has(key) && key != 'profile').toList();
     for (var start = 0; start < pending.length; start += 3) {
-      if (!mounted || ticket != generation) return;
-      await Future.wait(pending.skip(start).take(3).map(fetchSection));
+      if (!mounted) return;
+      await Future.wait(pending.skip(start).take(3).map((key) => fetchSection(key, force: force)));
     }
   }
 
@@ -266,25 +308,42 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (e is ApiException && e.status == 401) widget.onLogout();
   }
 
-  Future<void> load() async {
+  /// Loads the open screen. [force] false (just navigating) reuses data already loaded; saves,
+  /// pull-to-refresh and the first visit fetch from the server.
+  Future<void> load({bool force = true}) async {
     if (selected == null || selected == '_more') {
-      await loadScreens();
+      if (!force && screens.isNotEmpty) {
+        unawaited(loadHome(generation, force: false));
+        return;
+      }
+      await loadScreens(force: force);
       return;
     }
     if (selected == 'messages') return; // Chats load themselves (ChatHome).
-    final ticket = ++generation;
     final key = selected!;
+    if (!force && cache[key] != null && !dateScoped.contains(key)) {
+      setState(() {
+        busy = false;
+        error = null;
+      });
+      if (key == 'fees' && has('payments')) unawaited(fetchSection('payments', force: false));
+      return;
+    }
+    final ticket = ++generation;
+    final epoch = studentEpoch;
     setState(() {
       busy = true;
       error = null;
     });
     try {
       final result = await fetch(key);
-      if (!mounted || ticket != generation) return;
+      if (!mounted || epoch != studentEpoch) return;
+      // Keep the data even if another screen was opened meanwhile; it is shown when you return.
       setState(() {
         cache[key] = result;
+        fetchedAt[key] = DateTime.now();
         student ??= result['selected_student_code'] as String?;
-        busy = false;
+        if (ticket == generation) busy = false;
         sectionErrors.remove(key);
       });
     } catch (e) {
@@ -297,8 +356,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   /// Opens [key] (null is Home). [remember] keeps the current screen for Back; bottom-bar tabs
   /// pass false because they are top-level destinations whose Back returns Home.
-  void open(String? key, {bool remember = true}) {
+  void open(String? key, {bool remember = true, bool restore = false}) {
     if (saving) return;
+    if (!restore) scrolls[key ?? 'home']?.saved = 0;
     if (key == null) {
       history.clear();
     } else if (remember && key != selected) {
@@ -315,12 +375,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       search.clear();
       busy = false;
     });
-    if (key != null && key != '_more') load();
+    if (key == null) {
+      if (screens.isNotEmpty) unawaited(loadHome(generation, force: false));
+    } else if (key != '_more') {
+      load(force: false);
+    }
   }
 
   void goBack() {
     if (saving) return;
-    open(history.isEmpty ? null : history.removeLast(), remember: false);
+    open(history.isEmpty ? null : history.removeLast(), remember: false, restore: true);
   }
 
   void openTab(String? key) {
@@ -353,6 +417,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   }
 
   Future<void> refreshWorkspace() async {
+    ApiFreshness.epoch++; // pull-to-refresh always reads fresh data
     await load();
     if (!mounted) return;
     if (error != null ||
@@ -364,6 +429,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   Future<void> changeStudent(String value) async {
     generation++;
+    studentEpoch++;
+    fetchedAt.clear();
     setState(() {
       student = value;
       cache.clear();
@@ -468,6 +535,63 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     }
   }
 
+  /// Opens a college PDF in the app (the viewer can save or share it) or, with [view] false,
+  /// goes straight to save / share.
+  Future<void> pdfDocument(Future<Uint8List> Function() load, String title, {bool view = true}) async {
+    if (downloading) return;
+    setState(() => downloading = true);
+    toast(view ? 'Opening $title…' : 'Preparing $title…');
+    try {
+      final bytes = await load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (view) {
+        await Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => CertificatePdfScreen(bytes: bytes, title: title)));
+      } else {
+        final box = context.findRenderObject() as RenderBox?;
+        await SharePlus.instance.share(ShareParams(
+          files: [XFile.fromData(bytes, mimeType: 'application/pdf')],
+          fileNameOverrides: ['${title.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '-')}.pdf'],
+          sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        toast(e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => downloading = false);
+    }
+  }
+
+  /// "View" and "Download" for one PDF; wraps on narrow screens and large text.
+  Widget pdfButtons(String title, Future<Uint8List> Function() load,
+          {String view = 'View', String save = 'Download', Key? viewKey, VoidCallback? before}) =>
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        FilledButton.tonalIcon(
+          key: viewKey,
+          onPressed: downloading
+              ? null
+              : () {
+                  before?.call();
+                  pdfDocument(load, title);
+                },
+          icon: const Icon(Icons.visibility_outlined, size: 18),
+          label: Text(view),
+        ),
+        OutlinedButton.icon(
+          onPressed: downloading
+              ? null
+              : () {
+                  before?.call();
+                  pdfDocument(load, title, view: false);
+                },
+          icon: const Icon(Icons.download_outlined, size: 18),
+          label: Text(save),
+        ),
+      ]);
+
   /// A college report PDF opened in the app (view, save or share from the viewer).
   Future<void> openReport(String name, String title) async {
     if (downloading) return;
@@ -567,6 +691,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         await widget.api.storage.write(
           key: ApiConfig.pushPreferenceKey(widget.api.clientId),
           value: 'true',
+        );
+      } else if (status.startsWith('Notifications are blocked')) {
+        // Don't ask again at every launch; the switch in the inbox still turns alerts on.
+        await widget.api.storage.write(
+          key: ApiConfig.pushPreferenceKey(widget.api.clientId),
+          value: 'false',
         );
       }
       if (mounted) setState(() => pushStatus = status);
@@ -784,6 +914,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                         duration: EduMotion.duration(context, EduMotion.tab),
                         child: ListView.builder(
                           key: ValueKey('page-${selected ?? 'home'}'),
+                          // Back returns to where you were; opening a screen afresh starts at the top.
+                          controller: pageScroll(selected ?? 'home'),
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
                           itemCount: pageWidgets.length,
@@ -3032,30 +3164,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 ),
               ],
               const SizedBox(height: 16),
-              FilledButton.icon(
-                key: const ValueKey('download-payslip'),
-                onPressed: downloading
-                    ? null
-                    : () {
-                        Navigator.pop(sheet);
-                        openDocument(kind, '${r['code']}', 'Payslip ${r['period'] ?? ''}'.trim());
-                      },
-                icon: const Icon(Icons.picture_as_pdf_outlined),
-                label: const Text('View payslip PDF'),
-              ),
+              Text('Payslip PDF', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              pdfButtons('Payslip ${r['period'] ?? ''}'.trim(), () => widget.api.download(kind, '${r['code']}'),
+                  view: 'View payslip', viewKey: const ValueKey('download-payslip'), before: () => Navigator.pop(sheet)),
               if (r['paid_on'] != null) ...[
+                const SizedBox(height: 14),
+                Text('Salary payment receipt', style: text.titleSmall?.copyWith(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  key: const ValueKey('salary-receipt'),
-                  onPressed: downloading
-                      ? null
-                      : () {
-                          Navigator.pop(sheet);
-                          openDocument('salary-receipt', '${r['code']}', 'Salary receipt ${r['period'] ?? ''}'.trim());
-                        },
-                  icon: const Icon(Icons.receipt_long_outlined),
-                  label: const Text('Salary payment receipt'),
-                ),
+                pdfButtons('Salary receipt ${r['period'] ?? ''}'.trim(), () => widget.api.download('salary-receipt', '${r['code']}'),
+                    view: 'View receipt', viewKey: const ValueKey('salary-receipt'), before: () => Navigator.pop(sheet)),
               ],
             ],
           ),
@@ -3112,14 +3230,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               Text.rich(TextSpan(text: money(structure['net_monthly'])), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w900, color: collegePine)),
             ]),
             const SizedBox(height: 12),
-            OutlinedButton.icon(
-              key: const ValueKey('salary-structure-pdf'),
-              onPressed: downloading || structure['employee_code'] == null
-                  ? null
-                  : () => openDocument('salary-structure', '${structure['employee_code']}', 'Salary structure'),
-              icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text('Salary structure PDF'),
-            ),
+            if (structure['employee_code'] != null)
+              pdfButtons('Salary structure', () => widget.api.download('salary-structure', '${structure['employee_code']}'),
+                  view: 'View salary structure', viewKey: const ValueKey('salary-structure-pdf')),
           ]),
         ),
       ],
@@ -3269,21 +3382,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                   ),
                 ],
                 const SizedBox(height: 12),
-                Row(children: [
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: downloading ? null : () => openDocument('tax-document', '${r['code']}', '$title FY ${r['financial_year']}'),
-                      icon: const Icon(Icons.picture_as_pdf_outlined),
-                      label: const Text('View PDF'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.outlined(
-                    tooltip: 'Save or share',
-                    onPressed: downloading ? null : () => download('tax-document', '${r['code']}'),
-                    icon: const Icon(Icons.ios_share_rounded),
-                  ),
-                ]),
+                pdfButtons('$title FY ${r['financial_year']}', () => widget.api.download('tax-document', '${r['code']}'), view: 'View PDF'),
               ]),
             );
           }),
@@ -4097,4 +4196,17 @@ class _LedgerSummaryState extends State<LedgerSummary> {
       ],
     ]);
   }
+}
+
+
+/// Scroll controller that remembers its offset so a screen reopened with Back resumes there.
+class _RememberedScroll extends ScrollController {
+  _RememberedScroll() {
+    addListener(() {
+      if (positions.isNotEmpty) saved = positions.last.pixels;
+    });
+  }
+  double saved = 0;
+  @override
+  double get initialScrollOffset => saved;
 }

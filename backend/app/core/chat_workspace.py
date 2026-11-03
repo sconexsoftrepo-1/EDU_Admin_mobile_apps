@@ -364,7 +364,8 @@ def notify(data, user, thread, message):
         code = new_code("MNOTICE")
         data["records"].setdefault("notifications", {})[code] = {
             "code": code, "user_code": member["user_code"], "title": title, "body": preview(message)[:160] or "New message",
-            "channel": "in_app", "status": "sent", "sent_at": now(), "screen": "messages", "thread_code": thread["code"]}
+            "channel": "in_app", "status": "sent", "sent_at": now(), "screen": "messages", "thread_code": thread["code"],
+            "kind": "chat", "sender_name": sender, "conversation_title": None if kind == "direct" else (thread.get("title") or thread.get("subject"))}
         notices.append(code)
     return notices
 

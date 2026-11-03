@@ -34,7 +34,7 @@ class _SyllabusHubState extends State<SyllabusHub> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.title), automaticallyImplyLeading: false, actions: [IconButton(onPressed: busy ? null : load, tooltip: 'Refresh resources', icon: const Icon(Icons.refresh))]),
       floatingActionButton: canCreate ? FloatingActionButton.extended(onPressed: () async { final saved = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => SyllabusComposer(api: widget.api))); if (saved == true && mounted) await load(); }, icon: const Icon(Icons.add), label: const Text('Add resource')) : null,
-      body: RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), children: [
+      body: RefreshIndicator(onRefresh: () => ApiFreshness.refresh(load), child: ListView(padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), children: [
         if (error.isNotEmpty) Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(children: [Text(error), TextButton(onPressed: load, child: const Text('Retry'))]))),
         if (busy) const LinearProgressIndicator(),
         if (students.length > 1) DropdownButtonFormField<String>(key: ValueKey(child), initialValue: child.isEmpty ? null : child, decoration: const InputDecoration(labelText: 'Student'), items: students.map((s) => DropdownMenuItem(value: _asText(s['code']), child: Text(_asText(s['name'])))).toList(), onChanged: (value) { child = value ?? ''; load(); }),

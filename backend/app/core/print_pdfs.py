@@ -502,8 +502,11 @@ def print_letter(kind: str, code: str, request: Request, user=Depends(current_us
 
 @router.get("/fee-statement/{code}")
 def print_fee_statement(code: str, request: Request, user=Depends(current_user), inline: bool = False):
+    from app.modules.documents.files.api import permitted_person
     data = request.app.state.store.snapshot()
-    staff(data, user, "student_fee_charges", "payments", "students")
+    # Students and parents open their own (their child's) statement in the app.
+    if not (user.get("person_type") in {"student", "parent"} and permitted_person(data, user, "student", code)):
+        staff(data, user, "student_fee_charges", "payments", "students")
     return pdf_response(fee_statement_pdf(data, code), f"fee-statement-{code}.pdf", inline)
 
 
