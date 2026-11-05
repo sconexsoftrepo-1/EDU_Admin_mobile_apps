@@ -254,8 +254,8 @@ def test_create_course_registers_a_typed_department(client, app):
     h = master_data_user(app, client)
     form = next(a for a in client.get("/api/v1/master-data/actions", headers=h).json()["actions"]
                 if a["key"] == "create-course")
-    department = next(f for f in form["fields"] if f["key"] == "program.department_code")
-    assert department["reference"] is None and department["type"] == "text"
+    assert form["fields"][0]["key"] == "program.course_level"
+    assert not any(f["key"] == "program.department_code" for f in form["fields"])
     result = client.post("/api/v1/master-data/actions/create-course", headers=h, json={"values": {
         "program.code": "BSC-CS", "program.department_code": "Computer Science", "program.name": "B.Sc. Computers",
         "program.qualification": "B.Sc.", "program.duration_semesters": 6, "program.course_level": "degree",
