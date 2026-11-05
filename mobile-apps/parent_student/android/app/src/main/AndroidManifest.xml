@@ -5,7 +5,8 @@
     <application
         android:label="EduNest"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
         <!-- Pushes drawn by the system (e.g. before the app has run) use the app's notification icon and colour. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

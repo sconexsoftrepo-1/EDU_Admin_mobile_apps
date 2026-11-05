@@ -182,6 +182,7 @@ export default function CourseInsightsPanel({
                 course.semesters_label || course.duration_semesters,
               ],
               ["Subjects", course.subjects],
+              ["Details", course.details],
               ["Careers", course.career_opportunities],
               ["Course code", course.code],
               ["Admission branch code", course.branch_code],

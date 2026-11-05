@@ -74,8 +74,12 @@ export default function AcademicYearForm({
           years: Math.max(
             1,
             Math.ceil(
-              (programs.find((program) => program.code === course.value)
-                ?.duration_semesters || 2) / 2,
+              Number(
+                programs.find((program) => program.code === course.value)
+                  ?.duration_years,
+              ) ||
+                (programs.find((program) => program.code === course.value)
+                  ?.duration_semesters || 2) / 2,
             ),
           ),
         }));

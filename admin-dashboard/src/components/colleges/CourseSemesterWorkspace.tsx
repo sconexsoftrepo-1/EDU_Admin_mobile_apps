@@ -83,9 +83,12 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
     }
   }
   const semesterName = (n: number) =>
-    intermediate
+    (Array.isArray(course.semester_labels)
+      ? String(course.semester_labels[n - 1] || "")
+      : "") ||
+    (intermediate
       ? `${Math.floor((n - 1) / 2) + 1}-${((n - 1) % 2) + 1}`
-      : `Semester ${n}`;
+      : `Semester ${n}`);
   const semesters = Array.from(
     { length: Number(course.duration_semesters) || 4 },
     (_, i) => i + 1,

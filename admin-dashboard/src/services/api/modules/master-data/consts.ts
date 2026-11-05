@@ -26,6 +26,8 @@ export interface WizardCourse {
   course_code?: "INT" | "DEG";
   qualification?: string;
   duration_semesters?: number;
+  duration_years?: number;
+  details?: string;
   /** Course family, e.g. "Commerce, Finance and Management". */
   category?: string | null;
   duration_label?: string | null;

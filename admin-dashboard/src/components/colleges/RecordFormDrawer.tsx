@@ -12,6 +12,7 @@ import {
 } from "@/lib/colleges/workspace-cache";
 import Select from "./SearchSelect";
 import AcademicYearForm from "./AcademicYearForm";
+import CourseFormDrawer from "./CourseFormDrawer";
 import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
 import DateInput from "./DateInput";
 const pretty = (key: string) =>
@@ -66,7 +67,7 @@ const sections: Record<string, string> = {
   batch: "Batch details",
   link: "Relationship & permissions",
 };
-export default function RecordFormDrawer({
+function GenericRecordFormDrawer({
   title,
   fields,
   initial = {},
@@ -674,5 +675,17 @@ export default function RecordFormDrawer({
         />
       )}
     </>
+  );
+}
+
+export default function RecordFormDrawer(
+  props: Parameters<typeof GenericRecordFormDrawer>[0],
+) {
+  return props.fields.some(
+    (f) => (f.key || f.name) === "duration_semesters",
+  ) ? (
+    <CourseFormDrawer {...props} />
+  ) : (
+    <GenericRecordFormDrawer {...props} />
   );
 }
