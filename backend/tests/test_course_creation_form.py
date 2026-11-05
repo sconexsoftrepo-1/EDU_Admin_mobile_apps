@@ -61,3 +61,21 @@ def test_legacy_course_request_still_works(client, headers, app):
         'course_level': 'degree', 'duration_semesters': 6, 'branch_code': 'LEGACY'})
     assert response.status_code == 201, response.text
     assert response.json()['name'] == 'Legacy course'
+
+
+def test_course_setup_action_uses_new_form_and_accepts_dotted_payload(client, headers):
+    actions = client.get('/api/v1/master-data/actions', headers=headers).json()['actions']
+    form = next(a for a in actions if a['key'] == 'create-course')
+    keys = [f['key'] for f in form['fields']]
+    assert keys[0] == 'program.course_level'
+    assert not {'program.department_code', 'program.name', 'program.category',
+                'program.duration_label', 'program.career_opportunities'} & set(keys)
+    response = client.post('/api/v1/master-data/actions/create-course', headers=headers,
+                           json={'values': {f'program.{k}': v for k, v in course().items()}})
+    assert response.status_code == 201, response.text
+    row = response.json()['program']
+    assert row['duration_label'] == '3 years'
+    assert row['semester_labels'] == course()['semester_labels']
+    workspace = client.get(f"/api/v1/academics/course-curricula/{row['code']}/workspace", headers=headers)
+    assert workspace.status_code == 200, workspace.text
+    assert {r['name'] for r in workspace.json()['items']} == {'Physics', 'Physics lab'}

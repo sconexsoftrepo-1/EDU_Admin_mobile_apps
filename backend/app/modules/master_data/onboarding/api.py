@@ -182,7 +182,9 @@ def department_for(data, typed, campus_code, actor):
 
 def create_course(data, body: CourseInput, actor, campus_code=None):
     program = dict(body.program)
-    program["department_code"] = department_for(data, program.get("department_code"), campus_code, actor)
+    if program.get("department_code"):
+        # Preserve typed departments for legacy API clients; the new form derives it.
+        program["department_code"] = department_for(data, program["department_code"], campus_code, actor)
     program = create(data, "programs", program, actor)
     batches = [create(data, "batches", {**batch_record(b), "program_code": program["code"]}, actor) for b in body.batches]
     return {"program": program, "batches": batches}
@@ -606,11 +608,17 @@ ACTIONS = {
     ),
     "create-course": (
         "Create course", "programs", [("programs", "create")],
-        # The department is typed (existing ones are reused, new ones registered on the campus).
-        lambda: [field("program.department_code", "Program: department (e.g. Science, Commerce)")]
-        + fields("programs", "program", skip=("department_code",))
-        + [field("campus_code", "Campus of a new department (only if there are several)", required=False,
-                 reference="campuses")],
+        lambda: [
+            field("program.course_level", "Course level", "select", options=["intermediate", "degree"]),
+            field("program.qualification", "Qualification"),
+            field("program.branch", "Branch"),
+            field("program.branch_code", "Branch code"),
+            field("program.duration_years", "Duration (years)", "number"),
+            field("program.duration_semesters", "Number of semesters", "number"),
+            field("program.semester_labels", "Semester labels", "json"),
+            field("program.subject_entries", "Subjects", "json", required=False),
+            field("program.details", "Details", "textarea", required=False),
+        ],
         # Dated batches are created through the single course-linked calendar form.
         lambda d, v, a: create_course(d, CourseInput(program=v.get("program", {}),
                                                      batches=[]), a,
