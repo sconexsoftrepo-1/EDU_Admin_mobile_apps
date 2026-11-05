@@ -610,9 +610,8 @@ ACTIONS = {
         "Create course", "programs", [("programs", "create")],
         lambda: [
             field("program.course_level", "Course level", "select", options=["intermediate", "degree"]),
-            field("program.qualification", "Qualification"),
-            field("program.branch", "Branch"),
-            field("program.branch_code", "Branch code"),
+            field("program.branch", "Course name"),
+            field("program.branch_code", "Course code"),
             field("program.duration_years", "Duration (years)", "number"),
             field("program.duration_semesters", "Number of semesters", "number"),
             field("program.semester_labels", "Semester labels", "json"),
