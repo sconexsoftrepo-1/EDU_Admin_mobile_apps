@@ -681,9 +681,36 @@ function GenericRecordFormDrawer({
 export default function RecordFormDrawer(
   props: Parameters<typeof GenericRecordFormDrawer>[0],
 ) {
-  return props.fields.some(
-    (f) => (f.key || f.name) === "duration_semesters",
-  ) ? (
+  const keys = props.fields.map((f) => f.key || f.name);
+  if (
+    keys.includes("program.duration_semesters") ||
+    keys.includes("program.duration_years")
+  ) {
+    // Onboarding actions submit dotted program keys; resource CRUD uses plain keys.
+    const initial = Object.fromEntries(
+      Object.entries(props.initial || {}).map(([key, value]) => [
+        key.replace(/^program\./, ""),
+        value,
+      ]),
+    );
+    return (
+      <CourseFormDrawer
+        {...props}
+        initial={initial}
+        onSave={(row) =>
+          props.onSave(
+            Object.fromEntries(
+              Object.entries(row).map(([key, value]) => [
+                `program.${key}`,
+                value,
+              ]),
+            ),
+          )
+        }
+      />
+    );
+  }
+  return keys.includes("duration_semesters") ? (
     <CourseFormDrawer {...props} />
   ) : (
     <GenericRecordFormDrawer {...props} />
