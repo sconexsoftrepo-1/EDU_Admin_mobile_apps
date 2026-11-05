@@ -5376,14 +5376,14 @@
       {
         "name": "department_code",
         "type": "character varying",
-        "required": true,
+        "required": false,
         "reference": "departments",
         "choices": []
       },
       {
         "name": "name",
         "type": "text",
-        "required": true,
+        "required": false,
         "reference": null,
         "choices": []
       },
@@ -5473,6 +5473,34 @@
       },
       {
         "name": "subjects",
+        "type": "text",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "duration_years",
+        "type": "numeric",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "semester_labels",
+        "type": "ARRAY",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "subject_entries",
+        "type": "jsonb",
+        "required": false,
+        "reference": null,
+        "choices": []
+      },
+      {
+        "name": "details",
         "type": "text",
         "required": false,
         "reference": null,

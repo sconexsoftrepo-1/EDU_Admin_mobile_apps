@@ -1976,7 +1976,11 @@ export default function StudentEnrollmentWizard({
                             placeholder="Search courses, e.g. B.Com, Data Science"
                             value={courseQuery}
                             onValueChange={setCourseQuery}
-                            suggestions={searchValues(programs, ["name", "branch", "qualification"])}
+                            suggestions={searchValues(programs, [
+                              "name",
+                              "branch",
+                              "qualification",
+                            ])}
                           />
                           <div
                             className="enw-chips"
@@ -2033,13 +2037,18 @@ export default function StudentEnrollmentWizard({
                           >
                             <strong>{p.branch || p.name}</strong>
                             <small>{p.branch ? p.name : p.qualification}</small>
-                            {(p.duration_label || p.subjects) && (
-                              <em>
-                                {course.level === "intermediate"
-                                  ? p.subjects
-                                  : `${p.duration_label}${p.semesters_label ? ` · ${p.semesters_label} semesters` : ""}`}
-                              </em>
+                            <em>
+                              {p.duration_label ||
+                                `${p.duration_years || Number(p.duration_semesters || 0) / 2} years`}
+                              {p.duration_semesters
+                                ? ` · ${p.duration_semesters} semesters`
+                                : ""}
+                            </em>
+                            {!!p.subjects && <em>{p.subjects}</em>}
+                            {!!p.semester_labels?.length && (
+                              <em>{p.semester_labels.join(" · ")}</em>
                             )}
+                            {!!p.details && <em>{p.details}</em>}
                           </button>
                         ))}
                       </div>

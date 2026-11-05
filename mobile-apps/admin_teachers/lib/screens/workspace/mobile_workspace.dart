@@ -812,16 +812,49 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
               borderRadius: BorderRadius.circular(10),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-                child: Column(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Edu-Pragathi'),
-                    Text(
-                      selected == null ? widget.title : title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall,
+                    // App logo in a circle at the left end of the title.
+                    Container(
+                      key: const ValueKey('appbar-logo'),
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: collegeIvory,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: .25),
+                        ),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Transform.scale(
+                        // The icon art has a rounded-square margin; crop into it.
+                        scale: 1.18,
+                        child: Image.asset(
+                          'assets/icons/image.png',
+                          fit: BoxFit.cover,
+                          cacheWidth: 160,
+                          filterQuality: FilterQuality.medium,
+                          errorBuilder: (context, error, stack) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Edu Desk'),
+                          Text(
+                            selected == null ? widget.title : title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

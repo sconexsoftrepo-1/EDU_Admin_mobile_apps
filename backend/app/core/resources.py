@@ -220,7 +220,11 @@ class ResourceService:
         self.repo.save(data, record)
         if self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
             from .curriculum_workspace import insert, starter
-            insert(data, record, starter(record), generated=True)
+            if "subject_entries" in record:
+                from .course_form import subject_plan
+                insert(data, record, subject_plan(record), generated=False)
+            else:
+                insert(data, record, starter(record), generated=True)
         audit(data, actor, "create", self.table, record["code"])
         return record
 

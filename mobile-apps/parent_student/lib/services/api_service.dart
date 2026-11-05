@@ -163,9 +163,21 @@ class CollegeApi {
     null,
   )).bodyBytes;
 
-  Future<dynamic> academicProgress({String program='',String year='',String student=''})=>get(_Endpoints.query('/academics/semester-workspace',{if(program.isNotEmpty)'program_code':program,if(year.isNotEmpty)'academic_year_code':year,if(student.isNotEmpty)'student_code':student}));
-  Future<dynamic> saveSemesterCalendar(Json body)=>_send('PUT','/academics/semester-workspace/calendar',body);
-  Future<dynamic> saveSemesterResults(Json body)=>_send('PUT','/academics/semester-workspace/results',body);
+  Future<dynamic> academicProgress({
+    String program = '',
+    String year = '',
+    String student = '',
+  }) => get(
+    _Endpoints.query('/academics/semester-workspace', {
+      if (program.isNotEmpty) 'program_code': program,
+      if (year.isNotEmpty) 'academic_year_code': year,
+      if (student.isNotEmpty) 'student_code': student,
+    }),
+  );
+  Future<dynamic> saveSemesterCalendar(Json body) =>
+      _send('PUT', '/academics/semester-workspace/calendar', body);
+  Future<dynamic> saveSemesterResults(Json body) =>
+      _send('PUT', '/academics/semester-workspace/results', body);
   static const _assessments = '/academics/assessment-workspace';
   Future<dynamic> assessments({String studentCode = ''}) => get(
     _Endpoints.query(_assessments, {
@@ -351,7 +363,7 @@ class CollegeApi {
     final uri = Uri.parse(
       '${baseUrl.replaceFirst(RegExp(r"/+$"), "")}${ApiConfig.apiPrefix}$path',
     );
-    if (uri.scheme != 'https' && !kDebugMode) {
+    if (uri.scheme != 'https' && !kDebugMode && !ApiConfig.allowInsecureHttp) {
       throw ApiException('A secure HTTPS server is required.', 0);
     }
     try {
@@ -384,7 +396,14 @@ class CollegeApi {
     } on TimeoutException {
       // A slow first response is usually a cold server: reads are safe to ask for once more.
       if (method == 'GET' && resend) {
-        return _response(method, path, body, auth: auth, retry: retry, resend: false);
+        return _response(
+          method,
+          path,
+          body,
+          auth: auth,
+          retry: retry,
+          resend: false,
+        );
       }
       throw ApiException(
         'The college server is taking longer than usual. Pull down to try again.',
@@ -392,7 +411,14 @@ class CollegeApi {
       );
     } catch (_) {
       if (method == 'GET' && resend) {
-        return _response(method, path, body, auth: auth, retry: retry, resend: false);
+        return _response(
+          method,
+          path,
+          body,
+          auth: auth,
+          retry: retry,
+          resend: false,
+        );
       }
       throw ApiException(
         'Cannot reach the college server. Check the connection and try again.',
@@ -410,7 +436,9 @@ class CollegeApi {
     final cacheable = method == 'GET' && auth && _cacheable(path);
     if (cacheable) {
       final hit = _reads[path];
-      if (hit != null && hit.epoch == ApiFreshness.epoch && DateTime.now().difference(hit.at) < readTtl) {
+      if (hit != null &&
+          hit.epoch == ApiFreshness.epoch &&
+          DateTime.now().difference(hit.at) < readTtl) {
         return hit.body.isEmpty ? <String, dynamic>{} : jsonDecode(hit.body);
       }
     } else if (method != 'GET') {
@@ -418,13 +446,16 @@ class CollegeApi {
     }
     final response = await _response(method, path, body, auth: auth);
     if (cacheable) {
-      _reads[path] = (at: DateTime.now(), epoch: ApiFreshness.epoch, body: response.body);
+      _reads[path] = (
+        at: DateTime.now(),
+        epoch: ApiFreshness.epoch,
+        body: response.body,
+      );
     }
     return response.body.isEmpty
         ? <String, dynamic>{}
         : jsonDecode(response.body);
   }
-
 
   /// A college document PDF from GET /print/{path} (fee statement, letters, profiles).
   Future<Uint8List> printPdf(String path) async =>
