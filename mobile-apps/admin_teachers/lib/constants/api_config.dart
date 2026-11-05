@@ -4,6 +4,13 @@ abstract final class ApiConfig {
     'API_BASE_URL',
     defaultValue: 'http://150.241.246.34:8010',
   );
+  // Temporary: the current server has no TLS yet, so release builds accept
+  // http:// too. Build with --dart-define=ALLOW_INSECURE_HTTP=false once the
+  // API is served over HTTPS (and remove usesCleartextTraffic on Android).
+  static const allowInsecureHttp = bool.fromEnvironment(
+    'ALLOW_INSECURE_HTTP',
+    defaultValue: true,
+  );
   static const apiPrefix = '/api/v1';
   static const requestTimeout = Duration(seconds: 20);
   static const pageSize = 50;

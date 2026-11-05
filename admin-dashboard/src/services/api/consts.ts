@@ -45,6 +45,7 @@ export interface ValuesPayload {
 /** Lookup option for reference fields. */
 export interface LookupOption {
   duration_semesters?: number;
+  duration_years?: number;
   course_level?: string;
   program_code?: string;
   value: string;

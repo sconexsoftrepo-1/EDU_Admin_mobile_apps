@@ -139,7 +139,7 @@ def lookup(table: str, request: Request, user=Depends(current_user)):
     return [
         {
             "value": r["code"],
-            **({"duration_semesters":r.get("duration_semesters"),"course_level":r.get("course_level")} if table=="programs" else {"program_code":r.get("program_code")} if table=="academic_years" else {}),
+            **({"duration_years":r.get("duration_years"),"duration_semesters":r.get("duration_semesters"),"course_level":r.get("course_level")} if table=="programs" else {"program_code":r.get("program_code")} if table=="academic_years" else {}),
             "label": r.get("name")
             or r.get("title")
             or " ".join(str(r.get(k, "")) for k in ["first_name", "last_name"]).strip()
@@ -259,7 +259,7 @@ def save_with_form(table, code, body, request, user):
             else module.service.create(data, record_values, user["code"])
         )
         if form:
-            values = {f["key"]: body.values.get(f["key"]) for f in form["fields"]}
+            values = {f["key"]: (result.get(f["key"], body.values.get(f["key"])) if table == "programs" else body.values.get(f["key"])) for f in form["fields"]}
             submission = FormService().submit(
                 data,
                 form["code"],

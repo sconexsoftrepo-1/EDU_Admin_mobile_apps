@@ -19,6 +19,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.core.admission_numbers import branch_code, course_code, next_admission_number
+from app.core.course_form import course_years
 from app.core.resources import staff_only
 from app.core.security import current_user
 from app.core.storage import audit, new_code
@@ -61,6 +62,8 @@ def semester_labels(program):
     """Names of a course's semesters. Intermediate: year-term (1-1, 1-2, 2-1, 2-2 = 1st year 1st
     semester ...), used for marks, backlogs and records; degrees: Semester 1, Semester 2, ..."""
     count = int(program.get("duration_semesters") or 0)
+    if program.get("semester_labels") and len(program["semester_labels"]) == count:
+        return program["semester_labels"]
     if program.get("course_level") == "intermediate":
         return [f"{(n - 1) // 2 + 1}-{(n - 1) % 2 + 1}" for n in range(1, count + 1)]
     return [f"Semester {n}" for n in range(1, count + 1)]
@@ -107,6 +110,7 @@ def courses(data):
             "code": p["code"], "name": p["name"], "branch": p.get("branch"),
             "branch_code": branch_code(p), "course_code": course_code(p),
             "qualification": p.get("qualification"), "duration_semesters": p.get("duration_semesters"),
+            "duration_years": p.get("duration_years"), "details": p.get("details"),
             "category": p.get("category"), "duration_label": p.get("duration_label"),
             "semesters_label": p.get("semesters_label"), "subjects": p.get("subjects"),
             "career_opportunities": p.get("career_opportunities"),
@@ -388,7 +392,7 @@ def course_insights(program_code: str, request: Request, user=Depends(current_us
         section_code = enrollment.get("section_code")
         if section_code in section_members and enrollment.get("status", "active") == "active":
             section_members[section_code].add(enrollment["student_code"])
-    years = max(1, (int(program.get("duration_semesters") or 2) + 1) // 2)
+    years = course_years(program)
     out = []
     for b in batches:
         item = {"code": b["code"], "name": b["name"], "entry_year": b["entry_year"],
@@ -439,7 +443,7 @@ def batch_overview(request: Request, program_code: str | None = None, user=Depen
         program = programs.get(batch["program_code"], {})
         result.append({"code": batch["code"], "name": batch["name"], "program_code": batch["program_code"],
                        "course_name": program.get("name") or batch["program_code"], "entry_year": batch["entry_year"],
-                       "graduation_year": batch.get("graduation_year") or int(batch["entry_year"]) + max(1, (int(program.get("duration_semesters") or 2) + 1) // 2),
+                       "graduation_year": batch.get("graduation_year") or int(batch["entry_year"]) + course_years(program),
                        "students": len(members[batch["code"]]),
                        "sections": [{"code": section["code"], "name": section["name"], "capacity": section.get("capacity"),
                                      "students": len(section_members[section["code"]])}
@@ -504,7 +508,7 @@ def promote_students(data, batch_code, to_year, actor):
     if not batch:
         raise HTTPException(404, "Batch not found")
     program = data["records"].get("programs", {}).get(batch["program_code"], {})
-    years = max(1, (int(program.get("duration_semesters") or 2) + 1) // 2)
+    years = course_years(program)
     if not 1 <= to_year <= max(years, 1):
         raise HTTPException(422, f"Year of study must be between 1 and {years} for this course")
     codes = {p["student_code"] for p in rows(data, PROFILES) if p.get("batch_code") == batch_code}
