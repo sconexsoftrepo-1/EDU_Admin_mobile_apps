@@ -6,7 +6,16 @@ class Service(ResourceService):
 
     def create(self, data, body, actor):
         from app.core.course_form import normalize
-        return super().create(data, normalize(data, body), actor)
+        from app.core.admission_numbers import COURSE_CODES, branch_code
+        from fastapi import HTTPException
+
+        body = normalize(data, body)
+        if not body.get("code") and body.get("course_level") in COURSE_CODES and body.get("branch_code"):
+            body["branch_code"] = branch_code(body)
+            body["code"] = f"{COURSE_CODES[body['course_level']]}-{body['branch_code']}"
+            if body["code"] in data["records"].get("programs", {}):
+                raise HTTPException(409, f"Course code {body['code']} already exists; choose a unique branch code")
+        return super().create(data, body, actor)
 
     def update(self, data, code, body, actor):
         from app.core.course_form import normalize

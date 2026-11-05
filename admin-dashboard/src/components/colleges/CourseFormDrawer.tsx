@@ -21,6 +21,11 @@ export default function CourseFormDrawer({
   const id = useId();
   const editing = !!initial.code;
   const [level, setLevel] = useState(String(initial.course_level || ""));
+  const [courseCode, setCourseCode] = useState(
+    String(initial.branch_code || ""),
+  );
+  const prefix =
+    level === "intermediate" ? "INT" : level === "degree" ? "DEG" : "";
   const [years, setYears] = useState(
     String(
       initial.duration_years || Number(initial.duration_semesters || 4) / 2,
@@ -79,7 +84,6 @@ export default function CourseFormDrawer({
     const form = new FormData(event.currentTarget);
     const row: Row = {
       course_level: level,
-      qualification: String(form.get("qualification") || "").trim(),
       branch: String(form.get("branch") || "").trim(),
       branch_code: String(form.get("branch_code") || "")
         .trim()
@@ -137,16 +141,7 @@ export default function CourseFormDrawer({
               </select>
             </label>
             <label>
-              Qualification *
-              <input
-                required
-                name="qualification"
-                defaultValue={String(initial.qualification || "")}
-                placeholder="e.g. Bachelor of Science"
-              />
-            </label>
-            <label>
-              Branch *
+              Course name *
               <input
                 required
                 name="branch"
@@ -154,14 +149,25 @@ export default function CourseFormDrawer({
               />
             </label>
             <label>
-              Branch code *
+              Course code *
               <input
                 required
                 name="branch_code"
                 maxLength={40}
                 pattern="[A-Za-z0-9]+"
-                defaultValue={String(initial.branch_code || "")}
+                value={courseCode}
+                onChange={(event) =>
+                  setCourseCode(event.target.value.toUpperCase())
+                }
+                placeholder="e.g. HAC"
               />
+              <small aria-live="polite">
+                {editing
+                  ? `Course ID: ${initial.code}`
+                  : prefix && courseCode.trim()
+                    ? `Course ID: ${prefix}-${courseCode.trim()}`
+                    : "Select a level and enter a course code"}
+              </small>
             </label>
             <label>
               Duration (years) *
