@@ -258,7 +258,18 @@ export function PhoneInput({
         pattern={code === "+91" ? "[6-9][0-9]{9}" : "[0-9 ]{4,17}"}
         title={code === "+91" ? "10-digit mobile number" : "Phone number"}
         value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[^0-9 ]/g, ""))}
+        onChange={(e) => {
+          if (code !== "+91")
+            return onChange(e.target.value.replace(/[^0-9 ]/g, ""));
+          // Indian numbers: digits only, at most 10, even when pasted with the country code.
+          const digits = e.target.value.replace(/\D/g, "");
+          onChange(
+            (digits.length === 12 && digits.startsWith("91")
+              ? digits.slice(2)
+              : digits
+            ).slice(0, 10),
+          );
+        }}
       />
     </span>
   );

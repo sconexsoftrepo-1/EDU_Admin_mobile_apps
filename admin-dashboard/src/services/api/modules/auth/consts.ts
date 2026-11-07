@@ -14,6 +14,8 @@ export interface Account {
   clients: ApiClient[];
   workspace_scope?: WorkspaceScope;
   session_code?: string;
+  /** One sign-in; unlike session_code it survives token refreshes. */
+  login_code?: string;
   client?: ApiClient;
   [key: string]: unknown;
 }

@@ -87,12 +87,16 @@ for (const [screen, title] of [
   });
 }
 
-test("Students keeps only its inline Manage action", async ({ page }) => {
+test("Students keeps its own toolbar without a second management bar", async ({
+  page,
+}) => {
   await setup(page);
   await page.goto(`${origin}${root}/students`);
+  // This read-only fixture has no record actions; the unified directory owns its toolbar.
+  await expect(page.locator(".edu-toolbar")).toHaveCount(1);
   await expect(
     page.getByRole("button", { name: "Manage Students", exact: true }),
-  ).toHaveCount(1);
+  ).toHaveCount(0);
   await expect(page.locator(".erp-api-controls")).toHaveCount(0);
 });
 

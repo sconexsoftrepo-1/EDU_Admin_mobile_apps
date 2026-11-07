@@ -2,6 +2,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from app.core.admission_numbers import COURSE_LEVELS
 from pydantic import Field
 
 from . import assignment_workspace as aw
@@ -82,7 +83,7 @@ def present(data, user, record):
 
 
 class SyllabusInput(StrictModel):
-    course_level: Literal["intermediate", "degree"]
+    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped"]
     program_code: str = Field(min_length=1, max_length=100)
     specialization: str = Field(min_length=1, max_length=160)
     academic_year_code: str = Field(min_length=1, max_length=100)
@@ -103,7 +104,7 @@ def options(request: Request, course_level: str | None = None, program_code: str
         years = [y for y in years if any(b["code"] in owned_batches and b.get("program_code") == y.get("program_code") and
                     (b["code"] == y.get("batch_code") or b.get("academic_year_code") == y["code"] or
                      str(b.get("entry_year")) == str(y.get("start_date", ""))[:4] and str(b.get("graduation_year")) == str(y.get("end_date", ""))[:4]) for b in records(data, "batches"))]
-    courses = [p for p in records(data, "programs") if p.get("course_level") in {"intermediate", "degree"}
+    courses = [p for p in records(data, "programs") if p.get("course_level") in COURSE_LEVELS
                and (not course_level or p.get("course_level") == course_level)
                and (not program_code or p["code"] == program_code)
                and (not aw.teaching(user) or p["code"] in {y.get("program_code") for y in years})]

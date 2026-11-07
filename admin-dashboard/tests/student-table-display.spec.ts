@@ -12,7 +12,9 @@ test("private photo paths use the authenticated proxy and storage keys are never
     "api/v1/documents/document/DOC-PHOTO/view",
     "http://backend.example/api/v1/documents/document/DOC-PHOTO/view",
   ])
-    expect(personPhotoUrl(url)).toBe("/api/college/documents/document/DOC-PHOTO/view");
+    expect(personPhotoUrl(url)).toBe(
+      "/api/college/documents/document/DOC-PHOTO/view",
+    );
   expect(personPhotoUrl("private/student/photo.jpg")).toBe("");
   expect(personPhotoUrl("https://")).toBe("");
   expect(personPhotoUrl("https://images.example/photo.jpg")).toBe(
@@ -130,26 +132,20 @@ async function setup(page: Page) {
     if (path.startsWith("workspace/lookups/"))
       return route.fulfill({ json: [] });
     return route.fulfill({
-      json: {
-        items: [],
-        total: 0,
-        roles: [],
-        screens: [],
-        actions: [],
-        summary: {},
-      },
+      status: 503,
+      json: { detail: "Unrelated widget is unavailable in this fixture" },
     });
   });
 }
 
 test.describe("student record presentation", () => {
   test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running dashboard");
-  test("student directory and record manager show full names and working photo thumbnails", async ({
+  test("unified student directory shows full names and working photo thumbnails", async ({
     page,
   }) => {
     await setup(page);
     await page.goto(`${origin}${root}/students`);
-    const directory = page.locator(".erp-table-scroll table").first();
+    const directory = page.locator(".edu-table table").first();
     await expect(
       directory.getByText("Asha Rani Devi", { exact: true }),
     ).toBeVisible();
@@ -163,12 +159,7 @@ test.describe("student record presentation", () => {
         exact: true,
       }),
     ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Manage Students", exact: true })
-      .click();
-    const table = page
-      .getByRole("dialog", { name: "Manage college records", exact: true })
-      .locator(".edu-table table");
+    const table = directory;
     await expect(table.getByRole("columnheader").first()).toHaveText(
       "Student name",
     );
@@ -207,7 +198,7 @@ test.describe("student record presentation", () => {
   }) => {
     await setup(page);
     await page.goto(`${origin}${root}/dashboard`);
-    await expect(page.locator(".erp-welcome")).toBeVisible();
+    await expect(page.locator(".dov-banner")).toBeVisible();
     await expect(page.getByText("Passengers", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Low stock", { exact: true })).toHaveCount(0);
     await page

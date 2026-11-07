@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import CollegeWorkspaceProvider from "@/components/colleges/CollegeWorkspaceProvider";
+import SelectEnhancer from "@/components/colleges/SelectEnhancer";
 import { colleges } from "@/data/colleges";
 import "@/styles/colleges.css";
 import "@/styles/college-erp.css";
@@ -19,6 +20,7 @@ export default function CampusLayout({
   return (
     <CollegeWorkspaceProvider slug={colleges[0].slug}>
       {children}
+      <SelectEnhancer />
     </CollegeWorkspaceProvider>
   );
 }

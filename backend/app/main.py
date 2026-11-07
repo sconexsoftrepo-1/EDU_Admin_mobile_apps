@@ -27,6 +27,14 @@ from app.core.certificate_workspace import router as certificate_workspace_route
 from app.core.lab_workspace import router as lab_workspace_router
 from app.core.payroll_workspace import router as payroll_workspace_router
 from app.core.student_leave_workspace import router as student_leave_workspace_router
+from app.core.admission_insights import router as admission_insights_router
+from app.core.module_hubs import router as module_hubs_router
+from app.core.dashboard_overview import router as dashboard_overview_router
+from app.core.analytics_workspace import router as analytics_workspace_router
+from app.core.edit_approvals import edit_approval_gate, router as edit_approvals_router
+from app.core.fee_collection import router as fee_collection_router
+from app.core.cash_custody import router as cash_custody_router
+from app.core.late_fees import router as late_fees_router
 from app.core.chat_workspace import router as chat_workspace_router
 from app.core.hr_workspace import router as hr_workspace_router
 from app.core.finance_ledger import router as finance_ledger_router
@@ -113,14 +121,17 @@ async def semester_reminder_worker(app):
 
 def ensure_builtin_roles(app):
     """Roles the product relies on (e.g. "Lab In-charge"), created once when missing."""
+    from app.core.cash_custody import CLERK_ROLE, ensure_clerk_role
     from app.core.lab_workspace import LAB_ROLE, ensure_lab_role
     store = app.state.store
     try:
         with store.request_scope() if hasattr(store, 'request_scope') else nullcontext():
-            if LAB_ROLE in store.snapshot().get('roles', {}):
+            existing = store.snapshot().get('roles', {})
+            if LAB_ROLE in existing and CLERK_ROLE in existing:
                 return
             with store.transaction() as data:
                 ensure_lab_role(data)
+                ensure_clerk_role(data)
     except Exception:
         logging.getLogger(__name__).exception('Could not create the built-in roles; they are created when first needed')
 
@@ -160,6 +171,8 @@ def create_app(settings=None):
         app.state.store = Store(settings.data_dir)
     app.state.catalog = CATALOG
     app.state.files = files_for(settings)
+    # Registered first so it runs last, inside the request scope that releases database connections.
+    app.middleware("http")(edit_approval_gate)
     if hasattr(app.state.store, "request_scope"):
 
         @app.middleware("http")
@@ -248,6 +261,14 @@ def create_app(settings=None):
         completion_router_2,
         completion_router_3,
         completion_router_4,
+        admission_insights_router,
+        dashboard_overview_router,
+        module_hubs_router,
+        analytics_workspace_router,
+        edit_approvals_router,
+        fee_collection_router,
+        cash_custody_router,
+        late_fees_router,
         enrollment_router,
         staff_onboarding_router,
         master_data_router,

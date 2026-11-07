@@ -73,18 +73,39 @@ def balance(data, charge):
     }
 
 
-def calculate_ledger(data, student_code):
+def build_ledger_index(data):
+    """Read each ledger source once; keep balance() as the financial source of truth."""
+    from collections import defaultdict
+    by_student = defaultdict(list)
+    for charge in query_rows(data, "student_fee_charges").values():
+        by_student[charge.get("student_code")].append(charge)
+    allocations = {}
+    for table in ("fee_adjustments", "charge_scholarship_allocations", "payment_allocations", "refund_allocations"):
+        grouped = defaultdict(dict)
+        for row in query_rows(data, table).values():
+            grouped[row.get("charge_code")][row["code"]] = row
+        allocations[table] = grouped
+    return {"students": by_student, "allocations": allocations}
+
+
+def indexed_balance(data, charge, index):
+    narrowed = {"records": {table: grouped.get(charge["code"], {}) for table, grouped in index["allocations"].items()}}
+    return balance(narrowed, charge)
+
+
+def calculate_ledger(data, student_code, *, index=None):
     query_record(data, "students", student_code)
     result = []
     totals = {
         k: ZERO for k in ["gross", "discount", "scholarship", "paid", "outstanding"]
     }
-    for charge in query_rows(data, "student_fee_charges").values():
+    charges = index["students"].get(student_code, []) if index is not None else query_rows(data, "student_fee_charges").values()
+    for charge in charges:
         if charge["student_code"] != student_code:
             continue
         structure = query_record(data, "fee_structures", charge["fee_structure_code"])
         head = query_record(data, "fee_heads", structure["fee_head_code"])
-        values = balance(data, charge)
+        values = indexed_balance(data, charge, index) if index is not None else balance(data, charge)
         for k, v in values.items():
             totals[k] += v
         result.append(
@@ -173,10 +194,12 @@ def record_payment(data, body, key, actor):
             "amount": str(amount),
         }
         query_rows(data, "payment_allocations")[allocation["code"]] = allocation
+    from app.core.fee_collection import next_receipt_number
+
     receipt = {
         "code": new_code("RCT"),
         "payment_code": payment["code"],
-        "receipt_number": new_code("EDU-RCT"),
+        "receipt_number": next_receipt_number(data),
         "issued_on": body.paid_on.isoformat(),
     }
     query_rows(data, "receipts")[receipt["code"]] = receipt

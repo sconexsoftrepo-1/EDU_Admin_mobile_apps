@@ -9,6 +9,11 @@
     ]
   },
   {
+    "key": "change-requests",
+    "title": "Change requests",
+    "resources": []
+  },
+  {
     "key": "employees",
     "title": "Employee directory",
     "resources": [
@@ -448,7 +453,23 @@
       "refunds",
       "refund_allocations",
       "payment_gateway_orders",
-      "payment_gateway_events"
+      "payment_gateway_events",
+      "receipts"
+    ]
+  },
+  {
+    "key": "manual-payments",
+    "title": "Manual payments screen",
+    "resources": [
+      "payments",
+      "receipts"
+    ]
+  },
+  {
+    "key": "late-fees",
+    "title": "Late fee dues",
+    "resources": [
+      "student_fee_charges"
     ]
   },
   {
@@ -464,7 +485,8 @@
     "resources": [
       "payments",
       "expense_payment_entries",
-      "external_remittances"
+      "external_remittances",
+      "expenses"
     ]
   },
   {

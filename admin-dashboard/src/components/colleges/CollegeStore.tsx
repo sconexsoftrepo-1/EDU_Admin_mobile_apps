@@ -44,6 +44,7 @@ import {
   firstScreen,
 } from "@/lib/colleges/role-navigation";
 import { toast } from "./toast";
+import { activeHub } from "@/lib/colleges/module-hubs";
 
 type Context = {
   activeRole: AccountRole | null;
@@ -183,6 +184,11 @@ export function CollegeStore({
       return;
     }
     setReady(true);
+    if (activeHub(activeModule, allowed.map((s) => s.key))) {
+      setState(emptyTemplateState(slug));
+      setMessage("");
+      return;
+    }
     if (
       [
         "student-enrollment",

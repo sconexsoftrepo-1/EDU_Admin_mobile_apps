@@ -1,4 +1,5 @@
 "use client";
+import { COURSE_LEVELS } from "@/lib/colleges/course-levels";
 
 import { useId, useState, type FormEvent } from "react";
 import type { Row } from "@/services/api";
@@ -25,7 +26,7 @@ export default function CourseFormDrawer({
     String(initial.branch_code || ""),
   );
   const prefix =
-    level === "intermediate" ? "INT" : level === "degree" ? "DEG" : "";
+    COURSE_LEVELS.find((l) => l.key === level)?.code || "";
   const [years, setYears] = useState(
     String(
       initial.duration_years || Number(initial.duration_semesters || 4) / 2,
@@ -136,8 +137,11 @@ export default function CourseFormDrawer({
                 onChange={(e) => setLevel(e.target.value)}
               >
                 <option value="">Select course level</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="degree">Degree</option>
+                {COURSE_LEVELS.map((l) => (
+                  <option key={l.key} value={l.key}>
+                    {l.label}
+                  </option>
+                ))}
               </select>
             </label>
             <label>

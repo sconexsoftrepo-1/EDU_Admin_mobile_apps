@@ -53,24 +53,25 @@ for (const width of [390, 1440])
           json: {
             key: path.split("/").at(-1),
             title: "Fees",
-            resources: path.endsWith("/fees")
-              ? [
-                  {
-                    name: "fee_heads",
-                    title: "Fee Heads",
-                    path: "/api/v1/finance/fee-heads",
-                    fields,
-                    actions: ["view", "create", "edit"],
-                  },
-                  {
-                    name: "external_parties",
-                    title: "External parties",
-                    path: "/api/v1/finance/external-parties",
-                    fields: [],
-                    actions: ["view", "create"],
-                  },
-                ]
-              : [],
+            resources:
+              path.endsWith("/fees") || path.endsWith("/fee-structures")
+                ? [
+                    {
+                      name: "fee_heads",
+                      title: "Fee Heads",
+                      path: "/api/v1/finance/fee-heads",
+                      fields,
+                      actions: ["view", "create", "edit"],
+                    },
+                    {
+                      name: "external_parties",
+                      title: "External parties",
+                      path: "/api/v1/finance/external-parties",
+                      fields: [],
+                      actions: ["view", "create"],
+                    },
+                  ]
+                : [],
           },
         });
       if (path === "workspace/resources/fee_heads/form")
@@ -94,40 +95,34 @@ for (const width of [390, 1440])
         json: { items: [], total: 0, actions: [], screens: [], summary: {} },
       });
     });
-    await page.goto(
-      `${origin}/portal/admin/fees`,
-    );
+    await page.goto(`${origin}/portal/admin/fees`);
     await page.locator(".erp-api-controls button").click();
     const manager = page.getByRole("dialog", {
       name: "Manage college records",
     });
     await manager
-      .getByRole("button", { name: "Create record", exact: true })
+      .getByRole("button", { name: "Add fee head", exact: true })
       .click();
-    const form = page.getByRole("dialog", {
-      name: "Create Fee Heads",
-      exact: true,
-    });
-    await expect(form.locator('input[name="code"]')).toHaveValue(
-      /^FH-[A-F0-9]{12}$/,
-    );
+    const form = page.getByRole("dialog", { name: "Fee heads", exact: true });
     await expect(
       form.getByRole("combobox", { name: "Collection ownership", exact: true }),
-    ).toHaveValue("Internal — college income");
+    ).toHaveValue("Institution collection");
     await expect(
       form.getByRole("combobox", {
         name: "External organization",
         exact: true,
       }),
     ).toHaveCount(0);
-    await form.locator('input[name="name"]').fill("Sports participation");
-    await form.getByLabel("Category", { exact: true }).fill("Sports");
+    await form
+      .getByRole("textbox", { name: "Fee head name", exact: false })
+      .fill("Sports participation");
+    await form.getByLabel(/^Category/).fill("Sports");
     await form
       .getByRole("combobox", { name: "Collection ownership", exact: true })
       .click();
     await form
       .getByRole("option", {
-        name: "External — collected for another organization",
+        name: "Collected for another organization",
         exact: true,
       })
       .click();
@@ -140,18 +135,16 @@ for (const width of [390, 1440])
       .getByRole("option", { name: "State Examination Board", exact: true })
       .click();
     await form
-      .getByRole("button", { name: "Create record", exact: true })
+      .getByRole("button", { name: "Add fee head", exact: true })
       .click();
-    await expect(form).toHaveCount(0);
+    await expect.poll(() => saved.length).toBe(1);
+    expect(saved[0].code).toMatch(/^FH-[A-F0-9]{12}$/);
     expect(saved[0]).toMatchObject({
       category_label: "Sports",
       category: "academic",
       collection_ownership: "external",
       external_party_code: "BOARD",
     });
-    await manager
-      .getByRole("button", { name: "Create record", exact: true })
-      .click();
     await expect(form.locator('datalist option[value="Sports"]')).toHaveCount(
       1,
     );

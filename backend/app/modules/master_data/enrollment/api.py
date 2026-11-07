@@ -18,7 +18,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from app.core.admission_numbers import branch_code, course_code, next_admission_number
+from app.core.admission_numbers import COURSE_LEVELS, branch_code, course_code, next_admission_number
 from app.core.course_form import course_years
 from app.core.resources import staff_only
 from app.core.security import current_user
@@ -81,6 +81,8 @@ def fee_lines(data, program_code, academic_year_code, hostel, transport, year_of
     for s in rows(data, "fee_structures"):
         if s["program_code"] != program_code or s["academic_year_code"] != academic_year_code:
             continue
+        if s.get("fee_basis") == "late_fee":  # added by the late fee job, never at enrollment
+            continue
         if s.get("fee_basis") == "full_course" and year_of_study != FIRST_YEAR:
             continue
         if s.get("fee_basis") != "full_course" and int(s["semester_number"]) != year_of_study:
@@ -101,7 +103,7 @@ def fee_lines(data, program_code, academic_year_code, hostel, transport, year_of
 def courses(data):
     batches = rows(data, "batches")
     sections = rows(data, "sections")
-    out = {"intermediate": [], "degree": []}
+    out = {level: [] for level in COURSE_LEVELS}
     for p in sorted(rows(data, "programs"), key=lambda p: (p.get("name") or "")):
         level = p.get("course_level")
         if level not in out:
@@ -214,6 +216,18 @@ def apply_concession(data, charges, amount, kind, reason, approver, actor):
     return made
 
 
+def qualification_title(q):
+    title = {"ssc": "10th class", "intermediate": "Intermediate", "polytechnic": "Polytechnic", "degree": "Degree",
+             "pg": "Post graduation", "bped": "B.P.Ed", "mped": "M.P.Ed", "other": ""}[q.level]
+    return "10th class" if q.level == "ssc" else f"{title} {q.group or ''}".strip() or "Other qualification"
+
+
+def masked_account(account):
+    """Bank numbers are shown as last four digits everywhere after enrollment."""
+    number = str((account or {}).get("account_number") or "")
+    return {**account, "account_number": "•••• " + number[-4:]} if number else account
+
+
 def enroll(data, body: EnrollmentInput, actor):
     choice = body.course
     program = data["records"].get("programs", {}).get(choice.program_code)
@@ -236,12 +250,16 @@ def enroll(data, body: EnrollmentInput, actor):
     if not campus:
         raise HTTPException(422, "Choose the campus")
 
-    admission_number = next_admission_number(data, program, start_year)
+    # The generated number is the reference number; staff enter the admission number themselves.
+    reference_number = next_admission_number(data, program, start_year)
+    admission_number = body.admission_number or reference_number
+    if any(str(s.get("admission_number") or "").casefold() == admission_number.casefold() for s in rows(data, "students")):
+        raise HTTPException(409, f"Admission number {admission_number} is already used by another student")
     registration_number = next_registration_number(data, choice.program_code, start_year)
     guardian = body.guardian
     q = body.last_qualification
     student = create(data, "students", {
-        **body.student.model_dump(mode="json", exclude={"campus_code"}),
+        **body.student.model_dump(mode="json", exclude={"campus_code", "complete_name"}),
         "campus_code": campus,
         "admission_number": admission_number,
         "university_registration_number": registration_number,
@@ -252,8 +270,8 @@ def enroll(data, body: EnrollmentInput, actor):
         "emergency_contact_name": f"{guardian.first_name} {guardian.last_name}",
         "emergency_contact_phone": guardian.phone,
         "previous_institution": q.institution,
-        "previous_qualification": "10th class" if q.level == "ssc" else f"Intermediate {q.group or ''}".strip(),
-        "previous_score": q.grade if q.level == "ssc" else q.second_year_score or q.first_year_score,
+        "previous_qualification": qualification_title(q),
+        "previous_score": q.grade if q.level == "ssc" else q.total_percentage or q.second_year_score or q.first_year_score,
         "previous_education": q.model_dump(mode="json"),
     }, actor)
 
@@ -307,12 +325,20 @@ def enroll(data, body: EnrollmentInput, actor):
         "course_level": choice.course_level,
         "registration_number": registration_number,
         "last_qualification": q.model_dump(mode="json"),
+        "qualifications": [item.model_dump(mode="json") for item in (body.qualifications or [q])],
+        "reference_number": reference_number,
+        "complete_name": body.student.complete_name,
+        "family": body.family.model_dump(mode="json") if body.family else None,
+        "identity_details": body.identity.model_dump(mode="json") if body.identity else None,
+        "bank_accounts": body.bank_accounts.model_dump(mode="json", exclude_none=True) if body.bank_accounts else None,
         "referral": body.referral.model_dump(mode="json") if body.referral else None,
         "achievements": [a.model_dump(mode="json") for a in body.achievements],
         "certifications": [c.model_dump(mode="json") for c in body.certifications],
         "document_checklist": {
             **{k: {"label": DOCUMENTS[k], "submitted": v, "uploaded": False} for k, v in body.documents.items()},
             **{k: {"label": v, "submitted": True, "uploaded": False} for k, v in IDENTITY_DOCUMENTS.items()},
+            **({"bank_passbook_student": {"label": "Student bank passbook (first page)", "submitted": False, "uploaded": False}} if body.bank_accounts and body.bank_accounts.student else {}),
+            **({"bank_passbook_mother": {"label": "Mother bank passbook (first page)", "submitted": False, "uploaded": False}} if body.bank_accounts and body.bank_accounts.mother else {}),
         },
         "hostel_required": body.hostel_required,
         "transport_required": body.transport_required,
@@ -490,7 +516,9 @@ def enrollment_review(student_code: str, request: Request, user=Depends(current_
     profile = next((p for p in rows(data, PROFILES) if p["student_code"] == student_code), None)
     if not student:
         raise HTTPException(404, "Enrollment not found")
-    profile = profile or {}
+    profile = dict(profile or {})
+    if profile.get("bank_accounts"):
+        profile["bank_accounts"] = {who: masked_account(account) for who, account in profile["bank_accounts"].items()}
     parents = {p["code"]: p for p in rows(data, "parents")}
     links = [{**l, "parent": parents.get(l["parent_code"])} for l in rows(data, "student_parents")
              if l["student_code"] == student_code]

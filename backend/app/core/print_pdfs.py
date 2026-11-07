@@ -156,6 +156,7 @@ def enquiry_pdf(data, code):
                 ("Referred by", row.get("reference_name") or row.get("referrer_name")), ("Reference mobile", row.get("reference_mobile") or row.get("campaign_reference")),
                 ("Assigned counsellor", name(counsellor)), ("Enquiry created", when(row.get("created_at")))])
     fees = [s for s in aw.rows(data, "fee_structures") if s.get("program_code") == row.get("program_code")
+            and s.get("fee_basis") != "late_fee"
             and (not row.get("academic_year_code") or s.get("academic_year_code") == row.get("academic_year_code"))]
     if fees:
         heads = records.get("fee_heads", {})

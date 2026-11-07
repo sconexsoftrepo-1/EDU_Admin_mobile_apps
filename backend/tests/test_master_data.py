@@ -1,3 +1,4 @@
+import pytest
 import importlib.util
 from pathlib import Path
 
@@ -9,6 +10,13 @@ role_tool = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(role_tool)
 
 PASSWORD = "Strong-Entry-Password-245!"
+
+
+
+@pytest.fixture(autouse=True)
+def endpoints_without_approval_gate(app):
+    """These tests cover the endpoints' own rules; tests/test_edit_approvals.py covers the gate."""
+    app.state.edit_approvals_off = True
 
 
 def master_data_user(app, client):
@@ -673,3 +681,85 @@ def test_fee_basis_separates_annual_course_and_semester_schedules(client,app):
     with app.state.store.transaction() as data:data['records']['academic_years']['AY']['program_code']='OTHER'
     response=client.post('/api/v1/master-data/actions/course-fee-structure',headers=h,json={'values':body})
     assert response.status_code==422
+
+
+def new_form_body(**extra):
+    bank = {"account_holder": "Asha Rao", "account_number": "1234567890", "bank_name": "SBI", "ifsc": "SBIN0001234"}
+    return {
+        "student": {"complete_name": "Katta Ravi Kumar", "date_of_birth": "2008-01-02", "gender": "male",
+                    "phone": "+91 9876500011", "aadhaar_number": "123412341234", "address": "1 Main Road",
+                    "city": "Vizag", "state": "AP", "postal_code": "530001"},
+        "admission_number": "ADM/2026/7",
+        "qualifications": [
+            {"level": "ssc", "institution": "ZP School", "board": "SSC (State board)", "grade": "9.5", "passed_year": 2022},
+            {"level": "polytechnic", "institution": "Govt Poly", "group": "ECE", "total_percentage": "81",
+             "semester_scores": [{"semester": "Semester 1", "score": "80"}, {"semester": "Semester 2", "score": "82"}]},
+            {"level": "degree", "institution": "Govt Degree College", "group": "B.Sc MPCs", "total_percentage": "74"},
+            {"level": "bped", "institution": "College of Physical Education", "total_percentage": "79"},
+        ],
+        "family": {"father_name": "Katta Suresh", "mother_name": "Katta Lakshmi"},
+        "identity": {"sachivalayam_code": "SV12", "sachivalayam_name": "Ward 12", "apar_id": "APAR123"},
+        "bank_accounts": {"student": bank, "mother": {**bank, "account_holder": "Katta Lakshmi"}},
+        "guardian": {"relationship": "father", "first_name": "Katta", "last_name": "Suresh", "phone": "+91 9876500012"},
+        **extra,
+    }
+
+
+def test_new_enrollment_form_fields(client, app):
+    h = master_data_user(app, client)
+    run = lambda key, values: client.post(f"/api/v1/master-data/actions/{key}", headers=h, json={"values": values})
+    created = run("create-course", {"program.code": "INT-MPC", "program.department_code": "DEP",
+                                    "program.name": "Intermediate MPC", "program.qualification": "Intermediate",
+                                    "program.duration_semesters": 4, "program.course_level": "intermediate",
+                                    "program.branch": "MPC"})
+    assert created.status_code == 201, created.text
+    year = client.post("/api/v1/workspace/resources/academic_years", headers=h, json={"values": {
+        "program_code": "INT-MPC", "start_date": "2026-06-01", "end_date": "2028-05-31"}})
+    assert year.status_code == 201, year.text
+    choice = {"course_level": "intermediate", "program_code": "INT-MPC", "academic_year_code": "INT-MPC-2026-2028"}
+    made = client.post("/api/v1/master-data/enrollment", headers=h, json=new_form_body(course=choice))
+    assert made.status_code == 201, made.text
+    student = made.json()["student"]
+    # Name parts stay filled for every screen that uses them.
+    assert (student["first_name"], student["middle_name"], student["last_name"]) == ("Katta", "Ravi", "Kumar")
+    reference = made.json()["profile"]["reference_number"]
+    assert student["admission_number"] == "ADM/2026/7" and reference.startswith("26INT")
+    # The most recently added qualification fills the student's previous-education fields.
+    assert student["previous_qualification"] == "B.P.Ed" and student["previous_score"] == "79"
+    assert "bank_accounts" not in student and "1234567890" not in str(student)
+
+    review = client.get(f"/api/v1/master-data/enrollment/{student['code']}", headers=h).json()
+    profile = review["profile"]
+    assert [q["level"] for q in profile["qualifications"]] == ["ssc", "polytechnic", "degree", "bped"]
+    assert profile["qualifications"][1]["semester_scores"][1]["score"] == "82"
+    assert profile["family"]["mother_name"] == "Katta Lakshmi" and profile["identity_details"]["apar_id"] == "APAR123"
+    # Bank numbers never come back in full.
+    assert profile["bank_accounts"]["mother"]["account_number"].endswith("7890") and "1234567890" not in str(review)
+
+    # Typed admission numbers must be unique, and the generated sequence still moves on.
+    duplicate = new_form_body(course=choice)
+    duplicate["student"] = {**duplicate["student"], "aadhaar_number": "123412341235"}
+    assert client.post("/api/v1/master-data/enrollment", headers=h, json=duplicate).status_code == 409
+    duplicate["admission_number"] = "ADM/2026/8"
+    second = client.post("/api/v1/master-data/enrollment", headers=h, json=duplicate)
+    assert second.status_code == 201, second.text
+    assert second.json()["profile"]["reference_number"] > reference
+
+
+def test_polytechnic_course_level_enrolls_with_its_own_prefix(client, app):
+    h = master_data_user(app, client)
+    run = lambda key, values: client.post(f"/api/v1/master-data/actions/{key}", headers=h, json={"values": values})
+    made = run("create-course", {"program.code": "POLY-ECE", "program.department_code": "DEP", "program.name": "Diploma in ECE",
+                                 "program.qualification": "Diploma", "program.duration_semesters": 6,
+                                 "program.course_level": "polytechnic", "program.branch": "ECE"})
+    assert made.status_code == 201, made.text
+    year = client.post("/api/v1/workspace/resources/academic_years", headers=h, json={"values": {
+        "program_code": "POLY-ECE", "start_date": "2026-06-01", "end_date": "2029-05-31"}})
+    assert year.status_code == 201, year.text
+    options = client.get("/api/v1/master-data/enrollment/options", headers=h).json()
+    assert [c["code"] for c in options["courses"]["polytechnic"]] == ["POLY-ECE"] and options["courses"]["bped"] == []
+    body = new_form_body(course={"course_level": "polytechnic", "program_code": "POLY-ECE",
+                                 "academic_year_code": "POLY-ECE-2026-2029"})
+    enrolled = client.post("/api/v1/master-data/enrollment", headers=h, json=body)
+    assert enrolled.status_code == 201, enrolled.text
+    assert enrolled.json()["profile"]["reference_number"].startswith("26POLYECE")

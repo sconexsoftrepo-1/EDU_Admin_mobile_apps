@@ -31,6 +31,7 @@ type Draft = {
   basis: string;
   termCount: number;
   termDueDates: (string | null)[];
+  lateFee: string;
   existing: boolean;
   program: string;
   year: string;
@@ -92,6 +93,7 @@ function fromSchedule(schedule: RecordRow, data: Snapshot): Draft {
     basis: String(first.fee_basis || "annual"),
     termCount: Number(first.term_count || 4),
     termDueDates: (first.term_due_dates || []) as (string | null)[],
+    lateFee: first.late_fee_amount ? String(Number(first.late_fee_amount)) : "",
     existing: true,
     program: String(first.program_code),
     year: String(first.academic_year_code),
@@ -178,6 +180,7 @@ export default function FeeStructureManager({
                 (_, i) => draft.termDueDates[i] || null,
               )
             : [],
+        late_fee_amount: draft.lateFee ? Number(draft.lateFee).toFixed(2) : null,
         program_code: draft.program,
         academic_year_code: draft.year,
         year_of_study: draft.studyYear,
@@ -259,6 +262,7 @@ export default function FeeStructureManager({
                 basis: "full_course",
                 termCount: 4,
                 termDueDates: [],
+                lateFee: "",
                 existing: false,
                 program: "",
                 year: "",
@@ -480,6 +484,30 @@ export default function FeeStructureManager({
                 )}
               </div>
             )}
+            <div className="erp-fee-manager-fields">
+              <label>
+                Late fee per semester (₹)
+                <input
+                  inputMode="decimal"
+                  pattern="[0-9]+(\.[0-9]{1,2})?"
+                  placeholder="e.g. 2000"
+                  value={draft.lateFee}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      lateFee: e.target.value.replace(/[^0-9.]/g, ""),
+                    })
+                  }
+                />
+              </label>
+            </div>
+            <p className="erp-help">
+              The late fee is added to a student&apos;s dues the day after a
+              semester&apos;s due date if that semester&apos;s fee is not fully
+              paid, once per semester. Students and parents get three app
+              reminders a day in the six days before each due date. Only an
+              admin can cancel a late fee, from Late fee dues.
+            </p>
             {draft.basis === "full_course" && (
               <p className="erp-help">
                 Amounts below cover the entire course and are divided equally

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from app.core import sql_queries as sql
 from app.core.resources import staff_only
 from app.core.security import StrictModel, require
+from app.core.storage import now
 
 from .schemas import CreateRequest, UpdateRequest
 from .service import Service
@@ -213,6 +214,7 @@ def create_intake(body: IntakeInput, request: Request, user=Depends(require(TABL
         record = validate_record(TABLE, record_values)
         created = service.create(data, record, user["code"])
         created.update(extras)
+        created.update(recorded_by=user["code"], recorded_at=now())
         query_save(data, created)
         return created
 

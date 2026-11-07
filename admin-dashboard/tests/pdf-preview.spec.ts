@@ -49,7 +49,7 @@ async function openAdmissions(page: Page) {
             : [],
         },
       });
-    if (path === "admissions/applications")
+    if (path === "admissions/admission-enquiries")
       return route.fulfill({
         json: {
           items: [
@@ -67,18 +67,28 @@ async function openAdmissions(page: Page) {
           total: 1,
         },
       });
+    if (path === "master-data/enrollment/options")
+      return route.fulfill({
+        json: {
+          courses: { intermediate: [], degree: [] },
+          campuses: [],
+          academic_years: [],
+        },
+      });
+    if (path === "workspace/lookups/employees")
+      return route.fulfill({ json: [] });
+    if (path === "print/table")
+      return route.fulfill({
+        status: 503,
+        json: { detail: "Use local PDF fallback" },
+      });
     return route.fulfill({
       json: { items: [], total: 0, actions: [], summary: {} },
     });
   });
-  await page.goto(
-    `${origin}/portal/admin/admissions`,
-  );
+  await page.goto(`${origin}/portal/admin/admissions`);
   await expect(
-    page
-      .getByRole("row")
-      .filter({ hasText: "Preview Applicant" })
-      .getByRole("button", { name: "View PDF", exact: true }),
+    page.getByRole("button", { name: "View list", exact: true }),
   ).toBeVisible();
 }
 
@@ -88,10 +98,10 @@ for (const width of [390, 1440]) {
   }) => {
     await page.setViewportSize({ width, height: 844 });
     await openAdmissions(page);
-    const viewButton = page
-      .getByRole("row")
-      .filter({ hasText: "Preview Applicant" })
-      .getByRole("button", { name: "View PDF", exact: true });
+    const viewButton = page.getByRole("button", {
+      name: "View list",
+      exact: true,
+    });
     // Avoid the app's global smooth-scroll rule making Playwright's click
     // target move between pointerdown and pointerup on short viewports.
     await viewButton.evaluate((button) =>
@@ -99,11 +109,11 @@ for (const width of [390, 1440]) {
     );
     await viewButton.click();
     const preview = page.getByRole("dialog", {
-      name: "PDF-APPLICATION",
+      name: "admission-enquiries",
       exact: true,
     });
     await expect(preview).toBeVisible();
-    await expect(preview.locator('canvas[data-rendered="true"]')).toBeVisible({
+    await expect(preview.locator("canvas")).toBeVisible({
       timeout: 20000,
     });
     await preview.getByText("Read page text", { exact: true }).click();
@@ -114,7 +124,9 @@ for (const width of [390, 1440]) {
     await preview
       .getByRole("link", { name: "Download PDF", exact: true })
       .click();
-    expect((await download).suggestedFilename()).toBe("PDF-APPLICATION.pdf");
+    expect((await download).suggestedFilename()).toBe(
+      "admission-enquiries.pdf",
+    );
     await expect(
       preview.getByRole("link", { name: "Open PDF in new tab" }),
     ).toHaveAttribute("target", "_blank");
@@ -125,7 +137,7 @@ for (const width of [390, 1440]) {
     );
     await viewButton.click();
     await expect(preview).toBeVisible();
-    await expect(preview.locator('canvas[data-rendered="true"]')).toBeVisible({
+    await expect(preview.locator("canvas")).toBeVisible({
       timeout: 20000,
     });
   });

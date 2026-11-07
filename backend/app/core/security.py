@@ -155,7 +155,8 @@ def issue(data, account, client, settings, family=None):
         "refresh_token": refresh,
         "token_type": "bearer",
         "expires_in": settings.access_minutes * 60,
-        "account": public_account(account),
+        # Stays the same across token refreshes, unlike session_code: it identifies this sign-in.
+        "account": {**public_account(account), "login_code": family},
     }
 
 
@@ -213,6 +214,7 @@ def current_user(
         **public_account(account),
         "workspace_scope": scope,
         "session_code": session["code"],
+        "login_code": session["family"],
         "client": session["client"],
     }
 

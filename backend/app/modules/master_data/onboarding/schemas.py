@@ -90,6 +90,8 @@ class CourseFeeScheduleInput(StrictModel):
     fee_basis: str = Field(default="annual", pattern=r"^(annual|full_course|semester)$")
     term_count: int = Field(default=4, ge=1, le=40)
     term_due_dates: list[date | None] = Field(default_factory=list, max_length=40)
+    late_fee_amount: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2,
+                                            description="Added once per semester when its fee is not paid by the due date")
     program_code: str
     academic_year_code: str
     year_of_study: int = Field(default=1, ge=1, le=20)

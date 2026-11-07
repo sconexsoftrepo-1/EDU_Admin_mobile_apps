@@ -1,5 +1,9 @@
 "use client";
 import WorkspaceSkeleton from "./WorkspaceSkeleton";
+import { AdmissionsPopup } from "./AdmissionInsights";
+import AdmissionAnalytics from "./AdmissionAnalytics";
+import DashboardOverview from "./DashboardOverview";
+import EditRequestsWorkspace from "./EditRequestsWorkspace";
 import { useErrorToast } from "./toast";
 import AssignmentWorkspace from "./AssignmentWorkspace";
 import SyllabusWorkspace from "./SyllabusWorkspace";
@@ -19,10 +23,19 @@ import {
 } from "@/services/api";
 export default function PersonalPortal({
   name,
+  session,
+  slug,
+  roleName,
+  teaching = false,
   signOut,
   openForm,
 }: {
   name: string;
+  /** This sign-in's login code: the admissions popup shows once per login. */
+  session?: string;
+  slug: string;
+  roleName?: string;
+  teaching?: boolean;
   signOut: () => Promise<void>;
   openForm: (dialog: {
     title: string;
@@ -56,6 +69,8 @@ export default function PersonalPortal({
       .catch((e) => setError(errorText(e)));
   }, []);
   useEffect(() => {
+    // This view has its own data; it is not a mobile screen.
+    if (selected === "edit-requests") return;
     let active = true;
     void api.mobile
       .screen(selected, student || undefined)
@@ -111,12 +126,33 @@ export default function PersonalPortal({
               {s.title}
             </button>
           ))}
+          {teaching && (
+            <button
+              className={selected === "edit-requests" ? "active" : ""}
+              onClick={() => setSelected("edit-requests")}
+            >
+              My edit requests
+            </button>
+          )}
         </nav>
         <button onClick={signOut}>Sign out</button>
       </aside>
       <section className="edu-content">
+        <AdmissionsPopup session={session} />
+        {selected === "profile" && teaching && (
+          <DashboardOverview
+            campusName={name}
+            roleName={roleName || "Faculty"}
+            session={session}
+            teaching
+            campusImage={`/assets/colleges-institutions/${slug}/campus.webp`}
+            moduleHref={() => undefined}
+            actions={[]}
+          />
+        )}
+        {selected === "profile" && teaching && <AdmissionAnalytics />}
         {selected === "overview" && <AcademicProgressOverview onOpen={()=>setSelected("results")}/>}
-        {["academics","results"].includes(selected) ? <AcademicProgressWorkspace onNavigate={setSelected}/> : selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : ["assignments", "submissions"].includes(selected) ? (
+        {selected === "edit-requests" ? <EditRequestsWorkspace /> : ["academics","results"].includes(selected) ? <AcademicProgressWorkspace onNavigate={setSelected}/> : selected === "assessments" ? <AssessmentWorkspace /> : selected === "attendance" ? <AttendanceWorkspace /> : ["assignments", "submissions"].includes(selected) ? (
           <AssignmentWorkspace studentCode={student || undefined} />
         ) : selected === "syllabus" ? (
           <SyllabusWorkspace studentCode={student || undefined} />

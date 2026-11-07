@@ -457,3 +457,33 @@
   color: #756b60;
   font-size: 13px;
 }
+.adm-create-form .adm-form-actions {
+  background: #fffdf9;
+  border-top: 1px solid var(--adm-line);
+  bottom: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 12px 0;
+  position: sticky;
+  z-index: 2;
+}
+.adm-create-form .adm-form-actions > span {
+  color: var(--adm-muted);
+  flex: 1 1 200px;
+  font-size: 12px;
+}
+.adm-create-form .adm-form-actions > button:not(.adm-submit) {
+  background: #fff;
+  border: 1px solid var(--adm-line);
+  border-radius: 8px;
+  color: var(--adm-ink);
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 40px;
+  padding: 0 16px;
+}
+.adm-create-form .adm-form-actions > .adm-discard {
+  border-color: #dfb4b4;
+  color: #a12f2f;
+}

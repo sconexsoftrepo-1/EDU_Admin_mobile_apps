@@ -14,7 +14,7 @@ export const UPLOAD_SCREENS = ["documents", "student-enrollment"] as const;
 
 // ---- Student enrollment wizard (POST master-data/enrollment) ---------------------------------
 
-export type CourseLevel = "intermediate" | "degree";
+export type CourseLevel = "intermediate" | "degree" | "polytechnic" | "bped" | "mped";
 export type FeeCategory = "academic" | "hostel" | "transport" | "other";
 
 export interface WizardCourse {
@@ -81,9 +81,7 @@ export interface EnrollmentOptions {
 }
 
 export interface EnrollmentStudent {
-  first_name: string;
-  middle_name?: string;
-  last_name: string;
+  complete_name: string;
   date_of_birth: string;
   gender: "female" | "male" | "other" | "prefer_not_to_say";
   email?: string;
@@ -100,7 +98,15 @@ export interface EnrollmentStudent {
 }
 
 export interface LastQualification {
-  level: "ssc" | "intermediate";
+  level:
+    | "ssc"
+    | "intermediate"
+    | "polytechnic"
+    | "degree"
+    | "pg"
+    | "bped"
+    | "mped"
+    | "other";
   institution: string;
   board?: string;
   group?: string;
@@ -108,6 +114,16 @@ export interface LastQualification {
   first_year_score?: string;
   second_year_score?: string;
   passed_year?: number;
+  semester_scores?: { semester: string; score: string }[];
+  total_percentage?: string;
+}
+
+export interface EnrollmentBankAccount {
+  account_holder: string;
+  account_number: string;
+  bank_name: string;
+  ifsc: string;
+  branch?: string;
 }
 
 /** The student's guardian; the guardian's mobile number is the primary contact. */
@@ -121,7 +137,23 @@ export interface EnrollmentGuardian {
 
 export interface EnrollmentPayload {
   student: EnrollmentStudent;
-  last_qualification: LastQualification;
+  admission_number: string;
+  qualifications: LastQualification[];
+  family: {
+    father_name?: string;
+    mother_name?: string;
+    guardian_name?: string;
+    guardian_relationship?: string;
+  };
+  identity: {
+    sachivalayam_code?: string;
+    sachivalayam_name?: string;
+    apar_id?: string;
+  };
+  bank_accounts: {
+    student?: EnrollmentBankAccount;
+    mother?: EnrollmentBankAccount;
+  };
   guardian: EnrollmentGuardian;
   documents: Record<string, boolean>;
   referral?: { name: string; relation: string; mobile: string } | null;
@@ -146,6 +178,7 @@ export interface EnrollmentPayload {
 }
 
 export interface AdmissionProfile {
+  reference_number?: string;
   code: string;
   student_code: string;
   program_code: string;

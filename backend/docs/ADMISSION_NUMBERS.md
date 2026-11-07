@@ -36,13 +36,13 @@ The new generator does not automatically renumber students already enrolled. Pre
 existing-data mapping from `backend/`:
 
 ```sh
-.venv/bin/python tools/format_admission_numbers.py
+# tools/format_admission_numbers.py was a one-time script; it has run and was removed (see git history).
 ```
 
 Once existing-student renumbering has been authorized, apply the mapping atomically:
 
 ```sh
-.venv/bin/python tools/format_admission_numbers.py --apply
+# tools/format_admission_numbers.py was a one-time script; it has run and was removed (see git history).
 ```
 
 The tool discovers a student's course from their admission profile, application or enrollment.

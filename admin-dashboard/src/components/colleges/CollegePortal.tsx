@@ -63,12 +63,27 @@ import {
 } from "@/lib/colleges/reports";
 import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
+import { activeHub, RETIRED_SCREENS } from "@/lib/colleges/module-hubs";
+const ModuleHubDashboard = dynamic(() => import("./ModuleHubDashboard"), { loading: () => <WorkspaceSkeleton label="Loading module dashboard" /> });
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => <WorkspaceSkeleton label="Loading collection analytics" />,
 });
 const ERPInsights = dynamic(() => import("./ERPInsights"), {
   loading: () => <WorkspaceSkeleton label="Loading campus insights" />,
 });
+import { AdmissionsPopup } from "./AdmissionInsights";
+import AdmissionAnalytics from "./AdmissionAnalytics";
+import CampusAnalytics from "./CampusAnalytics";
+import EditRequestsWorkspace, { ChangeRequestsBadge } from "./EditRequestsWorkspace";
+import FeePaymentsWorkspace from "./FeePaymentsWorkspace";
+import CashbookWorkspace from "./CashbookWorkspace";
+import LateFeesWorkspace from "./LateFeesWorkspace";
+import DashboardOverview, {
+  DashboardTabs,
+  initialsOf,
+  useDashboardOverview,
+  type DashboardAction,
+} from "./DashboardOverview";
 import {
   WorkspaceNavigation,
   WorkspaceSearch,
@@ -111,6 +126,10 @@ import {
   Printer,
   FileCheck,
   Briefcase,
+  LayoutGrid,
+  CalendarDays,
+  Megaphone,
+  UserPlus,
   ArrowRight,
 } from "lucide-react";
 import {
@@ -149,13 +168,16 @@ const entryScreens = [
 const labels: Record<string, string> = {
   ...operationLabels,
   dashboard: "Dashboard",
+  "change-requests": "Change requests",
   students: "Students",
   admissions: "Admissions",
-  fees: "Fees & Finance",
+  fees: "Fee ledger & dues",
   "fee-structures": "Fee structures",
-  payments: "Payments",
+  payments: "Payments & receipts",
+  "manual-payments": "Manual payments screen",
+  "late-fees": "Late fee dues",
   receipts: "Receipts",
-  cashbook: "Cashbook",
+  cashbook: "Cashbook & clerk deposits",
   expenses: "Expenses",
   invoices: "Invoices",
   scholarships: "Scholarships",
@@ -236,6 +258,48 @@ function instantPortalNavigation(event: React.MouseEvent) {
   window.history.pushState(null, "", url.pathname + url.search);
 }
 
+function CampusCard({
+  loginCode,
+  college,
+}: {
+  loginCode?: string;
+  college: string;
+}) {
+  const { data } = useDashboardOverview(loginCode);
+  return (
+    <div className="erp-campus-card">
+      <Building2 size={20} />
+      <span>
+        <strong>{data?.viewer?.campus || college}</strong>
+        <small>{college}</small>
+      </span>
+    </div>
+  );
+}
+
+/** The signed-in person's real name in the header, not a role placeholder. */
+function HeaderIdentity({
+  loginCode,
+  fallback,
+  campus,
+}: {
+  loginCode?: string;
+  fallback: string;
+  campus: string;
+}) {
+  const { data } = useDashboardOverview(loginCode);
+  const name = data?.viewer?.name || fallback;
+  return (
+    <>
+      <span className="erp-avatar">{initialsOf(name)}</span>
+      <span>
+        <strong>{name}</strong>
+        <small>{name === fallback ? campus : `${fallback} · ${campus}`}</small>
+      </span>
+    </>
+  );
+}
+
 export default function CollegePortal({
   college: c,
   parts,
@@ -245,6 +309,7 @@ export default function CollegePortal({
 }) {
   const {
       state: s,
+      activeRole,
       ready,
       role,
       login,
@@ -322,6 +387,13 @@ export default function CollegePortal({
   const area = parts[1] || "admin",
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
+  const moduleHub = activeHub(activeModule, modules);
+  // Retired setup screens open the screen that replaced them (?records=… keeps raw-table access).
+  useEffect(() => {
+    const target = RETIRED_SCREENS[activeModule];
+    if (target && modules.includes(target) && !new URLSearchParams(window.location.search).get("records"))
+      router.replace(window.location.pathname.replace(new RegExp(`${activeModule}$`), target));
+  }, [activeModule, router, modules]);
   useEffect(() => {
     if (!scrollTopAfterNavigation) return;
     scrollTopAfterNavigation = false;
@@ -329,7 +401,7 @@ export default function CollegePortal({
   }, [area, activeModule, detail]);
   /** Student directory list: its filters live inside the table card (Teaching staff layout). */
   const recordDirectory =
-    ["students", "admissions", "attendance", "assessments"].includes(
+    ["students", "admissions", "attendance", "assessments", "change-requests", "payments", "manual-payments", "receipts", "cashbook", "late-fees"].includes(
       activeModule,
     ) && !detail;
   const [confirmation, setConfirmation] = useState<DrawerAction | null>(null);
@@ -338,9 +410,9 @@ export default function CollegePortal({
   useEffect(() => {
     try {
       setCompact(
-        localStorage.getItem(`kc-floating-sidebar-${c.slug}`)
-          ? localStorage.getItem(`kc-floating-sidebar-${c.slug}`) !== "expanded"
-          : !false,
+        localStorage.getItem(`kc-sidebar-${c.slug}`)
+          ? localStorage.getItem(`kc-sidebar-${c.slug}`) !== "expanded"
+          : false,
       );
       const filters = JSON.parse(
         sessionStorage.getItem(`kc-filters-${c.slug}`) || "{}",
@@ -357,7 +429,7 @@ export default function CollegePortal({
     if (preferencesReady) {
       try {
         localStorage.setItem(
-          `kc-floating-sidebar-${c.slug}`,
+          `kc-sidebar-${c.slug}`,
           compact ? "compact" : "expanded",
         );
       } catch {}
@@ -461,6 +533,10 @@ export default function CollegePortal({
       (role !== "Student" || x.id === selfStudent.id),
   );
   const ids = new Set(studentRows.map((x) => x.id));
+  // Fee ledger lists only students with something on their ledger, not rows of ₹0.
+  const ledgerRows = studentRows
+    .map((st) => ({ ...st, paid: paid(s, st.id), outstanding: balance(s, st) }))
+    .filter((st) => Number(st.fee) || Number(st.scholarship) || st.paid || st.outstanding);
   const payments = s.payments.filter(
     (p) =>
       ids.has(p.studentId || "") &&
@@ -644,7 +720,7 @@ export default function CollegePortal({
   const areaAllowed = area === homeArea;
   if (!areaAllowed && modules.length)
     return <PortalShellSkeleton college={c} />;
-  if (!areaAllowed || !modules.includes(activeModule))
+  if (!areaAllowed || (!moduleHub && !modules.includes(activeModule)))
     return (
       <ConnectedPortal
         college={c}
@@ -653,49 +729,42 @@ export default function CollegePortal({
         loginError="Your account or selected role does not have access to this workspace. Choose your assigned role and sign in again."
       />
     );
+  const moduleHref = (module: string) =>
+    modules.includes(module) ? nav(module) : undefined;
+  /** Shortcuts this role can actually open, in the order that suits its work. */
+  const dashboardActions = (): DashboardAction[] => {
+    const links: [string, string, typeof Users][] = [
+      ["admissions", "New admission", UserPlus],
+      ["certificates", "Issue certificate", FileCheck],
+      ["students", "Manage students", Users],
+      ["reports", "View reports", BarChart3],
+      ["announcements", "Announcements", Megaphone],
+      ["attendance", "Attendance", CalendarDays],
+      ["timetable", "Timetable", CalendarDays],
+      ["fees", "Outstanding fees", Wallet],
+      ["employees", "Employees", Briefcase],
+      ["payroll", "Payroll", Wallet],
+      ["academics", "Academics", GraduationCap],
+    ];
+    const items: DashboardAction[] = links
+      .filter(([module]) => modules.includes(module))
+      .map(([module, label, icon]) => ({
+        key: module,
+        label,
+        icon,
+        href: nav(module),
+      }));
+    if (allowed("Super Admin", "Accounts Manager"))
+      items.splice(1, 0, {
+        key: "collect",
+        label: "Collect fee",
+        icon: CreditCard,
+        onClick: () => collect(),
+      });
+    return items.slice(0, 6);
+  };
   const dashboard = () => (
     <>
-      <div className="erp-welcome">
-        <div>
-          <span>
-            {new Date().toLocaleDateString("en-IN", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </span>
-          <h1>
-            {role === "Student"
-              ? `Hi, ${selfStudent.name.split(" ")[0]}.`
-              : role === "Principal"
-                ? "A clear view of your institution."
-                : role === "Accounts Manager"
-                  ? "Every transaction, connected."
-                  : `Welcome back, ${role === "Super Admin" ? "Admin" : role}.`}
-          </h1>
-          <p>
-            {role === "Student"
-              ? `${selfStudent.program} / ${selfStudent.year}`
-              : role === "Principal"
-                ? "Enrollment, performance, and the decisions that matter."
-                : "Here’s what’s happening across your campus today."}
-          </p>
-        </div>
-        <div className="erp-quick-actions">
-          {allowed("Super Admin", "Accounts Manager", "Student") && (
-            <button className="erp-primary" onClick={() => collect()}>
-              {role === "Student" ? "Pay fees" : "Collect fee"}{" "}
-              <Plus size={15} />
-            </button>
-          )}
-          {allowed("Super Admin", "Admission Officer") && (
-            <button onClick={() => application()}>
-              New admission <Plus size={15} />
-            </button>
-          )}
-        </div>
-      </div>
       <RoleWorkspace college={c} role={role!} nav={nav} />
       {role !== "Student" && (
         <>
@@ -1494,6 +1563,7 @@ export default function CollegePortal({
           onNavigate={(screen) => router.push(nav(screen))}
         />
       );
+    if (activeModule === "change-requests") return <EditRequestsWorkspace />;
     if (activeModule === "assessments") return <AssessmentWorkspace />;
     if (activeModule === "attendance") return <AttendanceWorkspace />;
     if (activeModule === "assignments") return <AssignmentWorkspace />;
@@ -1518,11 +1588,58 @@ export default function CollegePortal({
     if (activeModule === "dashboard")
       return (
         <>
-          <AcademicProgressOverview
-            onOpen={() => router.push(nav("academics"))}
+          <DashboardOverview
+            campusName={c.short}
+            roleName={roleName || String(role)}
+            session={account?.login_code}
+            campusImage={`/assets/colleges-institutions/${c.slug}/campus.webp`}
+            moduleHref={moduleHref}
+            actions={dashboardActions()}
           />
-          <OperationsSummary college={c} />
-          {dashboard()}
+          <DashboardTabs
+            action={
+              <button
+                className="erp-primary"
+                onClick={() => {
+                  setManageModule(null);
+                  setFeeStructureId(null);
+                  setApiOpen(true);
+                }}
+              >
+                Manage Dashboard <Plus size={15} />
+              </button>
+            }
+            tabs={[
+              {
+                key: "admissions",
+                label: "Admission analytics",
+                content: (
+                  <AdmissionAnalytics
+                    admissionsHref={moduleHref("admissions")}
+                  />
+                ),
+              },
+              {
+                key: "campus",
+                label: "Campus insights",
+                content: (
+                  <CampusAnalytics
+                    moduleHref={moduleHref}
+                    more={
+                      <>
+                        <div className="erp-filters is-open">{filterFields}</div>
+                        <AcademicProgressOverview
+                          onOpen={() => router.push(nav("academics"))}
+                        />
+                        <OperationsSummary college={c} />
+                        {dashboard()}
+                      </>
+                    }
+                  />
+                ),
+              },
+            ]}
+          />
         </>
       );
     if (activeModule === "students" && detail) {
@@ -1941,6 +2058,17 @@ export default function CollegePortal({
         </>
       );
     }
+    if (activeModule === "manual-payments")
+      return <FeePaymentsWorkspace key="manual" mode="manual" />;
+    if (activeModule === "payments" || activeModule === "receipts")
+      return (
+        <FeePaymentsWorkspace
+          key={activeModule}
+          initialTab={activeModule === "receipts" ? "history" : "record"}
+        />
+      );
+    if (activeModule === "cashbook") return <CashbookWorkspace />;
+    if (activeModule === "late-fees") return <LateFeesWorkspace />;
     if (["fees", "payments", "receipts"].includes(activeModule))
       return (
         <>
@@ -1954,14 +2082,14 @@ export default function CollegePortal({
                 ? registerPdf(
                     "Student fee ledgers",
                     "student-fee-ledgers",
-                    studentRows.map((st) => ({
+                    ledgerRows.map((st) => ({
                       id: st.id,
                       name: st.name,
                       program: st.program,
                       fee: st.fee,
                       scholarship: st.scholarship,
-                      paid: paid(s, st.id),
-                      outstanding: balance(s, st),
+                      paid: st.paid,
+                      outstanding: st.outstanding,
                     })),
                     [
                       { key: "id", label: "Student ID" },
@@ -2000,12 +2128,7 @@ export default function CollegePortal({
           {activeModule === "fees"
             ? table(
                 "Student fee ledgers",
-                studentRows.map((st) => ({
-                  ...st,
-                  amount: st.fee,
-                  paid: paid(s, st.id),
-                  outstanding: balance(s, st),
-                })),
+                ledgerRows.map((st) => ({ ...st, amount: st.fee })),
                 [
                   ...cols("id", "name", "program", "amount"),
                   {
@@ -3167,6 +3290,7 @@ export default function CollegePortal({
           compact={compact}
           expand={() => setCompact(false)}
         />
+        <CampusCard loginCode={account.login_code} college={c.short} />
         <div className="erp-sidebar-foot">
           <button
             aria-label={compact ? "Expand sidebar" : "Collapse sidebar"}
@@ -3187,12 +3311,18 @@ export default function CollegePortal({
           onClick={() => setOpen(false)}
         />
       )}
+      <AdmissionsPopup
+        session={account.login_code}
+        admissionsHref={
+          modules.includes("admissions") ? nav("admissions") : undefined
+        }
+      />
       <div className="erp-workspace">
         <header className="erp-topbar">
           <div className="erp-topbar-breadcrumb" aria-label="Breadcrumb">
             <Link href={`${root}/portal/${area}`}>{c.short}</Link>
             <span aria-hidden="true">/</span>
-            <span>{labels[activeModule] || activeModule}</span>
+            <span>{moduleHub?.title || labels[activeModule] || activeModule}</span>
             {detail && (
               <>
                 <span aria-hidden="true">/</span>
@@ -3223,6 +3353,7 @@ export default function CollegePortal({
             labels={labels}
             nav={nav}
           />
+          <ChangeRequestsBadge href={nav("change-requests")} />
           {modules.includes("notifications") && (
             <NotificationCenter
               rows={visibleNotices(s, role)}
@@ -3270,13 +3401,11 @@ export default function CollegePortal({
           </details>
           <details className="erp-profile-menu">
             <summary>
-              <span className="erp-avatar">
-                {role === "Student" ? "AS" : role === "Principal" ? "RS" : "AD"}
-              </span>
-              <span>
-                <strong>{roleName || role}</strong>
-                <small>{c.short}</small>
-              </span>
+              <HeaderIdentity
+                loginCode={account.login_code}
+                fallback={String(roleName || role)}
+                campus={c.short}
+              />
               <ChevronDown size={14} />
             </summary>
             <div>
@@ -3292,24 +3421,9 @@ export default function CollegePortal({
             </div>
           </details>
         </header>
-        {activeModule === "dashboard" && (
-          <div className="erp-campus-banner">
-            <Image
-              src={`/assets/colleges-institutions/${c.slug}/campus.webp`}
-              alt={`${c.short} campus`}
-              fill
-              priority
-              sizes="(max-width: 650px) 100vw, 85vw"
-            />
-            <div>
-              <span>{c.short}</span>
-              <strong>{"Learn today. Lead tomorrow."}</strong>
-            </div>
-            <span className="erp-campus-live">Campus workspace</span>
-          </div>
-        )}
         <main id="erp-content" className="erp-content">
-          {activeModule !== "timetable" &&
+          {!moduleHub && activeModule !== "timetable" &&
+            activeModule !== "dashboard" &&
             !entryScreens.includes(activeModule) &&
             !recordDirectory && (
               <>
@@ -3362,8 +3476,9 @@ export default function CollegePortal({
               </button>
             </div>
           )}
-          {activeModule !== "roles" &&
+          {!moduleHub && activeModule !== "roles" &&
             activeModule !== "timetable" &&
+            activeModule !== "dashboard" &&
             !LIVE_HR_SCREENS.has(activeModule) &&
             !recordDirectory &&
             !entryScreens.includes(activeModule) && (
@@ -3383,7 +3498,20 @@ export default function CollegePortal({
               </div>
             )}
 
-          {[
+          {moduleHub ? (
+            <ModuleHubDashboard
+              key={activeModule}
+              hub={moduleHub}
+              labels={labels}
+              nav={nav}
+              cacheScope={`${account.code}:${activeRole?.code || roleName}`}
+              canCreateCampus={Boolean(
+                activeRole?.system_admin ||
+                  (activeRole?.permissions.campuses?.includes("view") &&
+                    activeRole.permissions.campuses.includes("create")),
+              )}
+            />
+          ) : [
             "accounts",
             "credentials",
             "forms",
@@ -3421,7 +3549,15 @@ export default function CollegePortal({
             className={`erp-api-drawer ${(manageModule || activeModule) === "academics" ? "erp-academics-drawer" : ""}`}
           >
             <header>
-              <h2>{labels[activeModule] || activeModule}</h2>
+              <div className="erp-manage-head">
+                <span>
+                  <LayoutGrid size={20} />
+                </span>
+                <div>
+                  <h2>Manage {labels[activeModule] || activeModule}</h2>
+                  <p>Explore and manage detailed records.</p>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setApiOpen(false);
@@ -3441,6 +3577,37 @@ export default function CollegePortal({
                 embedded
                 openPrimaryForm
               />
+            )}
+            {activeModule === "dashboard" && (
+              <section className="erp-manage-shortcuts">
+                <h3>Module shortcuts</h3>
+                <div>
+                  {(
+                    [
+                      ["students", "Students", "Manage student records", Users],
+                      ["fees", "Fee charges", "Student fee structure", Wallet],
+                      ["payments", "Collections", "Receipts and payments", CreditCard],
+                      ["admissions", "Admissions", "Applications and enrolment", GraduationCap],
+                      ["certificates", "Certificates", "Issue and tracking", FileCheck],
+                      ["reports", "Reports", "Downloads and statements", BarChart3],
+                    ] as const
+                  )
+                    .filter(([module]) => modules.includes(module))
+                    .map(([module, title, note, Icon]) => (
+                      <Link
+                        key={module}
+                        href={nav(module)}
+                        onClick={() => setApiOpen(false)}
+                      >
+                        <Icon size={20} />
+                        <span>
+                          <strong>{title}</strong>
+                          <small>{note}</small>
+                        </span>
+                      </Link>
+                    ))}
+                </div>
+              </section>
             )}
           </div>
         </div>

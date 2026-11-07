@@ -45,8 +45,9 @@ import {
   type FeeLine,
 } from "@/services/api";
 import type { College } from "@/data/colleges";
-import { csv, professionalPdf } from "@/lib/colleges/download";
+import { csv } from "@/lib/colleges/download";
 import "./enrollment-wizard.css";
+import { COURSE_LEVELS } from "@/lib/colleges/course-levels";
 import { toast } from "../toast";
 import Select from "../SearchSelect";
 import { PhoneInput } from "../CountryCodePicker";
@@ -76,11 +77,99 @@ const inr = (value: number) =>
     maximumFractionDigits: 2,
   }).format(value);
 const num = (value: string | number | undefined) => Number(value || 0) || 0;
-const fullName = (p: {
-  first_name?: string;
-  middle_name?: string;
-  last_name?: string;
-}) => [p.first_name, p.middle_name, p.last_name].filter(Boolean).join(" ");
+const QUALIFICATION_LEVELS = [
+  ["ssc", "10th class"],
+  ["intermediate", "Intermediate"],
+  ["polytechnic", "Polytechnic"],
+  ["degree", "Degree (UG)"],
+  ["pg", "Post graduation"],
+  ["bped", "B.P.Ed"],
+  ["mped", "M.P.Ed"],
+  ["other", "Other"],
+] as const;
+/** Course and semester details apply to every qualification after Intermediate. */
+const HAS_SEMESTERS = new Set(["polytechnic", "degree", "pg", "bped", "mped", "other"]);
+const COURSE_LABEL: Record<string, string> = {
+  polytechnic: "Branch *",
+  degree: "Degree course *",
+  pg: "PG course *",
+  bped: "Specialization",
+  mped: "Specialization",
+  other: "Course name *",
+};
+const COURSE_HINT: Record<string, string> = {
+  degree: "e.g. B.Sc MPCs, B.Com, BA",
+  pg: "e.g. M.Sc Physics, MBA, MA",
+};
+type QualificationLevel = (typeof QUALIFICATION_LEVELS)[number][0];
+type QualificationEntry = {
+  id: number;
+  level: QualificationLevel;
+  institution: string;
+  board: string;
+  group: string;
+  grade: string;
+  first_year_score: string;
+  second_year_score: string;
+  semesters: { semester: string; score: string }[];
+  total_percentage: string;
+  passed_year: string;
+};
+const newQualification = (
+  id: number,
+  level: QualificationLevel = "ssc",
+): QualificationEntry => ({
+  id,
+  level,
+  institution: "",
+  board: BOARDS[0],
+  group: level === "intermediate" ? "MPC" : "",
+  grade: "",
+  first_year_score: "",
+  second_year_score: "",
+  semesters: [],
+  total_percentage: "",
+  passed_year: "",
+});
+const qualificationName = (q: QualificationEntry) =>
+  [
+    QUALIFICATION_LEVELS.find(([value]) => value === q.level)?.[1],
+    q.level === "ssc" ? "" : q.group,
+  ]
+    .filter(Boolean)
+    .join(" ");
+const qualificationScore = (q: QualificationEntry) =>
+  q.level === "ssc"
+    ? q.grade
+    : q.total_percentage || q.second_year_score || q.first_year_score;
+type BankForm = {
+  account_holder: string;
+  account_number: string;
+  bank_name: string;
+  ifsc: string;
+  branch: string;
+};
+const EMPTY_BANK: BankForm = {
+  account_holder: "",
+  account_number: "",
+  bank_name: "",
+  ifsc: "",
+  branch: "",
+};
+const BANK_OWNERS = [
+  ["student", "Student"],
+  ["mother", "Mother"],
+] as const;
+/** The API stores name parts; a one-word name is used for both, as the public form does. */
+const splitName = (name: string) => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return {
+    first_name: parts.slice(0, -1).join(" ") || parts[0] || "",
+    last_name: parts.at(-1) || "",
+  };
+};
+const lastFour = (number: string) =>
+  number ? `•••• ${number.slice(-4)}` : "—";
 
 /** Normalize camera/selected images to a format and size accepted by document storage. */
 export async function fitImage(
@@ -487,7 +576,7 @@ export default function StudentEnrollmentWizard({
     parent_phone?: string;
     program_code?: string;
     academic_year_code?: string;
-    course_level?: "intermediate" | "degree";
+    course_level?: CourseLevel;
   };
 }) {
   const [step, setStep] = useState(0);
@@ -509,9 +598,9 @@ export default function StudentEnrollmentWizard({
   );
   const [files, setFiles] = useState<Files>({});
   const [student, setStudent] = useState({
-    first_name: initialApplicant?.first_name || "",
-    middle_name: "",
-    last_name: initialApplicant?.last_name || "",
+    complete_name: [initialApplicant?.first_name, initialApplicant?.last_name]
+      .filter(Boolean)
+      .join(" "),
     date_of_birth: "",
     gender: "",
     email: initialApplicant?.email || "",
@@ -525,16 +614,42 @@ export default function StudentEnrollmentWizard({
     country: "India",
     campus_code: "",
   });
-  const [qualification, setQualification] = useState({
-    level: "ssc" as "ssc" | "intermediate",
-    institution: "",
-    board: BOARDS[0],
-    group: "MPC",
-    grade: "",
-    first_year_score: "",
-    second_year_score: "",
-    passed_year: "",
+  const [qualifications, setQualifications] = useState<QualificationEntry[]>([
+    newQualification(1),
+  ]);
+  const qualificationId = useRef(1);
+  const updateQualification = (
+    id: number,
+    patch: Partial<QualificationEntry>,
+  ) =>
+    setQualifications((items) =>
+      items.map((q) => (q.id === id ? { ...q, ...patch } : q)),
+    );
+  const latestQualification = qualifications.at(-1);
+  const [identity, setIdentity] = useState({
+    sachivalayam_code: "",
+    sachivalayam_name: "",
+    apar_id: "",
   });
+  const [banks, setBanks] = useState<Record<"student" | "mother", BankForm>>({
+    student: EMPTY_BANK,
+    mother: EMPTY_BANK,
+  });
+  const bankStarted = (owner: "student" | "mother") =>
+    Object.values(banks[owner]).some((value) => value.trim()) ||
+    !!files[`bank_passbook_${owner}`];
+  const bankPayload = (owner: "student" | "mother") => {
+    if (!bankStarted(owner)) return undefined;
+    const bank = banks[owner];
+    return {
+      account_holder: bank.account_holder.trim(),
+      account_number: bank.account_number.trim(),
+      bank_name: bank.bank_name.trim(),
+      ifsc: bank.ifsc.trim(),
+      branch: bank.branch.trim() || undefined,
+    };
+  };
+  const [admissionInput, setAdmissionInput] = useState("");
   const [documents, setDocuments] = useState<Record<string, boolean>>({});
   // Country codes of the phone numbers; saved with the number ("+91 9876543210").
   const [codes, setCodes] = useState({
@@ -545,24 +660,27 @@ export default function StudentEnrollmentWizard({
   });
   const withCode = (code: string, number?: string) =>
     number?.trim() ? `${code} ${number.trim()}` : "";
-  const [guardian, setGuardian] = useState<Guardian>({
-    relationship: "father",
-    first_name: String(initialApplicant?.parent_name || "")
-      .trim()
-      .split(/\s+/)
-      .slice(0, -1)
-      .join(" "),
-    last_name:
-      String(initialApplicant?.parent_name || "")
-        .trim()
-        .split(/\s+/)
-        .slice(-1)[0] || "",
-    phone: String(initialApplicant?.parent_phone || "").replace(
+  const [family, setFamily] = useState({
+    father_name: String(initialApplicant?.parent_name || "").trim(),
+    mother_name: "",
+    has_other: false,
+    guardian_name: "",
+    guardian_relationship: "",
+    primary_phone: String(initialApplicant?.parent_phone || "").replace(
       /^\+?91\s*/,
       "",
     ),
-    alternate_phone: "",
+    secondary_phone: "",
   });
+  // The contact linked as the student's parent record: the other guardian when ticked.
+  const contactName = family.has_other
+    ? family.guardian_name.trim()
+    : family.father_name.trim() || family.mother_name.trim();
+  const contactRelationship: Guardian["relationship"] = family.has_other
+    ? "guardian"
+    : family.father_name.trim()
+      ? "father"
+      : "mother";
   const [referred, setReferred] = useState(false);
   const [referral, setReferral] = useState({
     name: "",
@@ -683,9 +801,7 @@ export default function StudentEnrollmentWizard({
     const s = student;
     return {
       student: {
-        first_name: s.first_name.trim(),
-        middle_name: s.middle_name.trim() || undefined,
-        last_name: s.last_name.trim(),
+        complete_name: s.complete_name.trim().replace(/\s+/g, " "),
         date_of_birth: s.date_of_birth,
         gender: s.gender as EnrollmentPayload["student"]["gender"],
         email: s.email.trim() || undefined,
@@ -699,32 +815,56 @@ export default function StudentEnrollmentWizard({
         country: s.country.trim() || "India",
         campus_code: s.campus_code || undefined,
       },
-      last_qualification:
-        qualification.level === "ssc"
-          ? {
-              level: "ssc",
-              institution: qualification.institution.trim(),
-              board: qualification.board,
-              grade: qualification.grade.trim() || undefined,
-              passed_year: num(qualification.passed_year) || undefined,
-            }
-          : {
-              level: "intermediate",
-              institution: qualification.institution.trim(),
-              group: qualification.group,
-              first_year_score:
-                qualification.first_year_score.trim() || undefined,
-              second_year_score:
-                qualification.second_year_score.trim() || undefined,
-              passed_year: num(qualification.passed_year) || undefined,
-            },
+      admission_number: admissionInput.trim(),
+      qualifications: qualifications.map((q) => ({
+        level: q.level,
+        institution: q.institution.trim(),
+        board: q.level === "ssc" ? q.board : undefined,
+        group: q.level === "ssc" ? undefined : q.group.trim() || undefined,
+        grade: q.level === "ssc" ? q.grade.trim() || undefined : undefined,
+        first_year_score:
+          q.level === "intermediate"
+            ? q.first_year_score.trim() || undefined
+            : undefined,
+        second_year_score:
+          q.level === "intermediate"
+            ? q.second_year_score.trim() || undefined
+            : undefined,
+        semester_scores: q.semesters
+          .filter((row) => row.score.trim())
+          .map((row) => ({
+            semester: row.semester.trim(),
+            score: row.score.trim(),
+          })),
+        total_percentage:
+          q.level === "ssc" ? undefined : q.total_percentage.trim() || undefined,
+        passed_year: num(q.passed_year) || undefined,
+      })),
+      family: {
+        father_name: family.father_name.trim() || undefined,
+        mother_name: family.mother_name.trim() || undefined,
+        guardian_name: family.has_other
+          ? family.guardian_name.trim()
+          : undefined,
+        guardian_relationship: family.has_other
+          ? family.guardian_relationship.trim()
+          : undefined,
+      },
+      identity: {
+        sachivalayam_code: identity.sachivalayam_code.trim() || undefined,
+        sachivalayam_name: identity.sachivalayam_name.trim() || undefined,
+        apar_id: identity.apar_id.trim() || undefined,
+      },
+      bank_accounts: {
+        student: bankPayload("student"),
+        mother: bankPayload("mother"),
+      },
       guardian: {
-        relationship: guardian.relationship,
-        first_name: guardian.first_name.trim(),
-        last_name: guardian.last_name.trim(),
-        phone: withCode(codes.phone, guardian.phone),
+        relationship: contactRelationship,
+        ...splitName(contactName),
+        phone: withCode(codes.phone, family.primary_phone),
         alternate_phone:
-          withCode(codes.alternate, guardian.alternate_phone) || undefined,
+          withCode(codes.alternate, family.secondary_phone) || undefined,
       },
       documents,
       referral: referred
@@ -799,7 +939,10 @@ export default function StudentEnrollmentWizard({
         ...(photo ? ([["student_photo", photo]] as [string, File][]) : []),
         ...Object.entries(files).filter(
           (e): e is [string, File] =>
-            !!e[1] && (e[0] === "aadhaar_copy" || documents[e[0]]),
+            !!e[1] &&
+            (e[0] === "aadhaar_copy" ||
+              e[0].startsWith("bank_passbook_") ||
+              documents[e[0]]),
         ),
       ];
       const issues: string[] = [];
@@ -834,8 +977,12 @@ export default function StudentEnrollmentWizard({
 
   // ---- review data shared by the review card, PDF and CSV ---------------------------------
   const admissionNumber = String(
-    result?.student.admission_number || quote?.admission_number || "—",
+    result?.student.admission_number || admissionInput.trim() || "—",
   );
+  const referenceNumber = String(
+    result?.profile.reference_number || quote?.admission_number || "—",
+  );
+  const studentName = student.complete_name.trim().replace(/\s+/g, " ");
   const registrationNumber = String(
     result?.profile.registration_number || quote?.registration_number || "—",
   );
@@ -853,6 +1000,7 @@ export default function StudentEnrollmentWizard({
       title: "Admission",
       fields: [
         ["Admission number", admissionNumber],
+        ["Reference number", referenceNumber],
         ["Registration number", registrationNumber],
         ["Batch", year?.name || "—"],
         [
@@ -873,7 +1021,7 @@ export default function StudentEnrollmentWizard({
     {
       title: "Student",
       fields: [
-        ["Name", fullName(student)],
+        ["Complete name as per SSC", studentName],
         ["Date of birth", formatDate(student.date_of_birth)],
         ["Gender", student.gender.replaceAll("_", " ")],
         ["Contact number", withCode(codes.student, student.phone)],
@@ -883,6 +1031,9 @@ export default function StudentEnrollmentWizard({
           student.aadhaar_number.replace(/(\d{4})(?=\d)/g, "$1 "),
         ],
         ["Blood group", student.blood_group || "—"],
+        ["Sachivalayam code", identity.sachivalayam_code || "—"],
+        ["Sachivalayam name", identity.sachivalayam_name || "—"],
+        ["DigiLocker / APAR ID", identity.apar_id || "—"],
         [
           "Address",
           [student.address, student.city, student.state, student.postal_code]
@@ -892,40 +1043,56 @@ export default function StudentEnrollmentWizard({
       ],
     },
     {
-      title: "Last qualification",
-      fields:
-        qualification.level === "ssc"
-          ? [
-              ["Qualification", "10th class"],
-              ["School", qualification.institution],
-              ["Board", qualification.board],
-              ["Grade / GPA", qualification.grade || "—"],
-              ["Year passed", qualification.passed_year || "—"],
-            ]
-          : [
-              ["Qualification", "Intermediate"],
-              ["College", qualification.institution],
-              ["Group", qualification.group],
-              ["1st year % / grade", qualification.first_year_score || "—"],
-              ["2nd year % / grade", qualification.second_year_score || "—"],
-              ["Year passed", qualification.passed_year || "—"],
-            ],
+      title: "Qualifications",
+      columns: ["Qualification", "School / college", "Year passed", "Score"],
+      rows: qualifications.map((q) => [
+        qualificationName(q),
+        q.institution,
+        q.passed_year || "—",
+        [
+          qualificationScore(q),
+          ...q.semesters
+            .filter((row) => row.score)
+            .map((row) => `${row.semester}: ${row.score}`),
+        ]
+          .filter(Boolean)
+          .join(" · ") || "—",
+      ]),
     },
     {
-      title: "Guardian details",
+      title: "Family details",
       fields: [
-        ["Name", `${guardian.first_name} ${guardian.last_name}`.trim()],
-        ["Relationship", guardian.relationship],
+        ["Father name as per SSC", family.father_name || "—"],
+        ["Mother name as per SSC", family.mother_name || "—"],
+        ...(family.has_other
+          ? ([
+              ["Guardian name as per SSC", family.guardian_name],
+              ["Guardian relation", family.guardian_relationship],
+            ] as [string, string][])
+          : []),
+        ["Primary contact number", withCode(codes.phone, family.primary_phone)],
         [
-          "Mobile number (primary contact)",
-          withCode(codes.phone, guardian.phone),
-        ],
-        [
-          "Secondary number",
-          withCode(codes.alternate, guardian.alternate_phone) || "—",
+          "Secondary contact number",
+          withCode(codes.alternate, family.secondary_phone) || "—",
         ],
       ],
     },
+    ...BANK_OWNERS.filter(([owner]) => bankStarted(owner)).map(
+      ([owner, label]) => ({
+        title: `${label} bank account`,
+        fields: [
+          ["Account holder", banks[owner].account_holder],
+          ["Account number", lastFour(banks[owner].account_number)],
+          ["Bank", banks[owner].bank_name],
+          ["IFSC", banks[owner].ifsc],
+          ["Branch", banks[owner].branch || "—"],
+          [
+            "Passbook first page",
+            files[`bank_passbook_${owner}`]?.name || "Not uploaded",
+          ],
+        ] as [string, string][],
+      }),
+    ),
     {
       title: "Documents",
       columns: ["Document", "Submitted", "File"],
@@ -1012,14 +1179,47 @@ export default function StudentEnrollmentWizard({
       ],
     },
   ];
+  // Numbers and course shown once, in the header; the sections below hold everything else.
+  const headline = (): [string, string][] => [
+    ["Admission no.", admissionNumber],
+    ["Reference no.", referenceNumber],
+    ["Registration no.", registrationNumber],
+    ["Batch", year?.name || "—"],
+    [
+      "Course",
+      program
+        ? `${program.name}${program.branch ? ` (${program.branch})` : ""}`
+        : "—",
+    ],
+    ["Date", formatDate(new Date().toISOString().slice(0, 10))],
+  ];
   async function pdf() {
-    const image = photo ? await dataUrl(photo) : undefined;
-    await professionalPdf(`admission-${admissionNumber}`, {
-      title: "Student admission — application overview",
-      context: { college, reference: admissionNumber },
-      sections: sections().map((s, i) =>
-        i === 1 && image ? { ...s, image } : s,
+    const { enrollmentPdf } = await import("@/lib/colleges/enrollment-pdf");
+    await enrollmentPdf(`admission-${admissionNumber}`, {
+      college: college.name,
+      title: "Student admission form",
+      photo: photo ? await dataUrl(photo) : undefined,
+      numbers: headline(),
+      sections: sections().map((s) =>
+        s.title === "Admission"
+          ? {
+              ...s,
+              title: "Course & facilities",
+              fields: s.fields!.filter(
+                ([k]) =>
+                  !/^(Admission number|Reference number|Registration number|Batch|Course \/ specialization)$/.test(
+                    k,
+                  ),
+              ),
+            }
+          : s,
       ),
+      signatures: [
+        "Student",
+        "Parent / guardian",
+        "Admission officer",
+        "Principal",
+      ],
     });
   }
   function exportCsv() {
@@ -1041,6 +1241,20 @@ export default function StudentEnrollmentWizard({
     );
   }
 
+  const reviewSections = sections().map((s) =>
+    s.title === "Admission"
+      ? {
+          ...s,
+          title: "Course & facilities",
+          fields: s.fields!.filter(
+            ([k]) =>
+              !/^(Admission number|Reference number|Registration number|Batch|Course \/ specialization)$/.test(
+                k,
+              ),
+          ),
+        }
+      : s,
+  );
   const review = (
     <div className="enw-review enw-print">
       <header className="enw-review-head">
@@ -1049,91 +1263,77 @@ export default function StudentEnrollmentWizard({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photoUrl} alt="Student" />
           ) : (
-            <UserRound size={44} />
+            <UserRound size={40} />
           )}
         </div>
-        <div>
-          <span className="enw-eyebrow">{college.name}</span>
-          <h2>{fullName(student) || "New student"}</h2>
-          <p>
-            {program
-              ? `${program.name}${program.branch ? ` · ${program.branch}` : ""}`
-              : "Course not chosen"}{" "}
-            · {year?.name}
-          </p>
-        </div>
-        <dl className="enw-numbers">
-          <div>
-            <dt>Admission no.</dt>
-            <dd>{admissionNumber}</dd>
-          </div>
-          <div>
-            <dt>Registration no.</dt>
-            <dd>{registrationNumber}</dd>
-          </div>
-        </dl>
-      </header>
-      <div className="enw-review-grid">
-        {sections()
-          .slice(1)
-          .map((s) => (
-            <section
-              key={s.title}
-              className={
-                s.rows ? "enw-review-card enw-wide" : "enw-review-card"
-              }
-            >
-              <h4>{s.title}</h4>
-              {s.fields && (
-                <dl>
-                  {s.fields.map(([k, v]) => (
-                    <div key={k}>
-                      <dt>{k}</dt>
-                      <dd>{v || "—"}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-              {s.rows && (
-                <table>
-                  <thead>
-                    <tr>
-                      {s.columns?.map((c) => (
-                        <th key={c}>{c}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {s.rows.map((r, i) => (
-                      <tr
-                        key={i}
-                        className={
-                          /^(Gross fee|Net payable)$/.test(r[0])
-                            ? "enw-total"
-                            : ""
-                        }
-                      >
-                        {r.map((c, j) => (
-                          <td key={j}>{c}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </section>
-          ))}
-        <section className="enw-review-card">
-          <h4>Admission</h4>
-          <dl>
-            {sections()[0].fields!.map(([k, v]) => (
+        <div className="enw-review-title">
+          <span className="enw-eyebrow">
+            {college.name} · Student admission form
+          </span>
+          <h2>{studentName || "New student"}</h2>
+          <dl className="enw-numbers">
+            {headline().map(([k, v]) => (
               <div key={k}>
                 <dt>{k}</dt>
                 <dd>{v}</dd>
               </div>
             ))}
           </dl>
-        </section>
+        </div>
+      </header>
+      <div className="enw-review-columns">
+        {reviewSections
+          .filter((s) => s.fields)
+          .map((s) => (
+            <section key={s.title} className="enw-review-card">
+              <h4>{s.title}</h4>
+              <dl>
+                {s.fields!.map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v || "—"}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+      </div>
+      {reviewSections
+        .filter((s) => s.rows)
+        .map((s) => (
+          <section key={s.title} className="enw-review-card enw-review-table">
+            <h4>{s.title}</h4>
+            <table>
+              <thead>
+                <tr>
+                  {s.columns?.map((c) => (
+                    <th key={c}>{c}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {s.rows!.map((r, i) => (
+                  <tr
+                    key={i}
+                    className={
+                      /^(Gross fee|Net payable)$/.test(r[0]) ? "enw-total" : ""
+                    }
+                  >
+                    {r.map((c, j) => (
+                      <td key={j}>{c}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))}
+      <div className="enw-signatures" aria-hidden="true">
+        {["Student", "Parent / guardian", "Admission officer", "Principal"].map(
+          (who) => (
+            <span key={who}>{who}</span>
+          ),
+        )}
       </div>
     </div>
   );
@@ -1197,9 +1397,10 @@ export default function StudentEnrollmentWizard({
             <div className="enw-success">
               <CheckCircle2 size={34} />
               <div>
-                <h3>{fullName(student)} is enrolled</h3>
+                <h3>{studentName} is enrolled</h3>
                 <p>
                   Admission number <strong>{admissionNumber}</strong> ·
+                  Reference number <strong>{referenceNumber}</strong> ·
                   Registration number <strong>{registrationNumber}</strong>
                   {result.profile.fee_summary.some(
                     (f) => f.status === "pending_approval",
@@ -1238,32 +1439,17 @@ export default function StudentEnrollmentWizard({
                 />
                 <Card title="Student details" icon={<UserRound size={17} />}>
                   <div className="enw-grid">
-                    <Field label="First name *">
+                    <Field label="Complete name as per SSC *" wide>
                       <input
                         required
-                        value={student.first_name}
-                        onChange={(e) =>
-                          setStudent({ ...student, first_name: e.target.value })
-                        }
-                      />
-                    </Field>
-                    <Field label="Middle name">
-                      <input
-                        value={student.middle_name}
+                        maxLength={300}
+                        autoComplete="off"
+                        value={student.complete_name}
                         onChange={(e) =>
                           setStudent({
                             ...student,
-                            middle_name: e.target.value,
+                            complete_name: e.target.value,
                           })
-                        }
-                      />
-                    </Field>
-                    <Field label="Last name / surname *">
-                      <input
-                        required
-                        value={student.last_name}
-                        onChange={(e) =>
-                          setStudent({ ...student, last_name: e.target.value })
                         }
                       />
                     </Field>
@@ -1423,147 +1609,403 @@ export default function StudentEnrollmentWizard({
                         onFile={(f) => setFiles({ ...files, aadhaar_copy: f })}
                       />
                     </Field>
+                    <Field label="DIGI LOCKER or APAR ID">
+                      <input
+                        maxLength={50}
+                        autoComplete="off"
+                        value={identity.apar_id}
+                        onChange={(e) =>
+                          setIdentity({ ...identity, apar_id: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="Sachivalayam code">
+                      <input
+                        maxLength={50}
+                        autoComplete="off"
+                        value={identity.sachivalayam_code}
+                        onChange={(e) =>
+                          setIdentity({
+                            ...identity,
+                            sachivalayam_code: e.target.value,
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="Sachivalayam name">
+                      <input
+                        maxLength={150}
+                        autoComplete="off"
+                        value={identity.sachivalayam_name}
+                        onChange={(e) =>
+                          setIdentity({
+                            ...identity,
+                            sachivalayam_name: e.target.value,
+                          })
+                        }
+                      />
+                    </Field>
                   </div>
                 </Card>
 
                 <Card
-                  title="Last qualification"
+                  title="Qualifications"
                   icon={<GraduationCap size={17} />}
-                >
-                  <div
-                    className="enw-segmented"
-                    role="radiogroup"
-                    aria-label="Last qualification"
-                  >
-                    {[
-                      ["ssc", "10th class"],
-                      ["intermediate", "Intermediate"],
-                    ].map(([value, label]) => (
-                      <button
-                        key={value}
-                        type="button"
-                        role="radio"
-                        aria-checked={qualification.level === value}
-                        className={qualification.level === value ? "is-on" : ""}
-                        onClick={() =>
-                          setQualification({
-                            ...qualification,
-                            level: value as "ssc" | "intermediate",
-                          })
-                        }
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="enw-grid">
-                    <Field
-                      label={
-                        qualification.level === "ssc"
-                          ? "School name *"
-                          : "College name *"
-                      }
-                      wide
+                  aside={
+                    <button
+                      type="button"
+                      disabled={qualifications.length >= 10}
+                      onClick={() => {
+                        qualificationId.current += 1;
+                        const used = qualifications.map((q) => q.level);
+                        const level = used.includes("ssc")
+                          ? used.includes("intermediate")
+                            ? "polytechnic"
+                            : "intermediate"
+                          : "ssc";
+                        setQualifications([
+                          ...qualifications,
+                          newQualification(qualificationId.current, level),
+                        ]);
+                      }}
                     >
-                      <input
-                        required
-                        value={qualification.institution}
-                        onChange={(e) =>
-                          setQualification({
-                            ...qualification,
-                            institution: e.target.value,
-                          })
-                        }
-                      />
-                    </Field>
-                    {qualification.level === "ssc" ? (
-                      <>
-                        <Field label="Board *">
-                          <Select
-                            value={qualification.board}
+                      <Plus size={14} /> Add qualification
+                    </button>
+                  }
+                >
+                  {qualifications.map((q, index) => (
+                    <div key={q.id} className="enw-qualification">
+                      <div className="enw-qualification-head">
+                        <div
+                          className="enw-segmented"
+                          role="radiogroup"
+                          aria-label={`Qualification ${index + 1} type`}
+                        >
+                          {QUALIFICATION_LEVELS.map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              role="radio"
+                              aria-checked={q.level === value}
+                              className={q.level === value ? "is-on" : ""}
+                              onClick={() =>
+                                updateQualification(q.id, {
+                                  level: value,
+                                  group:
+                                    value === "intermediate"
+                                      ? GROUPS.includes(q.group)
+                                        ? q.group
+                                        : "MPC"
+                                      : "",
+                                })
+                              }
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                        {qualifications.length > 1 && (
+                          <button
+                            type="button"
+                            aria-label={`Remove qualification ${index + 1}`}
+                            onClick={() =>
+                              setQualifications(
+                                qualifications.filter((x) => x.id !== q.id),
+                              )
+                            }
+                          >
+                            <Trash2 size={14} /> Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="enw-grid">
+                        <Field
+                          label={
+                            q.level === "ssc"
+                              ? "School name *"
+                              : "College name *"
+                          }
+                          wide
+                        >
+                          <input
+                            required
+                            value={q.institution}
                             onChange={(e) =>
-                              setQualification({
-                                ...qualification,
-                                board: e.target.value,
+                              updateQualification(q.id, {
+                                institution: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                        {q.level === "ssc" && (
+                          <>
+                            <Field label="Board *">
+                              <Select
+                                value={q.board}
+                                onChange={(e) =>
+                                  updateQualification(q.id, {
+                                    board: e.target.value,
+                                  })
+                                }
+                              >
+                                {BOARDS.map((b) => (
+                                  <option key={b}>{b}</option>
+                                ))}
+                              </Select>
+                            </Field>
+                            <Field label="Grade / GPA *">
+                              <input
+                                required
+                                value={q.grade}
+                                onChange={(e) =>
+                                  updateQualification(q.id, {
+                                    grade: e.target.value,
+                                  })
+                                }
+                              />
+                            </Field>
+                          </>
+                        )}
+                        {q.level === "intermediate" && (
+                          <>
+                            <Field label="Group *">
+                              <Select
+                                value={q.group}
+                                onChange={(e) =>
+                                  updateQualification(q.id, {
+                                    group: e.target.value,
+                                  })
+                                }
+                              >
+                                {GROUPS.map((g) => (
+                                  <option key={g}>{g}</option>
+                                ))}
+                              </Select>
+                            </Field>
+                            <Field label="1st year % / grade *">
+                              <input
+                                required
+                                value={q.first_year_score}
+                                onChange={(e) =>
+                                  updateQualification(q.id, {
+                                    first_year_score: e.target.value,
+                                  })
+                                }
+                              />
+                            </Field>
+                            <Field label="2nd year % / grade *">
+                              <input
+                                required
+                                value={q.second_year_score}
+                                onChange={(e) =>
+                                  updateQualification(q.id, {
+                                    second_year_score: e.target.value,
+                                  })
+                                }
+                              />
+                            </Field>
+                          </>
+                        )}
+                        {HAS_SEMESTERS.has(q.level) && (
+                          <Field
+                            label={COURSE_LABEL[q.level]}
+                            hint={COURSE_HINT[q.level]}
+                          >
+                            <input
+                              required={COURSE_LABEL[q.level].endsWith("*")}
+                              maxLength={30}
+                              value={q.group}
+                              onChange={(e) =>
+                                updateQualification(q.id, {
+                                  group: e.target.value,
+                                })
+                              }
+                            />
+                          </Field>
+                        )}
+                        {q.level !== "ssc" && (
+                          <Field label="Total percentage">
+                            <input
+                              maxLength={20}
+                              value={q.total_percentage}
+                              onChange={(e) =>
+                                updateQualification(q.id, {
+                                  total_percentage: e.target.value,
+                                })
+                              }
+                            />
+                          </Field>
+                        )}
+                        <Field label="Year passed">
+                          <input
+                            type="number"
+                            min={1990}
+                            max={2100}
+                            value={q.passed_year}
+                            onChange={(e) =>
+                              updateQualification(q.id, {
+                                passed_year: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                      </div>
+                      {HAS_SEMESTERS.has(q.level) && (
+                        <div className="enw-semesters">
+                          <div className="enw-grid enw-grid-3">
+                            {q.semesters.map((row, i) => (
+                              <Field key={i} label={`${row.semester} %`}>
+                                <span className="enw-semester-input">
+                                  <input
+                                    maxLength={20}
+                                    value={row.score}
+                                    onChange={(e) =>
+                                      updateQualification(q.id, {
+                                        semesters: q.semesters.map((x, j) =>
+                                          j === i
+                                            ? { ...x, score: e.target.value }
+                                            : x,
+                                        ),
+                                      })
+                                    }
+                                  />
+                                  <button
+                                    type="button"
+                                    aria-label={`Remove ${row.semester}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      updateQualification(q.id, {
+                                        semesters: q.semesters
+                                          .filter((_, j) => j !== i)
+                                          .map((x, j) => ({
+                                            ...x,
+                                            semester: `Semester ${j + 1}`,
+                                          })),
+                                      });
+                                    }}
+                                  >
+                                    <X size={13} />
+                                  </button>
+                                </span>
+                              </Field>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            disabled={q.semesters.length >= 16}
+                            onClick={() =>
+                              updateQualification(q.id, {
+                                semesters: [
+                                  ...q.semesters,
+                                  {
+                                    semester: `Semester ${q.semesters.length + 1}`,
+                                    score: "",
+                                  },
+                                ],
                               })
                             }
                           >
-                            {BOARDS.map((b) => (
-                              <option key={b}>{b}</option>
-                            ))}
-                          </Select>
-                        </Field>
-                        <Field label="Grade / GPA *">
-                          <input
-                            required
-                            value={qualification.grade}
-                            onChange={(e) =>
-                              setQualification({
-                                ...qualification,
-                                grade: e.target.value,
-                              })
-                            }
-                          />
-                        </Field>
-                      </>
-                    ) : (
-                      <>
-                        <Field label="Group *">
-                          <Select
-                            value={qualification.group}
-                            onChange={(e) =>
-                              setQualification({
-                                ...qualification,
-                                group: e.target.value,
-                              })
-                            }
+                            <Plus size={14} /> Add semester
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </Card>
+
+                <Card title="Bank account details" icon={<IdCard size={17} />}>
+                  {BANK_OWNERS.map(([owner, label]) => {
+                    const bank = banks[owner];
+                    const required = bankStarted(owner);
+                    const change = (patch: Partial<BankForm>) =>
+                      setBanks({ ...banks, [owner]: { ...bank, ...patch } });
+                    return (
+                      <div key={owner} className="enw-bank">
+                        <h4>{label} bank account</h4>
+                        <div className="enw-grid">
+                          <Field label={`Account holder name${required ? " *" : ""}`}>
+                            <input
+                              required={required}
+                              minLength={2}
+                              maxLength={150}
+                              autoComplete="off"
+                              value={bank.account_holder}
+                              onChange={(e) =>
+                                change({ account_holder: e.target.value })
+                              }
+                            />
+                          </Field>
+                          <Field label={`Account number${required ? " *" : ""}`}>
+                            <input
+                              required={required}
+                              inputMode="numeric"
+                              pattern="[0-9]{6,34}"
+                              title="6 to 34 digits"
+                              maxLength={34}
+                              autoComplete="off"
+                              value={bank.account_number}
+                              onChange={(e) =>
+                                change({
+                                  account_number: e.target.value.replace(/\D/g, ""),
+                                })
+                              }
+                            />
+                          </Field>
+                          <Field label={`Bank name${required ? " *" : ""}`}>
+                            <input
+                              required={required}
+                              minLength={2}
+                              maxLength={150}
+                              autoComplete="off"
+                              value={bank.bank_name}
+                              onChange={(e) =>
+                                change({ bank_name: e.target.value })
+                              }
+                            />
+                          </Field>
+                          <Field label={`IFSC code${required ? " *" : ""}`}>
+                            <input
+                              required={required}
+                              pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                              title="11 characters, for example SBIN0001234"
+                              maxLength={11}
+                              autoComplete="off"
+                              spellCheck={false}
+                              placeholder="e.g. SBIN0001234"
+                              value={bank.ifsc}
+                              onChange={(e) =>
+                                change({ ifsc: e.target.value.toUpperCase() })
+                              }
+                            />
+                          </Field>
+                          <Field label="Branch">
+                            <input
+                              maxLength={150}
+                              autoComplete="off"
+                              value={bank.branch}
+                              onChange={(e) => change({ branch: e.target.value })}
+                            />
+                          </Field>
+                          <Field
+                            label="Bank passbook first page"
+                            hint="JPG or PNG image up to 650 KB."
                           >
-                            {GROUPS.map((g) => (
-                              <option key={g}>{g}</option>
-                            ))}
-                          </Select>
-                        </Field>
-                        <Field label="1st year % / grade *">
-                          <input
-                            required
-                            value={qualification.first_year_score}
-                            onChange={(e) =>
-                              setQualification({
-                                ...qualification,
-                                first_year_score: e.target.value,
-                              })
-                            }
-                          />
-                        </Field>
-                        <Field label="2nd year % / grade *">
-                          <input
-                            required
-                            value={qualification.second_year_score}
-                            onChange={(e) =>
-                              setQualification({
-                                ...qualification,
-                                second_year_score: e.target.value,
-                              })
-                            }
-                          />
-                        </Field>
-                      </>
-                    )}
-                    <Field label="Year passed">
-                      <input
-                        type="number"
-                        min={1990}
-                        max={2100}
-                        value={qualification.passed_year}
-                        onChange={(e) =>
-                          setQualification({
-                            ...qualification,
-                            passed_year: e.target.value,
-                          })
-                        }
-                      />
-                    </Field>
-                  </div>
+                            <FilePick
+                              label="Upload image"
+                              accept=".png,.jpg,.jpeg"
+                              file={files[`bank_passbook_${owner}`]}
+                              onChange={(f) =>
+                                setFiles({
+                                  ...files,
+                                  [`bank_passbook_${owner}`]: f,
+                                })
+                              }
+                            />
+                          </Field>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </Card>
 
                 <Card title="Documents submitted" icon={<Upload size={17} />}>
@@ -1604,75 +2046,99 @@ export default function StudentEnrollmentWizard({
                   </div>
                 </Card>
 
-                <Card title="Guardian details" icon={<UserRound size={17} />}>
-                  <div className="enw-grid enw-grid-3">
-                    <Field label="Relationship with the student *">
-                      <Select
-                        required
-                        value={guardian.relationship}
-                        onChange={(e) =>
-                          setGuardian({
-                            ...guardian,
-                            relationship: e.target
-                              .value as Guardian["relationship"],
-                          })
-                        }
-                      >
-                        <option value="father">Father</option>
-                        <option value="mother">Mother</option>
-                        <option value="guardian">Guardian</option>
-                        <option value="other">Other</option>
-                      </Select>
-                    </Field>
-                    <Field label="Guardian first name *">
+                <Card title="Family details" icon={<UserRound size={17} />}>
+                  <div className="enw-grid">
+                    <Field
+                      label={`Father name as per SSC${family.has_other ? "" : " *"}`}
+                    >
                       <input
-                        required
-                        value={guardian.first_name}
+                        required={!family.has_other}
+                        maxLength={200}
+                        autoComplete="off"
+                        value={family.father_name}
                         onChange={(e) =>
-                          setGuardian({
-                            ...guardian,
-                            first_name: e.target.value,
-                          })
-                        }
-                      />
-                    </Field>
-                    <Field label="Guardian last name *">
-                      <input
-                        required
-                        value={guardian.last_name}
-                        onChange={(e) =>
-                          setGuardian({
-                            ...guardian,
-                            last_name: e.target.value,
-                          })
+                          setFamily({ ...family, father_name: e.target.value })
                         }
                       />
                     </Field>
                     <Field
-                      label="Guardian mobile number *"
-                      hint="Primary contact for the student"
+                      label={`Mother name as per SSC${family.has_other ? "" : " *"}`}
                     >
-                      <PhoneInput
-                        label="Guardian mobile number"
-                        required
-                        code={codes.phone}
-                        onCode={(phone) => setCodes({ ...codes, phone })}
-                        value={guardian.phone}
-                        onChange={(phone) =>
-                          setGuardian({ ...guardian, phone })
+                      <input
+                        required={!family.has_other}
+                        maxLength={200}
+                        autoComplete="off"
+                        value={family.mother_name}
+                        onChange={(e) =>
+                          setFamily({ ...family, mother_name: e.target.value })
                         }
                       />
                     </Field>
-                    <Field label="Secondary number">
+                    <label className="enw-switch enw-wide">
+                      <input
+                        type="checkbox"
+                        checked={family.has_other}
+                        onChange={(e) =>
+                          setFamily({ ...family, has_other: e.target.checked })
+                        }
+                      />{" "}
+                      Other (guardian)
+                    </label>
+                    {family.has_other && (
+                      <>
+                        <Field label="Guardian name as per SSC *">
+                          <input
+                            required
+                            maxLength={200}
+                            autoComplete="off"
+                            value={family.guardian_name}
+                            onChange={(e) =>
+                              setFamily({
+                                ...family,
+                                guardian_name: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                        <Field label="Guardian relation *">
+                          <input
+                            required
+                            maxLength={100}
+                            autoComplete="off"
+                            placeholder="e.g. Uncle, grandmother…"
+                            value={family.guardian_relationship}
+                            onChange={(e) =>
+                              setFamily({
+                                ...family,
+                                guardian_relationship: e.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                      </>
+                    )}
+                    <Field label="Primary contact number *">
                       <PhoneInput
-                        label="Secondary number"
+                        label="Primary contact number"
+                        required
+                        code={codes.phone}
+                        onCode={(phone) => setCodes({ ...codes, phone })}
+                        value={family.primary_phone}
+                        onChange={(primary_phone) =>
+                          setFamily({ ...family, primary_phone })
+                        }
+                      />
+                    </Field>
+                    <Field label="Secondary contact number">
+                      <PhoneInput
+                        label="Secondary contact number"
                         code={codes.alternate}
                         onCode={(alternate) =>
                           setCodes({ ...codes, alternate })
                         }
-                        value={guardian.alternate_phone || ""}
-                        onChange={(alternate_phone) =>
-                          setGuardian({ ...guardian, alternate_phone })
+                        value={family.secondary_phone}
+                        onChange={(secondary_phone) =>
+                          setFamily({ ...family, secondary_phone })
                         }
                       />
                     </Field>
@@ -1905,8 +2371,21 @@ export default function StudentEnrollmentWizard({
                 onSubmit={(e) => e.preventDefault()}
               >
                 <div className="enw-numbers-bar">
+                  <Field label="Admission number *">
+                    <input
+                      required
+                      maxLength={40}
+                      pattern="[A-Za-z0-9][A-Za-z0-9/_\-]*"
+                      title="Letters, numbers, / _ and - only"
+                      autoComplete="off"
+                      spellCheck={false}
+                      placeholder="Enter admission number"
+                      value={admissionInput}
+                      onChange={(e) => setAdmissionInput(e.target.value)}
+                    />
+                  </Field>
                   <div>
-                    <span>Admission number</span>
+                    <span>Reference number</span>
                     <strong>
                       {quote?.admission_number || "Choose a course and year"}
                     </strong>
@@ -1920,7 +2399,7 @@ export default function StudentEnrollmentWizard({
                     </strong>
                   </div>
                   <small>
-                    Admission number: year + INT/DEG + branch code + sequence
+                    Reference number: year + INT/DEG + branch code + sequence
                     (e.g. 26INTMPC0001). Assigned when enrollment is confirmed.
                   </small>
                 </div>
@@ -1933,10 +2412,12 @@ export default function StudentEnrollmentWizard({
                     role="radiogroup"
                     aria-label="Joining"
                   >
-                    {[
-                      ["intermediate", "Intermediate"],
-                      ["degree", "Degree"],
-                    ].map(([value, label]) => (
+                    {COURSE_LEVELS.filter(
+                      (l) =>
+                        l.key === "intermediate" ||
+                        l.key === "degree" ||
+                        (options?.courses[l.key]?.length || 0) > 0,
+                    ).map(({ key: value, label }) => (
                       <button
                         key={value}
                         type="button"
@@ -2253,7 +2734,7 @@ export default function StudentEnrollmentWizard({
                     <dl>
                       <div>
                         <dt>Student</dt>
-                        <dd>{fullName(student) || "—"}</dd>
+                        <dd>{studentName || "—"}</dd>
                       </div>
                       <div>
                         <dt>Contact</dt>
@@ -2262,16 +2743,21 @@ export default function StudentEnrollmentWizard({
                       <div>
                         <dt>Last qualification</dt>
                         <dd>
-                          {qualification.level === "ssc"
-                            ? `10th · ${qualification.board} · ${qualification.grade}`
-                            : `Intermediate ${qualification.group}`}
+                          {latestQualification
+                            ? [
+                                qualificationName(latestQualification),
+                                qualificationScore(latestQualification),
+                              ]
+                                .filter(Boolean)
+                                .join(" · ")
+                            : "—"}
                         </dd>
                       </div>
                       <div>
                         <dt>Guardian (primary contact)</dt>
                         <dd>
-                          {guardian.first_name
-                            ? `${guardian.first_name} ${guardian.last_name} (${guardian.relationship}) · ${withCode(codes.phone, guardian.phone)}`
+                          {contactName
+                            ? `${contactName} (${contactRelationship})`
                             : "—"}
                         </dd>
                       </div>
@@ -2289,7 +2775,7 @@ export default function StudentEnrollmentWizard({
                 <div className="enw-confirm-bar">
                   <p>
                     Check every detail with the student and parent. Confirming
-                    reserves the admission and registration numbers and raises
+                    reserves the reference and registration numbers and raises
                     {fullCourseFees
                       ? "the full-course fee, payable by semester."
                       : "the first-year fee."}
