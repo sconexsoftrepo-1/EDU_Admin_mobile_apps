@@ -2748,7 +2748,7 @@ END $$;
 
 -- 1. Courses are Intermediate or Degree programmes with a branch (MPC, BPC, Computers, ...).
 ALTER TABLE programs
-  ADD COLUMN course_level TEXT CHECK (course_level IN ('intermediate','degree')),
+  ADD COLUMN course_level TEXT CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped')),
   ADD COLUMN branch TEXT;
 CREATE INDEX ix_programs_course_level ON programs(course_level);
 
@@ -2770,7 +2770,7 @@ CREATE TABLE student_admission_profiles (
   academic_year_code VARCHAR(100) NOT NULL REFERENCES academic_years(code) ON UPDATE CASCADE ON DELETE RESTRICT,
   batch_code VARCHAR(100) REFERENCES batches(code) ON UPDATE CASCADE ON DELETE RESTRICT,
   section_code VARCHAR(100) REFERENCES sections(code) ON UPDATE CASCADE ON DELETE RESTRICT,
-  course_level TEXT NOT NULL CHECK (course_level IN ('intermediate','degree')),
+  course_level TEXT NOT NULL CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped')),
   registration_number VARCHAR(100) NOT NULL UNIQUE,
   last_qualification JSONB NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(last_qualification) = 'object'),
   referral JSONB CHECK (referral IS NULL OR jsonb_typeof(referral) = 'object'),
@@ -3015,3 +3015,28 @@ ON CONFLICT (code) DO NOTHING;
 -- END EDUNEXA SEED DATA
 
 COMMIT;
+
+-- Edits waiting for the Super Admin. Live data changes only when a request is accepted.
+CREATE TABLE edit_requests (
+  id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  status VARCHAR(20) NOT NULL,
+  method VARCHAR(10) NOT NULL,
+  path VARCHAR(500) NOT NULL,
+  query_string VARCHAR(1000),
+  body TEXT,
+  target_table VARCHAR(100),
+  target_code VARCHAR(200),
+  target_title VARCHAR(200),
+  target_label VARCHAR(300),
+  changes TEXT,
+  before_record TEXT,
+  requester_code VARCHAR(100) NOT NULL,
+  requester_name VARCHAR(200),
+  requester_role VARCHAR(300),
+  requested_at VARCHAR(40) NOT NULL,
+  decided_by VARCHAR(100),
+  decided_at VARCHAR(40),
+  decision_note VARCHAR(500),
+  last_error VARCHAR(1000)
+);

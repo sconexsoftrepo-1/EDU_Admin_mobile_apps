@@ -268,6 +268,19 @@ def test_certificate_authorization_signature_and_download_audit(
         },
     )
     assert r.status_code == 201, r.text
+    # Issuance intentionally requires S3; exercise that guard and then use an in-memory
+    # S3 adapter rather than weakening the production rule or needing cloud credentials.
+    denied = client.post(
+        "/api/v1/documents/certificates/issue", headers=headers,
+        json={"request_code": r.json()["record"]["code"]},
+    )
+    assert denied.status_code == 503
+    from tests.test_certificate_workspace_regressions import MemoryS3
+    class CertificateFiles(MemoryS3):
+        def get(self, key):
+            return self.files.get(key)
+    seeded.state.settings.file_storage = "s3"
+    seeded.state.files = CertificateFiles()
     issued = client.post(
         "/api/v1/documents/certificates/issue",
         headers=headers,
@@ -292,9 +305,7 @@ def test_certificate_authorization_signature_and_download_audit(
         len(seeded.state.store.snapshot()["records"]["certificate_download_events"])
         == 1
     )
-    (seeded.state.settings.data_dir / "files" / cert["storage_key"]).write_bytes(
-        b"tampered"
-    )
+    seeded.state.files.files[cert["storage_key"]] = b"tampered"
     assert (
         client.get("/api/v1/documents/certificates/verify/" + token).json()["valid"]
         is False

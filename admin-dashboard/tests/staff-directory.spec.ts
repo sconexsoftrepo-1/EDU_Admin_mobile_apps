@@ -25,7 +25,7 @@ test("compact detail tabs fit a small mobile drawer and support keyboard selecti
   await expect(files).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(files).toHaveAttribute("aria-pressed", "true");
-  await expect(files).toHaveCSS("border-bottom-color", "rgb(164, 106, 39)");
+  await expect(files).toHaveCSS("border-bottom-color", "rgb(74, 46, 18)");
   expect((await tabs.boundingBox())!.width).toBeLessThan(285);
   expect((await files.boundingBox())!.width).toBeLessThan(160);
   expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
@@ -36,8 +36,7 @@ test("compact detail tabs fit a small mobile drawer and support keyboard selecti
     path: test.info().outputPath("compact-mobile-tabs.png"),
   });
 });
-const root =
-  "/portal/master-data-entry/teaching-staff";
+const root = "/portal/master-data-entry/teaching-staff";
 test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend.");
 const code = "EMP-PRA-005";
 const employee = {

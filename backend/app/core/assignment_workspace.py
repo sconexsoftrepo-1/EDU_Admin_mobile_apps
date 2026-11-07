@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
+from app.core.admission_numbers import COURSE_LEVELS
 from fastapi.responses import Response
 from pydantic import Field, model_validator
 
@@ -196,7 +197,7 @@ def present(data, user, record, student_code=None, values=None):
 
 
 class AssignmentInput(StrictModel):
-    course_level: Literal["intermediate", "degree"]
+    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped"]
     program_code: str = Field(min_length=1, max_length=100)
     academic_year_code: str = Field(min_length=1, max_length=100)
     section_code: str | None = None
@@ -234,7 +235,7 @@ def options(request: Request, program_code: str | None = None, academic_year_cod
         years = [y for y in years if any(b["code"] in batches_owned and b["program_code"] == y["program_code"] and
                  (b["code"] == y.get("batch_code") or b.get("academic_year_code") == y["code"] or
                   str(b["entry_year"]) == str(y["start_date"])[:4] and str(b["graduation_year"]) == str(y["end_date"])[:4]) for b in rows(data, "batches"))]
-    programs = [p for p in rows(data, "programs") if p.get("course_level") in {"intermediate", "degree"}
+    programs = [p for p in rows(data, "programs") if p.get("course_level") in COURSE_LEVELS
                 and (not teaching(user) or p["code"] in {y["program_code"] for y in years})]
     employees = {e["code"]: e for e in rows(data, "employees")}
     teachers = [{"code": t["code"], "name": name(employees.get(t["employee_code"], {}))} for t in rows(data, "teachers")

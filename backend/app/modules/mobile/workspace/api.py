@@ -24,6 +24,9 @@ SCREENS = {
         ("students", "Students", "students"),
         ("admissions", "Admissions", "admission_applications"),
         ("collections", "Collections and receipts", "payments"),
+        ("cash", "Cash and clerk deposits", "cash"),
+        ("cash-analytics", "Collection analytics", "fee_analytics"),
+        ("change-requests", "Change requests", "edit_requests"),
         ("expenses", "Expenditures", "expenses"),
         ("employees", "Employees", "employees"),
         ("assessments", "Assessments and marks", "exams"),
@@ -97,6 +100,19 @@ SCREENS = {
 }
 
 
+# Cash clerks sign in to the staff app; they see the cash they must deposit, not teaching screens.
+CASH_CLERK_SCREENS = [
+    ("profile", "My profile", "profile"),
+    ("cash", "Cash deposits", "cash"),
+    ("leave", "Leave requests", "leave_requests"),
+    ("payslips", "Salary and payslips", "payslips"),
+    ("tax-documents", "Form 16 and tax documents", "employee_tax_documents"),
+    ("calendar", "Calendar and events", "calendar_events"),
+    ("announcements", "Announcements", "announcements"),
+    ("notifications", "Notifications", "notifications"),
+]
+
+
 # Lab in-charges sign in to the staff app; they see their labs instead of teaching screens.
 LAB_INCHARGE_SCREENS = [
     ("profile", "My profile", "profile"),
@@ -146,6 +162,14 @@ def admin_can_view(data, user, resource):
     may view fee charges or payments sees them as well as holders of the reports permission."""
     if resource == "audit":
         return has_permission(data, user, "audit", "view")
+    if resource == "cash":
+        from app.core.cash_custody import can_manage
+        return can_manage(data, user)
+    if resource == "edit_requests":  # only the Super Admin decides change requests
+        from app.core.edit_approvals import is_super_admin
+        return is_super_admin(data, user)
+    if resource == "fee_analytics":
+        return has_permission(data, user, "payments", "view")
     if resource in {"summary", "reports"}:
         return any(has_permission(data, user, table, "view")
                    for table in ("reports", "student_fee_charges", "payments"))
@@ -153,8 +177,11 @@ def admin_can_view(data, user, resource):
 
 
 def client_screens(data, user):
+    from app.core.cash_custody import is_clerk
     from app.core.lab_workspace import is_lab_incharge
     client = effective_client(user)
+    if client == "teacher-mobile" and is_clerk(data, user):
+        return CASH_CLERK_SCREENS
     if client == "teacher-mobile" and is_lab_incharge(data, user):
         return LAB_INCHARGE_SCREENS
     return SCREENS.get(client, [])
@@ -591,6 +618,26 @@ def screen_data(
     }
     if screen not in definitions:
         raise HTTPException(404, "Screen not available")
+    if definitions[screen][1] in {"fee_analytics", "edit_requests"}:
+        # Drawn by the app from /finance/fee-payments/analytics and /edit-requests.
+        return {"screen": screen, "title": definitions[screen][0], "items": [], "total": 0, "students": [],
+                "actions": [], "lookups": {}, "summary": None}
+    if definitions[screen][1] == "cash" and effective_client(user) == "admin-mobile":
+        from app.core.cash_custody import overview as cash_overview
+        result = cash_overview(request, user)
+        review = sum(1 for t in result["transfers"] for d in t["deposits"] if d["status"] == "awaiting_review")
+        return {"screen": screen, "title": definitions[screen][0], "items": [], "total": 0, "students": [],
+                "actions": [], "lookups": {}, "summary": {"with_admin": result["with_admin"], "with_clerks": result["with_clerks"],
+                                                          "to_review": review}}
+    if definitions[screen][1] == "cash":
+        # The staff app draws this screen itself from /finance/cash/overview; this is its summary.
+        from app.core.cash_custody import overview as cash_overview
+        result = cash_overview(request, user)
+        mine = [t for t in result["transfers"] if t["clerk_account"] == user["code"]]
+        return {"screen": screen, "title": definitions[screen][0], "items": mine, "total": len(mine), "students": [],
+                "actions": [], "lookups": {}, "summary": {"in_hand": result["my_in_hand"],
+                "to_collect": sum(1 for t in mine if t["status"] == "assigned"),
+                "to_upload": sum(1 for t in mine for d in t["deposits"] if d["status"] in {"awaiting_proof", "rejected"})}}
     if definitions[screen][1] in {"lab_sessions", "lab_timetable"}:
         from app.core.academic_progress import local_now
         from app.core.lab_workspace import day_sessions, employee_labs, view, weekly_sessions

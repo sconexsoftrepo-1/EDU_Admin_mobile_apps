@@ -1,5 +1,6 @@
 "use client";
 import IconAction from "./IconAction";
+import { COURSE_LEVELS } from "@/lib/colleges/course-levels";
 import SearchField, { searchValues } from "./SearchField";
 /** Compact, API-backed course catalog. Filtering state is shared by cards and table views. */
 import { useEffect, useRef, useState } from "react";
@@ -139,7 +140,7 @@ export default function CourseCards({
   onEdit: (row: Row) => void;
   onDelete: (row: Row) => Promise<void>;
 }) {
-  const [level, setLevel] = useState<"intermediate" | "degree">("intermediate");
+  const [level, setLevel] = useState<string>("intermediate");
   const [groupBy, setGroupBy] = useState<GroupBy>("years");
   const [active, setActive] = useState("");
   const [program, setProgram] = useState("");
@@ -172,9 +173,13 @@ export default function CourseCards({
       document.removeEventListener("keydown", escape);
     };
   }, [menu]);
-  const intermediate = rows.filter(isIntermediate);
-  const degrees = rows.filter((r) => !isIntermediate(r));
-  const base = level === "intermediate" ? intermediate : degrees;
+  const levelOf = (r: Row) =>
+    COURSE_LEVELS.some((l) => l.key === r.course_level)
+      ? String(r.course_level)
+      : isIntermediate(r)
+        ? "intermediate"
+        : "degree";
+  const base = rows.filter((r) => levelOf(r) === level);
   const families = [...new Set(base.map(family))].sort();
   const searched = base.filter(
     (r) =>
@@ -262,12 +267,9 @@ export default function CourseCards({
               role="group"
               aria-label={mobile ? "Mobile course level" : "Course level"}
             >
-              {(
-                [
-                  ["intermediate", "Intermediate", intermediate.length],
-                  ["degree", "Degree", degrees.length],
-                ] as const
-              ).map(([key, label, count]) => (
+              {COURSE_LEVELS.map((l) => [l.key, l.label, rows.filter((r) => levelOf(r) === l.key).length] as const)
+                .filter(([key, , count]) => count > 0 || key === "intermediate" || key === "degree")
+                .map(([key, label, count]) => (
                 <button
                   type="button"
                   key={key}

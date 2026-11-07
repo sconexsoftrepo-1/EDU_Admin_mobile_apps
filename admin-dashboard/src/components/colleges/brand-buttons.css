@@ -9,9 +9,10 @@
 :is(.edu-primary, .enw-primary, .erp-primary):is(:hover, :focus-visible, :active):not(
     :disabled
   ) {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%) !important;
-  color: #fff !important;
-  filter: brightness(0.93);
+  background: #fff !important;
+  color: #251e18 !important;
+  box-shadow: inset 0 0 0 1px #a46a27;
+  filter: none;
 }
 :is(.edu-primary, .enw-primary, .erp-primary):focus-visible {
   outline: 2px solid #a46a27 !important;

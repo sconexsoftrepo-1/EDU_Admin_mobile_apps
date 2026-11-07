@@ -1,3 +1,4 @@
+import moduleHubs from "@/lib/colleges/module-hubs.json";
 import screenCatalog from "../../services/api/modules/workspace/screens.json";
 
 export type College = {
@@ -111,6 +112,9 @@ export const operationLabels: Record<string, string> = {
 export const modules = [
   ...Object.keys(operationLabels),
   "dashboard",
+  "change-requests",
+  "manual-payments",
+  "late-fees",
   "students",
   "admissions",
   "fees",
@@ -327,7 +331,7 @@ export function validCollegePath(_c: College, parts: string[]) {
   if (parts.length === 3)
     return (
       safeArea(parts[1]) &&
-      screenCatalog.some((screen) => screen.key === parts[2])
+      (screenCatalog.some((screen) => screen.key === parts[2]) || moduleHubs.some((hub) => `hub-${hub.key}` === parts[2]))
     );
   return (
     parts.length === 4 &&

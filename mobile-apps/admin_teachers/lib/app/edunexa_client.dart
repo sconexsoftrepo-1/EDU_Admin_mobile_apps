@@ -1,6 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:file_selector/file_selector.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../services/push_notifications.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../screens/chat/chat_screens.dart';
 
@@ -25,6 +27,10 @@ part '../screens/assessments/assessment_workspace.dart';
 part '../screens/academics/academic_progress.dart';
 part '../components/workspace/record_helpers.dart';
 part '../screens/certificates/certificate_workspace.dart';
+part '../screens/cash/cash_deposit_workspace.dart';
+part '../screens/cash/admin_cash_workspace.dart';
+part '../screens/cash/collection_analytics.dart';
+part '../screens/approvals/change_requests_workspace.dart';
 part '../components/workspace/widgets.dart';
 part '../components/workspace/forms.dart';
 part '../components/workspace/presentations.dart';

@@ -6,6 +6,7 @@ from typing import Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from app.core.admission_numbers import COURSE_LEVELS
 from fastapi.responses import Response
 from pydantic import Field
 
@@ -126,7 +127,7 @@ def options(request: Request, user=Depends(current_user)):
     return {"departments": [{"code": r["code"], "name": r["name"]} for r in departments],
             "courses": [{"code": r["code"], "name": r["name"], "department_code": r.get("department_code"),
                          "course_level": r.get("course_level"), "specialization": r.get("branch") or "General"}
-                        for r in rows(data, "programs") if r.get("course_level") in {"intermediate", "degree"}],
+                        for r in rows(data, "programs") if r.get("course_level") in COURSE_LEVELS],
             "event_types": ["holiday", "academic", "cultural", "sports", "meeting"], "can_create": True}
 
 
@@ -170,7 +171,7 @@ def create(body: EventInput, request: Request, background: BackgroundTasks, user
             raise HTTPException(422, "Select a valid department")
         if body.audience_type == "program" and body.audience_code not in programs:
             raise HTTPException(422, "Select a valid course specialization")
-        if body.audience_type == "program" and programs[body.audience_code].get("course_level") not in {"intermediate", "degree"}:
+        if body.audience_type == "program" and programs[body.audience_code].get("course_level") not in {*COURSE_LEVELS, "degree"}:
             raise HTTPException(422, "Select an intermediate or degree course")
         image = None
         if body.image_code:

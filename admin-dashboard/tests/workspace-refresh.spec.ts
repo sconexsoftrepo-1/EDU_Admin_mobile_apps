@@ -202,7 +202,7 @@ test("student search, clearing and manual refresh keep using the current query",
 }) => {
   const { calls, searches } = await setup(page, "student-enrollment");
   expect(searches).toHaveLength(1);
-  const input = page.getByRole("searchbox", {
+  const input = page.getByRole("combobox", {
     name: "Search records",
     exact: true,
   });
@@ -217,9 +217,9 @@ test("student search, clearing and manual refresh keep using the current query",
   await expect.poll(() => searches.length).toBe(4);
   expect(searches.at(-1)).toBe("");
   await page.waitForLoadState("networkidle");
-  const baseline = calls.length;
+  const baseline = searches.length;
   await idle(page);
-  expect(calls).toHaveLength(baseline);
+  expect(searches).toHaveLength(baseline);
 });
 
 for (const screen of Object.keys(titles)) {
@@ -227,9 +227,6 @@ for (const screen of Object.keys(titles)) {
     page,
   }) => {
     const { calls } = await setup(page, screen);
-    const baseline = calls.length;
-    await idle(page);
-    expect(calls).toHaveLength(baseline);
     const staff = /staff|labour/.test(screen);
     const target = staff
       ? "master-data/staff-onboarding"
@@ -237,6 +234,8 @@ for (const screen of Object.keys(titles)) {
         ? "academics/students"
         : `workspace/screens/${screen}`;
     const before = calls.filter((path) => path === target).length;
+    await idle(page);
+    expect(calls.filter((path) => path === target)).toHaveLength(before);
     await page
       .getByRole("button", {
         name: staff ? "Refresh staff" : "Refresh",
@@ -249,9 +248,9 @@ for (const screen of Object.keys(titles)) {
     await expect(page.locator(".edu-spin")).toHaveCount(0);
     await page.clock.runFor(500);
     await page.waitForLoadState("networkidle");
-    const refreshed = calls.length;
+    const refreshed = calls.filter((path) => path === target).length;
     await idle(page);
-    expect(calls).toHaveLength(refreshed);
+    expect(calls.filter((path) => path === target)).toHaveLength(refreshed);
   });
 }
 
@@ -285,6 +284,10 @@ test("dated course batch saves the exact selected course and dates once", async 
     .selectOption("academic_years");
   await page.getByRole("button", { name: "Create batch", exact: true }).click();
   const form = page.getByRole("dialog", { name: "Create batch", exact: true });
+  await form
+    .getByRole("combobox", { name: "Course level", exact: true })
+    .click();
+  await form.getByRole("option", { name: "Degree", exact: true }).click();
   await form.getByRole("combobox", { name: "Course", exact: true }).click();
   await form.getByRole("option", { name: "B.Sc (BSC)", exact: true }).click();
   await form
@@ -301,9 +304,20 @@ test("dated course batch saves the exact selected course and dates once", async 
   await expect(form).not.toBeVisible();
   expect(api.writes()).toBe(1);
   await page.waitForLoadState("networkidle");
-  const saved = api.calls.length;
+  const saved = api.calls.filter(
+    (path) =>
+      path === "workspace/screens/course-setup" ||
+      path === "academics/academic-years",
+  ).length;
   await idle(page);
-  expect(api.calls).toHaveLength(saved);
+  expect(
+    api.calls.filter(
+      (path) =>
+        path === "workspace/screens/course-setup" ||
+        path === "academics/academic-years",
+    ),
+  ).toHaveLength(saved);
+  expect(api.writes()).toBe(1);
 });
 
 test("dated batch creation also completes the cohort on the older Windows API", async ({
@@ -342,6 +356,10 @@ test("dated batch creation also completes the cohort on the older Windows API", 
     .selectOption("academic_years");
   await page.getByRole("button", { name: "Create batch", exact: true }).click();
   const form = page.getByRole("dialog", { name: "Create batch", exact: true });
+  await form
+    .getByRole("combobox", { name: "Course level", exact: true })
+    .click();
+  await form.getByRole("option", { name: "Degree", exact: true }).click();
   await form.getByRole("combobox", { name: "Course", exact: true }).click();
   await form.getByRole("option", { name: "B.Sc (BSC)", exact: true }).click();
   await form

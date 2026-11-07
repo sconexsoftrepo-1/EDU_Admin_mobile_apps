@@ -116,7 +116,7 @@ CREATE TABLE programs (
   KEY ix_programs_category (category),
   KEY ix_programs_course_level (course_level),
   KEY ix_programs_department_code (department_code),
-  CONSTRAINT programs_course_level_check CHECK ((course_level IN ('intermediate', 'degree'))),
+  CONSTRAINT programs_course_level_check CHECK ((course_level IN ('intermediate', 'degree', 'polytechnic', 'bped', 'mped'))),
   CONSTRAINT programs_duration_semesters_check CHECK ((duration_semesters > 0)),
   CONSTRAINT programs_intake_capacity_check CHECK ((intake_capacity > 0)),
   CONSTRAINT programs_department_code_fkey FOREIGN KEY (department_code) REFERENCES departments (code) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -3050,7 +3050,7 @@ CREATE TABLE student_admission_profiles (
   UNIQUE KEY student_admission_profiles_registration_number_key (registration_number),
   KEY ix_student_admission_profiles_academic_year_code (academic_year_code),
   KEY ix_student_admission_profiles_program_code (program_code),
-  CONSTRAINT student_admission_profiles_course_level_check CHECK ((course_level IN ('intermediate', 'degree'))),
+  CONSTRAINT student_admission_profiles_course_level_check CHECK ((course_level IN ('intermediate', 'degree', 'polytechnic', 'bped', 'mped'))),
   CONSTRAINT student_admission_profiles_last_qualification_check CHECK ((JSON_TYPE(last_qualification) = 'OBJECT')),
   CONSTRAINT student_admission_profiles_referral_check CHECK (((referral IS NULL) OR (JSON_TYPE(referral) = 'OBJECT'))),
   CONSTRAINT student_admission_profiles_achievements_check CHECK ((JSON_TYPE(achievements) = 'ARRAY')),
@@ -3845,3 +3845,28 @@ INSERT IGNORE INTO programs (code, department_code, name, qualification, course_
   ('DEG-BACHELOR-OF-DISASTER-MANAGEMENT', 'DEP-VOCATIONAL-AND-INDUSTRY-ORIENTED-DEGREES', 'Bachelor of Disaster Management', 'Bachelor of Disaster Management', 'degree', NULL, 'Vocational and Industry-Oriented Degrees', '3–4 years', '6–8', 6, NULL, NULL, 'Emergency planning, disaster response'),
   ('DEG-BACHELOR-OF-PACKAGING-TECHNOLOGY', 'DEP-VOCATIONAL-AND-INDUSTRY-ORIENTED-DEGREES', 'Bachelor of Packaging Technology', 'Bachelor of Packaging Technology', 'degree', NULL, 'Vocational and Industry-Oriented Degrees', '3–4 years', '6–8', 6, NULL, NULL, 'Packaging design and quality');
 -- END EDUNEXA SEED DATA
+
+-- Edits waiting for the Super Admin. Live data changes only when a request is accepted.
+CREATE TABLE edit_requests (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  status VARCHAR(20) NOT NULL,
+  method VARCHAR(10) NOT NULL,
+  path VARCHAR(500) NOT NULL,
+  query_string VARCHAR(1000),
+  body LONGTEXT,
+  target_table VARCHAR(100),
+  target_code VARCHAR(200),
+  target_title VARCHAR(200),
+  target_label VARCHAR(300),
+  changes LONGTEXT,
+  before_record LONGTEXT,
+  requester_code VARCHAR(100) NOT NULL,
+  requester_name VARCHAR(200),
+  requester_role VARCHAR(300),
+  requested_at VARCHAR(40) NOT NULL,
+  decided_by VARCHAR(100),
+  decided_at VARCHAR(40),
+  decision_note VARCHAR(500),
+  last_error VARCHAR(1000)
+);

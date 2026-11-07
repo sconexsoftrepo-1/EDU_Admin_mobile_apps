@@ -10,7 +10,15 @@ from typing import Any, Literal
 from fastapi import HTTPException
 from pydantic import ConfigDict, Field, ValidationError, create_model
 
-from .storage import audit, new_code
+from .storage import audit, next_code
+
+CODE_PREFIXES = {"fee_structures": "FEE", "student_fee_charges": "CHG"}
+
+
+def code_prefix(table):
+    """students -> STU, academic_years -> AY: short and different for tables sharing a first word."""
+    words = table.split("_")
+    return CODE_PREFIXES.get(table) or (words[0][:3] if len(words) == 1 else "".join(w[0] for w in words)).upper()
 
 CATALOG = {
     t["name"]: t
@@ -211,8 +219,8 @@ class ResourceService:
         record = validate_record(
             self.table, {**RESOURCE_DEFAULTS.get(self.table, {}), **body}
         )
-        record["code"] = record.get("code") or new_code(self.table[:3].upper())
         rows = data["records"].setdefault(self.table, {})
+        record["code"] = record.get("code") or next_code(rows, code_prefix(self.table))
         if record["code"] in rows:
             raise HTTPException(409, "Record code already exists")
         ensure_references(data, self.table, record)

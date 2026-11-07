@@ -12,6 +12,10 @@
  */
 import { administrationService } from "./modules/administration/service";
 import { admissionsApi } from "./modules/admissions";
+import { analyticsApi } from "./modules/analytics";
+import { dashboardApi } from "./modules/dashboard";
+import { feePaymentsApi } from "./modules/fee-payments";
+import { editRequestsApi } from "./modules/edit-requests";
 import { certificates } from "./modules/certificates";
 import { authService } from "./modules/auth/service";
 import { documentService } from "./modules/documents/service";
@@ -34,6 +38,10 @@ export const api = {
   masterData: masterDataService,
   administration: administrationService,
   admissions: admissionsApi,
+  dashboard: dashboardApi,
+  feePayments: feePaymentsApi,
+  analytics: analyticsApi,
+  editRequests: editRequestsApi,
   certificates,
   forms: formService,
   finance: financeService,
@@ -72,3 +80,41 @@ export * from "./modules/staff/consts";
 export * from "./modules/labs/consts";
 export * from "./modules/workflows/consts";
 export * from "./modules/workspace/consts";
+
+export type {
+  AdmissionAnalytics,
+  AdmissionInsights,
+  AdmissionOpening,
+} from "./modules/admissions";
+export type {
+  DashboardMetric,
+  DashboardOverviewData,
+  DashboardSections,
+  SectionError,
+} from "./modules/dashboard";
+export type {
+  EditRequest,
+  EditRequestChange,
+} from "./modules/edit-requests";
+export type {
+  AdmissionAnalyticsData,
+  ApplicationRow,
+  CampusAnalyticsData,
+  CollectionRow,
+  DueRow,
+  EnquiryRow,
+} from "./modules/analytics";
+export type {
+  CashDeposit,
+  CashLedgerRow,
+  CashOverview,
+  CashTransfer,
+  FeeAnalytics,
+  LateFee,
+  LateFeeOverview,
+  LateFeeStudent,
+  PaymentOptions,
+  PaymentRow,
+  PaymentEdit,
+  PaymentStudent,
+} from "./modules/fee-payments";

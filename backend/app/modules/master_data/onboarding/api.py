@@ -15,6 +15,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from app.core.admission_numbers import COURSE_LEVELS
 from pydantic import ValidationError
 
 from app.core.resources import CATALOG, staff_only
@@ -518,7 +519,8 @@ def inline_course_fee_schedule(data, values, actor):
                 "due_date": (line.due_date or payload.due_date).isoformat()}, actor))
     for row in saved:
         row.update(fee_basis=payload.fee_basis, term_count=payload.term_count,
-            term_due_dates=[d.isoformat() if d else None for d in payload.term_due_dates])
+            term_due_dates=[d.isoformat() if d else None for d in payload.term_due_dates],
+            late_fee_amount=f"{payload.late_fee_amount:.2f}" if payload.late_fee_amount else None)
     return {"program_code": payload.program_code, "academic_year_code": payload.academic_year_code,
         "year_of_study": payload.year_of_study, "fee_structures": saved}
 
@@ -609,7 +611,7 @@ ACTIONS = {
     "create-course": (
         "Create course", "programs", [("programs", "create")],
         lambda: [
-            field("program.course_level", "Course level", "select", options=["intermediate", "degree"]),
+            field("program.course_level", "Course level", "select", options=list(COURSE_LEVELS)),
             field("program.branch", "Course name"),
             field("program.branch_code", "Course code"),
             field("program.duration_years", "Duration (years)", "number"),

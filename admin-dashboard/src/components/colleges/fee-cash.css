@@ -1,0 +1,1287 @@
+.fcw {
+  --fcw-ink: #241d18;
+  --fcw-muted: #76695e;
+  --fcw-line: #eadccb;
+  --fcw-amber: #a56824;
+  --fcw-soft: #fbf8f3;
+  color: var(--fcw-ink);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.fcw h1,
+.fcw h2,
+.fcw p {
+  margin: 0;
+}
+.fcw-head {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+.fcw-head h1 {
+  color: var(--fcw-ink);
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 700;
+}
+.fcw-head p {
+  color: var(--fcw-muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+.fcw-tabs,
+.fcw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fcw-tabs button,
+.fcw-chips button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 10px;
+  color: var(--fcw-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+}
+.fcw-tabs button[aria-selected="true"],
+.fcw-chips button[aria-pressed="true"] {
+  border-color: var(--fcw-amber);
+  box-shadow: inset 0 0 0 1px var(--fcw-amber);
+  color: var(--fcw-ink);
+}
+.fcw-card {
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 14px;
+  padding: 18px;
+}
+.fcw-form {
+  display: grid;
+  gap: 12px;
+}
+.fcw-form h2 {
+  border-bottom: 1px solid var(--fcw-line);
+  font-size: 14px;
+  padding-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fcw-amber);
+}
+.fcw-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.fcw-form label {
+  color: var(--fcw-muted);
+  display: grid;
+  font-size: 12px;
+  font-weight: 600;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+  position: relative;
+}
+.fcw-form label small {
+  font-weight: 500;
+}
+.fcw-wide {
+  grid-column: 1 / -1;
+}
+.fcw-form :is(input, select) {
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 8px;
+  color: var(--fcw-ink);
+  font-size: 14px;
+  height: 40px;
+  min-height: 40px;
+  min-width: 0;
+  padding: 0 10px;
+  width: 100%;
+}
+.fcw-hint {
+  color: var(--fcw-muted);
+  font-size: 12px;
+  margin-top: -6px;
+}
+.fcw-form input[readonly],
+.fcw-form select:disabled {
+  background: var(--fcw-soft);
+  cursor: not-allowed;
+}
+.fcw-search {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 8px;
+  display: flex;
+  flex: 1 1 220px;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+}
+.fcw-search input,
+.fcw-form .fcw-search input {
+  border: 0;
+  flex: 1;
+  min-height: 36px;
+  outline: 0;
+  padding: 0;
+}
+.fcw-matches {
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px #5a361324;
+  left: 0;
+  list-style: none;
+  margin: 0;
+  max-height: 280px;
+  overflow: auto;
+  padding: 4px;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 5;
+}
+.fcw-matches button {
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: var(--fcw-ink);
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  text-align: left;
+  width: 100%;
+}
+.fcw-matches button:hover {
+  background: var(--fcw-soft);
+}
+.fcw-matches small,
+.fcw-sub {
+  color: var(--fcw-muted);
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+}
+.fcw-methods {
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+.fcw-methods legend {
+  color: var(--fcw-muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.fcw-form .fcw-methods label {
+  align-items: center;
+  border: 1px solid var(--fcw-line);
+  border-radius: 10px;
+  color: var(--fcw-ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 14px;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+}
+.fcw-form .fcw-methods label.is-on {
+  background: #f6e6ce;
+  border-color: var(--fcw-amber);
+}
+.fcw-form .fcw-methods input {
+  min-height: 0;
+  width: auto;
+}
+.fcw-actions {
+  align-items: center;
+  border-top: 1px solid var(--fcw-line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+.fcw-actions > span {
+  color: var(--fcw-muted);
+  flex: 1 1 260px;
+  font-size: 12px;
+}
+.fcw :is(.fcw-primary, .fcw-actions button, .fcw-row-actions button, .fcw-accept, .fcw-reject),
+.fcw-drawer-form :is(.fcw-primary, .fcw-actions button, .fcw-accept, .fcw-reject) {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fcw-line, #eadccb);
+  border-radius: 8px;
+  color: var(--fcw-ink, #241d18);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+}
+.fcw .fcw-primary,
+.fcw-drawer-form .fcw-primary,
+.fcw-drawer-form .fcw-accept {
+  background: #a56824;
+  border-color: #a56824;
+  color: #fff;
+}
+.fcw-drawer-form .fcw-accept {
+  background: #18824b;
+  border-color: #18824b;
+}
+.fcw-drawer-form .fcw-reject {
+  border-color: #dfb4b4;
+  color: #a12f2f;
+}
+.fcw :is(button):disabled,
+.fcw-drawer-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.fcw-link {
+  background: none;
+  border: 0;
+  color: var(--fcw-amber);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  justify-self: start;
+  padding: 0;
+}
+.fcw-saved {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.fcw-saved > svg {
+  color: #18824b;
+}
+.fcw-saved > div {
+  flex: 1 1 260px;
+}
+.fcw-saved h2 {
+  font-size: 18px;
+}
+.fcw-stack {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.fcw-filters {
+  align-items: flex-end;
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+}
+.fcw-filters .anw-filter {
+  flex: 0 1 160px;
+}
+.fcw-stats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+.fcw-alert {
+  border-color: #e3bd80;
+}
+.fcw-list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fcw-list li {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+.fcw-list li > div {
+  display: grid;
+}
+.fcw-list small {
+  color: var(--fcw-muted);
+  font-size: 12px;
+}
+.fcw-status {
+  background: #f6e6ce;
+  border-radius: 99px;
+  color: #6b441b;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+}
+.fcw-status.is-settled {
+  background: #e4f4ea;
+  color: #14683d;
+}
+.fcw-status.is-awaiting_review {
+  background: #fdf0d5;
+}
+.fcw-status.is-cancelled {
+  background: #eee;
+  color: #666;
+}
+.fcw-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fcw .anw-table table {
+  min-width: 720px;
+}
+.fcw .fcw-pdf {
+  font-size: 12px;
+}
+.fcw-drawer-form {
+  color: #241d18;
+}
+.fcw-balance {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 0;
+}
+.fcw-balance > div {
+  background: #fbf8f3;
+  border: 1px solid #eadccb;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.fcw-balance dt {
+  color: #76695e;
+  font-size: 12px;
+}
+.fcw-balance dd {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin: 2px 0 0;
+}
+.fcw-warn {
+  color: #a12f2f;
+}
+.fcw-slip {
+  background: #fbf8f3;
+  border: 1px solid #eadccb;
+  border-radius: 10px;
+  min-height: 200px;
+  overflow: hidden;
+}
+.fcw-slip img {
+  display: block;
+  max-height: 60vh;
+  object-fit: contain;
+  width: 100%;
+}
+
+/* The portal styles every footer and button; these keep the payment screens' own look. */
+.college-erp .fcw .fcw-actions,
+.fcw-drawer-form .fcw-actions {
+  background: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 12px 0 0;
+}
+.college-erp .fcw .fcw-primary,
+.college-erp .fcw-drawer-form .fcw-primary,
+.fcw-drawer-form .fcw-primary {
+  background: #a56824;
+  border-color: #a56824;
+  color: #fff;
+}
+.college-erp .fcw .fcw-primary:hover:not(:disabled),
+.fcw-drawer-form .fcw-primary:hover:not(:disabled) {
+  background: #fff;
+  color: #241d18;
+}
+.college-erp .fcw-drawer-form .fcw-accept {
+  background: #18824b;
+  border-color: #18824b;
+  color: #fff;
+}
+
+.fcw-icon {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 8px;
+  color: #241d18;
+  cursor: pointer;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+.college-erp .fcw .fcw-icon:hover {
+  background: #f6e6ce;
+  color: #241d18;
+}
+.fcw-details {
+  display: grid;
+  gap: 0;
+  margin: 0 0 14px;
+}
+.fcw-details > div {
+  border-bottom: 1px dashed #efe6d8;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(130px, 40%) 1fr;
+  padding: 8px 0;
+}
+.fcw-details dt {
+  color: #76695e;
+  font-size: 13px;
+}
+.fcw-details dd {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Student suggestions styled like the role list. */
+.fcw-form .fcw-matches {
+  border-color: #eadccb;
+  border-radius: 12px;
+  box-shadow: 0 16px 34px #5a361326;
+  padding: 6px;
+}
+.fcw-form .fcw-matches button {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 10px;
+}
+.fcw-form .fcw-matches button.is-active {
+  background: #fbf3e6;
+  box-shadow: inset 0 0 0 1px #eadccb;
+}
+.fcw-avatar {
+  align-items: center;
+  background: #f6e6ce;
+  border-radius: 50%;
+  color: #6b441b;
+  display: inline-flex;
+  flex: 0 0 36px;
+  font-size: 12.5px;
+  font-weight: 700;
+  height: 36px;
+  justify-content: center;
+}
+.fcw-match-text {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+.fcw-match-text strong {
+  font-size: 14px;
+}
+.fcw-match-course {
+  align-items: center;
+  background: #fbf8f3;
+  border: 1px solid #f0e6d8;
+  border-radius: 99px;
+  color: #76695e;
+  display: inline-flex;
+  flex: 0 1 auto;
+  font-size: 11.5px;
+  gap: 5px;
+  max-width: 45%;
+  overflow: hidden;
+  padding: 3px 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Academic year: calendar-style From / To year pickers. */
+.fcw-form .fcw-years {
+  align-items: end;
+  border: 0;
+  display: grid;
+  gap: 6px 8px;
+  grid-template-columns: 1fr auto 1fr;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+.fcw-years legend {
+  color: var(--fcw-muted);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  padding: 0;
+}
+.fcw-years > span {
+  color: var(--fcw-muted);
+  font-size: 12px;
+  line-height: 40px;
+}
+.ypk {
+  position: relative;
+}
+.fcw-form .ypk-field,
+.ypk-field {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fcw-line, #e3d6c3);
+  border-radius: 8px;
+  color: var(--fcw-ink, #241d18);
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 500;
+  height: 40px;
+  justify-content: space-between;
+  padding: 0 10px;
+  width: 100%;
+}
+.ypk-field svg {
+  color: #a56824;
+}
+.college-erp .fcw .ypk-field:hover,
+.ypk-field[aria-expanded="true"],
+.ypk-field:focus-visible {
+  background: #fff;
+  border-color: #c99448;
+  box-shadow: 0 0 0 3px #c9944826;
+  color: var(--fcw-ink, #241d18);
+  outline: 0;
+}
+.ypk-placeholder {
+  color: #9a8d80;
+}
+.ypk-proxy {
+  border: 0;
+  bottom: 0;
+  height: 1px;
+  left: 12px;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
+}
+.ypk-panel {
+  animation: sx-in 160ms ease both;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 12px;
+  box-shadow: 0 16px 34px #5a361326;
+  left: 0;
+  padding: 8px;
+  position: absolute;
+  top: calc(100% + 4px);
+  width: 248px;
+  z-index: 40;
+}
+.ypk-nav {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.ypk-nav strong {
+  color: #241d18;
+  font-size: 13px;
+}
+.ypk-panel button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: #241d18;
+  cursor: pointer;
+  font-size: 13.5px;
+  min-height: 36px;
+}
+.ypk-nav button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  width: 32px;
+}
+.ypk-grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(3, 1fr);
+}
+.college-erp .fcw .ypk-panel button:hover:not(:disabled) {
+  background: #fbf3e6;
+  color: #241d18;
+}
+.ypk-grid button.is-now {
+  box-shadow: inset 0 0 0 1px #c99448;
+}
+.college-erp .fcw .ypk-grid button[aria-pressed="true"],
+.ypk-grid button[aria-pressed="true"] {
+  background: #a56824;
+  color: #fff;
+  font-weight: 600;
+}
+.ypk-panel button:disabled {
+  color: #c8bdb1;
+  cursor: default;
+}
+@keyframes sx-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Collection analytics in the cashbook. */
+.fca {
+  display: grid;
+  gap: 14px;
+}
+.fca-filters {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+.fca-filters .fcw-tabs {
+  margin: 0;
+}
+.fca-scale {
+  background: #f6efe4;
+  border-radius: 9px;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+}
+.fca-scale button {
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: #76695e;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+}
+.college-erp .fcw .fca-scale button[aria-selected="true"],
+.fca-scale button[aria-selected="true"] {
+  background: #fff;
+  box-shadow: 0 1px 3px #5a36131f;
+  color: #6b441b;
+}
+.fca-chart {
+  height: 300px;
+  width: 100%;
+}
+.fca-chart-sm {
+  height: 210px;
+}
+.fca-key {
+  color: #76695e;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 6px 16px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.fca-key li {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+}
+.fca-key i {
+  border-radius: 3px;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+}
+.fca-key i.fca-line {
+  background: #2f6f4f;
+  border-radius: 2px;
+  height: 3px;
+  width: 16px;
+}
+.fca-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
+.fca .anw-table .fca-num {
+  text-align: right;
+  white-space: nowrap;
+}
+.fca .fca-sub {
+  color: #76695e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+}
+.fca .anw-table table {
+  min-width: 0;
+}
+
+/* Late fee dues. */
+.college-erp .fcw .fcw-secondary,
+.fcw .fcw-secondary,
+.fcw-drawer-form .fcw-secondary {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--fcw-line, #eadccb);
+  border-radius: 8px;
+  color: var(--fcw-ink, #241d18);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 14px;
+}
+.college-erp .fcw .fcw-secondary:hover:not(:disabled),
+.college-erp .fcw-drawer-form .fcw-secondary:hover:not(:disabled) {
+  background: #fbf3e6;
+  border-color: #c99448;
+  color: #241d18;
+}
+.lfw-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  justify-content: space-between;
+}
+.lfw-bar .fcw-tabs {
+  margin: 0;
+}
+.lfw-search {
+  flex: 0 1 340px;
+}
+.lfw-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.college-erp .fcw .lfw-card,
+.lfw-card {
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-left: 4px solid #c99448;
+  border-radius: 12px;
+  color: var(--fcw-ink);
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  height: 100%;
+  justify-content: stretch;
+  justify-items: stretch;
+  padding: 14px;
+  text-align: left;
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+  width: 100%;
+}
+.college-erp .fcw .lfw-card.is-uncleared,
+.lfw-card.is-uncleared {
+  border-left-color: #c2410c;
+}
+.college-erp .fcw .lfw-card.is-cleared,
+.lfw-card.is-cleared {
+  border-left-color: #18824b;
+}
+.college-erp .fcw .lfw-card.is-no_late_fee,
+.lfw-card.is-no_late_fee {
+  border-left-color: #a8a29e;
+}
+.college-erp .fcw .lfw-card:hover,
+.lfw-card:focus-visible {
+  background: #fff;
+  box-shadow: 0 10px 24px #5a36131c;
+  color: var(--fcw-ink);
+  transform: translateY(-1px);
+}
+.lfw-top {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+.lfw-who {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.lfw-who strong {
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lfw-who small,
+.lfw-course {
+  color: var(--fcw-muted);
+  font-size: 12px;
+}
+.lfw-chip {
+  border-radius: 99px;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+}
+.lfw-chip.is-uncleared {
+  background: #fdebe1;
+  color: #9a3412;
+}
+.lfw-chip.is-cleared {
+  background: #e3f4ea;
+  color: #166534;
+}
+.lfw-chip.is-no_late_fee {
+  background: #f1efec;
+  color: #57534e;
+}
+.lfw-figures {
+  border-top: 1px solid #f0e6d8;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto 1fr 1fr;
+  padding-top: 10px;
+}
+.lfw-figures > span {
+  display: grid;
+  gap: 1px;
+}
+.lfw-figures small {
+  color: var(--fcw-muted);
+  font-size: 11px;
+}
+.lfw-figures b {
+  font-size: 14px;
+}
+.lfw-figures b.is-due {
+  color: #9a3412;
+}
+.lfw-sub {
+  font-size: 13px;
+  margin: 18px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #a56824;
+}
+.lfw-fees {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lfw-fees > li {
+  background: #fbf8f3;
+  border: 1px solid #f0e6d8;
+  border-radius: 10px;
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+}
+.lfw-fees > li.is-cancelled {
+  opacity: 0.75;
+}
+.lfw-fee-head {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+.lfw-fee-head svg {
+  color: #a56824;
+}
+.lfw-fee-head strong {
+  flex: 1;
+  font-size: 14px;
+}
+.lfw-fees small {
+  color: var(--fcw-muted);
+  font-size: 12px;
+}
+.college-erp .lfw-fees .lfw-cancel,
+.lfw-fees .lfw-cancel {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dfb4b4;
+  border-radius: 8px;
+  color: #a12f2f;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 12.5px;
+  font-weight: 600;
+  gap: 6px;
+  justify-self: start;
+  min-height: 32px;
+  padding: 0 12px;
+}
+.college-erp .lfw-fees .lfw-cancel:hover {
+  background: #fdf0f0;
+  color: #a12f2f;
+}
+.lfw-confirm {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  gap: 8px;
+}
+.lfw-confirm span {
+  flex: 1 1 100%;
+}
+.college-erp .lfw-confirm .lfw-danger,
+.lfw-confirm .lfw-danger {
+  background: #b42318;
+  border: 1px solid #b42318;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 34px;
+  padding: 0 14px;
+}
+.college-erp .lfw-confirm .lfw-danger:hover:not(:disabled) {
+  background: #8f1c13;
+  color: #fff;
+}
+.lfw-note {
+  color: var(--fcw-muted);
+  font-size: 12px;
+  margin-top: 12px;
+}
+.lfw-card > span {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Today's collection, under the payment form */
+.fcw-today {
+  display: grid;
+  gap: 10px;
+}
+.fcw-today h2 {
+  font-size: 15px;
+}
+
+/* Receipt popup shown when a payment is saved */
+.fcw-print {
+  background: #fff;
+  border: 1px solid var(--fcw-line);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(36 29 24 / 0.25);
+  color: var(--fcw-ink);
+  display: none;
+  gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: min(860px, calc(100vh - 32px));
+  max-width: calc(100vw - 32px);
+  padding: 18px;
+  width: 920px;
+}
+.fcw-print[open] {
+  display: grid;
+}
+.fcw-print::backdrop {
+  background: rgb(36 29 24 / 0.45);
+}
+.fcw-print > header {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.fcw-print > header > svg {
+  color: #2f7d4f;
+}
+.fcw-print h2 {
+  font-size: 17px;
+  margin: 0;
+}
+.fcw-print header p {
+  color: var(--fcw-muted);
+  font-size: 13px;
+  margin: 2px 0 0;
+}
+.fcw-print-body {
+  background: var(--fcw-soft);
+  border: 1px solid var(--fcw-line);
+  border-radius: 10px;
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+}
+.fcw-print-body iframe {
+  border: 0;
+  height: 100%;
+  width: 100%;
+}
+.fcw-print-note {
+  align-self: center;
+  color: var(--fcw-muted);
+  justify-self: center;
+}
+.fcw-print .fcw-actions > span {
+  color: var(--fcw-muted);
+  flex: 1 1 260px;
+  font-size: 12px;
+}
+
+/* Row actions in payment tables */
+.fcw-row-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* Payment overview drawn like the printed receipt (pdf_kit colours). */
+.rcp {
+  --rcp-ink: #251e18;
+  --rcp-muted: #6b6158;
+  --rcp-line: #e4d9c8;
+  --rcp-band: #f7f1e7;
+  --rcp-accent: #7a4a1c;
+  --rcp-soft: #f3e6d3;
+  color: var(--rcp-ink);
+  display: grid;
+  gap: 14px;
+}
+.rcp h3 {
+  margin: 0;
+}
+.rcp-band {
+  align-items: center;
+  background: var(--rcp-band);
+  border-bottom: 3px solid var(--rcp-accent);
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+.rcp-band > div {
+  display: grid;
+  gap: 2px;
+}
+.rcp-band strong {
+  color: var(--rcp-accent);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+.rcp-band span,
+.rcp-band small {
+  color: var(--rcp-muted);
+  font-size: 12px;
+}
+.rcp-tiles {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.rcp-tiles > div {
+  border: 1px solid var(--rcp-line);
+  border-radius: 10px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+}
+.rcp-tiles small {
+  color: var(--rcp-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.rcp-tiles strong {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.rcp-tiles em {
+  color: var(--rcp-muted);
+  font-size: 11px;
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rcp-tiles > .is-dark {
+  background: var(--rcp-accent);
+  border-color: var(--rcp-accent);
+}
+.rcp-tiles > .is-dark :is(small, strong, em) {
+  color: #fff;
+}
+.rcp-panels {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.rcp-panels section {
+  border: 1px solid var(--rcp-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.rcp-panels h3 {
+  background: var(--rcp-soft);
+  color: var(--rcp-accent);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 8px 14px;
+  text-transform: uppercase;
+}
+.rcp-panels dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 14px 12px;
+}
+.rcp-panels dl > div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+.rcp-panels dt {
+  color: var(--rcp-muted);
+  font-size: 12px;
+}
+.rcp-panels dd {
+  font-size: 13px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+.rcp-section {
+  border-bottom: 1px solid var(--rcp-line);
+  color: var(--rcp-accent);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  padding-bottom: 6px;
+  text-transform: uppercase;
+}
+.rcp-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  width: 100%;
+}
+.rcp .rcp-table th {
+  background: var(--rcp-soft);
+  border: 0;
+  color: var(--rcp-ink);
+  font-weight: 500;
+  text-align: left;
+}
+.rcp .rcp-table :is(th, td) {
+  border-left: 0;
+  border-right: 0;
+  padding: 8px 10px;
+}
+.rcp .rcp-table :is(th, td):last-child {
+  text-align: right;
+}
+.rcp .rcp-table tfoot td {
+  background: var(--rcp-soft);
+  font-weight: 600;
+}
+.rcp-highlight {
+  align-items: center;
+  background: var(--rcp-soft);
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 14px 16px;
+}
+.rcp-highlight > div {
+  display: grid;
+  gap: 4px;
+}
+.rcp-highlight strong {
+  color: var(--rcp-accent);
+  font-size: 15px;
+  font-weight: 500;
+}
+.rcp-highlight span {
+  font-size: 12px;
+}
+.rcp-highlight b {
+  color: var(--rcp-accent);
+  font-size: 20px;
+  font-weight: 500;
+}
+.rcp-highlight .rcp-stamp {
+  border: 2px solid #2f7d4f;
+  border-radius: 6px;
+  color: #2f7d4f;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 12px;
+  transform: rotate(8deg);
+}
+.rcp-highlight .rcp-stamp.is-alert {
+  border-color: #b43540;
+  color: #b43540;
+}
+.rcp-note {
+  color: var(--rcp-muted);
+  font-size: 12px;
+  margin: 0;
+}
+.rcp-edit-hint {
+  margin: 0 0 4px;
+}
+@media (max-width: 560px) {
+  .rcp-highlight {
+    grid-template-columns: 1fr;
+  }
+}
+/* The app styles every table header brown; the receipt table follows the printed receipt instead. */
+.rcp .rcp-table.rcp-table > thead > tr,
+.rcp .rcp-table.rcp-table > thead > tr > th {
+  background: var(--rcp-soft) !important;
+  border: 0 !important;
+  color: var(--rcp-ink) !important;
+  font-weight: 500 !important;
+}
+.rcp .rcp-table.rcp-table > thead > tr > th:last-child {
+  text-align: right;
+}

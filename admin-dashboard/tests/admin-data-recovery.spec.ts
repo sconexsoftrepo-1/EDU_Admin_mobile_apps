@@ -116,6 +116,16 @@ test("Super Admin can reload failed dashboard requests without signing out", asy
           roles: [role],
         },
       });
+    if (path === "dashboard/overview")
+      return healthy
+        ? route.fulfill({
+            json: {
+              viewer: { name: "Administrator" },
+              academic_session: "2026–27",
+              sections: {},
+            },
+          })
+        : route.fulfill({ status: 503, json: { detail: "API restarting" } });
     if (path.startsWith("workspace/screens/")) {
       if (!healthy)
         return route.fulfill({
@@ -126,25 +136,15 @@ test("Super Admin can reload failed dashboard requests without signing out", asy
       return route.fulfill({ json: { key, title: key, resources: [] } });
     }
     return route.fulfill({
-      json: {
-        items: [],
-        total: 0,
-        roles: [],
-        screens: [],
-        summary: {},
-        actions: [],
-      },
+      status: 503,
+      json: { detail: "Unrelated widget is unavailable in this fixture" },
     });
   });
-  await page.goto(
-    `${origin}/portal/admin/dashboard`,
-  );
-  const warning = page.locator(".erp-record-recovery");
-  await expect(warning).toContainText("Some data requests failed");
+  await page.goto(`${origin}/portal/admin/dashboard`);
+  const warning = page.locator(".dov-failed");
+  await expect(warning).toContainText("This section could not be loaded.");
   healthy = true;
-  await page
-    .getByRole("button", { name: "Reload records", exact: true })
-    .click();
+  await warning.getByRole("button", { name: "Try again", exact: true }).click();
   await expect(warning).toHaveCount(0);
   await expect(page).toHaveURL(/portal\/admin\/dashboard$/);
 });

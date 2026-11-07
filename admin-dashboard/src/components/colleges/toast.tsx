@@ -7,6 +7,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
 import "./toast.css";
+import { editJustQueued, onEditPending } from "@/lib/colleges/edit-pending";
 
 export type ToastKind = "success" | "error" | "warning" | "info";
 type ToastItem = {
@@ -69,8 +70,18 @@ function show(kind: ToastKind, title: string, detail?: string) {
   return id;
 }
 
+// A form that just queued an edit would otherwise claim "saved" while nothing changed.
+onEditPending(() =>
+  show(
+    "info",
+    "Sent to the Super Admin for approval",
+    "The data changes only after the request is accepted.",
+  ),
+);
+
 export const toast = {
-  success: (title: string, detail?: string) => show("success", title, detail),
+  success: (title: string, detail?: string) =>
+    editJustQueued() ? undefined : show("success", title, detail),
   error: (title: string, detail?: string) => show("error", title, detail),
   warning: (title: string, detail?: string) => show("warning", title, detail),
   info: (title: string, detail?: string) => show("info", title, detail),

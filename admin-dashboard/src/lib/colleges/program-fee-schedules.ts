@@ -30,6 +30,8 @@ export function programFeeSchedules(
     yearNames = names(years);
   const groups = new Map<string, RecordRow>();
   for (const record of records) {
+    // Late fee rows are added per student by the late fee job, not part of a schedule.
+    if (record.fee_basis === "late_fee") continue;
     const program = String(record.program_code || "");
     const academicYear = String(record.academic_year_code || "");
     const studyYear = Number(record.semester_number || 1);

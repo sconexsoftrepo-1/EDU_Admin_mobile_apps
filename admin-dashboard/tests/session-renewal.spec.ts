@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { NextRequest } from "next/server";
+import { API_CONFIG } from "../src/services/api/config";
 import { GET } from "../src/app/api/college/[...path]/route";
 
 const pair = {
@@ -133,7 +134,9 @@ test("idle sessions renew when the browser access cookie has expired", async () 
     );
     expect(result.status).toBe(200);
     expect(rotations).toBe(1);
-    expect(result.cookies.get("edu_refresh")?.maxAge).toBe(7 * 86400);
+    expect(result.cookies.get("edu_refresh")?.maxAge).toBe(
+      API_CONFIG.cookies.refreshMaxAgeSeconds,
+    );
   } finally {
     globalThis.fetch = previous;
   }
