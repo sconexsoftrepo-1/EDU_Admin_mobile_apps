@@ -699,11 +699,11 @@
     size: A3 landscape;
     margin: 10mm;
   }
-  body * {
+  body:has(.tt-editor) * {
     visibility: hidden;
   }
-  .tt-editor,
-  .tt-editor * {
+  body:has(.tt-editor) .tt-editor,
+  body:has(.tt-editor) .tt-editor * {
     visibility: visible;
   }
   .tt-editor {

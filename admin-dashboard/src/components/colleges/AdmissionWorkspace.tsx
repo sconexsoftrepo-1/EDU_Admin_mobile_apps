@@ -10,7 +10,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { Info, Plus, RefreshCw, UserRoundCheck } from "lucide-react";
+import { Info, Plus, Printer, RefreshCw, UserRoundCheck } from "lucide-react";
 import type { College } from "@/data/colleges";
 import {
   api,
@@ -81,7 +81,7 @@ export default function AdmissionWorkspace({
     "intermediate",
   );
   const [programCode, setProgramCode] = useState("");
-  const [referenceType, setReferenceType] = useState("walk_in");
+  const [referenceType, setReferenceType] = useState("self");
   const [employeeCode, setEmployeeCode] = useState("");
   const platformReference = isPlatformReference(referenceType);
   const [saving, setSaving] = useState(false);
@@ -118,6 +118,17 @@ export default function AdmissionWorkspace({
     window.addEventListener("edunexa:new-application", open);
     return () => window.removeEventListener("edunexa:new-application", open);
   }, [canCreate]);
+  // "Recent admissions" on the dashboard links here with ?enquiry=CODE: open that exact enquiry.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("enquiry");
+    if (!wanted || !rows.length) return;
+    const found = rows.find((row) => String(row.code) === wanted);
+    const id = window.setTimeout(() => {
+      if (found) setDetail(found);
+      window.history.replaceState(null, "", window.location.pathname);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [rows]);
   // "New enquiry" on the dashboard links here with ?new=1.
   useEffect(() => {
     if (!canCreate) return;
@@ -242,7 +253,7 @@ export default function AdmissionWorkspace({
       target.reset();
       setProgramCode("");
       setEmployeeCode("");
-      setReferenceType("walk_in");
+      setReferenceType("self");
       setSuccess("Admission enquiry saved.");
       closeForm();
       await load();
@@ -604,6 +615,7 @@ export default function AdmissionWorkspace({
                       setEmployeeCode("");
                     }}
                   >
+                    <option value="self">My reference (entered by me)</option>
                     <option value="walk_in">Walk-in / direct</option>
                     <option value="employee">Employee reference</option>
                     <option value="staff">Staff reference</option>
@@ -640,7 +652,7 @@ export default function AdmissionWorkspace({
                     </label>
                   </>
                 ) : (
-                  referenceType !== "walk_in" && (
+                  !["walk_in", "self"].includes(referenceType) && (
                     <>
                       <label>
                         {platformReference
@@ -734,11 +746,15 @@ export default function AdmissionWorkspace({
       {detail && (
         <SideDrawer
           expanded
+          className="adm-doc-drawer"
           title="Admission enquiry details"
           subtitle={`${text(detail.first_name)} ${text(detail.last_name)} · ${text(detail.code)}`}
           onClose={() => setDetail(null)}
           actions={
             <>
+              <button type="button" className="adm-print" onClick={() => window.print()}>
+                <Printer size={15} /> Print
+              </button>
               <PrintButtons
                 path={`enquiry/${encodeURIComponent(String(detail.code))}`}
                 filename={`enquiry-${text(detail.first_name)}-${text(detail.last_name)}`}
@@ -788,58 +804,110 @@ export default function AdmissionWorkspace({
               </div>
             )
           )}
-          <div className="adm-detail-grid">
-            {Object.entries({
-              "Course level": nice(detail.course_level),
-              Course:
-                detailCourses.find(
-                  (course) => course.code === detail.program_code,
-                )?.name || text(detail.program_code),
-              "Academic year": text(detail.academic_year_code),
-              "First name": text(detail.first_name),
-              "Last name": text(detail.last_name),
-              Phone: text(detail.phone),
-              "Second phone": text(detail.secondary_phone),
-              "Guardian name": text(detail.parent_name),
-              "Guardian relationship": nice(detail.guardian_relationship),
-              "Guardian mobile": text(
-                detail.guardian_mobile || detail.parent_phone,
-              ),
-              Email: text(detail.email),
-              Street: text(detailAddress.street),
-              Area: text(detailAddress.area),
-              City: text(detailAddress.city),
-              State: text(detailAddress.state),
-              "PIN code": text(detailAddress.postal_code),
-              Reference: nice(detail.reference_type),
-              [isPlatformReference(detail.reference_type)
-                ? "Platform name"
-                : "Reference name"]: text(
-                detail.reference_name || detail.referrer_name,
-              ),
-              ...(detail.reference_relationship
-                ? { Relationship: text(detail.reference_relationship) }
-                : {}),
-              ...(!isPlatformReference(detail.reference_type)
-                ? {
-                    "Reference mobile": text(
-                      detail.reference_mobile || detail.campaign_reference,
-                    ),
-                  }
-                : {}),
-              Status: nice(detail.workflow_status || detail.status),
-              "Next follow up": dateTime(detail.next_follow_up_at),
-              "Communication consent": detail.communication_consent
-                ? "Recorded"
-                : "Not recorded",
-              "Consent recorded at": dateTime(detail.consent_recorded_at),
-            }).map(([label, value]) => (
-              <div key={label}>
-                <span>{label}</span>
-                <strong>{text(value)}</strong>
+          <article className="adm-doc" aria-label="Admission enquiry">
+            <header className="adm-doc-head">
+              {college.logo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={college.logo} alt="" width={56} height={56} />
+              )}
+              <div>
+                <strong>{college.name}</strong>
+                <span>Admissions office</span>
               </div>
+              <div className="adm-doc-title">
+                <strong>ADMISSION ENQUIRY</strong>
+                <span>No. {text(detail.code)}</span>
+                <span>
+                  Recorded{" "}
+                  {dateTime(detail.enquiry_date || detail.recorded_at || detail.created_at)}
+                </span>
+              </div>
+            </header>
+            <p className="adm-doc-status">
+              <span>Status</span>
+              <strong>{nice(detail.workflow_status || detail.status)}</strong>
+              <span>Next follow-up</span>
+              <strong>{dateTime(detail.next_follow_up_at)}</strong>
+            </p>
+            {(
+              [
+                [
+                  "Course applied for",
+                  {
+                    "Course level": nice(detail.course_level),
+                    Course:
+                      detailCourses.find((course) => course.code === detail.program_code)?.name ||
+                      text(detail.program_code),
+                    "Academic year": text(detail.academic_year_code),
+                  },
+                ],
+                [
+                  "Applicant",
+                  {
+                    "Full name": `${text(detail.first_name)} ${detail.last_name ? text(detail.last_name) : ""}`.trim(),
+                    Phone: text(detail.phone),
+                    "Second phone": text(detail.secondary_phone),
+                    Email: text(detail.email),
+                  },
+                ],
+                [
+                  "Parent / guardian",
+                  {
+                    "Guardian name": text(detail.parent_name),
+                    Relationship: nice(detail.guardian_relationship) || "—",
+                    "Guardian mobile": text(detail.guardian_mobile || detail.parent_phone),
+                  },
+                ],
+                [
+                  "Address",
+                  {
+                    Street: text(detailAddress.street),
+                    Area: text(detailAddress.area),
+                    City: text(detailAddress.city),
+                    State: text(detailAddress.state),
+                    "PIN code": text(detailAddress.postal_code),
+                  },
+                ],
+                [
+                  "Reference",
+                  {
+                    "Reference type": nice(detail.reference_type) || "—",
+                    [isPlatformReference(detail.reference_type) ? "Platform name" : "Reference name"]: text(
+                      detail.reference_name || detail.referrer_name,
+                    ),
+                    ...(detail.reference_relationship ? { Relationship: text(detail.reference_relationship) } : {}),
+                    ...(!isPlatformReference(detail.reference_type)
+                      ? { "Reference mobile": text(detail.reference_mobile || detail.campaign_reference) }
+                      : {}),
+                  },
+                ],
+                [
+                  "Follow-up & consent",
+                  {
+                    "Next follow-up": dateTime(detail.next_follow_up_at),
+                    "Communication consent": detail.communication_consent ? "Recorded" : "Not recorded",
+                    "Consent recorded at": dateTime(detail.consent_recorded_at),
+                  },
+                ],
+              ] as [string, Record<string, string>][]
+            ).map(([title, fields]) => (
+              <section key={title} className="adm-doc-section">
+                <h3>{title}</h3>
+                <dl>
+                  {Object.entries(fields).map(([label, value]) => (
+                    <div key={label}>
+                      <dt>{label}</dt>
+                      <dd>{text(value)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
             ))}
-          </div>
+            <footer className="adm-doc-sign">
+              <span>Applicant / guardian signature</span>
+              <span>Admissions officer</span>
+            </footer>
+          </article>
         </SideDrawer>
       )}
       {convert && (

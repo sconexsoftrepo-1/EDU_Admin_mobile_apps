@@ -1,8 +1,9 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ArrowRightLeft, Banknote, BarChart3, Check, Clock, Info, Landmark, Smartphone, Users, Wallet, X } from "lucide-react";
+import { ArrowRightLeft, Banknote, BarChart3, Check, Clock, Info, Landmark, LayoutDashboard, Smartphone, Users, Wallet, X } from "lucide-react";
 import { api, errorText, type CashDeposit, type CashOverview, type CashTransfer } from "@/services/api";
 import { Empty, LoadFailed, Panel, rupees, shortDate, Stat } from "./AnalyticsParts";
+import CashbookDashboard from "./CashbookDashboard";
 import FeeCollectionAnalytics from "./FeeCollectionAnalytics";
 import { PaymentHistory } from "./FeePaymentsWorkspace";
 import SideDrawer from "./SideDrawer";
@@ -29,7 +30,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export default function CashbookWorkspace() {
   const [data, setData] = useState<CashOverview | null>(null);
   const [error, setError] = useState("");
-  const [ledger, setLedger] = useState<"cash" | "upi" | "bank_transfer" | "analytics">("cash");
+  const [ledger, setLedger] = useState<"dashboard" | "cash" | "upi" | "bank_transfer" | "analytics">("dashboard");
   const [assigning, setAssigning] = useState(false);
   const [reviewing, setReviewing] = useState<{ transfer: CashTransfer; deposit: CashDeposit } | null>(null);
   const [details, setDetails] = useState<string | null>(null);
@@ -107,6 +108,7 @@ export default function CashbookWorkspace() {
       <div className="fcw-tabs" role="tablist" aria-label="Ledger">
         {(
           [
+            ["dashboard", "Cashbook dashboard", LayoutDashboard],
             ["cash", "Cash ledger", Wallet],
             ["upi", "UPI ledger", Smartphone],
             ["bank_transfer", "Bank transfer ledger", Landmark],
@@ -245,6 +247,8 @@ export default function CashbookWorkspace() {
             )}
           </Panel>
         </>
+      ) : ledger === "dashboard" ? (
+        <CashbookDashboard />
       ) : ledger === "analytics" ? (
         <FeeCollectionAnalytics />
       ) : (

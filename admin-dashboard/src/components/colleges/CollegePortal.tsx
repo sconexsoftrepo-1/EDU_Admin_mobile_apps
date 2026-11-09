@@ -78,6 +78,7 @@ import EditRequestsWorkspace, { ChangeRequestsBadge } from "./EditRequestsWorksp
 import FeePaymentsWorkspace from "./FeePaymentsWorkspace";
 import CashbookWorkspace from "./CashbookWorkspace";
 import LateFeesWorkspace from "./LateFeesWorkspace";
+import ReportsAnalytics from "./ReportsAnalytics";
 import DashboardOverview, {
   DashboardTabs,
   initialsOf,
@@ -759,7 +760,8 @@ export default function CollegePortal({
         key: "collect",
         label: "Collect fee",
         icon: CreditCard,
-        onClick: () => collect(),
+        // Fees are recorded on the Manual payments screen (Finance & Fees).
+        href: nav("manual-payments"),
       });
     return items.slice(0, 6);
   };
@@ -2974,6 +2976,7 @@ export default function CollegePortal({
               </button>
             </div>,
           )}
+          <ReportsAnalytics nav={nav} />
           <div className="erp-dashboard-grid erp-report-charts">
             <ERPAnalytics
               payments={payments}
@@ -3372,8 +3375,10 @@ export default function CollegePortal({
                   e.currentTarget.closest("details")?.removeAttribute("open");
               }}
             >
-              {allowed("Super Admin", "Accounts Manager", "Student") && (
-                <button onClick={() => collect()}>Collect fee</button>
+              {allowed("Super Admin", "Accounts Manager") ? (
+                <Link href={nav("manual-payments")}>Collect fee</Link>
+              ) : (
+                allowed("Student") && <button onClick={() => collect()}>Collect fee</button>
               )}
               {allowed("Super Admin", "Admission Officer") && (
                 <>

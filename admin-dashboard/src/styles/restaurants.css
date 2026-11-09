@@ -2921,11 +2921,11 @@
   }
 }
 @media print {
-  body * {
+  body:has(.qr-print-card) * {
     visibility: hidden !important;
   }
-  .qr-print-card,
-  .qr-print-card * {
+  body:has(.qr-print-card) .qr-print-card,
+  body:has(.qr-print-card) .qr-print-card * {
     visibility: visible !important;
   }
   .qr-print-card {

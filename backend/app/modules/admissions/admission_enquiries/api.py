@@ -211,10 +211,17 @@ def create_intake(body: IntakeInput, request: Request, user=Depends(require(TABL
                 from app.modules.admissions.admission_sources.api import service as sources_service
                 direct = sources_service.create(data, {"name": "Direct / walk-in", "channel": "walk_in", "is_active": True}, user["code"])
             record_values["source_code"] = direct["code"]
+        # "My reference": credit whoever entered the enquiry (admin, teacher, staff or employee).
+        if extras.get("reference_type") in (None, "", "self"):
+            from app.core.admission_insights import creator_reference
+            kind, name, employee_code = creator_reference(data, user)
+            extras.update(reference_type=kind, reference_name=name, referrer_employee_code=employee_code,
+                          referred_by_account=user["code"])
+            record_values["referrer_name"] = record_values.get("referrer_name") or name
         record = validate_record(TABLE, record_values)
         created = service.create(data, record, user["code"])
         created.update(extras)
-        created.update(recorded_by=user["code"], recorded_at=now())
+        created.update(recorded_by=user["code"], recorded_at=created.get("recorded_at") or now())
         query_save(data, created)
         return created
 

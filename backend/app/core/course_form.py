@@ -7,6 +7,12 @@ from math import ceil
 
 from fastapi import HTTPException
 
+# Qualification shown with each course level (all levels the college offers).
+QUALIFICATIONS = {'intermediate': 'Intermediate', 'degree': 'Degree', 'polytechnic': 'Diploma',
+                  'bped': 'B.P.Ed', 'mped': 'M.P.Ed'}
+DEPARTMENT_NAMES = {'polytechnic': 'Polytechnic (Diploma in Engineering)', 'bped': 'Physical Education (B.P.Ed)',
+                    'mped': 'Physical Education (M.P.Ed)'}
+
 
 def course_years(program):
     return max(1, ceil(float(program.get("duration_years") or (int(program.get("duration_semesters") or 2) / 2))))
@@ -17,9 +23,9 @@ def normalize(data, body, old=None):
     current = {**(old or {}), **body}
     modern = any(k in body for k in ('duration_years', 'semester_labels', 'subject_entries')) or bool(old and old.get('duration_years') is not None)
     if modern:
-        if current.get('course_level') not in {'intermediate', 'degree'}:
+        if current.get('course_level') not in QUALIFICATIONS:
             raise HTTPException(422, 'Select a course level')
-        body['qualification'] = {'intermediate': 'Intermediate', 'degree': 'Degree'}[current['course_level']]
+        body['qualification'] = QUALIFICATIONS[current['course_level']]
         current['qualification'] = body['qualification']
         for key in ('branch', 'branch_code'):
             if not str(current.get(key) or '').strip():
@@ -66,7 +72,7 @@ def normalize(data, body, old=None):
             body['subject_entries'] = clean
             body['subjects'] = ', '.join(dict.fromkeys(e['name'] for e in clean))
     if not current.get('qualification'):
-        qualification = {'intermediate': 'Intermediate', 'degree': 'Degree'}.get(current.get('course_level'))
+        qualification = QUALIFICATIONS.get(current.get('course_level'))
         if not qualification:
             raise HTTPException(422, 'Select a course level')
         body['qualification'] = current['qualification'] = qualification
@@ -84,16 +90,20 @@ def normalize(data, body, old=None):
     if not current.get('department_code'):
         departments = data['records'].setdefault('departments', {})
         level = current.get('course_level') or 'general'
-        matching = next((d for d in departments.values() if level in str(d.get('name', '')).lower()), None)
-        existing = matching or next(iter(departments.values()), None)
+        wanted = DEPARTMENT_NAMES.get(level, '').lower()
+        matching = next((d for d in departments.values()
+                         if level in str(d.get('name', '')).lower() or (wanted and str(d.get('name', '')).lower() == wanted)), None)
+        # Polytechnic / B.P.Ed / M.P.Ed get a department of their own rather than another level's.
+        existing = matching or (next(iter(departments.values()), None) if level in {'intermediate', 'degree', 'general'} else None)
         if existing:
             body['department_code'] = existing['code']
         else:
             campus = next(iter(data['records'].get('campuses', {}).values()), None)
             if not campus:
                 raise HTTPException(422, 'Configure a college campus before creating courses')
-            code = f'COURSES-{level.upper()}'
-            departments[code] = {'code': code, 'campus_code': campus['code'], 'name': f'{level.title()} courses'}
+            code = f'DEP-{level.upper()}' if level in DEPARTMENT_NAMES else f'COURSES-{level.upper()}'
+            departments[code] = {'code': code, 'campus_code': campus['code'],
+                                 'name': DEPARTMENT_NAMES.get(level, f'{level.title()} courses')}
             body['department_code'] = code
     return body
 

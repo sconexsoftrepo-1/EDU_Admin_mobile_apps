@@ -564,18 +564,36 @@ function RecentAdmissions({
     >
       {rows.length ? (
         <ul className="dov-people">
-          {rows.slice(0, 5).map((row) => (
-            <li key={row.code}>
-              <span className="dov-avatar">{initialsOf(row.name)}</span>
-              <span className="dov-person">
-                <strong>{row.name}</strong>
-                <small>{row.course_name || "Course not chosen"}</small>
-              </span>
-              <span className={`dov-status is-${row.status}`}>
-                {statusText(row.status)}
-              </span>
-            </li>
-          ))}
+          {rows.slice(0, 5).map((row) => {
+            const inner = (
+              <>
+                <span className="dov-avatar">{initialsOf(row.name)}</span>
+                <span className="dov-person">
+                  <strong>{row.name}</strong>
+                  <small>{row.course_name || "Course not chosen"}</small>
+                </span>
+                <span className={`dov-status is-${row.status}`}>
+                  {statusText(row.status)}
+                </span>
+              </>
+            );
+            return (
+              <li key={row.code}>
+                {/* Opens this exact enquiry's details, not just the register. */}
+                {href ? (
+                  <Link
+                    className="dov-person-link"
+                    href={`${href}?enquiry=${encodeURIComponent(row.code)}`}
+                    aria-label={`View enquiry of ${row.name}`}
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  inner
+                )}
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <Empty>No admissions recorded yet.</Empty>
