@@ -1102,3 +1102,10 @@
   text-align: left;
   width: 100%;
 }
+
+/* Export buttons in a panel header (staff referrals). */
+.anw-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}

@@ -113,6 +113,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
   const [filters, setFilters] = useState({ level: "", program: "", year: "" });
   const [typed, setTyped] = useState(EMPTY_TYPED);
   const [semester, setSemester] = useState("");
+  const [otherBranch, setOtherBranch] = useState(false);
   const [query, setQuery] = useState("");
   const [matches, setMatches] = useState<PaymentStudent[]>([]);
   const [student, setStudent] = useState<PaymentStudent | null>(null);
@@ -176,6 +177,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
     setStudent(null);
     setQuery("");
     setTyped(EMPTY_TYPED);
+    setOtherBranch(false);
     setSemester("");
     setFilters({ level: "", program: "", year: "" });
     setHead("");
@@ -270,7 +272,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course level *
-            <select required value={typed.level} onChange={(e) => setTyped({ ...typed, level: e.target.value })}>
+            <select required value={typed.level} onChange={(e) => setTyped({ ...typed, level: e.target.value, branch: otherBranch ? typed.branch : "" })}>
               <option value="">Select level</option>
               {options?.levels.map((l) => (
                 <option key={l.key} value={l.key}>
@@ -281,21 +283,38 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course branch *
-            <input
+            {/* Same dropdown as the other fields; "Other" types a branch not set up as a course. */}
+            <select
               required
-              maxLength={150}
-              list="fcw-branches"
-              autoComplete="off"
-              placeholder="e.g. MPC, BCA, Diploma ECE"
-              value={typed.branch}
-              onChange={(e) => setTyped({ ...typed, branch: e.target.value })}
-            />
-            <datalist id="fcw-branches">
+              value={otherBranch ? OTHER : typed.branch}
+              onChange={(e) => {
+                const other = e.target.value === OTHER;
+                setOtherBranch(other);
+                setTyped({ ...typed, branch: other ? "" : e.target.value });
+              }}
+            >
+              <option value="">Select branch</option>
               {programs.map((p) => (
-                <option key={p.code} value={p.name} />
+                <option key={p.code} value={p.name}>
+                  {p.name}
+                </option>
               ))}
-            </datalist>
+              <option value={OTHER}>Other (type the branch)</option>
+            </select>
           </label>
+          {otherBranch && (
+            <label>
+              Branch name *
+              <input
+                required
+                maxLength={150}
+                autoComplete="off"
+                placeholder="e.g. Diploma Automobile"
+                value={typed.branch}
+                onChange={(e) => setTyped({ ...typed, branch: e.target.value })}
+              />
+            </label>
+          )}
           <fieldset className="fcw-years">
             <legend>Academic year *</legend>
             <YearPicker

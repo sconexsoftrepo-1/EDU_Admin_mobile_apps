@@ -7,16 +7,11 @@ import SideDrawer from "./SideDrawer";
 import { toast } from "./toast";
 import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import "./edit-requests.css";
+import { formatDateTime } from "@/lib/colleges/dates";
 
 const CHANGED_EVENT = "edunexa:edit-requests-changed";
 const POLL_MS = 60_000;
-const when = (value: string | null) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
-};
+const when = (value: string | null) => formatDateTime(value);
 
 /**
  * Top bar shortcut. The Super Admin opens the Change requests page (count = edits waiting).

@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode } from "react";
 import { RefreshCw, type LucideProps } from "lucide-react";
 import { money } from "@/data/colleges";
 import "./analytics-workspace.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 /** The analytics APIs send rupees; money() takes paise. */
 export const rupees = (value: number) => money(value * 100);
@@ -10,13 +11,8 @@ export const nice = (value: string | null | undefined) =>
   String(value || "—")
     .replaceAll("_", " ")
     .replace(/^\w/, (c) => c.toUpperCase());
-export const shortDate = (value: string | null | undefined) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleDateString("en-IN", { dateStyle: "medium" });
-};
+/** Day/month/year: 09/11/2026. */
+export const shortDate = (value: string | null | undefined) => formatDate(value);
 export const percentOf = (part: number, whole: number) =>
   whole ? Math.round((part * 1000) / whole) / 10 : 0;
 

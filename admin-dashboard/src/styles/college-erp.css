@@ -3325,6 +3325,35 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-topbar-breadcrumb > span[aria-hidden="true"] {
   color: var(--erp-muted);
 }
+/* Back to the module (hub) page, left of the screen title. */
+.college-erp :is(h1, h2):has(> .erp-back-host) {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+.college-erp .erp-back-host {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+.college-erp .erp-back {
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid #241d18;
+  border-radius: 10px;
+  color: #111;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 36px;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  width: 36px;
+}
+.college-erp .erp-back:hover,
+.college-erp .erp-back:focus-visible {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
 @media (max-width: 650px) {
   .college-erp .erp-topbar-breadcrumb {
     flex: 0 1 auto;

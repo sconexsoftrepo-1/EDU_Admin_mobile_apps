@@ -63,7 +63,7 @@ import {
 } from "@/lib/colleges/reports";
 import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
-import { activeHub, RETIRED_SCREENS } from "@/lib/colleges/module-hubs";
+import { activeHub, hubRoute, RETIRED_SCREENS, visibleHubs } from "@/lib/colleges/module-hubs";
 const ModuleHubDashboard = dynamic(() => import("./ModuleHubDashboard"), { loading: () => <WorkspaceSkeleton label="Loading module dashboard" /> });
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => <WorkspaceSkeleton label="Loading collection analytics" />,
@@ -78,6 +78,8 @@ import EditRequestsWorkspace, { ChangeRequestsBadge } from "./EditRequestsWorksp
 import FeePaymentsWorkspace from "./FeePaymentsWorkspace";
 import CashbookWorkspace from "./CashbookWorkspace";
 import LateFeesWorkspace from "./LateFeesWorkspace";
+import ReportsAnalytics from "./ReportsAnalytics";
+import HeadingBack from "./HeadingBack";
 import DashboardOverview, {
   DashboardTabs,
   initialsOf,
@@ -388,6 +390,8 @@ export default function CollegePortal({
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
   const moduleHub = activeHub(activeModule, modules);
+  // The module (hub) a screen belongs to, for the back button and breadcrumb.
+  const parentHub = moduleHub ? undefined : visibleHubs(modules).find((hub) => hub.screens.includes(activeModule));
   // Retired setup screens open the screen that replaced them (?records=… keeps raw-table access).
   useEffect(() => {
     const target = RETIRED_SCREENS[activeModule];
@@ -553,6 +557,7 @@ export default function CollegePortal({
       ? rows.filter((x) => x.studentId === selfStudent.id)
       : rows;
   const nav = (m: string) => `${root}/portal/${area}/${m}`;
+  const hubHref = parentHub ? `${nav(hubRoute(parentHub))}#module-workspaces` : null;
   function collect(st?: Student) {
     form("Record payment", "payment", [
       field(
@@ -759,7 +764,8 @@ export default function CollegePortal({
         key: "collect",
         label: "Collect fee",
         icon: CreditCard,
-        onClick: () => collect(),
+        // Fees are recorded on the Manual payments screen (Finance & Fees).
+        href: nav("manual-payments"),
       });
     return items.slice(0, 6);
   };
@@ -2974,6 +2980,7 @@ export default function CollegePortal({
               </button>
             </div>,
           )}
+          <ReportsAnalytics nav={nav} />
           <div className="erp-dashboard-grid erp-report-charts">
             <ERPAnalytics
               payments={payments}
@@ -3322,6 +3329,12 @@ export default function CollegePortal({
           <div className="erp-topbar-breadcrumb" aria-label="Breadcrumb">
             <Link href={`${root}/portal/${area}`}>{c.short}</Link>
             <span aria-hidden="true">/</span>
+            {hubHref && (
+              <>
+                <Link href={hubHref}>{parentHub!.title}</Link>
+                <span aria-hidden="true">/</span>
+              </>
+            )}
             <span>{moduleHub?.title || labels[activeModule] || activeModule}</span>
             {detail && (
               <>
@@ -3372,8 +3385,10 @@ export default function CollegePortal({
                   e.currentTarget.closest("details")?.removeAttribute("open");
               }}
             >
-              {allowed("Super Admin", "Accounts Manager", "Student") && (
-                <button onClick={() => collect()}>Collect fee</button>
+              {allowed("Super Admin", "Accounts Manager") ? (
+                <Link href={nav("manual-payments")}>Collect fee</Link>
+              ) : (
+                allowed("Student") && <button onClick={() => collect()}>Collect fee</button>
               )}
               {allowed("Super Admin", "Admission Officer") && (
                 <>
@@ -3422,6 +3437,7 @@ export default function CollegePortal({
           </details>
         </header>
         <main id="erp-content" className="erp-content">
+          {hubHref && <HeadingBack href={hubHref} label={parentHub!.title} screen={activeModule} />}
           {!moduleHub && activeModule !== "timetable" &&
             activeModule !== "dashboard" &&
             !entryScreens.includes(activeModule) &&

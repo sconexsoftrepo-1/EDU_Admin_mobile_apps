@@ -1,0 +1,400 @@
+/* Reports & analytics dashboard. */
+.rpa {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.rpa h2,
+.rpa h3,
+.rpa p {
+  margin: 0;
+}
+.rpa-head {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+.rpa-head h2 {
+  font-size: 20px;
+}
+.rpa-head p {
+  color: #76695e;
+  font-size: 13px;
+  margin-top: 2px;
+}
+.rpa-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.college-erp .rpa .rpa-button,
+.rpa-button,
+.rpa-reset {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 8px;
+  color: #241d18;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+}
+.rpa-reset {
+  align-self: end;
+  border-color: transparent;
+  color: #a56824;
+}
+.rpa-filters {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.rpa-label {
+  color: #76695e;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  margin-bottom: -6px !important;
+  text-transform: uppercase;
+}
+
+/* Course and branch carousels */
+.rpa-carousel {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.rpa-carousel-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+}
+.college-erp .rpa .rpa-carousel-nav,
+.rpa-carousel-nav {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  width: 34px;
+}
+.college-erp .rpa .rpa-card,
+.rpa-card {
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 14px;
+  color: #241d18;
+  cursor: pointer;
+  display: grid;
+  flex: 0 0 210px;
+  gap: 4px;
+  min-height: 0;
+  padding: 14px;
+  scroll-snap-align: start;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.rpa-card.is-small {
+  flex-basis: 190px;
+  padding: 12px;
+}
+.rpa-card:hover {
+  box-shadow: 0 8px 20px #5a361314;
+  transform: translateY(-1px);
+}
+.college-erp .rpa .rpa-card.is-on,
+.rpa-card.is-on {
+  background: #fbf3e7;
+  border-color: #a56824;
+  box-shadow: 0 0 0 2px #a5682433;
+}
+.rpa-card strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rpa-card span,
+.rpa-card small {
+  color: #76695e;
+  font-size: 12px;
+}
+.rpa-card b {
+  color: #2f6f4f;
+  font-size: 15px;
+}
+.rpa-card i,
+.rpa-meter i {
+  background: #efe6d8;
+  border-radius: 99px;
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.rpa-card i::after,
+.rpa-meter i::after {
+  background: #2f6f4f;
+  border-radius: inherit;
+  content: "";
+  inset: 0 auto 0 0;
+  position: absolute;
+  width: var(--p, 0%);
+}
+
+/* KPI cards: each opens its module */
+.rpa-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.rpa-kpi {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 14px;
+  color: #241d18;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: 14px;
+  text-decoration: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rpa-kpi:hover,
+.rpa-kpi:focus-visible {
+  border-color: #a56824;
+  box-shadow: 0 8px 20px #5a361314;
+}
+.rpa-kpi-icon {
+  align-items: center;
+  background: #f6e6ce;
+  border-radius: 12px;
+  color: #8a5520;
+  display: inline-flex;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+.rpa-kpi-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.rpa-kpi-text small {
+  color: #76695e;
+  font-size: 12px;
+}
+.rpa-kpi-text strong {
+  font-size: 19px;
+}
+.rpa-kpi-text em {
+  color: #76695e;
+  font-size: 11px;
+  font-style: normal;
+}
+.rpa-kpi-go {
+  color: #c9b9a3;
+}
+.rpa-kpi:hover .rpa-kpi-go {
+  color: #a56824;
+}
+
+.rpa-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+}
+.rpa-chart {
+  min-height: 180px;
+  width: 100%;
+}
+.rpa-warn {
+  color: #b43540;
+  font-weight: 600;
+}
+.rpa-meter {
+  align-items: center;
+  display: inline-grid;
+  gap: 8px;
+  grid-template-columns: 80px auto;
+  font-size: 12px;
+}
+.rpa-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rpa-list li {
+  align-items: center;
+  border-bottom: 1px dashed #efe6d8;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 9px 0;
+}
+.rpa-list span {
+  display: grid;
+  gap: 2px;
+}
+.rpa-list small {
+  color: #76695e;
+  font-size: 12px;
+}
+.rpa-list b {
+  color: #b43540;
+}
+.rpa-mini {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 8px;
+}
+.rpa-mini span {
+  background: #fbf8f3;
+  border-radius: 10px;
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+}
+.rpa-mini small {
+  color: #76695e;
+  font-size: 11px;
+}
+.rpa-mini strong {
+  font-size: 17px;
+}
+@media (max-width: 640px) {
+  .rpa-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .rpa-mini {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* "Download PDF" prints the dashboard alone, charts included. */
+@media print {
+  .erp-sidebar,
+  .erp-topbar,
+  .rpa-head-actions,
+  .rpa-carousel-nav,
+  .rpa-reset,
+  .rpa ~ *,
+  body:has(.rpa) .erp-api-controls,
+  body:has(.rpa) .erp-skip,
+  body:has(.rpa) .chat-fab {
+    display: none !important;
+  }
+  .rpa-carousel-track {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .rpa-kpi,
+  .anw-panel,
+  .rpa-card {
+    break-inside: avoid;
+  }
+  .rpa * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+.rpa-label-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+.rpa-label-row .anw-link {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Cashbook dashboard */
+.college-erp .rpa button.rpa-kpi,
+button.rpa-kpi {
+  cursor: pointer;
+  font: inherit;
+  min-height: 0;
+  text-align: left;
+  width: 100%;
+}
+.college-erp .rpa .rpa-kpi.is-on,
+.rpa-kpi.is-on {
+  background: #fbf3e7;
+  border-color: #a56824;
+  box-shadow: 0 0 0 2px #a5682433;
+}
+.rpa-mini-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.rpa-mini em {
+  color: #76695e;
+  font-size: 11px;
+  font-style: normal;
+}
+.rpa-note {
+  color: #76695e;
+  font-size: 12px;
+  margin: 6px 0 0 !important;
+}
+.rpa-method {
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+}
+.rpa-method.is-cash {
+  background: #f6e6ce;
+  color: #8a5520;
+}
+.rpa-method.is-upi {
+  background: #fbefd9;
+  color: #9a6a1c;
+}
+.rpa-method.is-bank_transfer {
+  background: #eadfd3;
+  color: #5b3a17;
+}
+@media (max-width: 900px) {
+  .rpa-mini-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Donut beside a wide table (manual payments). */
+.rpa-split {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 2.4fr);
+}
+.rpa .anw-table td {
+  white-space: nowrap;
+}
+.rpa .anw-table td:first-child {
+  white-space: normal;
+}
+@media (max-width: 900px) {
+  .rpa-split {
+    grid-template-columns: 1fr;
+  }
+}

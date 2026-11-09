@@ -21,11 +21,8 @@ import SideDrawer from "./SideDrawer";
 import Select from "./SearchSelect";
 import SearchField, { searchValues } from "./SearchField";
 import "./assessment-workspace.css";
-const date = (v: string) =>
-  new Date(v).toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+import { formatDateTime } from "@/lib/colleges/dates";
+const date = (v: string) => formatDateTime(v);
 export default function AssessmentWorkspace() {
   const [data, setData] = useState<AssessmentList | null>(null),
     [error, setError] = useState(""),

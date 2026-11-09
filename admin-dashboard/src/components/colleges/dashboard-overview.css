@@ -476,6 +476,22 @@ a.dov-kpi:hover {
 .dov-people li + li {
   border-top: 1px solid var(--dov-line);
 }
+/* A recent admission opens that enquiry's details. */
+.dov-people .dov-person-link {
+  align-items: center;
+  border-radius: 10px;
+  color: inherit;
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  text-decoration: none;
+}
+.dov-people .dov-person-link:hover,
+.dov-people .dov-person-link:focus-visible {
+  background: var(--dov-tint);
+}
 .dov-avatar {
   align-items: center;
   background: var(--dov-tint);

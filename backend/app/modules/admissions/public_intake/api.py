@@ -8,7 +8,8 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import Field
 
 from app.core.security import StrictModel
-from app.core.storage import audit, new_code, now
+from app.core.resources import code_prefix
+from app.core.storage import audit, new_code, next_code, now
 
 router = APIRouter(prefix="/public", tags=["Public college intake"])
 
@@ -118,7 +119,10 @@ def apply(body: ApplicationInput, request: Request):
             data,
             "admission_enquiries",
             {
-                "code": new_code("ENQ"),
+                # Same short sequence as enquiries entered on the dashboard: ADMPRA-0001.
+                "code": next_code(data["records"].setdefault("admission_enquiries", {}),
+                                  code_prefix("admission_enquiries", data)),
+                "recorded_at": now(),
                 "campus_code": department["campus_code"],
                 "source_code": source["code"],
                 "cycle_code": cycle["code"],

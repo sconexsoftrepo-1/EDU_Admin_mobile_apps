@@ -91,3 +91,26 @@ def test_login_code_identifies_one_sign_in(client):
     again = client.get("/api/v1/auth/me", headers={"Authorization": "Bearer " + renewed.json()["access_token"]}).json()
     assert again["account"]["login_code"] == code and again["account"]["session_code"] != me["account"]["session_code"]
     assert login()["account"]["login_code"] != code
+
+
+def test_my_reference_credits_whoever_entered_the_enquiry(app, client, headers):
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C"}}
+        d["records"]["programs"] = {"P2": {"code": "P2", "name": "MPC", "course_level": "intermediate"}}
+    made = client.post("/api/v1/admissions/admission-enquiries/intake", headers=headers, json={"values": {
+        "campus_code": "C", "program_code": "P2", "first_name": "Ravi", "last_name": "K", "phone": "9876543210",
+        "status": "joined", "communication_consent": False, "reference_type": "self"}})
+    assert made.status_code == 201, made.text
+    body = made.json()
+    # The Super Admin entered it: an admin reference credited to them.
+    assert body["reference_type"] == "admin" and body["reference_name"] and body["referred_by_account"] == "ADMIN"
+    rows = client.get("/api/v1/dashboard/admission-analytics", headers=headers).json()["enquiries"]
+    row = next(r for r in rows if r["name"] == "Ravi K")
+    assert (row["reference_label"], row["credited_to"], row["status"]) == ("Admin reference", body["reference_name"], "joined")
+    # Choosing an outside source keeps it; nobody on staff is credited.
+    other = client.post("/api/v1/admissions/admission-enquiries/intake", headers=headers, json={"values": {
+        "campus_code": "C", "first_name": "Sita", "last_name": "M", "phone": "9876543211", "status": "new",
+        "communication_consent": False, "reference_type": "social_media", "reference_name": "Instagram"}})
+    rows = client.get("/api/v1/dashboard/admission-analytics", headers=headers).json()["enquiries"]
+    sita = next(r for r in rows if r["name"] == "Sita M")
+    assert other.status_code == 201 and sita["reference_type"] == "social_media" and sita["credited_to"] is None

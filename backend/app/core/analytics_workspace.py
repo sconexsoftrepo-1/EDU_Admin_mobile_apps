@@ -17,7 +17,7 @@ from .security import current_user, has_permission
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard analytics"])
 # Every category the enquiry form offers, in the form's order, even with no enquiries yet.
-REFERENCE_ORDER = ["walk_in", "employee", "staff", "relative", "advertising", "post", "social_media", "other"]
+REFERENCE_ORDER = ["walk_in", "admin", "teacher", "employee", "staff", "relative", "advertising", "post", "social_media", "other"]
 
 
 def staff_only(user):
@@ -67,6 +67,9 @@ def admission_rows(data, user, can_view_all):
             "code": base["code"] if visible else None, "name": base["name"] if visible else None,
             "phone": enquiry.get("phone") if visible else None,
             "reference_name": base["reference_name"] if visible else None,
+            # Staff credited with the enquiry (for incentives): only for those who may see everyone's.
+            "credited_to": base["credited_to"] if can_view_all or mine else None,
+            "credited_key": base["credited_key"] if can_view_all or mine else None,
             "assigned_to": aw.name(employees.get(enquiry.get("assigned_employee_code"), {})).strip() or None if visible else None,
         }
         enquiries.append(row)
@@ -225,3 +228,91 @@ def campus_analytics(request: Request, user=Depends(current_user)):
                                "detail": e.get("place") or e.get("short_description")}
                               for e in events if str(e.get("starts_at") or "")[:10] >= since][:6]
     return result
+
+
+# ---- Reports & analytics: one payload, filtered in the browser ------------------------------------
+@router.get("/reports-analytics")
+def reports_analytics(request: Request, user=Depends(current_user)):
+    """Rows behind the Reports & analytics dashboard: students, every fee charge, collections,
+    admissions, the cash book and late fees, each tagged with course level, branch and academic year."""
+    from app.modules.finance.transactions.api import build_ledger_index, calculate_ledger
+
+    from .cash_custody import positions
+    from .fee_collection import LEVELS, student_info
+    from .late_fees import LATE_BASIS, overview as late_overview
+
+    staff_only(user)
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
+    if not any(has_permission(data, user, t, "view") for t in ("reports", "payments", "student_fee_charges")):
+        raise HTTPException(403, "Reports are not assigned to this role")
+    today = academics.local_now().date()
+    records = data["records"]
+    programs, years = records.get("programs", {}), records.get("academic_years", {})
+    structures = records.get("fee_structures", {})
+    students, charges = [], []
+    index = build_ledger_index(data)
+    for student in aw.rows(data, "students"):
+        if student.get("code") == "FEE-PAYERS":
+            continue
+        info = student_info(data, student)
+        students.append({"code": student["code"], "name": info["name"], "status": student.get("status") or "active",
+                         "level": info["course_level"], "program_code": info["program_code"],
+                         "year_code": info["academic_year_code"]})
+        for charge in calculate_ledger(data, student["code"], index=index)["charges"]:
+            structure = structures.get(charge.get("fee_structure_code"), {})
+            program = programs.get(structure.get("program_code"), {})
+            due = str(charge.get("due_date") or "")[:10]
+            outstanding = float(amount(charge.get("outstanding")))
+            charges.append({"student_code": student["code"], "student": info["name"],
+                            "level": program.get("course_level") or info["course_level"],
+                            "program_code": structure.get("program_code") or info["program_code"],
+                            "year_code": structure.get("academic_year_code") or info["academic_year_code"],
+                            "semester": structure.get("semester_number"), "head": charge.get("fee_head"),
+                            "late_fee": structure.get("fee_basis") == LATE_BASIS,
+                            "billed": float(amount(charge.get("gross"))),
+                            "concession": float(amount(charge.get("discount")) + amount(charge.get("scholarship"))),
+                            "paid": float(amount(charge.get("paid"))), "outstanding": outstanding, "due_date": due,
+                            "days_overdue": (today - date.fromisoformat(due)).days if due and outstanding > 0 and due < today.isoformat() else 0})
+    payments = []
+    infos = {}
+    receipts = {r.get("payment_code"): r.get("receipt_number") for r in aw.rows(data, "receipts")}
+    for p in aw.rows(data, "payments"):
+        if p.get("status") != "settled":
+            continue
+        payer = p.get("payer") or {}
+        if payer:
+            level, program, year = payer.get("course_level"), None, payer.get("academic_year")
+        else:
+            student = records.get("students", {}).get(p.get("student_code"))
+            info = infos.get(p.get("student_code")) or (student_info(data, student) if student else {})
+            infos[p.get("student_code")] = info
+            level, program, year = info.get("course_level"), info.get("program_code"), info.get("academic_year_code")
+        payments.append({"date": str(p.get("transaction_date") or p.get("paid_on") or "")[:10], "amount": float(amount(p.get("amount"))),
+                         "method": p.get("method"), "source": "manual" if payer else "linked", "level": level,
+                         "program_code": program, "year_code": year, "branch_label": payer.get("course_branch"),
+                         "semester": p.get("semester"), "head": p.get("fee_head_name"), "student_code": p.get("student_code"),
+                         "student": payer.get("name") or (infos.get(p.get("student_code")) or {}).get("name"),
+                         "receipt_number": receipts.get(p["code"]), "reference": p.get("transaction_reference")})
+    enquiries, _ = admission_rows(data, user, has_permission(data, user, admissions.TABLE, "view"))
+    late = late_overview(data)
+    cash = positions(data, today)[0]
+    return {
+        "today": today.isoformat(),
+        "levels": [{"key": k, "label": v} for k, v in LEVELS.items()],
+        "programs": sorted(({"code": p["code"], "name": p.get("name"), "level": p.get("course_level"),
+                             "branch": p.get("branch"), "department": p.get("department_code")}
+                            for p in aw.rows(data, "programs")), key=lambda p: str(p["name"])),
+        "years": sorted(({"code": y["code"], "name": y.get("name"), "program_code": y.get("program_code")}
+                         for y in aw.rows(data, "academic_years")), key=lambda y: str(y["name"])),
+        "students": students,
+        "charges": charges,
+        "payments": payments,
+        "enquiries": [{"level": e["course_level"], "program_code": e["program_code"], "year_code": e["academic_year_code"],
+                       "status": e["status"], "stage": e["stage"], "reference": e["reference_label"],
+                       "recorded_at": e["recorded_at"]} for e in enquiries],
+        "cashbook": cash[-366:],
+        "late_fees": {"summary": late["summary"],
+                      "items": [{"student_code": i["student_code"], "status": i["status"],
+                                 "late_fees": [{"amount": f["amount"], "status": f["status"], "semester": f.get("semester_number")}
+                                               for f in i["late_fees"]]} for i in late["items"]]},
+    }

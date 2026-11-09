@@ -20,6 +20,7 @@ import type { College } from "@/data/colleges";
 import { professionalPdf } from "@/lib/colleges/download";
 import PDFActions from "./PDFActions";
 import AcademicTimetableGrid from "./AcademicTimetableGrid";
+import { formatDate } from "@/lib/colleges/dates";
 export default function TimetableOverview({ college }: { college: College }) {
   const { state, run, role } = useCollege();
   const manage = role === "Super Admin";
@@ -471,7 +472,7 @@ export default function TimetableOverview({ college }: { college: College }) {
             </summary>
             {opRows(state, "timetable-versions").map((v) => (
               <div key={v.id}>
-                <strong>{v.name}</strong> · {v.date}
+                <strong>{v.name}</strong> · {formatDate(v.date)}
                 <button
                   onClick={() => {
                     if (

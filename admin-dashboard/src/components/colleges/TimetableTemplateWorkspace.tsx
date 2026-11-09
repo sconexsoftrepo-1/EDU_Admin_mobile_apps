@@ -35,6 +35,7 @@ import {
 } from "@/lib/colleges/timetable-templates";
 import TimetableCanvas from "./TimetableCanvas";
 import "./timetable-templates.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 export default function TimetableTemplateWorkspace({
   college,
@@ -745,7 +746,7 @@ export default function TimetableTemplateWorkspace({
                       {r.status}
                     </span>
                     <small>
-                      {new Date(r.updated_at).toLocaleDateString("en-IN")}
+                      {formatDate(r.updated_at)}
                     </small>
                     <span>
                       {records.can_edit ? "Open & edit" : "View timetable"} →

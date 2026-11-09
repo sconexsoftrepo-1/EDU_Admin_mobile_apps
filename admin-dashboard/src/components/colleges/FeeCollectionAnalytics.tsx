@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChevronLeft, ChevronRight, IndianRupee, Receipt, TrendingUp, Users } from "lucide-react";
 import { api, errorText, type FeeAnalytics } from "@/services/api";
+import { formatDate } from "@/lib/colleges/dates";
 import { BarList, Donut, Empty, FilterDate, LoadFailed, Panel, rupees, Stat } from "./AnalyticsParts";
 
 type Scale = "day" | "week" | "month" | "year";
@@ -11,16 +12,16 @@ type Range = "day" | "week" | "month" | "year" | "all" | "custom";
 
 const METHOD_COLOURS: Record<string, string> = { cash: "#a56824", upi: "#e0a85a", bank_transfer: "#5b3a17" };
 const METHOD_NAMES: Record<string, string> = { cash: "Cash", upi: "UPI", bank_transfer: "Bank transfer" };
-const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+export const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const parse = (s: string) => new Date(`${s}T00:00:00`);
 const compact = (v: number) =>
   v >= 1e7 ? `${+(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `${+(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `${+(v / 1e3).toFixed(0)}K` : String(v);
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const dayLabel = (d: Date) => d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+const dayLabel = (d: Date) => `${d.toLocaleDateString("en-IN", { weekday: "short" })}, ${formatDate(d)}`;
 
 /** First and last day of the day / week (Monday–Sunday) / month / year that contains the anchor. */
-function periodBounds(range: "day" | "week" | "month" | "year", anchor: Date) {
+export function periodBounds(range: "day" | "week" | "month" | "year", anchor: Date) {
   const y = anchor.getFullYear(), m = anchor.getMonth(), d = anchor.getDate();
   if (range === "day") return [new Date(y, m, d), new Date(y, m, d)];
   if (range === "week") {
@@ -32,7 +33,7 @@ function periodBounds(range: "day" | "week" | "month" | "year", anchor: Date) {
 }
 
 /** The anchor moved one period back (-1) or forward (+1). */
-function shift(range: "day" | "week" | "month" | "year", anchor: Date, step: number) {
+export function shift(range: "day" | "week" | "month" | "year", anchor: Date, step: number) {
   const y = anchor.getFullYear(), m = anchor.getMonth(), d = anchor.getDate();
   if (range === "day") return new Date(y, m, d + step);
   if (range === "week") return new Date(y, m, d + 7 * step);
@@ -48,12 +49,12 @@ function rangeDates(range: Range, custom: { start: string; end: string }, anchor
 }
 
 /** "Today · Mon, 9 Nov 2026", "This week · 9 – 15 Nov 2026", "November 2026", "2026". */
-function periodTitle(range: "day" | "week" | "month" | "year", anchor: Date) {
+export function periodTitle(range: "day" | "week" | "month" | "year", anchor: Date) {
   const [start, end] = periodBounds(range, anchor);
   const current = iso(periodBounds(range, new Date())[0]) === iso(start);
   const name = {
     day: dayLabel(start),
-    week: `${start.getDate()} ${start.toLocaleDateString("en-IN", { month: "short" })}${start.getFullYear() !== end.getFullYear() ? ` ${start.getFullYear()}` : ""} – ${end.getDate()} ${end.toLocaleDateString("en-IN", { month: "short" })} ${end.getFullYear()}`,
+    week: `${formatDate(start)} – ${formatDate(end)}`,
     month: `${MONTHS[start.getMonth()]} ${start.getFullYear()}`,
     year: String(start.getFullYear()),
   }[range];
@@ -375,7 +376,7 @@ export default function FeeCollectionAnalytics() {
 }
 
 /** The selected day / week / month / year with previous–next arrows, a picker and "back to now". */
-function PeriodPicker({
+export function PeriodPicker({
   range,
   anchor,
   onChange,

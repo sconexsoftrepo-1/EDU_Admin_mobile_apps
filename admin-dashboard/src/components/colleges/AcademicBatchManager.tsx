@@ -13,6 +13,7 @@ import AcademicYearForm from "./AcademicYearForm";
 import SideDrawer from "./SideDrawer";
 import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import SearchField, { searchValues } from "./SearchField";
+import { formatDate } from "@/lib/colleges/dates";
 
 export default function AcademicBatchManager({
   onSelect,
@@ -112,7 +113,7 @@ export default function AcademicBatchManager({
                         <small>{b.course_name}</small>
                       </td>
                       <td>
-                        {b.start_date} – {b.end_date}
+                        {formatDate(b.start_date)} – {formatDate(b.end_date)}
                       </td>
                       <td>
                         <button

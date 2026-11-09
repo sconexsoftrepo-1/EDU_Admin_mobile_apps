@@ -21,6 +21,7 @@ import {
   writeWorkspaceCache,
 } from "@/lib/colleges/workspace-cache";
 import "./assignment-workspace.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 const PDFCanvasViewer = dynamic(() => import("./PDFCanvasViewer"), {
   ssr: false,
@@ -372,7 +373,7 @@ export default function CertificateWorkspace({
                 <span className="as-pill">{row.status}</span>
                 <span className="as-date">
                   {row.requested_on
-                    ? new Date(row.requested_on).toLocaleDateString("en-IN")
+                    ? formatDate(row.requested_on)
                     : ""}
                 </span>
               </div>
