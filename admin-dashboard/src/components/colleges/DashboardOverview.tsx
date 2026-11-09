@@ -37,6 +37,7 @@ import {
   type SectionError,
 } from "@/services/api";
 import "./dashboard-overview.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 const DashboardFeeChart = dynamic(() => import("./DashboardFeeChart"), {
   ssr: false,
@@ -296,11 +297,7 @@ function Banner({
           {now?.toLocaleDateString("en-IN", { weekday: "long" }) || " "}
         </small>
         <strong>
-          {now?.toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }) || " "}
+          {now ? formatDate(now) : " "}
         </strong>
         <small>Academic session</small>
         <b>{session?.replace("-", " – ") || " "}</b>

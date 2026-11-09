@@ -9,6 +9,7 @@ import { PaymentHistory } from "./FeePaymentsWorkspace";
 import SideDrawer from "./SideDrawer";
 import { toast } from "./toast";
 import "./fee-cash.css";
+import { formatDateTime } from "@/lib/colleges/dates";
 
 const STATUS: Record<CashTransfer["status"], string> = {
   assigned: "Waiting for clerk",
@@ -443,10 +444,7 @@ function ReviewSlip({
   );
 }
 
-const when = (value?: string | null) =>
-  value
-    ? new Date(value).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })
-    : null;
+const when = (value?: string | null) => (value ? formatDateTime(value) : null);
 
 /** The bank slip image (or a note for a PDF slip), loaded with the signed-in session. */
 function SlipImage({ transfer, deposit }: { transfer: CashTransfer; deposit: CashDeposit }) {

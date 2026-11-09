@@ -251,3 +251,37 @@ test("restricted role sees only its authorized module and workspace cards", asyn
   await expect(page.locator('.erp-hub-navigation a[href="/portal/admin/hub-administration"]')).toHaveCount(0);
   await expect(page.locator('.erp-hub-navigation a[href="/portal/admin/hub-students"]')).toHaveCount(0);
 });
+
+test("workspace back links sit beside the screen title and return to the module", async ({
+  page,
+}) => {
+  test.skip(!origin, "Set EDUNEXA_TEST_BASE_URL to a running frontend");
+  await setup(page);
+
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${origin}/portal/admin/hub-finance`);
+    await page.locator('.mhub-links a[href="/portal/admin/manual-payments"]').click();
+
+    const title = page.getByRole("heading", { name: "Manual payments screen", exact: true });
+    const back = title.getByRole("link", { name: "Back to Finance & Fees" });
+    await expect(back).toBeVisible();
+    await expect(page.locator(".erp-topbar .erp-back")).toHaveCount(0);
+    await expect(
+      page.getByLabel("Breadcrumb", { exact: true }).getByRole("link", {
+        name: "Finance & Fees",
+      }),
+    ).toHaveAttribute("href", "/portal/admin/hub-finance#module-workspaces");
+    expect(await back.evaluate((link) => link.parentElement === link.closest("h1")?.firstElementChild)).toBe(true);
+
+    await back.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/portal\/admin\/hub-finance(?:#module-workspaces)?$/);
+    await expect(page.getByRole("heading", { name: "Module workspaces", exact: true })).toBeVisible();
+    await expect(page.locator(".erp-back")).toHaveCount(0);
+  }
+
+  await page.goto(`${origin}/portal/admin/timetable`);
+  const timetable = page.getByRole("heading", { name: "Timetable studio", exact: true });
+  await expect(timetable.getByRole("link", { name: "Back to Academics" })).toBeVisible();
+});

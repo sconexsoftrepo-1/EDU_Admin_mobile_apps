@@ -21,6 +21,7 @@ import {
 import "./staff/staff.css";
 import "./payslips.css";
 import "./staff-hr.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 export type StaffHRView = "attendance" | "leave" | "bonuses";
 const TITLES: Record<StaffHRView, string> = {
@@ -41,14 +42,7 @@ const inr = (v?: string | number | null) =>
     currency: "INR",
     maximumFractionDigits: 0,
   }).format(Number(v || 0));
-const day = (v?: string | null) =>
-  v
-    ? new Date(v.slice(0, 10) + "T00:00:00").toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : "—";
+const day = (v?: string | null) => (v ? formatDate(v.slice(0, 10)) : "—");
 
 /** Taken | pending | remaining bar for one leave type. */
 export function LeaveBar({ b }: { b: LeaveBalance }) {

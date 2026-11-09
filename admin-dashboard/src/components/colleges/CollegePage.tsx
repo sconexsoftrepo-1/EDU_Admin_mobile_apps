@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { api, errorText, type CertificateVerification } from "@/services/api";
+import { formatDate } from "@/lib/colleges/dates";
 const Login = dynamic(() => import("./ConnectedPortal"));
 
 function Verification({ college: c, id }: { college: College; id: string }) {
@@ -50,7 +51,7 @@ function Verification({ college: c, id }: { college: College; id: string }) {
             <dt>Certificate number</dt>
             <dd>{result.certificate_number}</dd>
             <dt>Issued on</dt>
-            <dd>{result.issued_on}</dd>
+            <dd>{formatDate(result.issued_on)}</dd>
             <dt>Signing mode</dt>
             <dd>{result.signer_type}</dd>
           </dl>

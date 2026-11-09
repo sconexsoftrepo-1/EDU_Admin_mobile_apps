@@ -21,6 +21,7 @@ import SearchField, { searchValues } from "./SearchField";
 import SideDrawer from "./SideDrawer";
 import AttendanceWorkspace from "./AttendanceWorkspace";
 import "./academic-progress.css";
+import { formatDate, formatDateTime } from "@/lib/colleges/dates";
 const money = (s: string | number) =>
   Number(s).toLocaleString("en-IN", {
     style: "currency",
@@ -552,7 +553,7 @@ export default function AcademicProgressWorkspace({
                 <summary>Payment history ({data.payments.length})</summary>
                 {data.payments.map((p) => (
                   <p key={p.code}>
-                    {p.paid_on} · {money(p.amount)} · {p.method} · {p.status}
+                    {formatDate(p.paid_on)} · {money(p.amount)} · {p.method} · {p.status}
                   </p>
                 ))}
               </details>
@@ -560,9 +561,7 @@ export default function AcademicProgressWorkspace({
           )}
           <small>
             Updated{" "}
-            {new Date(data.generated_at).toLocaleString("en-IN", {
-              timeZone: "Asia/Kolkata",
-            })}
+            {formatDateTime(data.generated_at)}
           </small>
         </>
       )}

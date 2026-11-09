@@ -12,6 +12,7 @@ import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import { useErrorToast } from "./toast";
 import "./staff/staff.css";
 import "./cash-ledger.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 type Period = "day" | "week" | "month" | "year";
 type Group = {
@@ -281,7 +282,7 @@ export default function CashLedgerPanel({
                   <tbody>
                     {data.entries.map((e) => (
                       <tr key={`${e.date}-${e.voucher}`}>
-                        <td>{e.date}</td>
+                        <td>{formatDate(e.date)}</td>
                         <td>
                           <code className="stf-code">{e.voucher}</code>
                         </td>

@@ -34,11 +34,6 @@ const eligible = (el: Element | null): el is HTMLSelectElement =>
   !el.disabled &&
   !el.closest(".campus-auth, [data-native-select]");
 
-const setValue = Object.getOwnPropertyDescriptor(
-  HTMLSelectElement.prototype,
-  "value",
-)?.set;
-
 function readItems(select: HTMLSelectElement): Item[] {
   return Array.from(select.options)
     .map((o, index) => ({
@@ -214,6 +209,10 @@ export default function SelectEnhancer() {
     const el = current.current;
     if (!el || !item || item.disabled) return;
     if (el.value !== item.value) {
+      const setValue = Object.getOwnPropertyDescriptor(
+        HTMLSelectElement.prototype,
+        "value",
+      )?.set;
       setValue?.call(el, item.value);
       el.dispatchEvent(new Event("input", { bubbles: true }));
       el.dispatchEvent(new Event("change", { bubbles: true }));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Search, X, type LucideIcon } from "lucide-react";
 import { hubIcons, screenLabel } from "@/lib/colleges/module-hubs";
@@ -41,6 +41,16 @@ export default function ModuleWorkspaceSection({
 }) {
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("");
+  const section = useRef<HTMLElement>(null);
+  // Coming back from a module screen (#module-workspaces): keep the workspaces in the middle of
+  // the screen. Tried again as the hub's figures above finish loading and change the height.
+  useEffect(() => {
+    if (window.location.hash !== "#module-workspaces") return;
+    const centre = () => section.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const timers = [80, 600, 1500].map((ms) => window.setTimeout(centre, ms));
+    const clear = window.setTimeout(() => window.history.replaceState(null, "", window.location.pathname + window.location.search), 1700);
+    return () => [...timers, clear].forEach((t) => window.clearTimeout(t));
+  }, []);
   const orderedScreens = screens.filter(
     (screen) => screen !== "module-admissions",
   );
@@ -84,6 +94,7 @@ export default function ModuleWorkspaceSection({
 
   return (
     <section
+      ref={section}
       className="mhub-workspaces"
       aria-labelledby="mhub-workspaces-title"
     >

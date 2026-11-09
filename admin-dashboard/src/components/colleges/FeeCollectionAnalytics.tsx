@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChevronLeft, ChevronRight, IndianRupee, Receipt, TrendingUp, Users } from "lucide-react";
 import { api, errorText, type FeeAnalytics } from "@/services/api";
+import { formatDate } from "@/lib/colleges/dates";
 import { BarList, Donut, Empty, FilterDate, LoadFailed, Panel, rupees, Stat } from "./AnalyticsParts";
 
 type Scale = "day" | "week" | "month" | "year";
@@ -17,7 +18,7 @@ const compact = (v: number) =>
   v >= 1e7 ? `${+(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `${+(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `${+(v / 1e3).toFixed(0)}K` : String(v);
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const dayLabel = (d: Date) => d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+const dayLabel = (d: Date) => `${d.toLocaleDateString("en-IN", { weekday: "short" })}, ${formatDate(d)}`;
 
 /** First and last day of the day / week (Monday–Sunday) / month / year that contains the anchor. */
 export function periodBounds(range: "day" | "week" | "month" | "year", anchor: Date) {
@@ -53,7 +54,7 @@ export function periodTitle(range: "day" | "week" | "month" | "year", anchor: Da
   const current = iso(periodBounds(range, new Date())[0]) === iso(start);
   const name = {
     day: dayLabel(start),
-    week: `${start.getDate()} ${start.toLocaleDateString("en-IN", { month: "short" })}${start.getFullYear() !== end.getFullYear() ? ` ${start.getFullYear()}` : ""} – ${end.getDate()} ${end.toLocaleDateString("en-IN", { month: "short" })} ${end.getFullYear()}`,
+    week: `${formatDate(start)} – ${formatDate(end)}`,
     month: `${MONTHS[start.getMonth()]} ${start.getFullYear()}`,
     year: String(start.getFullYear()),
   }[range];

@@ -28,6 +28,7 @@ import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./admission-workspace.css";
 import { COURSE_LEVELS } from "@/lib/colleges/course-levels";
 import type { CourseLevel } from "@/services/api";
+import { formatDateTime } from "@/lib/colleges/dates";
 
 type Lookups = { employees: LookupOption[]; options: EnrollmentOptions };
 type Props = {
@@ -48,13 +49,7 @@ const nice = (value: unknown) =>
   String(value || "")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
-const dateTime = (value: unknown) => {
-  if (!value) return "—";
-  const date = new Date(String(value));
-  return Number.isNaN(date.getTime())
-    ? String(value)
-    : date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
-};
+const dateTime = (value: unknown) => formatDateTime(value);
 
 export default function AdmissionWorkspace({
   college,

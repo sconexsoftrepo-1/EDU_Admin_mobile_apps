@@ -13,9 +13,10 @@ import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./assignment-workspace.css";
 import "./calendar-workspace.css";
 import { readWorkspaceCache, workspaceCacheKey, writeWorkspaceCache } from "@/lib/colleges/workspace-cache";
+import { formatDateTime } from "@/lib/colleges/dates";
 
 const asLocalDateTime = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-const showDate = (value: string) => new Date(value).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const showDate = (value: string) => formatDateTime(value);
 function audienceText(event: CalendarEvent, options?: CalendarOptions) {
   if (event.audience_type === "department") return options?.departments.find((row) => row.code === event.audience_code)?.name || "Selected department";
   if (event.audience_type === "intermediate") return "All Intermediate students";

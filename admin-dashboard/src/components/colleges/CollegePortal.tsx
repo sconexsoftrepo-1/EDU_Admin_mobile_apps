@@ -63,7 +63,7 @@ import {
 } from "@/lib/colleges/reports";
 import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
-import { activeHub, RETIRED_SCREENS } from "@/lib/colleges/module-hubs";
+import { activeHub, hubRoute, RETIRED_SCREENS, visibleHubs } from "@/lib/colleges/module-hubs";
 const ModuleHubDashboard = dynamic(() => import("./ModuleHubDashboard"), { loading: () => <WorkspaceSkeleton label="Loading module dashboard" /> });
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => <WorkspaceSkeleton label="Loading collection analytics" />,
@@ -79,6 +79,7 @@ import FeePaymentsWorkspace from "./FeePaymentsWorkspace";
 import CashbookWorkspace from "./CashbookWorkspace";
 import LateFeesWorkspace from "./LateFeesWorkspace";
 import ReportsAnalytics from "./ReportsAnalytics";
+import HeadingBack from "./HeadingBack";
 import DashboardOverview, {
   DashboardTabs,
   initialsOf,
@@ -389,6 +390,8 @@ export default function CollegePortal({
     activeModule = parts[2] || "dashboard",
     detail = parts[3];
   const moduleHub = activeHub(activeModule, modules);
+  // The module (hub) a screen belongs to, for the back button and breadcrumb.
+  const parentHub = moduleHub ? undefined : visibleHubs(modules).find((hub) => hub.screens.includes(activeModule));
   // Retired setup screens open the screen that replaced them (?records=… keeps raw-table access).
   useEffect(() => {
     const target = RETIRED_SCREENS[activeModule];
@@ -554,6 +557,7 @@ export default function CollegePortal({
       ? rows.filter((x) => x.studentId === selfStudent.id)
       : rows;
   const nav = (m: string) => `${root}/portal/${area}/${m}`;
+  const hubHref = parentHub ? `${nav(hubRoute(parentHub))}#module-workspaces` : null;
   function collect(st?: Student) {
     form("Record payment", "payment", [
       field(
@@ -3325,6 +3329,12 @@ export default function CollegePortal({
           <div className="erp-topbar-breadcrumb" aria-label="Breadcrumb">
             <Link href={`${root}/portal/${area}`}>{c.short}</Link>
             <span aria-hidden="true">/</span>
+            {hubHref && (
+              <>
+                <Link href={hubHref}>{parentHub!.title}</Link>
+                <span aria-hidden="true">/</span>
+              </>
+            )}
             <span>{moduleHub?.title || labels[activeModule] || activeModule}</span>
             {detail && (
               <>
@@ -3427,6 +3437,7 @@ export default function CollegePortal({
           </details>
         </header>
         <main id="erp-content" className="erp-content">
+          {hubHref && <HeadingBack href={hubHref} label={parentHub!.title} screen={activeModule} />}
           {!moduleHub && activeModule !== "timetable" &&
             activeModule !== "dashboard" &&
             !entryScreens.includes(activeModule) &&
