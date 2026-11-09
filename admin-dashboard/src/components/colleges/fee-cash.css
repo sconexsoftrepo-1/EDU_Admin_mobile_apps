@@ -603,8 +603,18 @@
   padding: 8px;
   position: absolute;
   top: calc(100% + 4px);
+  max-width: calc(100vw - 32px);
   width: 248px;
   z-index: 40;
+}
+/* Opened where there is room, so the page never grows a scrollbar for it. */
+.ypk-panel.is-up {
+  bottom: calc(100% + 4px);
+  top: auto;
+}
+.ypk-panel.is-right {
+  left: auto;
+  right: 0;
 }
 .ypk-nav {
   align-items: center;
@@ -1284,4 +1294,121 @@
 }
 .rcp .rcp-table.rcp-table > thead > tr > th:last-child {
   text-align: right;
+}
+
+
+/* Handover details side panel (cashbook). */
+.ctd {
+  display: grid;
+  gap: 12px;
+}
+.ctd-heading {
+  border-bottom: 1px solid #eadccb;
+  color: #a56824;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  margin: 6px 0 0;
+  padding-bottom: 6px;
+  text-transform: uppercase;
+}
+.ctd-muted {
+  color: #76695e;
+  font-size: 13px;
+  margin: 0;
+}
+.ctd-timeline {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ctd-timeline li {
+  border-left: 2px solid #eadccb;
+  display: grid;
+  gap: 2px;
+  padding: 0 0 12px 16px;
+  position: relative;
+}
+.ctd-timeline li::before {
+  background: #a56824;
+  border-radius: 50%;
+  content: "";
+  height: 10px;
+  left: -6px;
+  position: absolute;
+  top: 3px;
+  width: 10px;
+}
+.ctd-timeline strong {
+  font-size: 13px;
+}
+.ctd-timeline span {
+  font-size: 13px;
+}
+.ctd-timeline small {
+  color: #76695e;
+  font-size: 12px;
+}
+.ctd-deposit {
+  border: 1px solid #eadccb;
+  border-radius: 12px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+.ctd-deposit > header {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+.ctd-deposit > small {
+  color: #76695e;
+}
+.ctd-slip img {
+  border-radius: 10px;
+  display: block;
+  max-height: 320px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.ctd-review {
+  display: grid;
+  gap: 8px;
+}
+
+/* Collection analytics: the selected day / week / month / year. */
+.fca-period {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 10px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+}
+.fca-period strong {
+  font-size: 14px;
+  min-width: 150px;
+  text-align: center;
+}
+.fca-period-pick :is(input, select) {
+  border: 1px solid #eadccb;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  height: 34px;
+  padding: 0 8px;
+}
+.college-erp .fca .fca-period-now,
+.fca-period-now {
+  background: none;
+  border: 0;
+  color: #a56824;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 6px;
 }

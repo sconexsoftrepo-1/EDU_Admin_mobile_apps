@@ -23,6 +23,8 @@ export default function YearPicker({
   const thisYear = new Date().getFullYear();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(0);
+  // Where the panel opens so it always stays on screen: above / below, left- / right-aligned.
+  const [place, setPlace] = useState({ up: false, right: false });
   const root = useRef<HTMLDivElement>(null);
   const start = page;
   const years = Array.from({ length: 12 }, (_, i) => start + i);
@@ -50,6 +52,14 @@ export default function YearPicker({
         onClick={() => {
           // Open on a page with the chosen (or current) year in the second row.
           setPage((value ?? Math.min(max, Math.max(min, thisYear))) - 4);
+          const box = root.current?.getBoundingClientRect();
+          if (box) {
+            const panel = { width: 248, height: 250 };
+            setPlace({
+              up: window.innerHeight - box.bottom < panel.height + 8 && box.top > window.innerHeight - box.bottom,
+              right: box.left + panel.width > window.innerWidth - 8,
+            });
+          }
           setOpen(!open);
         }}
       >
@@ -59,7 +69,7 @@ export default function YearPicker({
       {/* Lets the browser's required-field check cover this custom control. */}
       <input className="ypk-proxy" tabIndex={-1} aria-hidden="true" required={required} value={value ?? ""} onChange={() => undefined} />
       {open && (
-        <div className="ypk-panel" role="dialog" aria-label={label}>
+        <div className={`ypk-panel${place.up ? " is-up" : ""}${place.right ? " is-right" : ""}`} role="dialog" aria-label={label}>
           <div className="ypk-nav">
             <button type="button" aria-label="Earlier years" disabled={start <= min} onClick={() => setPage(start - 12)}>
               <ChevronLeft size={16} />

@@ -203,4 +203,34 @@ void main() {
     await shot(tester, 'admin-analytics');
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('deposit history shows what was deposited and opens the details screen', (tester) async {
+    final finished = {
+      ...transfer('settled', [
+        {'code': 'D1', 'amount': '80000.00', 'deposited_on': '2026-11-08', 'status': 'accepted', 'has_proof': true,
+         'proof_mime': 'image/jpeg', 'recorded_at': '2026-11-08T05:30:00Z', 'proof_uploaded_at': '2026-11-08T05:40:00Z',
+         'reviewed_at': '2026-11-08T07:00:00Z', 'reviewed_by_name': 'Akhil'},
+      ]),
+      'amount': '100000.00', 'accepted_amount': '80000.00', 'returned_amount': '20000.00', 'with_clerk': '0.00',
+      'returns': [
+        {'amount': '20000.00', 'returned_on': '2026-11-08', 'recorded_at': '2026-11-08T08:00:00Z'},
+      ],
+    };
+    final client = await api((req) {
+      if (req.url.path.endsWith('/proof')) return slip;
+      return {'account_code': 'CLERK', 'my_in_hand': '0.00', 'transfers': [finished]};
+    });
+    await show(tester, CashDepositWorkspace(api: client));
+    // The history card leads with the ₹80,000 deposited, not the ₹1,00,000 handed over.
+    expect(find.text('₹80,000 deposited'), findsOneWidget);
+    expect(find.text('of ₹1,00,000 handed over · ₹20,000 refunded to admin'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('transfer-T1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('deposit-history-details')), findsOneWidget);
+    expect(find.text('Deposited & accepted'), findsOneWidget);
+    expect(find.text('Cash remaining in hand'), findsOneWidget);
+    expect(find.text('Refunded to admin'), findsOneWidget);
+    expect(find.text('Proof of deposit'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

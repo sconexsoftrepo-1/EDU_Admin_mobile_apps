@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ArrowRightLeft, Banknote, BarChart3, Check, Clock, Landmark, Smartphone, Users, Wallet, X } from "lucide-react";
+import { ArrowRightLeft, Banknote, BarChart3, Check, Clock, Info, Landmark, Smartphone, Users, Wallet, X } from "lucide-react";
 import { api, errorText, type CashDeposit, type CashOverview, type CashTransfer } from "@/services/api";
 import { Empty, LoadFailed, Panel, rupees, shortDate, Stat } from "./AnalyticsParts";
 import FeeCollectionAnalytics from "./FeeCollectionAnalytics";
@@ -32,6 +32,7 @@ export default function CashbookWorkspace() {
   const [ledger, setLedger] = useState<"cash" | "upi" | "bank_transfer" | "analytics">("cash");
   const [assigning, setAssigning] = useState(false);
   const [reviewing, setReviewing] = useState<{ transfer: CashTransfer; deposit: CashDeposit } | null>(null);
+  const [details, setDetails] = useState<string | null>(null);
   const load = useCallback(() => {
     setError("");
     return api.feePayments
@@ -167,6 +168,7 @@ export default function CashbookWorkspace() {
                       <th>Clerk</th>
                       <th>Amount</th>
                       <th>Deposited (accepted)</th>
+                      <th>Refunded (returned)</th>
                       <th>With clerk</th>
                       <th>Status</th>
                       <th>Actions</th>
@@ -179,6 +181,20 @@ export default function CashbookWorkspace() {
                         <td>{t.clerk_name}</td>
                         <td>{rupees(Number(t.amount))}</td>
                         <td>{rupees(Number(t.accepted_amount))}</td>
+                        <td>
+                          {Number(t.returned_amount) > 0 ? (
+                            <>
+                              {rupees(Number(t.returned_amount))}
+                              {(t.returns || []).map((r, i) => (
+                                <small key={i} className="fcw-sub">
+                                  Returned {shortDate(r.returned_on)}
+                                </small>
+                              ))}
+                            </>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
                         <td>{rupees(Number(t.with_clerk))}</td>
                         <td>
                           <span className={`fcw-status is-${t.status}`}>{STATUS[t.status]}</span>
@@ -190,6 +206,15 @@ export default function CashbookWorkspace() {
                           ))}
                         </td>
                         <td className="fcw-row-actions">
+                          <button
+                            type="button"
+                            className="fcw-icon"
+                            aria-label={`Details of ${rupees(Number(t.amount))} handed to ${t.clerk_name}`}
+                            title="Handover details"
+                            onClick={() => setDetails(t.code)}
+                          >
+                            <Info size={16} />
+                          </button>
                           {data.can_manage && t.status === "assigned" && (
                             <button onClick={() => act(api.feePayments.cancel(t.code), "Transfer cancelled")}>Cancel</button>
                           )}
@@ -226,6 +251,14 @@ export default function CashbookWorkspace() {
         <PaymentHistory key={ledger} fixedMethod={ledger} />
       )}
       {assigning && <TransferCash data={data} onClose={() => setAssigning(false)} onDone={load} />}
+      {details && data.transfers.some((t) => t.code === details) && (
+        <TransferDetails
+          transfer={data.transfers.find((t) => t.code === details)!}
+          canManage={data.can_manage}
+          onClose={() => setDetails(null)}
+          onChanged={load}
+        />
+      )}
       {reviewing && (
         <ReviewSlip
           {...reviewing}
@@ -401,6 +434,208 @@ function ReviewSlip({
             <Check size={15} /> Accept deposit
           </button>
         </footer>
+      </div>
+    </SideDrawer>
+  );
+}
+
+const when = (value?: string | null) =>
+  value
+    ? new Date(value).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })
+    : null;
+
+/** The bank slip image (or a note for a PDF slip), loaded with the signed-in session. */
+function SlipImage({ transfer, deposit }: { transfer: CashTransfer; deposit: CashDeposit }) {
+  const [image, setImage] = useState("");
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!deposit.has_proof || deposit.proof_mime === "application/pdf") return;
+    let url = "";
+    api.feePayments
+      .proofUrl(transfer.code, deposit.code)
+      .then((value) => {
+        url = value;
+        setImage(value);
+      })
+      .catch(() => setFailed(true));
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [transfer.code, deposit.code, deposit.has_proof, deposit.proof_mime]);
+  if (!deposit.has_proof) return <p className="ctd-muted">No slip uploaded yet.</p>;
+  if (deposit.proof_mime === "application/pdf") return <p className="ctd-muted">A PDF slip was uploaded ({deposit.proof_name}).</p>;
+  return (
+    <div className="fcw-slip ctd-slip">
+      {image ? (
+        <a href={image} target="_blank" rel="noreferrer" title="Open the slip full size">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt={`Bank slip for ${rupees(Number(deposit.amount))}`} />
+        </a>
+      ) : failed ? (
+        <Empty>The slip could not be loaded.</Empty>
+      ) : (
+        <div className="anw-skeleton anw-skeleton-tall" />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Everything about one handover in one panel: amounts, the timeline (handed over, collected,
+ * deposited, slip uploaded, reviewed, returned), each slip with accept / reject, and returns.
+ */
+function TransferDetails({
+  transfer: t,
+  canManage,
+  onClose,
+  onChanged,
+}: {
+  transfer: CashTransfer;
+  canManage: boolean;
+  onClose: () => void;
+  onChanged: () => Promise<unknown>;
+}) {
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const run = async (work: () => Promise<unknown>, done: string) => {
+    setSaving(true);
+    try {
+      await work();
+      toast.success(done);
+      await onChanged();
+    } catch (e) {
+      toast.error("Not saved", errorText(e));
+    } finally {
+      setSaving(false);
+    }
+  };
+  const review = (d: CashDeposit, decision: "accept" | "reject") => {
+    const note = (notes[d.code] || "").trim();
+    if (decision === "reject" && !note) return toast.warning("Give the reason for rejecting the slip");
+    return run(() => api.feePayments.review(t.code, d.code, decision, note), decision === "accept" ? "Deposit accepted" : "Slip rejected");
+  };
+  const returns = t.returns || [];
+  const events: [string, string | null, string][] = [
+    ["Handed over", when(t.assigned_at), `${rupees(Number(t.amount))} by ${t.assigned_by_name}`],
+    ...(t.collected_at ? [["Collected by clerk", when(t.collected_at), t.clerk_name] as [string, string | null, string]] : []),
+    ...t.deposits.flatMap((d) => [
+      ["Deposited at bank", when(d.recorded_at) || shortDate(d.deposited_on), `${rupees(Number(d.amount))} on ${shortDate(d.deposited_on)}`] as [
+        string,
+        string | null,
+        string,
+      ],
+      ...(d.proof_uploaded_at ? [["Slip uploaded", when(d.proof_uploaded_at), rupees(Number(d.amount))] as [string, string | null, string]] : []),
+      ...(d.reviewed_at
+        ? [
+            [
+              d.status === "accepted" ? "Deposit accepted" : "Slip rejected",
+              when(d.reviewed_at),
+              [d.reviewed_by_name, d.review_note].filter(Boolean).join(" · ") || rupees(Number(d.amount)),
+            ] as [string, string | null, string],
+          ]
+        : []),
+    ]),
+    ...returns.map(
+      (r) =>
+        ["Returned to admin", when(r.recorded_at), `${rupees(Number(r.amount))} on ${shortDate(r.returned_on)}${r.recorded_by_name ? ` · ${r.recorded_by_name}` : ""}`] as [
+          string,
+          string | null,
+          string,
+        ],
+    ),
+    ...(t.status === "cancelled" ? [["Cancelled", null, "Nothing to collect"] as [string, string | null, string]] : []),
+  ];
+  return (
+    <SideDrawer title={`${rupees(Number(t.amount))} · ${t.clerk_name}`} subtitle={STATUS[t.status]} onClose={onClose}>
+      <div className="fcw-drawer-form ctd">
+        <dl className="fcw-balance">
+          <div>
+            <dt>Handed over</dt>
+            <dd>{rupees(Number(t.amount))}</dd>
+          </div>
+          <div>
+            <dt>Deposited (accepted)</dt>
+            <dd>{rupees(Number(t.accepted_amount))}</dd>
+          </div>
+          <div>
+            <dt>Slips waiting for review</dt>
+            <dd>{rupees(Number(t.pending_amount))}</dd>
+          </div>
+          <div>
+            <dt>Refunded (returned to admin)</dt>
+            <dd>{Number(t.returned_amount) > 0 ? rupees(Number(t.returned_amount)) : "Not refunded"}</dd>
+          </div>
+          <div>
+            <dt>Still with the clerk</dt>
+            <dd>{rupees(Number(t.with_clerk))}</dd>
+          </div>
+        </dl>
+        {t.note && <p className="ctd-muted">Note: {t.note}</p>}
+        <h3 className="ctd-heading">Timeline</h3>
+        <ol className="ctd-timeline">
+          {events.map(([what, at, detail], i) => (
+            <li key={i}>
+              <strong>{what}</strong>
+              <span>{detail}</span>
+              {at && <small>{at}</small>}
+            </li>
+          ))}
+        </ol>
+        <h3 className="ctd-heading">Deposits and slips</h3>
+        {t.deposits.length === 0 && <p className="ctd-muted">No deposit recorded yet.</p>}
+        {t.deposits.map((d) => (
+          <section key={d.code} className="ctd-deposit">
+            <header>
+              <strong>{rupees(Number(d.amount))}</strong>
+              <span className={`fcw-status is-${d.status}`}>{DEPOSIT[d.status]}</span>
+            </header>
+            <small>
+              Deposited {shortDate(d.deposited_on)}
+              {d.bank_reference ? ` · reference ${d.bank_reference}` : ""}
+              {d.review_note ? ` · ${d.review_note}` : ""}
+            </small>
+            <SlipImage transfer={t} deposit={d} />
+            {canManage && d.status === "awaiting_review" && (
+              <div className="ctd-review">
+                <label>
+                  Note (required to reject)
+                  <input
+                    maxLength={300}
+                    value={notes[d.code] || ""}
+                    onChange={(e) => setNotes({ ...notes, [d.code]: e.target.value })}
+                  />
+                </label>
+                <div className="fcw-actions">
+                  <button type="button" className="fcw-reject" disabled={saving} onClick={() => review(d, "reject")}>
+                    <X size={15} /> Reject
+                  </button>
+                  <button type="button" className="fcw-accept" disabled={saving} onClick={() => review(d, "accept")}>
+                    <Check size={15} /> Accept deposit
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        ))}
+        {canManage && (
+          <footer className="fcw-actions">
+            {t.status === "assigned" && (
+              <button type="button" disabled={saving} onClick={() => run(() => api.feePayments.cancel(t.code), "Transfer cancelled")}>
+                Cancel handover
+              </button>
+            )}
+            {!["assigned", "cancelled", "settled"].includes(t.status) && Number(t.can_deposit) > 0 && (
+              <button
+                type="button"
+                className="fcw-primary"
+                disabled={saving}
+                onClick={() => run(() => api.feePayments.returned(t.code, t.can_deposit, today()), "Recorded as returned to cash")}
+              >
+                Record {rupees(Number(t.can_deposit))} returned
+              </button>
+            )}
+          </footer>
+        )}
       </div>
     </SideDrawer>
   );

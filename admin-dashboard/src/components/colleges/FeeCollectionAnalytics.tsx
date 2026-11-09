@@ -2,12 +2,12 @@
 /** Fee collection analytics for the cashbook: totals, collection progress over time and breakdowns. */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { IndianRupee, Receipt, TrendingUp, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, IndianRupee, Receipt, TrendingUp, Users } from "lucide-react";
 import { api, errorText, type FeeAnalytics } from "@/services/api";
 import { BarList, Donut, Empty, FilterDate, LoadFailed, Panel, rupees, Stat } from "./AnalyticsParts";
 
 type Scale = "day" | "week" | "month" | "year";
-type Range = "month" | "30" | "quarter" | "year" | "all" | "custom";
+type Range = "day" | "week" | "month" | "year" | "all" | "custom";
 
 const METHOD_COLOURS: Record<string, string> = { cash: "#a56824", upi: "#e0a85a", bank_transfer: "#5b3a17" };
 const METHOD_NAMES: Record<string, string> = { cash: "Cash", upi: "UPI", bank_transfer: "Bank transfer" };
@@ -16,15 +16,49 @@ const parse = (s: string) => new Date(`${s}T00:00:00`);
 const compact = (v: number) =>
   v >= 1e7 ? `${+(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `${+(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `${+(v / 1e3).toFixed(0)}K` : String(v);
 
-function rangeDates(range: Range, custom: { start: string; end: string }) {
-  const now = new Date();
-  const end = iso(now);
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const dayLabel = (d: Date) => d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+
+/** First and last day of the day / week (Monday–Sunday) / month / year that contains the anchor. */
+function periodBounds(range: "day" | "week" | "month" | "year", anchor: Date) {
+  const y = anchor.getFullYear(), m = anchor.getMonth(), d = anchor.getDate();
+  if (range === "day") return [new Date(y, m, d), new Date(y, m, d)];
+  if (range === "week") {
+    const monday = new Date(y, m, d - ((anchor.getDay() + 6) % 7));
+    return [monday, new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)];
+  }
+  if (range === "month") return [new Date(y, m, 1), new Date(y, m + 1, 0)];
+  return [new Date(y, 0, 1), new Date(y, 11, 31)];
+}
+
+/** The anchor moved one period back (-1) or forward (+1). */
+function shift(range: "day" | "week" | "month" | "year", anchor: Date, step: number) {
+  const y = anchor.getFullYear(), m = anchor.getMonth(), d = anchor.getDate();
+  if (range === "day") return new Date(y, m, d + step);
+  if (range === "week") return new Date(y, m, d + 7 * step);
+  if (range === "month") return new Date(y, m + step, 1);
+  return new Date(y + step, 0, 1);
+}
+
+function rangeDates(range: Range, custom: { start: string; end: string }, anchor: Date) {
   if (range === "custom") return custom;
   if (range === "all") return { start: "", end: "" };
-  if (range === "month") return { start: iso(new Date(now.getFullYear(), now.getMonth(), 1)), end };
-  if (range === "30") return { start: iso(new Date(now.getTime() - 29 * 864e5)), end };
-  if (range === "quarter") return { start: iso(new Date(now.getFullYear(), now.getMonth() - 2, 1)), end };
-  return { start: iso(new Date(now.getFullYear(), 0, 1)), end };
+  const [start, end] = periodBounds(range, anchor);
+  return { start: iso(start), end: iso(end) };
+}
+
+/** "Today · Mon, 9 Nov 2026", "This week · 9 – 15 Nov 2026", "November 2026", "2026". */
+function periodTitle(range: "day" | "week" | "month" | "year", anchor: Date) {
+  const [start, end] = periodBounds(range, anchor);
+  const current = iso(periodBounds(range, new Date())[0]) === iso(start);
+  const name = {
+    day: dayLabel(start),
+    week: `${start.getDate()} ${start.toLocaleDateString("en-IN", { month: "short" })}${start.getFullYear() !== end.getFullYear() ? ` ${start.getFullYear()}` : ""} – ${end.getDate()} ${end.toLocaleDateString("en-IN", { month: "short" })} ${end.getFullYear()}`,
+    month: `${MONTHS[start.getMonth()]} ${start.getFullYear()}`,
+    year: String(start.getFullYear()),
+  }[range];
+  const now = { day: "Today", week: "This week", month: "This month", year: "This year" }[range];
+  return { current, now, label: current ? `${now} · ${name}` : name };
 }
 
 /** Bucket key and label for a day at the chosen scale (weeks start on Monday). */
@@ -82,13 +116,14 @@ function series(daily: FeeAnalytics["daily"], scale: Scale): Point[] {
 const tooltipStyle = { borderRadius: 10, border: "1px solid #eadccb", fontSize: 12 };
 
 export default function FeeCollectionAnalytics() {
-  const [range, setRange] = useState<Range>("year");
+  const [range, setRange] = useState<Range>("month");
+  const [anchor, setAnchor] = useState(() => new Date());
   const [custom, setCustom] = useState({ start: "", end: "" });
   const [source, setSource] = useState<"all" | "manual" | "linked">("all");
   const [scale, setScale] = useState<Scale>("day");
   const [data, setData] = useState<FeeAnalytics | null>(null);
   const [error, setError] = useState("");
-  const dates = rangeDates(range, custom);
+  const dates = rangeDates(range, custom, anchor);
   const load = useCallback(() => {
     setError("");
     return api.feePayments
@@ -110,19 +145,32 @@ export default function FeeCollectionAnalytics() {
         <div className="fcw-tabs" role="tablist" aria-label="Period">
           {(
             [
-              ["month", "This month"],
-              ["30", "Last 30 days"],
-              ["quarter", "Last 3 months"],
-              ["year", "This year"],
+              ["day", "Day"],
+              ["week", "Week"],
+              ["month", "Month"],
+              ["year", "Year"],
               ["all", "All time"],
               ["custom", "Custom"],
             ] as const
           ).map(([key, label]) => (
-            <button key={key} role="tab" aria-selected={range === key} onClick={() => setRange(key)}>
+            <button
+              key={key}
+              role="tab"
+              aria-selected={range === key}
+              onClick={() => {
+                setRange(key);
+                // Each period opens on the current one; the chart follows the period's natural unit.
+                setAnchor(new Date());
+                setScale(key === "year" ? "month" : key === "all" ? "month" : "day");
+              }}
+            >
               {label}
             </button>
           ))}
         </div>
+        {range !== "all" && range !== "custom" && (
+          <PeriodPicker range={range} anchor={anchor} onChange={setAnchor} />
+        )}
         {range === "custom" && (
           <>
             <FilterDate label="From" value={custom.start} onChange={(start) => setCustom({ ...custom, start })} />
@@ -321,6 +369,67 @@ export default function FeeCollectionAnalytics() {
             </Panel>
           </div>
         </>
+      )}
+    </div>
+  );
+}
+
+/** The selected day / week / month / year with previous–next arrows, a picker and "back to now". */
+function PeriodPicker({
+  range,
+  anchor,
+  onChange,
+}: {
+  range: "day" | "week" | "month" | "year";
+  anchor: Date;
+  onChange: (d: Date) => void;
+}) {
+  const title = periodTitle(range, anchor);
+  const thisYear = new Date().getFullYear();
+  const unit = { day: "day", week: "week", month: "month", year: "year" }[range];
+  return (
+    <div className="fca-period" role="group" aria-label={`Selected ${unit}`}>
+      <button type="button" className="fcw-icon" aria-label={`Previous ${unit}`} onClick={() => onChange(shift(range, anchor, -1))}>
+        <ChevronLeft size={16} />
+      </button>
+      <strong aria-live="polite">{title.label}</strong>
+      <button type="button" className="fcw-icon" aria-label={`Next ${unit}`} onClick={() => onChange(shift(range, anchor, 1))}>
+        <ChevronRight size={16} />
+      </button>
+      <label className="fca-period-pick">
+        <span className="sr-only">Choose a {unit}</span>
+        {range === "year" ? (
+          <select
+            aria-label="Choose a year"
+            value={anchor.getFullYear()}
+            onChange={(e) => onChange(new Date(Number(e.target.value), 0, 1))}
+          >
+            {Array.from({ length: 12 }, (_, i) => thisYear + 1 - i).map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        ) : range === "month" ? (
+          <input
+            type="month"
+            aria-label="Choose a month"
+            value={`${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, "0")}`}
+            onChange={(e) => e.target.value && onChange(parse(`${e.target.value}-01`))}
+          />
+        ) : (
+          <input
+            type="date"
+            aria-label={range === "week" ? "Choose any day in the week" : "Choose a day"}
+            value={iso(anchor)}
+            onChange={(e) => e.target.value && onChange(parse(e.target.value))}
+          />
+        )}
+      </label>
+      {!title.current && (
+        <button type="button" className="fca-period-now" onClick={() => onChange(new Date())}>
+          Back to {title.now.toLowerCase()}
+        </button>
       )}
     </div>
   );
