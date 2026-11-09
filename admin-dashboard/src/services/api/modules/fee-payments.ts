@@ -122,7 +122,21 @@ export type CashDeposit = {
   status: "awaiting_proof" | "awaiting_review" | "accepted" | "rejected";
   has_proof: boolean;
   proof_name?: string;
+  proof_mime?: string;
   review_note?: string | null;
+  /** When the clerk recorded the deposit, uploaded the slip and the admin reviewed it. */
+  recorded_at?: string | null;
+  proof_uploaded_at?: string | null;
+  reviewed_at?: string | null;
+  reviewed_by_name?: string | null;
+};
+/** Cash the clerk handed back to the admin instead of depositing it. */
+export type CashReturn = {
+  amount: string;
+  returned_on: string;
+  note: string | null;
+  recorded_at: string;
+  recorded_by_name?: string | null;
 };
 export type CashTransfer = {
   code: string;
@@ -135,6 +149,7 @@ export type CashTransfer = {
   assigned_at: string;
   collected_at: string | null;
   deposits: CashDeposit[];
+  returns?: CashReturn[];
   accepted_amount: string;
   pending_amount: string;
   returned_amount: string;

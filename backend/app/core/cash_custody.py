@@ -103,8 +103,12 @@ def refresh_status(transfer):
 
 def public(data, transfer):
     item = {k: v for k, v in transfer.items() if k != "deposits"}
-    item["deposits"] = [{k: v for k, v in d.items() if k != "proof_key"} | {"has_proof": bool(d.get("proof_key"))}
-                        for d in transfer.get("deposits", [])]
+    item["deposits"] = [{k: v for k, v in d.items() if k != "proof_key"} | {
+        "has_proof": bool(d.get("proof_key")),
+        "reviewed_by_name": account_name(data, d["reviewed_by"]) if d.get("reviewed_by") else None}
+        for d in transfer.get("deposits", [])]
+    item["returns"] = [r | {"recorded_by_name": account_name(data, r["recorded_by"]) if r.get("recorded_by") else None}
+                       for r in transfer.get("returns", [])]
     item.update(accepted_amount=str(accepted(transfer)), pending_amount=str(pending(transfer)),
                 returned_amount=str(returned(transfer)), with_clerk=str(with_clerk(transfer)),
                 can_deposit=str(with_clerk(transfer) - pending(transfer)))
