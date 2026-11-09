@@ -270,9 +270,17 @@ class _CashDepositWorkspaceState extends State<CashDepositWorkspace> {
     final deposits = (t['deposits'] as List? ?? []).cast<Json>();
     final open = !{'assigned', 'cancelled', 'settled'}.contains(status);
     final room = num.tryParse('${t['can_deposit']}') ?? 0;
+    // Finished handovers lead with what was actually deposited, not what was handed over.
+    final finished = {'settled', 'cancelled'}.contains(status);
     return Card(
+      key: ValueKey('transfer-${t['code']}'),
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
+          builder: (_) => DepositHistoryDetailsScreen(api: widget.api, transfer: t),
+        )),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -284,7 +292,7 @@ class _CashDepositWorkspaceState extends State<CashDepositWorkspace> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
-                  money(t['amount']),
+                  finished ? '${money(t['accepted_amount'])} deposited' : money(t['amount']),
                   style: text.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -295,6 +303,14 @@ class _CashDepositWorkspaceState extends State<CashDepositWorkspace> {
                 ),
               ],
             ),
+            if (finished)
+              Text(
+                [
+                  'of ${money(t['amount'])} handed over',
+                  if ((num.tryParse('${t['returned_amount']}') ?? 0) > 0) '${money(t['returned_amount'])} refunded to admin',
+                ].join(' · '),
+                style: text.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              ),
             Text(
               'Assigned by ${t['assigned_by_name'] ?? 'admin'} · ${prettyDate(DateTime.parse('${t['assigned_at']}').toLocal())}',
               style: text.bodySmall,
@@ -377,6 +393,7 @@ class _CashDepositWorkspaceState extends State<CashDepositWorkspace> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -445,6 +462,8 @@ class _CashDepositWorkspaceState extends State<CashDepositWorkspace> {
           ...active.map(transferCard),
           if (history.isNotEmpty) ...[
             const SectionHeading(title: 'Deposit history'),
+            Text('Tap a deposit for its details and bank slip.', style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
             ...history.map(transferCard),
           ],
         ],

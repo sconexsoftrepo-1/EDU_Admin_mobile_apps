@@ -235,7 +235,12 @@ class _AdminCashWorkspaceState extends State<AdminCashWorkspace> {
     final assigned = DateTime.tryParse('${t['assigned_at']}')?.toLocal();
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push<void>(MaterialPageRoute(
+          builder: (_) => DepositHistoryDetailsScreen(api: widget.api, transfer: t),
+        )),
+        child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [
@@ -255,6 +260,7 @@ class _AdminCashWorkspaceState extends State<AdminCashWorkspace> {
               if (assigned != null) 'Handed over ${prettyDate(assigned)}',
               if (open) 'with the clerk ${money(t['with_clerk'])}',
               if ((num.tryParse('${t['accepted_amount']}') ?? 0) > 0) 'deposited ${money(t['accepted_amount'])}',
+              if ((num.tryParse('${t['returned_amount']}') ?? 0) > 0) 'refunded ${money(t['returned_amount'])}',
             ].join(' · '),
             style: text.bodySmall,
           ),
@@ -268,6 +274,7 @@ class _AdminCashWorkspaceState extends State<AdminCashWorkspace> {
               ),
             ),
         ]),
+      ),
       ),
     );
   }

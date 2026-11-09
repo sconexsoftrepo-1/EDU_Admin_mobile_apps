@@ -29,6 +29,7 @@ part '../components/workspace/record_helpers.dart';
 part '../screens/certificates/certificate_workspace.dart';
 part '../screens/cash/cash_deposit_workspace.dart';
 part '../screens/cash/admin_cash_workspace.dart';
+part '../screens/cash/deposit_history_details_screen.dart';
 part '../screens/cash/collection_analytics.dart';
 part '../screens/approvals/change_requests_workspace.dart';
 part '../components/workspace/widgets.dart';
