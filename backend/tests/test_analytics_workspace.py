@@ -24,7 +24,8 @@ def test_admission_rows_and_all_eight_references(app, client, headers):
     seed_enquiries(app)
     body = client.get(ADMISSIONS, headers=headers).json()
     keys = [o["key"] for o in body["options"]["references"]]
-    assert keys[:8] == ["walk_in", "employee", "staff", "relative", "advertising", "post", "social_media", "other"]
+    assert keys[:10] == ["walk_in", "admin", "teacher", "employee", "staff", "relative", "advertising", "post",
+                         "social_media", "other"]
     rows = {r["code"]: r for r in body["enquiries"]}
     assert rows["E1"]["stage"] == "joined" and rows["E1"]["course_level"] == "degree" and rows["E1"]["mine"]
     # An application record links its enquiry, and follow-ups are counted from the real table.

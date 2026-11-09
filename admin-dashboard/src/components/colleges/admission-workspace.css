@@ -487,3 +487,212 @@
   border-color: #dfb4b4;
   color: #a12f2f;
 }
+
+
+/* Admission enquiry details, laid out as a printable document. */
+.adm-doc {
+  background: #fff;
+  border: 1px solid #e4d9c8;
+  border-radius: 14px;
+  color: #251e18;
+  display: grid;
+  gap: 14px;
+  padding: 20px 22px;
+}
+.adm-doc-head {
+  align-items: center;
+  border-bottom: 3px solid #7a4a1c;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding-bottom: 14px;
+}
+.adm-doc-head img {
+  border-radius: 10px;
+  height: 56px;
+  object-fit: contain;
+  width: 56px;
+}
+.adm-doc-head > div {
+  display: grid;
+  gap: 2px;
+}
+.adm-doc-head > div > strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+}
+.adm-doc-head span {
+  color: #6b6158;
+  font-size: 12px;
+}
+.adm-doc-title {
+  text-align: right;
+}
+.adm-doc-title strong {
+  color: #7a4a1c;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.adm-doc-status {
+  align-items: baseline;
+  background: #f7f1e7;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 10px 14px;
+}
+.adm-doc-status span {
+  color: #6b6158;
+  font-size: 12px;
+}
+.adm-doc-status strong {
+  font-size: 13px;
+  margin-right: 18px;
+}
+.adm-doc-section {
+  border: 1px solid #e4d9c8;
+  border-radius: 12px;
+  break-inside: avoid;
+  overflow: hidden;
+}
+.adm-doc-section h3 {
+  background: #f3e6d3;
+  color: #7a4a1c;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  margin: 0;
+  padding: 8px 14px;
+  text-transform: uppercase;
+}
+.adm-doc-section dl {
+  display: grid;
+  gap: 0 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  padding: 6px 14px 10px;
+}
+.adm-doc-section dl > div {
+  border-bottom: 1px dashed #efe6d8;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(110px, 42%) 1fr;
+  padding: 7px 0;
+}
+.adm-doc-section dt {
+  color: #6b6158;
+  font-size: 12px;
+}
+.adm-doc-section dd {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.adm-doc-sign,
+.edu-record-drawer .adm-doc-sign {
+  background: none;
+  border: 0;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 30px 0 0;
+}
+.adm-doc-sign span {
+  border-top: 1px solid #c9b9a3;
+  color: #6b6158;
+  font-size: 12px;
+  min-width: 190px;
+  padding-top: 6px;
+  text-align: center;
+}
+.adm-print {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e4d9c8;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+}
+@media (max-width: 640px) {
+  .adm-doc-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .adm-doc-title {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
+  .adm-doc-section dl {
+    grid-template-columns: 1fr;
+  }
+}
+/* Printing from the details panel prints only the enquiry document. */
+@media print {
+  /* Only while the enquiry panel is open; other pages print normally. */
+  body:has(dialog.adm-doc-drawer[open]) * {
+    visibility: hidden !important;
+  }
+  body:has(dialog.adm-doc-drawer[open]) .adm-doc-drawer,
+  body:has(dialog.adm-doc-drawer[open]) .adm-doc-drawer .adm-doc,
+  body:has(dialog.adm-doc-drawer[open]) .adm-doc-drawer .adm-doc * {
+    visibility: visible !important;
+  }
+  .adm-doc-drawer {
+    background: #fff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    inset: 0 !important;
+    max-height: none !important;
+    max-width: none !important;
+    overflow: visible !important;
+    position: absolute !important;
+    width: 100% !important;
+  }
+  .adm-doc-drawer::backdrop {
+    background: #fff !important;
+  }
+  .adm-doc-drawer .adm-doc {
+    border: 0;
+    left: 0;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .adm-doc-section h3,
+  .adm-doc-status {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* One A4 page: tighter spacing than on screen. */
+  @page {
+    margin: 12mm;
+    size: A4;
+  }
+  .adm-doc-drawer .adm-doc {
+    gap: 8px;
+  }
+  .adm-doc-head {
+    padding-bottom: 8px;
+  }
+  .adm-doc-section h3 {
+    padding: 5px 12px;
+  }
+  .adm-doc-section dl {
+    gap: 0 18px;
+    padding: 2px 12px 6px;
+  }
+  .adm-doc-section dl > div {
+    padding: 4px 0;
+  }
+  .adm-doc-sign {
+    padding-top: 36px;
+  }
+}

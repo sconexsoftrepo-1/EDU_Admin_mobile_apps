@@ -14,9 +14,33 @@ from .security import current_user, has_permission
 router = APIRouter(prefix="/admissions/insights", tags=["Admission insights"])
 TABLE = "admission_enquiries"
 ACTIVE = ("new", "contacted", "counselling", "applied")
-REFERENCES = {"walk_in": "Walk-in / direct", "employee": "Employee reference", "staff": "Staff reference",
+REFERENCES = {"walk_in": "Walk-in / direct", "admin": "Admin reference", "teacher": "Teacher reference",
+              "employee": "Employee reference", "staff": "Staff reference",
               "relative": "Relative reference", "advertising": "Advertising", "post": "Post / mail",
               "social_media": "Social media", "website": "Website", "referral": "Referral", "other": "Other"}
+
+
+# References that credit a member of staff (admissions incentives).
+STAFF_REFERENCES = {"admin", "teacher", "staff", "employee"}
+
+
+def creator_reference(data, user):
+    """How an enquiry entered by this person is credited: admin, teacher, staff or employee reference."""
+    from .edit_approvals import is_super_admin
+    person = user.get("person_code")
+    records = data["records"]
+    employee = records.get("employees", {}).get(person, {}) if user.get("person_type") == "employee" else {}
+    name = " ".join(aw.name(employee).split()) or data["accounts"].get(user["code"], {}).get("display_name") \
+        or data["accounts"].get(user["code"], {}).get("login_id") or "Admin"
+    if is_super_admin(data, user) or user.get("person_type") == "system":
+        kind = "admin"
+    elif any(t.get("employee_code") == person for t in aw.rows(data, "teachers")):
+        kind = "teacher"
+    elif any(t.get("employee_code") == person for t in aw.rows(data, "staff_profiles")):
+        kind = "staff"
+    else:
+        kind = "employee"
+    return kind, name, (person if employee else None)
 
 
 def label(key):
@@ -52,6 +76,11 @@ def enquiry_row(data, enquiry):
             "reference_type": reference,
             "reference_label": label(reference),
             "reference_name": enquiry.get("reference_name") or enquiry.get("referrer_name"),
+            # Who gets the credit (incentives): the staff member whose reference this is.
+            "credited_to": enquiry.get("reference_name") if reference in STAFF_REFERENCES else None,
+            "credited_key": (enquiry.get("referrer_employee_code") or enquiry.get("assigned_employee_code")
+                             or enquiry.get("referred_by_account") or enquiry.get("reference_name"))
+            if reference in STAFF_REFERENCES else None,
             "status": enquiry.get("workflow_status") or enquiry.get("status") or "new",
             "recorded_at": enquiry.get("recorded_at") or enquiry.get("created_at")}
 

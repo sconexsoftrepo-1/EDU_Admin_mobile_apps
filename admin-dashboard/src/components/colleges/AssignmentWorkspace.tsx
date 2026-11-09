@@ -30,15 +30,9 @@ import {
   writeWorkspaceCache,
 } from "@/lib/colleges/workspace-cache";
 import "./assignment-workspace.css";
+import { formatDateTime } from "@/lib/colleges/dates";
 
-const date = (value: string) =>
-  new Date(value).toLocaleString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const date = (value: string) => formatDateTime(value);
 const tabs = [
   ["all", "All"],
   ["today", "Today"],

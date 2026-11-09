@@ -22,6 +22,9 @@ export type EnquiryRow = {
   next_follow_up_at: string | null;
   followups_done: number;
   recorded_at: string | null;
+  /** Staff member credited with the enquiry (admin / teacher / staff / employee reference). */
+  credited_to?: string | null;
+  credited_key?: string | null;
 };
 export type ApplicationRow = {
   key: string;
@@ -119,7 +122,57 @@ export type CampusAnalyticsData = {
   };
 };
 
+/** GET dashboard/reports-analytics: rows for the Reports & analytics dashboard (filtered in the browser). */
+export type ReportsAnalyticsData = {
+  today: string;
+  levels: { key: string; label: string }[];
+  programs: { code: string; name: string; level: string | null; branch: string | null; department: string | null }[];
+  years: { code: string; name: string; program_code: string | null }[];
+  students: { code: string; name: string; status: string; level: string | null; program_code: string | null; year_code: string | null }[];
+  charges: {
+    student_code: string;
+    student: string;
+    level: string | null;
+    program_code: string | null;
+    year_code: string | null;
+    semester: number | null;
+    head: string | null;
+    late_fee: boolean;
+    billed: number;
+    concession: number;
+    paid: number;
+    outstanding: number;
+    due_date: string;
+    days_overdue: number;
+  }[];
+  payments: {
+    date: string;
+    amount: number;
+    method: string;
+    source: "manual" | "linked";
+    level: string | null;
+    program_code: string | null;
+    year_code: string | null;
+    branch_label: string | null;
+    semester: number | null;
+    head: string | null;
+    student_code: string | null;
+    student?: string | null;
+    receipt_number?: string | null;
+    reference?: string | null;
+  }[];
+  enquiries: { level: string | null; program_code: string | null; year_code: string | null; status: string; stage: string; reference: string; recorded_at: string | null }[];
+  cashbook: { date: string; opening: string; received: string; paid: string; deposited: string; closing: string; with_admin: string; with_clerks: string }[];
+  late_fees: {
+    summary: { students: number; cleared: number; uncleared: number; late_fee_total: string; late_fee_pending: string; cancelled: number };
+    items: { student_code: string; status: string; late_fees: { amount: string; status: string; semester: number | null }[] }[];
+  };
+};
+
 export const analyticsApi = {
+  reports() {
+    return apiRequest<ReportsAnalyticsData>("dashboard/reports-analytics");
+  },
   admissions() {
     return apiRequest<AdmissionAnalyticsData>("dashboard/admission-analytics");
   },

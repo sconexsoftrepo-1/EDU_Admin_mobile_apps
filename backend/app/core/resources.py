@@ -10,13 +10,17 @@ from typing import Any, Literal
 from fastapi import HTTPException
 from pydantic import ConfigDict, Field, ValidationError, create_model
 
-from .storage import audit, next_code
+from .storage import audit, next_code, now
 
 CODE_PREFIXES = {"fee_structures": "FEE", "student_fee_charges": "CHG"}
 
 
-def code_prefix(table):
-    """students -> STU, academic_years -> AY: short and different for tables sharing a first word."""
+def code_prefix(table, data=None):
+    """students -> STU, academic_years -> AY: short and different for tables sharing a first word.
+    Admission enquiries carry the college: ADMPRA-0001 for Pragathi."""
+    if table == "admission_enquiries" and data is not None:
+        from app.modules.master_data.staff.api import institution_prefix
+        return "ADM" + institution_prefix(data)
     words = table.split("_")
     return CODE_PREFIXES.get(table) or (words[0][:3] if len(words) == 1 else "".join(w[0] for w in words)).upper()
 
@@ -220,19 +224,22 @@ class ResourceService:
             self.table, {**RESOURCE_DEFAULTS.get(self.table, {}), **body}
         )
         rows = data["records"].setdefault(self.table, {})
-        record["code"] = record.get("code") or next_code(rows, code_prefix(self.table))
+        record["code"] = record.get("code") or next_code(rows, code_prefix(self.table, data))
+        if self.table == "admission_enquiries":
+            record.setdefault("recorded_at", now())  # shown and printed as the enquiry date
         if record["code"] in rows:
             raise HTTPException(409, "Record code already exists")
         ensure_references(data, self.table, record)
         self.business_validation(data, record)
         self.repo.save(data, record)
-        if self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
+        if self.table == "programs" and "subject_entries" in record:
+            # Subjects and labs typed per semester, for every course level.
+            from .course_form import subject_plan
+            from .curriculum_workspace import insert
+            insert(data, record, subject_plan(record), generated=False)
+        elif self.table == "programs" and record.get("course_level") in {"intermediate", "degree"}:
             from .curriculum_workspace import insert, starter
-            if "subject_entries" in record:
-                from .course_form import subject_plan
-                insert(data, record, subject_plan(record), generated=False)
-            else:
-                insert(data, record, starter(record), generated=True)
+            insert(data, record, starter(record), generated=True)
         audit(data, actor, "create", self.table, record["code"])
         return record
 

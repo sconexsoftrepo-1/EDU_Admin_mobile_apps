@@ -191,6 +191,32 @@ export default function AdmissionAnalytics({
     return [...rows.values()].sort((a, b) => b.enquiries - a.enquiries || a.name.localeCompare(b.name));
   }, [enquiries, applications, today]);
 
+  // Admissions credited to each member of staff (the enquiry was entered by them or names them).
+  const staffRows = useMemo(() => {
+    const rows = new Map<string, { key: string; name: string; role: string; enquiries: number; applied: number; joined: number; courses: Map<string, number> }>();
+    for (const row of enquiries) {
+      if (!row.credited_to) continue;
+      const key = row.credited_key || row.credited_to;
+      if (!rows.has(key))
+        rows.set(key, { key, name: row.credited_to, role: row.reference_label.replace(/ reference$/, ""), enquiries: 0, applied: 0, joined: 0, courses: new Map() });
+      const item = rows.get(key)!;
+      item.enquiries += 1;
+      if (row.stage !== "enquiry") item.applied += 1;
+      if (row.status === "joined") {
+        item.joined += 1;
+        const course = row.course_name || "Course not chosen";
+        item.courses.set(course, (item.courses.get(course) || 0) + 1);
+      }
+    }
+    return [...rows.values()].sort((a, b) => b.joined - a.joined || b.enquiries - a.enquiries || a.name.localeCompare(b.name));
+  }, [enquiries]);
+  const staffColumns = ["Staff member", "Role", "Enquiries", "Applied", "Admissions confirmed", "Conversion", "Admissions by course"];
+  const staffExport = () =>
+    staffRows.map((r) => [
+      r.name, r.role, String(r.enquiries), String(r.applied), String(r.joined), `${percentOf(r.joined, r.enquiries)}%`,
+      [...r.courses].map(([course, n]) => `${course} × ${n}`).join(", ") || "—",
+    ]);
+
   const referenceCounts = useMemo(() => tally(enquiries, (r) => r.reference_type), [enquiries]);
   const levelCounts = useMemo(() => tally(enquiries, (r) => r.course_level || "Not set"), [enquiries]);
   const statusCounts = useMemo(() => tally(enquiries, (r) => r.status), [enquiries]);
@@ -374,6 +400,53 @@ export default function AdmissionAnalytics({
           ) : <Empty>No courses match these filters.</Empty>}
         </Panel>
       </div>
+      <Panel
+        title="Staff referrals & incentives"
+        action={
+          staffRows.length ? (
+            <span className="anw-actions">
+              <button type="button" className="anw-link" onClick={() => excelTable("staff-referrals", "Staff referrals", staffColumns, staffExport())}>
+                <Download size={14} /> Excel
+              </button>
+              <PDFActions
+                viewLabel="View PDF"
+                onAction={(mode) =>
+                  pdfTable("staff-referrals", "Staff referrals & incentives", `${staffRows.length} staff · ${stats.total} enquiries`, staffColumns, staffExport(), mode).catch((e) =>
+                    toast.error("Could not create the PDF", errorText(e)),
+                  )
+                }
+              >
+                <FileText size={14} /> PDF
+              </PDFActions>
+            </span>
+          ) : undefined
+        }
+      >
+        {staffRows.length ? (
+          <div className="anw-table">
+            <table>
+              <thead>
+                <tr>{staffColumns.map((c) => <th key={c}>{c}</th>)}</tr>
+              </thead>
+              <tbody>
+                {staffRows.map((r) => (
+                  <tr key={r.key}>
+                    <td><strong>{r.name}</strong></td>
+                    <td>{r.role}</td>
+                    <td>{r.enquiries}</td>
+                    <td>{r.applied}</td>
+                    <td><strong>{r.joined}</strong></td>
+                    <td>{percentOf(r.joined, r.enquiries)}%</td>
+                    <td>{[...r.courses].map(([course, n]) => `${course} × ${n}`).join(", ") || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <Empty>No enquiries credited to staff yet. Enquiries entered by an admin, teacher or staff member are credited to them.</Empty>
+        )}
+      </Panel>
       <section className="anw-panel anw-register">
         <div className="anw-register-bar">
           <div className="anw-chips" role="group" aria-label="Which records">

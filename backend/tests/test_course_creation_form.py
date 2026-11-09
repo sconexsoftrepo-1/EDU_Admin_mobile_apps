@@ -168,3 +168,22 @@ def test_direct_course_api_accepts_no_qualification(client, headers):
     response = client.post(BASE, headers=headers, json=values)
     assert response.status_code == 201, response.text
     assert response.json()['qualification'] == 'Intermediate'
+
+
+def test_polytechnic_course_gets_its_own_department_and_semester_labs(client, headers, app):
+    with app.state.store.transaction() as data:
+        data['records'].setdefault('departments', {})['INT'] = {'code': 'INT', 'name': 'Intermediate (Class 11 and 12)'}
+    response = client.post(BASE, headers=headers, json={**course(), **dict(
+        course_level='polytechnic', branch='Civil Engineering', branch_code='CIVIL', duration_semesters=2,
+        semester_labels=['1st Year (Sem 1 & 2)', '3rd Semester'],
+        subject_entries=[{'name': 'English', 'semester_number': 1, 'subject_type': 'theory'},
+                         {'name': 'Engineering Drawing', 'semester_number': 1, 'subject_type': 'practical'},
+                         {'name': 'Hydraulics', 'semester_number': 2, 'subject_type': 'theory'}])})
+    assert response.status_code == 201, response.text
+    row = response.json()
+    assert (row['code'], row['name'], row['qualification']) == ('POLY-CIVIL', 'Diploma · Civil Engineering', 'Diploma')
+    department = app.state.store.snapshot()['records']['departments'][row['department_code']]
+    assert department['name'] == 'Polytechnic (Diploma in Engineering)'
+    items = client.get(f'/api/v1/academics/course-curricula/POLY-CIVIL/workspace', headers=headers).json()['items']
+    assert {(r['name'], r['semester_number'], r['subject_type']) for r in items} == {
+        ('English', 1, 'theory'), ('Engineering Drawing', 1, 'practical'), ('Hydraulics', 2, 'theory')}

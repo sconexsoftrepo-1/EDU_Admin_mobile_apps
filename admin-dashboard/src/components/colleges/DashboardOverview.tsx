@@ -37,6 +37,7 @@ import {
   type SectionError,
 } from "@/services/api";
 import "./dashboard-overview.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 const DashboardFeeChart = dynamic(() => import("./DashboardFeeChart"), {
   ssr: false,
@@ -296,11 +297,7 @@ function Banner({
           {now?.toLocaleDateString("en-IN", { weekday: "long" }) || " "}
         </small>
         <strong>
-          {now?.toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }) || " "}
+          {now ? formatDate(now) : " "}
         </strong>
         <small>Academic session</small>
         <b>{session?.replace("-", " – ") || " "}</b>
@@ -564,18 +561,36 @@ function RecentAdmissions({
     >
       {rows.length ? (
         <ul className="dov-people">
-          {rows.slice(0, 5).map((row) => (
-            <li key={row.code}>
-              <span className="dov-avatar">{initialsOf(row.name)}</span>
-              <span className="dov-person">
-                <strong>{row.name}</strong>
-                <small>{row.course_name || "Course not chosen"}</small>
-              </span>
-              <span className={`dov-status is-${row.status}`}>
-                {statusText(row.status)}
-              </span>
-            </li>
-          ))}
+          {rows.slice(0, 5).map((row) => {
+            const inner = (
+              <>
+                <span className="dov-avatar">{initialsOf(row.name)}</span>
+                <span className="dov-person">
+                  <strong>{row.name}</strong>
+                  <small>{row.course_name || "Course not chosen"}</small>
+                </span>
+                <span className={`dov-status is-${row.status}`}>
+                  {statusText(row.status)}
+                </span>
+              </>
+            );
+            return (
+              <li key={row.code}>
+                {/* Opens this exact enquiry's details, not just the register. */}
+                {href ? (
+                  <Link
+                    className="dov-person-link"
+                    href={`${href}?enquiry=${encodeURIComponent(row.code)}`}
+                    aria-label={`View enquiry of ${row.name}`}
+                  >
+                    {inner}
+                  </Link>
+                ) : (
+                  inner
+                )}
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <Empty>No admissions recorded yet.</Empty>

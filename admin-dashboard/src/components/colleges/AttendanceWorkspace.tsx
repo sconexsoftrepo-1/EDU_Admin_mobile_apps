@@ -17,6 +17,7 @@ import {
 import { errorText } from "@/services/api";
 import SearchField, { searchValues } from "./SearchField";
 import "./attendance-workspace.css";
+import { formatDate } from "@/lib/colleges/dates";
 const localDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const statusNames: Record<AttendanceStatus, string> = {
@@ -490,7 +491,7 @@ export default function AttendanceWorkspace({
                   <button
                     key={d.date}
                     aria-pressed={day === d.date}
-                    title={`${d.date}: ${d.recorded ? `${d.percentage}% attendance` : "Not recorded"}${d.leave_days ? `, ${d.leave_days} leave days` : ""}`}
+                    title={`${formatDate(d.date)}: ${d.recorded ? `${d.percentage}% attendance` : "Not recorded"}${d.leave_days ? `, ${d.leave_days} leave days` : ""}`}
                     className={
                       d.absent
                         ? "has-absence"
@@ -527,8 +528,8 @@ export default function AttendanceWorkspace({
                   <button
                     key={d.date}
                     onClick={() => selectDay(d.date)}
-                    title={`${d.date}: ${percentages[i] ?? "Not recorded"}${percentages[i] === null ? "" : "%"}`}
-                    aria-label={`${d.date}: ${percentages[i] ?? "Not recorded"}`}
+                    title={`${formatDate(d.date)}: ${percentages[i] ?? "Not recorded"}${percentages[i] === null ? "" : "%"}`}
+                    aria-label={`${formatDate(d.date)}: ${percentages[i] ?? "Not recorded"}`}
                   >
                     <span
                       style={{ height: `${Math.max(3, percentages[i] || 0)}%` }}
@@ -728,7 +729,7 @@ export default function AttendanceWorkspace({
                             <td key={d.date}>
                               <button
                                 className={`att-cell att-cell-${text}`}
-                                title={`${s.name} · ${d.date} · ${text === "—" ? "Not recorded" : text}`}
+                                title={`${s.name} · ${formatDate(d.date)} · ${text === "—" ? "Not recorded" : text}`}
                                 onClick={() => selectDay(d.date)}
                               >
                                 {text}

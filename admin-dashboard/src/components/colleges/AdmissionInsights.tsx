@@ -5,14 +5,10 @@ import { GraduationCap, X } from "lucide-react";
 import { api, type AdmissionOpening } from "@/services/api";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import "./admission-insights.css";
+import { formatDate } from "@/lib/colleges/dates";
 
 const POPUP_KEY = "edunexa-admissions-popup-session";
-const shortDate = (value: string) => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleDateString("en-IN", { dateStyle: "medium" });
-};
+const shortDate = (value: string) => formatDate(value);
 
 function seenThisLogin(session: string) {
   try {

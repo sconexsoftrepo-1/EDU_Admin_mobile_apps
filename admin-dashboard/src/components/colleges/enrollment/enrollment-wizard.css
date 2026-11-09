@@ -819,11 +819,11 @@
 }
 /* Print only the review (application overview). */
 @media print {
-  body * {
+  body:has(.enw-print) * {
     visibility: hidden !important;
   }
-  .enw-print,
-  .enw-print * {
+  body:has(.enw-print) .enw-print,
+  body:has(.enw-print) .enw-print * {
     visibility: visible !important;
   }
   .enw-print {

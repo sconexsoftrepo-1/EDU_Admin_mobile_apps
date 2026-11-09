@@ -103,6 +103,7 @@ export type {
   CollectionRow,
   DueRow,
   EnquiryRow,
+  ReportsAnalyticsData,
 } from "./modules/analytics";
 export type {
   CashDeposit,
