@@ -18,7 +18,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import (
     Ed25519PrivateKey,
     Ed25519PublicKey,
 )
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from pydantic import Field
 from reportlab.lib.pagesizes import A4, landscape
@@ -517,7 +517,8 @@ def verify(token: str, request: Request):
 
 
 @router.get("/{kind}/{code}/download")
-def download(kind: str, code: str, request: Request, user=Depends(current_user), inline: bool = False):
+def download(kind: str, code: str, request: Request, user=Depends(current_user), inline: bool = False,
+             copies: int = Query(1, ge=1, le=2)):
     with request.app.state.store.transaction() as data:
         if kind == "payslip":
             slip = query_get(data, "payslips", code)
@@ -612,8 +613,9 @@ def download(kind: str, code: str, request: Request, user=Depends(current_user),
                 data, user, "student", payment["student_code"]
             ) and not has_permission(data, user, "receipts", "view"):
                 raise HTTPException(404, "Receipt not found")
-            from app.core.finance_pdfs import fee_receipt_pdf
-            raw = fee_receipt_pdf(data, receipt, payment)
+            from app.core.finance_pdfs import RECEIPT_COPIES, fee_receipt_pdf
+            # copies=2: an admin / staff copy and a student copy, each named on its pages.
+            raw = fee_receipt_pdf(data, receipt, payment, RECEIPT_COPIES if copies == 2 else None)
             mime = "application/pdf"
         else:
             raise HTTPException(404, "Download type not found")
@@ -654,8 +656,8 @@ def revoke(code: str, body: RevokeInput, request: Request, user=Depends(current_
 
 
 @router.get("/{kind}/{code}/view")
-def view(kind: str, code: str, request: Request, user=Depends(current_user)):
-    return download(kind, code, request, user, inline=True)
+def view(kind: str, code: str, request: Request, user=Depends(current_user), copies: int = Query(1, ge=1, le=2)):
+    return download(kind, code, request, user, inline=True, copies=copies)
 
 
 @router.get("/files/{person_kind}/{person_code}")

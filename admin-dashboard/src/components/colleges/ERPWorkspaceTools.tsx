@@ -1,12 +1,13 @@
 "use client";
 import "./search-field.css";
+import "./module-hub.css";
+import { visibleHubs, hubRoute, hubIcons, screenLabel, HIDDEN_SCREENS } from "@/lib/colleges/module-hubs";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Bell,
   X,
   Search,
-  ChevronDown,
   BookOpen,
   Users,
   GraduationCap,
@@ -15,7 +16,6 @@ import {
   Receipt,
   Building2,
   FileCheck,
-  Briefcase,
   Shield,
   Settings,
   LayoutDashboard,
@@ -24,9 +24,9 @@ import {
   Package,
   CalendarDays,
   BadgeIndianRupee,
+  ClipboardCheck,
 } from "lucide-react";
-import { courseOfferings } from "@/data/colleges/subjects";
-import { collegeBySlug, permissions, type Role } from "@/data/colleges";
+import { permissions, type Role } from "@/data/colleges";
 import type { CollegeState, RecordRow } from "@/lib/colleges/store";
 
 const moduleIcons: Record<string, typeof BookOpen> = {
@@ -55,315 +55,29 @@ const moduleIcons: Record<string, typeof BookOpen> = {
   reports: BarChart3,
   notifications: Bell,
 };
-export function WorkspaceNavigation({
-  role,
-  allowedModules,
-  active,
-  labels,
-  nav,
-  close,
-  compact,
-  expand,
-}: {
-  role: Role;
-  allowedModules?: string[];
-  active: string;
-  labels: Record<string, string>;
-  nav: (m: string) => string;
-  close: () => void;
-  compact: boolean;
-  expand: () => void;
+export function WorkspaceNavigation({ role, allowedModules, active, labels, nav, close, compact }: {
+  role: Role; allowedModules?: string[]; active: string; labels: Record<string, string>;
+  nav: (m: string) => string; close: () => void; compact: boolean; expand: () => void;
 }) {
-  const [flyout, setFlyout] = useState<{
-    name: string;
-    modules: string[];
-    top: number;
-  } | null>(null);
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
-  const groupIcons: Record<string, typeof BookOpen> = {
-    Overview: LayoutDashboard,
-    "Student operations": Users,
-    Finance: Wallet,
-    Academics: GraduationCap,
-    "HR & payroll": Briefcase,
-    "Procurement & expenses": Package,
-    "Transport & bus": Bus,
-    Certificates: FileCheck,
-    Hostel: Building2,
-    Communication: Bell,
-    Reports: BarChart3,
-    Administration: Shield,
-  };
-  // Setup comes first: courses and batches, their fee structures, then student enrollment.
-  const groups: [string, string[]][] = [
-    ["Overview", ["dashboard", "campus-analytics"]],
-    [
-      "Academics",
-      [
-        "academics",
-        "course-setup",
-        "teaching-staff",
-        "non-teaching-staff",
-        "labs",
-        "daily-labour",
-        "timetable",
-        "assignments",
-        "syllabus",
-        "calendar",
-      ],
-    ],
-    [
-      "Finance",
-      [
-        "fees",
-        "fee-structures",
-        "payments",
-        "receipts",
-        "cashbook",
-        "expenses",
-        "invoices",
-        "scholarships",
-      ],
-    ],
-    [
-      "Student operations",
-      [
-        "students",
-        "admissions",
-        "student-enrollment",
-        "attendance",
-        "student-leave",
-        "assessments",
-      ],
-    ],
-    [
-      "HR & payroll",
-      [
-        "employees",
-        "employee-attendance",
-        "employee-leave",
-        "salary-structures",
-        "payroll",
-        "payslips",
-        "bonuses",
-        "reimbursements",
-        "payroll-reports",
-      ],
-    ],
-    [
-      "Procurement & expenses",
-      [
-        "expense-dashboard",
-        "purchase-requests",
-        "purchase-orders",
-        "vendors",
-        "equipment",
-        "utilities",
-        "maintenance",
-        "travel",
-        "transport-expenses",
-        "additional-expenses",
-        "inventory",
-        "assets",
-      ],
-    ],
-    [
-      "Transport & bus",
-      [
-        "transport",
-        "buses",
-        "routes",
-        "route-stops",
-        "drivers",
-        "driver-allocation",
-        "student-allocation",
-        "faculty-allocation",
-        "bus-seating",
-        "trips",
-        "manifest",
-        "transport-attendance",
-        "vehicle-maintenance",
-        "fuel",
-        "transport-reports",
-      ],
-    ],
-    ["Certificates", ["certificates", "certificate-requests"]],
-    ["Hostel", ["hostels", "hostel-permissions"]],
-    [
-      "Communication",
-      [
-        "notifications",
-        "payment-reminders",
-        "announcements",
-        "notification-templates",
-        "campaigns",
-      ],
-    ],
-    ["Reports", ["reports", "audit-logs"]],
-    [
-      "Administration",
-      [
-        "accounts",
-        "credentials",
-        "roles",
-        "forms",
-        "imports",
-        "documents",
-        "settings",
-      ],
-    ],
-  ];
-  return (
-    <nav
-      aria-label="Portal navigation"
-      onMouseLeave={() => setFlyout(null)}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") setFlyout(null);
-      }}
-    >
-      {compact && flyout && (
-        <div
-          className="erp-rail-flyout"
-          style={{ top: flyout.top }}
-          onMouseEnter={() => setFlyout(flyout)}
-        >
-          <strong>{flyout.name}</strong>
-          {flyout.modules.map((m) => (
-            <Link
-              key={m}
-              href={nav(m)}
-              aria-current={m === active ? "page" : undefined}
-              onClick={() => {
-                setFlyout(null);
-                close();
-              }}
-            >
-              {labels[m]}
-            </Link>
-          ))}
-        </div>
-      )}
-      <div className="erp-nav-rail" aria-label="Campus sections">
-        {groups.map(([name, modules]) => {
-          const visible = modules.filter((m) =>
-            allowedModules
-              ? allowedModules.includes(m)
-              : permissions[role].includes(m),
-          );
-          if (!visible.length) return null;
-          const Icon = groupIcons[name];
-          return (
-            <button
-              key={name}
-              type="button"
-              title={name}
-              onMouseEnter={(e) => {
-                if (compact)
-                  setFlyout({
-                    name,
-                    modules: visible,
-                    top: Math.min(
-                      e.currentTarget.getBoundingClientRect().top,
-                      window.innerHeight - 340,
-                    ),
-                  });
-              }}
-              onFocus={(e) => {
-                if (compact)
-                  setFlyout({
-                    name,
-                    modules: visible,
-                    top: Math.min(
-                      e.currentTarget.getBoundingClientRect().top,
-                      window.innerHeight - 340,
-                    ),
-                  });
-              }}
-              aria-label={`Open ${name} section`}
-              aria-current={visible.includes(active) ? "true" : undefined}
-              onClick={() => {
-                setExpandedGroup(name);
-                expand();
-              }}
-            >
-              <Icon size={19} />
-              <span className="erp-rail-tooltip">{name}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="erp-nav-sections">
-        {groups.map(([name, modules]) => {
-          const visible = modules.filter((m) =>
-            allowedModules
-              ? allowedModules.includes(m)
-              : permissions[role].includes(m),
-          );
-          if (!visible.length) return null;
-          const GroupIcon = groupIcons[name];
-          if (visible.length === 1) {
-            const visibleModule = visible[0];
-            return (
-              <div className="erp-nav-group erp-nav-single" key={name}>
-                <Link
-                  href={nav(visibleModule)}
-                  title={labels[visibleModule]}
-                  aria-current={visibleModule === active ? "page" : undefined}
-                  className={visibleModule === active ? "active" : ""}
-                  onClick={() => {
-                    setExpandedGroup(null);
-                    close();
-                  }}
-                >
-                  <GroupIcon size={16} />
-                  <span>{labels[visibleModule]}</span>
-                </Link>
-              </div>
-            );
-          }
-          return (
-            <details
-              className="erp-nav-group"
-              key={`${name}-${compact}-${active}`}
-              name="campus-navigation-groups"
-              open={
-                expandedGroup
-                  ? expandedGroup === name
-                  : active === "dashboard"
-                    ? name === "Student operations"
-                    : visible.includes(active)
-              }
-            >
-              <summary title={name}>
-                <GroupIcon size={16} />
-                <span>{name}</span>
-                <ChevronDown size={12} />
-              </summary>
-              {visible.map((m) => {
-                const Icon = moduleIcons[m] || BookOpen;
-                return (
-                  <Link
-                    key={m}
-                    href={nav(m)}
-                    title={labels[m]}
-                    aria-current={m === active ? "page" : undefined}
-                    className={m === active ? "active" : ""}
-                    onClick={() => {
-                      setExpandedGroup(null);
-                      close();
-                    }}
-                  >
-                    <Icon size={15} />
-                    <span>{labels[m]}</span>
-                  </Link>
-                );
-              })}
-            </details>
-          );
-        })}
-      </div>
-    </nav>
-  );
+  const allowed = allowedModules || permissions[role];
+  const hubs = visibleHubs(allowed);
+  const assigned = new Set(hubs.flatMap((h) => h.screens));
+  const direct = ["dashboard", "campus-analytics", "change-requests", ...allowed.filter((m) => !HIDDEN_SCREENS.has(m) && !assigned.has(m) && !["dashboard", "campus-analytics", "change-requests"].includes(m))].filter((m) => allowed.includes(m));
+  return <nav aria-label="Portal navigation" className={`erp-hub-navigation ${compact ? "is-compact" : ""}`}>
+    {direct.map((screen) => {
+      const Icon = moduleIcons[screen] || ClipboardCheck;
+      return <Link key={screen} href={nav(screen)} title={screenLabel(screen, labels)} className={active === screen ? "active" : ""} aria-current={active === screen ? "page" : undefined} onClick={close}>
+        <Icon size={18} /><span>{screenLabel(screen, labels)}</span>
+      </Link>;
+    })}
+    {hubs.map((hub) => {
+      const Icon = hubIcons[hub.key] || BookOpen;
+      const selected = active === hubRoute(hub) || hub.screens.includes(active);
+      return <Link key={hub.key} href={nav(hubRoute(hub))} title={hub.title} aria-label={hub.title} className={selected ? "active" : ""} aria-current={selected ? "page" : undefined} onClick={close}>
+        <Icon size={18} /><span>{hub.title}</span>
+      </Link>;
+    })}
+  </nav>;
 }
 
 export function WorkspaceSearch({
@@ -406,20 +120,7 @@ export function WorkspaceSearch({
     };
   }, []);
   const sources = [
-    ...(permittedModules.includes("academics")
-      ? (collegeBySlug(state.slug)?.programs || []).flatMap((p) => [
-          {
-            name: p.name,
-            context: `Program · ${p.department}`,
-            url: nav("academics"),
-          },
-          ...courseOfferings(p.name, 1).map((c) => ({
-            name: c.name,
-            context: `Course · ${c.code}`,
-            url: nav("academics"),
-          })),
-        ])
-      : []),
+    ...visibleHubs(permittedModules).map((hub) => ({ name: hub.title, context: "Module dashboard", url: nav(hubRoute(hub)) })),
     ...(permittedModules.includes("timetable")
       ? (state.operations?.records.timetable || []).slice(0, 500).map((p) => ({
           name: p.name,
@@ -435,8 +136,8 @@ export function WorkspaceSearch({
         }))
       : []),
     ...permittedModules.map((m) => ({
-      name: labels[m],
-      context: "Module",
+      name: screenLabel(m, labels),
+      context: "Submodule",
       url: nav(m),
     })),
     ...(
@@ -446,7 +147,7 @@ export function WorkspaceSearch({
         ["payments", state.payments],
         ["certificates", state.certificates],
         ["hostels", state.rooms],
-        ["staff", state.staff],
+        ["employees", state.staff],
       ] as const
     ).flatMap(([m, rows]) =>
       permittedModules.includes(m) && role !== "Student"

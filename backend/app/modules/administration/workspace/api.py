@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
+from app.core.edit_approvals import is_super_admin
 from app.core.resources import CATALOG, IMMUTABLE, MANAGED, RESOURCE_DEFAULTS, staff_only
 from app.core.security import current_user, has_permission, role_limit
 
@@ -38,7 +39,7 @@ def lookup_permitted(data, user, table):
 @router.get("/screens")
 def screens(request: Request, user=Depends(current_user)):
     staff_only(user)
-    data = request.app.state.store.snapshot()
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
     allowed = role_limit(data, user, "screens")
     system_admin = any(data["roles"].get(code, {}).get("system_admin") for code in user["role_codes"])
     items = []
@@ -76,13 +77,14 @@ def screens(request: Request, user=Depends(current_user)):
 @router.get("/screens/{key}")
 def screen(key: str, request: Request, user=Depends(current_user)):
     staff_only(user)
-    data = request.app.state.store.snapshot()
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
     definition = next((s for s in SCREENS if s["key"] == key), None)
     if not definition:
         raise HTTPException(404, "Unknown screen")
     allowed = role_limit(data, user, "screens")
     if allowed is not None and key not in allowed:
         raise HTTPException(403, "Screen access denied")
+    system_admin_user = is_super_admin(data, user)
     output = []
     for table in definition["resources"]:
         if not permitted(data, user, table):
@@ -99,6 +101,9 @@ def screen(key: str, request: Request, user=Depends(current_user)):
             actions = [a for a in actions if a not in {"create", "edit", "delete"}]
         if table in IMMUTABLE:
             actions = [a for a in actions if a not in {"edit", "delete"}]
+        # On the dashboard only the Super Admin deletes; other roles send edits for approval.
+        if not system_admin_user:
+            actions = [a for a in actions if a != "delete"]
         output.append(
             {
                 "name": table,
@@ -126,7 +131,7 @@ def screen(key: str, request: Request, user=Depends(current_user)):
 @router.get("/lookups/{table}")
 def lookup(table: str, request: Request, user=Depends(current_user)):
     staff_only(user)
-    data = request.app.state.store.snapshot()
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
     if table == "users":
         if not permitted(data, user, "accounts"):
             raise HTTPException(403, "Lookup denied")
@@ -168,7 +173,7 @@ def resource_form(
     user=Depends(current_user),
 ):
     staff_only(user)
-    data = request.app.state.store.snapshot()
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
     if table not in RESOURCES or not has_permission(data, user, table, "view"):
         raise HTTPException(403, "Form access denied")
     form = next(

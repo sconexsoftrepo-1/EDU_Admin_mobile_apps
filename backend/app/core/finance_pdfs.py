@@ -34,7 +34,12 @@ def _due_label(due, today):
     return f"Overdue {-days} day{'s' if days != -1 else ''}" if days < 0 else "Due today" if days == 0 else f"Due in {days} days"
 
 
-def fee_receipt_pdf(data, receipt, payment):
+RECEIPT_COPIES = ["ADMIN / STAFF COPY", "STUDENT COPY"]
+COPY_NOTES = {"ADMIN / STAFF COPY": "Kept by the accounts office", "STUDENT COPY": "Given to the student / parent"}
+
+
+def fee_receipt_pdf(data, receipt, payment, copies=None):
+    """Fee receipt; with copies (e.g. RECEIPT_COPIES) each copy is printed in full under its own name."""
     from .pdf_kit import HexColor
     from .student_leave_workspace import student_context
     records = data["records"]
@@ -43,84 +48,103 @@ def fee_receipt_pdf(data, receipt, payment):
     number = receipt.get("receipt_number") or receipt.get("code")
     paid_on = str(payment.get("paid_on") or receipt.get("issued_on") or "")[:10]
     charges, totals = _charge_rows(data, payment.get("student_code"))
+    payer = payment.get("payer") or {}
+    if payer:
+        # Fee paid before enrollment: no fee account yet, so show this payment and the typed details.
+        charges, totals = [], {}
+        place = {"student_name": payer.get("name"), "course_name": payer.get("course_branch"),
+                 "academic_year_name": payer.get("academic_year"), "section_name": payer.get("course_level_label")}
+        student = {**student, "admission_number": payer.get("admission_number") or "Not assigned yet",
+                   "code": payer.get("roll_or_reference") or "-"}
     by_charge = {c["code"]: c for c in charges}
     balance = amount(totals.get("outstanding")) if totals else Decimal("0")
     concessions = amount(totals.get("discount")) + amount(totals.get("scholarship")) if totals else Decimal("0")
     mode = METHODS.get(payment.get("method"), str(payment.get("method") or "").title())
     status = str(payment.get("status") or "").lower()
 
-    doc = Document(data, "FEE RECEIPT", f"No. {number}", campus_code=student.get("campus_code"),
-                   reference=f"Issued {paid_on}")
-    doc.tiles([("Total fee", f"INR {inr(totals.get('gross'))}" if totals else "—", f"Concessions INR {inr(concessions)}"),
-               ("Paid to date", f"INR {inr(totals.get('paid'))}" if totals else "—", "Including this receipt"),
-               ("Balance due", f"INR {inr(balance)}", "Fully paid" if balance <= 0 else "See balance statement (page 2)"),
-               ("Amount received", f"INR {inr(payment.get('amount'))}", f"{mode} · {paid_on}")])
-    payment_type = "Full settlement" if balance <= 0 else "Part payment (instalment)"
-    doc.panels([
-        ("Student", [("Name", place.get("student_name")), ("Admission no.", student.get("admission_number")),
-                     ("Course", place.get("course_name")), ("Academic year", place.get("academic_year_name")),
-                     ("Section", place.get("section_name")), ("Student ID", student.get("code"))]),
-        ("Payment", [("Receipt no.", number), ("Payment date", paid_on), ("Mode of payment", mode),
-                     ("Transaction no.", payment.get("transaction_reference") or ("Cash — no reference" if payment.get("method") == "cash" else "—")),
-                     ("Payment type", payment_type), ("Status", status.title() or "—")]),
-    ])
-    rows = []
-    for alloc in aw.rows(data, "payment_allocations"):
-        if alloc.get("payment_code") != payment.get("code"):
-            continue
-        ch = by_charge.get(alloc.get("charge_code"), {})
-        rows.append([ch.get("fee_head") or alloc.get("charge_code"), ch.get("term", ""), str(ch.get("due_date") or "")[:10],
-                     inr(ch.get("gross")) if ch else "", inr(alloc.get("amount"))])
-    if not rows:
-        rows = [["Fee payment", "", "", "", inr(payment.get("amount"))]]
-    doc.section("What this payment was for")
-    doc.table(["Fee head", "Term", "Due date", "Charged (INR)", "Paid now (INR)"], rows, widths=[3, 1.4, 1.3, 1.5, 1.5],
-              align="LLLRR", totals=["Total received", "", "", "", inr(payment.get("amount"))])
-    doc.highlight("Amount received", f"INR {inr(payment.get('amount'))}", words(payment.get("amount")),
-                  stamp={"settled": "PAID", "pending": "PENDING", "failed": "FAILED", "refunded": "REFUNDED"}.get(status, "RECEIVED"),
-                  stamp_color=None if status in {"settled", ""} else HexColor("#b43540"))
-    if balance > 0:
-        doc.note(f"A balance of INR {inr(balance)} remains on this student's fee account. The balance statement on the next "
-                 "page lists every outstanding fee with its due date, and all payments received so far.")
-    doc.signature("Received from (parent / student)", "Cashier / Accounts")
-    doc.note("Keep this receipt for your records. Fees once paid are refundable only as per the college refund policy. "
-             "Verify any receipt with the accounts office using the receipt number.")
-    if balance > 0:
-        today = date.today()
-        open_rows = [c for c in charges if amount(c.get("outstanding")) > 0]
-        open_rows.sort(key=lambda c: str(c.get("due_date") or ""))
-        doc.page_break("BALANCE STATEMENT", f"As on {today.isoformat()}")
-        doc.tiles([("Total fee", f"INR {inr(totals.get('gross'))}"), ("Paid to date", f"INR {inr(totals.get('paid'))}"),
-                   ("Next due", str(open_rows[0].get("due_date") or "—")[:10] if open_rows else "—",
-                    _due_label(open_rows[0].get("due_date"), today) if open_rows else ""),
-                   ("Balance due", f"INR {inr(balance)}", f"{len(open_rows)} fee item(s) open")])
-        doc.panels([("Student", [("Name", place.get("student_name")), ("Admission no.", student.get("admission_number")),
-                                 ("Course", place.get("course_name"))]),
-                    ("Statement", [("Against receipt", number), ("Statement date", today.isoformat()),
-                                   ("Concessions", f"INR {inr(concessions)}")])])
-        doc.section("Outstanding fees")
-        doc.table(["Fee head", "Term", "Due date", "Charged", "Paid", "Balance", "Status"],
-                  [[c.get("fee_head"), c.get("term", ""), str(c.get("due_date") or "")[:10], inr(c.get("gross")), inr(c.get("paid")),
-                    inr(c.get("outstanding")), _due_label(c.get("due_date"), today)] for c in open_rows],
-                  widths=[2.4, 1.2, 1.2, 1.3, 1.3, 1.3, 1.5], align="LLLRRRL",
-                  totals=["Balance due", "", "", "", "", inr(balance), ""], font=8)
-        receipts = {r.get("payment_code"): r for r in aw.rows(data, "receipts")}
-        heads = {}
+    copies = copies or [None]
+    doc = None
+    for copy in copies:
+        title = f"FEE RECEIPT · {copy}" if copy else "FEE RECEIPT"
+        if doc is None:
+            doc = Document(data, title, f"No. {number}", campus_code=student.get("campus_code"),
+                           reference=f"Issued {paid_on}")
+        else:
+            doc.page_break(title, f"No. {number}")
+        if copy:
+            doc.banner(copy, COPY_NOTES.get(copy, ""))
+        doc.tiles([("Total fee", f"INR {inr(totals.get('gross'))}" if totals else "—", f"Concessions INR {inr(concessions)}" if totals else "No fee account yet"),
+                   ("Paid to date", f"INR {inr(totals.get('paid'))}" if totals else f"INR {inr(payment.get('amount'))}", "Including this receipt"),
+                   ("Balance due", f"INR {inr(balance)}" if totals else "—", ("Fully paid" if balance <= 0 else "Statement on next page") if totals else "Recorded before enrollment"),
+                   ("Amount received", f"INR {inr(payment.get('amount'))}", f"{mode} · {paid_on}")])
+        payment_type = "Full settlement" if balance <= 0 else "Part payment (instalment)"
+        doc.panels([
+            ("Student", [("Name", place.get("student_name")), ("Admission no.", student.get("admission_number")),
+                         ("Course", place.get("course_name")), ("Academic year", place.get("academic_year_name")),
+                         ("Course level" if payer else "Section", place.get("section_name")),
+                         ("Roll / reference no." if payer else "Student ID", student.get("code"))]),
+            ("Payment", [("Receipt no.", number), ("Payment date", paid_on), ("Mode of payment", mode),
+                         *([("Transaction date", str(payment["transaction_date"])[:10])] if payment.get("transaction_date") else []),
+                         ("Transaction no.", payment.get("transaction_reference") or ("Cash — no reference" if payment.get("method") == "cash" else "—")),
+                         ("Payment type", payment_type), ("Status", status.title() or "—")]),
+        ])
+        rows = []
         for alloc in aw.rows(data, "payment_allocations"):
-            name = by_charge.get(alloc.get("charge_code"), {}).get("fee_head")
-            if name:
-                heads.setdefault(alloc.get("payment_code"), []).append(name)
-        history = sorted((p for p in aw.rows(data, "payments") if p.get("student_code") == payment.get("student_code")
-                          and p.get("status") == "settled"), key=lambda p: str(p.get("paid_on") or ""))
-        doc.section("Payment history")
-        doc.table(["Date", "Receipt no.", "Mode", "Transaction no.", "Paid for", "Amount"],
-                  [[str(p.get("paid_on") or "")[:10], receipts.get(p["code"], {}).get("receipt_number") or p["code"][-10:],
-                    METHODS.get(p.get("method"), p.get("method")), p.get("transaction_reference") or "—",
-                    ", ".join(dict.fromkeys(heads.get(p["code"], []))) or "Fees", inr(p.get("amount"))] for p in history],
-                  widths=[1.2, 1.6, 1.1, 1.8, 2.3, 1.3], align="LLLLLR",
-                  totals=["Total paid", "", "", "", "", inr(sum((amount(p.get("amount")) for p in history), Decimal("0")))], font=8)
-        doc.note("Pay the balance at the accounts office or through the college app (Fees → Pay). Overdue fees may attract "
-                 "a late fee as per the fee policy. Contact the accounts office for instalment requests.")
+            if alloc.get("payment_code") != payment.get("code"):
+                continue
+            ch = by_charge.get(alloc.get("charge_code"), {})
+            rows.append([ch.get("fee_head") or alloc.get("charge_code"), ch.get("term", ""), str(ch.get("due_date") or "")[:10],
+                         inr(ch.get("gross")) if ch else "", inr(alloc.get("amount"))])
+        if not rows:
+            rows = [[payment.get("fee_head_name") or "Fee payment", "", str(paid_on), "", inr(payment.get("amount"))]]
+        doc.section("What this payment was for")
+        doc.table(["Fee head", "Term", "Due date", "Charged (INR)", "Paid now (INR)"], rows, widths=[3, 1.4, 1.3, 1.5, 1.5],
+                  align="LLLRR", totals=["Total received", "", "", "", inr(payment.get("amount"))])
+        doc.highlight("Amount received", f"INR {inr(payment.get('amount'))}", words(payment.get("amount")),
+                      stamp={"settled": "PAID", "pending": "PENDING", "failed": "FAILED", "refunded": "REFUNDED"}.get(status, "RECEIVED"),
+                      stamp_color=None if status in {"settled", ""} else HexColor("#b43540"))
+        if balance > 0:
+            doc.note(f"A balance of INR {inr(balance)} remains on this student's fee account. The balance statement on the next "
+                     "page lists every outstanding fee with its due date, and all payments received so far.")
+        doc.signature("Received from (parent / student)", "Cashier / Accounts")
+        doc.note("Keep this receipt for your records. Fees once paid are refundable only as per the college refund policy. "
+                 "Verify any receipt with the accounts office using the receipt number.")
+        if balance > 0:
+            today = date.today()
+            open_rows = [c for c in charges if amount(c.get("outstanding")) > 0]
+            open_rows.sort(key=lambda c: str(c.get("due_date") or ""))
+            doc.page_break(f"BALANCE STATEMENT · {copy}" if copy else "BALANCE STATEMENT", f"As on {today.isoformat()}")
+            doc.tiles([("Total fee", f"INR {inr(totals.get('gross'))}"), ("Paid to date", f"INR {inr(totals.get('paid'))}"),
+                       ("Next due", str(open_rows[0].get("due_date") or "—")[:10] if open_rows else "—",
+                        _due_label(open_rows[0].get("due_date"), today) if open_rows else ""),
+                       ("Balance due", f"INR {inr(balance)}", f"{len(open_rows)} fee item(s) open")])
+            doc.panels([("Student", [("Name", place.get("student_name")), ("Admission no.", student.get("admission_number")),
+                                     ("Course", place.get("course_name"))]),
+                        ("Statement", [("Against receipt", number), ("Statement date", today.isoformat()),
+                                       ("Concessions", f"INR {inr(concessions)}")])])
+            doc.section("Outstanding fees")
+            doc.table(["Fee head", "Term", "Due date", "Charged", "Paid", "Balance", "Status"],
+                      [[c.get("fee_head"), c.get("term", ""), str(c.get("due_date") or "")[:10], inr(c.get("gross")), inr(c.get("paid")),
+                        inr(c.get("outstanding")), _due_label(c.get("due_date"), today)] for c in open_rows],
+                      widths=[2.4, 1.2, 1.2, 1.3, 1.3, 1.3, 1.5], align="LLLRRRL",
+                      totals=["Balance due", "", "", "", "", inr(balance), ""], font=8)
+            receipts = {r.get("payment_code"): r for r in aw.rows(data, "receipts")}
+            heads = {}
+            for alloc in aw.rows(data, "payment_allocations"):
+                name = by_charge.get(alloc.get("charge_code"), {}).get("fee_head")
+                if name:
+                    heads.setdefault(alloc.get("payment_code"), []).append(name)
+            history = sorted((p for p in aw.rows(data, "payments") if p.get("student_code") == payment.get("student_code")
+                              and p.get("status") == "settled"), key=lambda p: str(p.get("paid_on") or ""))
+            doc.section("Payment history")
+            doc.table(["Date", "Receipt no.", "Mode", "Transaction no.", "Paid for", "Amount"],
+                      [[str(p.get("paid_on") or "")[:10], receipts.get(p["code"], {}).get("receipt_number") or p["code"][-10:],
+                        METHODS.get(p.get("method"), p.get("method")), p.get("transaction_reference") or "—",
+                        ", ".join(dict.fromkeys(heads.get(p["code"], []))) or "Fees", inr(p.get("amount"))] for p in history],
+                      widths=[1.2, 1.6, 1.1, 1.8, 2.3, 1.3], align="LLLLLR",
+                      totals=["Total paid", "", "", "", "", inr(sum((amount(p.get("amount")) for p in history), Decimal("0")))], font=8)
+            doc.note("Pay the balance at the accounts office or through the college app (Fees → Pay). Overdue fees may attract "
+                     "a late fee as per the fee policy. Contact the accounts office for instalment requests.")
     return doc.finish()
 
 

@@ -62,6 +62,9 @@ class CollegeApi {
       !path.startsWith('/documents') &&
       !path.startsWith('/print') &&
       !path.startsWith('/mobile/alerts') &&
+      // Live statuses: cash handovers and change requests.
+      !path.startsWith('/finance/cash') &&
+      !path.startsWith('/edit-requests') &&
       !path.contains('/notifications') &&
       !path.endsWith('.pdf');
 
@@ -325,6 +328,59 @@ class CollegeApi {
       if (studentCode.isNotEmpty) 'student_code': studentCode,
     }),
   );
+  Future<dynamic> cashOverview() => get('/finance/cash/overview');
+  Future<dynamic> cashCollect(String code) =>
+      post('/finance/cash/transfers/${Uri.encodeComponent(code)}/collect', {});
+  Future<dynamic> cashDeposited(String code, Json body) =>
+      post('/finance/cash/transfers/${Uri.encodeComponent(code)}/deposits', body);
+  Future<dynamic> cashDepositProof(String code, String deposit, Json body) => post(
+    '/finance/cash/transfers/${Uri.encodeComponent(code)}/deposits/${Uri.encodeComponent(deposit)}/proof',
+    body,
+  );
+  // Admin: hand cash to a clerk, review deposit slips, record cash returned.
+  Future<dynamic> cashAssign(String clerkAccount, String amount, {String? note}) =>
+      post('/finance/cash/transfers', {
+        'clerk_account': clerkAccount,
+        'amount': amount,
+        if (note != null && note.isNotEmpty) 'note': note,
+      });
+  Future<dynamic> cashCancel(String code) =>
+      post('/finance/cash/transfers/${Uri.encodeComponent(code)}/cancel', {});
+  Future<dynamic> cashReview(String code, String deposit, String decision, {String? note}) => post(
+    '/finance/cash/transfers/${Uri.encodeComponent(code)}/deposits/${Uri.encodeComponent(deposit)}/review',
+    {'decision': decision, if (note != null && note.isNotEmpty) 'note': note},
+  );
+  Future<dynamic> cashReturn(String code, String amount, String returnedOn) =>
+      post('/finance/cash/transfers/${Uri.encodeComponent(code)}/returns', {
+        'amount': amount,
+        'returned_on': returnedOn,
+      });
+  /// The bank slip a clerk uploaded (image bytes), for the admin to check.
+  Future<Uint8List> cashSlip(String code, String deposit) async => (await _response(
+    'GET',
+    '/finance/cash/transfers/${Uri.encodeComponent(code)}/deposits/${Uri.encodeComponent(deposit)}/proof',
+    null,
+  )).bodyBytes;
+
+  // Fee collection analytics (same figures as the dashboard cashbook analytics).
+  Future<dynamic> feeAnalytics({String? start, String? end}) => get(
+    _Endpoints.query('/finance/fee-payments/analytics', {
+      'start': ?start,
+      'end': ?end,
+    }),
+  );
+
+  // Change requests: staff edits waiting for the Super Admin.
+  Future<dynamic> editRequests() => get('/edit-requests');
+  Future<dynamic> acceptEditRequest(String code, {bool overNewer = false}) => post(
+    '/edit-requests/${Uri.encodeComponent(code)}/accept',
+    {'apply_over_newer_data': overNewer},
+  );
+  Future<dynamic> rejectEditRequest(String code, {String? note}) => post(
+    '/edit-requests/${Uri.encodeComponent(code)}/reject',
+    {'note': (note == null || note.isEmpty) ? null : note},
+  );
+
   Future<dynamic> certificateOptions() =>
       get('${_Endpoints.certificates}/options');
   Future<dynamic> requestCertificate(

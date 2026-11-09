@@ -63,8 +63,8 @@ async function setup(page: Page, table: string) {
     if (path.startsWith("workspace/screens/"))
       return route.fulfill({
         json: {
-          key: "buses",
-          title: "Buses",
+          key: "module-finance",
+          title: "Record forms",
           resources: [resources[table]],
         },
       });
@@ -104,9 +104,7 @@ async function setup(page: Page, table: string) {
       json: { items: [], total: 0, actions: [], screens: [], summary: {} },
     });
   });
-  await page.goto(
-    `${origin}/portal/admin/buses`,
-  );
+  await page.goto(`${origin}/portal/admin/module-finance`);
   await page.locator(".erp-api-controls button").click();
   await page
     .getByRole("dialog", { name: "Manage college records" })
@@ -134,11 +132,7 @@ test("scholarship defaults submit and invalid rules show a useful error", async 
 }) => {
   const { form, saved } = await setup(page, "scholarships");
   await form.locator('input[name="name"]').fill("Merit scholarship");
-  await pick(
-    page,
-    form.getByRole("combobox", { name: "Academic year code" }),
-    "2026–2027",
-  );
+  await pick(page, form.getByRole("combobox", { name: "Batch" }), "2026–2027");
   await form.locator('input[name="maximum_amount"]').fill("500");
   await expect(form.locator('textarea[name="eligibility_rules"]')).toHaveValue(
     "{}",

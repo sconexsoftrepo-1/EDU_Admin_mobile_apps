@@ -270,6 +270,19 @@ class Document:
             self.stamp(stamp, stamp_color, x=(self.left + self.right) / 2 + 40, y=box_y - 6)
         self.y -= 62
 
+    def banner(self, text, detail=""):
+        """Full-width coloured strip naming the copy, e.g. ADMIN / STAFF COPY."""
+        self.ensure(40)
+        self.c.setFillColor(ACCENT)
+        self.c.roundRect(self.left, self.y - 14, self.right - self.left, 28, 6, stroke=0, fill=1)
+        self.c.setFillColor(white)
+        self.c.setFont("Helvetica-Bold", 12)
+        self.c.drawString(self.left + 14, self.y - 4, text)
+        if detail:
+            self.c.setFont("Helvetica", 8.5)
+            self.c.drawRightString(self.right - 14, self.y - 4, detail[:90])
+        self.y -= 34
+
     def note(self, text, size=8.5):
         for line in simpleSplit(text, "Helvetica", size, self.right - self.left):
             self.ensure(14)

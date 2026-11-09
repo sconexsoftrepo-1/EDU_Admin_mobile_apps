@@ -1,0 +1,121 @@
+/* Searchable dropdown panel for every native select, in the look of the sign-in role picker. */
+select[data-picking="true"] {
+  border-color: #c99448 !important;
+  box-shadow: 0 0 0 3px #c9944826 !important;
+  outline: 0 !important;
+}
+.sx-panel {
+  animation: sx-in 160ms ease both;
+  background: #fff;
+  border: 1px solid #eadccb;
+  border-radius: 12px;
+  box-shadow: 0 16px 34px #5a361326;
+  box-sizing: border-box;
+  color: #241d18;
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+  padding: 6px;
+  position: fixed;
+  z-index: 2147483000;
+}
+.sx-panel[data-placement="up"] {
+  animation-name: sx-up;
+}
+@keyframes sx-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes sx-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+/* The typing field laid exactly over the select while it is open. */
+.sx-field {
+  position: fixed;
+  z-index: 2147483001;
+}
+.sx-field input {
+  border: 1px solid #c99448;
+  box-shadow: 0 0 0 3px #c9944826;
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0;
+  outline: 0;
+  width: 100%;
+}
+.sx-field input::placeholder {
+  color: #8a7d70;
+  opacity: 1;
+}
+.sx-chevron {
+  color: #a56824;
+  pointer-events: none;
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+}
+.sx-panel ul {
+  list-style: none;
+  margin: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+}
+.sx-group {
+  color: #a56824;
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 4px;
+  text-transform: uppercase;
+}
+.sx-panel [role="option"] {
+  align-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  justify-content: space-between;
+  line-height: 1.3;
+  min-height: 40px;
+  padding: 7px 10px;
+}
+.sx-panel [role="option"] > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.sx-panel [role="option"] svg {
+  color: #a56824;
+  flex: 0 0 auto;
+}
+.sx-panel [role="option"].is-active {
+  background: #fbf3e6;
+  box-shadow: inset 0 0 0 1px #eadccb;
+}
+.sx-panel [role="option"][aria-selected="true"] {
+  background: #f6e6ce;
+  font-weight: 600;
+}
+.sx-panel [role="option"][aria-disabled="true"] {
+  color: #b3a89c;
+  cursor: default;
+}
+.sx-empty {
+  color: #76695e;
+  font-size: 13px;
+  padding: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sx-panel {
+    animation: none;
+  }
+}

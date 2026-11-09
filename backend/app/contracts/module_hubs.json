@@ -1,0 +1,193 @@
+[
+  {
+    "key": "admissions",
+    "title": "Admissions",
+    "description": "Follow enquiries through applications, admissions and enrollment.",
+    "screens": [
+      "admissions",
+      "module-admissions"
+    ]
+  },
+  {
+    "key": "academics",
+    "title": "Academics",
+    "description": "Manage courses, batches, teaching plans and academic progress.",
+    "screens": [
+      "course-setup",
+      "academics",
+      "teaching-staff",
+      "non-teaching-staff",
+      "labs",
+      "daily-labour",
+      "timetable",
+      "assignments",
+      "syllabus",
+      "calendar",
+      "module-academics"
+    ]
+  },
+  {
+    "key": "finance",
+    "title": "Finance & Fees",
+    "description": "Record payments and receipts, keep the cashbook and clerk deposits, and manage fee ledgers, structures and scholarships.",
+    "screens": [
+      "payments",
+      "manual-payments",
+      "cashbook",
+      "late-fees",
+      "fees",
+      "fee-structures",
+      "scholarships"
+    ]
+  },
+  {
+    "key": "students",
+    "title": "Student operations",
+    "description": "Manage student records, enrollment, attendance and requests.",
+    "screens": [
+      "students",
+      "student-enrollment",
+      "attendance",
+      "student-leave",
+      "assessments",
+      "module-student_management"
+    ]
+  },
+  {
+    "key": "hr",
+    "title": "HR & payroll",
+    "description": "Manage employees, attendance, leave and payroll.",
+    "screens": [
+      "employees",
+      "employee-attendance",
+      "employee-leave",
+      "salary-structures",
+      "payroll",
+      "payslips",
+      "bonuses",
+      "reimbursements",
+      "payroll-reports",
+      "module-human_resources"
+    ]
+  },
+  {
+    "key": "procurement",
+    "title": "Procurement & expenses",
+    "description": "Review expenses, purchasing, vendors and college assets.",
+    "screens": [
+      "expenses",
+      "invoices",
+      "expense-dashboard",
+      "purchase-requests",
+      "purchase-orders",
+      "vendors",
+      "equipment",
+      "utilities",
+      "maintenance",
+      "travel",
+      "transport-expenses",
+      "additional-expenses",
+      "inventory",
+      "assets",
+      "module-inventory"
+    ]
+  },
+  {
+    "key": "transport",
+    "title": "Transport & bus",
+    "description": "Manage buses, routes, passengers and transport operations.",
+    "screens": [
+      "transport",
+      "buses",
+      "routes",
+      "route-stops",
+      "drivers",
+      "driver-allocation",
+      "student-allocation",
+      "faculty-allocation",
+      "bus-seating",
+      "trips",
+      "manifest",
+      "transport-attendance",
+      "vehicle-maintenance",
+      "fuel",
+      "transport-reports",
+      "module-transport"
+    ]
+  },
+  {
+    "key": "certificates",
+    "title": "Certificates",
+    "description": "Manage certificate requests, issuance and verification.",
+    "screens": [
+      "certificates",
+      "certificate-requests",
+      "module-certificates"
+    ]
+  },
+  {
+    "key": "hostel",
+    "title": "Hostel",
+    "description": "Manage rooms, beds, allocations and hostel permissions.",
+    "screens": [
+      "hostels",
+      "hostel-permissions",
+      "module-hostel"
+    ]
+  },
+  {
+    "key": "communication",
+    "title": "Communication",
+    "description": "Manage announcements, notifications and communication campaigns.",
+    "screens": [
+      "notifications",
+      "payment-reminders",
+      "announcements",
+      "notification-templates",
+      "campaigns",
+      "module-communications"
+    ]
+  },
+  {
+    "key": "reports",
+    "title": "Reports",
+    "description": "Find reports, downloads and the college audit trail.",
+    "screens": [
+      "reports",
+      "audit-logs",
+      "module-reports"
+    ]
+  },
+  {
+    "key": "administration",
+    "title": "Administration",
+    "description": "Manage access, configuration, master data and documents.",
+    "screens": [
+      "accounts",
+      "credentials",
+      "roles",
+      "forms",
+      "imports",
+      "documents",
+      "settings",
+      "module-access_control",
+      "module-imports"
+    ]
+  },
+  {
+    "key": "library",
+    "title": "Library",
+    "description": "Manage library books, copies and loans.",
+    "screens": [
+      "module-library"
+    ]
+  },
+  {
+    "key": "placements",
+    "title": "Placements",
+    "description": "Manage placement companies, drives and applications.",
+    "screens": [
+      "module-placements"
+    ]
+  }
+]

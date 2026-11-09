@@ -364,6 +364,16 @@ class TableView(MutableMapping):
         self._select("WHERE t.code = %s", (code,))
         self.orig.setdefault(code, _ABSENT)
 
+    def codes_like(self, prefix):
+        """Codes that start with prefix, saved or added in this transaction, without loading the rows."""
+        if self.full:
+            return [c for c in self.rows if c.startswith(prefix)]
+        cur = self.s.cursor()
+        cur.execute(f"SELECT code FROM {self.t.name} WHERE code LIKE %s", (prefix + "%",))
+        saved = {row[0] for row in cur.fetchall()}
+        gone = {c for c, v in self.orig.items() if v is not _ABSENT and c not in self.rows}
+        return list((saved - gone) | {c for c in self.rows if c.startswith(prefix)})
+
     def load(self):
         if not self.full:
             self._select()
@@ -1101,7 +1111,27 @@ class Session(MutableMapping):
             if hasattr(part, "rebase"):
                 part.rebase()
 
+    # Technical tables whose deletions are not business records.
+    UNAUDITED_DELETES = {"audit_logs", "record_extras", "refresh_tokens", "login_attempts", "device_tokens",
+                         "schema_migrations", "file_storage_objects"}
+
+    def audit_deletes(self):
+        """Proof of every deleted record: an audit entry with the row as it was and the time."""
+        removed = [(name, code, before) for name, view in self.tables.items()
+                   if isinstance(view, TableView) and name not in self.UNAUDITED_DELETES
+                   for code, before in view.orig.items() if before is not _ABSENT and code not in view.rows]
+        if not removed:
+            return
+        log = self["audit"]
+        recent = getattr(log, "new", None) or []
+        actor = recent[-1].get("actor") if recent else None
+        stamp = datetime.now(timezone.utc).isoformat()
+        for name, code, before in removed:
+            log.append({"code": "AUD-" + uuid4().hex[:16].upper(), "actor": actor or "system", "action": "record_deleted",
+                        "resource": name, "entity_code": code, "occurred_at": stamp, "before_data": before})
+
     def flush(self):
+        self.audit_deletes()
         for key in ("accounts", "roles", "sessions", "forms", "submissions", "audit"):
             if key in self.parts:
                 self.parts[key].push()
@@ -1200,8 +1230,12 @@ class Session(MutableMapping):
 
     def _update(self, cur, name, code, changed, extras, extras_changed):
         t = self.meta.tables[name]
-        if changed:
-            sets = ", ".join(f"{k} = %s" for k in changed)
+        changed = {k: v for k, v in changed.items() if k != "updated_at"}
+        # Every edit stamps the row with the database's current time (proof of when it changed).
+        stamp = ("SYSDATETIMEOFFSET()" if getattr(self.meta, "dialect", "postgres") == "sqlserver" else "now()") \
+            if "updated_at" in t.columns and (changed or extras_changed) else None
+        if changed or stamp:
+            sets = ", ".join([f"{k} = %s" for k in changed] + ([f"updated_at = {stamp}"] if stamp else []))
             cur.execute(f"UPDATE {name} SET {sets} WHERE code = %s",
                         (*(to_db(t.columns[k], v) for k, v in changed.items()), code))
         if extras_changed:

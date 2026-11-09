@@ -52,25 +52,29 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       (cache[key]?['items'] as List? ?? []).cast<Json>();
   /// Lab in-charges sign in to the staff app; their workspace offers labs instead of classes.
   bool get labIncharge => widget.role == MobileRole.teacher && has('labs') && !has('classes');
+  /// Cash clerks sign in to the staff app too; their main screen is cash to deposit.
+  bool get cashClerk => widget.role == MobileRole.teacher && has('cash');
+  /// Screens the app draws itself (no generic record list or screen actions).
+  static const selfDrawn = {'certificates', 'cash', 'cash-analytics', 'change-requests'};
   String get primary => switch (widget.role) {
     MobileRole.admin => 'overview',
-    MobileRole.teacher => labIncharge ? 'labs' : 'classes',
+    MobileRole.teacher => cashClerk ? 'cash' : labIncharge ? 'labs' : 'classes',
     MobileRole.parent => 'fees',
     MobileRole.student => 'assignments',
   };
   String get primaryLabel => switch (widget.role) {
     MobileRole.admin => 'Finance',
-    MobileRole.teacher => labIncharge ? 'Labs' : 'Classes',
+    MobileRole.teacher => cashClerk ? 'Cash' : labIncharge ? 'Labs' : 'Classes',
     MobileRole.parent => 'Fees',
     MobileRole.student => 'Study',
   };
   /// Second bottom-bar destination: the week for teaching staff, students for administrators.
   String get secondary => widget.role == MobileRole.admin
       ? (has('students') ? 'students' : 'reports')
-      : 'timetable';
+      : cashClerk ? 'leave' : 'timetable';
   String get secondaryLabel => widget.role == MobileRole.admin
       ? (has('students') ? 'Students' : 'Reports')
-      : 'Timetable';
+      : cashClerk ? 'Leave' : 'Timetable';
   // Bottom bar order: primary, secondary, Home (centre), Chats, More. Inbox lives on the bell.
   int get tab => selected == null
       ? 2
@@ -912,7 +916,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           items: [
             EduNavItem(moduleIcon(primary), primaryLabel),
             EduNavItem(
-              widget.role == MobileRole.admin ? moduleIcon(secondary) : Icons.view_week_outlined,
+              widget.role == MobileRole.admin || cashClerk ? moduleIcon(secondary) : Icons.view_week_outlined,
               secondaryLabel,
             ),
             const EduNavItem(Icons.house_rounded, 'Home'),
@@ -1005,7 +1009,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             .cast<Json>();
     final summary = cache[primary]?['summary'] as Json?;
     final priorities = switch (role) {
-      MobileRole.admin => ['dues', 'collections', 'students', 'reports'],
+      MobileRole.admin => ['change-requests', 'cash', 'cash-analytics', 'dues', 'collections', 'students', 'reports'],
+      MobileRole.teacher when cashClerk => ['cash', 'leave', 'payslips', 'tax-documents'],
       MobileRole.teacher when labIncharge => ['labs', 'timetable', 'leave', 'payslips', 'tax-documents'],
       MobileRole.teacher => [
         'attendance',
@@ -1361,6 +1366,66 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     return (day: now, periods: const [], today: true);
   }
 
+  Json? get cashSummary => cache['cash']?['summary'] as Json?;
+
+  /// Clerk home: the cash handed to this clerk that is not settled yet, newest first.
+  List<Widget> clerkCashSection(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    const labels = {
+      'assigned': ('Collect from accounts', EduTints.gold),
+      'collected': ('Deposit in the bank', EduTints.clay),
+      'deposited': ('Upload the bank slip', EduTints.mist),
+      'awaiting_review': ('Slip with admin for review', EduTints.sage),
+    };
+    final open = rows('cash').where((t) => labels.containsKey('${t['status']}')).toList();
+    return [
+      SectionHeading(title: 'Cash to deposit', action: 'Cash deposits', onAction: () => this.open('cash')),
+      if (sectionErrors['cash'] != null)
+        sectionFailure('cash')
+      else if (cache['cash'] == null && busy)
+        const EduCardSkeleton(height: 110)
+      else if (open.isEmpty)
+        const QuietEmpty(
+          icon: Icons.account_balance_wallet_outlined,
+          title: 'No cash with you',
+          message: 'Cash the accounts office hands you for the bank appears here.',
+        )
+      else
+        for (final t in open.take(4))
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: EduWorkspace.border)),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: () => this.open('cash'),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(color: labels['${t['status']}']!.$2, borderRadius: BorderRadius.circular(12)),
+                      child: Icon(Icons.payments_outlined, size: 20, color: EduTints.ink(labels['${t['status']}']!.$2)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(money(t['status'] == 'assigned' ? t['amount'] : t['with_clerk']), style: text.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 2),
+                        Text(labels['${t['status']}']!.$1, style: text.bodySmall),
+                      ]),
+                    ),
+                    const Icon(Icons.chevron_right_rounded),
+                  ]),
+                ),
+              ),
+            ),
+          ),
+    ];
+  }
+
   Widget staffHeroCard(BuildContext context, {required String name, required String greeting, required DateTime today, Json? summary}) {
     final text = Theme.of(context).textTheme;
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -1373,6 +1438,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
             (Icons.groups_outlined, EduTints.mist, 'Students', '${cache['students']?['total'] ?? '—'}', cache['students'] == null && busy, has('students') ? () => open('students') : null),
             (Icons.account_balance_wallet_outlined, EduTints.clay, 'Outstanding', totals?['outstanding'] == null ? '—' : money(totals!['outstanding']), cache[primary] == null && busy, has('dues') ? () => open('dues') : null),
             (Icons.notifications_none_rounded, EduTints.plum, unread == 1 ? 'Alert' : 'Alerts', '$unread', cache['notifications'] == null && busy, has('notifications') ? () => open('notifications') : null),
+          ]
+        : cashClerk
+        ? [
+            (Icons.account_balance_wallet_outlined, EduTints.clay, 'With me', cashSummary?['in_hand'] == null ? '—' : money(cashSummary!['in_hand']), cache['cash'] == null && busy, () => open('cash')),
+            (Icons.move_to_inbox_outlined, EduTints.gold, 'To collect', '${cashSummary?['to_collect'] ?? '—'}', cache['cash'] == null && busy, () => open('cash')),
+            (Icons.upload_file_outlined, EduTints.mist, 'To upload', '${cashSummary?['to_upload'] ?? '—'}', cache['cash'] == null && busy, () => open('cash')),
           ]
         : labIncharge
         ? [
@@ -1456,11 +1527,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(color: collegeIvory, borderRadius: BorderRadius.circular(99), border: Border.all(color: collegeLine)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(admin ? Icons.admin_panel_settings_outlined : labIncharge ? Icons.science_outlined : Icons.school_outlined, size: 16),
+                  Icon(admin ? Icons.admin_panel_settings_outlined : cashClerk ? Icons.account_balance_wallet_outlined : labIncharge ? Icons.science_outlined : Icons.school_outlined, size: 16),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      admin ? 'College administration' : labIncharge ? 'Lab in-charge' : 'Faculty',
+                      admin ? 'College administration' : cashClerk ? 'Cash clerk' : labIncharge ? 'Lab in-charge' : 'Faculty',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -1589,7 +1660,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         key: ValueKey('staff-hero-${widget.role.name}'),
         child: staffHeroCard(context, name: name, greeting: greeting, today: today, summary: summary),
       ),
-      if (!admin && has(scheduleKey)) ...[
+      if (cashClerk) ...clerkCashSection(context),
+      if (!admin && !cashClerk && has(scheduleKey)) ...[
         SectionHeading(
           title: labIncharge
               ? 'Today’s lab sessions'
@@ -1655,7 +1727,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           ],
         ),
       ),
-      if (!admin && !labIncharge) ...records('assignments', 'Assignments & grading', limit: 1),
+      if (!admin && !labIncharge && !cashClerk && has('assignments')) ...records('assignments', 'Assignments & grading', limit: 1),
       if (admin) ...records('activity', 'Recent activity', limit: 3),
       if (has('announcements')) ...[
         SectionHeading(title: 'Updates', action: 'View all', onAction: () => open('announcements')),
@@ -3425,7 +3497,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   List<Widget> screenContent(BuildContext context) {
     final all = rows(selected!);
     final students = (data?['students'] as List? ?? []).cast<Json>();
-    final actions = selected == 'certificates' ? <Json>[] : (data?['actions'] as List? ?? []).cast<Json>();
+    final actions = selfDrawn.contains(selected) ? <Json>[] : (data?['actions'] as List? ?? []).cast<Json>();
     final financial = {
       'overview',
       'dues',
@@ -3436,7 +3508,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       'reports',
       'payslips',
     }.contains(selected);
-    final items = (selected == 'certificates' ? <Json>[] : all).where((r) {
+    final items = (selfDrawn.contains(selected) ? <Json>[] : all).where((r) {
       if (query.isNotEmpty &&
           !display(r).toLowerCase().contains(query.toLowerCase())) {
         return false;
@@ -3618,6 +3690,12 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         SectionHeading(title: 'Agenda · ${prettyDate(calendarDay)}'),
       if (selected == 'certificates')
         CertificateMobileWorkspace(api: widget.api, role: widget.role, studentCode: student),
+      if (selected == 'cash')
+        widget.role == MobileRole.admin ? AdminCashWorkspace(api: widget.api) : CashDepositWorkspace(api: widget.api),
+      if (selected == 'cash-analytics')
+        CollectionAnalyticsWorkspace(api: widget.api),
+      if (selected == 'change-requests')
+        ChangeRequestsWorkspace(api: widget.api),
       if (selected == 'timetable') ...[
         TimetableDaySelector(
           selected: calendarDay,
@@ -3708,7 +3786,7 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         ),
         const SizedBox(height: 8),
       ],
-      if (items.isEmpty && selected != 'overview' && selected != 'reports' && selected != 'certificates')
+      if (items.isEmpty && selected != 'overview' && selected != 'reports' && !selfDrawn.contains(selected))
         QuietEmpty(
           icon: moduleIcon(selected!),
           title: query.isNotEmpty

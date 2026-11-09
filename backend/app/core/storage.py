@@ -16,8 +16,31 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
+_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"  # Crockford base32: no I, L, O or U
+
+
 def new_code(prefix="REC"):
-    return f"{prefix}-{uuid4().hex}"
+    """Short unique code such as NOTICE-7K3QH9XM2PRA (60 random bits)."""
+    bits = uuid4().int
+    return f"{prefix}-" + "".join(_ALPHABET[(bits >> (5 * i)) & 31] for i in range(12))
+
+
+def next_number(values, prefix, width=4, taken=()):
+    """PREFIX-<n> one past the highest PREFIX-<number> in values, skipping anything in taken."""
+    start = len(prefix) + 1
+    top = max((int(v[start:]) for v in values if isinstance(v, str) and v.startswith(f"{prefix}-") and v[start:].isdigit()),
+              default=0)
+    code = f"{prefix}-{top + 1:0{width}d}"
+    while code in taken:  # a code taken by hand (or a concurrent save) moves the number on
+        top += 1
+        code = f"{prefix}-{top + 1:0{width}d}"
+    return code
+
+
+def next_code(rows, prefix, width=4):
+    """Next number in a table's sequence, such as STU-0049, after the highest PREFIX-<number>."""
+    codes = rows.codes_like(f"{prefix}-") if hasattr(rows, "codes_like") else rows
+    return next_number(codes, prefix, width, taken=rows)
 
 
 class Store:

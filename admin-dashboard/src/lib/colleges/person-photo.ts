@@ -27,5 +27,8 @@ export function courseLevelLabel(value: unknown): string {
     .toLowerCase();
   if (["inter", "intermediate"].includes(level)) return "Intermediate";
   if (level === "degree") return "Degree";
+  if (level === "polytechnic") return "Polytechnic";
+  if (level === "bped") return "B.P.Ed";
+  if (level === "mped") return "M.P.Ed";
   return level ? level.charAt(0).toUpperCase() + level.slice(1) : "—";
 }

@@ -118,7 +118,7 @@ def passed(row):
     return not row.get('absent') and row.get('marks') is not None and Decimal(str(row['marks']))>=Decimal(str(row['pass_marks']))
 
 
-def progress_for_batch(data, year, members, user):
+def progress_for_batch(data, year, members, user, *, summary_only=False):
     plan=curriculum(data,year['program_code'],year['code'])['items']
     final=latest_results(data,year['code'],set(members))
     if aw.teaching(user):
@@ -147,6 +147,8 @@ def progress_for_batch(data, year, members, user):
         earned=sum(Decimal(str(r.get('marks') or 0)) for r in scored)
         term=next((t for t in terms if t['semester_number']==n),{})
         summaries.append({'semester_number':n,'students':len(members),'all_clear':clear,'backlog_students':backlog,'pending_students':pending,'graded_subject_results':len(scored),'earned_marks':str(earned),'max_marks':str(maximum),'percentage':round(float(earned/maximum*100),2) if maximum else None,'start_date':term.get('start_date'),'end_date':term.get('end_date'),'estimated':term.get('estimated',False)})
+    if summary_only:
+        return {"semesters": summaries, "students": students}
     groups=[]
     revisions=data.get('documents',{}).get('semester_result_revisions',{})
     for row in results(data).values():
@@ -209,11 +211,12 @@ def today_classes(data, user, year, student_codes=None, instant=None):
 
 
 def fee_progress(data, students):
-    from app.modules.finance.transactions.api import calculate_ledger
+    from app.modules.finance.transactions.api import build_ledger_index, calculate_ledger
     structures={s['code']:s for s in aw.rows(data,'fee_structures')}
     items=[]
+    index=build_ledger_index(data)
     for student in sorted(students):
-        ledger=calculate_ledger(data,student)
+        ledger=calculate_ledger(data,student,index=index)
         for plan in ledger.get('course_plans',[]):
             for term in plan['terms']:
                 due=term.get('due_date');remaining=Decimal(term['balance'])
@@ -240,9 +243,38 @@ def enrollment_placements(data, year, members):
             for e in aw.rows(data,'student_enrollments') if e['student_code'] in members and e['section_code'] in sections and e.get('status') in {'active','completed'}]
 
 
+def dashboard_summary(request, user, academic_year_code=None, *, include_classes=False):
+    """Same published-result calculations, without loading fee ledgers or detailed record payloads."""
+    data = getattr(request.state, "auth_data", None) or request.app.state.store.snapshot()
+    years, members = eligible_batches(data, user)
+    selected = [y for y in years if not academic_year_code or y["code"] == academic_year_code]
+    if academic_year_code and not selected:
+        raise HTTPException(404, "Academic batch not found")
+    batches, comparisons, classes = [], {}, []
+    backlogs, students = set(), set()
+    clear = 0
+    for year in selected:
+        progress = progress_for_batch(data, year, members[year["code"]], user, summary_only=True)
+        batches.append({"code": year["code"], "semesters": progress["semesters"]})
+        students.update(members[year["code"]])
+        backlogs.update(s["code"] for s in progress["students"] if s["status"] == "backlogs")
+        clear += sum(s["all_clear"] for s in progress["semesters"])
+        values = comparisons.setdefault(year["program_code"], [Decimal(0), Decimal(0)])
+        for term in progress["semesters"]:
+            values[0] += Decimal(term["earned_marks"])
+            values[1] += Decimal(term["max_marks"])
+        if include_classes:
+            classes.extend(today_classes(data, user, year, set(members[year["code"]]) if aw.personal(user) else None))
+    courses = [{"name": data["records"]["programs"][code]["name"], "percentage": round(float(earned / maximum * 100), 2) if maximum else None} for code, (earned, maximum) in sorted(comparisons.items())]
+    earned = sum(v[0] for v in comparisons.values())
+    maximum = sum(v[1] for v in comparisons.values())
+    return {"batches": batches, "course_comparison": courses, "college_percentage": round(float(earned / maximum * 100), 2) if maximum else None, "today_classes": classes,
+            "totals": {"students": len(students), "batches": len(batches), "backlog_students": len(backlogs), "all_clear_semester_results": clear}}
+
+
 @router.get('')
 def overview(request: Request, program_code: str|None=None, academic_year_code: str|None=None, student_code: str|None=None, semester_number: int|None=None, user=Depends(current_user)):
-    data=request.app.state.store.snapshot(); years,members=eligible_batches(data,user,student_code)
+    data=getattr(request.state,"auth_data",None) or request.app.state.store.snapshot(); years,members=eligible_batches(data,user,student_code)
     options=years
     selected=[y for y in years if (not program_code or y['program_code']==program_code) and (not academic_year_code or y['code']==academic_year_code)]
     if academic_year_code and not selected: raise HTTPException(404,'Academic batch not found')
@@ -250,8 +282,9 @@ def overview(request: Request, program_code: str|None=None, academic_year_code: 
     output=[]; classes=[]
     for year in selected:
         progress=progress_for_batch(data,year,members[year['code']],user)
+        _, year_sections, _ = aw.roster(data,year['code'],year['program_code'])
         output.append({'code':year['code'],'name':year['name'],'program_code':year['program_code'],'course_name':data['records']['programs'][year['program_code']]['name'],
-                       'placements':enrollment_placements(data,year,members[year['code']]), 'timeline':semester_state(data,year),'calendar_revision':revision_value(data.get('documents',{}).get('semester_calendar_revisions',{}).get(year['code'])),'sections':[{'code':s['code'],'name':s['name']} for s in aw.rows(data,'sections') if s['code'] in aw.roster(data,year['code'],year['program_code'])[1]],**progress})
+                       'placements':enrollment_placements(data,year,members[year['code']]), 'timeline':semester_state(data,year),'calendar_revision':revision_value(data.get('documents',{}).get('semester_calendar_revisions',{}).get(year['code'])),'sections':[{'code':s['code'],'name':s['name']} for s in aw.rows(data,'sections') if s['code'] in year_sections],**progress})
         classes+=today_classes(data,user,year,set(members[year['code']]) if aw.personal(user) else None)
     selected_students={s for y in selected for s in members[y['code']]}
     financial=aw.personal(user) or has_permission(data,user,'student_fee_charges','view')
@@ -262,12 +295,13 @@ def overview(request: Request, program_code: str|None=None, academic_year_code: 
         earned=sum(Decimal(t['earned_marks']) for t in values); maximum=sum(Decimal(t['max_marks']) for t in values)
         comparisons.append({'code':program,'name':data['records']['programs'][program]['name'],'percentage':round(float(earned/maximum*100),2) if maximum else None,'earned_marks':str(earned),'max_marks':str(maximum)})
     earned=sum(Decimal(c['earned_marks']) for c in comparisons);maximum=sum(Decimal(c['max_marks']) for c in comparisons)
+    fee_codes={f['code'] for f in fees}
     return {'can_manage_batches':not aw.personal(user) and not aw.teaching(user) and has_permission(data,user,'academic_years','view'),'course_comparison':comparisons,'college_percentage':round(float(earned/maximum*100),2) if maximum else None,'can_manage_calendar':not aw.personal(user) and has_permission(data,user,'academic_years','edit'), 'generated_at':local_now().isoformat(),'personal':aw.personal(user),'teacher':aw.teaching(user),'can_grade':can_grade(data,user),
             'courses':[{'code':p['code'],'name':p['name'],'course_level':p.get('course_level'),'branch':p.get('branch')} for p in aw.rows(data,'programs') if p['code'] in {y['program_code'] for y in options}],
             'academic_years':[{'code':y['code'],'name':y['name'],'program_code':y['program_code']} for y in options],
             'children':[{'code':s,'name':aw.name(data['records']['students'].get(s,{}))} for s in sorted(own)],'batches':output,'today_classes':classes,'fees':[f for f in fees if not semester_number or f['semester_number']==semester_number or f['semester_number'] is None],
             'payments':[p for p in aw.rows(data,'payments') if financial and p['student_code'] in selected_students],
-            'payment_allocations':[a for a in aw.rows(data,'payment_allocations') if financial and a['charge_code'] in {f['code'] for f in fees}],
+            'payment_allocations':[a for a in aw.rows(data,'payment_allocations') if financial and a['charge_code'] in fee_codes],
             'totals':{'students':len(selected_students),'batches':len(output),'backlog_students':len({s['code'] for b in output for s in b['students'] if s['status']=='backlogs'}),'all_clear_semester_results':sum(s['all_clear'] for b in output for s in b['semesters'])}}
 
 
@@ -381,23 +415,10 @@ def academic_roster(data,year,user):
 
 
 def due_reminders(data):
-    """Deduplicated in-app notices: seven days before, due day, then weekly overdue."""
-    from .certificate_workspace import personal_accounts
-    student_codes={r['student_code'] for r in aw.rows(data,'student_fee_charges')}
-    made=[];sent=data.setdefault('documents',{}).setdefault('semester_fee_reminders',{})
-    for charge in fee_progress(data,student_codes):
-        if Decimal(charge['outstanding'])<=0 or not charge.get('due_date'):continue
-        remaining=(date.fromisoformat(str(charge['due_date'])[:10])-local_now().date()).days
-        if remaining>7:continue
-        stage='upcoming' if remaining>0 else 'due' if remaining==0 else f'overdue-{(-remaining-1)//7}'
-        for account in personal_accounts(data,charge['student_code']):
-            key='FREM-'+hashlib.sha256(f"{charge['code']}|{charge['due_date']}|{account}|{stage}".encode()).hexdigest()[:32]
-            if key in sent:continue
-            term=f"Semester {charge['semester_number']}" if charge.get('semester_number') else 'College'
-            code=new_code('FNOTICE')
-            data['records'].setdefault('notifications',{})[code]={'code':code,'user_code':account,'title':term+' fee reminder','body':f"{charge['fee_head']}: INR {charge['outstanding']} remains due on {charge['due_date']}. Open Fees to review payments.",'screen':'fees','charge_code':charge['code'],'academic_year_code':charge['academic_year_code'],'semester_number':charge.get('semester_number'),'channel':'in_app','status':'sent','sent_at':now()}
-            sent[key]={'notification_code':code,'created_at':now()};made.append(code)
-    return made
+    """Three reminders a day in the six days before a semester's due date, weekly once overdue,
+    and the late fee the day after an unpaid due date (see late_fees)."""
+    from .late_fees import run_fee_jobs
+    return run_fee_jobs(data, local_now())
 
 
 @router.post('/fee-reminders/run')

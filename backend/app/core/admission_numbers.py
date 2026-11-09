@@ -5,7 +5,9 @@ import re
 
 from fastapi import HTTPException
 
-COURSE_CODES = {"intermediate": "INT", "degree": "DEG"}
+COURSE_CODES = {"intermediate": "INT", "degree": "DEG", "polytechnic": "POLY", "bped": "BPED", "mped": "MPED"}
+# Every course level; all but Intermediate are semester-based like a degree.
+COURSE_LEVELS = tuple(COURSE_CODES)
 
 
 def branch_code(program):
@@ -31,7 +33,7 @@ def branch_code(program):
 def course_code(program):
     value = COURSE_CODES.get(program.get("course_level"))
     if not value:
-        raise HTTPException(422, "Set the course level to Intermediate or Degree before enrolling students")
+        raise HTTPException(422, "Set the course level of this course before enrolling students")
     return value
 
 
@@ -53,7 +55,9 @@ def next_admission_number(data, program, start_year):
     all SQL/JSON stores serialize writers, and students.admission_number is unique in SQL.
     """
     prefix = f"{int(start_year) % 100:02d}{course_code(program)}{validate_branch_code(data, program)}"
+    # Staff may now type any admission number, so generated numbers live on as reference numbers.
     numbers = {str(row.get("admission_number") or "") for row in data["records"].get("students", {}).values()}
+    numbers |= {str(row.get("reference_number") or "") for row in data["records"].get("student_admission_profiles", {}).values()}
     used = [int(number[len(prefix):]) for number in numbers
             if number.startswith(prefix) and number[len(prefix):].isdigit()]
     sequence = max(used, default=0) + 1

@@ -21,6 +21,9 @@ String moduleGroup(String key) => switch (key) {
   'overview' ||
   'dues' ||
   'collections' ||
+  'cash' ||
+  'cash-analytics' ||
+  'change-requests' ||
   'expenses' ||
   'reports' ||
   'fees' ||
@@ -69,6 +72,9 @@ IconData workspaceIcon(String key) => switch (key) {
   'labs' => Icons.science_outlined,
   'fees' || 'dues' => Icons.account_balance_wallet_outlined,
   'payments' || 'collections' => Icons.receipt_long_outlined,
+  'cash' => Icons.account_balance_outlined,
+  'cash-analytics' => Icons.query_stats_rounded,
+  'change-requests' => Icons.fact_check_outlined,
   'overview' || 'reports' => Icons.analytics_outlined,
   'expenses' => Icons.payments_outlined,
   'payslips' => Icons.request_quote_outlined,
@@ -100,6 +106,9 @@ const workspaceKeywords = <String, String>{
   'payments': 'receipts transactions paid fees',
   'dues': 'fees balance pending',
   'collections': 'payments receipts fees',
+  'cash': 'clerk deposit bank slip handover cashbook',
+  'cash-analytics': 'cashbook analytics collection semester graph',
+  'change-requests': 'approvals edits approve reject pending',
   'payslips': 'salary pay',
   'tax-documents': 'tax form16',
   'leave': 'absence holiday apply',

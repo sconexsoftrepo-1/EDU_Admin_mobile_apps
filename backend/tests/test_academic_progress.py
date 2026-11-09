@@ -104,3 +104,19 @@ def test_fee_reminders_use_balances_and_do_not_duplicate(app,academics):
         d['records'].setdefault('payments',{})['PAY']={'code':'PAY','student_code':'ST1','amount':'1000','status':'settled','paid_on':'2026-10-31','method':'cash','currency':'INR'}
         d['records'].setdefault('payment_allocations',{})['ALLOC']={'code':'ALLOC','payment_code':'PAY','charge_code':'CH','amount':'1000'}
         assert progress.fee_progress(d,{'ST1'})[0]['reminder_state']=='paid'
+
+
+def test_dashboard_summary_keeps_result_totals_without_loading_fee_detail(client, headers, academics, monkeypatch):
+    client.put(BASE+'/results',headers=headers,json=payload(academics[1],'70'))
+    original=client.get(BASE,headers=headers).json()
+    def unwanted_fee_detail(*args):
+        raise AssertionError('Dashboard summaries must not build the full fee workspace')
+    monkeypatch.setattr(progress,'fee_progress',unwanted_fee_detail)
+    home=client.get('/api/v1/dashboard/overview',headers=headers).json()['sections']['academics']
+    assert home['percentage']==original['college_percentage']
+    assert home['students']==original['totals']['students']
+    assert home['backlog_students']==original['totals']['backlog_students']
+    hub=client.get('/api/v1/dashboard/modules/academics?academic_year=Y',headers=headers).json()
+    course=next(c for c in hub['charts'] if c['title'].startswith('Course performance'))
+    assert course['items']==[{'label':c['name'],'value':c['percentage']} for c in original['course_comparison'] if c['percentage'] is not None]
+    assert hub['warnings']==[]

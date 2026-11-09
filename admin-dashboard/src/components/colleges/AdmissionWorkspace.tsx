@@ -26,6 +26,8 @@ import { pdfTable } from "@/lib/colleges/export-table";
 import StudentEnrollmentWizard from "./enrollment/StudentEnrollmentWizard";
 import WorkspacePrimaryAction from "./WorkspacePrimaryAction";
 import "./admission-workspace.css";
+import { COURSE_LEVELS } from "@/lib/colleges/course-levels";
+import type { CourseLevel } from "@/services/api";
 
 type Lookups = { employees: LookupOption[]; options: EnrollmentOptions };
 type Props = {
@@ -75,7 +77,7 @@ export default function AdmissionWorkspace({
   const [query, setQuery] = useState("");
   const [detail, setDetail] = useState<Row | null>(null);
   const [convert, setConvert] = useState<Row | null>(null);
-  const [courseLevel, setCourseLevel] = useState<"intermediate" | "degree">(
+  const [courseLevel, setCourseLevel] = useState<CourseLevel>(
     "intermediate",
   );
   const [programCode, setProgramCode] = useState("");
@@ -85,6 +87,27 @@ export default function AdmissionWorkspace({
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [formError, setFormError] = useState("");
+  const [dirty, setDirty] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  useEffect(() => {
+    if (!creating || !dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [creating, dirty]);
+  const closeForm = () => {
+    // Kept in the URL until now: the page can remount while it starts up.
+    if (window.location.search.includes("new=1"))
+      window.history.replaceState(null, "", window.location.pathname);
+    setCreating(false);
+    setDirty(false);
+    setConfirmDiscard(false);
+  };
+  const requestClose = () => {
+    if (saving) return;
+    if (dirty) setConfirmDiscard(true);
+    else closeForm();
+  };
 
   useEffect(() => {
     if (!canCreate) return;
@@ -94,6 +117,14 @@ export default function AdmissionWorkspace({
     };
     window.addEventListener("edunexa:new-application", open);
     return () => window.removeEventListener("edunexa:new-application", open);
+  }, [canCreate]);
+  // "New enquiry" on the dashboard links here with ?new=1.
+  useEffect(() => {
+    if (!canCreate) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("new") !== "1") return;
+    const id = window.setTimeout(() => setCreating(true), 0);
+    return () => window.clearTimeout(id);
   }, [canCreate]);
 
   const load = useCallback(async () => {
@@ -132,7 +163,9 @@ export default function AdmissionWorkspace({
   const detailCourses =
     detail && lookups
       ? lookups.options.courses[
-          detail.course_level === "degree" ? "degree" : "intermediate"
+          (COURSE_LEVELS.some((l) => l.key === detail.course_level)
+            ? detail.course_level
+            : "intermediate") as CourseLevel
         ]
       : [];
   const detailAddress =
@@ -201,13 +234,17 @@ export default function AdmissionWorkspace({
         reference_type: referenceType,
         reference_name: employee?.label || value("reference_name") || null,
         reference_mobile: referenceMobile,
+        reference_relationship:
+          referenceType === "relative"
+            ? value("reference_relationship") || null
+            : null,
       });
       target.reset();
       setProgramCode("");
       setEmployeeCode("");
       setReferenceType("walk_in");
       setSuccess("Admission enquiry saved.");
-      setCreating(false);
+      closeForm();
       await load();
     } catch (e) {
       setFormError(errorText(e));
@@ -415,14 +452,16 @@ export default function AdmissionWorkspace({
       </div>
       {creating && (
         <SideDrawer
-          title="New application"
-          subtitle="Capture applicant, guardian, course and follow-up details."
+          title="New enquiry"
+          subtitle="Create a new student enquiry and track follow-ups."
           className="adm-application-drawer"
-          onClose={() => {
-            if (!saving) setCreating(false);
-          }}
+          onClose={requestClose}
         >
-          <form className="adm-create-form" onSubmit={create}>
+          <form
+            className="adm-create-form"
+            onSubmit={create}
+            onChange={() => setDirty(true)}
+          >
             <div className="adm-form-title">
               <div>
                 <span>NEW ENQUIRY</span>
@@ -443,8 +482,11 @@ export default function AdmissionWorkspace({
                     setProgramCode("");
                   }}
                 >
-                  <option value="intermediate">Intermediate</option>
-                  <option value="degree">Degree</option>
+                  {COURSE_LEVELS.map((l) => (
+                    <option key={l.key} value={l.key}>
+                      {l.label}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label>
@@ -601,7 +643,13 @@ export default function AdmissionWorkspace({
                   referenceType !== "walk_in" && (
                     <>
                       <label>
-                        {platformReference ? "Platform name" : "Reference name"}
+                        {platformReference
+                          ? "Platform name"
+                          : referenceType === "post"
+                            ? "Mail or campaign reference"
+                            : referenceType === "other"
+                              ? "Source description"
+                              : "Relative's name"}
                         <input
                           key={referenceType}
                           name="reference_name"
@@ -612,6 +660,16 @@ export default function AdmissionWorkspace({
                           }
                         />
                       </label>
+                      {referenceType === "relative" && (
+                        <label>
+                          Relationship
+                          <input
+                            name="reference_relationship"
+                            autoComplete="off"
+                            placeholder="e.g. Uncle, cousin…"
+                          />
+                        </label>
+                      )}
                       {!platformReference && (
                         <label>
                           Reference mobile
@@ -648,10 +706,27 @@ export default function AdmissionWorkspace({
               </div>
             )}
             <footer className="adm-form-actions">
-              <span>Campus and enquiry source are assigned automatically.</span>
-              <button className="adm-submit" disabled={saving || !programCode}>
-                {saving ? "Saving…" : "Save admission enquiry"}
-              </button>
+              {confirmDiscard ? (
+                <>
+                  <span role="status">Discard the details you entered?</span>
+                  <button type="button" onClick={() => setConfirmDiscard(false)}>
+                    Keep editing
+                  </button>
+                  <button type="button" className="adm-discard" onClick={closeForm}>
+                    Discard
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span>Campus and enquiry source are assigned automatically.</span>
+                  <button type="button" disabled={saving} onClick={requestClose}>
+                    Cancel
+                  </button>
+                  <button className="adm-submit" disabled={saving || !programCode}>
+                    {saving ? "Saving…" : "Save enquiry"}
+                  </button>
+                </>
+              )}
             </footer>
           </form>
         </SideDrawer>
@@ -742,6 +817,9 @@ export default function AdmissionWorkspace({
                 : "Reference name"]: text(
                 detail.reference_name || detail.referrer_name,
               ),
+              ...(detail.reference_relationship
+                ? { Relationship: text(detail.reference_relationship) }
+                : {}),
               ...(!isPlatformReference(detail.reference_type)
                 ? {
                     "Reference mobile": text(
@@ -780,7 +858,9 @@ export default function AdmissionWorkspace({
               program_code: String(convert.program_code || ""),
               academic_year_code: String(convert.academic_year_code || ""),
               course_level:
-                convert.course_level === "degree" ? "degree" : "intermediate",
+                (COURSE_LEVELS.some((l) => l.key === convert.course_level)
+                  ? convert.course_level
+                  : "intermediate") as CourseLevel,
             }}
             onClose={() => setConvert(null)}
             onEnrolled={(studentCode) => void joined(studentCode)}

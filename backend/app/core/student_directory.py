@@ -2,6 +2,8 @@
 
 
 def student_directory_rows(data, students):
+    # The fee payers system record holds fees taken before enrollment; it is not a student.
+    students = [s for s in students if s.get("code") != "FEE-PAYERS"]
     records = data["records"]
     programs = records.get("programs", {})
     batches = records.get("batches", {})

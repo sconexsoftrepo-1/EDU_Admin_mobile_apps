@@ -103,6 +103,9 @@ def allowed_people(data, user):
         sections = active_sections(data, students)
         teachers = {o["teacher_code"] for o in aw.rows(data, "subject_offerings") if o.get("section_code") in sections}
         return {("employee", t["employee_code"]) for t in aw.rows(data, "teachers") if t["code"] in teachers}
+    from .cash_custody import is_clerk
+    if is_clerk(data, user):  # cash clerks chat with staff (teachers and admins) only
+        return {("employee", e["code"]) for e in aw.rows(data, "employees") if e.get("status", "active") == "active"}
     students = section_students(data, teacher_sections(data, user["person_code"]))
     people = {("student", s) for s in students} | {("parent", p) for p in parents_of(data, students)}
     people |= {("employee", e["code"]) for e in aw.rows(data, "employees") if e.get("status", "active") == "active"}

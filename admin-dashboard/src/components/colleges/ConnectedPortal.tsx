@@ -1,4 +1,5 @@
 "use client";
+import { money } from "@/data/colleges";
 import SearchField, { searchValues } from "./SearchField";
 import PersonFiles from "./PersonFiles";
 import PersonPhoto from "./PersonPhoto";
@@ -15,6 +16,7 @@ import {
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useState,
   useRef,
   type FormEvent,
@@ -26,6 +28,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowRight,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
   Download,
   FileText,
   Info,
@@ -258,6 +264,7 @@ export default function ConnectedPortal({
     {},
   );
   const [pageOffset, setPageOffset] = useState(0);
+  const [sort, setSort] = useState<{ key: string; down: boolean } | null>(null);
   const [validatingWorkbook, setValidatingWorkbook] = useState(false);
   const studentFilterRequest = useRef({ path: "", query: "" });
   const [feeHeads, setFeeHeads] = useState<{ initial?: Row } | null>(null);
@@ -341,6 +348,10 @@ export default function ConnectedPortal({
     try {
       const snapshot = await refreshWorkspaceCache(key, async () => {
         const rawSpec = await api.workspace.screen(name);
+        if (name === "module-admissions") {
+          rawSpec.title = "Admission records";
+          rawSpec.resources = [...rawSpec.resources].sort((a, b) => Number(["document_verification_events", "student_document_links"].includes(b.name)) - Number(["document_verification_events", "student_document_links"].includes(a.name)));
+        }
         const spec = activeRoleRef.current
           ? roleScreen(rawSpec, activeRoleRef.current)
           : rawSpec;
@@ -408,6 +419,10 @@ export default function ConnectedPortal({
     if (!key || readWorkspaceCache<ScreenSnapshot>(key)) return;
     void refreshWorkspaceCache(key, async () => {
       const rawSpec = await api.workspace.screen(name);
+        if (name === "module-admissions") {
+          rawSpec.title = "Admission records";
+          rawSpec.resources = [...rawSpec.resources].sort((a, b) => Number(["document_verification_events", "student_document_links"].includes(b.name)) - Number(["document_verification_events", "student_document_links"].includes(a.name)));
+        }
       const spec = activeRoleRef.current
         ? roleScreen(rawSpec, activeRoleRef.current)
         : rawSpec;
@@ -733,9 +748,8 @@ export default function ConnectedPortal({
       window.clearTimeout(timer);
     };
   }, [selected, studentScreen, studentResourcePath, columnFilters, filter]);
-  const edit = async (row?: Row) => {
-    if (!resource || (!row && studentScreen)) return;
-    const current = resource;
+  const edit = async (row?: Row, current = resource) => {
+    if (!current || (!row && studentScreen)) return;
     // Students, parents and enrollments are only created through the Student enrollment screen.
     if (!row && STUDENT_RECORDS.has(current.name)) {
       openEnrollment();
@@ -816,6 +830,25 @@ export default function ConnectedPortal({
       setError(errorText(e));
     }
   };
+  const openCampusForm = useEffectEvent((campus: Resource) => {
+    void edit(undefined, campus);
+  });
+  useEffect(() => {
+    if (selected !== "module-academics" || screen?.key !== selected) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("create") !== "campus") return;
+    const campus = screen.resources.find(
+      (entry) => entry.name === "campuses" && entry.actions.includes("create"),
+    );
+    const timer = window.setTimeout(() => {
+      if (window.location.href !== url.href) return;
+      url.searchParams.delete("create");
+      window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+      if (campus) openCampusForm(campus);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [screen, selected]);
+
   /** The data-entry form that "Create" opens on this screen, when the user may use it. */
   const primaryForm =
     resource?.name === "academic_years"
@@ -951,6 +984,10 @@ export default function ConnectedPortal({
       <>
         <PersonalPortal
           name={college.short}
+          session={String(account.login_code || "")}
+          slug={college.slug}
+          roleName={displayRole?.name}
+          teaching={String(account.workspace_scope) === "teaching"}
           signOut={async () => {
             try {
               clearWorkspaceCache();
@@ -1057,7 +1094,10 @@ export default function ConnectedPortal({
           a.key !== primaryForm?.key &&
           screen?.resources.some((r) => r.name === a.resource),
       );
-  const visibleRows = rows.filter(
+  /** The Manage Dashboard drawer switches between its modules with chips. */
+  const moduleChips =
+    embedded && selected === "dashboard" && (screen?.resources.length || 0) > 1;
+  const filteredRows = rows.filter(
     (row) =>
       JSON.stringify(row).toLowerCase().includes(filter.toLowerCase()) &&
       (!studentRegister ||
@@ -1065,6 +1105,16 @@ export default function ConnectedPortal({
           values.includes(String(cellValue(row, key) || "")),
         )),
   );
+  const visibleRows = sort
+    ? [...filteredRows].sort(
+        (a, b) =>
+          String(cellValue(a, sort.key) ?? "").localeCompare(
+            String(cellValue(b, sort.key) ?? ""),
+            undefined,
+            { numeric: true },
+          ) * (sort.down ? -1 : 1),
+      )
+    : filteredRows;
   /** Excel / PDF of the table as shown (current search applied), on record screens only. */
   const canExport =
     !!resource &&
@@ -1337,12 +1387,18 @@ export default function ConnectedPortal({
             )}
             {summary && (
               <section className="edu-summary">
-                {Object.entries(summary).map(([k, v]) => (
-                  <div key={k}>
-                    <span>{pretty(k)}</span>
-                    <strong>{text(v)}</strong>
-                  </div>
-                ))}
+                {Object.entries(summary)
+                  .filter(([k]) => k !== "currency")
+                  .map(([k, v]) => (
+                    <div key={k}>
+                      <span>{pretty(k)}</span>
+                      <strong>
+                        {embedded && !Number.isNaN(Number(v))
+                          ? money(Number(v) * 100)
+                          : text(v)}
+                      </strong>
+                    </div>
+                  ))}
               </section>
             )}
             <div className="edu-card">
@@ -1352,7 +1408,43 @@ export default function ConnectedPortal({
               >
                 {resource && !HEADER_ACTIONS.has(selected) && !staffKind && (
                   <>
-                    {selected !== "students" && (
+                    {moduleChips && (
+                      <div className="edu-module-chips">
+                        <button
+                          type="button"
+                          className="edu-module-arrow"
+                          aria-label="Scroll modules left"
+                          onClick={(e) => {
+                            e.currentTarget.nextElementSibling?.scrollBy({ left: -220 });
+                          }}
+                        >
+                          <ChevronLeft size={16} />
+                        </button>
+                        <div role="group" aria-label="Screen resource">
+                          {screen?.resources.map((r) => (
+                            <button
+                              key={r.name}
+                              type="button"
+                              aria-pressed={r.name === resource.name}
+                              onClick={() => void refreshResource(r)}
+                            >
+                              {r.title}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          className="edu-module-arrow"
+                          aria-label="Scroll modules right"
+                          onClick={(e) => {
+                            e.currentTarget.previousElementSibling?.scrollBy({ left: 220 });
+                          }}
+                        >
+                          <ChevronRight size={16} />
+                        </button>
+                      </div>
+                    )}
+                    {!moduleChips && selected !== "students" && (
                       <select
                         aria-label="Screen resource"
                         value={resource.name}
@@ -1447,11 +1539,26 @@ export default function ConnectedPortal({
                 )}
                 {!HEADER_ACTIONS.has(selected) &&
                   !staffKind &&
-                  screenActions.map((a) => (
+                  (embedded ? screenActions.slice(0, 2) : screenActions).map((a) => (
                     <button key={a.key} onClick={() => runAction(a)}>
                       {a.label}
                     </button>
                   ))}
+                {embedded &&
+                  !HEADER_ACTIONS.has(selected) &&
+                  !staffKind &&
+                  screenActions.length > 2 && (
+                    <details className="edu-more-actions">
+                      <summary>More</summary>
+                      <div>
+                        {screenActions.slice(2).map((a) => (
+                          <button key={a.key} onClick={() => runAction(a)}>
+                            {a.label}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
                 {selected === "reports" && (
                   <>
                     <button
@@ -1632,6 +1739,25 @@ export default function ConnectedPortal({
                                         }
                                       />
                                     </div>
+                                  ) : embedded ? (
+                                    <button
+                                      type="button"
+                                      className="edu-sort"
+                                      onClick={() =>
+                                        setSort({
+                                          key: k,
+                                          down: sort?.key === k ? !sort.down : false,
+                                        })
+                                      }
+                                    >
+                                      {columnLabel(k)}
+                                      {sort?.key === k &&
+                                        (sort.down ? (
+                                          <ChevronDown size={12} aria-hidden="true" />
+                                        ) : (
+                                          <ChevronUp size={12} aria-hidden="true" />
+                                        ))}
+                                    </button>
                                   ) : (
                                     columnLabel(k)
                                   )}

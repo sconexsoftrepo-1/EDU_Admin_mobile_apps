@@ -61,7 +61,8 @@ export function roleScreens(
 ): ScreenSummary[] {
   if (!role) return [];
   if (role.system_admin) return screens;
-  return screens.flatMap((screen) => {
+  const allowed = screens.flatMap((screen) => {
+    if (screen.key === "change-requests") return [screen];
     if (role.screens?.length && !role.screens.includes(screen.key)) return [];
     const resources = screen.resources.filter((target) =>
       role.permissions[target]?.includes("view"),
@@ -76,6 +77,10 @@ export function roleScreens(
       ]?.includes("view");
     return permitted ? [{ ...screen, resources }] : [];
   });
+  // Everyone follows their own edits there, but it alone does not count as workspace access.
+  return allowed.some((screen) => screen.key !== "change-requests")
+    ? allowed
+    : [];
 }
 export function roleScreen(screen: Screen, role: AccountRole): Screen {
   if (role.system_admin) return screen;
@@ -85,7 +90,10 @@ export function roleScreen(screen: Screen, role: AccountRole): Screen {
       .filter((r) => role.permissions[r.name]?.includes("view"))
       .map((r) => ({
         ...r,
-        actions: r.actions.filter((a) => role.permissions[r.name]?.includes(a)),
+        // On the dashboard only the Super Admin deletes.
+        actions: r.actions.filter(
+          (a) => a !== "delete" && role.permissions[r.name]?.includes(a),
+        ),
       })),
   };
 }

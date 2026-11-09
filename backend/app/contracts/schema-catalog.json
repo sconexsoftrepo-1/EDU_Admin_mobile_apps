@@ -5415,7 +5415,10 @@
         "reference": null,
         "choices": [
           "intermediate",
-          "degree"
+          "degree",
+          "polytechnic",
+          "bped",
+          "mped"
         ]
       },
       {
@@ -8145,7 +8148,10 @@
         "reference": null,
         "choices": [
           "intermediate",
-          "degree"
+          "degree",
+          "polytechnic",
+          "bped",
+          "mped"
         ]
       },
       {

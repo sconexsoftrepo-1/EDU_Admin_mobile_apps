@@ -19,7 +19,7 @@ EDUNEXA_S3_REGION=ap-south-1
 From `backend/` after installing requirements:
 
 ```sh
-.venv/bin/python tools/setup_s3_metadata.py
+# tools/setup_s3_metadata.py was a one-time script; it has run and was removed (see git history).
 .venv/bin/python tools/check_s3_storage.py
 ```
 

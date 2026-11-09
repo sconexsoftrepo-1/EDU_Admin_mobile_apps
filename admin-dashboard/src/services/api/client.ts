@@ -1,3 +1,4 @@
+import { notifyEditPending } from "@/lib/colleges/edit-pending";
 /**
  * HTTP client for browser components. Every module service calls the backend through
  * apiRequest/apiDownload; the base URL comes from config.ts.
@@ -90,6 +91,8 @@ export async function apiRequest<T = unknown>(
     );
   if (method !== "GET" && !path.startsWith("auth/"))
     invalidateWorkspaceDataCache();
+  if ((value as { pending_approval?: boolean })?.pending_approval)
+    notifyEditPending();
   return value as T;
 }
 

@@ -1,0 +1,2991 @@
+{
+  "audit_date": "2026-11-07",
+  "timezone": "Asia/Kolkata",
+  "git_head": "ff6db45466a4fd218b17ad69bdaefce8edda9726",
+  "scope": "Uncommitted working tree including the earlier Codex implementation and Claude fixes; no commit or deployment performed.",
+  "environment": "Production Next build, its actual cookie-authenticated proxy, disposable FastAPI fixture store; no production records changed.",
+  "preservation": {
+    "branding": "Existing college logo, chocolate/gold palette and assets reused.",
+    "forms": "No data-entry field definitions, order, validation or payload definitions changed by this audit. Earlier uncommitted New Enquiry edits retained.",
+    "database": "No migrations or production record writes performed by this audit. Existing schema-file changes were present before the audit.",
+    "authorization": "Existing current_user, has_permission, screen allowlists and resource actions retained.",
+    "navigation": "All 93 existing workspace screens accounted for. Duplicate Admissions setup card hidden; legacy URL redirects, and a secondary records link preserves every existing admission register."
+  },
+  "fixed_findings": [
+    {
+      "severity": "medium",
+      "finding": "Monthly trends were rendered as donut charts when another chart preceded them",
+      "resolution": "Trend/month charts always use bars; added a real-stack chart regression assertion; payment method labels are human-readable."
+    },
+    {
+      "severity": "high",
+      "finding": "Enrollment counts ignored academic-year filters",
+      "resolution": "Use the selected batch roster sections for enrollments, student metrics, program chart, attendance and student-linked pending records. Regression tests include another batch."
+    },
+    {
+      "severity": "high",
+      "finding": "Students by program used a nonexistent section.program_code",
+      "resolution": "Verified and retained Claude fix: section → batch → program."
+    },
+    {
+      "severity": "high",
+      "finding": "Year-filtered Students could show zero",
+      "resolution": "Verified and retained Claude roster-based membership fix; expanded dependent counts and leave scoping."
+    },
+    {
+      "severity": "medium",
+      "finding": "Attendance duplication and unclear missing values",
+      "resolution": "One Student attendance metric; selected-student/year/date scope; explicit Not marked text and explanation when no attendance exists."
+    },
+    {
+      "severity": "medium",
+      "finding": "Unique admission registers became unreachable after duplicate-card removal",
+      "resolution": "One primary Admissions card plus More admission records. The legacy setup route keeps a query mode for all existing registers, with document registers first."
+    },
+    {
+      "severity": "medium",
+      "finding": "Activity lists used opaque codes",
+      "resolution": "Use row names/titles and authorized related student/employee/vendor names; retain codes when access is absent."
+    },
+    {
+      "severity": "medium",
+      "finding": "Tablet hub header overflow",
+      "resolution": "Wrap actions within workspace width; responsive evidence covers all 13 enabled hubs at eight widths."
+    },
+    {
+      "severity": "medium",
+      "finding": "Repeated student-by-student ledger table scans",
+      "resolution": "Build charge/allocation indexes once per request and reuse the original balance calculation; exact result-parity and bounded-scan tests."
+    },
+    {
+      "severity": "medium",
+      "finding": "Academic dashboards built the full semester and fee workspace unnecessarily",
+      "resolution": "Use a published-result summary path with parity tests; retain the full semester endpoint contract."
+    },
+    {
+      "severity": "low",
+      "finding": "Sidebar label size depended on stylesheet order",
+      "resolution": "15px, bold labels in the module-navigation stylesheet itself."
+    },
+    {
+      "severity": "test-fixture",
+      "finding": "Old browser fixtures expected retired controls, old cookie duration, missing course-level selection and malformed widget responses",
+      "resolution": "Updated fixtures and assertions to the existing UI/contracts without changing production forms or auth."
+    },
+    {
+      "severity": "test-fixture",
+      "finding": "Certificate test tried issuing through local storage although issuance requires S3",
+      "resolution": "Assert missing-S3 rejection, then use an in-memory S3 adapter to verify issuance, signature, download audit and tamper detection."
+    }
+  ],
+  "test_results": {
+    "backend_full": [
+      "251 passed, 1 skipped, 1 warning in 302.00s (0:05:01)"
+    ],
+    "browser_full": [
+      "5 skipped",
+      "117 passed (1.0m)"
+    ],
+    "browser_real_stack": [
+      "5 passed (1.6m)"
+    ],
+    "targeted_browser": [
+      "27 passed (25.0s)"
+    ],
+    "final_chart_and_performance_regression": [
+      "2 passed (31.9s)"
+    ],
+    "build": "passed",
+    "typecheck": "passed",
+    "lint": "passed",
+    "diff_whitespace": "passed",
+    "permission_profiles": 14,
+    "enabled_hubs_responsive_checked": 13,
+    "workspace_urls_verified": 77,
+    "browser_stack_note": "The full suite skips the five explicitly enabled real-stack tests. Their separate run uses EDUNEXA_AUDIT_BASE_URL. No request mocks are used in that run.",
+    "workflow_coverage_note": "Existing backend workflows and browser form suites were rerun. Deep-link traversal proves rendering/access, not an exhaustive manual CRUD/approval/export exercise for every production role and every record type."
+  },
+  "performance": {
+    "environment": "Disposable local fixture backend and production Next build; not production latency",
+    "timings": [
+      {
+        "endpoint": "dashboard/overview",
+        "samples_ms": [
+          79,
+          78,
+          78
+        ],
+        "median_ms": 78,
+        "bytes": 5714
+      },
+      {
+        "endpoint": "dashboard/campus-analytics",
+        "samples_ms": [
+          80,
+          80,
+          78
+        ],
+        "median_ms": 80,
+        "bytes": 47534
+      },
+      {
+        "endpoint": "academics/semester-workspace",
+        "samples_ms": [
+          62,
+          59,
+          60
+        ],
+        "median_ms": 60,
+        "bytes": 487962
+      },
+      {
+        "endpoint": "dashboard/modules/academics",
+        "samples_ms": [
+          44,
+          42,
+          41
+        ],
+        "median_ms": 42,
+        "bytes": 3273
+      }
+    ],
+    "browser": {
+      "navigation": [
+        {
+          "duration": 275.2999999988824
+        }
+      ],
+      "long_tasks_ms": []
+    }
+  },
+  "ledger_benchmark": {
+    "fixture_students": 250,
+    "fixture_charges": 1500,
+    "original_ms": 374.04,
+    "indexed_ms": 23.4,
+    "speedup": 15.99,
+    "ledger_parity": true
+  },
+  "remaining_external_validation": [
+    "SQL Server integration is opt-in and was skipped; no production schema or records were changed to force it to run.",
+    "Production latency must be measured after deploying the backend changes; local fixture timings cannot be compared directly with the reported Mac-to-production timings.",
+    "Real S3 delivery, external SMS/email/payment providers, and manual acceptance using every actual production role/account remain environment-specific checks.",
+    "Transport remains hidden according to the existing frontend configuration; its backend hub and permission checks were tested.",
+    "No deployment, commit or merge performed."
+  ],
+  "modules": [
+    {
+      "key": "admissions",
+      "title": "Admissions",
+      "hub_route": "/portal/{role}/hub-admissions",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "admissions",
+          "title": "Admissions",
+          "route": "/portal/{role}/admissions",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "admission_enquiries",
+              "api": "/api/v1/admissions/admission-enquiries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_sources",
+              "api": "/api/v1/admissions/admission-sources",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "enquiry_followups",
+              "api": "/api/v1/admissions/enquiry-followups",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_cycles",
+              "api": "/api/v1/admissions/admission-cycles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_applications",
+              "api": "/api/v1/admissions/admission-applications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "application_guardians",
+              "api": "/api/v1/admissions/application-guardians",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "application_qualifications",
+              "api": "/api/v1/admissions/application-qualifications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "program_document_requirements",
+              "api": "/api/v1/admissions/program-document-requirements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "document_types",
+              "api": "/api/v1/admissions/document-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_documents",
+              "api": "/api/v1/admissions/admission-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_offers",
+              "api": "/api/v1/admissions/admission-offers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_reviews",
+              "api": "/api/v1/admissions/admission-reviews",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_status_history",
+              "api": "/api/v1/admissions/admission-status-history",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_enrollment_events",
+              "api": "/api/v1/admissions/admission-enrollment-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-admissions",
+          "title": "Admissions setup",
+          "route": "/portal/{role}/module-admissions",
+          "records_mode_query": "?records=documents",
+          "legacy_redirect": "admissions (when assigned and no records-mode query)",
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "admission_applications",
+              "api": "/api/v1/admissions/admission-applications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_cycles",
+              "api": "/api/v1/admissions/admission-cycles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_documents",
+              "api": "/api/v1/admissions/admission-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_enquiries",
+              "api": "/api/v1/admissions/admission-enquiries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_enrollment_events",
+              "api": "/api/v1/admissions/admission-enrollment-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_offers",
+              "api": "/api/v1/admissions/admission-offers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_reviews",
+              "api": "/api/v1/admissions/admission-reviews",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_sources",
+              "api": "/api/v1/admissions/admission-sources",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_status_history",
+              "api": "/api/v1/admissions/admission-status-history",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "application_guardians",
+              "api": "/api/v1/admissions/application-guardians",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "application_qualifications",
+              "api": "/api/v1/admissions/application-qualifications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "document_types",
+              "api": "/api/v1/admissions/document-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "document_verification_events",
+              "api": "/api/v1/admissions/document-verification-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "enquiry_followups",
+              "api": "/api/v1/admissions/enquiry-followups",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "program_document_requirements",
+              "api": "/api/v1/admissions/program-document-requirements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_document_links",
+              "api": "/api/v1/admissions/student-document-links",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "academics",
+      "title": "Academics",
+      "hub_route": "/portal/{role}/hub-academics",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "academics",
+          "title": "Academic setup",
+          "route": "/portal/{role}/academics",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "academic_years",
+              "api": "/api/v1/academics/academic-years",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "departments",
+              "api": "/api/v1/academics/departments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "programs",
+              "api": "/api/v1/academics/programs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "semesters",
+              "api": "/api/v1/academics/semesters",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "sections",
+              "api": "/api/v1/academics/sections",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subjects",
+              "api": "/api/v1/academics/subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "curriculum_subjects",
+              "api": "/api/v1/academics/curriculum-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subject_offerings",
+              "api": "/api/v1/academics/subject-offerings",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "rooms",
+              "api": "/api/v1/academics/rooms",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "course-setup",
+          "title": "Courses & enrollment",
+          "route": "/portal/{role}/course-setup",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "programs",
+              "api": "/api/v1/academics/programs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "sections",
+              "api": "/api/v1/academics/sections",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_enrollments",
+              "api": "/api/v1/student-management/student-enrollments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "academic_years",
+              "api": "/api/v1/academics/academic-years",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "departments",
+              "api": "/api/v1/academics/departments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "semesters",
+              "api": "/api/v1/academics/semesters",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subjects",
+              "api": "/api/v1/academics/subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "curriculum_subjects",
+              "api": "/api/v1/academics/curriculum-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "teaching-staff",
+          "title": "Teaching staff onboarding",
+          "route": "/portal/{role}/teaching-staff",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "teachers",
+              "api": "/api/v1/human-resources/teachers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "non-teaching-staff",
+          "title": "Non-teaching staff onboarding",
+          "route": "/portal/{role}/non-teaching-staff",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "staff_profiles",
+              "api": "/api/v1/human-resources/staff-profiles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_salary_components",
+              "api": "/api/v1/human-resources/employee-salary-components",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "labs",
+          "title": "Labs & lab in-charges",
+          "route": "/portal/{role}/labs",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "staff_profiles",
+              "api": "/api/v1/human-resources/staff-profiles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subject_offerings",
+              "api": "/api/v1/academics/subject-offerings",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "daily-labour",
+          "title": "Daily labour",
+          "route": "/portal/{role}/daily-labour",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_salary_components",
+              "api": "/api/v1/human-resources/employee-salary-components",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "timetable",
+          "title": "Timetable",
+          "route": "/portal/{role}/timetable",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "timetable_slots",
+              "api": "/api/v1/academics/timetable-slots",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "timetable_swap_requests",
+              "api": "/api/v1/academics/timetable-swap-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "rooms",
+              "api": "/api/v1/academics/rooms",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "assignments",
+          "title": "Assignments",
+          "route": "/portal/{role}/assignments",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "assignments",
+              "api": "/api/v1/academics/assignments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "assignment_submissions",
+              "api": "/api/v1/academics/assignment-submissions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "syllabus",
+          "title": "Syllabus & resources",
+          "route": "/portal/{role}/syllabus",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "curriculum_subjects",
+              "api": "/api/v1/academics/curriculum-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "learning_resources",
+              "api": "/api/v1/academics/learning-resources",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "calendar",
+          "title": "Academic calendar",
+          "route": "/portal/{role}/calendar",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "calendar_events",
+              "api": "/api/v1/academics/calendar-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-academics",
+          "title": "Academics setup",
+          "route": "/portal/{role}/module-academics",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "academic_years",
+              "api": "/api/v1/academics/academic-years",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "assignment_submissions",
+              "api": "/api/v1/academics/assignment-submissions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "assignments",
+              "api": "/api/v1/academics/assignments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "attendance_sessions",
+              "api": "/api/v1/academics/attendance-sessions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "calendar_events",
+              "api": "/api/v1/academics/calendar-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "campuses",
+              "api": "/api/v1/academics/campuses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "curriculum_subjects",
+              "api": "/api/v1/academics/curriculum-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "departments",
+              "api": "/api/v1/academics/departments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "exam_papers",
+              "api": "/api/v1/academics/exam-papers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "exam_results",
+              "api": "/api/v1/academics/exam-results",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "exams",
+              "api": "/api/v1/academics/exams",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "institution_settings",
+              "api": "/api/v1/academics/institution-settings",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "institutions",
+              "api": "/api/v1/academics/institutions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "learning_resources",
+              "api": "/api/v1/academics/learning-resources",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "programs",
+              "api": "/api/v1/academics/programs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "rooms",
+              "api": "/api/v1/academics/rooms",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "sections",
+              "api": "/api/v1/academics/sections",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "semesters",
+              "api": "/api/v1/academics/semesters",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subject_offerings",
+              "api": "/api/v1/academics/subject-offerings",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "subjects",
+              "api": "/api/v1/academics/subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "timetable_slots",
+              "api": "/api/v1/academics/timetable-slots",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "timetable_swap_requests",
+              "api": "/api/v1/academics/timetable-swap-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "finance",
+      "title": "Finance & Fees",
+      "hub_route": "/portal/{role}/hub-finance",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "fees",
+          "title": "Fees and finance",
+          "route": "/portal/{role}/fees",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "student_fee_charges",
+              "api": "/api/v1/finance/student-fee-charges",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_heads",
+              "api": "/api/v1/finance/fee-heads",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_structures",
+              "api": "/api/v1/finance/fee-structures",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_adjustments",
+              "api": "/api/v1/finance/fee-adjustments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_scholarships",
+              "api": "/api/v1/finance/student-scholarships",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "charge_scholarship_allocations",
+              "api": "/api/v1/finance/charge-scholarship-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "external_parties",
+              "api": "/api/v1/finance/external-parties",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "fee-structures",
+          "title": "Fee structures",
+          "route": "/portal/{role}/fee-structures",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "fee_heads",
+              "api": "/api/v1/finance/fee-heads",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_structures",
+              "api": "/api/v1/finance/fee-structures",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "external_parties",
+              "api": "/api/v1/finance/external-parties",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "payments",
+          "title": "Payments",
+          "route": "/portal/{role}/payments",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payments",
+              "api": "/api/v1/finance/payments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_allocations",
+              "api": "/api/v1/finance/payment-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "refunds",
+              "api": "/api/v1/finance/refunds",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "refund_allocations",
+              "api": "/api/v1/finance/refund-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_gateway_orders",
+              "api": "/api/v1/finance/payment-gateway-orders",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_gateway_events",
+              "api": "/api/v1/finance/payment-gateway-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "receipts",
+          "title": "Receipts",
+          "route": "/portal/{role}/receipts",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "receipts",
+              "api": "/api/v1/finance/receipts",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "cashbook",
+          "title": "Cash book",
+          "route": "/portal/{role}/cashbook",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payments",
+              "api": "/api/v1/finance/payments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "expense_payment_entries",
+              "api": "/api/v1/finance/expense-payment-entries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "external_remittances",
+              "api": "/api/v1/finance/external-remittances",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "scholarships",
+          "title": "Scholarships",
+          "route": "/portal/{role}/scholarships",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "scholarships",
+              "api": "/api/v1/finance/scholarships",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_scholarships",
+              "api": "/api/v1/finance/student-scholarships",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "charge_scholarship_allocations",
+              "api": "/api/v1/finance/charge-scholarship-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-finance",
+          "title": "Finance setup",
+          "route": "/portal/{role}/module-finance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "charge_scholarship_allocations",
+              "api": "/api/v1/finance/charge-scholarship-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "external_parties",
+              "api": "/api/v1/finance/external-parties",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "external_remittances",
+              "api": "/api/v1/finance/external-remittances",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_adjustments",
+              "api": "/api/v1/finance/fee-adjustments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_heads",
+              "api": "/api/v1/finance/fee-heads",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_reminder_jobs",
+              "api": "/api/v1/finance/fee-reminder-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "fee_structures",
+              "api": "/api/v1/finance/fee-structures",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_allocations",
+              "api": "/api/v1/finance/payment-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_gateway_events",
+              "api": "/api/v1/finance/payment-gateway-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payment_gateway_orders",
+              "api": "/api/v1/finance/payment-gateway-orders",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payments",
+              "api": "/api/v1/finance/payments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "receipts",
+              "api": "/api/v1/finance/receipts",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "refund_allocations",
+              "api": "/api/v1/finance/refund-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "refunds",
+              "api": "/api/v1/finance/refunds",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "remittance_allocations",
+              "api": "/api/v1/finance/remittance-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "scholarships",
+              "api": "/api/v1/finance/scholarships",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_fee_charges",
+              "api": "/api/v1/finance/student-fee-charges",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_scholarships",
+              "api": "/api/v1/finance/student-scholarships",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vendors",
+              "api": "/api/v1/finance/vendors",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "college_invoices",
+              "api": "/api/v1/finance/college-invoices",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "expense_payment_entries",
+              "api": "/api/v1/finance/expense-payment-entries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "students",
+      "title": "Student operations",
+      "hub_route": "/portal/{role}/hub-students",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "students",
+          "title": "Students",
+          "route": "/portal/{role}/students",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "students",
+              "api": "/api/v1/student-management/students",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "parents",
+              "api": "/api/v1/student-management/parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_parents",
+              "api": "/api/v1/student-management/student-parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_enrollments",
+              "api": "/api/v1/student-management/student-enrollments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_subjects",
+              "api": "/api/v1/student-management/student-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "consents",
+              "api": "/api/v1/student-management/consents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_status_history",
+              "api": "/api/v1/student-management/student-status-history",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "student-enrollment",
+          "title": "Student enrollment",
+          "route": "/portal/{role}/student-enrollment",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "students",
+              "api": "/api/v1/student-management/students",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "parents",
+              "api": "/api/v1/student-management/parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_parents",
+              "api": "/api/v1/student-management/student-parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "documents",
+              "api": "/api/v1/student-management/documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "attendance",
+          "title": "Student attendance",
+          "route": "/portal/{role}/attendance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "attendance_sessions",
+              "api": "/api/v1/academics/attendance-sessions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_attendance",
+              "api": "/api/v1/student-management/student-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "student-leave",
+          "title": "Student leave",
+          "route": "/portal/{role}/student-leave",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "student_leave_requests",
+              "api": "/api/v1/student-management/student-leave-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "assessments",
+          "title": "Assessments",
+          "route": "/portal/{role}/assessments",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "exams",
+              "api": "/api/v1/academics/exams",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "exam_papers",
+              "api": "/api/v1/academics/exam-papers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "exam_results",
+              "api": "/api/v1/academics/exam-results",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-student_management",
+          "title": "Student Management setup",
+          "route": "/portal/{role}/module-student_management",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "consents",
+              "api": "/api/v1/student-management/consents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "documents",
+              "api": "/api/v1/student-management/documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "parents",
+              "api": "/api/v1/student-management/parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_attendance",
+              "api": "/api/v1/student-management/student-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_enrollments",
+              "api": "/api/v1/student-management/student-enrollments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_leave_requests",
+              "api": "/api/v1/student-management/student-leave-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_parents",
+              "api": "/api/v1/student-management/student-parents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_status_history",
+              "api": "/api/v1/student-management/student-status-history",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "student_subjects",
+              "api": "/api/v1/student-management/student-subjects",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "students",
+              "api": "/api/v1/student-management/students",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hr",
+      "title": "HR & payroll",
+      "hub_route": "/portal/{role}/hub-hr",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "employees",
+          "title": "Employee directory",
+          "route": "/portal/{role}/employees",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "teachers",
+              "api": "/api/v1/human-resources/teachers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "staff_profiles",
+              "api": "/api/v1/human-resources/staff-profiles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "employee-attendance",
+          "title": "Employee attendance",
+          "route": "/portal/{role}/employee-attendance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employee_attendance",
+              "api": "/api/v1/human-resources/employee-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "employee-leave",
+          "title": "Leave management",
+          "route": "/portal/{role}/employee-leave",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "leave_types",
+              "api": "/api/v1/human-resources/leave-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "leave_requests",
+              "api": "/api/v1/human-resources/leave-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "salary-structures",
+          "title": "Salary structures",
+          "route": "/portal/{role}/salary-structures",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employee_salary_components",
+              "api": "/api/v1/human-resources/employee-salary-components",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "payroll",
+          "title": "Payroll processing",
+          "route": "/portal/{role}/payroll",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payroll_runs",
+              "api": "/api/v1/human-resources/payroll-runs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslips",
+              "api": "/api/v1/human-resources/payslips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslip_lines",
+              "api": "/api/v1/human-resources/payslip-lines",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "payslips",
+          "title": "Payslips",
+          "route": "/portal/{role}/payslips",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payslips",
+              "api": "/api/v1/human-resources/payslips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslip_lines",
+              "api": "/api/v1/human-resources/payslip-lines",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_tax_documents",
+              "api": "/api/v1/human-resources/employee-tax-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "bonuses",
+          "title": "Bonuses & incentives",
+          "route": "/portal/{role}/bonuses",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payroll_adjustments",
+              "api": "/api/v1/human-resources/payroll-adjustments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "reimbursements",
+          "title": "Reimbursements",
+          "route": "/portal/{role}/reimbursements",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payroll_adjustments",
+              "api": "/api/v1/human-resources/payroll-adjustments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "payroll-reports",
+          "title": "Payroll reports",
+          "route": "/portal/{role}/payroll-reports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "payroll_runs",
+              "api": "/api/v1/human-resources/payroll-runs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslips",
+              "api": "/api/v1/human-resources/payslips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-human_resources",
+          "title": "Human Resources setup",
+          "route": "/portal/{role}/module-human_resources",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "employee_attendance",
+              "api": "/api/v1/human-resources/employee-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_salary_components",
+              "api": "/api/v1/human-resources/employee-salary-components",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_tax_documents",
+              "api": "/api/v1/human-resources/employee-tax-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "leave_requests",
+              "api": "/api/v1/human-resources/leave-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "leave_types",
+              "api": "/api/v1/human-resources/leave-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payroll_runs",
+              "api": "/api/v1/human-resources/payroll-runs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslip_lines",
+              "api": "/api/v1/human-resources/payslip-lines",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payslips",
+              "api": "/api/v1/human-resources/payslips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "staff_profiles",
+              "api": "/api/v1/human-resources/staff-profiles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "teachers",
+              "api": "/api/v1/human-resources/teachers",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "payroll_adjustments",
+              "api": "/api/v1/human-resources/payroll-adjustments",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "procurement",
+      "title": "Procurement & expenses",
+      "hub_route": "/portal/{role}/hub-procurement",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "expenses",
+          "title": "Expenses",
+          "route": "/portal/{role}/expenses",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "expense_payment_entries",
+              "api": "/api/v1/finance/expense-payment-entries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "invoices",
+          "title": "Invoices",
+          "route": "/portal/{role}/invoices",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "college_invoices",
+              "api": "/api/v1/finance/college-invoices",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "expense-dashboard",
+          "title": "Expense dashboard",
+          "route": "/portal/{role}/expense-dashboard",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "college_invoices",
+              "api": "/api/v1/finance/college-invoices",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "purchase-requests",
+          "title": "Purchase requests",
+          "route": "/portal/{role}/purchase-requests",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "purchase_requests",
+              "api": "/api/v1/inventory/purchase-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "purchase-orders",
+          "title": "Purchase orders",
+          "route": "/portal/{role}/purchase-orders",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "purchase_orders",
+              "api": "/api/v1/inventory/purchase-orders",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "vendors",
+          "title": "Vendors",
+          "route": "/portal/{role}/vendors",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "vendors",
+              "api": "/api/v1/finance/vendors",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "equipment",
+          "title": "Equipment purchases",
+          "route": "/portal/{role}/equipment",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "inventory_items",
+              "api": "/api/v1/inventory/inventory-items",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "utilities",
+          "title": "Utilities",
+          "route": "/portal/{role}/utilities",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "maintenance",
+          "title": "Maintenance",
+          "route": "/portal/{role}/maintenance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "travel",
+          "title": "Travel expenses",
+          "route": "/portal/{role}/travel",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "transport-expenses",
+          "title": "Transport expenses",
+          "route": "/portal/{role}/transport-expenses",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "additional-expenses",
+          "title": "Additional expenses",
+          "route": "/portal/{role}/additional-expenses",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "expenses",
+              "api": "/api/v1/finance/expenses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "inventory",
+          "title": "Inventory",
+          "route": "/portal/{role}/inventory",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "inventory_items",
+              "api": "/api/v1/inventory/inventory-items",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "inventory_movements",
+              "api": "/api/v1/inventory/inventory-movements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "assets",
+          "title": "Asset register",
+          "route": "/portal/{role}/assets",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "asset_register",
+              "api": "/api/v1/inventory/asset-register",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-inventory",
+          "title": "Inventory setup",
+          "route": "/portal/{role}/module-inventory",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "inventory_items",
+              "api": "/api/v1/inventory/inventory-items",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "inventory_movements",
+              "api": "/api/v1/inventory/inventory-movements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "purchase_requests",
+              "api": "/api/v1/inventory/purchase-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "purchase_orders",
+              "api": "/api/v1/inventory/purchase-orders",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "asset_register",
+              "api": "/api/v1/inventory/asset-register",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "transport",
+      "title": "Transport & bus",
+      "hub_route": "/portal/{role}/hub-transport",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [],
+      "browser_visible": false,
+      "screens": [
+        {
+          "screen": "transport",
+          "title": "Transport dashboard",
+          "route": "/portal/{role}/transport",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicles",
+              "api": "/api/v1/transport/vehicles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_routes",
+              "api": "/api/v1/transport/transport-routes",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_allocations",
+              "api": "/api/v1/transport/transport-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "buses",
+          "title": "Bus management",
+          "route": "/portal/{role}/buses",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicles",
+              "api": "/api/v1/transport/vehicles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_seats",
+              "api": "/api/v1/transport/vehicle-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "routes",
+          "title": "Bus routes",
+          "route": "/portal/{role}/routes",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "transport_routes",
+              "api": "/api/v1/transport/transport-routes",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "route-stops",
+          "title": "Route stops",
+          "route": "/portal/{role}/route-stops",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "transport_stops",
+              "api": "/api/v1/transport/transport-stops",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "drivers",
+          "title": "Driver management",
+          "route": "/portal/{role}/drivers",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "employees",
+              "api": "/api/v1/human-resources/employees",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "driver-allocation",
+          "title": "Driver allocation",
+          "route": "/portal/{role}/driver-allocation",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicles",
+              "api": "/api/v1/transport/vehicles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "student-allocation",
+          "title": "Student allocation",
+          "route": "/portal/{role}/student-allocation",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "transport_allocations",
+              "api": "/api/v1/transport/transport-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "passenger_seats",
+              "api": "/api/v1/transport/passenger-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "faculty-allocation",
+          "title": "Faculty allocation",
+          "route": "/portal/{role}/faculty-allocation",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "passenger_seats",
+              "api": "/api/v1/transport/passenger-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "bus-seating",
+          "title": "3D bus seating",
+          "route": "/portal/{role}/bus-seating",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicle_seats",
+              "api": "/api/v1/transport/vehicle-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "passenger_seats",
+              "api": "/api/v1/transport/passenger-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "trips",
+          "title": "Daily trips",
+          "route": "/portal/{role}/trips",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicle_trips",
+              "api": "/api/v1/transport/vehicle-trips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "manifest",
+          "title": "Passenger manifest",
+          "route": "/portal/{role}/manifest",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "passenger_seats",
+              "api": "/api/v1/transport/passenger-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_allocations",
+              "api": "/api/v1/transport/transport-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "transport-attendance",
+          "title": "Transport attendance",
+          "route": "/portal/{role}/transport-attendance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "transport_attendance",
+              "api": "/api/v1/transport/transport-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "vehicle-maintenance",
+          "title": "Vehicle maintenance",
+          "route": "/portal/{role}/vehicle-maintenance",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicle_maintenance",
+              "api": "/api/v1/transport/vehicle-maintenance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "fuel",
+          "title": "Fuel records",
+          "route": "/portal/{role}/fuel",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicle_fuel",
+              "api": "/api/v1/transport/vehicle-fuel",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "transport-reports",
+          "title": "Transport reports",
+          "route": "/portal/{role}/transport-reports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "vehicle_trips",
+              "api": "/api/v1/transport/vehicle-trips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_fuel",
+              "api": "/api/v1/transport/vehicle-fuel",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_maintenance",
+              "api": "/api/v1/transport/vehicle-maintenance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-transport",
+          "title": "Transport setup",
+          "route": "/portal/{role}/module-transport",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "hidden by existing Transport configuration",
+          "http_status": null,
+          "sources": [
+            {
+              "resource": "transport_allocations",
+              "api": "/api/v1/transport/transport-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_routes",
+              "api": "/api/v1/transport/transport-routes",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_stops",
+              "api": "/api/v1/transport/transport-stops",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicles",
+              "api": "/api/v1/transport/vehicles",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_trips",
+              "api": "/api/v1/transport/vehicle-trips",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_maintenance",
+              "api": "/api/v1/transport/vehicle-maintenance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_fuel",
+              "api": "/api/v1/transport/vehicle-fuel",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "vehicle_seats",
+              "api": "/api/v1/transport/vehicle-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "passenger_seats",
+              "api": "/api/v1/transport/passenger-seats",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "transport_attendance",
+              "api": "/api/v1/transport/transport-attendance",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "certificates",
+      "title": "Certificates",
+      "hub_route": "/portal/{role}/hub-certificates",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "certificates",
+          "title": "Certificates",
+          "route": "/portal/{role}/certificates",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "certificates",
+              "api": "/api/v1/certificates/certificates",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_signatures",
+              "api": "/api/v1/certificates/certificate-signatures",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_download_events",
+              "api": "/api/v1/certificates/certificate-download-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_types",
+              "api": "/api/v1/certificates/certificate-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "certificate-requests",
+          "title": "Certificate requests",
+          "route": "/portal/{role}/certificate-requests",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "certificate_requests",
+              "api": "/api/v1/certificates/certificate-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-certificates",
+          "title": "Certificates setup",
+          "route": "/portal/{role}/module-certificates",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "certificate_download_events",
+              "api": "/api/v1/certificates/certificate-download-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_requests",
+              "api": "/api/v1/certificates/certificate-requests",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_signatures",
+              "api": "/api/v1/certificates/certificate-signatures",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificate_types",
+              "api": "/api/v1/certificates/certificate-types",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "certificates",
+              "api": "/api/v1/certificates/certificates",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hostel",
+      "title": "Hostel",
+      "hub_route": "/portal/{role}/hub-hostel",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "hostels",
+          "title": "Hostels",
+          "route": "/portal/{role}/hostels",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "hostels",
+              "api": "/api/v1/hostel/hostels",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_rooms",
+              "api": "/api/v1/hostel/hostel-rooms",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_beds",
+              "api": "/api/v1/hostel/hostel-beds",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_allocations",
+              "api": "/api/v1/hostel/hostel-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_provision_issues",
+              "api": "/api/v1/hostel/hostel-provision-issues",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "hostel-permissions",
+          "title": "Hostel permissions",
+          "route": "/portal/{role}/hostel-permissions",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "hostel_permissions",
+              "api": "/api/v1/hostel/hostel-permissions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-hostel",
+          "title": "Hostel setup",
+          "route": "/portal/{role}/module-hostel",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "hostel_allocations",
+              "api": "/api/v1/hostel/hostel-allocations",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_beds",
+              "api": "/api/v1/hostel/hostel-beds",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_permissions",
+              "api": "/api/v1/hostel/hostel-permissions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_provision_issues",
+              "api": "/api/v1/hostel/hostel-provision-issues",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostel_rooms",
+              "api": "/api/v1/hostel/hostel-rooms",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "hostels",
+              "api": "/api/v1/hostel/hostels",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "communication",
+      "title": "Communication",
+      "hub_route": "/portal/{role}/hub-communication",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "notifications",
+          "title": "Notifications",
+          "route": "/portal/{role}/notifications",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "notifications",
+              "api": "/api/v1/communications/notifications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "notification_delivery_attempts",
+              "api": "/api/v1/communications/notification-delivery-attempts",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "payment-reminders",
+          "title": "Payment reminders",
+          "route": "/portal/{role}/payment-reminders",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "fee_reminder_jobs",
+              "api": "/api/v1/finance/fee-reminder-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "announcements",
+          "title": "Announcements",
+          "route": "/portal/{role}/announcements",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "announcements",
+              "api": "/api/v1/communications/announcements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "announcement_recipients",
+              "api": "/api/v1/communications/announcement-recipients",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "notification-templates",
+          "title": "Notification templates",
+          "route": "/portal/{role}/notification-templates",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "notification_templates",
+              "api": "/api/v1/communications/notification-templates",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "campaigns",
+          "title": "Notification campaigns",
+          "route": "/portal/{role}/campaigns",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "notification_campaigns",
+              "api": "/api/v1/communications/notification-campaigns",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-communications",
+          "title": "Communications setup",
+          "route": "/portal/{role}/module-communications",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "announcement_recipients",
+              "api": "/api/v1/communications/announcement-recipients",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "announcements",
+              "api": "/api/v1/communications/announcements",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "contact_enquiries",
+              "api": "/api/v1/communications/contact-enquiries",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "device_tokens",
+              "api": "/api/v1/communications/device-tokens",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "grievances",
+              "api": "/api/v1/communications/grievances",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "message_threads",
+              "api": "/api/v1/communications/message-threads",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "messages",
+              "api": "/api/v1/communications/messages",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "notification_delivery_attempts",
+              "api": "/api/v1/communications/notification-delivery-attempts",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "notifications",
+              "api": "/api/v1/communications/notifications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "thread_members",
+              "api": "/api/v1/communications/thread-members",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "notification_templates",
+              "api": "/api/v1/communications/notification-templates",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "notification_campaigns",
+              "api": "/api/v1/communications/notification-campaigns",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "reports",
+      "title": "Reports",
+      "hub_route": "/portal/{role}/hub-reports",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "reports",
+          "title": "Reports",
+          "route": "/portal/{role}/reports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "report_export_jobs",
+              "api": "/api/v1/reports/report-export-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "report_download_events",
+              "api": "/api/v1/reports/report-download-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "audit-logs",
+          "title": "Audit trail",
+          "route": "/portal/{role}/audit-logs",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "module-reports",
+          "title": "Reports setup",
+          "route": "/portal/{role}/module-reports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "admin_mobile_preferences",
+              "api": "/api/v1/reports/admin-mobile-preferences",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "report_download_events",
+              "api": "/api/v1/reports/report-download-events",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "report_export_jobs",
+              "api": "/api/v1/reports/report-export-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "administration",
+      "title": "Administration",
+      "hub_route": "/portal/{role}/hub-administration",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "accounts",
+          "title": "User accounts",
+          "route": "/portal/{role}/accounts",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "credentials",
+          "title": "Credential provisioning",
+          "route": "/portal/{role}/credentials",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "roles",
+          "title": "Roles and screen permissions",
+          "route": "/portal/{role}/roles",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "forms",
+          "title": "Form builder",
+          "route": "/portal/{role}/forms",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "imports",
+          "title": "Excel imports",
+          "route": "/portal/{role}/imports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "import_jobs",
+              "api": "/api/v1/imports/import-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "import_rows",
+              "api": "/api/v1/imports/import-rows",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "documents",
+          "title": "Documents and Form 16",
+          "route": "/portal/{role}/documents",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "documents",
+              "api": "/api/v1/student-management/documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "admission_documents",
+              "api": "/api/v1/admissions/admission-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "employee_tax_documents",
+              "api": "/api/v1/human-resources/employee-tax-documents",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "settings",
+          "title": "College settings",
+          "route": "/portal/{role}/settings",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "institutions",
+              "api": "/api/v1/academics/institutions",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "campuses",
+              "api": "/api/v1/academics/campuses",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "institution_settings",
+              "api": "/api/v1/academics/institution-settings",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        },
+        {
+          "screen": "module-access_control",
+          "title": "Access Control setup",
+          "route": "/portal/{role}/module-access_control",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": []
+        },
+        {
+          "screen": "module-imports",
+          "title": "Imports setup",
+          "route": "/portal/{role}/module-imports",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "import_jobs",
+              "api": "/api/v1/imports/import-jobs",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "import_rows",
+              "api": "/api/v1/imports/import-rows",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "library",
+      "title": "Library",
+      "hub_route": "/portal/{role}/hub-library",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "module-library",
+          "title": "Library setup",
+          "route": "/portal/{role}/module-library",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "library_books",
+              "api": "/api/v1/library/library-books",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "library_copies",
+              "api": "/api/v1/library/library-copies",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "library_loans",
+              "api": "/api/v1/library/library-loans",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "placements",
+      "title": "Placements",
+      "hub_route": "/portal/{role}/hub-placements",
+      "backend_summary": "passed",
+      "screen_restricted_permission_profile": "passed",
+      "responsive_widths": [
+        1920,
+        1440,
+        1280,
+        1024,
+        768,
+        430,
+        390,
+        360
+      ],
+      "browser_visible": true,
+      "screens": [
+        {
+          "screen": "module-placements",
+          "title": "Placements setup",
+          "route": "/portal/{role}/module-placements",
+          "records_mode_query": null,
+          "legacy_redirect": null,
+          "browser_status": "passed",
+          "http_status": 200,
+          "sources": [
+            {
+              "resource": "placement_applications",
+              "api": "/api/v1/placements/placement-applications",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "placement_companies",
+              "api": "/api/v1/placements/placement-companies",
+              "permission": "view; mutations retain existing per-resource action checks"
+            },
+            {
+              "resource": "placement_drives",
+              "api": "/api/v1/placements/placement-drives",
+              "permission": "view; mutations retain existing per-resource action checks"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

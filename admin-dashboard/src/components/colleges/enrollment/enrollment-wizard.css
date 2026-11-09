@@ -470,24 +470,69 @@
   gap: 26px;
   align-items: center;
   flex-wrap: wrap;
-  background: var(--enw-ink);
-  color: #fff;
+  background: #f6e6ce;
+  border: 1px solid #eadccb;
+  color: #241d18;
   border-radius: 8px;
   padding: 14px 18px;
 }
-.enw-numbers-bar span {
+.enw-numbers-bar > div > span {
   display: block;
+  color: #4f4338;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  opacity: 0.8;
 }
 .enw-numbers-bar strong {
+  color: #241d18;
   font-size: 18px;
 }
-.enw-numbers-bar small {
+.enw-numbers-bar > small {
+  color: #4f4338;
   margin-left: auto;
-  opacity: 0.8;
+}
+.enw-numbers-bar .enw-field {
+  flex: 0 1 240px;
+}
+.enw-qualification,
+.enw-bank {
+  border: 1px solid #eadccb;
+  border-radius: 10px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+.enw-qualification + .enw-qualification,
+.enw-bank + .enw-bank {
+  margin-top: 12px;
+}
+.enw-bank h4 {
+  font-size: 14px;
+  margin: 0;
+}
+.enw-qualification-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+.enw-semesters {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.enw-semesters > .enw-grid {
+  width: 100%;
+}
+.enw-semester-input {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+.enw-semester-input input {
+  flex: 1;
+  min-width: 0;
 }
 .enw-choices {
   display: grid;
@@ -1091,3 +1136,173 @@
 .enw-footer {
   padding-inline: var(--edu-drawer-gutter);
 }
+.enw-qualification .enw-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  max-width: 100%;
+}
+
+/* Review & confirm: a compact admission form on screen and on paper. */
+.enw-review {
+  gap: 10px;
+}
+.enw-review .enw-review-head {
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px 14px;
+}
+.enw-review .enw-review-photo {
+  height: 96px;
+  width: 80px;
+}
+.enw-review-title {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+  min-width: 0;
+}
+.enw-review .enw-review-head h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.enw-review .enw-numbers {
+  display: grid;
+  gap: 4px 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .enw-review .enw-numbers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.enw-review .enw-numbers div {
+  border-left: 3px solid #e3bd80;
+  padding-left: 7px;
+}
+.enw-review .enw-numbers dt {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.enw-review .enw-numbers dd {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+/* Cards flow into two columns like a newspaper, so short and long sections leave no gaps. */
+.enw-review-columns {
+  column-gap: 10px;
+  columns: 2 330px;
+}
+.enw-review-columns .enw-review-card {
+  break-inside: avoid;
+  display: inline-block;
+  margin: 0 0 10px;
+  width: 100%;
+}
+.enw-review .enw-review-card {
+  padding: 10px 12px;
+}
+.enw-review .enw-review-card h4 {
+  border-bottom: 1px solid var(--enw-line);
+  font-size: 11px;
+  margin: 0 0 6px;
+  padding-bottom: 5px;
+}
+.enw-review .enw-review-card dl {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr;
+}
+.enw-review .enw-review-card dl > div {
+  border-bottom: 1px dashed #efe6d8;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(110px, 42%) 1fr;
+  padding: 3px 0;
+}
+.enw-review .enw-review-card dl > div:last-child {
+  border-bottom: 0;
+}
+.enw-review .enw-review-card dt {
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.enw-review .enw-review-card dd {
+  font-size: 13px;
+  margin: 0;
+}
+.enw-review-table table {
+  font-size: 12.5px;
+}
+.enw-review-table td,
+.enw-review-table th {
+  padding: 5px 8px;
+}
+.enw-signatures {
+  display: none;
+}
+@media print {
+  @page {
+    margin: 10mm;
+    size: A4;
+  }
+  .enw-print {
+    font-size: 10px;
+  }
+  .enw-print .enw-review-head,
+  .enw-print .enw-review-card {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 6px 8px;
+  }
+  .enw-print .enw-review-photo {
+    height: 80px;
+    width: 66px;
+  }
+  .enw-print .enw-review-head h2 {
+    font-size: 15px;
+  }
+  .enw-print .enw-numbers {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .enw-print .enw-numbers dd,
+  .enw-print .enw-review-card dd {
+    font-size: 10px;
+  }
+  .enw-print .enw-review-columns {
+    column-gap: 6px;
+    columns: 2;
+  }
+  .enw-print .enw-review-columns .enw-review-card {
+    margin-bottom: 6px;
+  }
+  .enw-print .enw-review-table table {
+    font-size: 9.5px;
+  }
+  .enw-print .enw-review-table td,
+  .enw-print .enw-review-table th {
+    padding: 2px 5px;
+  }
+  .enw-print .enw-signatures {
+    break-inside: avoid;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(4, 1fr);
+    margin-top: 28px;
+  }
+  .enw-print .enw-signatures span {
+    border-top: 1px solid #555;
+    font-size: 9px;
+    padding-top: 3px;
+    text-align: center;
+  }
+  .enw-exports,
+  .enw-confirm-bar,
+  .enw-footer,
+  .enw-top {
+    display: none !important;
+  }
+}
+
