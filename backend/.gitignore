@@ -10,3 +10,8 @@ __pycache__/
 .ruff_cache/
 
 .migration-target/
+
+# Server-only secrets (Firebase service-account key for push notifications); never commit.
+secrets/
+*service-account*.json
+*firebase-adminsdk*.json
