@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "836243265119",
+    "project_id": "edu-pragathi",
+    "storage_bucket": "edu-pragathi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836243265119:android:02a3af758999636fe82dea",
+        "android_client_info": {
+          "package_name": "com.edunexa.edunexa_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqD1fmDMo88XOfAX6s7EAzfG7w_Rim-Ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836243265119:android:dd7a84ea2282360ce82dea",
+        "android_client_info": {
+          "package_name": "com.edunexa.edunexa_parent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqD1fmDMo88XOfAX6s7EAzfG7w_Rim-Ik"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
