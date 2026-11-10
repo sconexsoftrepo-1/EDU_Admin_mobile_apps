@@ -136,6 +136,10 @@ flutter run --dart-define-from-file=firebase-android.json      # Android phone
 flutter run --dart-define-from-file=firebase-ios.json          # iPhone
 ```
 
+Android builds also work with a plain `flutter build apk --release`: the apps fall back to their
+Android values from `firebase-android.json` (built into `lib/constants/api_config.dart`). iOS builds
+must pass `--dart-define-from-file=firebase-ios.json`.
+
 Add `--dart-define=API_BASE_URL=http://127.0.0.1:8010` only when testing against a local backend
 (the default is the live server). Without the Firebase values an app still works but shows no
 phone notifications (only the in-app list).

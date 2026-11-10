@@ -19,7 +19,7 @@ typedef PushData = Map<String, dynamic>;
 Future<void> _initialize() async {
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
+      options: FirebaseOptions(
         apiKey: PushConfig.apiKey,
         appId: PushConfig.appId,
         messagingSenderId: PushConfig.senderId,

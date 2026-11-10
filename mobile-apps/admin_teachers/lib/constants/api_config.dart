@@ -1,3 +1,7 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart';
+
 /// App-local environment and storage configuration. This app has no shared package.
 abstract final class ApiConfig {
   static const baseUrl = String.fromEnvironment(
@@ -25,13 +29,26 @@ abstract final class ApiConfig {
 }
 
 abstract final class PushConfig {
-  static const apiKey = String.fromEnvironment('FIREBASE_API_KEY');
-  static const appId = String.fromEnvironment('FIREBASE_APP_ID');
-  static const projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
-  static const senderId = String.fromEnvironment(
+  static const _apiKey = String.fromEnvironment('FIREBASE_API_KEY');
+  static const _appId = String.fromEnvironment('FIREBASE_APP_ID');
+  static const _projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
+  static const _senderId = String.fromEnvironment(
     'FIREBASE_MESSAGING_SENDER_ID',
   );
   static const iosBundleId = String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID');
+
+  /// Android builds without `--dart-define-from-file` use this app's Android registration in the
+  /// edu-pragathi Firebase project (same values as firebase-android.json; not secret), so a plain
+  /// `flutter build apk` still receives pushes. iOS builds must pass firebase-ios.json.
+  static bool get _androidDefaults =>
+      _apiKey.isEmpty &&
+      !kIsWeb &&
+      defaultTargetPlatform == TargetPlatform.android &&
+      !Platform.environment.containsKey('FLUTTER_TEST');
+  static String get apiKey => _androidDefaults ? 'AIzaSyBqD1fmDMo88XOfAX6s7EAzfG7w_Rim-Ik' : _apiKey;
+  static String get appId => _androidDefaults ? '1:836243265119:android:02a3af758999636fe82dea' : _appId;
+  static String get projectId => _androidDefaults ? 'edu-pragathi' : _projectId;
+  static String get senderId => _androidDefaults ? '836243265119' : _senderId;
   static bool get configured =>
       [apiKey, appId, projectId, senderId].every((v) => v.isNotEmpty);
 }
