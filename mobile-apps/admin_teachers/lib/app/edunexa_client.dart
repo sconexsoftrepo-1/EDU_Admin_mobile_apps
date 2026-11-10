@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:file_selector/file_selector.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../services/push_notifications.dart';
+import '../services/app_permissions.dart';
 import '../services/api_service.dart';
 export '../services/api_service.dart';
 import '../theme/mobile_design.dart';

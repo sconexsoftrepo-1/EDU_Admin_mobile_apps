@@ -168,11 +168,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   Future<void> resumePush() async {
     try {
-      final enabled = await widget.api.storage.read(
-        key: ApiConfig.pushPreferenceKey(widget.api.clientId),
-      );
-      // On by default: the first sign-in asks for notification permission once.
-      if ((enabled == 'true' || enabled == null) && mounted) await enablePush();
+      // Ask for notifications, camera and microphone when the app opens (prompts only appear
+      // for permissions not answered yet), then connect device alerts.
+      if (mounted) await AppPermissions.requestAtStartup(context);
+      if (mounted) await enablePush();
     } catch (_) {
       /* Optional device alerts never block sign-in. */
     }
@@ -193,6 +192,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) refreshChatBadge();
+    // Back from the phone's settings with notifications turned on: connect device alerts.
+    if (state == AppLifecycleState.resumed && !pushBusy && pushStatus != 'Device alerts enabled' && push != null) {
+      enablePush();
+    }
     if (state == AppLifecycleState.resumed && !busy && selected != 'messages') {
       final at = fetchedAt[selected ?? primary];
       if (at == null || DateTime.now().difference(at) > staleAfter) load();
@@ -695,12 +698,6 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         await widget.api.storage.write(
           key: ApiConfig.pushPreferenceKey(widget.api.clientId),
           value: 'true',
-        );
-      } else if (status.startsWith('Notifications are blocked')) {
-        // Don't ask again at every launch; the switch in the inbox still turns alerts on.
-        await widget.api.storage.write(
-          key: ApiConfig.pushPreferenceKey(widget.api.clientId),
-          value: 'false',
         );
       }
       if (mounted) setState(() => pushStatus = status);
@@ -3605,7 +3602,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 ),
               ),
               TextButton(
-                onPressed: pushBusy ? null : enablePush,
+                onPressed: pushBusy
+                    ? null
+                    : () async {
+                        // Android does not ask again once blocked: explain and open settings.
+                        if (pushStatus.startsWith('Notifications are blocked') ||
+                            pushStatus.startsWith('Notification permission has not been granted')) {
+                          await AppPermissions.explainBlockedNotifications(context);
+                        }
+                        await enablePush();
+                      },
                 child: Text(pushBusy ? 'Connecting…' : 'Enable'),
               ),
             ],

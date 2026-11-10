@@ -64,6 +64,7 @@ class CollegeApi {
       !path.startsWith('/mobile/alerts') &&
       // Live statuses: cash handovers and change requests.
       !path.startsWith('/finance/cash') &&
+      !path.startsWith('/mobile/workspace/cash') &&
       !path.startsWith('/edit-requests') &&
       !path.contains('/notifications') &&
       !path.endsWith('.pdf');
