@@ -103,53 +103,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     push = PushNotifications(
       onOpen: (data) async {
         if (!mounted) return;
-        // Chat pushes open the conversation straight away.
-        final thread = data['thread_code']?.toString();
-        if (thread != null && thread.isNotEmpty) {
-          openChat(thread);
-          return;
+        // Opened from the notification bar: wait for the signed-in screens, then go where the
+        // notice points (the push carries the screen and record ids as well).
+        for (var i = 0; i < 40 && screens.isEmpty && mounted; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 250));
         }
+        if (!mounted) return;
         final code = data['notification_code']?.toString();
-        if (!has('notifications')) return;
-        await fetchSection('notifications');
-        final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
-        if (notice != null && notice['thread_code'] != null) {
-          openChat(notice['thread_code'].toString());
-        } else if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
-          open('certificates');
-        } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
-          open('assessments');
-        } else if(notice!=null&&notice['screen'] is String&&has(notice['screen'] as String)){
-          open(notice['screen'] as String);
-        } else {
+        Json? notice;
+        if (has('notifications')) {
+          await fetchSection('notifications');
+          notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
+        }
+        if (notice != null && notice['status'] != 'read') unawaited(markRead(notice));
+        final target = noticeTarget(notice ?? Map<String, dynamic>.from(data));
+        if (target != null) {
+          target();
+        } else if (has('notifications')) {
           open('notifications');
         }
       },
       onForeground: (title, body, data) {
+        // The push is already shown in the notification bar; keep the badges and inbox current.
         if (!mounted) return;
-        if (data['kind'] == 'chat' || data['screen'] == 'messages') {
-          refreshChatBadge();
-          final thread = data['thread_code']?.toString();
-          // Android shows a notification; on iOS show a banner unless that chat is open.
-          if (Theme.of(context).platform == TargetPlatform.iOS && thread != PushNotifications.activeThread) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('$title\n$body', maxLines: 3, overflow: TextOverflow.ellipsis),
-              action: SnackBarAction(label: 'Open', onPressed: () => openChat(thread)),
-            ));
-          }
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title\n$body'),
-            action: SnackBarAction(
-              label: 'View',
-              onPressed: () => open('notifications'),
-            ),
-          ),
-        );
-        fetchSection('notifications');
         refreshChatBadge();
+        if (has('notifications')) fetchSection('notifications');
       },
     );
     resumePush();
@@ -607,7 +585,9 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
         );
       }
       if (mounted) setState(() => pushStatus = status);
-    } catch (e) {
+    } catch (e, stack) {
+      // Shown in the device log (adb logcat -s flutter) to diagnose push setup.
+      debugPrint('Device alerts could not connect: $e\n$stack');
       if (mounted) {
         setState(
           () => pushStatus = 'Device alerts could not connect. Try again.',
@@ -1966,7 +1946,18 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (selected == 'notifications') ...[
         // Summary first, then a compact device-alerts banner.
         inboxSummary(all),
-        const SizedBox(height: 12),
+        if (all.any((r) => r['status'] == 'read'))
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: const ValueKey('clear-read-notifications'),
+              onPressed: saving ? null : clearRead,
+              icon: const Icon(Icons.clear_all_rounded),
+              label: Text('Clear read (${all.where((r) => r['status'] == 'read').length})'),
+            ),
+          )
+        else
+          const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
           decoration: BoxDecoration(
@@ -2275,6 +2266,27 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (r['certificate_request_code'] != null || r['certificate_code'] != null || screen == 'certificates') {
       return (label: 'Certificates', icon: Icons.workspace_premium_outlined, tint: EduTints.clay);
     }
+    if (r['thread_code'] != null || screen == 'messages') {
+      return (label: 'Messages', icon: Icons.chat_bubble_outline_rounded, tint: EduTints.sage);
+    }
+    if (r['cash_transfer_code'] != null || screen == 'cash') {
+      return (label: 'Cash', icon: Icons.payments_outlined, tint: EduTints.gold);
+    }
+    if (r['edit_request_code'] != null || screen == 'change-requests') {
+      return (label: 'Approvals', icon: Icons.fact_check_outlined, tint: EduTints.clay);
+    }
+    if (r['payment_code'] != null) {
+      return (label: 'Payments', icon: Icons.receipt_long_outlined, tint: EduTints.gold);
+    }
+    if (r['announcement_code'] != null || screen == 'announcements') {
+      return (label: 'Announcements', icon: Icons.campaign_outlined, tint: EduTints.plum);
+    }
+    if (screen == 'attendance') {
+      return (label: 'Attendance', icon: Icons.fact_check_outlined, tint: EduTints.clay);
+    }
+    if (screen == 'leave') {
+      return (label: 'Leave', icon: Icons.event_busy_outlined, tint: EduTints.mist);
+    }
     if (screen == 'fees' || r['charge_code'] != null) {
       return (label: 'Fees', icon: Icons.account_balance_wallet_outlined, tint: EduTints.gold);
     }
@@ -2326,6 +2338,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (r['assignment_code'] != null) {
       return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: r['assignment_code'].toString())));
     }
+    if ((r['announcement_code'] != null || screen == 'announcements') && has('announcements')) return () => open('announcements');
+    if (r['payment_code'] != null && has('fees')) return () => openPayment(r['payment_code'].toString(), r['receipt_number']?.toString(), r['student_code']?.toString());
     if (r['assessment_code'] != null && has('assessments')) return () => open('assessments');
     if (r['thread_code'] != null || screen == 'messages') return () => openChat(r['thread_code']?.toString());
     if (screen.isNotEmpty && has(screen)) return () => open(screen);
@@ -3407,6 +3421,34 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       else
         EduGrid(phone: 1, fold: 2, tablet: 2, children: shown.map(card).toList()),
     ];
+  }
+
+  /// Removes the read notifications from this inbox (unread ones stay).
+  Future<void> clearRead() async {
+    if (saving) return;
+    setState(() => saving = true);
+    try {
+      final result = await widget.api.clearReadNotifications();
+      await fetchSection('notifications');
+      final cleared = (result is Map ? result['cleared'] : null) ?? 0;
+      if (mounted) toast('Cleared $cleared read notification${cleared == 1 ? '' : 's'}', success: true);
+    } catch (e) {
+      if (mounted) toast(e.toString());
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  /// A payment notice opens Fees and that payment's details (receipt, what it settled).
+  Future<void> openPayment(String code, String? receipt, String? studentCode) async {
+    open('fees');
+    if (!has('payments')) return;
+    await fetchSection('payments');
+    final payment = rows('payments')
+        .where((r) => r['code']?.toString() == code || (receipt != null && (r['receipts'] as List? ?? [])
+            .any((x) => x is Map && x['receipt_number']?.toString() == receipt)))
+        .firstOrNull;
+    if (payment != null && mounted) await showPayment(payment);
   }
 
   Future<void> markRead(Json record) async {

@@ -10,7 +10,7 @@ from decimal import Decimal
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from pydantic import Field
 
 from app.core.security import StrictModel, current_user, has_permission, require
@@ -312,7 +312,7 @@ class CallbackInput(StrictModel):
 
 
 @router.post("/payments/callback")
-async def payment_callback(request: Request):
+async def payment_callback(request: Request, background: BackgroundTasks):
     secret = request.app.state.settings.payment_callback_secret
     if not secret:
         raise HTTPException(503, "Payment callbacks are not configured")
@@ -365,6 +365,9 @@ async def payment_callback(request: Request):
                 record["created_by_user_code"],
             )
             record["payment_code"] = settled["payment"]["code"]
+            if settled.get("notices"):
+                from app.core.push_delivery import deliver
+                background.add_task(deliver, request, settled["notices"])
         record["status"] = body.status
         query_save(
             data,

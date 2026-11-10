@@ -8,7 +8,7 @@ offered from the start and created the first time one is used; "Other" creates a
 from datetime import date
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import Field, model_validator
 
 from . import assignment_workspace as aw
@@ -68,6 +68,29 @@ def next_receipt_number(data):
     """Receipts are numbered in one short running sequence: RCT-0001, RCT-0002, ..."""
     used = [r.get("receipt_number") for r in aw.rows(data, "receipts")]
     return next_number(used, "RCT", taken=set(used))
+
+
+METHOD_NAMES = {"cash": "cash", "upi": "UPI", "bank_transfer": "bank transfer", "card": "card", "cheque": "cheque"}
+
+
+def payment_notices(data, payment, receipt):
+    """Payment received: tell the student and their parents; the notice opens that payment."""
+    from .certificate_workspace import personal_accounts
+    from .pdf_kit import inr
+    student = payment.get("student_code")
+    if not student or payment.get("payer"):
+        return []
+    made = []
+    for account in sorted(personal_accounts(data, student)):
+        code = new_code("PNOTICE")
+        data["records"].setdefault("notifications", {})[code] = {
+            "code": code, "user_code": account, "title": "Payment received",
+            "body": f"Rs. {inr(payment['amount'])} received by {METHOD_NAMES.get(payment.get('method'), payment.get('method'))}"
+                    f" on {payment['paid_on']}. Receipt {receipt['receipt_number']}.",
+            "channel": "in_app", "status": "sent", "sent_at": now(), "screen": "fees",
+            "payment_code": payment["code"], "receipt_number": receipt["receipt_number"], "student_code": student}
+        made.append(code)
+    return made
 
 
 def student_info(data, student):
@@ -234,7 +257,7 @@ def fee_head_for(data, body, actor):
 
 
 @router.post("", status_code=201)
-def record(body: FeePaymentInput, request: Request, user=Depends(current_user)):
+def record(body: FeePaymentInput, request: Request, background: BackgroundTasks, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
         require(data, user, "create")
         if body.student_code:
@@ -282,7 +305,12 @@ def record(body: FeePaymentInput, request: Request, user=Depends(current_user)):
                    "issued_on": body.paid_on.isoformat()}
         data["records"].setdefault("receipts", {})[receipt["code"]] = receipt
         audit(data, user["code"], "collect", "payments", payment["code"])
-        return {"payment": payment, "receipt": receipt, "allocations": allocations, "advance": str(left), "student": info}
+        notices = payment_notices(data, payment, receipt)
+        result = {"payment": payment, "receipt": receipt, "allocations": allocations, "advance": str(left), "student": info}
+    if notices:
+        from .push_delivery import deliver
+        background.add_task(deliver, request, notices)
+    return result
 
 
 class PaymentEditInput(StrictModel):

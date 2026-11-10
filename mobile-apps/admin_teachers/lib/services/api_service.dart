@@ -565,6 +565,8 @@ class CollegeApi {
     await post(_Endpoints.action(screen, action), payload.toJson()) as Json,
   );
 
+  Future<dynamic> clearReadNotifications() =>
+      post('/mobile/workspace/notifications/clear-read', {});
   Future<void> markNotificationRead(String notificationCode) async {
     await executeAction(
       'notifications',

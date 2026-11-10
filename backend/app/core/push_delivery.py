@@ -24,7 +24,9 @@ from .storage import now
 log = logging.getLogger(__name__)
 DATA_KEYS = ("screen", "thread_code", "certificate_request_code", "certificate_code", "academic_year_code",
              "semester_number", "charge_code", "assignment_code", "assessment_code", "syllabus_code", "calendar_event_code",
-             "leave_code", "sender_name", "conversation_title", "kind")
+             "leave_code", "sender_name", "conversation_title", "kind", "cash_transfer_code",
+             "edit_request_code", "payment_code", "receipt_number", "announcement_code", "student_code",
+             "attendance_code", "student_leave_code")
 _token_lock = threading.Lock()
 _token_cache: dict = {}
 

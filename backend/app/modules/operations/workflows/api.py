@@ -468,6 +468,7 @@ def perform(
                 "manual:" + v["student_code"] + ":" + v["transaction_reference"],
                 user["code"],
             )
+            result.pop("notices", None)  # kept in the in-app inbox
         elif action == "document-review":
             from app.modules.admissions.enrollment.api import review_admission_document
             from app.workflows.schemas import ReviewInput

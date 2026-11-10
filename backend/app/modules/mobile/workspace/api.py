@@ -600,6 +600,22 @@ def screen_list(request: Request, user=Depends(current_user)):
     }
 
 
+@router.post("/notifications/clear-read")
+def clear_read_notifications(request: Request, user=Depends(current_user)):
+    """Hide the caller's read notifications from their inbox (kept in the table for the record)."""
+    if effective_client(user) not in SCREENS:
+        raise HTTPException(403, "Mobile session required")
+    with request.app.state.store.transaction() as data:
+        cleared = 0
+        for record in data["records"].get("notifications", {}).values():
+            if record.get("user_code") == user["code"] and record.get("status") == "read" and not record.get("cleared_at"):
+                record["cleared_at"] = now()
+                cleared += 1
+        if cleared:
+            audit(data, user["code"], "clear_read_notifications", "notifications", user["code"])
+    return {"cleared": cleared}
+
+
 @router.get("/{screen}")
 def screen_data(
     screen: str,
@@ -680,7 +696,7 @@ def screen_data(
         elif table == "profile":
             items = [data["records"].get("employees", {}).get(user["person_code"], {})]
         elif table == "notifications":
-            items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
+            items = [r for r in query_rows(data, table) if r["user_code"] == user["code"] and not r.get("cleared_at")]
         elif screen == "dues":
             from app.core.student_leave_workspace import student_context
             for student in query_rows(data, "students"):
@@ -937,7 +953,7 @@ def screen_data(
             if r["thread_code"] in threads
         ]
     elif table == "notifications":
-        items = [r for r in query_rows(data, table) if r["user_code"] == user["code"]]
+        items = [r for r in query_rows(data, table) if r["user_code"] == user["code"] and not r.get("cleared_at")]
     if table == "assignments":
         from app.core.assignment_workspace import listing as assignment_listing
         items = assignment_listing(request, student_code, user)["items"]
@@ -1170,6 +1186,12 @@ def mobile_action(
             ensure_references(data, table, record)
             query_save(data, table, record)
             audit(data, user["code"], action, table, record["code"])
+            if action == "publish_announcement":
+                from app.core.announcement_notices import announcement_notices
+                from app.core.certificate_workspace import push
+                announced = announcement_notices(data, record, user["code"])
+                if announced:  # background tasks run after the response, once this is saved
+                    background.add_task(push, request, announced)
             return {"record": clean(record)}
         if action == "change_password":
             from app.core.security import check_password, hasher, revoke_user

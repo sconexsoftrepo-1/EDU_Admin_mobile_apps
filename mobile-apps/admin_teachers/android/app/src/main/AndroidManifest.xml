@@ -9,6 +9,10 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
+        <!-- Lets Firebase Messaging register this device for push notifications. -->
+        <meta-data
+            android:name="firebase_messaging_installation_id_enabled"
+            android:value="true" />
         <!-- Pushes drawn by the system (e.g. before the app has run) use the app's notification icon and colour. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

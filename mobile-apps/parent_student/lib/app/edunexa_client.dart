@@ -184,6 +184,8 @@ class _EdunexaAppState extends State<EdunexaApp> {
             role: role,
             api: api,
             onLogout: () {
+              // Every sign-out path (button, expired session, password change) ends here.
+              unawaited(PushNotifications.forgetDevice());
               setState(() => signedIn = false);
             },
           )

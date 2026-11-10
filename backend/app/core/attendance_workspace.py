@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import Field, model_validator
 
 from . import assignment_workspace as aw
@@ -309,7 +309,8 @@ def listing(request: Request, program_code: str | None = None, academic_year_cod
 
 
 @router.put("/register")
-def save(body: Register, request: Request, user=Depends(current_user)):
+def save(body: Register, request: Request, background: BackgroundTasks, user=Depends(current_user)):
+    notices = []
     with request.app.state.store.transaction() as data:
         require(data, user, "create")
         people = scope(data, user, body.program_code, body.academic_year_code, body.section_code)
@@ -357,4 +358,32 @@ def save(body: Register, request: Request, user=Depends(current_user)):
                       updated_at=now(), updated_by=user["code"])
         documents(data)[record["code"]] = record
         audit(data, user["code"], "attendance_save", "student_attendance", record["code"])
+        notices = absence_notices(data, record, previous.get("marks", {}))
+    if notices:
+        from .push_delivery import deliver
+        background.add_task(deliver, request, notices)
     return record
+
+
+ALERT_STATUSES = {"absent": "absent", "late": "late"}
+
+
+def absence_notices(data, record, before):
+    """Tell students and parents when a student is newly marked absent or late in a register."""
+    from .certificate_workspace import personal_accounts
+    made = []
+    when = record["session_date"] + ("" if not record.get("period") else f", period {record['period']}")
+    for student, status in sorted(record.get("marks", {}).items()):
+        if status not in ALERT_STATUSES or before.get(student) == status:
+            continue
+        pupil = data["records"].get("students", {}).get(student, {})
+        name = f"{pupil.get('first_name', '')} {pupil.get('last_name', '')}".strip() or "The student"
+        for account in sorted(personal_accounts(data, student)):
+            code = new_code("ANOTICE")
+            data["records"].setdefault("notifications", {})[code] = {
+                "code": code, "user_code": account, "title": f"Attendance: marked {ALERT_STATUSES[status]}",
+                "body": f"{name} was marked {ALERT_STATUSES[status]} on {when}.", "channel": "in_app",
+                "status": "sent", "sent_at": now(), "screen": "attendance", "attendance_code": record["code"],
+                "student_code": student}
+            made.append(code)
+    return made
