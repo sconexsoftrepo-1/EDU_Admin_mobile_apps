@@ -177,6 +177,7 @@ phone notifications (only the in-app list).
 |---|---|
 | Nothing arrives on any phone | `EDUNEXA_FCM_SERVICE_ACCOUNT_FILE` set and readable on the server; backend restarted; FCM API (V1) enabled |
 | `push_status` = `failed` | Service-account key belongs to this Firebase project; server clock correct |
+| Nothing arrives after the app is closed (Realme/OPPO/Xiaomi/Vivo) | The app asks at startup to run in the background - tap Allow; App info > Battery > *Allow background activity* / Autostart. A force-stopped app gets no pushes (Android rule) |
 | Android only fails | App built with `firebase-android.json`; notifications allowed in Android settings for the app |
 | iOS only fails | APNs key uploaded for **that** iOS app; Push Notifications enabled on its App ID; real device; release build uses the production entitlement automatically |
 | No row in `device_tokens` | App built with the Firebase values; the user signed in after installing that build |

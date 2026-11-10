@@ -77,8 +77,16 @@ def build_message(token, platform, notice, badge=None):
                 body=str(notice.get("body") or ""))
     group = notice.get("thread_code") or notice.get("screen") or "college"
     if platform == "android":
-        # Data-only: the app shows it with the app icon, the sender and the message preview.
-        return {"token": token, "data": data, "android": {"priority": "high", "ttl": "86400s"}}
+        # A notification payload is drawn by Android itself, so it appears even when the app was
+        # swiped away or the phone (ColorOS, MIUI, ...) blocks apps from waking in the background.
+        # While the app is open it draws the push instead (same channel, icon and tap action).
+        chat = notice.get("screen") == "messages" or bool(notice.get("thread_code"))
+        return {"token": token, "data": data,
+                "notification": {"title": data["title"], "body": data["body"][:240]},
+                "android": {"priority": "high", "ttl": "86400s", "notification": {
+                    "channel_id": "chat_messages" if chat else "college_updates",
+                    "icon": "ic_notification", "color": "#A46A27", "default_sound": True,
+                    "notification_priority": "PRIORITY_HIGH" if chat else "PRIORITY_DEFAULT"}}}
     aps = {"alert": {"title": data["title"], "body": data["body"][:180]}, "sound": "default", "thread-id": group}
     if badge is not None:
         aps["badge"] = badge
