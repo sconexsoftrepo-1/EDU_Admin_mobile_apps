@@ -454,7 +454,7 @@ def issue_form16(data, files, employee_code, financial_year, actor_user=None, ac
     table[code] = record
     data["records"].setdefault("file_storage_objects", {})[code] = {
         **{k: record.get(k) for k in ("original_filename", "mime_type", "size_bytes", "sha256", "document_url", "uploaded_at",
-                                      "storage_provider", "s3_bucket", "s3_key", "s3_uri")},
+                                      "storage_provider", "s3_bucket", "s3_key", "s3_uri", "azure_container", "azure_blob")},
         "code": code, "owner_type": "employee", "owner_code": employee_code, "document_table": "employee_tax_documents",
         "document_code": code, "storage_key": key, "uploaded_by_user_code": uploader, "deleted_at": None}
     audit(data, actor_user, "form16_generate", "employee_tax_documents", code)

@@ -136,6 +136,10 @@ flutter run --dart-define-from-file=firebase-android.json      # Android phone
 flutter run --dart-define-from-file=firebase-ios.json          # iPhone
 ```
 
+Android builds also work with a plain `flutter build apk --release`: the apps fall back to their
+Android values from `firebase-android.json` (built into `lib/constants/api_config.dart`). iOS builds
+must pass `--dart-define-from-file=firebase-ios.json`.
+
 Add `--dart-define=API_BASE_URL=http://127.0.0.1:8010` only when testing against a local backend
 (the default is the live server). Without the Firebase values an app still works but shows no
 phone notifications (only the in-app list).
@@ -159,9 +163,17 @@ phone notifications (only the in-app list).
    | Add a calendar event | Its audience |
    | Fee due in ≤ 6 days (3 a day) / late fee added | Students and parents |
    | Student leave decided | The student / parent |
+   | Staff leave decided | The staff member |
+   | Fee payment recorded | The student and parents (opens that payment) |
+   | Announcement published (dashboard or app) | Staff, students and parents of its campus |
+   | Student marked absent or late | The student and parents |
 
 4. Each sent notice records the result: the `notifications` row gets `push_status` = `accepted`
-   (sent) or `failed`. Tapping a push opens the matching screen (chat, cash, change requests, …).
+   (sent) or `failed`. Pushes show in the notification bar even while the app is open. Tapping one
+   (or a row in the in-app Notifications screen) opens the matching screen: the chat, the cash
+   handover with its deposits, change requests, the payment details, announcements, the calendar
+   event, certificates, attendance or leave. **Clear read** on the Notifications screen hides the
+   read notices (they stay in the database).
 
 ## Troubleshooting
 
@@ -169,14 +181,10 @@ phone notifications (only the in-app list).
 |---|---|
 | Nothing arrives on any phone | `EDUNEXA_FCM_SERVICE_ACCOUNT_FILE` set and readable on the server; backend restarted; FCM API (V1) enabled |
 | `push_status` = `failed` | Service-account key belongs to this Firebase project; server clock correct |
+| Nothing arrives after the app is closed (Realme/OPPO/Xiaomi/Vivo) | The app asks at startup to run in the background - tap Allow; App info > Battery > *Allow background activity* / Autostart. A force-stopped app gets no pushes (Android rule) |
 | Android only fails | App built with `firebase-android.json`; notifications allowed in Android settings for the app |
 | iOS only fails | APNs key uploaded for **that** iOS app; Push Notifications enabled on its App ID; real device; release build uses the production entitlement automatically |
 | No row in `device_tokens` | App built with the Firebase values; the user signed in after installing that build |
 
-## Not sent as phone notifications yet
-
-These appear only in the in-app notification list today:
-- **Announcements / broadcasts** created in Communication → Announcements.
-- **Staff leave decisions** (approved / rejected).
-
-They need a small server change to also push; the Firebase setup above stays the same.
+Announcements scheduled for a later date are not notified when they go live (only when published
+immediately).

@@ -24,7 +24,9 @@ from .storage import now
 log = logging.getLogger(__name__)
 DATA_KEYS = ("screen", "thread_code", "certificate_request_code", "certificate_code", "academic_year_code",
              "semester_number", "charge_code", "assignment_code", "assessment_code", "syllabus_code", "calendar_event_code",
-             "leave_code", "sender_name", "conversation_title", "kind")
+             "leave_code", "sender_name", "conversation_title", "kind", "cash_transfer_code",
+             "edit_request_code", "payment_code", "receipt_number", "announcement_code", "student_code",
+             "attendance_code", "student_leave_code")
 _token_lock = threading.Lock()
 _token_cache: dict = {}
 
@@ -34,6 +36,13 @@ def _b64(raw: bytes) -> str:
 
 
 def _service_account(settings):
+    inline = getattr(settings, "fcm_service_account_json", None)
+    if inline:
+        try:
+            return json.loads(inline.get_secret_value())
+        except ValueError:
+            log.error("EDUNEXA_FCM_SERVICE_ACCOUNT_JSON is not valid JSON")
+            return None
     path = getattr(settings, "fcm_service_account_file", None)
     if not path:
         return None
@@ -75,8 +84,16 @@ def build_message(token, platform, notice, badge=None):
                 body=str(notice.get("body") or ""))
     group = notice.get("thread_code") or notice.get("screen") or "college"
     if platform == "android":
-        # Data-only: the app shows it with the app icon, the sender and the message preview.
-        return {"token": token, "data": data, "android": {"priority": "high", "ttl": "86400s"}}
+        # A notification payload is drawn by Android itself, so it appears even when the app was
+        # swiped away or the phone (ColorOS, MIUI, ...) blocks apps from waking in the background.
+        # While the app is open it draws the push instead (same channel, icon and tap action).
+        chat = notice.get("screen") == "messages" or bool(notice.get("thread_code"))
+        return {"token": token, "data": data,
+                "notification": {"title": data["title"], "body": data["body"][:240]},
+                "android": {"priority": "high", "ttl": "86400s", "notification": {
+                    "channel_id": "chat_messages" if chat else "college_updates",
+                    "icon": "ic_notification", "color": "#A46A27", "default_sound": True,
+                    "notification_priority": "PRIORITY_HIGH" if chat else "PRIORITY_DEFAULT"}}}
     aps = {"alert": {"title": data["title"], "body": data["body"][:180]}, "sound": "default", "thread-id": group}
     if badge is not None:
         aps["badge"] = badge

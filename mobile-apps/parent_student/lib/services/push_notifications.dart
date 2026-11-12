@@ -19,7 +19,7 @@ typedef PushData = Map<String, dynamic>;
 Future<void> _initialize() async {
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
-      options: const FirebaseOptions(
+      options: FirebaseOptions(
         apiKey: PushConfig.apiKey,
         appId: PushConfig.appId,
         messagingSenderId: PushConfig.senderId,
@@ -175,6 +175,26 @@ class PushNotifications {
 
   PushNotifications({required this.onOpen, required this.onForeground});
 
+  /// Signed out, or the session ended: this phone stops receiving the previous account's pushes
+  /// (its push token is retired; the next sign-in registers a new one for the new account) and
+  /// that account's notifications are removed from the notification bar.
+  static Future<void> forgetDevice() => _forgetting = _forget();
+  static Future<void>? _forgetting;
+
+  static Future<void> _forget() async {
+    if (kIsWeb) return;
+    try {
+      if (_android) {
+        await _ensureLocal();
+        await _local.cancelAll();
+      }
+    } catch (_) {}
+    if (Firebase.apps.isEmpty) return;
+    try {
+      await FirebaseMessaging.instance.unregister();
+    } catch (_) {}
+  }
+
   Future<String> enable({
     required Future<void> Function(String, String) register,
   }) async {
@@ -193,6 +213,8 @@ class PushNotifications {
     ].any((v) => v.isEmpty)) {
       return 'Device alerts will be available when the college enables push delivery. Your inbox works here.';
     }
+    // A sign-out that is still retiring the old token finishes first, so it cannot remove this one.
+    await _forgetting;
     await _initialize();
     final messaging = FirebaseMessaging.instance;
     final settings = await messaging.requestPermission(
@@ -206,8 +228,9 @@ class PushNotifications {
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
       return 'Notification permission has not been granted.';
     }
+    // Pushes also appear in the notification bar while the app is open.
     await messaging.setForegroundNotificationPresentationOptions(
-      alert: false,
+      alert: true,
       badge: true,
       sound: true,
     );
@@ -255,8 +278,9 @@ class PushNotifications {
             data['body']?.toString() ??
             'Open your inbox for details.';
         final thread = data['thread_code']?.toString();
-        // A new chat message pops up like any messaging app, unless that chat is already open.
-        if (_android && isChatPush(data) && thread != activeThread) {
+        // Every push goes to the notification bar while the app is open too, except a chat
+        // message for the conversation already on screen.
+        if (_android && !(isChatPush(data) && thread != null && thread == activeThread)) {
           unawaited(
             showCollegeNotification({...data, 'title': title, 'body': body}),
           );

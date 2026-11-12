@@ -2,7 +2,7 @@ import csv
 import io
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from app.core.fee_plans import semester_ledger
@@ -204,7 +204,9 @@ def record_payment(data, body, key, actor):
     }
     query_rows(data, "receipts")[receipt["code"]] = receipt
     audit(data, actor, "collect", "payments", payment["code"])
-    return {"payment": payment, "receipt": receipt}
+    from app.core.fee_collection import payment_notices
+    # "notices" is for the caller to push; callers drop it from their response.
+    return {"payment": payment, "receipt": receipt, "notices": payment_notices(data, payment, receipt)}
 
 
 def record_adjustment(data, body, actor):
@@ -333,12 +335,18 @@ def ledger(
 def collect(
     body: PaymentInput,
     request: Request,
+    background: BackgroundTasks,
     idempotency_key: str = Header(min_length=16, max_length=100),
     user=Depends(require("payments", "create")),
 ):
     staff_only(user)
     with request.app.state.store.transaction() as data:
-        return record_payment(data, body, idempotency_key, user["code"])
+        result = record_payment(data, body, idempotency_key, user["code"])
+    notices = result.pop("notices", None)
+    if notices:
+        from app.core.push_delivery import deliver
+        background.add_task(deliver, request, notices)
+    return result
 
 
 @router.post("/finance/adjustments", status_code=201)

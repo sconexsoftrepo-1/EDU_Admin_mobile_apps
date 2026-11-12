@@ -19,7 +19,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import Field
 
 from . import assignment_workspace as aw
@@ -220,7 +220,8 @@ class Decision(StrictModel):
 
 
 @router.post("/leave/{code}/decision")
-def decide(code: str, body: Decision, request: Request, user=Depends(current_user)):
+def decide(code: str, body: Decision, request: Request, background: BackgroundTasks, user=Depends(current_user)):
+    notices = []
     with request.app.state.store.transaction() as data:
         if not (has_permission(data, user, "leave_requests", "approve") or has_permission(data, user, "leave_requests", "edit")):
             raise HTTPException(403, "Approving staff leave is not assigned to this role")
@@ -241,12 +242,16 @@ def decide(code: str, body: Decision, request: Request, user=Depends(current_use
         if account:
             notice = new_code("LNOTICE")
             data["records"].setdefault("notifications", {})[notice] = {
-                "code": notice, "user_code": account, "channel": "in_app", "status": "sent", "sent_at": now(), "screen": "leave",
+                "code": notice, "user_code": account, "channel": "in_app", "status": "sent", "sent_at": now(), "screen": "leave", "leave_code": code,
                 "title": f"Leave {body.status}",
                 "body": f"Your leave from {record['start_date']} to {record['end_date']} was {body.status}."
                         + (f" Note: {body.note.strip()}" if body.note.strip() else "")}
+            notices.append(notice)
         audit(data, user["code"], f"staff_leave_{body.status}", "leave_requests", code)
-        return record
+    if notices:
+        from .push_delivery import deliver
+        background.add_task(deliver, request, notices)
+    return record
 
 
 class AdjustmentInput(StrictModel):

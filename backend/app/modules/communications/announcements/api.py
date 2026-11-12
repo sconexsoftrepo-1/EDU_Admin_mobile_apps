@@ -2,7 +2,7 @@ from app.core.resources import display_rows
 
 """Announcements endpoints and their PostgreSQL queries."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 
 from app.core import sql_queries as sql
 from app.core.resources import staff_only
@@ -152,13 +152,20 @@ def get_record(code: str, request: Request, user=Depends(require(TABLE, "view"))
 
 @router.post("", status_code=201)
 def create_record(
-    body: CreateRequest, request: Request, user=Depends(require(TABLE, "create"))
+    body: CreateRequest, request: Request, background: BackgroundTasks, user=Depends(require(TABLE, "create"))
 ):
+    from app.core.announcement_notices import announcement_notices
+    from app.core.push_delivery import deliver
+
     staff_only(user)
     with request.app.state.store.transaction() as data:
-        return service.create(
+        record = service.create(
             data, body.model_dump(mode="json", exclude_unset=True), user["code"]
         )
+        notices = announcement_notices(data, record, user["code"])
+    if notices:
+        background.add_task(deliver, request, notices)
+    return record
 
 
 @router.patch("/{code}")

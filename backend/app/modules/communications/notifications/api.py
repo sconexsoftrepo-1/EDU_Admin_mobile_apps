@@ -131,6 +131,31 @@ class Queries:
 service = Service(Queries())
 
 
+PRIVATE_BODY = "Private message - only the recipient can read it"
+
+
+def visible(data, user, record):
+    """The admin sees the whole notification log; everyone else only their own notifications.
+    Chat previews stay private to their recipient, even for the admin."""
+    from app.core.edit_approvals import is_super_admin
+
+    mine = record.get("user_code") == user["code"]
+    if not mine and not is_super_admin(data, user):
+        return None
+    if not mine and (record.get("thread_code") or record.get("screen") == "messages"):
+        return {**record, "body": PRIVATE_BODY}
+    return record
+
+
+def owned(data, user, code):
+    """Changing or deleting a notification: the admin, or the person it was sent to."""
+    from app.core.edit_approvals import is_super_admin
+
+    record = data["records"].get(TABLE, {}).get(code)
+    if not record or (record.get("user_code") != user["code"] and not is_super_admin(data, user)):
+        raise HTTPException(404, "Notification not found")
+
+
 @router.get("")
 def list_records(
     request: Request,
@@ -140,7 +165,7 @@ def list_records(
 ):
     staff_only(user)
     data = request.app.state.store.snapshot()
-    records = display_rows(data, TABLE, query_list(data))
+    records = [r for r in (visible(data, user, row) for row in display_rows(data, TABLE, query_list(data))) if r]
     return {
         "items": records[offset : offset + limit],
         "total": len(records),
@@ -152,7 +177,11 @@ def list_records(
 @router.get("/{code}")
 def get_record(code: str, request: Request, user=Depends(require(TABLE, "view"))):
     staff_only(user)
-    return query_get(request.app.state.store.snapshot(), code)
+    data = request.app.state.store.snapshot()
+    record = visible(data, user, query_get(data, code))
+    if not record:
+        raise HTTPException(404, "Notification not found")
+    return record
 
 
 @router.post("", status_code=201)
@@ -175,6 +204,7 @@ def update_record(
 ):
     staff_only(user)
     with request.app.state.store.transaction() as data:
+        owned(data, user, code)
         return service.update(
             data, code, body.model_dump(mode="json", exclude_unset=True), user["code"]
         )
@@ -184,4 +214,5 @@ def update_record(
 def delete_record(code: str, request: Request, user=Depends(require(TABLE, "delete"))):
     staff_only(user)
     with request.app.state.store.transaction() as data:
+        owned(data, user, code)
         service.delete(data, code, user["code"])

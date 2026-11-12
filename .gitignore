@@ -13,3 +13,6 @@
 /artifacts/
 /admin-dashboard/test-results/
 /admin-dashboard/playwright-report/
+
+# Azure deploy outputs (zips and app settings with secrets)
+/deploy/azure/out/

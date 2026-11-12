@@ -19,9 +19,12 @@ class TokenInput(StrictModel):
 def register_device(body: DeviceInput, request: Request, user=Depends(current_user)):
     with request.app.state.store.transaction() as data:
         devices = data["records"].setdefault("device_tokens", {})
-        existing = next((r for r in devices.values() if r["token"] == body.token), None)
-        code = existing["code"] if existing else new_code("DEVICE")
-        # An installation may switch accounts; move the token instead of duplicating it.
+        same = [r["code"] for r in devices.values() if r["token"] == body.token]
+        code = same[0] if same else new_code("DEVICE")
+        # An installation may switch accounts: the phone belongs to whoever signed in last, so drop
+        # every other record of this token (or the earlier account would keep getting its pushes).
+        for stale in same[1:]:
+            del devices[stale]
         devices[code] = {"code": code, "user_code": user["code"], "token": body.token,
                          "platform": body.platform, "last_seen_at": now()}
         audit(data, user["code"], "register_device", "device_tokens", code)

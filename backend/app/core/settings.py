@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     # Firebase service-account JSON (Project settings → Service accounts → Generate key). When set,
     # pushes go straight to Firebase Cloud Messaging; otherwise through the push adapter above.
     fcm_service_account_file: str | None = None
+    # Or the same JSON pasted into one setting (Azure App Service / any host without a secrets folder).
+    fcm_service_account_json: SecretStr | None = None
     sms_adapter_url: str | None = None
     sms_adapter_token: SecretStr | None = None
     payment_adapter_url: str | None = None
@@ -42,7 +44,14 @@ class Settings(BaseSettings):
     storage_backend: Literal["local-json", "postgres", "sqlserver"] = "local-json"
     public_portal_url: str = "http://localhost:3000"
     # Private files: local development, private Supabase Storage, or Amazon S3.
-    file_storage: Literal["local", "supabase", "s3"] = "local"
+    file_storage: Literal["local", "supabase", "s3", "azure"] = "local"
+    # Azure Blob Storage (EDUNEXA_FILE_STORAGE=azure): a PRIVATE container; files reach users only
+    # through the API's signed-in view/download links. Account name + key, or a connection string.
+    azure_storage_account: str | None = None
+    azure_storage_key: SecretStr | None = None
+    azure_storage_connection_string: SecretStr | None = None
+    azure_storage_container: str = "edu"
+    azure_storage_prefix: str = "uploads"
     s3_bucket_name: str = "edu-admin-portal-file"
     s3_prefix: str = "Admin_Uploads"
     s3_region: str = "ap-south-1"

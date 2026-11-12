@@ -1,6 +1,7 @@
 """Private file storage for uploads, imports and issued certificates.
 
-Local development files, private Supabase buckets and private S3 objects share the same
+Local development files, private Supabase buckets, private S3 objects and private Azure Blob
+containers share the same
 put/get/delete interface. Only server-generated validated keys become object paths.
 """
 
@@ -99,6 +100,77 @@ class S3Files:
             Params={"Bucket": self.bucket, "Key": self.object_key(key)}, ExpiresIn=300)
 
 
+
+class AzureBlobFiles:
+    """Private Azure Blob Storage container (account key or connection string)."""
+
+    def __init__(self, settings, client=None):
+        self.container = settings.azure_storage_container
+        prefix = (settings.azure_storage_prefix or "").strip("/")
+        self.prefix = check_key(prefix) if prefix else ""
+        self.account = settings.azure_storage_account
+        self.key = settings.azure_storage_key.get_secret_value() if settings.azure_storage_key else None
+        if client is None:
+            from azure.storage.blob import BlobServiceClient
+            if settings.azure_storage_connection_string:
+                service = BlobServiceClient.from_connection_string(
+                    settings.azure_storage_connection_string.get_secret_value(), connection_timeout=8, read_timeout=30)
+                self.account = service.account_name
+                self.key = getattr(service.credential, "account_key", None) or self.key
+            elif self.account and self.key:
+                service = BlobServiceClient(f"https://{self.account}.blob.core.windows.net", credential=self.key,
+                                            connection_timeout=8, read_timeout=30)
+            else:
+                raise RuntimeError("Azure Blob storage needs EDUNEXA_AZURE_STORAGE_ACCOUNT and EDUNEXA_AZURE_STORAGE_KEY "
+                                   "or EDUNEXA_AZURE_STORAGE_CONNECTION_STRING")
+            client = service.get_container_client(self.container)
+        self.client = client
+
+    def blob_name(self, key):
+        key = check_key(key)
+        if not self.prefix or key.startswith(self.prefix + "/"):
+            return key
+        return self.prefix + "/" + key
+
+    def metadata(self, key):
+        return {"storage_provider": "azure", "azure_container": self.container, "azure_blob": self.blob_name(key)}
+
+    def _call(self, action):
+        from azure.core.exceptions import AzureError, HttpResponseError, ResourceExistsError, ResourceNotFoundError
+        try:
+            return action()
+        except ResourceNotFoundError:
+            return None
+        except ResourceExistsError:
+            raise HTTPException(409, "A file with this name already exists") from None
+        except HttpResponseError:
+            raise HTTPException(502, "Azure file operation failed") from None
+        except AzureError:
+            raise HTTPException(503, "Azure file storage is unavailable") from None
+
+    def put(self, key, raw, mime):
+        from azure.storage.blob import ContentSettings
+        self._call(lambda: self.client.upload_blob(self.blob_name(key), raw, overwrite=False,
+                                                   content_settings=ContentSettings(content_type=mime)))
+
+    def get(self, key):
+        stream = self._call(lambda: self.client.download_blob(self.blob_name(key)))
+        return None if stream is None else self._call(stream.readall)
+
+    def delete(self, key):
+        self._call(lambda: self.client.delete_blob(self.blob_name(key)))
+
+    def view_url(self, key, minutes=5):
+        """Short-lived read-only link to one file (the container itself stays private)."""
+        from datetime import datetime, timedelta, timezone
+        from azure.storage.blob import BlobSasPermissions, generate_blob_sas
+        name = self.blob_name(key)
+        sas = generate_blob_sas(self.account, self.container, name, account_key=self.key,
+                                permission=BlobSasPermissions(read=True),
+                                expiry=datetime.now(timezone.utc) + timedelta(minutes=minutes))
+        return f"https://{self.account}.blob.core.windows.net/{self.container}/{name}?{sas}"
+
+
 class SupabaseFiles:
     def __init__(self, url: str, service_key: str, bucket: str, timeout: float = 30.0):
         self.base = url.rstrip("/") + "/storage/v1"
@@ -142,10 +214,14 @@ class SupabaseFiles:
 
 
 class UnconfiguredFiles:
-    """Serverless deployment without file storage: file endpoints explain what to configure."""
+    """No usable file storage (serverless host, or credentials missing): file endpoints explain what to set."""
 
-    message = ("File storage is not configured: set EDUNEXA_FILE_STORAGE=s3 with S3 credentials "
-               "or configure private Supabase storage")
+    def __init__(self, message=None):
+        if message:
+            self.message = message
+
+    message = ("File storage is not configured: set EDUNEXA_FILE_STORAGE=azure (or s3) with its "
+               "credentials, or configure private Supabase storage")
 
     def put(self, key: str, raw: bytes, mime: str) -> None:
         raise HTTPException(503, self.message)
@@ -153,8 +229,17 @@ class UnconfiguredFiles:
     def get(self, key: str) -> bytes | None:
         raise HTTPException(503, self.message)
 
+    def delete(self, key: str) -> None:
+        return None  # nothing was stored
+
 
 def files_for(settings):
+    if settings.file_storage == "azure":
+        if not (settings.azure_storage_connection_string or (settings.azure_storage_account and settings.azure_storage_key)):
+            # Starts anyway; only file endpoints answer 503 until the account name and key are set.
+            return UnconfiguredFiles(
+                "Azure Blob storage is selected but EDUNEXA_AZURE_STORAGE_ACCOUNT / EDUNEXA_AZURE_STORAGE_KEY are empty")
+        return AzureBlobFiles(settings)
     if settings.file_storage == "s3":
         return S3Files(settings)
     if settings.file_storage == "supabase":

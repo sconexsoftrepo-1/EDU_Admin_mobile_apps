@@ -103,53 +103,31 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     push = PushNotifications(
       onOpen: (data) async {
         if (!mounted) return;
-        // Chat pushes open the conversation straight away.
-        final thread = data['thread_code']?.toString();
-        if (thread != null && thread.isNotEmpty) {
-          openChat(thread);
-          return;
+        // Opened from the notification bar: wait for the signed-in screens, then go where the
+        // notice points (the push carries the screen and record ids as well).
+        for (var i = 0; i < 40 && screens.isEmpty && mounted; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 250));
         }
+        if (!mounted) return;
         final code = data['notification_code']?.toString();
-        if (!has('notifications')) return;
-        await fetchSection('notifications');
-        final notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
-        if (notice != null && notice['thread_code'] != null) {
-          openChat(notice['thread_code'].toString());
-        } else if (notice != null && (notice['certificate_request_code'] != null || notice['certificate_code'] != null || notice['screen'] == 'certificates')) {
-          open('certificates');
-        } else if (notice != null && notice['assessment_code'] != null && has('assessments')) {
-          open('assessments');
-        } else if(notice!=null&&notice['screen'] is String&&has(notice['screen'] as String)){
-          open(notice['screen'] as String);
-        } else {
+        Json? notice;
+        if (has('notifications')) {
+          await fetchSection('notifications');
+          notice = rows('notifications').where((row) => row['code']?.toString() == code).firstOrNull;
+        }
+        if (notice != null && notice['status'] != 'read') unawaited(markRead(notice));
+        final target = noticeTarget(notice ?? Map<String, dynamic>.from(data));
+        if (target != null) {
+          target();
+        } else if (has('notifications')) {
           open('notifications');
         }
       },
       onForeground: (title, body, data) {
+        // The push is already shown in the notification bar; keep the badges and inbox current.
         if (!mounted) return;
-        if (data['kind'] == 'chat' || data['screen'] == 'messages') {
-          refreshChatBadge();
-          final thread = data['thread_code']?.toString();
-          // Android shows a notification; on iOS show a banner unless that chat is open.
-          if (Theme.of(context).platform == TargetPlatform.iOS && thread != PushNotifications.activeThread) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('$title\n$body', maxLines: 3, overflow: TextOverflow.ellipsis),
-              action: SnackBarAction(label: 'Open', onPressed: () => openChat(thread)),
-            ));
-          }
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title\n$body'),
-            action: SnackBarAction(
-              label: 'View',
-              onPressed: () => open('notifications'),
-            ),
-          ),
-        );
-        fetchSection('notifications');
         refreshChatBadge();
+        if (has('notifications')) fetchSection('notifications');
       },
     );
     resumePush();
@@ -157,11 +135,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
 
   Future<void> resumePush() async {
     try {
-      final enabled = await widget.api.storage.read(
-        key: ApiConfig.pushPreferenceKey(widget.api.clientId),
-      );
-      // On by default: the first sign-in asks for notification permission once.
-      if ((enabled == 'true' || enabled == null) && mounted) await enablePush();
+      // Ask for notifications, camera and microphone when the app opens (prompts only appear
+      // for permissions not answered yet), then connect device alerts.
+      if (mounted) await AppPermissions.requestAtStartup(context);
+      if (mounted) await enablePush();
     } catch (_) {
       /* Optional device alerts never block sign-in. */
     }
@@ -182,6 +159,10 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) refreshChatBadge();
+    // Back from the phone's settings with notifications turned on: connect device alerts.
+    if (state == AppLifecycleState.resumed && !pushBusy && pushStatus != 'Device alerts enabled' && push != null) {
+      enablePush();
+    }
     if (state == AppLifecycleState.resumed && !busy && selected != 'messages') {
       final at = fetchedAt[selected ?? primary];
       if (at == null || DateTime.now().difference(at) > staleAfter) load();
@@ -288,6 +269,71 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (!mounted) return;
       await Future.wait(pending.skip(start).take(3).map((key) => fetchSection(key, force: force)));
     }
+    // Once per sign-in / app start: the fee due popup on the home screen.
+    if (!feeAlertChecked && mounted && has('fees')) {
+      feeAlertChecked = true;
+      unawaited(showFeeAlert());
+    }
+  }
+
+  bool feeAlertChecked = false;
+
+  /// Semester fee due within a week, due today or overdue: a popup with the balance, the late
+  /// fee and Pay now (the same alerts also arrive as notifications, three a day).
+  Future<void> showFeeAlert() async {
+    Json? alert;
+    try {
+      final result = await widget.api.feeAlert();
+      if (result is Map && result['alert'] is Map) alert = Map<String, dynamic>.from(result['alert'] as Map);
+    } catch (_) {
+      return; // the popup is a convenience; the Fees screen still shows the balance
+    }
+    if (alert == null || !mounted) return;
+    final a = alert;
+    final term = '${a['term'] ?? 'semester'}';
+    final days = int.tryParse('${a['days_left']}') ?? 0;
+    final level = '${a['level']}';
+    final late = num.tryParse('${a['late_fee_amount']}') ?? 0;
+    final due = DateTime.tryParse('${a['due_date']}');
+    final dueText = due == null ? '' : prettyDate(due);
+    final who = '${a['student_name'] ?? ''}'.trim();
+    final forWho = who.isEmpty || widget.role == MobileRole.student ? '' : ' for $who';
+    final title = level == 'last_day'
+        ? 'Last day to pay the $term fee'
+        : level == 'overdue'
+        ? '${term[0].toUpperCase()}${term.substring(1)} fee overdue'
+        : '$days day${days == 1 ? '' : 's'} left to pay the $term fee';
+    final balance = money(a['balance']);
+    final lateText = late <= 0
+        ? ''
+        : a['late_fee_added'] == true
+        ? ' A late fee of ${money(late)} has been added.'
+        : level == 'overdue'
+        ? ' A late fee of ${money(late)} will be added.'
+        : ' Pay now, or a late fee of ${money(late)} will be added after $dueText.';
+    final body = level == 'last_day'
+        ? 'Today is the last day to pay $balance$forWho.$lateText'
+        : level == 'overdue'
+        ? '$balance$forWho was due on $dueText.$lateText'
+        : '$balance$forWho is due on $dueText.$lateText';
+    final pay = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        key: const ValueKey('fee-due-alert'),
+        icon: Icon(level == 'due_soon' ? Icons.schedule_rounded : Icons.warning_amber_rounded,
+            color: level == 'due_soon' ? null : Theme.of(dialog).colorScheme.error),
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialog, false), child: const Text('Later')),
+          FilledButton(onPressed: () => Navigator.pop(dialog, true), child: const Text('Pay now')),
+        ],
+      ),
+    );
+    if (pay != true || !mounted) return;
+    final child = a['student_code']?.toString();
+    if (child != null && child != student && widget.role == MobileRole.parent) await changeStudent(child);
+    if (mounted) open('fees');
   }
 
   void fail(Object e, int ticket) {
@@ -602,15 +648,11 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
           key: ApiConfig.pushPreferenceKey(widget.api.clientId),
           value: 'true',
         );
-      } else if (status.startsWith('Notifications are blocked')) {
-        // Don't ask again at every launch; the switch in the inbox still turns alerts on.
-        await widget.api.storage.write(
-          key: ApiConfig.pushPreferenceKey(widget.api.clientId),
-          value: 'false',
-        );
       }
       if (mounted) setState(() => pushStatus = status);
-    } catch (e) {
+    } catch (e, stack) {
+      // Shown in the device log (adb logcat -s flutter) to diagnose push setup.
+      debugPrint('Device alerts could not connect: $e\n$stack');
       if (mounted) {
         setState(
           () => pushStatus = 'Device alerts could not connect. Try again.',
@@ -1969,7 +2011,18 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (selected == 'notifications') ...[
         // Summary first, then a compact device-alerts banner.
         inboxSummary(all),
-        const SizedBox(height: 12),
+        if (all.any((r) => r['status'] == 'read'))
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              key: const ValueKey('clear-read-notifications'),
+              onPressed: saving ? null : clearRead,
+              icon: const Icon(Icons.clear_all_rounded),
+              label: Text('Clear read (${all.where((r) => r['status'] == 'read').length})'),
+            ),
+          )
+        else
+          const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.fromLTRB(14, 10, 8, 10),
           decoration: BoxDecoration(
@@ -1989,7 +2042,16 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
                 ),
               ),
               TextButton(
-                onPressed: pushBusy ? null : enablePush,
+                onPressed: pushBusy
+                    ? null
+                    : () async {
+                        // Android does not ask again once blocked: explain and open settings.
+                        if (pushStatus.startsWith('Notifications are blocked') ||
+                            pushStatus.startsWith('Notification permission has not been granted')) {
+                          await AppPermissions.explainBlockedNotifications(context);
+                        }
+                        await enablePush();
+                      },
                 child: Text(pushBusy ? 'Connecting…' : 'Enable'),
               ),
             ],
@@ -2269,6 +2331,27 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (r['certificate_request_code'] != null || r['certificate_code'] != null || screen == 'certificates') {
       return (label: 'Certificates', icon: Icons.workspace_premium_outlined, tint: EduTints.clay);
     }
+    if (r['thread_code'] != null || screen == 'messages') {
+      return (label: 'Messages', icon: Icons.chat_bubble_outline_rounded, tint: EduTints.sage);
+    }
+    if (r['cash_transfer_code'] != null || screen == 'cash') {
+      return (label: 'Cash', icon: Icons.payments_outlined, tint: EduTints.gold);
+    }
+    if (r['edit_request_code'] != null || screen == 'change-requests') {
+      return (label: 'Approvals', icon: Icons.fact_check_outlined, tint: EduTints.clay);
+    }
+    if (r['payment_code'] != null) {
+      return (label: 'Payments', icon: Icons.receipt_long_outlined, tint: EduTints.gold);
+    }
+    if (r['announcement_code'] != null || screen == 'announcements') {
+      return (label: 'Announcements', icon: Icons.campaign_outlined, tint: EduTints.plum);
+    }
+    if (screen == 'attendance') {
+      return (label: 'Attendance', icon: Icons.fact_check_outlined, tint: EduTints.clay);
+    }
+    if (screen == 'leave') {
+      return (label: 'Leave', icon: Icons.event_busy_outlined, tint: EduTints.mist);
+    }
     if (screen == 'fees' || r['charge_code'] != null) {
       return (label: 'Fees', icon: Icons.account_balance_wallet_outlined, tint: EduTints.gold);
     }
@@ -2320,6 +2403,8 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
     if (r['assignment_code'] != null) {
       return () => Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => AssignmentReview(api: widget.api, code: r['assignment_code'].toString())));
     }
+    if ((r['announcement_code'] != null || screen == 'announcements') && has('announcements')) return () => open('announcements');
+    if (r['payment_code'] != null && has('fees')) return () => openPayment(r['payment_code'].toString(), r['receipt_number']?.toString(), r['student_code']?.toString());
     if (r['assessment_code'] != null && has('assessments')) return () => open('assessments');
     if (r['thread_code'] != null || screen == 'messages') return () => openChat(r['thread_code']?.toString());
     if (screen.isNotEmpty && has(screen)) return () => open(screen);
@@ -3401,6 +3486,34 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       else
         EduGrid(phone: 1, fold: 2, tablet: 2, children: shown.map(card).toList()),
     ];
+  }
+
+  /// Removes the read notifications from this inbox (unread ones stay).
+  Future<void> clearRead() async {
+    if (saving) return;
+    setState(() => saving = true);
+    try {
+      final result = await widget.api.clearReadNotifications();
+      await fetchSection('notifications');
+      final cleared = (result is Map ? result['cleared'] : null) ?? 0;
+      if (mounted) toast('Cleared $cleared read notification${cleared == 1 ? '' : 's'}', success: true);
+    } catch (e) {
+      if (mounted) toast(e.toString());
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  /// A payment notice opens Fees and that payment's details (receipt, what it settled).
+  Future<void> openPayment(String code, String? receipt, String? studentCode) async {
+    open('fees');
+    if (!has('payments')) return;
+    await fetchSection('payments');
+    final payment = rows('payments')
+        .where((r) => r['code']?.toString() == code || (receipt != null && (r['receipts'] as List? ?? [])
+            .any((x) => x is Map && x['receipt_number']?.toString() == receipt)))
+        .firstOrNull;
+    if (payment != null && mounted) await showPayment(payment);
   }
 
   Future<void> markRead(Json record) async {

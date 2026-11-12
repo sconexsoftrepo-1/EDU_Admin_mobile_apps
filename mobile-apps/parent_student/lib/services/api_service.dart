@@ -62,6 +62,7 @@ class CollegeApi {
       !path.startsWith('/documents') &&
       !path.startsWith('/print') &&
       !path.startsWith('/mobile/alerts') &&
+      !path.startsWith('/finance/late-fees') &&
       !path.contains('/notifications') &&
       !path.endsWith('.pdf');
 
@@ -492,6 +493,10 @@ class CollegeApi {
     await post(_Endpoints.action(screen, action), payload.toJson()) as Json,
   );
 
+  /// The semester fee due popup (students and parents).
+  Future<dynamic> feeAlert() => get('/finance/late-fees/my-alert');
+  Future<dynamic> clearReadNotifications() =>
+      post('/mobile/workspace/notifications/clear-read', {});
   Future<void> markNotificationRead(String notificationCode) async {
     await executeAction(
       'notifications',
