@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 abstract final class ApiConfig {
   static const baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://150.241.246.34:8010',
+    // The Azure App Service backend (HTTPS). Override with --dart-define=API_BASE_URL=...
+    defaultValue: 'https://edunexa-api-pragathi-dpaafqe8ftbabxay.westus3-01.azurewebsites.net',
   );
   // Temporary: the current server has no TLS yet, so release builds accept
   // http:// too. Build with --dart-define=ALLOW_INSECURE_HTTP=false once the

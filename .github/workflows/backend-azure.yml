@@ -65,6 +65,7 @@ jobs:
           ls -lh ../backend.zip
 
       - name: Deploy
+        id: deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
@@ -73,8 +74,11 @@ jobs:
           package: backend.zip
 
       - name: Health check
+        env:
+          WEBAPP_URL: ${{ steps.deploy.outputs.webapp-url }}
         run: |
-          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/health"
+          echo "App address: $WEBAPP_URL"
+          url="${WEBAPP_URL%/}/health"
           for i in $(seq 1 30); do
             if body=$(curl -fsS --max-time 20 "$url"); then echo "$body"; exit 0; fi
             echo "waiting for the app to start ($i/30)"; sleep 10

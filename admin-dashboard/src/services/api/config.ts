@@ -10,8 +10,8 @@
  *     -> Next.js proxy route                     (src/app/api/college/[...path]/route.ts)
  *          keeps the access/refresh tokens in httpOnly cookies and refreshes them
  *     -> {API_CONFIG.backendUrl}{API_CONFIG.backendPrefix}/<path>
- *                                                e.g. http://150.241.246.34:8010/api/v1/auth/login
- *     -> FastAPI backend (backend/), SQL Server on the Windows backend server
+ *                                                e.g. https://edunexa-api-pragathi-dpaafqe8ftbabxay.westus3-01.azurewebsites.net/api/v1/auth/login
+ *     -> FastAPI backend (backend/) on Azure App Service, Azure SQL Database
  *
  * Endpoint paths in the module services are written WITHOUT the /api/v1 prefix
  * ("auth/login", "workspace/screens"); the proxy adds it. The full list of backend
@@ -20,13 +20,15 @@
  * Environment
  * -----------
  *   EDUNEXA_API_URL   Backend origin used by the server-side proxy (never sent to the browser).
- *                     Default http://150.241.246.34:8010 (the deployed backend);
+ *                     Default https://edunexa-api-pragathi-dpaafqe8ftbabxay.westus3-01.azurewebsites.net
+ *                     (the Azure App Service backend; on Azure the web app setting overrides it);
  *                     set EDUNEXA_API_URL=http://127.0.0.1:8010 in .env.local to use a local backend.
  */
 
 /** Origin of the FastAPI backend, read on the server only (proxy route). */
 const backendUrl = (
-  process.env.EDUNEXA_API_URL || "http://150.241.246.34:8010"
+  process.env.EDUNEXA_API_URL ||
+  "https://edunexa-api-pragathi-dpaafqe8ftbabxay.westus3-01.azurewebsites.net"
 ).replace(/\/+$/, "");
 
 export const API_CONFIG = {

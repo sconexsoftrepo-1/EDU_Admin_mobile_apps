@@ -335,15 +335,21 @@ class TableView(MutableMapping):
         self.seq: dict = {}  # code -> when the code last changed the row (write order)
 
     # -- loading -----------------------------------------------------------
-    def _select(self, where="", params=()):
+    def _select_sql(self, where=""):
         cols = ", ".join(f"t.{c}" for c in self.t.visible)
-        sql = (
+        return (
             f"SELECT {cols}, x.data AS {EXTRAS_COLUMN} FROM {self.t.name} t"
             f" LEFT JOIN {EXTRAS} x ON x.table_name = %s AND x.record_code = t.code"
             f" {where}"
         )
+
+    def _select(self, where="", params=()):
         cur = self.s.cursor()
-        cur.execute(sql, (self.t.name, *params))
+        cur.execute(self._select_sql(where), (self.t.name, *params))
+        self._ingest(cur)
+
+    def _ingest(self, cur):
+        """Keep the rows of the cursor's current result set (a SELECT built by _select_sql)."""
         names = [d[0] for d in cur.description]
         for values in cur.fetchall():
             record = {}
@@ -378,6 +384,7 @@ class TableView(MutableMapping):
         if not self.full:
             self._select()
             self.full = True
+            _learn(self.t.name)
         return self
 
     # -- mapping protocol --------------------------------------------------
@@ -1018,6 +1025,8 @@ class Session(MutableMapping):
         self.parts: dict = {}
         self._cursor = None
         self._seq = 0
+        # Tables this request's route read in full last time: read together on first use.
+        self._prefetch = _learned() if getattr(meta, "dialect", "postgres") == "sqlserver" else None
 
     def next_seq(self):
         self._seq += 1
@@ -1034,7 +1043,33 @@ class Session(MutableMapping):
                 self.tables[name] = {}  # unknown resource: in-memory only, must stay empty
             else:
                 self.tables[name] = TableView(self, self.meta.tables[name])
+        if self._prefetch and name in self._prefetch:
+            names, self._prefetch = self._prefetch, None
+            self.prefetch(names)
         return self.tables[name]
+
+    def prefetch(self, names):
+        """Read several whole tables in ONE round trip (a batch of SELECTs, one result set each).
+
+        A page that reads 40 tables otherwise waits for 40 sequential round trips; far from the
+        database (another region) that is most of the response time. SQL Server only.
+        """
+        views = []
+        for name in sorted(names):
+            view = self.table(name) if name in self.meta.tables else None
+            if isinstance(view, TableView) and not view.full:
+                views.append(view)
+        if len(views) < 2:
+            for view in views:
+                view.load()
+            return
+        cur = self.cursor()
+        cur.execute(";\n".join(view._select_sql() for view in views), tuple(view.t.name for view in views))
+        for index, view in enumerate(views):
+            if index and not cur.nextset():
+                raise RuntimeError(f"prefetch: no result set for {view.t.name}")
+            view._ingest(cur)
+            view.full = True
 
     def part(self, key):
         if key not in self.parts:
@@ -1313,6 +1348,31 @@ def _http_error(exc):
 
 # Snapshots opened while handling one request; released when the request ends (see request_scope).
 _REQUEST_SNAPSHOTS: contextvars.ContextVar = contextvars.ContextVar("edunexa_request_snapshots", default=None)
+_REQUEST_ROUTE: contextvars.ContextVar = contextvars.ContextVar("edunexa_request_route", default=None)
+_ROUTE_TABLES: dict = {}  # "GET /path" -> table names read in full (insertion order = recency)
+_ROUTE_LOCK = threading.Lock()
+_ROUTE_LIMIT = 2000
+
+
+def _learn(table):
+    route = _REQUEST_ROUTE.get()
+    if not route:
+        return
+    with _ROUTE_LOCK:
+        tables = _ROUTE_TABLES.pop(route, None) or set()
+        tables.add(table)
+        _ROUTE_TABLES[route] = tables  # most recent last
+        while len(_ROUTE_TABLES) > _ROUTE_LIMIT:
+            _ROUTE_TABLES.pop(next(iter(_ROUTE_TABLES)))
+
+
+def _learned():
+    route = _REQUEST_ROUTE.get()
+    if not route:
+        return None
+    with _ROUTE_LOCK:
+        tables = _ROUTE_TABLES.get(route)
+        return set(tables) if tables and len(tables) > 1 else None
 
 
 class PostgresStore:
@@ -1381,13 +1441,18 @@ class PostgresStore:
         return session
 
     @contextmanager
-    def request_scope(self):
-        """Return the connections of snapshots opened inside the block to the pool when it ends."""
+    def request_scope(self, route=None):
+        """Return the connections of snapshots opened inside the block to the pool when it ends.
+
+        ``route`` ("GET /api/v1/...") lets sessions read the tables that route needed last time in
+        one batch."""
         opened = []
         token = _REQUEST_SNAPSHOTS.set(opened)
+        route_token = _REQUEST_ROUTE.set(route)
         try:
             yield
         finally:
+            _REQUEST_ROUTE.reset(route_token)
             _REQUEST_SNAPSHOTS.reset(token)
             for release in opened:
                 release()  # finalize runs at most once

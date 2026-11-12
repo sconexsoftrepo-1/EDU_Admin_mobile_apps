@@ -70,14 +70,18 @@ jobs:
         with:
           name: admin-zip
       - name: Deploy
+        id: deploy
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_ADMIN_PUBLISH_PROFILE }}
           package: admin.zip
       - name: Check the login page
+        env:
+          WEBAPP_URL: ${{ steps.deploy.outputs.webapp-url }}
         run: |
-          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/portal/login"
+          echo "App address: $WEBAPP_URL"
+          url="${WEBAPP_URL%/}/portal/login"
           for i in $(seq 1 30); do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$url" || true)
             if [ "$code" = "200" ]; then echo "login page: HTTP 200"; exit 0; fi

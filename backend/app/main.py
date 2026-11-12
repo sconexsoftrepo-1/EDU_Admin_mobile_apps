@@ -178,7 +178,8 @@ def create_app(settings=None):
         @app.middleware("http")
         async def release_snapshots(request: Request, call_next):
             # Read-only snapshots hand their database connection back when the request ends.
-            with app.state.store.request_scope():
+            # The route also lets the store read that page's tables in one batch (SQL Server).
+            with app.state.store.request_scope(route=f"{request.method} {request.url.path}"):
                 return await call_next(request)
 
     app.add_middleware(
