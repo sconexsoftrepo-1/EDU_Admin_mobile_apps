@@ -1,0 +1,81 @@
+# Backend API -> Azure App Service (edunexa-api-pragathi), on every push to main that changes backend/.
+#
+# Only the backend/ folder is deployed. App Service installs requirements.txt itself
+# (SCM_DO_BUILD_DURING_DEPLOYMENT=true) and starts the app with `sh startup.sh`.
+# Settings and secrets (database, JWT, Firebase, Blob storage) live in the web app's
+# Environment variables, never in this repository.
+#
+# One-time setup: repository secret AZURE_BACKEND_PUBLISH_PROFILE = the web app's publish profile
+# (see deploy/azure/CICD.md).
+name: Backend to Azure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-azure.yml"
+  workflow_dispatch: # "Run workflow" button in the Actions tab
+
+concurrency:
+  group: backend-azure
+  cancel-in-progress: false # never stop a deploy half-way
+
+permissions:
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: edunexa-api-pragathi
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run tests (local file storage, no Azure or database access)
+        run: python -m pytest -q
+
+  deploy:
+    name: Deploy to App Service
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package the backend folder only
+        working-directory: backend
+        run: |
+          zip -qr ../backend.zip . \
+            -x "tests/*" ".venv/*" "var/*" "secrets/*" ".env" ".env.*" "*/__pycache__/*" "__pycache__/*" \
+               ".pytest_cache/*" ".ruff_cache/*" ".migration-target/*" "*.pyc" "api/*" "vercel.json"
+          unzip -l ../backend.zip | grep -qE " app/asgi.py$" || { echo "app/asgi.py missing"; exit 1; }
+          unzip -l ../backend.zip | grep -qE " startup.sh$" || { echo "startup.sh missing"; exit 1; }
+          ls -lh ../backend.zip
+
+      - name: Deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          package: backend.zip
+
+      - name: Health check
+        run: |
+          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/health"
+          for i in $(seq 1 30); do
+            if body=$(curl -fsS --max-time 20 "$url"); then echo "$body"; exit 0; fi
+            echo "waiting for the app to start ($i/30)"; sleep 10
+          done
+          echo "Health check failed: open the web app > Monitoring > Log stream"; exit 1
