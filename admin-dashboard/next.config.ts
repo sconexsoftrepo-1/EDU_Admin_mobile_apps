@@ -15,6 +15,11 @@ const securityHeaders = [
     : []),
 ];
 const nextConfig: NextConfig = {
+  // Self-contained server bundle (.next/standalone, started with `node server.js`) for Azure App
+  // Service; Vercel ignores this setting. The tracing root is this folder (the repo has no root
+  // package.json), so server.js sits at the top of the bundle.
+  output: "standalone",
+  outputFileTracingRoot: process.cwd(),
   devIndicators: false,
   poweredByHeader: false,
   async headers() {

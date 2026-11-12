@@ -114,3 +114,19 @@ def test_late_fee_amount_is_saved_with_the_fee_schedule(client, app):
     made = client.post("/api/v1/master-data/actions/course-fee-structure", headers=h, json={"values": values})
     assert made.status_code == 201, made.text
     assert made.json()["fee_structures"][0]["late_fee_amount"] == "1500.00"
+
+
+def test_app_popup_alert_counts_down_then_shows_the_late_fee(family):
+    from datetime import date
+    with family.state.store.transaction() as d:
+        assert late_fees.fee_alert(d, {"S1"}, date(2026, 11, 13)) is None  # a week out: no popup yet
+        soon = late_fees.fee_alert(d, {"S1"}, date(2026, 11, 17))
+        assert (soon["level"], soon["days_left"], soon["balance"], soon["late_fee_amount"]) == \
+            ("due_soon", 3, "1000.00", "2000.00")
+        last = late_fees.fee_alert(d, {"S1"}, date(2026, 11, 20))
+        assert last["level"] == "last_day" and last["student_name"] == "Asha Rao"
+        late_fees.apply_late_fees(d, date(2026, 11, 21))
+        overdue = late_fees.fee_alert(d, {"S1"}, date(2026, 11, 21))
+        assert overdue["level"] == "overdue" and overdue["late_fee_added"] is True
+        assert late_fees.fee_alert(d, set(), date(2026, 11, 20)) is None  # only the signed-in family's students
+

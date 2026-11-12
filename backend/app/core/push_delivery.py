@@ -36,6 +36,13 @@ def _b64(raw: bytes) -> str:
 
 
 def _service_account(settings):
+    inline = getattr(settings, "fcm_service_account_json", None)
+    if inline:
+        try:
+            return json.loads(inline.get_secret_value())
+        except ValueError:
+            log.error("EDUNEXA_FCM_SERVICE_ACCOUNT_JSON is not valid JSON")
+            return None
     path = getattr(settings, "fcm_service_account_file", None)
     if not path:
         return None

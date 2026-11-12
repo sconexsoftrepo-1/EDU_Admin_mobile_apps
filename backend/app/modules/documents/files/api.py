@@ -116,7 +116,7 @@ def permitted_person(data, user, kind, code):
 def file_store(request, record=None):
     """Resolve recorded providers and preserve reads of legacy files still on local disk."""
     if record:
-        from app.core.files import LocalFiles, S3Files, SupabaseFiles
+        from app.core.files import AzureBlobFiles, LocalFiles, S3Files, SupabaseFiles
         settings = request.app.state.settings
         provider = record.get("storage_provider")
         local = LocalFiles(settings.data_dir / "files")
@@ -124,6 +124,8 @@ def file_store(request, record=None):
             return local
         if provider == "s3" and settings.file_storage != "s3":
             return S3Files(settings)
+        if provider == "azure" and settings.file_storage != "azure":
+            return AzureBlobFiles(settings)
         if provider == "supabase" and settings.file_storage != "supabase":
             if not settings.supabase_url or not settings.supabase_service_role_key:
                 raise HTTPException(503, "The original Supabase file storage needs configuration")
@@ -321,7 +323,7 @@ def upload(body: UploadInput, request: Request, user=Depends(current_user)):
         query_save(data, table, record)
         query_save(data, "file_storage_objects", {
             **{k: record[k] for k in ("original_filename", "mime_type", "size_bytes", "sha256", "document_url", "uploaded_at", "storage_provider")},
-            **{k: record.get(k) for k in ("s3_bucket", "s3_key", "s3_uri")},
+            **{k: record.get(k) for k in ("s3_bucket", "s3_key", "s3_uri", "azure_container", "azure_blob")},
             "code": record["code"], "owner_type": "application" if body.kind == "admission_document" else "student" if body.kind == "student_document" else "employee",
             "owner_code": body.person_code, "document_table": table, "document_code": record["code"],
             "storage_key": key, "uploaded_by_user_code": user["code"], "deleted_at": None})

@@ -58,11 +58,12 @@ def late_fee_amount(data, academic_year_code) -> Decimal:
     return max(amounts, default=ZERO)
 
 
-def semester_dues(data):
+def semester_dues(data, students=None):
     """Unpaid fees per (student, batch, semester, due date), late fees excluded."""
     from .academic_progress import fee_progress
     structures = {s["code"]: s for s in aw.rows(data, "fee_structures")}
-    students = {c["student_code"] for c in aw.rows(data, "student_fee_charges")}
+    if students is None:
+        students = {c["student_code"] for c in aw.rows(data, "student_fee_charges")}
     groups = {}
     for item in fee_progress(data, students):
         if is_late_structure(structures.get(item.get("fee_structure_code"))) or not item.get("due_date"):
@@ -317,6 +318,41 @@ def cancel(key: str, request: Request, user=Depends(current_user)):
         audit(data, user["code"], "cancel_late_fee", "student_fee_charges", code)
     return {"cancelled": key}
 
+
+
+def fee_alert(data, students, today):
+    """The most urgent unpaid semester fee of these students for the app's sign-in / home popup:
+    overdue first, then the nearest due date within the reminder window."""
+    applied = {(e.get("student_code"), e.get("academic_year_code"), e.get("semester_number"))
+               for e in data.get("documents", {}).get(LOG, {}).values() if e.get("status") == "applied"}
+    found = []
+    for (student, year, semester, due), slot in semester_dues(data, students).items():
+        if slot["outstanding"] <= 0:
+            continue
+        left = (date.fromisoformat(due) - today).days
+        if left > REMINDER_DAYS:
+            continue
+        pupil = data["records"].get("students", {}).get(student, {})
+        found.append({
+            "student_code": student,
+            "student_name": f"{pupil.get('first_name', '')} {pupil.get('last_name', '')}".strip(),
+            "academic_year_code": year, "semester_number": semester, "term": term_label(semester),
+            "due_date": due, "days_left": left, "balance": str(slot["outstanding"]),
+            "late_fee_amount": str(late_fee_amount(data, year)) if year else "0.00",
+            "late_fee_added": (student, year, semester) in applied,
+            "level": "overdue" if left < 0 else "last_day" if left == 0 else "due_soon"})
+    found.sort(key=lambda a: (a["days_left"] >= 0, a["days_left"] if a["days_left"] >= 0 else -a["days_left"]))
+    return found[0] if found else None
+
+
+@router.get("/my-alert")
+def my_alert(request: Request, user=Depends(current_user)):
+    """Students and parents: the fee popup shown at sign-in and on the home screen."""
+    from .academic_progress import local_now
+    from .calendar_workspace import personal_students
+    data = request.app.state.store.snapshot()
+    students = personal_students(data, user)
+    return {"alert": fee_alert(data, students, local_now().date()) if students else None}
 
 @router.get("/rules")
 def rules(request: Request, academic_year_code: str = Query(...), user=Depends(current_user)):

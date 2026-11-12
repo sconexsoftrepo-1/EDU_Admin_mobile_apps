@@ -12,6 +12,7 @@ from tests import sql_support
 
 # Tests never send real phone pushes, even when the developer's backend/.env holds the Firebase key.
 os.environ["EDUNEXA_FCM_SERVICE_ACCOUNT_FILE"] = ""
+os.environ["EDUNEXA_FCM_SERVICE_ACCOUNT_JSON"] = ""
 
 
 @pytest.fixture(scope="session")

@@ -99,3 +99,14 @@ def test_a_phone_token_belongs_only_to_the_last_account_signed_in(client, app):
                        json={"token": token, "platform": "android"}).status_code == 200
     rows = [r for r in app.state.store.snapshot()["records"]["device_tokens"].values() if r["token"] == token]
     assert [r["user_code"] for r in rows] == ["boss"]
+
+
+def test_firebase_key_can_come_from_an_app_setting():
+    from types import SimpleNamespace
+    from pydantic import SecretStr
+    from app.core.push_delivery import _service_account
+    key = SimpleNamespace(fcm_service_account_json=SecretStr('{"client_email": "push@x.iam", "project_id": "p"}'),
+                          fcm_service_account_file=None)
+    assert _service_account(key)["project_id"] == "p"
+    broken = SimpleNamespace(fcm_service_account_json=SecretStr("not json"), fcm_service_account_file=None)
+    assert _service_account(broken) is None

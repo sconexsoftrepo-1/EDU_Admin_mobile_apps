@@ -269,6 +269,71 @@ class _MobileWorkspaceState extends State<MobileWorkspace>
       if (!mounted) return;
       await Future.wait(pending.skip(start).take(3).map((key) => fetchSection(key, force: force)));
     }
+    // Once per sign-in / app start: the fee due popup on the home screen.
+    if (!feeAlertChecked && mounted && has('fees')) {
+      feeAlertChecked = true;
+      unawaited(showFeeAlert());
+    }
+  }
+
+  bool feeAlertChecked = false;
+
+  /// Semester fee due within a week, due today or overdue: a popup with the balance, the late
+  /// fee and Pay now (the same alerts also arrive as notifications, three a day).
+  Future<void> showFeeAlert() async {
+    Json? alert;
+    try {
+      final result = await widget.api.feeAlert();
+      if (result is Map && result['alert'] is Map) alert = Map<String, dynamic>.from(result['alert'] as Map);
+    } catch (_) {
+      return; // the popup is a convenience; the Fees screen still shows the balance
+    }
+    if (alert == null || !mounted) return;
+    final a = alert;
+    final term = '${a['term'] ?? 'semester'}';
+    final days = int.tryParse('${a['days_left']}') ?? 0;
+    final level = '${a['level']}';
+    final late = num.tryParse('${a['late_fee_amount']}') ?? 0;
+    final due = DateTime.tryParse('${a['due_date']}');
+    final dueText = due == null ? '' : prettyDate(due);
+    final who = '${a['student_name'] ?? ''}'.trim();
+    final forWho = who.isEmpty || widget.role == MobileRole.student ? '' : ' for $who';
+    final title = level == 'last_day'
+        ? 'Last day to pay the $term fee'
+        : level == 'overdue'
+        ? '${term[0].toUpperCase()}${term.substring(1)} fee overdue'
+        : '$days day${days == 1 ? '' : 's'} left to pay the $term fee';
+    final balance = money(a['balance']);
+    final lateText = late <= 0
+        ? ''
+        : a['late_fee_added'] == true
+        ? ' A late fee of ${money(late)} has been added.'
+        : level == 'overdue'
+        ? ' A late fee of ${money(late)} will be added.'
+        : ' Pay now, or a late fee of ${money(late)} will be added after $dueText.';
+    final body = level == 'last_day'
+        ? 'Today is the last day to pay $balance$forWho.$lateText'
+        : level == 'overdue'
+        ? '$balance$forWho was due on $dueText.$lateText'
+        : '$balance$forWho is due on $dueText.$lateText';
+    final pay = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        key: const ValueKey('fee-due-alert'),
+        icon: Icon(level == 'due_soon' ? Icons.schedule_rounded : Icons.warning_amber_rounded,
+            color: level == 'due_soon' ? null : Theme.of(dialog).colorScheme.error),
+        title: Text(title),
+        content: Text(body),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialog, false), child: const Text('Later')),
+          FilledButton(onPressed: () => Navigator.pop(dialog, true), child: const Text('Pay now')),
+        ],
+      ),
+    );
+    if (pay != true || !mounted) return;
+    final child = a['student_code']?.toString();
+    if (child != null && child != student && widget.role == MobileRole.parent) await changeStudent(child);
+    if (mounted) open('fees');
   }
 
   void fail(Object e, int ticket) {
