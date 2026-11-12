@@ -1,0 +1,86 @@
+# Admin dashboard (Next.js) -> Azure App Service (edunexa-admin-pragathi), on every push to main
+# that changes admin-dashboard/.
+#
+# Built here on Linux into a self-contained server (.next/standalone, output: "standalone" in
+# next.config.ts); App Service only runs `node server.js` - nothing is built on Azure.
+# The backend address comes from the web app setting EDUNEXA_API_URL (read when the server starts).
+#
+# One-time setup: repository secret AZURE_ADMIN_PUBLISH_PROFILE = the web app's publish profile
+# (see deploy/azure/CICD.md).
+name: Admin dashboard to Azure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "admin-dashboard/**"
+      - ".github/workflows/admin-azure.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: admin-azure
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: edunexa-admin-pragathi
+  NODE_VERSION: "22"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  build:
+    name: Build dashboard
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: admin-dashboard/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Build (type-checks the code)
+        run: npm run build
+      - name: Assemble the server bundle
+        run: |
+          test -f .next/standalone/server.js || { echo "no .next/standalone/server.js (output: standalone)"; exit 1; }
+          cp -R .next/static .next/standalone/.next/static
+          cp -R public .next/standalone/public
+          rm -f .next/standalone/.env .next/standalone/.env.local
+          cd .next/standalone && zip -qry ../../../admin.zip .
+          ls -lh ../../../admin.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-zip
+          path: admin.zip
+          retention-days: 7
+
+  deploy:
+    name: Deploy to App Service
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: admin-zip
+      - name: Deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_ADMIN_PUBLISH_PROFILE }}
+          package: admin.zip
+      - name: Check the login page
+        run: |
+          url="https://${AZURE_WEBAPP_NAME}.azurewebsites.net/portal/login"
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$url" || true)
+            if [ "$code" = "200" ]; then echo "login page: HTTP 200"; exit 0; fi
+            echo "waiting for the app to start ($i/30, HTTP $code)"; sleep 10
+          done
+          echo "Login page did not answer: open the web app > Monitoring > Log stream"; exit 1
