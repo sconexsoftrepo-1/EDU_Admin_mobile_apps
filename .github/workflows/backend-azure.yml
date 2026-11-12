@@ -6,7 +6,7 @@
 # Environment variables, never in this repository.
 #
 # One-time setup: repository secret AZURE_BACKEND_PUBLISH_PROFILE = the web app's publish profile
-# (see deploy/azure/CICD.md).
+# (see deploy/azure/CICD.md); the AZUREAPPSERVICE_PUBLISHPROFILE_… secret made by the portal also works.
 name: Backend to Azure
 
 on:
@@ -68,7 +68,8 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          # Our secret, or the one the Azure portal created when Deployment Center was connected.
+          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE || secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0F466A1C56FB4DE7800732A31CC8F8EB }}
           package: backend.zip
 
       - name: Health check
