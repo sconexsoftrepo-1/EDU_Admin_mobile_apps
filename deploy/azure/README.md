@@ -5,7 +5,7 @@ Two Linux web apps on one App Service plan, next to the Azure SQL database:
 | Web app | Folder | Runtime | Startup command | Health check |
 |---|---|---|---|---|
 | Backend API | `backend/` | Python 3.12 | `sh startup.sh` | `/health` |
-| Admin dashboard | `admin-dashboard/` | Node 22 LTS | `node server.js` | `/portal/login` |
+| Admin dashboard | `admin-dashboard/` | Node 24 LTS | `node server.js` | `/portal/login` |
 
 The database is `edupragathi.database.windows.net` / `edu-dev` (resource group **Pragathi**,
 region **Southeast Asia**). Create the plan and both web apps in **the same region** as the database:
@@ -17,7 +17,7 @@ the API makes many database calls per page, so it must be next to it.
    **Southeast Asia**, pricing plan **Premium v3 P1v3** (P0v3 or B2 for testing).
 2. **App Services → + Create → Web App**: name e.g. `edunexa-api-pragathi`, publish **Code**, runtime
    **Python 3.12**, Linux, Southeast Asia, plan `asp-edunexa`. Leave deployment and monitoring as they are.
-3. Same again for the dashboard: name e.g. `edunexa-admin-pragathi`, runtime **Node 22 LTS**, same plan.
+3. Same again for the dashboard: name e.g. `edunexa-admin-pragathi`, runtime **Node 24 LTS** (Node 22 LTS also works), same plan.
 4. Azure SQL server `edupragathi` → **Networking** → tick **Allow Azure services and resources to
    access this server** → Save (the API connects from Azure; your own IP stays for tools).
 

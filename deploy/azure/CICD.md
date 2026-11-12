@@ -82,7 +82,7 @@ new one and update the GitHub secret.
 
 `.github/workflows/admin-azure.yml` runs when a push to **main** changes `admin-dashboard/`. It:
 
-1. installs and builds the dashboard on GitHub (Node 22, Linux) — the build also type-checks the code,
+1. installs and builds the dashboard on GitHub (Node 24, Linux) — the build also type-checks the code,
 2. packs the self-contained server (`.next/standalone` + static files + `public`) into a zip,
 3. deploys it to `edunexa-admin-pragathi`, which runs `node server.js` (nothing is built on Azure),
 4. checks that `/portal/login` answers.
@@ -93,7 +93,7 @@ the dashboard, a push that changes both runs both at the same time.
 ## One-time setup for the dashboard
 
 1. **Create the web app**: App Services → + Create → Web App: name `edunexa-admin-pragathi`, publish
-   **Code**, runtime **Node 22 LTS**, Linux, region West US 3, the same B1 plan as the backend.
+   **Code**, runtime **Node 24 LTS** (Node 22 LTS also works), Linux, region West US 3, the same B1 plan as the backend.
 2. **Settings and startup command** (once, from the Mac, after the backend web app exists):
 
    ```bash
