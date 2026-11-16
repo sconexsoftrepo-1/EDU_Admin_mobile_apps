@@ -27,6 +27,7 @@ import { errorText, type Row } from "@/services/api";
 import Select from "./SearchSelect";
 import SearchField, { searchValues } from "./SearchField";
 import "./course-semester-workspace.css";
+import { intermediateSemesterLabel } from "./CourseCards";
 type Edit = {
   code: string;
   name: string;
@@ -87,10 +88,10 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
       ? String(course.semester_labels[n - 1] || "")
       : "") ||
     (intermediate
-      ? `${Math.floor((n - 1) / 2) + 1}-${((n - 1) % 2) + 1}`
+      ? intermediateSemesterLabel(n, Number(course.duration_semesters) || 2)
       : `Semester ${n}`);
   const semesters = Array.from(
-    { length: Number(course.duration_semesters) || 4 },
+    { length: Number(course.duration_semesters) || (intermediate ? 2 : 4) },
     (_, i) => i + 1,
   );
   const rows = (data?.items || []).filter(
@@ -364,7 +365,7 @@ export default function CourseSemesterWorkspace({ course }: { course: Row }) {
             id={`${tabsId}-panel`}
             aria-labelledby={`${tabsId}-tab-${semester}`}
           >
-            {intermediate && (
+            {intermediate && semesters.length > 2 && (
               <p className="cs-note">1-2 means first year, second semester.</p>
             )}
             {data.status === "starter_draft" && (

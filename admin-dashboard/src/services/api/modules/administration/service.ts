@@ -80,8 +80,13 @@ export class AdministrationService {
     });
   }
 
-  /** Disables the account and ends its sessions. */
-  disableAccount(code: string) {
+  /** Turns a login on or off (off ends its sessions). */
+  setAccountActive(code: string, active: boolean) {
+    return this.updateAccount(code, { active });
+  }
+
+  /** Deletes a login permanently. Logins with history are refused: deactivate those. */
+  deleteAccount(code: string) {
     return apiRequest<void>(ADMINISTRATION_ENDPOINTS.account(code), {
       method: "DELETE",
     });

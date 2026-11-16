@@ -5,6 +5,7 @@ import { useId, useState, type FormEvent } from "react";
 import type { Row } from "@/services/api";
 import SideDrawer from "./SideDrawer";
 import { toast } from "./toast";
+import { intermediateSemesterLabel } from "./CourseCards";
 
 type Subject = { name: string; semester_number: number; subject_type: string };
 type Props = {
@@ -29,10 +30,18 @@ export default function CourseFormDrawer({
     COURSE_LEVELS.find((l) => l.key === level)?.code || "";
   const [years, setYears] = useState(
     String(
-      initial.duration_years || Number(initial.duration_semesters || 4) / 2,
+      initial.duration_years ||
+        (initial.course_level === "intermediate"
+          ? 2
+          : Number(initial.duration_semesters || 4) / 2),
     ),
   );
-  const [count, setCount] = useState(Number(initial.duration_semesters || 4));
+  const [count, setCount] = useState(
+    Number(
+      initial.duration_semesters ||
+        (initial.course_level === "intermediate" ? 2 : 4),
+    ),
+  );
   const [labels, setLabels] = useState<string[]>(
     Array.isArray(initial.semester_labels)
       ? initial.semester_labels.map(String)
@@ -47,7 +56,7 @@ export default function CourseFormDrawer({
   const semesterLabel = (n: number) =>
     labels[n - 1] ??
     (level === "intermediate"
-      ? `${Math.floor((n - 1) / 2) + 1}-${((n - 1) % 2) + 1}`
+      ? intermediateSemesterLabel(n, count)
       : `Semester ${n}`);
   function addSubject() {
     const name = draft.trim();
@@ -134,7 +143,15 @@ export default function CourseFormDrawer({
               <select
                 required
                 value={level}
-                onChange={(e) => setLevel(e.target.value)}
+                onChange={(e) => {
+                  setLevel(e.target.value);
+                  // Intermediate is a 2-year course with one term per year.
+                  if (!initial.code && e.target.value === "intermediate") {
+                    setYears("2");
+                    setCount(2);
+                    setLabels([]);
+                  }
+                }}
               >
                 <option value="">Select course level</option>
                 {COURSE_LEVELS.map((l) => (

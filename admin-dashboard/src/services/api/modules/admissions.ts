@@ -46,9 +46,21 @@ export type AdmissionAnalytics = {
   all_rows: AdmissionRow[];
   my_rows: AdmissionRow[];
 };
+/** A student admitted in the last 7 days (staff who may view students only). */
+export type NewAdmission = {
+  student_code: string;
+  name: string;
+  admission_number: string | null;
+  course_name: string | null;
+  branch: string | null;
+  course_level: string | null;
+  admission_date: string;
+  reference: string | null;
+};
 export type AdmissionInsights = {
   available: AdmissionOpening[];
   analytics: AdmissionAnalytics | null;
+  new_admissions?: NewAdmission[];
 };
 
 export const admissionsApi = {

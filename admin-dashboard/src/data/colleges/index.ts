@@ -96,7 +96,7 @@ export const operationLabels: Record<string, string> = {
   "vehicle-maintenance": "Vehicle maintenance",
   fuel: "Fuel records",
   "transport-reports": "Transport reports",
-  accounts: "User accounts",
+  accounts: "Users & logins",
   credentials: "Credential provisioning",
   campaigns: "Notification campaigns",
   "payment-reminders": "Payment reminders",

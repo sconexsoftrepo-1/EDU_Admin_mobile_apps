@@ -85,6 +85,7 @@ export type {
   AdmissionAnalytics,
   AdmissionInsights,
   AdmissionOpening,
+  NewAdmission,
 } from "./modules/admissions";
 export type {
   DashboardMetric,

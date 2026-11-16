@@ -224,7 +224,7 @@ def catalog():
         courses.append(("Intermediate (Class 11 and 12)", {
             "code": code, "name": name, "qualification": "Intermediate", "course_level": "intermediate",
             "branch": group, "category": "Intermediate", "duration_label": "2 years",
-            "semesters_label": "4 (1-1, 1-2, 2-1, 2-2)", "duration_semesters": 4,
+            "semesters_label": "2 (1st Year, 2nd Year)", "duration_semesters": 2,
             "subjects": subjects, "career_opportunities": careers}))
     seen = set()
     for category, rows in DEGREES.items():

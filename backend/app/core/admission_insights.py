@@ -134,6 +134,37 @@ def available(data, joined_by_program):
     return sorted(items, key=lambda item: str(item["course_name"] or ""))
 
 
+NEW_DAYS = 7
+
+
+def new_admissions(data, days=NEW_DAYS):
+    """Students admitted in the last ``days`` days, newest first (for the sign-in popup)."""
+    from datetime import timedelta
+    records = data["records"]
+    since = (date.today() - timedelta(days=days)).isoformat()
+    programs = records.get("programs", {})
+    profiles = {p.get("student_code"): p for p in records.get("student_admission_profiles", {}).values()}
+    enrollments = {e.get("student_code"): e for e in records.get("student_enrollments", {}).values()}
+    out = []
+    for student in records.get("students", {}).values():
+        admitted = str(student.get("admission_date") or "")[:10]
+        if not admitted or admitted < since:
+            continue
+        profile = profiles.get(student["code"], {})
+        program_code = (profile.get("program_code") or enrollments.get(student["code"], {}).get("program_code")
+                        or student.get("program_code"))
+        program = programs.get(program_code, {})
+        referral = profile.get("referral") or {}
+        out.append({"student_code": student["code"],
+                    "name": " ".join(aw.name(student).split()) or student["code"],
+                    "admission_number": student.get("admission_number"),
+                    "course_name": program.get("name"), "branch": program.get("branch"),
+                    "course_level": program.get("course_level") or profile.get("course_level"),
+                    "admission_date": admitted,
+                    "reference": referral.get("name") or referral.get("reference_name") if isinstance(referral, dict) else None})
+    return sorted(out, key=lambda r: (r["admission_date"], str(r["admission_number"] or "")), reverse=True)
+
+
 @router.get("")
 def insights(request: Request, user=Depends(current_user)):
     data = request.app.state.store.snapshot()
@@ -144,6 +175,8 @@ def insights(request: Request, user=Depends(current_user)):
     # Students and parents only see what is open: college figures are for staff.
     if user.get("person_type") not in {"employee", "system"}:
         return result
+    # The sign-in popup: students admitted recently, for staff who may see student records.
+    result["new_admissions"] = new_admissions(data) if has_permission(data, user, "students", "view") else []
     can_view_all = not aw.teaching(user) and has_permission(data, user, TABLE, "view")
     person, account = user.get("person_code"), user.get("code")
     mine = [r for e, r in zip(enquiries, rows)

@@ -59,12 +59,15 @@ def next_registration_number(data, program_code, start_year):
 
 
 def semester_labels(program):
-    """Names of a course's semesters. Intermediate: year-term (1-1, 1-2, 2-1, 2-2 = 1st year 1st
-    semester ...), used for marks, backlogs and records; degrees: Semester 1, Semester 2, ..."""
+    """Names of a course's semesters, used for marks, backlogs and records. Intermediate runs
+    year-wise (1st Year, 2nd Year; year-term 1-1, 1-2 ... if set up with more terms);
+    degrees: Semester 1, Semester 2, ..."""
     count = int(program.get("duration_semesters") or 0)
     if program.get("semester_labels") and len(program["semester_labels"]) == count:
         return program["semester_labels"]
     if program.get("course_level") == "intermediate":
+        if count <= 2:
+            return ["1st Year", "2nd Year"][:count]
         return [f"{(n - 1) // 2 + 1}-{(n - 1) % 2 + 1}" for n in range(1, count + 1)]
     return [f"Semester {n}" for n in range(1, count + 1)]
 

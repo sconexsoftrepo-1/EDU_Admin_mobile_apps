@@ -114,3 +114,20 @@ def test_my_reference_credits_whoever_entered_the_enquiry(app, client, headers):
     rows = client.get("/api/v1/dashboard/admission-analytics", headers=headers).json()["enquiries"]
     sita = next(r for r in rows if r["name"] == "Sita M")
     assert other.status_code == 201 and sita["reference_type"] == "social_media" and sita["credited_to"] is None
+
+
+def test_popup_lists_students_admitted_in_the_last_week(app, client, headers):
+    from datetime import date, timedelta
+    seed(app)
+    today, old = date.today().isoformat(), (date.today() - timedelta(days=30)).isoformat()
+    with app.state.store.transaction() as d:
+        r = d["records"]
+        r.setdefault("students", {}).update({
+            "S-NEW": {"code": "S-NEW", "first_name": "Kiran", "last_name": "Rao", "admission_number": "ADM-9",
+                      "admission_date": today, "status": "active"},
+            "S-OLD": {"code": "S-OLD", "first_name": "Old", "last_name": "Student", "admission_number": "ADM-1",
+                      "admission_date": old, "status": "active"}})
+        r.setdefault("student_admission_profiles", {})["SAP-N"] = {"code": "SAP-N", "student_code": "S-NEW", "program_code": "P2"}
+    rows = client.get(URL, headers=headers).json()["new_admissions"]
+    assert [(x["name"], x["admission_number"], x["course_name"], x["admission_date"]) for x in rows] == [
+        ("Kiran Rao", "ADM-9", "MPC", today)]

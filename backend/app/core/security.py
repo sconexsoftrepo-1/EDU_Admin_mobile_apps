@@ -89,11 +89,21 @@ def clean_email(value):
     return value.strip().lower() if isinstance(value, str) and value.strip() else None
 
 
+# Extra screens given to one login on top of its roles: screen key -> access level.
+ACCESS_LEVELS = {"view": ["view"], "edit": ["view", "create", "edit"],
+                 "full": ["view", "create", "edit", "delete", "approve", "export"]}
+ExtraAccess = dict[str, Literal["view", "edit", "full"]]
+
+
 class AccountInput(StrictModel):
     login_id: str = Field(min_length=3, max_length=120, pattern=r"^[a-zA-Z0-9@._+-]+$")
-    password: str = Field(min_length=12, max_length=128)
-    person_type: Literal["employee", "student", "parent"]
-    person_code: str = Field(min_length=1, max_length=100)
+    # Staff sign in with a code sent to their email, so no password is needed; parents and
+    # students create theirs in the app. Kept optional for older clients.
+    password: str | None = Field(default=None, min_length=12, max_length=128)
+    # "system": a staff login not linked to an employee record (administrators).
+    person_type: Literal["employee", "student", "parent", "system"]
+    person_code: str | None = Field(default=None, min_length=1, max_length=100)
+    extra_access: ExtraAccess | None = Field(default=None, max_length=200)
     role_codes: list[str] = Field(default_factory=list, max_length=30)
     clients: list[
         Literal[
@@ -114,7 +124,9 @@ class AccountInput(StrictModel):
 
     @model_validator(mode="after")
     def staff_contact(self):
-        if self.person_type == "employee" and not self.email:
+        if self.person_type != "system" and not self.person_code:
+            raise ValueError("Choose the person this login belongs to")
+        if self.person_type in ("employee", "system") and not self.email:
             raise ValueError("An email address is required for staff logins")
         check_mobile(self.country_code, self.mobile_number, required=False)
         return self
@@ -123,6 +135,7 @@ class AccountInput(StrictModel):
 class AccountUpdate(StrictModel):
     login_id: str | None = Field(default=None, min_length=3, max_length=120, pattern=r"^[a-zA-Z0-9@._+-]+$")
     active: bool | None = None
+    extra_access: ExtraAccess | None = Field(default=None, max_length=200)
     role_codes: list[str] | None = Field(default=None, max_length=30)
     clients: (
         list[
@@ -281,7 +294,40 @@ def current_user(
     }
 
 
+_SCREEN_CATALOG = None
+
+
+def screen_catalog():
+    """Workspace screens (key -> resources), loaded once."""
+    global _SCREEN_CATALOG
+    if _SCREEN_CATALOG is None:
+        import json
+        from pathlib import Path
+        path = Path(__file__).resolve().parents[1] / "contracts" / "screens.json"
+        _SCREEN_CATALOG = {s["key"]: s.get("resources", []) for s in json.loads(path.read_text())}
+    return _SCREEN_CATALOG
+
+
+# Screens without tables of their own open with this permission.
+SPECIAL_SCREEN_PERMISSIONS = {"roles": "roles", "accounts": "accounts", "credentials": "accounts",
+                              "forms": "forms", "audit-logs": "audit", "reports": "reports", "dashboard": "reports"}
+
+
+def extra_grants(account):
+    """Permissions from the extra screens given to one login: resource -> actions."""
+    grants = {}
+    catalog = screen_catalog()
+    for key, level in (account.get("extra_access") or {}).items():
+        actions = ACCESS_LEVELS.get(level, [])
+        for resource in [*catalog.get(key, []), *([SPECIAL_SCREEN_PERMISSIONS[key]] if key in SPECIAL_SCREEN_PERMISSIONS else [])]:
+            grants.setdefault(resource, set()).update(actions)
+    return grants
+
+
 def has_permission(data, user, screen, action):
+    account = data["accounts"].get(user["code"], {})
+    if account.get("extra_access") and action in extra_grants(account).get(screen, ()):
+        return True
     assigned = [
         data["roles"][r]
         for r in data["accounts"].get(user["code"], {}).get("role_codes", [])
@@ -309,7 +355,8 @@ def role_limit(data, user, key):
     roles = [data["roles"][r] for r in data["accounts"].get(user["code"], {}).get("role_codes", []) if r in data["roles"]]
     if not roles or any(r.get("system_admin") or not r.get(key) for r in roles):
         return None
-    return {item for r in roles for item in r[key]}
+    extra = set((data["accounts"].get(user["code"], {}).get("extra_access") or {})) if key == "screens" else set()
+    return {item for r in roles for item in r[key]} | extra
 
 
 def require(screen, action):

@@ -1,7 +1,7 @@
 "use client";
 import "./search-field.css";
 import "./module-hub.css";
-import { visibleHubs, hubRoute, hubIcons, screenLabel, HIDDEN_SCREENS } from "@/lib/colleges/module-hubs";
+import { visibleHubs, hubRoute, hubIcons, screenLabel, screenIcon, HIDDEN_SCREENS } from "@/lib/colleges/module-hubs";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -29,32 +29,6 @@ import {
 import { permissions, type Role } from "@/data/colleges";
 import type { CollegeState, RecordRow } from "@/lib/colleges/store";
 
-const moduleIcons: Record<string, typeof BookOpen> = {
-  dashboard: LayoutDashboard,
-  transport: Bus,
-  buses: Bus,
-  "bus-seating": Bus,
-  employees: Users,
-  payroll: BadgeIndianRupee,
-  "salary-structures": BadgeIndianRupee,
-  "expense-dashboard": Package,
-  inventory: Package,
-  assets: Package,
-  "purchase-requests": Package,
-  timetable: CalendarDays,
-  accounts: Shield,
-  students: Users,
-  admissions: GraduationCap,
-  fees: Wallet,
-  payments: CreditCard,
-  receipts: Receipt,
-  hostels: Building2,
-  certificates: FileCheck,
-  roles: Shield,
-  settings: Settings,
-  reports: BarChart3,
-  notifications: Bell,
-};
 export function WorkspaceNavigation({ role, allowedModules, active, labels, nav, close, compact }: {
   role: Role; allowedModules?: string[]; active: string; labels: Record<string, string>;
   nav: (m: string) => string; close: () => void; compact: boolean; expand: () => void;
@@ -65,7 +39,7 @@ export function WorkspaceNavigation({ role, allowedModules, active, labels, nav,
   const direct = ["dashboard", "campus-analytics", "change-requests", ...allowed.filter((m) => !HIDDEN_SCREENS.has(m) && !assigned.has(m) && !["dashboard", "campus-analytics", "change-requests"].includes(m))].filter((m) => allowed.includes(m));
   return <nav aria-label="Portal navigation" className={`erp-hub-navigation ${compact ? "is-compact" : ""}`}>
     {direct.map((screen) => {
-      const Icon = moduleIcons[screen] || ClipboardCheck;
+      const Icon = screenIcon(screen);
       return <Link key={screen} href={nav(screen)} title={screenLabel(screen, labels)} className={active === screen ? "active" : ""} aria-current={active === screen ? "page" : undefined} onClick={close}>
         <Icon size={18} /><span>{screenLabel(screen, labels)}</span>
       </Link>;

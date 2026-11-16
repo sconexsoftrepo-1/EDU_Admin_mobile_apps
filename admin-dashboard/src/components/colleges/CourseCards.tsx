@@ -68,17 +68,23 @@ function years(row: Row): string {
   return `${Number.isInteger(value) ? value : value.toFixed(1)} ${value === 1 ? "year" : "years"}`;
 }
 
-/** Intermediate semesters are named year-term: 1-1, 1-2, 2-1, 2-2 (1st year 1st semester, ...). */
+/** Intermediate runs year-wise: 2 semesters named 1st Year and 2nd Year. A course still set up
+ * with more terms is named year-term (1-1, 1-2, 2-1, 2-2). */
+export function intermediateSemesterLabel(n: number, count: number): string {
+  if (count <= 2) return n === 1 ? "1st Year" : n === 2 ? "2nd Year" : `Year ${n}`;
+  return `${Math.floor((n - 1) / 2) + 1}-${((n - 1) % 2) + 1}`;
+}
+
 export function semesterLabels(row: Row): string[] {
   if (
     Array.isArray(row.semester_labels) &&
     row.semester_labels.length === Number(row.duration_semesters)
   )
     return row.semester_labels.map(String);
-  const count = Number(row.duration_semesters) || (isIntermediate(row) ? 4 : 0);
+  const count = Number(row.duration_semesters) || (isIntermediate(row) ? 2 : 0);
   return Array.from({ length: count }, (_, i) =>
     isIntermediate(row)
-      ? `${Math.floor(i / 2) + 1}-${(i % 2) + 1}`
+      ? intermediateSemesterLabel(i + 1, count)
       : `Semester ${i + 1}`,
   );
 }

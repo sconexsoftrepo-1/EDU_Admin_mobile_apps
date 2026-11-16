@@ -24,10 +24,12 @@ def curriculum(data,program_code,year_code=None):
 def starter(program):
     text=(str(program.get('branch',''))+' '+program['name']).lower()
     if program.get('course_level')=='intermediate':
+        # Year-wise: one term per year (2 semesters); a course set up with 4 terms keeps year-term numbering.
+        count=int(program.get('duration_semesters') or 2); year=(lambda i:i) if count<=2 else (lambda i:(i-1)//2+1)
         if 'vocational' in text:
-            return [{'semester_number':i,'subjects':['English','Computer applications '+str((i+1)//2),'Office administration '+str((i+1)//2),'Business fundamentals '+str((i+1)//2)],'labs':['Computer applications practical '+str((i+1)//2)]} for i in range(1,int(program.get('duration_semesters') or 4)+1)]
+            return [{'semester_number':i,'subjects':['English','Computer applications '+str(year(i)),'Office administration '+str(year(i)),'Business fundamentals '+str(year(i))],'labs':['Computer applications practical '+str(year(i))]} for i in range(1,count+1)]
         core=['Mathematics','Physics','Chemistry'] if any(x in text for x in ['mpc','math']) else ['Botany','Zoology','Physics','Chemistry'] if any(x in text for x in ['bipc','bpc','biology']) else ['Mathematics','Economics','Commerce'] if 'mec' in text else ['Civics','Economics','Commerce'] if 'cec' in text else ['History','Economics','Civics']
-        return [{'semester_number':i,'subjects':[f'{s} {((i-1)//2)+1}' for s in ['English','Second language',*core]],'labs':[f'{s} practical {((i-1)//2)+1}' for s in core if s in {'Physics','Chemistry','Botany','Zoology'}]} for i in range(1,int(program.get('duration_semesters') or 4)+1)]
+        return [{'semester_number':i,'subjects':[f'{s} {year(i)}' for s in ['English','Second language',*core]],'labs':[f'{s} practical {year(i)}' for s in core if s in {'Physics','Chemistry','Botany','Zoology'}]} for i in range(1,count+1)]
     if any(x in text for x in ['computer','bca','b.sc. cs','bsc cs','data science']):
         stages=[['Programming fundamentals','Mathematics for computing','Digital fundamentals'],['Object oriented programming','Discrete mathematics','Computer organization'],['Data structures','Database management systems','Operating systems'],['Computer networks','Software engineering','Web technologies'],['Data analytics','Information security','Cloud computing'],['Artificial intelligence foundations','Software project management','Major project']]
         labs=['Programming laboratory','Object oriented programming laboratory','Database laboratory','Web development laboratory','Data analytics laboratory','Project laboratory']

@@ -36,6 +36,11 @@ export interface AdministrationScreensResponse {
 
 export type PersonType = "employee" | "student" | "parent";
 
+/** Access level of a screen: view only, add and change, or everything (delete, approve, export). */
+export type AccessLevel = "view" | "edit" | "full";
+/** Extra screens given to one login on top of its roles. */
+export type ExtraAccess = Record<string, AccessLevel>;
+
 export interface LoginAccount {
   code: string;
   login_id: string;
@@ -44,15 +49,19 @@ export interface LoginAccount {
   person_code: string;
   role_codes: string[];
   clients: ApiClient[];
+  email?: string;
+  extra_access?: ExtraAccess;
   [key: string]: unknown;
 }
 
-/** POST administration/accounts (password 12-128 characters). */
+/** POST administration/accounts. Staff sign in with an emailed code, so no password is sent. */
 export interface CreateAccountPayload {
   login_id: string;
-  password: string;
-  person_type: PersonType;
-  person_code: string;
+  password?: string;
+  /** "system": a staff login not linked to an employee record (administrators). */
+  person_type: PersonType | "system";
+  person_code?: string;
+  extra_access?: ExtraAccess;
   role_codes: string[];
   clients: ApiClient[];
   /** Required for staff (employee) logins: sign-in codes (OTP) are sent here. */
@@ -66,6 +75,7 @@ export interface CreateAccountPayload {
 /** PATCH administration/accounts/{code}. */
 export interface UpdateAccountPayload {
   login_id?: string;
+  extra_access?: ExtraAccess;
   role_codes?: string[];
   clients?: ApiClient[];
   active?: boolean;

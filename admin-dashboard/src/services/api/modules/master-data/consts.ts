@@ -34,7 +34,7 @@ export interface WizardCourse {
   semesters_label?: string | null;
   subjects?: string | null;
   career_opportunities?: string | null;
-  /** Semester names: Intermediate 1-1, 1-2, 2-1, 2-2; degrees Semester 1, 2, ... */
+  /** Semester names: Intermediate 1st Year, 2nd Year; degrees Semester 1, 2, ... */
   semester_labels?: string[];
   batches: {
     code: string;
@@ -237,7 +237,7 @@ export interface CourseInsights {
   program: Row;
   /** Years of study of the course. */
   years: number;
-  /** Semester names: Intermediate 1-1, 1-2, 2-1, 2-2; degrees Semester 1, 2, ... */
+  /** Semester names: Intermediate 1st Year, 2nd Year; degrees Semester 1, 2, ... */
   semester_labels: string[];
   batches: (StudentCounts & {
     code: string;

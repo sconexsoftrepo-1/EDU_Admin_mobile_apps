@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.core.security import (
@@ -5,8 +7,11 @@ from app.core.security import (
     AccountUpdate,
     email_in_use,
     mobile_in_use,
+    ACCESS_LEVELS,
     RoleInput,
+    extra_grants,
     has_permission,
+    screen_catalog,
     hasher,
     public_account,
     require,
@@ -19,14 +24,41 @@ from app.modules.mobile.workspace.api import FORM_ACTIONS
 router = APIRouter(prefix="/administration", tags=["Roles and accounts"])
 
 
+def super_admin(data, user):
+    return any(data["roles"].get(r, {}).get("system_admin")
+               for r in data["accounts"].get(user["code"], {}).get("role_codes", []))
+
+
+def is_admin_account(data, account):
+    return any(data["roles"].get(r, {}).get("system_admin") for r in account.get("role_codes", []))
+
+
 def valid_roles(data, roles, actor=None):
+    # Only a super admin may hand out (or take back) the protected super admin role.
     if len(roles) != len(set(roles)) or any(
-        r not in data["roles"] or data["roles"][r].get("system_admin") for r in roles
+        r not in data["roles"] or (data["roles"][r].get("system_admin") and not (actor and super_admin(data, actor)))
+        for r in roles
     ):
         raise HTTPException(422, "Unknown, duplicate or protected role")
     if actor:
         for code in roles:
-            check_grant(data, actor, data["roles"][code]["permissions"])
+            if not data["roles"][code].get("system_admin"):
+                check_grant(data, actor, data["roles"][code]["permissions"])
+
+
+def valid_extra_access(data, actor, extra):
+    """Extra screens for one login: known screens, and only what the admin may grant."""
+    if not extra:
+        return
+    unknown = set(extra) - set(screen_catalog())
+    if unknown:
+        raise HTTPException(422, "Unknown screen: " + ", ".join(sorted(unknown)))
+    check_grant(data, actor, {k: sorted(v) for k, v in extra_grants({"extra_access": extra}).items()})
+
+
+def other_active_admins(data, code):
+    return [a for a in data["accounts"].values()
+            if a["code"] != code and a.get("active") and is_admin_account(data, a)]
 
 
 def check_grant(data, actor, permissions):
@@ -209,17 +241,25 @@ def create_account(
     with request.app.state.store.transaction() as data:
         access = personal_access(data, body.person_type)
         valid_roles(data, access["role_codes"] if access else body.role_codes, user)
-        table = {"employee": "employees", "student": "students", "parent": "parents"}[
-            body.person_type
-        ]
-        if body.person_code not in data["records"].get(table, {}):
-            raise HTTPException(422, "Create the employee/student/parent record first")
+        valid_extra_access(data, user, body.extra_access)
+        if body.person_type == "system":
+            # Teachers, lab in-charges and clerks work with their employee record (timetable,
+            # attendance, cash), so their logins must be linked to one.
+            if any(data["roles"][r].get("scope") == "teaching" for r in body.role_codes):
+                raise HTTPException(422, "Link this login to an employee record: teaching roles (teachers, "
+                                         "lab in-charges, clerks) need one")
+            if not super_admin(data, user):
+                raise HTTPException(403, "Only a super admin can create a login without an employee record")
+        else:
+            table = {"employee": "employees", "student": "students", "parent": "parents"}[body.person_type]
+            if body.person_code not in data["records"].get(table, {}):
+                raise HTTPException(422, "Create the employee/student/parent record first")
         if any(
             a["login_id"].casefold() == body.login_id.casefold()
             for a in data["accounts"].values()
         ):
             raise HTTPException(409, "Login ID exists")
-        if any(
+        if body.person_type != "system" and any(
             a["person_type"] == body.person_type
             and a["person_code"] == body.person_code
             for a in data["accounts"].values()
@@ -229,12 +269,15 @@ def create_account(
             raise HTTPException(409, "This email address is already used by another login")
         if mobile_in_use(data, body.country_code, body.mobile_number):
             raise HTTPException(409, "This mobile number is already used by another login")
+        code = new_code("USR")
         account = {
             **body.model_dump(exclude={"password"}, exclude_none=True),  # no empty email/mobile fields
             **(access or {}),
-            "code": new_code("USR"),
-            "active": True,
-            "password_hash": hasher.hash(body.password),
+            "code": code,
+            "person_code": body.person_code or code,
+            "active": True,  # new logins are active
+            # Staff sign in with an emailed code; an unusable random password is stored.
+            "password_hash": hasher.hash(body.password or secrets.token_urlsafe(32)),
         }
         data["accounts"][account["code"]] = account
         audit(data, user["code"], "create", "accounts", account["code"])
@@ -252,11 +295,18 @@ def update_account(
         account = data["accounts"].get(code)
         if not account:
             raise HTTPException(404, "Account not found")
-        if any(
-            data["roles"].get(r, {}).get("system_admin") for r in account["role_codes"]
-        ):
-            raise HTTPException(409, "Bootstrap account is protected")
+        if is_admin_account(data, account) and not super_admin(data, user):
+            raise HTTPException(403, "Only a super admin can change an administrator login")
+        if code == user["code"] and (body.active is False or (body.role_codes is not None and is_admin_account(data, account)
+                                                               and not any(data["roles"].get(r, {}).get("system_admin") for r in body.role_codes))):
+            raise HTTPException(409, "You cannot deactivate your own login or remove your own admin role")
+        removes_admin = (body.active is False or (body.role_codes is not None and not any(
+            data["roles"].get(r, {}).get("system_admin") for r in body.role_codes)))
+        if is_admin_account(data, account) and removes_admin and not other_active_admins(data, code):
+            raise HTTPException(409, "Keep at least one active super admin login")
         valid_roles(data, account["role_codes"], user)
+        if body.extra_access is not None:
+            valid_extra_access(data, user, body.extra_access)
         access = personal_access(data, account["person_type"])
         if access:
             valid_roles(data, access["role_codes"], user)
@@ -269,7 +319,7 @@ def update_account(
         if body.mobile_number and mobile_in_use(data, body.country_code, body.mobile_number, except_code=code):
             raise HTTPException(409, "This mobile number is already used by another login")
         # Turning a login on/off never needs the email; any other change to a staff login does.
-        if set(body.model_dump(exclude_none=True)) - {"active"} and account.get("person_type") == "employee" \
+        if set(body.model_dump(exclude_none=True)) - {"active"} and account.get("person_type") in ("employee", "system") \
                 and not (body.email or account.get("email")):
             raise HTTPException(422, "An email address is required for staff logins")
         account.update({**body.model_dump(exclude_none=True), **(access or {})})
@@ -278,11 +328,47 @@ def update_account(
         return public_account(account)
 
 
+# Per-login rows that go with the login; anything else that names it is history (deactivate instead).
+LOGIN_ROWS = ("device_tokens", "notifications", "announcement_recipients", "thread_members",
+              "admin_mobile_preferences", "password_reset_tokens")
+HISTORY = {"messages": "sender_code", "message_threads": "created_by_code",
+           "admission_status_history": "actor_user_code", "admission_applications": "submitted_by_user_code",
+           "admission_documents": "uploaded_by_user_code", "student_status_history": "actor_user_code",
+           "timetable_swap_requests": "requested_by_user_code", "import_jobs": "uploaded_by_code",
+           "report_export_jobs": "requested_by_user_code", "report_download_events": "user_code"}
+
+
 @router.delete("/accounts/{code}", status_code=204)
-def disable_account(
+def delete_account(
     code: str, request: Request, user=Depends(require("accounts", "delete"))
 ):
-    return update_account(code, AccountUpdate(active=False), request, user)
+    """Permanently delete a login. Logins with history (messages, admissions, imports, reports)
+    are kept for the record: deactivate those instead."""
+    with request.app.state.store.transaction() as data:
+        account = data["accounts"].get(code)
+        if not account:
+            raise HTTPException(404, "Account not found")
+        if code == user["code"]:
+            raise HTTPException(409, "You cannot delete your own login")
+        if is_admin_account(data, account):
+            if not super_admin(data, user):
+                raise HTTPException(403, "Only a super admin can delete an administrator login")
+            if not other_active_admins(data, code):
+                raise HTTPException(409, "Keep at least one active super admin login")
+        records = data["records"]
+        used = [table for table, column in HISTORY.items()
+                if any(r.get(column) == code for r in records.get(table, {}).values())]
+        if used:
+            raise HTTPException(409, "This login has history (" + ", ".join(t.replace("_", " ") for t in used)
+                                + "). Deactivate it instead.")
+        for table in LOGIN_ROWS:
+            rows = records.get(table, {})
+            for key in [k for k, r in rows.items() if r.get("user_code") == code]:
+                rows.pop(key, None)
+        for key in [k for k, s in data["sessions"].items() if s.get("user_code") == code]:
+            data["sessions"].pop(key, None)
+        data["accounts"].pop(code)
+        audit(data, user["code"], "delete", "accounts", code)
 
 
 @router.get("/audit")

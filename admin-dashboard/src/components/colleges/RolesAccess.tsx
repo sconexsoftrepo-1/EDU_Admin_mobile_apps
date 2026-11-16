@@ -1,120 +1,165 @@
 "use client";
 import SearchField, { searchValues } from "./SearchField";
-import { useErrorToast } from "./toast";
+import { toast, useErrorToast } from "./toast";
 import { useCallback, useEffect, useState } from "react";
 import {
-  KeyRound,
+  LayoutGrid,
+  Mail,
+  Pencil,
   Plus,
   RefreshCw,
   Shield,
-  Users,
-  Pencil,
   Trash2,
   UserPlus,
+  Users,
 } from "lucide-react";
 import {
   api,
   errorText,
+  type AccessLevel,
+  type LoginAccount,
   type Role,
   type ScreenSummary,
-  type LoginAccount,
-  type Row,
 } from "@/services/api";
 import { useOptionalCollege } from "./CollegeStore";
 import WorkspaceSkeleton from "./WorkspaceSkeleton";
 import {
   readWorkspaceCache,
   workspaceCacheKey,
-  writeWorkspaceCache,
   refreshWorkspaceCache,
 } from "@/lib/colleges/workspace-cache";
-import ConfigurationEditor, { generatePassword } from "./ConfigurationEditor";
+import { permissionsFor, roleSelection } from "@/lib/colleges/access";
+import AccessPicker from "./AccessPicker";
+import LoginActions from "./LoginActions";
+import LoginDrawer from "./LoginDrawer";
+import SideDrawer from "./SideDrawer";
 import "./connected-portal.css";
+import "./login-admin.css";
 
-const ACTIONS = [
-  "view",
-  "create",
-  "edit",
-  "delete",
-  "approve",
-  "export",
-] as const;
-/** Permission that opens a screen without tables of its own (mirrors the backend's rule). */
-const SCREEN_PERMISSION: Record<string, string> = {
-  roles: "roles",
-  accounts: "accounts",
-  credentials: "accounts",
-  forms: "forms",
-  "audit-logs": "audit",
+const personName = (row: Record<string, unknown>) => {
+  const employee = row.employee as Record<string, unknown> | null;
+  const name = employee ? [employee.first_name, employee.last_name].filter(Boolean).join(" ") : "";
+  return name || (row.person_type === "system" ? "Administrator" : String(row.person_code || ""));
 };
-/** Sensible defaults for a new login of a role: who the person is and where they sign in. */
-function loginDefaults(role: Role): Row {
-  const name = role.name.toLowerCase();
-  if (role.scope === "self" && name.includes("parent"))
-    return { person_type: "parent", clients: ["parent-mobile", "admin-web"] };
-  if (role.scope === "self")
-    return { person_type: "student", clients: ["student-mobile", "admin-web"] };
-  // Lab in-charges use the Staff app (lab sessions, timetable, payslips, Form 16).
-  if (role.code === "LAB_INCHARGE" || /lab in-?charge/.test(name))
-    return { person_type: "employee", clients: ["teacher-mobile"] };
-  if (role.scope === "teaching")
-    return {
-      person_type: "employee",
-      clients: ["admin-web", "teacher-mobile"],
-    };
-  return { person_type: "employee", clients: ["admin-web", "admin-mobile"] };
+
+/** Create or edit a role: a name and the screens it opens (checkboxes by module, with icons). */
+function RoleDrawer({
+  initial,
+  screens,
+  onClose,
+  onSaved,
+}: {
+  initial?: Role;
+  screens: ScreenSummary[];
+  onClose: () => void;
+  onSaved: (code: string) => void | Promise<void>;
+}) {
+  const [name, setName] = useState(initial?.name || "");
+  const [scope, setScope] = useState<"college" | "teaching">(
+    initial?.scope === "teaching" ? "teaching" : "college",
+  );
+  const [selection, setSelection] = useState<Record<string, AccessLevel>>(() =>
+    roleSelection(initial, screens),
+  );
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    if (!Object.keys(selection).length) return setError("Tick at least one screen");
+    setBusy(true);
+    setError("");
+    try {
+      const saved = await api.administration.saveRole(initial?.code, {
+        name: name.trim(),
+        scope,
+        permissions: permissionsFor(selection, screens),
+        screens: Object.keys(selection),
+      });
+      toast.success(initial ? "Role updated" : "Role created");
+      await onSaved(String((saved as Role | undefined)?.code || initial?.code || ""));
+      onClose();
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <SideDrawer
+      title={initial ? `Edit role · ${initial.name}` : "Create role"}
+      subtitle="Tick the screens this role opens and choose what it may do on each."
+      expanded
+      onClose={onClose}
+    >
+      <form className="la-form" onSubmit={save}>
+        <section className="la-section">
+          <div className="la-grid">
+            <label>
+              Role name
+              <input required minLength={2} maxLength={100} value={name} onChange={(e) => setName(e.target.value)} />
+            </label>
+            <label>
+              Who holds it
+              <select value={scope} onChange={(e) => setScope(e.target.value as "college" | "teaching")}>
+                <option value="college">College staff (office, accounts, admissions…)</option>
+                <option value="teaching">Teaching staff (sees only their own classes)</option>
+              </select>
+            </label>
+          </div>
+        </section>
+        <section className="la-section">
+          <h3>
+            <LayoutGrid size={17} /> Modules &amp; screens
+          </h3>
+          <p className="la-note">
+            View = open and read · Add &amp; edit = also add and change records · Full = also delete,
+            approve and export.
+          </p>
+          <AccessPicker screens={screens} value={selection} onChange={setSelection} disabled={busy} />
+        </section>
+        {error && (
+          <p role="alert" className="la-error">
+            {error}
+          </p>
+        )}
+        <footer className="la-actions">
+          <button type="button" onClick={onClose} disabled={busy}>
+            Cancel
+          </button>
+          <button type="submit" className="erp-primary" disabled={busy}>
+            {busy ? "Saving…" : initial ? "Save role" : "Create role"}
+          </button>
+        </footer>
+      </form>
+    </SideDrawer>
+  );
 }
-const personName = (row: Row) => {
-  const employee = row.employee as Row | null;
-  return employee
-    ? [employee.first_name, employee.last_name].filter(Boolean).join(" ") ||
-        String(row.person_code || row.login_id)
-    : String(row.person_code || row.login_id);
-};
-/** Authenticated template screen: data requests use the existing HttpOnly-cookie proxy. */
+
+/** Roles & access: roles, the screens each opens, and the logins holding it. */
 export default function RolesAccess() {
   const session = useOptionalCollege();
-  const cacheKey = workspaceCacheKey(
-    session?.account?.code,
-    session?.activeRole?.code,
-    "roles:list",
-  );
+  const me = session?.account?.code;
+  const cacheKey = workspaceCacheKey(session?.account?.code, session?.activeRole?.code, "roles:list");
   const cachedRoles = readWorkspaceCache<Role[]>(cacheKey);
   const [roles, setRoles] = useState<Role[]>(cachedRoles || []);
-  const [screens, setScreens] = useState<ScreenSummary[]>(
-    session?.assignedScreens || [],
-  );
+  const [screens, setScreens] = useState<ScreenSummary[]>(session?.assignedScreens || []);
   const [accounts, setAccounts] = useState<LoginAccount[]>([]);
-  const [accountsAvailable, setAccountsAvailable] = useState(false);
-  const [selectedCode, setSelectedCode] = useState(
-    cachedRoles?.[0]?.code || "",
-  );
+  const [selectedCode, setSelectedCode] = useState(cachedRoles?.[0]?.code || "");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(!cachedRoles);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   useErrorToast(error);
   const [accountCode, setAccountCode] = useState("");
-  const [editor, setEditor] = useState<{
-    kind: "role" | "account";
-    initial?: Row;
-  } | null>(null);
-  const [deleteCode, setDeleteCode] = useState<string | null>(null);
-  const [credential, setCredential] = useState<{
-    login: string;
-    password: string;
-  } | null>(null);
+  const [roleEditor, setRoleEditor] = useState<{ initial?: Role } | null>(null);
+  const [loginEditor, setLoginEditor] = useState<Partial<LoginAccount> | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const load = useCallback(async () => {
     setBusy(!readWorkspaceCache(cacheKey));
     setError("");
-    // Each list is shown as soon as it arrives; roles do not wait for screens or accounts.
-    const roleList = refreshWorkspaceCache(cacheKey, () =>
-      api.administration.roles(),
-    ).then((saved) => {
+    const roleList = refreshWorkspaceCache(cacheKey, () => api.administration.roles()).then((saved) => {
       setRoles(saved);
-      setSelectedCode((old) =>
-        saved.some((r) => r.code === old) ? old : saved[0]?.code || "",
-      );
+      setSelectedCode((old) => (saved.some((r) => r.code === old) ? old : saved[0]?.code || ""));
     });
     const screenList = api.workspace
       .screens()
@@ -122,11 +167,8 @@ export default function RolesAccess() {
       .then((navigation) => setScreens(navigation.screens));
     const accountList = api.administration
       .accounts()
-      .then((items) => {
-        setAccounts(items);
-        setAccountsAvailable(true);
-      })
-      .catch(() => setAccountsAvailable(false));
+      .then(setAccounts)
+      .catch(() => setAccounts([]));
     try {
       await Promise.all([roleList, screenList, accountList]);
     } catch (e) {
@@ -138,43 +180,16 @@ export default function RolesAccess() {
   useEffect(() => {
     void Promise.resolve().then(load);
   }, [load]);
+  const changed = useCallback(async () => {
+    await load();
+    window.dispatchEvent(new CustomEvent("edunexa:records-changed", { detail: { permissions: true } }));
+  }, [load]);
   const selected = roles.find((r) => r.code === selectedCode);
-  const assigned = selected?.assigned_accounts || [];
-  const allocated = selected
-    ? screens.filter((screen) => {
-        if (selected.screens?.length && !selected.screens.includes(screen.key))
-          return false;
-        if (selected.system_admin) return true;
-        // Backend rule: a screen opens when any of its tables is viewable, or else when the
-        // role may view the screen's own permission (reports for screens such as the dashboard).
-        return (
-          screen.resources.some((table) =>
-            selected.permissions[table]?.includes("view"),
-          ) ||
-          !!selected.permissions[
-            SCREEN_PERMISSION[screen.key] || "reports"
-          ]?.includes("view")
-        );
-      })
-    : [];
+  const assigned = (selected?.assigned_accounts || []) as unknown as (LoginAccount & Record<string, unknown>)[];
+  const selection = roleSelection(selected, screens);
   const remaining = accounts.filter(
-    (a) => a.active && !a.role_codes.includes(selectedCode),
+    (a) => a.person_type !== "student" && a.person_type !== "parent" && !a.role_codes.includes(selectedCode),
   );
-  async function resetPassword(user: Row) {
-    const password = generatePassword();
-    setSaving(true);
-    setError("");
-    try {
-      await api.administration.resetPassword(String(user.code), {
-        new_password: password,
-      });
-      setCredential({ login: String(user.login_id), password });
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setSaving(false);
-    }
-  }
   async function assign() {
     const target = accounts.find((a) => a.code === accountCode);
     if (!target || !selected) return;
@@ -184,32 +199,43 @@ export default function RolesAccess() {
       await api.administration.updateAccount(target.code, {
         role_codes: [...new Set([...target.role_codes, selected.code])],
       });
+      toast.success(`${target.login_id} now holds ${selected.name}`);
       setAccountCode("");
-      await load();
+      await changed();
     } catch (e) {
       setError(errorText(e));
     } finally {
       setSaving(false);
     }
   }
+  async function deleteRole() {
+    if (!selected) return;
+    setSaving(true);
+    try {
+      await api.administration.deleteRole(selected.code);
+      toast.success("Role deleted");
+      setConfirmDelete(false);
+      await changed();
+    } catch (e) {
+      setError(errorText(e));
+      setConfirmDelete(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+  const isFamily = (r?: Role) => r?.scope === "self";
   return (
     <section className="erp-roles-access">
       <div className="erp-page-heading">
         <div>
           <h1>Roles &amp; access</h1>
-          <p>
-            Manage college roles, allocated screens and the people assigned to
-            each role.
-          </p>
+          <p>Choose the screens each role opens, and manage the logins that hold it.</p>
         </div>
         <div className="erp-quick-actions">
           <button onClick={() => void load()} disabled={busy}>
             <RefreshCw size={15} /> Refresh
           </button>
-          <button
-            className="erp-primary"
-            onClick={() => setEditor({ kind: "role" })}
-          >
+          <button className="erp-primary" onClick={() => setRoleEditor({})}>
             <Plus size={15} /> Create role
           </button>
         </div>
@@ -219,27 +245,7 @@ export default function RolesAccess() {
           {error} <button onClick={() => void load()}>Try again</button>
         </p>
       )}
-      {busy && !roles.length && (
-        <WorkspaceSkeleton label="Loading roles and assignments" compact />
-      )}
-      {credential && (
-        <div className="erp-panel erp-role-credential" role="status">
-          <KeyRound size={18} />
-          <p>
-            New password for <strong>{credential.login}</strong>:{" "}
-            <code>{credential.password}</code>. Share it with the user now; it
-            is not shown again and the user should change it after signing in.
-          </p>
-          <button
-            onClick={() =>
-              void navigator.clipboard?.writeText(credential.password)
-            }
-          >
-            Copy
-          </button>
-          <button onClick={() => setCredential(null)}>Done</button>
-        </div>
-      )}
+      {busy && !roles.length && <WorkspaceSkeleton label="Loading roles and assignments" compact />}
       <div className="erp-roles-grid">
         <aside className="erp-panel erp-role-directory">
           <SearchField
@@ -249,14 +255,10 @@ export default function RolesAccess() {
             onValueChange={setQuery}
             suggestions={searchValues(roles, ["name", "code"])}
           />
-          <p>{roles.length} existing roles</p>
-          <nav aria-label="Existing roles">
+          <p>{roles.length} roles</p>
+          <nav aria-label="Roles">
             {roles
-              .filter((r) =>
-                `${r.name} ${r.code}`
-                  .toLowerCase()
-                  .includes(query.toLowerCase()),
-              )
+              .filter((r) => `${r.name} ${r.code}`.toLowerCase().includes(query.toLowerCase()))
               .map((role) => (
                 <button
                   key={role.code}
@@ -264,6 +266,7 @@ export default function RolesAccess() {
                   onClick={() => {
                     setSelectedCode(role.code);
                     setAccountCode("");
+                    setConfirmDelete(false);
                   }}
                   aria-pressed={role.code === selectedCode}
                 >
@@ -272,19 +275,18 @@ export default function RolesAccess() {
                     <strong>{role.name}</strong>
                     <small>
                       {role.system_admin
-                        ? "System administrator"
-                        : role.scope + " access"}
+                        ? "Full access"
+                        : role.scope === "teaching"
+                          ? "Teaching staff"
+                          : role.scope === "self"
+                            ? "EduNest app"
+                            : "College staff"}
                     </small>
                   </span>
-                  <span className="erp-role-count">
-                    {role.assigned_accounts?.length || 0}
-                  </span>
+                  <span className="erp-role-count">{role.assigned_accounts?.length || 0}</span>
                 </button>
               ))}
           </nav>
-          {!busy && !error && !roles.length && (
-            <p>No roles have been created yet.</p>
-          )}
         </aside>
         {selected && (
           <div className="erp-role-details">
@@ -293,26 +295,31 @@ export default function RolesAccess() {
                 <div>
                   <h2>{selected.name}</h2>
                   <p>
-                    {selected.code} · {selected.scope} access
+                    {Object.keys(selection).length} screens · {assigned.length} logins
                   </p>
                 </div>
                 <div className="erp-quick-actions">
-                  {selected.system_admin ? (
+                  {selected.system_admin || isFamily(selected) ? (
                     <span className="erp-role-protected">
-                      Protected system role
+                      {selected.system_admin ? "Super admin: every screen" : "Built-in EduNest role"}
+                    </span>
+                  ) : confirmDelete ? (
+                    <span className="la-confirm">
+                      Delete this role?
+                      <button className="erp-danger" disabled={saving} onClick={() => void deleteRole()}>
+                        Yes, delete
+                      </button>
+                      <button onClick={() => setConfirmDelete(false)}>Cancel</button>
                     </span>
                   ) : (
                     <>
-                      <button
-                        onClick={() =>
-                          setEditor({ kind: "role", initial: selected })
-                        }
-                      >
+                      <button onClick={() => setRoleEditor({ initial: selected })}>
                         <Pencil size={14} /> Edit role &amp; screens
                       </button>
                       <button
                         className="erp-danger"
-                        onClick={() => setDeleteCode(selected.code)}
+                        onClick={() => setConfirmDelete(true)}
+                        title={assigned.length ? "Remove its logins first" : "Delete role"}
                       >
                         <Trash2 size={14} /> Delete role
                       </button>
@@ -320,160 +327,96 @@ export default function RolesAccess() {
                   )}
                 </div>
               </div>
-              <div className="erp-role-stats">
-                <span>
-                  <strong>{allocated.length}</strong> permitted screens
-                </span>
-                <span>
-                  <strong>{assigned.length}</strong> assigned users
-                </span>
-              </div>
             </section>
-            <section className="erp-panel">
-              <h2>
-                <Shield size={18} /> Screens &amp; permissions
-              </h2>
-              <p>
-                {selected.system_admin
-                  ? "This system role has full access to all college screens."
-                  : "Screen allocation is combined with the role’s resource permissions. The backend enforces every action."}
-              </p>
-              <div className="erp-role-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Screen</th>
-                      {ACTIONS.map((action) => (
-                        <th key={action}>{action}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {allocated.map((screen) => (
-                      <tr key={screen.key}>
-                        <td>
-                          <strong>{screen.title}</strong>
-                          <small>{screen.key}</small>
-                        </td>
-                        {ACTIONS.map((action) => (
-                          <td key={action}>
-                            {selected.system_admin ||
-                            screen.resources.some((target) =>
-                              selected.permissions[target]?.includes(action),
-                            ) ||
-                            selected.permissions[screen.key]?.includes(
-                              action,
-                            ) ? (
-                              <span
-                                aria-label={`${action} allowed`}
-                                className="erp-role-allowed"
-                              >
-                                ✓
-                              </span>
-                            ) : (
-                              <span aria-label={`${action} not granted`}>
-                                —
-                              </span>
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {!allocated.length && (
-                <p>No college screens are currently permitted for this role.</p>
-              )}
-            </section>
+            {!isFamily(selected) && (
+              <section className="erp-panel">
+                <h2>
+                  <LayoutGrid size={18} /> Modules &amp; screens
+                </h2>
+                {selected.system_admin ? (
+                  <p>This role opens every screen with full access.</p>
+                ) : Object.keys(selection).length ? (
+                  <AccessPicker screens={screens} value={selection} readOnly />
+                ) : (
+                  <p>No screens yet. Use “Edit role &amp; screens” to tick the screens this role opens.</p>
+                )}
+              </section>
+            )}
             <section className="erp-panel">
               <h2>
                 <Users size={18} /> Assigned users &amp; employees
               </h2>
-              <p>The accounts below currently hold this role.</p>
-              <div className="erp-role-table">
+              <p>The logins below hold this role. New logins are active straight away.</p>
+              <div className="la-table">
                 <table>
                   <thead>
                     <tr>
-                      <th>Employee / person</th>
-                      <th>Login ID</th>
-                      <th>Type</th>
+                      <th>Login</th>
+                      <th>Person</th>
                       <th>Status</th>
-                      <th>Access</th>
+                      <th aria-label="Actions" />
                     </tr>
                   </thead>
                   <tbody>
                     {assigned.map((user) => (
-                      <tr key={String(user.code)}>
-                        <td>{personName(user)}</td>
-                        <td>{String(user.login_id)}</td>
-                        <td>{String(user.person_type)}</td>
-                        <td>{user.active ? "Active" : "Inactive"}</td>
+                      <tr key={user.code} className={user.active ? "" : "is-inactive"}>
                         <td>
-                          {accountsAvailable && !selected.system_admin ? (
-                            <>
-                              <button
-                                onClick={() =>
-                                  setEditor({ kind: "account", initial: user })
-                                }
-                              >
-                                Edit assigned roles
-                              </button>{" "}
-                              <button
-                                disabled={saving}
-                                onClick={() => void resetPassword(user)}
-                              >
-                                <KeyRound size={13} /> Reset password
-                              </button>
-                            </>
-                          ) : (
-                            "Assigned"
-                          )}
+                          <span className="la-person">
+                            <span>
+                              <strong>{user.login_id}</strong>
+                              {user.email && (
+                                <small>
+                                  <Mail size={12} /> {String(user.email)}
+                                </small>
+                              )}
+                            </span>
+                          </span>
+                        </td>
+                        <td>{personName(user)}</td>
+                        <td>
+                          <span className={`la-status ${user.active ? "is-active" : ""}`}>
+                            {user.active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td>
+                          <LoginActions
+                            account={user}
+                            self={user.code === me}
+                            onEdit={isFamily(selected) ? undefined : () => setLoginEditor(user)}
+                            onChanged={changed}
+                          />
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {!assigned.length && <p>No users are assigned to this role.</p>}
-              {accountsAvailable && !selected.system_admin && (
-                <button
-                  className="erp-primary"
-                  onClick={() =>
-                    setEditor({
-                      kind: "account",
-                      initial: {
-                        role_codes: [selected.code],
-                        ...loginDefaults(selected),
-                      },
-                    })
-                  }
-                >
-                  <UserPlus size={15} /> Create login for this role
-                </button>
-              )}
-              {accountsAvailable && !selected.system_admin && (
+              {!assigned.length && <p>No logins hold this role yet.</p>}
+              {!isFamily(selected) && (
                 <div className="erp-role-assign">
+                  <button
+                    className="erp-primary"
+                    onClick={() => setLoginEditor({ role_codes: [selected.code] })}
+                  >
+                    <UserPlus size={15} /> Create login for this role
+                  </button>
                   <label>
-                    Assign an existing user
+                    Or give this role to an existing login
                     <select
-                      aria-label="Existing user to assign"
+                      aria-label="Existing login"
                       value={accountCode}
                       onChange={(e) => setAccountCode(e.target.value)}
                     >
-                      <option value="">Choose an existing account</option>
+                      <option value="">Choose a login</option>
                       {remaining.map((user) => (
                         <option key={user.code} value={user.code}>
-                          {user.login_id} — {user.person_code}
+                          {user.login_id}
+                          {user.email ? ` — ${user.email}` : ""}
                         </option>
                       ))}
                     </select>
                   </label>
-                  <button
-                    className="erp-primary"
-                    disabled={!accountCode || saving}
-                    onClick={() => void assign()}
-                  >
+                  <button disabled={!accountCode || saving} onClick={() => void assign()}>
                     {saving ? "Assigning…" : "Assign to role"}
                   </button>
                 </div>
@@ -482,58 +425,25 @@ export default function RolesAccess() {
           </div>
         )}
       </div>
-      {editor && (
-        <div className="edu-connected">
-          <ConfigurationEditor
-            kind={editor.kind}
-            initial={editor.initial}
-            onClose={() => setEditor(null)}
-            onSaved={async () => {
-              await load();
-              window.dispatchEvent(
-                new CustomEvent("edunexa:records-changed", {
-                  detail: { permissions: true },
-                }),
-              );
-            }}
-          />
-        </div>
+      {roleEditor && (
+        <RoleDrawer
+          initial={roleEditor.initial}
+          screens={screens}
+          onClose={() => setRoleEditor(null)}
+          onSaved={async (code) => {
+            await changed();
+            if (code) setSelectedCode(code);
+          }}
+        />
       )}
-      {deleteCode && (
-        <div
-          className="erp-api-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Delete role"
-        >
-          <section className="erp-panel erp-role-confirm">
-            <h2>Delete this role?</h2>
-            <p>
-              Assigned or protected roles cannot be deleted. Remove user
-              assignments first.
-            </p>
-            <button onClick={() => setDeleteCode(null)}>Cancel</button>
-            <button
-              className="erp-danger"
-              disabled={saving}
-              onClick={async () => {
-                setSaving(true);
-                try {
-                  await api.administration.deleteRole(deleteCode);
-                  setDeleteCode(null);
-                  await load();
-                } catch (e) {
-                  setError(errorText(e));
-                  setDeleteCode(null);
-                } finally {
-                  setSaving(false);
-                }
-              }}
-            >
-              Delete role
-            </button>
-          </section>
-        </div>
+      {loginEditor && (
+        <LoginDrawer
+          initial={loginEditor}
+          roles={roles}
+          screens={screens}
+          onClose={() => setLoginEditor(null)}
+          onSaved={changed}
+        />
       )}
     </section>
   );

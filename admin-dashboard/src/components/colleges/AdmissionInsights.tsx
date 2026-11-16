@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { GraduationCap, X } from "lucide-react";
-import { api, type AdmissionOpening } from "@/services/api";
+import { api, type NewAdmission } from "@/services/api";
 import { courseLevelLabel } from "@/lib/colleges/person-photo";
 import "./admission-insights.css";
 import { formatDate } from "@/lib/colleges/dates";
 
 const POPUP_KEY = "edunexa-admissions-popup-session";
+const SEEN_KEY = "edunexa-admissions-seen";
 const shortDate = (value: string) => formatDate(value);
 
 function seenThisLogin(session: string) {
@@ -17,13 +18,23 @@ function seenThisLogin(session: string) {
     return false;
   }
 }
-function markSeen(session: string) {
+function seenStudents(): string[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+function markSeen(session: string, codes: string[]) {
   try {
     localStorage.setItem(POPUP_KEY, session);
+    const all = [...new Set([...codes, ...seenStudents()])].slice(0, 1000);
+    localStorage.setItem(SEEN_KEY, JSON.stringify(all));
   } catch {}
 }
 
-/** Shown once after each sign-in: every login has a new login code. */
+/** After sign-in: the students admitted since this browser last showed the list (last 7 days). */
 export function AdmissionsPopup({
   session,
   admissionsHref,
@@ -31,7 +42,7 @@ export function AdmissionsPopup({
   session?: string;
   admissionsHref?: string;
 }) {
-  const [rows, setRows] = useState<AdmissionOpening[]>([]);
+  const [rows, setRows] = useState<NewAdmission[]>([]);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (!session || seenThisLogin(session)) return;
@@ -39,7 +50,13 @@ export function AdmissionsPopup({
     void api.admissions
       .insights()
       .then((result) => {
-        if (active) setRows(result.available || []);
+        if (!active) return;
+        const seen = new Set(seenStudents());
+        setRows(
+          (result.new_admissions || []).filter(
+            (row) => !seen.has(row.student_code),
+          ),
+        );
       })
       // The popup is a notice; a failed request should not interrupt the home screen.
       .catch(() => {});
@@ -58,7 +75,13 @@ export function AdmissionsPopup({
       className="adi-popup"
       aria-labelledby="adi-popup-title"
       // The portal shell can remount during startup, so only a real close counts as seen.
-      onClose={() => session && markSeen(session)}
+      onClose={() =>
+        session &&
+        markSeen(
+          session,
+          rows.map((row) => row.student_code),
+        )
+      }
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}
@@ -69,38 +92,34 @@ export function AdmissionsPopup({
             <GraduationCap size={20} />
           </span>
           <div>
-            <h2 id="adi-popup-title">Admissions open</h2>
+            <h2 id="adi-popup-title">New admissions</h2>
             <p>
-              {rows.length} {rows.length === 1 ? "course" : "courses"} available
-              for admission
+              {rows.length} {rows.length === 1 ? "student has" : "students have"}{" "}
+              joined since you last checked
             </p>
           </div>
-          <button aria-label="Close admissions list" onClick={close}>
+          <button aria-label="Close new admissions" onClick={close}>
             <X size={18} />
           </button>
         </header>
         <ul>
-          {rows.map((row, index) => (
-            <li key={`${row.program_code || row.cycle_name}-${index}`}>
+          {rows.map((row) => (
+            <li key={row.student_code}>
               <div>
-                <strong>{row.course_name || row.cycle_name}</strong>
+                <strong>{row.name}</strong>
                 <small>
                   {[
+                    row.course_name,
                     row.course_level && courseLevelLabel(row.course_level),
-                    row.academic_year,
-                    row.cycle_name,
+                    row.reference && `Ref: ${row.reference}`,
                   ]
                     .filter(Boolean)
                     .join(" · ")}
                 </small>
               </div>
               <div className="adi-popup-meta">
-                {row.intake_capacity != null && (
-                  <span>{row.intake_capacity} seats</span>
-                )}
-                {row.closes_on && (
-                  <small>Closes {shortDate(row.closes_on)}</small>
-                )}
+                {row.admission_number && <span>{row.admission_number}</span>}
+                <small>Admitted {shortDate(row.admission_date)}</small>
               </div>
             </li>
           ))}

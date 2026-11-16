@@ -4,6 +4,7 @@ import { api, errorText } from "@/services/api";
 import { toast } from "./toast";
 import PortalShellSkeleton from "./PortalShellSkeleton";
 import RolesAccess from "./RolesAccess";
+import UserAccounts from "./UserAccounts";
 import ConnectedPortal from "./ConnectedPortal";
 import PayslipsWorkspace from "./PayslipsWorkspace";
 import StaffHRWorkspace from "./StaffHRWorkspace";
@@ -1576,6 +1577,8 @@ export default function CollegePortal({
     if (activeModule === "syllabus") return <SyllabusWorkspace />;
     if (activeModule === "calendar") return <CalendarWorkspace />;
     if (activeModule === "roles") return <RolesAccess />;
+    // Logins and their access: one screen (the old credentials address opens it too).
+    if (activeModule === "accounts" || activeModule === "credentials") return <UserAccounts />;
     // HR & payroll uses the live staff screens (backend hr_workspace / payroll_workspace).
     if (
       ["payslips", "salary-structures", "payroll", "payroll-reports"].includes(
@@ -3528,8 +3531,6 @@ export default function CollegePortal({
               )}
             />
           ) : [
-            "accounts",
-            "credentials",
             "forms",
             "imports",
             "documents",

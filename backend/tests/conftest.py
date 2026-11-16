@@ -14,6 +14,8 @@ from tests import sql_support
 os.environ["EDUNEXA_FCM_SERVICE_ACCOUNT_FILE"] = ""
 os.environ["EDUNEXA_FCM_SERVICE_ACCOUNT_JSON"] = ""
 os.environ["EDUNEXA_EMAIL_CONNECTION_STRING"] = ""  # never send real emails from tests
+os.environ["EDUNEXA_STAFF_PASSWORD_LOGIN"] = "true"  # tests sign staff in with passwords; one test turns it off
+os.environ["EDUNEXA_STUDENT_APP_LINK"] = ""
 
 
 @pytest.fixture(scope="session")
