@@ -12,6 +12,8 @@ export '../models/api_models.dart';
 /// The only REST endpoint registry for this application's API service.
 abstract final class _Endpoints {
   static const login = '/auth/login';
+  static const firstTimeRequest = '/auth/first-time/request';
+  static const firstTimeVerify = '/auth/first-time/verify';
   static const refresh = '/auth/refresh';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
@@ -103,6 +105,39 @@ class CollegeApi {
         password: password,
         client: clientId,
       ).toJson(),
+      auth: false,
+    );
+    await accept(result as Json);
+  }
+
+  /// First sign-in, step 1: emails a 6-digit code when the login ID (admission or reference
+  /// number) and the registered email match. The answer is the same either way.
+  Future<void> requestFirstTimeCode(String loginId, String email) async {
+    await _send(
+      'POST',
+      _Endpoints.firstTimeRequest,
+      {'login_id': loginId, 'email': email, 'client': clientId},
+      auth: false,
+    );
+  }
+
+  /// First sign-in, step 2: verifies the code, creates the password and signs in.
+  Future<void> completeFirstTime(
+    String loginId,
+    String email,
+    String code,
+    String password,
+  ) async {
+    final result = await _send(
+      'POST',
+      _Endpoints.firstTimeVerify,
+      {
+        'login_id': loginId,
+        'email': email,
+        'code': code,
+        'password': password,
+        'client': clientId,
+      },
       auth: false,
     );
     await accept(result as Json);

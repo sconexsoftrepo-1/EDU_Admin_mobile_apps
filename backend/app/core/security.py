@@ -1,4 +1,5 @@
 import hashlib
+import re
 import secrets
 import time
 from datetime import datetime, timedelta, timezone
@@ -9,7 +10,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .storage import new_code
 
@@ -52,6 +53,42 @@ class PasswordInput(StrictModel):
     new_password: str = Field(min_length=12, max_length=128)
 
 
+EMAIL = r"^[A-Za-z0-9._%+'-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$"
+COUNTRY_CODE = r"^\+[1-9][0-9]{0,3}$"
+MOBILE_NUMBER = r"^[0-9]{6,14}$"
+
+
+def check_mobile(country_code, mobile_number, required):
+    """Staff logins carry a mobile number (OTP sign-in); Indian numbers: 10 digits from 6-9."""
+    if not country_code and not mobile_number:
+        if required:
+            raise ValueError("Country code and mobile number are required for staff logins")
+        return
+    if not (country_code and mobile_number):
+        raise ValueError("Enter both the country code and the mobile number")
+    if country_code == "+91" and not re.fullmatch(r"[6-9][0-9]{9}", mobile_number):
+        raise ValueError("An Indian mobile number has 10 digits and starts with 6, 7, 8 or 9")
+
+
+def email_in_use(data, email, except_code=None):
+    """Another login already has this email (OTP codes are sent to it, so it must be unique)."""
+    return bool(email) and any(
+        a.get("code") != except_code and (a.get("email") or "").casefold() == email.casefold()
+        for a in data["accounts"].values())
+
+
+def mobile_in_use(data, country_code, mobile_number, except_code=None):
+    """Another login already has this number (each number signs in to one login)."""
+    return bool(mobile_number) and any(
+        a.get("code") != except_code and a.get("country_code") == country_code and a.get("mobile_number") == mobile_number
+        for a in data["accounts"].values())
+
+
+def clean_email(value):
+    """Emails are stored trimmed and in lower case (pasted addresses often carry spaces)."""
+    return value.strip().lower() if isinstance(value, str) and value.strip() else None
+
+
 class AccountInput(StrictModel):
     login_id: str = Field(min_length=3, max_length=120, pattern=r"^[a-zA-Z0-9@._+-]+$")
     password: str = Field(min_length=12, max_length=128)
@@ -67,6 +104,20 @@ class AccountInput(StrictModel):
             "student-mobile",
         ]
     ] = Field(min_length=1, max_length=5)
+    # Staff (employee) logins need an email: sign-in codes (OTP) are sent there. Mobile is optional
+    # for now (SMS later). Parents and students sign in without either.
+    email: str | None = Field(default=None, max_length=254, pattern=EMAIL)
+    country_code: str | None = Field(default=None, pattern=COUNTRY_CODE)
+    mobile_number: str | None = Field(default=None, pattern=MOBILE_NUMBER)
+
+    _email = field_validator("email", mode="before")(clean_email)
+
+    @model_validator(mode="after")
+    def staff_contact(self):
+        if self.person_type == "employee" and not self.email:
+            raise ValueError("An email address is required for staff logins")
+        check_mobile(self.country_code, self.mobile_number, required=False)
+        return self
 
 
 class AccountUpdate(StrictModel):
@@ -85,6 +136,16 @@ class AccountUpdate(StrictModel):
         ]
         | None
     ) = Field(default=None, min_length=1, max_length=5)
+    email: str | None = Field(default=None, max_length=254, pattern=EMAIL)
+    country_code: str | None = Field(default=None, pattern=COUNTRY_CODE)
+    mobile_number: str | None = Field(default=None, pattern=MOBILE_NUMBER)
+
+    _email = field_validator("email", mode="before")(clean_email)
+
+    @model_validator(mode="after")
+    def contact(self):
+        check_mobile(self.country_code, self.mobile_number, required=False)
+        return self
 
 
 class RoleInput(StrictModel):
@@ -129,7 +190,8 @@ def issue(data, account, client, settings, family=None):
         "user_code": account["code"],
         "client": client,
         "refresh_hash": digest(refresh),
-        "expires_at": time.time() + settings.refresh_days * 86400,
+        "expires_at": time.time() + (settings.mobile_refresh_days if str(client).endswith("-mobile")
+                                     else settings.refresh_days) * 86400,
         "revoked": False,
         "used": False,
         "used_at_epoch": None,

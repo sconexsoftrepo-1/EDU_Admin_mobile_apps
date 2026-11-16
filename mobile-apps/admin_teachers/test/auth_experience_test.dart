@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:edunexa_admin/app/edunexa_client.dart';
 import 'helpers/splash_test_support.dart';
+import 'helpers/code_sign_in.dart';
 
 void main() {
   const roles = [MobileRole.admin, MobileRole.teacher];
@@ -116,7 +117,10 @@ void main() {
         final payloads = <Json>[];
         await tester.pumpWidget(
           app((request, selected) async {
-            if (request.url.path.endsWith('/login')) {
+            if (isCodeRequest(request.url)) {
+              return http.Response('{"sent":true,"message":"sent"}', 200);
+            }
+            if (isCodeVerify(request.url)) {
               payloads.add(jsonDecode(request.body) as Json);
               return http.Response(
                 allow
@@ -161,43 +165,26 @@ void main() {
               .selected,
           role,
         );
-        await tester.ensureVisible(find.text('Sign in'));
-        await tester.tap(find.text('Sign in'));
+        // Staff sign in with a code emailed to them: no password field.
+        expect(find.text('Password'), findsNothing);
+        await tester.ensureVisible(find.text('Send code'));
+        await tester.tap(find.text('Send code'));
         await tester.pumpAndSettle();
-        expect(find.text('Enter your login ID'), findsOneWidget);
-        expect(find.text('Enter your password'), findsOneWidget);
+        expect(find.text('Enter your login ID or email'), findsOneWidget);
         expect(payloads, isEmpty);
-        await tester.enterText(
-          find.byType(TextFormField).first,
-          'test-${role.name}',
-        );
-        await tester.enterText(
-          find.byType(TextFormField).last,
-          'test-password',
-        );
-        await tester.tap(find.byTooltip('Show password'));
+        await sendCode(tester, 'test-${role.name}');
+        await tester.ensureVisible(find.text('Verify and sign in'));
+        await tester.tap(find.text('Verify and sign in'));
         await tester.pumpAndSettle();
-        expect(
-          tester
-              .widget<TextField>(
-                find.descendant(
-                  of: find.byType(TextFormField).last,
-                  matching: find.byType(TextField),
-                ),
-              )
-              .obscureText,
-          isFalse,
-        );
-        await tester.tap(find.byTooltip('Hide password'));
-        await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text('Sign in'));
-        await tester.tap(find.text('Sign in'));
-        await tester.pumpAndSettle();
+        expect(find.text('Enter the 6-digit code'), findsOneWidget);
+        expect(payloads, isEmpty);
+        await verifyCode(tester);
         expect(find.text('College account access denied'), findsOneWidget);
         expect(find.byType(MobileWorkspace), findsNothing);
         expect(payloads.single['client'], role.clientId);
+        expect(payloads.single['login'], 'test-${role.name}');
         allow = true;
-        await tester.tap(find.text('Sign in'));
+        await tester.tap(find.text('Verify and sign in'));
         await tester.pumpAndSettle();
         expect(find.text('${role.label} dashboard'), findsWidgets);
         expect(
@@ -210,17 +197,13 @@ void main() {
     );
   }
   testWidgets(
-    'role switching keeps Login ID, explains password clearing, and supports reverse navigation',
+    'role switching keeps Login ID, resets the code step, and supports reverse navigation',
     (tester) async {
       await tester.pumpWidget(app(records));
       await settleStartup(tester);
       await warmAuth(tester);
       await openLogin(tester);
       await tester.enterText(find.byType(TextFormField).first, 'college-user');
-      await tester.enterText(
-        find.byType(TextFormField).last,
-        'private-test-input',
-      );
       await tester.tap(find.text(roles.last.label));
       await tester.pumpAndSettle();
       expect(
@@ -230,17 +213,9 @@ void main() {
             .text,
         'college-user',
       );
-      expect(
-        tester
-            .widget<TextFormField>(find.byType(TextFormField).last)
-            .controller!
-            .text,
-        isEmpty,
-      );
-      expect(
-        find.text('Login ID kept. Re-enter the password for this role.'),
-        findsOneWidget,
-      );
+      // A new role asks for a new code: the code step resets.
+      expect(find.text('Send code'), findsOneWidget);
+      expect(find.text('6-digit code from your email'), findsNothing);
       await tester.ensureVisible(find.text('Choose another role'));
       await tester.tap(find.text('Choose another role'));
       await tester.pumpAndSettle();
@@ -263,7 +238,10 @@ void main() {
     var attempts = 0;
     await tester.pumpWidget(
       app((r, role) async {
-        if (r.url.path.endsWith('/login')) {
+        if (isCodeRequest(r.url)) {
+          return http.Response('{"sent":true,"message":"sent"}', 200);
+        }
+        if (isCodeVerify(r.url)) {
           attempts++;
           return pending.future;
         }
@@ -273,10 +251,10 @@ void main() {
     await settleStartup(tester);
     await warmAuth(tester);
     await openLogin(tester);
-    await tester.enterText(find.byType(TextFormField).first, 'college-user');
-    await tester.enterText(find.byType(TextFormField).last, 'test-password');
-    await tester.ensureVisible(find.text('Sign in'));
-    await tester.tap(find.text('Sign in'));
+    await sendCode(tester, 'college-user');
+    await tester.enterText(find.byType(TextFormField).last, '123456');
+    await tester.ensureVisible(find.text('Verify and sign in'));
+    await tester.tap(find.text('Verify and sign in'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Signing in…'), findsOneWidget);
@@ -287,7 +265,7 @@ void main() {
       isFalse,
     );
     expect(
-      tester.widget<TextFormField>(find.byType(TextFormField).first).enabled,
+      tester.widget<TextFormField>(find.byType(TextFormField).last).enabled,
       isFalse,
     );
     await tester.tap(find.text('Signing in…'));
@@ -328,7 +306,7 @@ void main() {
         await tester.tap(find.byType(TextFormField).last);
         tester.view.viewInsets = const FakeViewPadding(bottom: 260);
         await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text('Sign in'));
+        await tester.ensureVisible(find.text('Send code'));
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         tester.view.resetViewInsets();
@@ -359,4 +337,57 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('staff can sign in with a code sent to their email', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final calls = <String, Json>{};
+    await tester.pumpWidget(
+      app((request, selected) async {
+        final path = request.url.path;
+        if (path.endsWith('/otp/request')) {
+          calls['request'] = jsonDecode(request.body) as Json;
+          return http.Response('{"sent":true,"message":"sent"}', 200);
+        }
+        if (path.endsWith('/otp/verify')) {
+          calls['verify'] = jsonDecode(request.body) as Json;
+          final good = (jsonDecode(request.body) as Json)['code'] == '482915';
+          return http.Response(
+            good
+                ? '{"access_token":"test","refresh_token":"test-refresh"}'
+                : '{"detail":"The code is wrong or has expired. Request a new code."}',
+            good ? 200 : 401,
+          );
+        }
+        return records(request, selected);
+      }),
+    );
+    await settleStartup(tester);
+    await warmAuth(tester);
+    await tester.tap(find.text(MobileRole.admin.label));
+    await tester.pumpAndSettle();
+    await openLogin(tester);
+    expect(find.text('Login ID or email'), findsOneWidget);
+    expect(find.text('Password'), findsNothing);
+    await tester.enterText(find.byType(TextFormField).first, 'akhil@pragathiews.org');
+    await tester.ensureVisible(find.text('Send code'));
+    await tester.tap(find.text('Send code'));
+    await tester.pumpAndSettle();
+    expect(calls['request'], {'login': 'akhil@pragathiews.org', 'client': MobileRole.admin.clientId});
+    expect(find.text('6-digit code from your email'), findsOneWidget);
+    expect(find.textContaining('Resend in'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).last, '111111');
+    await tester.ensureVisible(find.text('Verify and sign in'));
+    await tester.tap(find.text('Verify and sign in'));
+    await tester.pumpAndSettle();
+    expect(find.text('The code is wrong or has expired. Request a new code.'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).last, '482915');
+    await tester.tap(find.text('Verify and sign in'));
+    await tester.pumpAndSettle();
+    expect(calls['verify']!['code'], '482915');
+    expect(find.text('${MobileRole.admin.label} dashboard'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
 }

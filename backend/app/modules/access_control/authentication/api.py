@@ -35,6 +35,7 @@ def login(body: LoginInput, request: Request, response: Response):
     denied = False
     limited = False
     wrong_role = False
+    staff_code_only = False
     result = None
     key = digest(body.login_id.casefold())
     ip_key = "ip:" + digest(request.client.host if request.client else "unknown")
@@ -52,6 +53,19 @@ def login(body: LoginInput, request: Request, response: Response):
                 ),
                 None,
             )
+            # EduNest: students may use the admission or reference number; parents sign in with
+            # their child's login ID and the shared password (their own account is found here).
+            if body.client in ("student-mobile", "parent-mobile") and (
+                account is None or account.get("person_type") not in ("student", "parent")
+                or (body.client == "parent-mobile" and account.get("person_type") == "student")
+            ):
+                from app.core.family_access import parent_accounts_for_login, student_account_for_login
+                if body.client == "student-mobile":
+                    account = student_account_for_login(data, body.login_id) or account
+                else:
+                    candidates = parent_accounts_for_login(data, body.login_id)
+                    account = next((a for a in candidates if check_password(body.password, a["password_hash"])),
+                                   candidates[0] if candidates else account)
             valid = check_password(
                 body.password, account["password_hash"] if account else DUMMY_HASH
             )
@@ -66,7 +80,15 @@ def login(body: LoginInput, request: Request, response: Response):
                 and body.role_code is not None
                 and body.role_code not in account["role_codes"]
             )
-            if wrong_role:
+            # Staff sign in with an emailed code when password sign-in is switched off for them.
+            staff_code_only = (
+                not denied
+                and not request.app.state.settings.staff_password_login
+                and account.get("person_type") not in ("student", "parent")
+            )
+            if staff_code_only:
+                pass
+            elif wrong_role:
                 pass  # correct credentials; the account just does not hold the chosen role
             elif denied:
                 attempts[key].append(time.time())
@@ -87,6 +109,8 @@ def login(body: LoginInput, request: Request, response: Response):
         )
     if denied:
         raise HTTPException(401, "Invalid credentials or client access")
+    if staff_code_only:
+        raise HTTPException(403, "Staff sign in with a code sent to their email")
     if wrong_role:
         raise HTTPException(403, "This account is not assigned to the selected role")
     return result

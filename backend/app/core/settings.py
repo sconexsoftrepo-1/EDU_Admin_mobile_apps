@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     fcm_service_account_file: str | None = None
     # Or the same JSON pasted into one setting (Azure App Service / any host without a secrets folder).
     fcm_service_account_json: SecretStr | None = None
+    # Email (Azure Communication Services): sign-in codes and notices.
+    email_connection_string: SecretStr | None = None
+    email_sender: str | None = None  # e.g. DoNotReply@pragathiews.org
+    email_sender_name: str = "Pragathi College"
     sms_adapter_url: str | None = None
     sms_adapter_token: SecretStr | None = None
     payment_adapter_url: str | None = None
@@ -35,6 +39,14 @@ class Settings(BaseSettings):
     audience: str = "edunexa-clients"
     access_minutes: int = Field(default=10, ge=1, le=30)
     refresh_days: int = Field(default=30, ge=1, le=30)
+    # EduDesk / EduNest stay signed in until the user logs out: every app start renews the session,
+    # so it only lapses after this many days without opening the app.
+    mobile_refresh_days: int = Field(default=365, ge=1, le=730)
+    # false (live server): staff (admin, teachers, clerks) sign in only with an emailed code;
+    # students and parents keep password sign-in.
+    staff_password_login: bool = True
+    # Play Store / App Store link of the EduNest app, used in welcome emails (empty = "coming soon").
+    student_app_link: str | None = None
     cors_origins: list[str] = [
         "http://localhost:3000",
         "http://localhost:3012",

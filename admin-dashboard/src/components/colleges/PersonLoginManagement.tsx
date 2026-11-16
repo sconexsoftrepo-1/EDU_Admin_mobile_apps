@@ -49,6 +49,21 @@ function LoginEditor({
       : [person.person_type === "student" ? "student-mobile" : "parent-mobile"];
   const [login, setLogin] = useState(account?.login_id || "");
   const [password, setPassword] = useState("");
+  // Staff logins need an email (sign-in codes are sent there); mobile is optional for now.
+  // Parents and students need neither.
+  const [email, setEmail] = useState(String(account?.email || ""));
+  const [countryCode, setCountryCode] = useState(
+    String(account?.country_code || "+91"),
+  );
+  const [mobile, setMobile] = useState(String(account?.mobile_number || ""));
+  const phone = personal
+    ? {}
+    : {
+        email: email.trim().toLowerCase(),
+        ...(mobile.trim()
+          ? { country_code: countryCode.trim(), mobile_number: mobile.trim() }
+          : {}),
+      };
   const [roles, setRoles] = useState<string[]>(account?.role_codes || []);
   const [clients, setClients] = useState<ApiClient[]>(
     account?.clients || choices,
@@ -74,6 +89,7 @@ function LoginEditor({
           role_codes: personal ? [] : roles,
           clients: personal ? choices : clients,
           active,
+          ...phone,
         });
       } else {
         await api.administration.createAccount({
@@ -83,6 +99,7 @@ function LoginEditor({
           person_code: person.person_code,
           role_codes: personal ? [] : roles,
           clients: personal ? choices : clients,
+          ...phone,
         });
       }
       setPassword("");
@@ -140,6 +157,57 @@ function LoginEditor({
               onChange={(e) => setLogin(e.target.value)}
             />
           </label>
+          {!personal && (
+            <label>
+              Email
+              <input
+                required
+                type="email"
+                autoComplete="off"
+                maxLength={254}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <small>Sign-in codes are sent here. Required for staff logins.</small>
+            </label>
+          )}
+          {!personal && (
+            <div className="login-mobile-row">
+              <label>
+                Country code
+                <input
+                  required={mobile.trim() !== ""}
+                  pattern="\+[1-9][0-9]{0,3}"
+                  title="For example +91"
+                  inputMode="tel"
+                  autoComplete="tel-country-code"
+                  maxLength={5}
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                />
+              </label>
+              <label>
+                Mobile number (optional)
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  pattern={
+                    countryCode.trim() === "+91" ? "[6-9][0-9]{9}" : "[0-9]{6,14}"
+                  }
+                  title={
+                    countryCode.trim() === "+91"
+                      ? "10 digits starting with 6, 7, 8 or 9"
+                      : "6 to 14 digits"
+                  }
+                  maxLength={14}
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+                />
+                <small>For SMS codes later. Optional for now.</small>
+              </label>
+            </div>
+          )}
           <label>
             {account ? "New password (for reset)" : "Initial password"}
             <input

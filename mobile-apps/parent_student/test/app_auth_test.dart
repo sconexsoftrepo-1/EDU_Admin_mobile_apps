@@ -22,12 +22,12 @@ void main() {
       await tester.ensureVisible(find.text('Continue'));
       await tester.tap(find.text('Continue'));
       await settleStartup(tester);
-      expect(find.text('Login ID'), findsOneWidget);
+      expect(find.text('Admission / reference number'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
       expect(find.textContaining('Planned module'), findsNothing);
       await tester.tap(find.text('Sign in'));
       await settleStartup(tester);
-      expect(find.text('Enter your login ID'), findsOneWidget);
+      expect(find.text('Enter your admission or reference number'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

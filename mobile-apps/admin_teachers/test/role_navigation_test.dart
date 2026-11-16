@@ -1,4 +1,5 @@
 import 'helpers/splash_test_support.dart';
+import 'helpers/code_sign_in.dart';
 import 'dart:convert';
 import 'package:edunexa_admin/app/edunexa_client.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,10 @@ void main() {
             baseUrl: 'http://localhost:8010',
             clientId: selected.clientId,
             httpClient: MockClient((request) async {
-              if (request.url.path.endsWith('/login')) {
+              if (isCodeRequest(request.url)) {
+                return http.Response('{"sent":true,"message":"sent"}', 200);
+              }
+              if (request.url.path.endsWith('/login') || isCodeVerify(request.url)) {
                 expect(jsonDecode(request.body)['client'], role.clientId);
                 return http.Response(
                   '{"access_token":"access","refresh_token":"refresh"}',
@@ -67,10 +71,15 @@ void main() {
         await tester.tap(find.text('Continue'));
         await settleStartup(tester);
       }
-      await tester.enterText(find.byType(TextFormField).first, 'college-user');
-      await tester.enterText(find.byType(TextFormField).last, 'password');
-      await tester.tap(find.text('Sign in'));
-      await settleStartup(tester);
+      if (role == MobileRole.admin || role == MobileRole.teacher) {
+        await signInWithCode(tester, 'college-user');
+        await settleStartup(tester);
+      } else {
+        await tester.enterText(find.byType(TextFormField).first, 'college-user');
+        await tester.enterText(find.byType(TextFormField).last, 'password');
+        await tester.tap(find.text('Sign in'));
+        await settleStartup(tester);
+      }
       expect(find.text('${role.label} dashboard'), findsWidgets);
       await tester.tap(
         find.descendant(
@@ -230,7 +239,10 @@ void main() {
             baseUrl: 'http://localhost:8010',
             clientId: r.clientId,
             httpClient: MockClient((req) async {
-              if (req.url.path.endsWith('/login')) {
+              if (isCodeRequest(req.url)) {
+                return http.Response('{"sent":true,"message":"sent"}', 200);
+              }
+              if (req.url.path.endsWith('/login') || isCodeVerify(req.url)) {
                 return http.Response(
                   '{"access_token":"token","refresh_token":"refresh"}',
                   200,
@@ -253,11 +265,16 @@ void main() {
         await tester.tap(find.text('Continue'));
         await settleStartup(tester);
       }
-      await tester.enterText(find.byType(TextFormField).first, 'college-user');
-      await tester.enterText(find.byType(TextFormField).last, 'password');
-      await tester.ensureVisible(find.text('Sign in'));
-      await tester.tap(find.text('Sign in'));
-      await settleStartup(tester);
+      if (staff) {
+        await signInWithCode(tester, 'college-user');
+        await settleStartup(tester);
+      } else {
+        await tester.enterText(find.byType(TextFormField).first, 'college-user');
+        await tester.enterText(find.byType(TextFormField).last, 'password');
+        await tester.ensureVisible(find.text('Sign in'));
+        await tester.tap(find.text('Sign in'));
+        await settleStartup(tester);
+      }
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),

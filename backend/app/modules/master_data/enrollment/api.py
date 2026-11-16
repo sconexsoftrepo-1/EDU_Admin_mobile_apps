@@ -16,7 +16,7 @@ study (1 = first year) and billing_frequency is "annual".
 from datetime import date
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 
 from app.core.admission_numbers import COURSE_LEVELS, branch_code, course_code, next_admission_number
 from app.core.course_form import course_years
@@ -358,11 +358,16 @@ def enroll(data, body: EnrollmentInput, actor):
 
 
 @router.post("", status_code=201)
-def post_enrollment(body: EnrollmentInput, request: Request, user=Depends(current_user)):
+def post_enrollment(body: EnrollmentInput, request: Request, background: BackgroundTasks, user=Depends(current_user)):
+    from app.core.family_access import send_all, welcome_emails
     staff_only(user)
     with request.app.state.store.transaction() as data:
         need(data, user, *GRANTS)
-        return enroll(data, body, user["code"])
+        result = enroll(data, body, user["code"])
+        # Welcome emails to the student and the parents (course, login ID, app, first sign-in).
+        emails = welcome_emails(data, request.app.state.settings, result["student"]["code"])
+    background.add_task(send_all, request.app.state.settings, emails)
+    return result
 
 
 @router.get("/courses/{program_code}/insights")

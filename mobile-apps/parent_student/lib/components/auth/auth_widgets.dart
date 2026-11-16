@@ -590,6 +590,7 @@ class EduAuthTextField extends StatefulWidget {
   final TextInputAction action;
   final Iterable<String> autofill;
   final ValueChanged<String>? onSubmitted, onChanged;
+  final TextInputType keyboard;
   const EduAuthTextField({
     super.key,
     required this.controller,
@@ -603,6 +604,7 @@ class EduAuthTextField extends StatefulWidget {
     this.suffix,
     this.onSubmitted,
     this.onChanged,
+    this.keyboard = TextInputType.text,
   });
   @override
   State<EduAuthTextField> createState() => _EduAuthTextFieldState();
@@ -653,7 +655,7 @@ class _EduAuthTextFieldState extends State<EduAuthTextField> {
       enableSuggestions: false,
       textInputAction: widget.action,
       autofillHints: widget.autofill,
-      keyboardType: TextInputType.text,
+      keyboardType: widget.keyboard,
       textCapitalization: TextCapitalization.none,
       scrollPadding: const EdgeInsets.fromLTRB(20, 24, 20, 96),
       onFieldSubmitted: widget.onSubmitted,

@@ -164,7 +164,7 @@ void main() {
         await tester.ensureVisible(find.text('Sign in'));
         await tester.tap(find.text('Sign in'));
         await tester.pumpAndSettle();
-        expect(find.text('Enter your login ID'), findsOneWidget);
+        expect(find.text('Enter your admission or reference number'), findsOneWidget);
         expect(find.text('Enter your password'), findsOneWidget);
         expect(payloads, isEmpty);
         await tester.enterText(

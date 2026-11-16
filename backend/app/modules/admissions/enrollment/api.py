@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 from app.core.resources import ResourceRepository, ResourceService, staff_only
 from app.core.security import require
@@ -250,8 +250,13 @@ def enroll(
     code: str,
     body: EnrollmentInput,
     request: Request,
+    background: BackgroundTasks,
     user=Depends(require("admission_applications", "approve")),
 ):
+    from app.core.family_access import send_all, welcome_emails
     staff_only(user)
     with request.app.state.store.transaction() as data:
-        return enroll_application(data, code, body, user)
+        result = enroll_application(data, code, body, user)
+        emails = welcome_emails(data, request.app.state.settings, result["student"]["code"])
+    background.add_task(send_all, request.app.state.settings, emails)
+    return result

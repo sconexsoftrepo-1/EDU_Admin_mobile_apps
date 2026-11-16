@@ -31,7 +31,7 @@ export async function createReport(report: PDFReport): Promise<Blob> {
   if (typeof document !== "undefined")
     try {
       const img = new Image();
-      img.src = "/assets/pragathilogo.jpg";
+      img.src = "/assets/pragathi-emblem.png";
       await img.decode();
       const canvas = document.createElement("canvas");
       canvas.width = 320;

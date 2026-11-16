@@ -3457,11 +3457,10 @@ body:has(.college-erp dialog[open]) {
 
 /* Pragathi crest on the dark sidebar. */
 .college-erp .erp-sidebar-brand img.erp-brand-logo {
-  width: 40px;
-  height: 40px;
-  padding: 2px;
-  border-radius: 8px;
-  background: #fff;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
   object-fit: contain;
 }
 .college-erp .erp-sidebar-brand strong {

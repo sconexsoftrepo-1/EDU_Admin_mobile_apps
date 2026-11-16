@@ -16,7 +16,7 @@ export default function PortalNotFound() {
     <main className="portal-missing">
       <header className="portal-missing-header">
         <Link href={collegeHome} className="portal-missing-brand">
-          <Image src="/favicon.svg" width={44} height={44} alt="" />
+          <Image src="/assets/pragathi-emblem.png" width={44} height={44} alt="" />
           <span>
             <strong>Pragathi College</strong>
             <small>Campus workspace</small>

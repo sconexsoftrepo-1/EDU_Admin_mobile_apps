@@ -20,14 +20,14 @@ From `backend/` after installing requirements:
 
 ```sh
 # tools/setup_s3_metadata.py was a one-time script; it has run and was removed (see git history).
-.venv/bin/python tools/check_s3_storage.py
+# tools/check_s3_storage.py was removed: files now go to Azure Blob storage (EDUNEXA_FILE_STORAGE=azure).
 ```
 
 Setup adds `file_storage_objects` and its owner index to SQL Server/PostgreSQL without changing
 existing documents. It is safe to rerun. Restart the backend afterward to refresh cached schema
 metadata. Fresh PostgreSQL installs include this table. Apply the same environment values to
 hosted backend secrets and deploy/restart both services for remote users to see these changes.
-The health check writes, reads and deletes one temporary object under `Admin_Uploads/Healthchecks/`.
+S3 is no longer used; see the Azure Blob settings in `deploy/azure/README.md`.
 
 `tools/s3-upload-policy.json` is the scoped IAM policy for the backend principal if permissions
 are missing. The application does not modify IAM or bucket policies. Keep the bucket private.

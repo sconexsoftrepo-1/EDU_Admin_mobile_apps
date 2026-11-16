@@ -34,6 +34,8 @@ from app.core.analytics_workspace import router as analytics_workspace_router
 from app.core.edit_approvals import edit_approval_gate, router as edit_approvals_router
 from app.core.fee_collection import router as fee_collection_router
 from app.core.cash_custody import router as cash_custody_router
+from app.core.otp_login import router as otp_login_router
+from app.core.family_access import router as family_access_router
 from app.core.late_fees import router as late_fees_router
 from app.core.chat_workspace import router as chat_workspace_router
 from app.core.hr_workspace import router as hr_workspace_router
@@ -269,6 +271,8 @@ def create_app(settings=None):
         edit_approvals_router,
         fee_collection_router,
         cash_custody_router,
+        otp_login_router,
+        family_access_router,
         late_fees_router,
         enrollment_router,
         staff_onboarding_router,

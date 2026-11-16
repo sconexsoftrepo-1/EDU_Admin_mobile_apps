@@ -36,7 +36,7 @@ export const colleges: College[] = [
     description:
       "A place to discover your potential, challenge your thinking, and build a life of purpose.",
     accent: "#a77524",
-    logo: "/assets/pragathilogo.jpg",
+    logo: "/assets/pragathi-emblem.png",
     programs: [
       ["science", "B.Sc. Applied Sciences", "Science"],
       ["commerce", "B.Com. Accounting & Finance", "Commerce"],

@@ -40,7 +40,7 @@ def test_teacher_app_and_web_share_login_and_reset_ends_sessions(client, app, he
     with app.state.store.transaction() as d:
         d['records']['employees']['TEACHER'] = {'code': 'TEACHER', 'first_name': 'Faculty', 'employee_type': 'teacher'}
         d['roles']['FACULTY'] = {'code': 'FACULTY', 'name': 'Faculty', 'scope': 'teaching', 'system_admin': False, 'permissions': {}}
-    body = {'login_id': 'faculty.test', 'password': 'Strong-Faculty-123!', 'person_type': 'employee', 'person_code': 'TEACHER', 'role_codes': ['FACULTY'], 'clients': ['teacher-mobile', 'admin-web']}
+    body = {'login_id': 'faculty.test', 'password': 'Strong-Faculty-123!', 'person_type': 'employee', 'person_code': 'TEACHER', 'role_codes': ['FACULTY'], 'clients': ['teacher-mobile', 'admin-web'], 'email': 'faculty.test@pragathiews.org'}
     made = client.post('/api/v1/administration/accounts', headers=headers, json=body)
     assert made.status_code == 201
     logins = client.get('/api/v1/administration/people/employee/TEACHER/logins', headers=headers).json()
@@ -82,3 +82,34 @@ def test_legacy_personal_web_sessions_are_denied(client, app, headers, kind, per
         legacy = issue(data, account, 'admin-web', app.state.settings)
     assert client.get('/api/v1/auth/me', headers={'Authorization': 'Bearer ' + legacy['access_token']}).status_code == 401
     assert client.post('/api/v1/auth/refresh', json={'refresh_token': legacy['refresh_token'], 'client': 'admin-web'}).status_code == 401
+
+
+def test_staff_logins_need_a_unique_email_mobile_optional_and_families_need_neither(client, app, headers):
+    seed_people(app)
+    with app.state.store.transaction() as d:
+        for code in ('T1', 'T2'):
+            d['records']['employees'][code] = {'code': code, 'first_name': code, 'employee_type': 'teacher'}
+        d['roles']['FACULTY'] = {'code': 'FACULTY', 'name': 'Faculty', 'scope': 'teaching', 'system_admin': False, 'permissions': {}}
+    staff = {'password': 'Strong-Faculty-123!', 'person_type': 'employee', 'role_codes': ['FACULTY'], 'clients': ['teacher-mobile']}
+    post = lambda body: client.post('/api/v1/administration/accounts', headers=headers, json=body)
+    missing = post({**staff, 'login_id': 't.one', 'person_code': 'T1'})
+    assert missing.status_code == 422 and 'email address is required' in missing.text
+    assert post({**staff, 'login_id': 't.one', 'person_code': 'T1', 'email': 'not-an-email'}).status_code == 422
+    # Mobile is optional, but when given it must be valid.
+    assert post({**staff, 'login_id': 't.one', 'person_code': 'T1', 'email': 't1@pragathiews.org',
+                 'country_code': '+91', 'mobile_number': '5876543210'}).status_code == 422
+    made = post({**staff, 'login_id': 't.one', 'person_code': 'T1', 'email': ' T1@PragathiEWS.org '})
+    assert made.status_code == 201, made.text
+    assert made.json()['email'] == 't1@pragathiews.org' and 'mobile_number' not in made.json()
+    taken = post({**staff, 'login_id': 't.two', 'person_code': 'T2', 'email': 't1@pragathiews.org'})
+    assert taken.status_code == 409 and 'email address is already used' in taken.text
+    with_mobile = post({**staff, 'login_id': 't.two', 'person_code': 'T2', 'email': 't2@pragathiews.org',
+                        'country_code': '+91', 'mobile_number': '8367048538'})
+    assert with_mobile.status_code == 201 and with_mobile.json()['mobile_number'] == '8367048538'
+    # Parents and students still sign in without an email.
+    family = {'login_id': 'guardian.one', 'password': 'Strong-Parent-123!', 'person_type': 'parent', 'person_code': 'P',
+              'role_codes': [], 'clients': ['parent-mobile']}
+    assert post(family).status_code == 201
+    # Switching a staff login off never asks for anything.
+    code = made.json()['code']
+    assert client.patch('/api/v1/administration/accounts/' + code, headers=headers, json={'active': False}).status_code == 200

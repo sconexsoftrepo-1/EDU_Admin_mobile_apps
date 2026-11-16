@@ -50,6 +50,7 @@ export const API_CONFIG = {
     "public/applications",
     "public/contact",
     "auth/roles",
+    "auth/otp/request",
   ],
   /** Public path prefixes (certificate verification links). */
   publicPrefixes: ["documents/certificates/verify/"],

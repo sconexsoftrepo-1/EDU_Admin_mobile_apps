@@ -55,6 +55,12 @@ export interface CreateAccountPayload {
   person_code: string;
   role_codes: string[];
   clients: ApiClient[];
+  /** Required for staff (employee) logins: sign-in codes (OTP) are sent here. */
+  email?: string;
+  /** Optional, e.g. "+91" (for SMS later). */
+  country_code?: string;
+  /** Optional; digits only, an Indian number has 10 digits starting with 6-9. */
+  mobile_number?: string;
 }
 
 /** PATCH administration/accounts/{code}. */
@@ -63,6 +69,9 @@ export interface UpdateAccountPayload {
   role_codes?: string[];
   clients?: ApiClient[];
   active?: boolean;
+  email?: string;
+  country_code?: string;
+  mobile_number?: string;
 }
 
 export interface ResetPasswordPayload {

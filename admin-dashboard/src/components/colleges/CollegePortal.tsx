@@ -3275,7 +3275,7 @@ export default function CollegePortal({
           <Link href={`${root}/portal/${area}`}>
             <Image
               className="erp-brand-logo"
-              src="/assets/pragathilogo.jpg"
+              src="/assets/pragathi-emblem.png"
               width={40}
               height={40}
               alt=""

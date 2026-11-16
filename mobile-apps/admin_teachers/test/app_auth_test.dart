@@ -22,12 +22,13 @@ void main() {
       await tester.ensureVisible(find.text('Continue'));
       await tester.tap(find.text('Continue'));
       await settleStartup(tester);
-      expect(find.text('Login ID'), findsOneWidget);
-      expect(find.text('Password'), findsOneWidget);
+      // Staff sign in with a code emailed to them: no password field.
+      expect(find.text('Login ID or email'), findsOneWidget);
+      expect(find.text('Password'), findsNothing);
       expect(find.textContaining('Planned module'), findsNothing);
-      await tester.tap(find.text('Sign in'));
+      await tester.tap(find.text('Send code'));
       await settleStartup(tester);
-      expect(find.text('Enter your login ID'), findsOneWidget);
+      expect(find.text('Enter your login ID or email'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

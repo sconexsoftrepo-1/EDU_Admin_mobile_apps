@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import Image from "next/image";
 import {
   ArrowRight,
@@ -9,7 +9,9 @@ import {
   EyeOff,
   GraduationCap,
   LoaderCircle,
+  KeyRound,
   LockKeyhole,
+  Mail,
   Settings,
   ShieldCheck,
   UserRound,
@@ -119,6 +121,9 @@ export default function CollegeLogin({
   error,
   onSubmit,
   onRoleChange,
+  onRequestCode,
+  onVerifyCode,
+  allowPassword = false,
 }: {
   college: College;
   roles: { code: string; name: string }[];
@@ -127,8 +132,49 @@ export default function CollegeLogin({
   error: string;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onRoleChange: (code: string) => void;
+  /** Emails a sign-in code; resolves when the request was accepted. */
+  onRequestCode?: (login: string) => Promise<void>;
+  /** Signs in with the emailed code. */
+  onVerifyCode?: (login: string, code: string) => Promise<void>;
+  /** Staff sign in with an emailed code only; true brings back the password form. */
+  allowPassword?: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  // "code": sign in with a 6-digit code sent to the login's email (staff only).
+  const [mode, setMode] = useState<"password" | "code">(
+    allowPassword || !onRequestCode ? "password" : "code",
+  );
+  const [codeLogin, setCodeLogin] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState("");
+  const [resendIn, setResendIn] = useState(0);
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = window.setTimeout(() => setResendIn((left) => left - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendIn]);
+  async function sendCode() {
+    if (!onRequestCode || !codeLogin.trim()) return;
+    try {
+      await onRequestCode(codeLogin.trim());
+      setCodeSent(true);
+      setCode("");
+      setResendIn(60);
+    } catch {
+      /* the error is shown by the parent */
+    }
+  }
+  async function submitCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (signingIn) return;
+    if (!codeSent) await sendCode();
+    else if (onVerifyCode) await onVerifyCode(codeLogin.trim(), code);
+  }
+  function switchMode(next: "password" | "code") {
+    setMode(next);
+    setCodeSent(false);
+    setCode("");
+  }
   return (
     <main
       className="college-login campus-auth"
@@ -145,14 +191,120 @@ export default function CollegeLogin({
                 `/assets/colleges-institutions/${college.slug}/crest.svg`
               }
               alt={`${college.name} logo`}
-              width={80}
-              height={88}
+              width={96}
+              height={96}
               priority
             />
             <h2 id="campus-welcome">Welcome to {college.name}</h2>
             <p>Sign in to your campus workspace.</p>
           </header>
-          <form className="ca-form" onSubmit={onSubmit} aria-busy={signingIn}>
+          {mode === "code" ? (
+          <form key="code-form" className="ca-form" onSubmit={submitCode} aria-busy={signingIn}>
+            <div className="ca-field">
+              <span id="campus-role-label">Role</span>
+              <RoleSelect
+                options={roles}
+                value={role}
+                disabled={signingIn}
+                onChange={onRoleChange}
+              />
+            </div>
+            <div className="ca-field">
+              <label htmlFor="campus-code-login">Login ID or email</label>
+              <div className="ca-input">
+                <Mail size={18} aria-hidden="true" />
+                <input
+                  id="campus-code-login"
+                  name="login"
+                  autoComplete="username"
+                  placeholder="Enter your login ID or email"
+                  required
+                  disabled={signingIn || codeSent}
+                  value={codeLogin}
+                  onChange={(e) => setCodeLogin(e.target.value)}
+                  aria-describedby={error ? "sign-in-error" : undefined}
+                  aria-invalid={error ? true : undefined}
+                />
+              </div>
+            </div>
+            {codeSent && (
+              <div className="ca-field">
+                <label htmlFor="campus-code">6-digit code</label>
+                <div className="ca-input">
+                  <KeyRound size={18} aria-hidden="true" />
+                  <input
+                    id="campus-code"
+                    name="code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    placeholder="Enter the code from your email"
+                    pattern="[0-9]{6}"
+                    required
+                    autoFocus
+                    disabled={signingIn}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    aria-describedby="code-help"
+                  />
+                </div>
+                <small id="code-help" className="ca-code-help">
+                  If this login is assigned to the selected role and has an
+                  email address, a code has been sent to it. It is valid for 5
+                  minutes.{" "}
+                  <button
+                    type="button"
+                    className="ca-link"
+                    disabled={signingIn || resendIn > 0}
+                    onClick={sendCode}
+                  >
+                    {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
+                  </button>{" "}
+                  ·{" "}
+                  <button
+                    type="button"
+                    className="ca-link"
+                    disabled={signingIn}
+                    onClick={() => {
+                      setCodeSent(false);
+                      setCode("");
+                    }}
+                  >
+                    Change login
+                  </button>
+                </small>
+              </div>
+            )}
+            {error && (
+              <p id="sign-in-error" role="alert" className="ca-error">
+                {error}
+              </p>
+            )}
+            <button className="ca-submit" type="submit" disabled={signingIn}>
+              {signingIn ? (
+                <>
+                  <LoaderCircle className="ca-spinner" size={18} aria-hidden="true" />{" "}
+                  {codeSent ? "Signing in…" : "Sending code…"}
+                </>
+              ) : (
+                <>
+                  {codeSent ? "Verify and sign in" : "Send code"}{" "}
+                  <ArrowRight size={18} aria-hidden="true" />
+                </>
+              )}
+            </button>
+            {allowPassword && (
+              <button
+                type="button"
+                className="ca-link ca-mode-switch"
+                disabled={signingIn}
+                onClick={() => switchMode("password")}
+              >
+                Use password instead
+              </button>
+            )}
+          </form>
+          ) : (
+          <form key="password-form" className="ca-form" onSubmit={onSubmit} aria-busy={signingIn}>
             <div className="ca-field">
               <span id="campus-role-label">Role</span>
               <RoleSelect
@@ -232,12 +384,23 @@ export default function CollegeLogin({
             <p className="ca-progress" role="status">
               {signingIn ? "Verifying your college account…" : ""}
             </p>
+            {onRequestCode && (
+              <button
+                type="button"
+                className="ca-link ca-mode-switch"
+                disabled={signingIn}
+                onClick={() => switchMode("code")}
+              >
+                Sign in with an email code instead
+              </button>
+            )}
           </form>
+          )}
           <aside className="ca-help">
             <ShieldCheck size={22} strokeWidth={1.6} aria-hidden="true" />
             <p>
-              Choose your assigned role and use your college account. For
-              password help, contact your college administrator.
+              Choose your assigned role, then enter your login ID or email. A
+              one-time code is sent to the email on your college account.
             </p>
           </aside>
         </div>

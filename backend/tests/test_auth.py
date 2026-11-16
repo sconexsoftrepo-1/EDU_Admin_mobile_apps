@@ -139,6 +139,7 @@ def test_roles_accounts_and_permissions(client, headers, seeded):
             "person_code": "E1",
             "role_codes": [role],
             "clients": ["admin-web", "teacher-mobile"],
+            "email": "teacher.one@pragathiews.org",
         },
     )
     assert r.status_code == 201, r.text

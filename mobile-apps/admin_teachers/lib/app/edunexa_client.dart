@@ -234,8 +234,15 @@ class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final form = GlobalKey<FormState>(),
       login = TextEditingController(),
-      password = TextEditingController();
+      password = TextEditingController(),
+      code = TextEditingController();
   bool busy = false, hidden = true;
+  // Sign in with a 6-digit code emailed to the login's address (staff only).
+  // Staff (admin, teachers, clerks, lab staff) sign in only with the emailed code.
+  bool get useCode => widget.role == MobileRole.admin || widget.role == MobileRole.teacher;
+  bool codeSent = false;
+  int resendIn = 0;
+  Timer? resendTimer;
   bool selectingRole = true, transitioning = false, entranceStarted = false;
   late final AnimationController entrance;
   final authScroll = ScrollController();
@@ -274,6 +281,9 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() {
       error = null;
       hidden = true;
+      // A code is sent for one role; another role needs a new code.
+      codeSent = false;
+      code.clear();
       roleNotice = hadPassword
           ? 'Login ID kept. Re-enter the password for this role.'
           : null;
@@ -325,7 +335,70 @@ class _LoginScreenState extends State<LoginScreen>
     authScroll.dispose();
     login.dispose();
     password.dispose();
+    code.dispose();
+    resendTimer?.cancel();
     super.dispose();
+  }
+
+  void startResendTimer() {
+    resendTimer?.cancel();
+    setState(() => resendIn = 60);
+    resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return timer.cancel();
+      setState(() => resendIn = resendIn > 0 ? resendIn - 1 : 0);
+      if (resendIn == 0) timer.cancel();
+    });
+  }
+
+  Future<void> sendCode() async {
+    if (busy || login.text.trim().isEmpty) {
+      if (login.text.trim().isEmpty) setState(() => error = 'Enter your login ID or email');
+      return;
+    }
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await widget.api.requestLoginCode(login.text.trim());
+      if (!mounted) return;
+      setState(() {
+        codeSent = true;
+        code.clear();
+      });
+      startResendTimer();
+    } catch (e) {
+      if (mounted) {
+        setState(() => error = e is ApiException && e.status == 429
+            ? 'Too many code requests. Please wait a while and try again.'
+            : e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> submitCode() async {
+    if (busy || transitioning || selectingRole) return;
+    if (!codeSent) return sendCode();
+    if (!form.currentState!.validate()) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await widget.api.verifyLoginCode(login.text.trim(), code.text.trim());
+      code.clear();
+      await widget.onLogin();
+    } catch (e) {
+      if (mounted) {
+        setState(() => error = e is ApiException && e.status == 401
+            ? 'The code is wrong or has expired. Request a new code.'
+            : e.toString());
+      }
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
   }
 
   Future<void> submit() async {
@@ -373,14 +446,41 @@ class _LoginScreenState extends State<LoginScreen>
             EduAuthTextField(
               key: ValueKey('login-id-${widget.role.name}'),
               controller: login,
-              label: 'Login ID',
+              label: useCode ? 'Login ID or email' : 'Login ID',
               icon: 'login_id',
-              enabled: !busy,
+              enabled: !busy && !(useCode && codeSent),
               action: TextInputAction.next,
               autofill: const [AutofillHints.username],
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Enter your login ID' : null,
+              keyboard: useCode ? TextInputType.emailAddress : TextInputType.text,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? (useCode ? 'Enter your login ID or email' : 'Enter your login ID')
+                  : null,
             ),
+            if (useCode && codeSent) ...[
+              const SizedBox(height: 14),
+              EduAuthTextField(
+                key: const ValueKey('login-code'),
+                controller: code,
+                label: '6-digit code from your email',
+                icon: 'password',
+                enabled: !busy,
+                action: TextInputAction.done,
+                autofill: const [AutofillHints.oneTimeCode],
+                keyboard: TextInputType.number,
+                validator: (v) => RegExp(r'^\d{6}$').hasMatch((v ?? '').trim())
+                    ? null
+                    : 'Enter the 6-digit code',
+                onSubmitted: (_) => submitCode(),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'If this login has an email address, a code has been sent to it. It is valid for 5 minutes.',
+                  style: TextStyle(fontSize: 12, height: 1.4, color: EduAuthPalette.muted),
+                ),
+              ),
+            ],
+            if (!useCode) ...[
             const SizedBox(height: 14),
             EduAuthTextField(
               key: ValueKey('password-${widget.role.name}'),
@@ -417,6 +517,7 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ),
             ),
+            ],
           ],
         ),
       ),
@@ -466,11 +567,37 @@ class _LoginScreenState extends State<LoginScreen>
       ),
       const SizedBox(height: 14),
       AnimatedAuthButton(
-        label: busy ? 'Signing in…' : 'Sign in',
+        label: !useCode
+            ? (busy ? 'Signing in…' : 'Sign in')
+            : !codeSent
+            ? (busy ? 'Sending code…' : 'Send code')
+            : (busy ? 'Signing in…' : 'Verify and sign in'),
         busy: busy,
         color: EduAuthPalette.accent(widget.role),
-        onPressed: busy ? null : submit,
+        onPressed: busy ? null : (useCode ? submitCode : submit),
       ),
+      if (useCode && codeSent)
+        Wrap(
+          alignment: WrapAlignment.center,
+          children: [
+            TextButton(
+              key: const ValueKey('resend-code'),
+              onPressed: busy || resendIn > 0 ? null : sendCode,
+              child: Text(resendIn > 0 ? 'Resend in ${resendIn}s' : 'Resend code'),
+            ),
+            TextButton(
+              key: const ValueKey('change-login'),
+              onPressed: busy
+                  ? null
+                  : () => setState(() {
+                      codeSent = false;
+                      code.clear();
+                      error = null;
+                    }),
+              child: const Text('Change login'),
+            ),
+          ],
+        ),
     ],
   );
 

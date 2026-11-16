@@ -3,6 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from app.core.security import (
     AccountInput,
     AccountUpdate,
+    email_in_use,
+    mobile_in_use,
     RoleInput,
     has_permission,
     hasher,
@@ -223,8 +225,12 @@ def create_account(
             for a in data["accounts"].values()
         ):
             raise HTTPException(409, "Person already has an account")
+        if email_in_use(data, body.email):
+            raise HTTPException(409, "This email address is already used by another login")
+        if mobile_in_use(data, body.country_code, body.mobile_number):
+            raise HTTPException(409, "This mobile number is already used by another login")
         account = {
-            **body.model_dump(exclude={"password"}),
+            **body.model_dump(exclude={"password"}, exclude_none=True),  # no empty email/mobile fields
             **(access or {}),
             "code": new_code("USR"),
             "active": True,
@@ -258,6 +264,14 @@ def update_account(
             valid_roles(data, body.role_codes, user)
         if body.login_id is not None and any(a["code"] != code and a["login_id"].casefold() == body.login_id.casefold() for a in data["accounts"].values()):
             raise HTTPException(409, "Login ID exists")
+        if body.email and email_in_use(data, body.email, except_code=code):
+            raise HTTPException(409, "This email address is already used by another login")
+        if body.mobile_number and mobile_in_use(data, body.country_code, body.mobile_number, except_code=code):
+            raise HTTPException(409, "This mobile number is already used by another login")
+        # Turning a login on/off never needs the email; any other change to a staff login does.
+        if set(body.model_dump(exclude_none=True)) - {"active"} and account.get("person_type") == "employee" \
+                and not (body.email or account.get("email")):
+            raise HTTPException(422, "An email address is required for staff logins")
         account.update({**body.model_dump(exclude_none=True), **(access or {})})
         revoke_user(data, code)
         audit(data, user["code"], "edit", "accounts", code)

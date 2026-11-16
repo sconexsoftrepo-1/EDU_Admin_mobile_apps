@@ -12,6 +12,8 @@ export '../models/api_models.dart';
 /// The only REST endpoint registry for this application's API service.
 abstract final class _Endpoints {
   static const login = '/auth/login';
+  static const otpRequest = '/auth/otp/request';
+  static const otpVerify = '/auth/otp/verify';
   static const refresh = '/auth/refresh';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
@@ -106,6 +108,28 @@ class CollegeApi {
         password: password,
         client: clientId,
       ).toJson(),
+      auth: false,
+    );
+    await accept(result as Json);
+  }
+
+  /// Email-code sign-in, step 1: emails a 6-digit code to the login's address (staff only).
+  /// The answer is the same whether or not the login exists.
+  Future<void> requestLoginCode(String login) async {
+    await _send(
+      'POST',
+      _Endpoints.otpRequest,
+      {'login': login, 'client': clientId},
+      auth: false,
+    );
+  }
+
+  /// Email-code sign-in, step 2: the same session as a password sign-in.
+  Future<void> verifyLoginCode(String login, String code) async {
+    final result = await _send(
+      'POST',
+      _Endpoints.otpVerify,
+      {'login': login, 'code': code, 'client': clientId},
       auth: false,
     );
     await accept(result as Json);

@@ -106,7 +106,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     expect(find.byType(CinematicSplashScreen), findsNothing);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Send code'), findsOneWidget);
   });
   testWidgets(
     'slow initialization holds the completed artwork without restarting',

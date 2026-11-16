@@ -638,6 +638,57 @@ export default function ConnectedPortal({
       setSigningIn(false);
     }
   }
+  /** Email-code sign-in, step 1: ask the backend to email a 6-digit code. */
+  async function requestSignInCode(login: string) {
+    setSigningIn(true);
+    setError("");
+    try {
+      await api.auth.requestCode(login, signInRole || undefined);
+    } catch (e) {
+      setError(
+        e instanceof ApiError && e.status === 429
+          ? "Too many code requests. Please wait a while and try again."
+          : errorText(e),
+      );
+      throw e;
+    } finally {
+      setSigningIn(false);
+    }
+  }
+  /** Email-code sign-in, step 2: the same session and workspace as a password sign-in. */
+  async function verifySignInCode(login: string, code: string) {
+    if (signingIn) return;
+    setSigningIn(true);
+    setError("");
+    try {
+      const signedIn = await api.auth.verifyCode({
+        login,
+        code,
+        ...(signInRole ? { role_code: signInRole } : {}),
+      });
+      await start(
+        signedIn.roles
+          ? { account: signedIn.account, roles: signedIn.roles }
+          : undefined,
+        signInRole || undefined,
+      );
+    } catch (e) {
+      setAccount(null);
+      setLanding("");
+      setError(
+        e instanceof ApiError && e.status === 401
+          ? "The code is wrong or has expired. Request a new code."
+          : e instanceof ApiError && e.status === 403
+            ? "Your account does not have access to the selected role. Choose your assigned role and try again."
+            : e instanceof ApiError && e.status === 429
+              ? "Sign-in is temporarily paused after several unsuccessful attempts. Please wait 15 minutes before trying again."
+              : errorText(e),
+      );
+      setBusy(false);
+    } finally {
+      setSigningIn(false);
+    }
+  }
   async function refreshResource(r: Resource, offset = 0) {
     const sequence = ++requestSequence.current;
     const key = workspaceCacheKey(
@@ -970,6 +1021,8 @@ export default function ConnectedPortal({
         signingIn={signingIn}
         error={error}
         onSubmit={login}
+        onRequestCode={requestSignInCode}
+        onVerifyCode={verifySignInCode}
         onRoleChange={(value) => {
           setSignInRole(value);
           setError("");

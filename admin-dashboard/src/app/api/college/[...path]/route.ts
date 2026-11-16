@@ -177,7 +177,8 @@ async function proxy(
     }
     let access = request.cookies.get(cookies.access)?.value;
     const refresh = request.cookies.get(cookies.refresh)?.value;
-    if (path === "auth/login") {
+    // Password sign-in and email-code sign-in both end with the same tokens (httpOnly cookies).
+    if (path === "auth/login" || path === "auth/otp/verify") {
       let parsed: unknown;
       try {
         parsed = JSON.parse(body || "{}");

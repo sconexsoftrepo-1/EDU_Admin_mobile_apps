@@ -30,6 +30,7 @@ part '../components/workspace/widgets.dart';
 part '../components/workspace/forms.dart';
 part '../components/workspace/presentations.dart';
 part '../components/auth/auth_widgets.dart';
+part '../components/auth/first_time_setup.dart';
 
 enum MobileRole {
   admin(
@@ -366,13 +367,14 @@ class _LoginScreenState extends State<LoginScreen>
             EduAuthTextField(
               key: ValueKey('login-id-${widget.role.name}'),
               controller: login,
-              label: 'Login ID',
+              label: 'Admission / reference number',
               icon: 'login_id',
               enabled: !busy,
               action: TextInputAction.next,
               autofill: const [AutofillHints.username],
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Enter your login ID' : null,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Enter your admission or reference number'
+                  : null,
             ),
             const SizedBox(height: 14),
             EduAuthTextField(
@@ -463,6 +465,22 @@ class _LoginScreenState extends State<LoginScreen>
         busy: busy,
         color: EduAuthPalette.accent(widget.role),
         onPressed: busy ? null : submit,
+      ),
+      TextButton(
+        key: const ValueKey('first-time-setup'),
+        onPressed: busy
+            ? null
+            : () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => FirstTimeSetupScreen(
+                    api: widget.api,
+                    role: widget.role,
+                    initialLogin: login.text.trim(),
+                    onDone: widget.onLogin,
+                  ),
+                ),
+              ),
+        child: const Text('First time? Create your password'),
       ),
     ],
   );
