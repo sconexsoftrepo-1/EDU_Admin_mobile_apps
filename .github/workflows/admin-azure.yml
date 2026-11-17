@@ -47,6 +47,9 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Build (type-checks the code)
         run: npm run build
+        env:
+          # Open dashboard tabs compare this with /api/version and reload after a new deployment.
+          NEXT_PUBLIC_BUILD_ID: ${{ github.sha }}
       - name: Assemble the server bundle
         run: |
           test -f .next/standalone/server.js || { echo "no .next/standalone/server.js (output: standalone)"; exit 1; }
