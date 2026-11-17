@@ -16,3 +16,6 @@
 
 # Azure deploy outputs (zips and app settings with secrets)
 /deploy/azure/out/
+
+# Python tool caches
+**/__pycache__/

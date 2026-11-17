@@ -65,6 +65,7 @@ jobs:
           retention-days: 7
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     name: Deploy to App Service
     needs: build
     runs-on: ubuntu-latest

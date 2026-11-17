@@ -1,0 +1,96 @@
+name: Stage backend to Azure
+
+on:
+  push:
+    branches: [stage]
+    paths:
+      - "backend/**"
+      - "deploy/azure/**"
+      - "database/**"
+      - ".github/workflows/backend-stage.yml"
+  workflow_dispatch: # "Run workflow" button in the Actions tab
+
+concurrency:
+  group: stage-backend-azure
+  cancel-in-progress: false # never stop a deploy half-way
+
+permissions:
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: edunexa-stage-api-pragathi
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Run tests (local file storage, no Azure or database access)
+        run: python -m pytest -q
+      - name: Validate stage configuration guards
+        working-directory: .
+        run: python -m unittest discover -s deploy/azure/tests -v
+
+  deploy:
+    if: github.ref == 'refs/heads/stage' && vars.STAGE_DEPLOY_ENABLED == 'true'
+    environment: stage
+    permissions:
+      contents: read
+      id-token: write
+    name: Deploy to App Service
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package the backend folder only
+        working-directory: backend
+        run: |
+          zip -qr ../backend.zip . \
+            -x "tests/*" ".venv/*" "var/*" "secrets/*" ".env" ".env.*" "*/__pycache__/*" "__pycache__/*" \
+               ".pytest_cache/*" ".ruff_cache/*" ".migration-target/*" "*.pyc" "api/*" "vercel.json"
+          unzip -l ../backend.zip | grep -qE " app/asgi.py$" || { echo "app/asgi.py missing"; exit 1; }
+          unzip -l ../backend.zip | grep -qE " startup.sh$" || { echo "startup.sh missing"; exit 1; }
+          ls -lh ../backend.zip
+
+      - name: Sign in to Azure (stage identity only)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_STAGE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_STAGE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_STAGE_SUBSCRIPTION_ID }}
+      - name: Apply optional initial stage configuration
+        env:
+          EDUNEXA_STAGE_BOOTSTRAP_SETTINGS: ${{ secrets.EDUNEXA_STAGE_BOOTSTRAP_SETTINGS }}
+        run: python deploy/azure/apply_stage_settings.py
+
+      - name: Deploy
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: backend.zip
+
+      - name: Health check
+        env:
+          WEBAPP_URL: ${{ steps.deploy.outputs.webapp-url }}
+        run: |
+          echo "App address: $WEBAPP_URL"
+          url="${WEBAPP_URL%/}/health"
+          for i in $(seq 1 30); do
+            if body=$(curl -fsS --max-time 20 "$url"); then echo "$body"; exit 0; fi
+            echo "waiting for the app to start ($i/30)"; sleep 10
+          done
+          echo "Health check failed: open the web app > Monitoring > Log stream"; exit 1

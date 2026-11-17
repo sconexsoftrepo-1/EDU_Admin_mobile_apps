@@ -48,6 +48,7 @@ jobs:
         run: python -m pytest -q
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     name: Deploy to App Service
     needs: test
     runs-on: ubuntu-latest

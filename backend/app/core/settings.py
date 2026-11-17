@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     email_connection_string: SecretStr | None = None
     email_sender: str | None = None  # e.g. DoNotReply@pragathiews.org
     email_sender_name: str = "Pragathi College"
+    # None preserves normal delivery. Stage supplies an explicit list; [] blocks all email.
+    email_allowed_recipients: list[str] | None = None
     sms_adapter_url: str | None = None
     sms_adapter_token: SecretStr | None = None
     payment_adapter_url: str | None = None

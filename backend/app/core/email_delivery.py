@@ -11,6 +11,10 @@ def email_configured(settings):
 
 def send_email(settings, to, subject, text, html=None):
     """Send one email; True when Azure accepted it. Never raises (callers run it in the background)."""
+    allowed = getattr(settings, "email_allowed_recipients", None)
+    if allowed is not None and str(to).strip().casefold() not in {str(address).strip().casefold() for address in allowed}:
+        log.warning("Email blocked by recipient allowlist")
+        return False
     if not email_configured(settings):
         log.warning("Email is not configured (EDUNEXA_EMAIL_CONNECTION_STRING / EDUNEXA_EMAIL_SENDER); not sent")
         return False
