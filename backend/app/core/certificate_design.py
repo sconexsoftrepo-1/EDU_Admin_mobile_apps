@@ -65,7 +65,7 @@ def render(title,student,kind,enrollment,data,code,issued,verify_url,issuer=None
         for x in (35,w-35):
             for y in (35,h-35):
                 c.setStrokeColor(accent);c.circle(x,y,5)
-    logo=Path(__file__).resolve().parents[2]/'assets/pragathi-logo.jpg'
+    logo=Path(__file__).resolve().parents[2]/'assets/pragathi-emblem.png'
     logo_size=49 if compact else 62;top=h-45
     if logo.exists():c.drawImage(ImageReader(str(logo)),(w-logo_size)/2,top-logo_size,width=logo_size,height=logo_size,preserveAspectRatio=True,anchor='c',mask='auto')
     y=top-logo_size-22;text(college,y,16 if compact else 23,'Times-Bold')

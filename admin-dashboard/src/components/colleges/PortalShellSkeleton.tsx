@@ -12,10 +12,13 @@ export default function PortalShellSkeleton({ college }: { college: College }) {
       <aside className="erp-sidebar">
         <div className="erp-sidebar-brand">
           <Image
-            src={`/assets/colleges-institutions/${college.slug}/crest.svg`}
+            src={
+              college.logo ||
+              `/assets/colleges-institutions/${college.slug}/crest.svg`
+            }
             alt={college.short}
-            width={32}
-            height={38}
+            width={36}
+            height={36}
           />
           <strong>{college.short}</strong>
         </div>

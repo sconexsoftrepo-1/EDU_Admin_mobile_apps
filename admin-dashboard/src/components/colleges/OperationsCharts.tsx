@@ -105,7 +105,13 @@ export default function OperationsCharts({ kind }: { kind: string }) {
           </details>
         </>
       ) : (
-        <p>No records yet. Calculate a payroll period to build this chart.</p>
+        <p>
+          {kind === "payroll"
+            ? "No records yet. Calculate a payroll period to build this chart."
+            : kind === "expenses"
+              ? "No records yet. Add an expense to build this chart."
+              : "No records yet."}
+        </p>
       )}
     </section>
   );

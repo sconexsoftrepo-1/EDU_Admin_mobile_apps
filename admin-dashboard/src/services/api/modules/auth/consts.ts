@@ -17,6 +17,8 @@ export interface Account {
   /** One sign-in; unlike session_code it survives token refreshes. */
   login_code?: string;
   client?: ApiClient;
+  /** Extra screens given to this login on top of its roles: screen key -> view | edit | full. */
+  extra_access?: Record<string, string>;
   [key: string]: unknown;
 }
 

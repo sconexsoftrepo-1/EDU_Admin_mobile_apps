@@ -46,7 +46,22 @@ export type ModuleHub = {
   description: string;
   screens: string[];
 };
-export const MODULE_HUBS: ModuleHub[] = definitions;
+/** Modules this college does not use: hidden from menus, search, dashboards and access pickers. */
+export const HIDDEN_HUBS = new Set(["transport"]);
+const ALL_HUBS: ModuleHub[] = definitions;
+/** Screens of hidden modules (and transport costs in Procurement), never offered anywhere. */
+export const HIDDEN_MODULE_SCREENS = new Set([
+  ...ALL_HUBS.filter((h) => HIDDEN_HUBS.has(h.key)).flatMap((h) => h.screens),
+  "transport-expenses",
+  // Administration screens the college does not use.
+  "imports",
+  "module-imports",
+  "module-access_control",
+]);
+export const MODULE_HUBS: ModuleHub[] = ALL_HUBS.filter((h) => !HIDDEN_HUBS.has(h.key)).map((h) => ({
+  ...h,
+  screens: h.screens.filter((s) => !HIDDEN_MODULE_SCREENS.has(s)),
+}));
 export const hubIcons: Record<string, LucideIcon> = {
   academics: GraduationCap,
   finance: Wallet,
@@ -135,7 +150,7 @@ export const RETIRED_SCREENS: Record<string, string> = {
   credentials: "accounts",
 };
 /** Still valid addresses, but no longer offered as separate entries in menus. */
-export const HIDDEN_SCREENS = new Set(["receipts", ...Object.keys(RETIRED_SCREENS)]);
+export const HIDDEN_SCREENS = new Set(["receipts", ...Object.keys(RETIRED_SCREENS), ...HIDDEN_MODULE_SCREENS]);
 export function visibleHubs(allowed: string[]) {
   return MODULE_HUBS.map((hub) => ({
     ...hub,

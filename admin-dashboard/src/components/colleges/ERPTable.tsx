@@ -189,6 +189,19 @@ export default function ERPTable({
             <option key={s}>{s}</option>
           ))}
         </select>
+        {(query || status) && (
+          <button
+            type="button"
+            className="erp-clear-filters"
+            onClick={() => {
+              setQuery("");
+              setStatus("");
+              setPage(0);
+            }}
+          >
+            Clear filters
+          </button>
+        )}
         <details className="erp-columns">
           <summary>Columns</summary>
           <div>

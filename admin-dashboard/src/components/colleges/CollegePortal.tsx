@@ -64,7 +64,7 @@ import {
 } from "@/lib/colleges/reports";
 import ERPActionDrawer, { type DrawerAction } from "./ERPActionDrawer";
 import dynamic from "next/dynamic";
-import { activeHub, hubRoute, RETIRED_SCREENS, visibleHubs } from "@/lib/colleges/module-hubs";
+import { HIDDEN_SCREENS, activeHub, hubRoute, RETIRED_SCREENS, visibleHubs } from "@/lib/colleges/module-hubs";
 const ModuleHubDashboard = dynamic(() => import("./ModuleHubDashboard"), { loading: () => <WorkspaceSkeleton label="Loading module dashboard" /> });
 const ERPAnalytics = dynamic(() => import("./ERPAnalytics"), {
   loading: () => <WorkspaceSkeleton label="Loading collection analytics" />,
@@ -3408,7 +3408,9 @@ export default function CollegePortal({
                 <>
                   <Link href={nav("teaching-staff")}>Add faculty</Link>
                   <Link href={nav("timetable")}>Create timetable</Link>
-                  <Link href={nav("bus-seating")}>Assign bus seat</Link>
+                  {!HIDDEN_SCREENS.has("bus-seating") && (
+                    <Link href={nav("bus-seating")}>Assign bus seat</Link>
+                  )}
                   <Link href={nav("assessments")}>Create assessment</Link>
                 </>
               )}

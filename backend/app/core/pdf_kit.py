@@ -18,7 +18,7 @@ from reportlab.lib.pagesizes import A4, landscape as rotate
 from reportlab.lib.utils import ImageReader, simpleSplit
 from reportlab.pdfgen.canvas import Canvas
 
-LOGO = Path(__file__).resolve().parents[2] / "assets" / "pragathi-logo.jpg"
+LOGO = Path(__file__).resolve().parents[2] / "assets" / "pragathi-emblem.png"
 INK, MUTED, LINE, BAND, ACCENT, SOFT, GOLD = (HexColor(x) for x in (
     "#251e18", "#6b6158", "#e4d9c8", "#f7f1e7", "#7a4a1c", "#f3e6d3", "#c99445"))
 

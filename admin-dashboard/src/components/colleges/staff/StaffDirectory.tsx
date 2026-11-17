@@ -142,7 +142,13 @@ export default function StaffDirectory({
   ]);
   const exportName = `${kind.replaceAll("_", "-")}-staff`;
   const exportExcel = () =>
-    excelTable(exportName, "Staff", exportColumns, exportRows);
+    excelTable(
+      exportName,
+      "Staff",
+      exportColumns,
+      exportRows,
+      `${STAFF_KIND_LABEL[kind]} directory`,
+    );
   const exportPdf = async (mode: "view" | "download" = "download") => {
     try {
       await pdfTable(

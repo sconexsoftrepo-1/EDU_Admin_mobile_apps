@@ -23,7 +23,7 @@ The persistent-server lifespan runs fee reminders hourly when `EDUNEXA_SEMESTER_
 
 The apply transaction uses a 300-second query timeout for the bulk insert. All workspace document values are JSON objects, compatible with SQL Server's `ISJSON` check. A run registry prevents duplicate people/accounts; reruns preserve edited records and add only missing demo timetable templates. `mock_logins.txt` is atomically replaced after commit, with mode 0600, and lists created logins and family/subject relationships. The requested demo password is `test@123`. Passwords are hashed in the accounts table, not included in the run registry.
 
-Certificate stationery lives in `app/core/certificate_design.py`, with the bundled Pragathi logo in `assets/pragathi-logo.jpg`. Five designs use A4 portrait, A4 landscape, A5 portrait and US Letter landscape. They share a college seal, issuer signatory, verification QR and the existing cryptographic certificate issuance/verification flow. Previously issued PDFs retain their original bytes.
+Certificate stationery lives in `app/core/certificate_design.py`, with the bundled Pragathi emblem in `assets/pragathi-emblem.png`. Five designs use A4 portrait, A4 landscape, A5 portrait and US Letter landscape. They share a college seal, issuer signatory, verification QR and the existing cryptographic certificate issuance/verification flow. Previously issued PDFs retain their original bytes.
 
 Deploy backend and dashboard together, include backend/assets, restart the persistent backend, and rebuild/install both Flutter apps. Database inserts alone do not update app binaries or the deployed API code. No schema migration is needed; existing canonical tables and record_extras hold the data.
 

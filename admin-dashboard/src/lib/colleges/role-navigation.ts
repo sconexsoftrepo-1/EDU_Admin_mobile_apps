@@ -1,5 +1,6 @@
 /** Workspace selection is a UI preference; API authorization remains enforced by the backend. */
 import { roleHome, roles, type Role } from "@/data/colleges";
+import { SCREEN_CATALOG } from "@/services/api/modules/workspace/catalog";
 import type {
   AccountRole,
   MeResponse,
@@ -15,6 +16,56 @@ export function rememberRole(accountCode: string, roleCode: string) {
     /* Navigation still works when browser storage is disabled. */
   }
 }
+/** What each extra-screen level allows (mirrors the backend's ACCESS_LEVELS). */
+const LEVEL_ACTIONS: Record<string, string[]> = {
+  view: ["view"],
+  edit: ["view", "create", "edit"],
+  full: ["view", "create", "edit", "delete", "approve", "export"],
+};
+/** Screens without tables of their own open with this permission (mirrors the backend). */
+const EXTRA_SPECIAL: Record<string, string> = {
+  roles: "roles",
+  accounts: "accounts",
+  credentials: "accounts",
+  forms: "forms",
+  "audit-logs": "audit",
+  reports: "reports",
+  dashboard: "reports",
+};
+/**
+ * The role as this login uses it: its own permissions plus the extra screens an admin gave this
+ * person (Users & logins). The backend enforces the same grants.
+ */
+export function withExtraAccess(
+  role: AccountRole | null,
+  account: { extra_access?: unknown } | null | undefined,
+): AccountRole | null {
+  const extra = (account?.extra_access || {}) as Record<string, string>;
+  const keys = Object.keys(extra);
+  if (!role || role.system_admin || !keys.length) return role;
+  const permissions: Record<string, string[]> = Object.fromEntries(
+    Object.entries(role.permissions).map(([k, v]) => [k, [...v]]),
+  );
+  for (const key of keys) {
+    const screen = SCREEN_CATALOG.find((s) => s.key === key);
+    const targets = [
+      ...(screen?.resources || []),
+      ...(EXTRA_SPECIAL[key] ? [EXTRA_SPECIAL[key]] : []),
+    ];
+    for (const target of targets)
+      permissions[target] = [
+        ...new Set([...(permissions[target] || []), ...(LEVEL_ACTIONS[extra[key]] || [])]),
+      ];
+  }
+  return {
+    ...role,
+    permissions,
+    screens: role.screens?.length
+      ? [...new Set([...role.screens, ...keys])]
+      : role.screens,
+  };
+}
+
 export function selectedRole(me: MeResponse): AccountRole | null {
   let remembered: string | null = null;
   try {
@@ -22,11 +73,12 @@ export function selectedRole(me: MeResponse): AccountRole | null {
   } catch {
     /* Use an assigned role below. */
   }
-  return (
+  return withExtraAccess(
     me.roles.find((role) => role.code === remembered) ||
-    me.roles.find((role) => role.system_admin) ||
-    me.roles[0] ||
-    null
+      me.roles.find((role) => role.system_admin) ||
+      me.roles[0] ||
+      null,
+    me.account,
   );
 }
 export function roleArea(role: Pick<AccountRole, "name" | "code">): string {

@@ -102,14 +102,14 @@ export function WorkspaceSearch({
           url: nav("timetable"),
         }))
       : []),
-    ...(permittedModules.includes("routes")
+    ...(permittedModules.includes("routes") && !HIDDEN_SCREENS.has("routes")
       ? (state.operations?.routes || []).map((r) => ({
           name: r.name,
           context: "Transport route",
           url: nav("routes"),
         }))
       : []),
-    ...permittedModules.map((m) => ({
+    ...permittedModules.filter((m) => !HIDDEN_SCREENS.has(m)).map((m) => ({
       name: screenLabel(m, labels),
       context: "Submodule",
       url: nav(m),

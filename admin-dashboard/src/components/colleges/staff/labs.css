@@ -38,6 +38,33 @@
   gap: 8px;
   font-size: 13px;
 }
+/* Register lab: checkbox beside its subject, one bordered row each (beats the drawer's grid labels). */
+.edu-connected .lab-subject-grid .lab-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid #e5e0d6;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  cursor: pointer;
+}
+.edu-connected .lab-subject-grid .lab-check:has(input:checked) {
+  border-color: #a46a27;
+  background: #fbf6ee;
+}
+.edu-connected .lab-check input[type="checkbox"] {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: #a46a27;
+  cursor: pointer;
+}
 @media (max-width: 560px) {
   .lab-subject-grid {
     grid-template-columns: 1fr;

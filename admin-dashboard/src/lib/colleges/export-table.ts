@@ -66,8 +66,47 @@ const xml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
 
+/**
+ * Excel download of the table: a branded .xlsx from the backend (POST print/table.xlsx: college
+ * emblem and name, report title and details, styled header, filters, grand total, Summary sheet).
+ * Falls back to the simple workbook below when the backend cannot be reached.
+ */
+export async function excelTable(
+  name: string,
+  sheet: string,
+  columns: string[],
+  rows: string[][],
+  title = sheet,
+  subtitle = "",
+) {
+  try {
+    const response = await fetch(apiUrl("print/table.xlsx"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({
+        title: title.slice(0, 120),
+        subtitle: subtitle.slice(0, 200),
+        columns: columns.slice(0, 20),
+        rows: rows.slice(0, 5000).map((r) => r.slice(0, 20).map((c) => String(c ?? ""))),
+        filename: name.slice(0, 80),
+      }),
+    });
+    if (!response.ok) throw new Error(String(response.status));
+    download(
+      `${name}.xlsx`,
+      await response.blob(),
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    return;
+  } catch {
+    // Fall back to the in-browser workbook below.
+  }
+  simpleExcel(name, sheet, columns, rows);
+}
+
 /** Excel workbook (.xls, SpreadsheetML) of the table, with styling and a totals row. */
-export function excelTable(
+function simpleExcel(
   name: string,
   sheet: string,
   columns: string[],

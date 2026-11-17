@@ -456,7 +456,13 @@ export default function LabRegistry({
           <button
             type="button"
             onClick={() =>
-              excelTable("labs", "Labs", exportColumns, exportRows)
+              excelTable(
+                "labs",
+                "Labs",
+                exportColumns,
+                exportRows,
+                "Labs & lab in-charges",
+              )
             }
             disabled={!visible.length}
           >

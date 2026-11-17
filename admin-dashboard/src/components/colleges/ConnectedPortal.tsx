@@ -71,7 +71,7 @@ import {
 } from "@/services/api";
 import {
   rememberRole,
-  selectedRole,
+  selectedRole, withExtraAccess,
   roleScreens,
   roleScreen,
   workspacePath,
@@ -528,7 +528,10 @@ export default function ConnectedPortal({
   async function start(known?: MeResponse, requestedRole?: string) {
     const me = known || (await api.auth.me());
     const active = requestedRole
-      ? me.roles.find((role) => role.code === requestedRole) || null
+      ? withExtraAccess(
+          me.roles.find((role) => role.code === requestedRole) || null,
+          me.account,
+        )
       : selectedRole(me);
     if (!active)
       throw Error(
@@ -1203,10 +1206,13 @@ export default function ConnectedPortal({
         <aside>
           <div className="edu-brand">
             <Image
-              src={`/assets/colleges-institutions/${college.slug}/crest.svg`}
+              src={
+                college.logo ||
+                `/assets/colleges-institutions/${college.slug}/crest.svg`
+              }
               alt=""
-              width={34}
-              height={40}
+              width={36}
+              height={36}
             />
             <strong>{college.short}</strong>
           </div>
@@ -1376,38 +1382,6 @@ export default function ConnectedPortal({
                       </div>
                     </details>
                   </>
-                )}
-                {displayRole?.system_admin && (
-                  <button
-                    onClick={() =>
-                      setDialog({
-                        title: "Change password",
-                        fields: [
-                          {
-                            key: "current_password",
-                            label: "Current password",
-                            type: "password",
-                            required: true,
-                          },
-                          {
-                            key: "new_password",
-                            label: "New password (12 or more characters)",
-                            type: "password",
-                            required: true,
-                          },
-                        ],
-                        save: async (values) => {
-                          await api.auth.changePassword({
-                            current_password: String(values.current_password),
-                            new_password: String(values.new_password),
-                          });
-                          setAccount(null);
-                        },
-                      })
-                    }
-                  >
-                    Change password
-                  </button>
                 )}
                 <button
                   className="edu-icon-button"
@@ -2092,29 +2066,6 @@ export default function ConnectedPortal({
                         setConfiguration({ kind: "account", initial: row })
                       }
                     />
-                    <button
-                      onClick={() =>
-                        setDialog({
-                          title: "Reset account password",
-                          fields: [
-                            {
-                              key: "new_password",
-                              label: "New password (at least 12 characters)",
-                              type: "password",
-                              required: true,
-                            },
-                          ],
-                          save: async (values) => {
-                            await api.administration.resetPassword(
-                              String(row.code),
-                              { new_password: String(values.new_password) },
-                            );
-                          },
-                        })
-                      }
-                    >
-                      Reset password
-                    </button>
                   </div>
                 )}
                 {selected === "forms" && (

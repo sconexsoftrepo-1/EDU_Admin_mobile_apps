@@ -1,4 +1,5 @@
 "use client";
+import { HIDDEN_SCREENS } from "@/lib/colleges/module-hubs";
 import TimetableOverview from "./TimetableOverview";
 import AcademicCalendar from "./AcademicCalendar";
 import PDFActions from "./PDFActions";
@@ -75,7 +76,7 @@ export function OperationsSummary({ college }: { college: College }) {
       />
       <div className="ops-module-links">
         {["payroll", "expense-dashboard", "transport"]
-          .filter((key) => permissions[role!].includes(key))
+          .filter((key) => permissions[role!].includes(key) && !HIDDEN_SCREENS.has(key))
           .map((key) => (
             <Link
               key={key}
@@ -1309,7 +1310,6 @@ export default function OperationsWorkspace({
         <OperationsSummary college={college} />
         <Charts kind="expenses" />
         <Charts kind="payroll" />
-        <Charts kind="transport" />
       </>
     );
   else

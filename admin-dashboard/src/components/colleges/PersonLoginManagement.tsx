@@ -94,7 +94,8 @@ function LoginEditor({
       } else {
         await api.administration.createAccount({
           login_id: login,
-          password,
+          // Staff sign in with a code sent to their email; only EduNest logins have passwords.
+          ...(personal ? { password } : {}),
           person_type: person.person_type,
           person_code: person.person_code,
           role_codes: personal ? [] : roles,
@@ -168,7 +169,9 @@ function LoginEditor({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <small>Sign-in codes are sent here. Required for staff logins.</small>
+              <small>
+                Sign-in codes are sent here. Required for staff logins.
+              </small>
             </label>
           )}
           {!personal && (
@@ -193,7 +196,9 @@ function LoginEditor({
                   inputMode="numeric"
                   autoComplete="tel-national"
                   pattern={
-                    countryCode.trim() === "+91" ? "[6-9][0-9]{9}" : "[0-9]{6,14}"
+                    countryCode.trim() === "+91"
+                      ? "[6-9][0-9]{9}"
+                      : "[0-9]{6,14}"
                   }
                   title={
                     countryCode.trim() === "+91"
@@ -208,21 +213,23 @@ function LoginEditor({
               </label>
             </div>
           )}
-          <label>
-            {account ? "New password (for reset)" : "Initial password"}
-            <input
-              type="password"
-              autoComplete="new-password"
-              required={!account}
-              minLength={12}
-              maxLength={128}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <small>
-              Use at least 12 characters. Saved passwords cannot be viewed.
-            </small>
-          </label>
+          {personal && (
+            <label>
+              {account ? "New password (for reset)" : "Initial password"}
+              <input
+                type="password"
+                autoComplete="new-password"
+                required={!account}
+                minLength={12}
+                maxLength={128}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <small>
+                Use at least 12 characters. Saved passwords cannot be viewed.
+              </small>
+            </label>
+          )}
           {personal ? (
             <p>
               Access:{" "}
@@ -296,7 +303,7 @@ function LoginEditor({
                   ? "Save login access"
                   : "Create login"}
             </button>
-            {account && (
+            {account && personal && (
               <button
                 type="button"
                 disabled={password.length < 12}
