@@ -1,6 +1,7 @@
 """Previous-day finance and admissions digest for active administrators."""
 from datetime import datetime, time, timedelta
 from decimal import Decimal
+from html import escape
 from zoneinfo import ZoneInfo
 
 from app.core.email_delivery import send_email
@@ -37,11 +38,16 @@ def build(data, day):
                           (by_year, years.get(year_code, {}).get("name") or year_code or "Unassigned year")):
             agg[name] = agg.get(name, Decimal("0")) + amount
     applications = [r for r in records.get("admission_applications", {}).values() if str(r.get("applied_on", ""))[:10] == day]
-    admissions_by_course = {}
-    for r in applications:
-        name = programs.get(r.get("program_code"), {}).get("name") or "Unassigned course"
-        admissions_by_course[name] = admissions_by_course.get(name, 0) + 1
     enquiries = [r for r in records.get("admission_enquiries", {}).values() if str(r.get("recorded_at", ""))[:10] == day]
+    admission_counts = {}
+    for kind, rows in (("Application", applications), ("Enquiry", enquiries)):
+        for row in rows:
+            program = programs.get(row.get("program_code"), {})
+            year_code = row.get("academic_year_code")
+            key = (kind, program.get("name") or "Unassigned course",
+                   program.get("branch") or program.get("branch_code") or "Unassigned branch",
+                   years.get(year_code, {}).get("name") or year_code or "Unassigned year")
+            admission_counts[key] = admission_counts.get(key, 0) + 1
     changes = [r for r in records.get("edit_requests", {}).values() if str(r.get("requested_at", ""))[:10] == day]
     entries = cash_entries(data)
     cash = [e for e in entries if str(e.get("date", ""))[:10] <= day]
@@ -57,10 +63,49 @@ def build(data, day):
     closing = opening + received - paid - deposited
     return {"day": day, "payment_total": total, "students": len(student_codes), "payments": len(payments),
             "by_mode": by_mode, "by_course": by_course, "by_branch": by_branch, "by_year": by_year,
-            "applications": len(applications), "admissions_by_course": admissions_by_course,
+            "applications": len(applications), "admissions_breakdown": admission_counts,
             "enquiries": len(enquiries), "change_requests": len(changes), "deposits": deposited,
             "deposit_count": len(deposits), "opening": opening, "cash_received": received,
             "cash_paid": paid, "closing": closing, "tomorrow_opening": closing}
+
+
+def render_email(report, settings):
+    from datetime import date as _date
+    from app.core.email_layout import logo_url
+    rupee = lambda n: f"₹{n:,.2f}"
+    report_date = _date.fromisoformat(report["day"])
+    date_heading = report_date.strftime("%A, %d %B %Y")
+    logo = logo_url(settings)
+    navy, gold, pale, ink, muted = "#17356b", "#b87924", "#f4f7fb", "#202b3c", "#65748b"
+    def table(headers, rows):
+        if not rows: rows = [["—" for _ in headers]]
+        th = "".join(f"<th style='padding:10px 12px;text-align:left;background:{navy};color:#fff;font-size:12px'>{escape(str(h))}</th>" for h in headers)
+        trs = "".join("<tr>"+"".join(f"<td style='padding:10px 12px;border-bottom:1px solid #e3e8ef;color:{ink};font-size:13px'>{escape(str(v))}</td>" for v in row)+"</tr>" for row in rows)
+        return f"<table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='border-collapse:collapse;margin:8px 0 20px;background:#fff'><thead><tr>{th}</tr></thead><tbody>{trs}</tbody></table>"
+    def bars(title, values, money=True):
+        items = sorted(values.items(), key=lambda x: x[1], reverse=True)[:8]
+        if not items: return f"<p style='color:{muted}'>No activity</p>"
+        maximum = max(float(v) for _,v in items) or 1
+        parts = []
+        for label, value in items:
+            width = max(2, int(float(value)/maximum*100))
+            shown = rupee(value) if money else str(value)
+            parts.append(f"<tr><td style='padding:5px 8px 5px 0;width:28%;font-size:12px;color:{ink}'>{escape(str(label))}</td><td style='padding:5px 0;width:52%'><div style='height:14px;width:{width}%;background:{gold};border-radius:3px'></div></td><td style='padding:5px 0 5px 8px;width:20%;font-size:12px;color:{ink}'>{shown}</td></tr>")
+        return f"<h3 style='color:{navy};margin:16px 0 6px'>{escape(title)}</h3><table role='presentation' width='100%' cellpadding='0' cellspacing='0'>{''.join(parts)}</table>"
+    def section(title, content):
+        return f"<h2 style='margin:26px 0 10px;padding-bottom:8px;border-bottom:2px solid {gold};font-size:18px;color:{navy}'>{escape(title)}</h2>{content}"
+    admissions_rows = [[kind, course, branch, year, count] for (kind,course,branch,year),count in sorted(report["admissions_breakdown"].items())]
+    cash_rows = [["Opening balance",rupee(report["opening"])],["Cash received",rupee(report["cash_received"])],["Cash paid",rupee(report["cash_paid"])],["Accepted clerk deposits",rupee(report["deposits"])],["Closing balance",rupee(report["closing"])],["Tomorrow opening balance",rupee(report["tomorrow_opening"])]]
+    html = f"""<div style='margin:0 auto;max-width:760px;background:#fff;border:1px solid #e1e6ee;font-family:Arial,sans-serif;color:{ink}'>
+<div style='background:{navy};padding:24px;text-align:center'>{f"<img src='{escape(logo)}' alt='Pragathi logo' width='92' style='display:block;margin:0 auto 12px;background:#fff;border-radius:50%;padding:6px'>" if logo else ''}<div style='font-size:21px;font-weight:bold;color:#fff'>Pragathi Educational Institutions</div><div style='margin-top:8px;color:#f4d79e;font-size:16px'>Daily Analytics Report</div><div style='margin-top:5px;color:#fff;font-size:13px'>{escape(date_heading)}</div></div>
+<div style='padding:20px;background:{pale}'><table role='presentation' width='100%' cellpadding='0' cellspacing='8'><tr><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Payments received</div><b style='font-size:21px;color:{navy}'>{rupee(report['payment_total'])}</b></td><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Students paid</div><b style='font-size:21px;color:{navy}'>{report['students']}</b></td><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Admissions</div><b style='font-size:21px;color:{navy}'>{report['applications']+report['enquiries']}</b></td></tr></table>
+{section('Payments',table(['Metric','Value'],[['Payment count',report['payments']],['Distinct students',report['students']],['Total received',rupee(report['payment_total'])]]))}
+{bars('Received by transaction mode',report['by_mode'])}{bars('Received by course',report['by_course'])}{bars('Received by branch',report['by_branch'])}{bars('Received by academic year',report['by_year'])}
+{section('Admissions received',table(['Type','Course','Branch','Academic year','Count'],admissions_rows))}
+{section('Daily operations',table(['Item','Count / amount'],[['Change requests raised',report['change_requests']],['Clerk deposits accepted',f"{report['deposit_count']} · {rupee(report['deposits'])}"]]))}
+{section('Cash position',table(['Balance item','Amount'],cash_rows))}<p style='margin:24px 0 0;color:{muted};font-size:11px'>Automated report for {escape(date_heading)}. Figures use records available at the time this report was generated.</p></div></div>"""
+    text = f"Daily college analytics — {date_heading}. Payments {rupee(report['payment_total'])}; {report['students']} students; admissions {report['applications']} applications and {report['enquiries']} enquiries; change requests {report['change_requests']}; clerk deposits {rupee(report['deposits'])}; cash closing {rupee(report['closing'])}; tomorrow opening {rupee(report['tomorrow_opening'])}."
+    return f"Daily college analytics · {date_heading}", text, html
 
 
 def deliver(store, settings, day):
@@ -72,25 +117,7 @@ def deliver(store, settings, day):
         admins = [a.get("email") for code, a in data.get("accounts", {}).items()
                   if a.get("active") and a.get("email") and any(data.get("roles", {}).get(r, {}).get("system_admin") for r in a.get("role_codes", []))]
         marker["sent_for"] = day
-    def rows(title, values):
-        if not values: return f"<p><b>{title}:</b> No activity</p>"
-        return "<p><b>"+title+"</b></p><ul>"+"".join(f"<li>{k}: ₹{v:,.2f}</li>" for k,v in sorted(values.items()))+"</ul>"
-    rupee = lambda n: f"₹{n:,.2f}"
-    from datetime import date as _date
-    report_date = _date.fromisoformat(day)
-    date_heading = report_date.strftime("%A, %d %B %Y")
-    from app.core.email_layout import logo_url
-    logo = logo_url(settings)
-    subject = f"Daily college analytics · {date_heading}"
-    html = ((f"<div style='text-align:center'><img src='{logo}' alt='Pragathi logo' width='140'></div>" if logo else "")
-            + f"<h1>Pragathi Educational Institutions</h1><h2>Daily Analytics Report</h2><h3>Report date: {date_heading}</h3><p>Payments received: {rupee(report['payment_total'])} across {report['payments']} payments from {report['students']} students.</p>"
-            + rows("Payment mode", report["by_mode"]) + rows("Course", report["by_course"])
-            + rows("Branch", report["by_branch"]) + rows("Academic year", report["by_year"])
-            + f"<p>Admissions: {report['applications']} applications and {report['enquiries']} enquiries.</p>"
-            + rows("Admissions by course", report["admissions_by_course"])
-            + f"<p>Change requests raised: {report['change_requests']}<br>Clerk deposits accepted: {report['deposit_count']} totaling {rupee(report['deposits'])}.</p>"
-            + f"<p>Cash opening: {rupee(report['opening'])}<br>Cash received: {rupee(report['cash_received'])}<br>Cash paid: {rupee(report['cash_paid'])}<br>Closing balance: {rupee(report['closing'])}<br>Tomorrow opening balance: {rupee(report['tomorrow_opening'])}</p>")
-    text = f"Daily college analytics — {day}\nPayments {rupee(report['payment_total'])}; {report['students']} students; {report['payments']} payments. Admissions {report['applications']} applications, {report['enquiries']} enquiries. Change requests {report['change_requests']}. Clerk deposits {rupee(report['deposits'])}. Cash opening {rupee(report['opening'])}, closing {rupee(report['closing'])}; tomorrow opening {rupee(report['tomorrow_opening'])}."
+    subject, text, html = render_email(report, settings)
     for email in admins:
         send_email(settings, email, subject, text, html)
     return bool(admins)
