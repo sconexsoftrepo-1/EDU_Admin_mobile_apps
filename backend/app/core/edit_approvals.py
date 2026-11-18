@@ -278,9 +278,9 @@ def evaluate(request, raw_body):
         return None  # The endpoint reports the malformed request.
     if not isinstance(body, dict):
         return None
-    if method == "PATCH" and template == "/finance/fee-payments/{code}":
+    if request.method == "PATCH" and template == "/finance/fee-payments/{code}":
         reason = body.get("reason")
-        if not isinstance(reason, str) or not 8 <= len(reason.strip()) <= 500:
+        if reason is not None and (not isinstance(reason, str) or not 8 <= len(reason.strip()) <= 500):
             return JSONResponse({"detail": "Enter a reason for the change (8–500 characters)."}, status_code=422)
     # First save of a versioned record (for example today's attendance) creates it: nothing to approve.
     if request.method == "PUT" and body.get("revision") == 0:
