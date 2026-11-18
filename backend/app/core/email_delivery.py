@@ -9,10 +9,10 @@ def email_configured(settings):
     return bool(getattr(settings, "email_connection_string", None) and getattr(settings, "email_sender", None))
 
 
-def send_email(settings, to, subject, text, html=None):
+def send_email(settings, to, subject, text, html=None, *, allow_unlisted=False):
     """Send one email; True when Azure accepted it. Never raises (callers run it in the background)."""
     allowed = getattr(settings, "email_allowed_recipients", None)
-    if allowed is not None and str(to).strip().casefold() not in {str(address).strip().casefold() for address in allowed}:
+    if not allow_unlisted and allowed is not None and str(to).strip().casefold() not in {str(address).strip().casefold() for address in allowed}:
         log.warning("Email blocked by recipient allowlist")
         return False
     if not email_configured(settings):

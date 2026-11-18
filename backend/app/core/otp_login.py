@@ -116,7 +116,10 @@ def request_code(body: OtpRequest, request: Request, response: Response, backgro
                 outgoing = (account["email"], *code_email(settings, display_name(data, account), APP_NAMES[body.client], code))
     if outgoing:
         to, subject, text, html = outgoing
-        background.add_task(send_email, settings, to, subject, text, html)
+        # Stage OTPs must work for accounts created directly in the stage database,
+        # whose addresses cannot be pre-populated in a deployment-time allowlist.
+        stage = "edunexa-stage-api-pragathi" in (settings.public_api_url or "").casefold()
+        background.add_task(send_email, settings, to, subject, text, html, allow_unlisted=stage)
     return {"sent": True, "message": NEUTRAL}
 
 
