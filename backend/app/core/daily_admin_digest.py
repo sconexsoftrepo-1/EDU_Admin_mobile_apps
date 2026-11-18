@@ -35,9 +35,12 @@ def build(data, day):
         year_code = structure.get("academic_year_code") or enrollment.get("academic_year_code")
         program = programs.get(program_code, {})
         mode = str(p.get("method") or "unspecified"); by_mode[mode] = by_mode.get(mode, Decimal("0")) + amount
+        year_label = " · ".join((program.get("name") or "Unassigned course",
+                                  program.get("branch") or program.get("branch_code") or "Unassigned branch",
+                                  years.get(year_code, {}).get("name") or year_code or "Unassigned year"))
         for agg, name in ((by_course, program.get("name") or "Unassigned course"),
                           (by_branch, program.get("branch") or program.get("branch_code") or "Unassigned branch"),
-                          (by_year, years.get(year_code, {}).get("name") or year_code or "Unassigned year")):
+                          (by_year, year_label)):
             agg[name] = agg.get(name, Decimal("0")) + amount
     applications = [r for r in records.get("admission_applications", {}).values() if str(r.get("applied_on", ""))[:10] == day]
     enquiries = [r for r in records.get("admission_enquiries", {}).values() if str(r.get("recorded_at", ""))[:10] == day]
