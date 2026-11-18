@@ -1,7 +1,9 @@
 """Previous-day finance and admissions digest for active administrators."""
 from datetime import datetime, time, timedelta
+import base64
 from decimal import Decimal
 from html import escape
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from app.core.email_delivery import send_email
@@ -75,7 +77,7 @@ def render_email(report, settings):
     rupee = lambda n: f"₹{n:,.2f}"
     report_date = _date.fromisoformat(report["day"])
     date_heading = report_date.strftime("%A, %d %B %Y")
-    logo = logo_url(settings)
+    logo = "cid:pragathi-emblem"
     navy, gold, pale, ink, muted = "#17356b", "#b87924", "#f4f7fb", "#202b3c", "#65748b"
     def table(headers, rows):
         if not rows: rows = [["—" for _ in headers]]
@@ -105,7 +107,12 @@ def render_email(report, settings):
 {section('Daily operations',table(['Item','Count / amount'],[['Change requests raised',report['change_requests']],['Clerk deposits accepted',f"{report['deposit_count']} · {rupee(report['deposits'])}"]]))}
 {section('Cash position',table(['Balance item','Amount'],cash_rows))}<p style='margin:24px 0 0;color:{muted};font-size:11px'>Automated report for {escape(date_heading)}. Figures use records available at the time this report was generated.</p></div></div>"""
     text = f"Daily college analytics — {date_heading}. Payments {rupee(report['payment_total'])}; {report['students']} students; admissions {report['applications']} applications and {report['enquiries']} enquiries; change requests {report['change_requests']}; clerk deposits {rupee(report['deposits'])}; cash closing {rupee(report['closing'])}; tomorrow opening {rupee(report['tomorrow_opening'])}."
-    return f"Daily college analytics · {date_heading}", text, html
+    logo_file = Path(__file__).resolve().parents[2] / "assets" / "pragathi-emblem.png"
+    attachments = []
+    if logo_file.is_file():
+        attachments.append({"name": "pragathi-emblem.png", "contentId": "pragathi-emblem",
+                            "contentType": "image/png", "contentInBase64": base64.b64encode(logo_file.read_bytes()).decode("ascii")})
+    return f"Daily college analytics · {date_heading}", text, html, attachments
 
 
 def deliver(store, settings, day):
@@ -117,9 +124,9 @@ def deliver(store, settings, day):
         admins = [a.get("email") for code, a in data.get("accounts", {}).items()
                   if a.get("active") and a.get("email") and any(data.get("roles", {}).get(r, {}).get("system_admin") for r in a.get("role_codes", []))]
         marker["sent_for"] = day
-    subject, text, html = render_email(report, settings)
+    subject, text, html, attachments = render_email(report, settings)
     for email in admins:
-        send_email(settings, email, subject, text, html)
+        send_email(settings, email, subject, text, html, attachments=attachments)
     return bool(admins)
 
 

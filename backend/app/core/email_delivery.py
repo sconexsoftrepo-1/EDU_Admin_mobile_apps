@@ -9,7 +9,7 @@ def email_configured(settings):
     return bool(getattr(settings, "email_connection_string", None) and getattr(settings, "email_sender", None))
 
 
-def send_email(settings, to, subject, text, html=None, *, allow_unlisted=False):
+def send_email(settings, to, subject, text, html=None, *, allow_unlisted=False, attachments=None):
     """Send one email; True when Azure accepted it. Never raises (callers run it in the background)."""
     allowed = getattr(settings, "email_allowed_recipients", None)
     if not allow_unlisted and allowed is not None and str(to).strip().casefold() not in {str(address).strip().casefold() for address in allowed}:
@@ -27,6 +27,8 @@ def send_email(settings, to, subject, text, html=None, *, allow_unlisted=False):
             "recipients": {"to": [{"address": to}]},
             "content": {"subject": subject, "plainText": text, **({"html": html} if html else {})},
         }
+        if attachments:
+            message["attachments"] = attachments
         result = client.begin_send(message).result()
         if (result or {}).get("status") != "Succeeded":
             log.error("Email to %s was not accepted: %s", to, (result or {}).get("status"))
