@@ -83,6 +83,11 @@ export function useDashboardOverview(key?: string) {
       active = false;
     };
   }, [cacheKey]);
+  useEffect(() => {
+    const refreshAfterRecordChange = () => { void load(true); };
+    window.addEventListener("edunexa:records-changed", refreshAfterRecordChange);
+    return () => window.removeEventListener("edunexa:records-changed", refreshAfterRecordChange);
+  }, [load]);
   return { data, error, loading, retry: () => load(true) };
 }
 

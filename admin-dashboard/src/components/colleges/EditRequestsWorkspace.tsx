@@ -148,6 +148,9 @@ function RequestCard({
   const stale = item.stale_fields || [];
   const finish = (message: string) => {
     toast.success(message);
+    // Approval replays the edit against live data. Notify dashboards and open workspaces
+    // to discard their cached totals immediately instead of waiting for manual refresh.
+    window.dispatchEvent(new Event("edunexa:records-changed"));
     window.dispatchEvent(new Event(CHANGED_EVENT));
     onDone();
   };
