@@ -1,274 +1,210 @@
-# Codex instructions: reproduce Edu-Pragathi as isolated stage and development environments
+# Codex runbook: operate staging and prepare development
 
-Prepared: 18 November 2026. Repository baseline: `main`, `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb`.
+Updated: 18 November 2026. Staging source release: `5fd5050c2104b6873dfb78597b5c39d86641ce8f` on `stage`. Production baseline: `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb` on `main`.
 
-This is an implementation runbook for the next Codex session. **Implementation started on the `stage` branch. The user created `edu_stage` on `pragathiedu`; Azure application provisioning and acceptance remain pending.** Read [PROJECT_HANDOVER.md](PROJECT_HANDOVER.md) and [PROJECT_INVENTORY.md](PROJECT_INVENTORY.md) first.
+Read [PROJECT_HANDOVER.md](PROJECT_HANDOVER.md), [PROJECT_INVENTORY.md](PROJECT_INVENTORY.md) and [the deployment evidence](environments/STAGE_DEPLOYMENT.md). **Stage resources and both application deployments now exist. Verify and maintain them; do not recreate them from the old proposal.** Hosted development remains future work.
 
-## 1. Objective and intended topology
+## 1. Authoritative decisions
 
-Preserve production on `main`. Create an equivalent isolated stage environment driven by `stage`, including database **`edu_stage`**, separate backend App Service, separate frontend App Service, private file storage, credentials, domain **`stage.edu.pragathiews.org`**, mobile configuration and CI/CD. Create a separate development environment using `develop` as the proposed branch and `devdb` as the proposed database. Use local development for ordinary work, and a hosted dev environment for integration if required.
+The user created **`edu_stage`** on the existing SQL server **`pragathiedu`** and requested the domain **`stage.edu.pragathiews.org`**. These supersede the earlier `stagedb` and `pragathinews.org` examples. The user also explicitly requested the **same application logins as production** and the same test/build/deploy sequence as `main`.
 
-The user's label **`stage_appservice`** describes the requested staging service. Azure Web App names allow alphanumerics and hyphens, not underscores: use a valid available name such as `edunexa-stage-api-pragathi`, and record the mapping. There must also be a separate frontend app such as `edunexa-stage-admin-pragathi`. Do not silently create one service and treat it as both runtimes. [Microsoft naming rules](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules).
+The initial production identity snapshot contained **3 application accounts and 18 roles**. Login IDs, password hashes, active state, person links, assigned roles, extra grants and client policies were copied and verified. Production sessions, OTP state, device registrations, financial/academic transactions and file bytes were not copied. The temporary `stage.admin` bootstrap login/role were removed. This identity snapshot does not continuously synchronize future password/account changes from production.
+
+Same login behavior means staff continue using email OTP; parent/student password behavior remains in the code. Stage JWT/session/signing secrets and SQL credentials are independent from production. The newly created SQL database started empty and received the authoritative SQL Server schema. It is not a full copy of production business data.
+
+## 2. Actual resources
 
 | Property | Production | Stage | Development proposal |
 |---|---|---|---|
 | Branch | `main` | `stage` | `develop` |
-| GitHub environment | `production` | `stage` | `development` |
-| Web domain | `edu.pragathiews.org` — user supplied, verify binding | `stage.edu.pragathiews.org` | `dev.edu.pragathiews.org` if hosted |
-| API domain | Discover actual hostname | Azure default hostname initially; optional `api.stage.edu.pragathiews.org` | Local `127.0.0.1:8010` or separate hosted API |
-| Backend app | Workflow: `edunexa-api-pragathi`; verify actual resource | `edunexa-stage-api-pragathi`, availability permitting | `edunexa-dev-api-pragathi` if hosted |
-| Frontend app | Workflow: `edunexa-admin-pragathi`; verify actual resource | `edunexa-stage-admin-pragathi` | `edunexa-dev-admin-pragathi` if hosted |
-| Database | Discover live DB; local candidate `eduadmin` | **`edu_stage`** | `devdb` |
-| SQL schema | Discover; local `dbo` | `dbo` unless deliberately changed | `dbo` |
-| SQL user | Existing production principal | Separate stage-only principal | Separate dev-only principal |
-| Blob | Discover; local candidate `pragathiedu` / `edu` / `uploads` | Separate storage account preferred; private `edu-stage` container | Separate account/private `edu-dev` container |
-| JWT / certificate keys | Existing production keys retained | New environment-specific keys | New environment-specific keys |
-| Email/push/payment/SMS | Existing verified live settings | Test-only integrations and recipients | Disabled or test-only |
-| Reminder worker | Existing production policy | Disabled by default | Disabled by default |
+| Web | `https://edu.pragathiews.org` | `https://stage.edu.pragathiews.org` | `https://dev.edu.pragathiews.org` if hosted |
+| API | `https://edunexa-api-pragathi-dpaafqe8ftbabxay.westus3-01.azurewebsites.net` (`api.pragathiews.org` CNAME also exists) | `https://edunexa-stage-api-pragathi.azurewebsites.net` | Separate dev API or local port 8010 |
+| Backend app | `edunexa-api-pragathi` | `edunexa-stage-api-pragathi` | `edunexa-dev-api-pragathi` if available |
+| Frontend app | `edunexa-admin-pragathi` | `edunexa-stage-admin-pragathi` | `edunexa-dev-admin-pragathi` if available |
+| Plan | `asp-edunexa`, Linux B1, West US 3 | Separate `asp-edunexa-stage`, Linux B1, West US 3 | Separate or explicitly approved non-production plan |
+| SQL server / database | `pragathiedu.database.windows.net` / `eduadmin` | Same logical server / **`edu_stage`**, schema `dbo`, Central US | `devdb`, separate principal |
+| SQL runtime principal | Existing production credential | Contained **`edunexa_stage`**; production connection denial verified | Separate contained dev user |
+| Blob | Existing production storage | Separate account **`pragathiedustage`**, private **`edu-stage`**, prefix `uploads`, West US 3 | Separate dev storage |
+| GitHub environment | Existing production workflow configuration | **`stage`**, restricted to branch `stage` | `development`, restricted to `develop` |
+| Deployment identity | Existing publish-profile workflows | **`edunexa-stage-github`**, OIDC, stage apps only | Separate identity |
 
-App names, API custom domains, hosted dev domain and `develop`/`devdb` are proposals; `stage`, `edu_stage` and `stage.edu.pragathiews.org` are user requirements. Do not overwrite an unrelated existing resource with a matching proposed name. Separate App Services are the requested design, rather than production deployment slots.
+Tenant: PEDRO Educational Welfare Society, `ac685c13-dc69-4450-8888-f423965b81f6`. Subscription: `fa7aff08-db6d-4b24-bb39-95dff95cf969`. Resource group: **`Pragathi`**.
 
-## 2. Execution contract for Codex
+Central US B1 creation was rejected because regional quota was zero. Stage therefore has a separate B1 plan in West US 3. The database remains in Central US. Do not describe the API and database as co-located, and do not move production resources to resolve this difference.
 
-Proceed with repository analysis, reversible preparation and verification. Implement changes in an isolated checkout/worktree or appropriate feature branch. Respect the current working tree and applicable `AGENTS.md`; do not discard unrelated work. The user has requested this guide as the next-step instruction, so this file itself is not a record that cloud execution has already been approved/performed.
+Azure app names cannot contain underscores. The user's logical `stage_appservice` label is implemented by the separate valid backend/frontend names above. Azure naming reference: [Microsoft resource name rules](https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules).
 
-When executing the future setup task, make the resulting plan/configuration reviewable, use the task's existing authorization and tool permission requirements, and ask only for missing access or genuinely unresolved decisions. Never put secrets in a chat response or committed artifact. Never mutate production data, DNS bindings, signing keys or credentials as a shortcut to make staging work.
+## 3. Verified release status
 
-Use actual resource discovery to fill placeholders. If a required account/permission is unavailable, finish independent work and report the exact missing capability; do not invent resource IDs or success. Track work in a checklist with evidence and mark unfinished acceptance honestly.
+- Dashboard standalone build and deployment passed: [frontend run](https://github.com/sconexsoftrepo-1/EDU_Admin_mobile_apps/actions/runs/44202660890).
+- Backend tests, stage guards, settings application, code deployment and health check passed: [backend run](https://github.com/sconexsoftrepo-1/EDU_Admin_mobile_apps/actions/runs/44202660972).
+- Custom-domain `/portal/login`: **HTTP 200**.
+- Exact user-reported `/api/college/auth/roles`: **HTTP 200**, 18 roles.
+- Direct stage API `/health`: **HTTP 200**, `storage=sqlserver`, `files=azureblob`, `certificate_signing=configured`.
+- SQL schema matched to the extracted source DACPAC: **150 tables, 5 views, 162 DML triggers**.
+- Stage runtime SQL user connected to `edu_stage` and was explicitly denied access to `eduadmin`.
+- Private stage Blob upload/download/delete round-trip passed; temporary test object removed.
+- Local backend tests: **320 passed, 1 skipped**. GitHub Python 3.12 run: **315 passed, 6 skipped**. Seven deployment configuration guards passed. Focused OTP/family/email tests: **17 passed**.
 
-## 3. Phase A — discover the real deployment before copying
+These are deployment/data-plane checks. Full business UAT, native stage releases, recovery rehearsals and a hosted dev environment are not complete merely because these checks passed. See the deployment evidence for authenticated-session and final follow-up results.
 
-Record a sanitized inventory in `docs/environments/ENVIRONMENT_INVENTORY.md` (new deliverable): subscription/tenant IDs, resource IDs/names, resource groups, regions, OS/runtime, plans/SKUs, instance count, hostnames/domains/TLS, deployment identity, DB server/name/schema/SKU/networking, Blob account/container, provider configuration status, backups and monitoring. Record secret **names and retrieval locations**, never values.
+## 4. Branch-bound CI/CD
 
-Read these source files before editing:
+Stage preserves the production sequence while using independent resources and OIDC authentication:
 
-- `.github/workflows/backend-azure.yml`, `admin-azure.yml`, `main_edunexa-admin-pragathi.yml`.
-- `deploy/azure/{README.md,CICD.md,make_backend_settings.py,package.sh,deploy.sh}`.
-- `backend/app/core/{settings.py,sqlserver.py,files.py,security.py,otp_login.py,family_access.py}`.
-- `backend/app/main.py`, `backend/startup.sh`, SQL Server changes and database tools.
-- Next proxy `admin-dashboard/src/app/api/college/[...path]/route.ts` and `next.config.ts`.
-- Both Flutter `lib/constants/api_config.dart`, Android/iOS manifests/build settings, Firebase registration files.
+```text
+push stage (relevant paths)
+  -> backend tests + configuration guards -> backend-only ZIP
+  -> stage OIDC login -> optional initial settings -> stage API deploy -> /health
 
-Safe discovery examples (requires authenticated CLI; do not paste raw app settings or deployment profiles):
-
-```bash
-az account show --query '{subscription:id,tenant:tenantId,name:name}' -o json
-az webapp list --query '[].{name:name,group:resourceGroup,location:location,host:defaultHostName,plan:serverFarmId}' -o json
-az sql server list --query '[].{name:name,group:resourceGroup,location:location,fqdn:fullyQualifiedDomainName}' -o json
-az storage account list --query '[].{name:name,group:resourceGroup,location:location}' -o json
-gh workflow list --all
+push stage (relevant paths)
+  -> Node 24 npm ci/build -> standalone/static/public ZIP
+  -> stage OIDC login -> stage dashboard deploy -> /portal/login
 ```
 
-Query known resources with explicit subscription/group/name afterward. Obtain necessary settings through secure tooling and save only redacted summaries. Check GitHub Deployment Center links, enabled workflows, recent runs, environments, secrets/variables **names**, branch protections and manual dispatch permissions.
+Files: `.github/workflows/backend-stage.yml` and `.github/workflows/admin-stage.yml`. Deploy jobs require `github.ref == 'refs/heads/stage'` and repository variable **`STAGE_DEPLOY_ENABLED=true`**. GitHub environment `stage` additionally permits the stage branch only. Concurrency groups are independent per stage app and do not cancel an in-progress deployment.
 
-Conflicting repository clues that must be resolved:
+Environment variables:
 
-- Local candidate: `pragathiedu.database.windows.net` / `eduadmin`; older Azure notes: `edupragathi.database.windows.net` / `edu-dev`.
-- Mobile defaults use a generated `westus3-01.azurewebsites.net` hostname; older notes prescribe Southeast Asia and others describe West US 3.
-- Local backend public API URL still refers to an older HTTP IP. Do not use it as the live URL.
-- A shared production plan is documented, but actual plan/SKU/regions have not been verified.
+| Variable | Current value |
+|---|---|
+| `AZURE_STAGE_CLIENT_ID` | `9776b7c7-8406-4bb4-98b3-0b157e88c6ce` |
+| `AZURE_STAGE_TENANT_ID` | `ac685c13-dc69-4450-8888-f423965b81f6` |
+| `AZURE_STAGE_SUBSCRIPTION_ID` | `fa7aff08-db6d-4b24-bb39-95dff95cf969` |
 
-Use `az webapp show ... --query defaultHostName -o tsv` to obtain actual generated hostnames. Do not assume `<app-name>.azurewebsites.net` is always the deployed hostname.
+Azure identity **`edunexa-stage-github`** has Website Contributor on the **two stage App Services only**. Its federated audience is `api://AzureADTokenExchange`, issuer is `https://token.actions.githubusercontent.com`, and the actual repository subject is:
 
-## 4. Phase B — branches and CI containment
-
-1. Inspect working tree, fetch authorized refs, record current production SHA and latest successful deployment artifacts.
-2. Audit the generated `main_edunexa-admin-pragathi.yml`: it targets the same production frontend as `admin-azure.yml`, uploads the repository, lacks the curated build and triggers on all `main` pushes. Confirm whether enabled. Prepare a reviewed consolidation/retirement so only one frontend pipeline owns production.
-3. Add explicit `main` checks to production deploy jobs, including `workflow_dispatch`. Existing manual workflows can be run from another ref while still targeting production.
-4. Create `stage` from a known good `main` baseline if absent. Preserve an existing stage branch's work. Create `develop` if the agreed development branch is absent. Use a worktree if switching would disturb changes.
-5. Add explicit stage/dev workflows, variables and credentials, ensuring no non-production ref can resolve to production resource names or profiles. Do not copy a workflow, change only its push branch, and leave its target app unchanged.
-6. Proposed promotion flow: feature branch → `develop` → `stage` for UAT → reviewed PR into `main`. Database contents and secrets are never promoted by merging branches. Record the tested SHA; merging may produce a new SHA, so rerun required checks or prove identical artifact/source content.
-
-Production hardening must be reviewed before it is merged, because workflow-file changes themselves trigger deployments. Stage work should not accidentally enqueue an uncontrolled production run.
-
-## 5. Phase C — isolate SQL and choose a data strategy
-
-Use Azure SQL Database for stage/dev parity with current SQL Server runtime. Place stage API near its database after confirming actual production region; shared plans may save cost but share capacity/blast radius. Prefer a dedicated non-production plan and separate resource group. Reusing a logical SQL server is possible only with separate users and explicit access isolation.
-
-Two supported provisioning strategies:
-
-**A. Schema plus synthetic records (preferred for routine development).** Extract the authoritative SQL Server schema or create a tested SQL Server schema deployment artifact from the current database. Apply it to new `edu_stage`/`devdb`, then insert fictional configuration/accounts and representative business records. The repo has PostgreSQL/MySQL reference schemas and incremental SQL Server scripts, not a proven complete blank SQL Server installer. Do not execute `edunexa_schema_postgresql.sql` or PostgreSQL tools as Azure SQL DDL.
-
-**B. Independent production copy, then sanitize before application start.** A database copy includes users/permissions as well as data, so copied access must be reviewed. Wait for Online, create separate runtime users, sanitize the target and prove no production secrets/session state remain before allowing requests. An example shape, after filling verified names:
-
-```bash
-az sql db copy --resource-group "$SOURCE_GROUP" --server "$SOURCE_SQL_SERVER" --name "$SOURCE_DATABASE" \
-  --dest-resource-group "$STAGE_GROUP" --dest-server "$STAGE_SQL_SERVER" --dest-name edu_stage
+```text
+repo:sconexsoftrepo-1@318086107/EDU_Admin_mobile_apps@1429245413:environment:stage
 ```
 
-This is a future mutation example; do not run with unresolved variables or guess source/target. Database copies are independent; user/login behavior across servers and permission requirements must be validated. [Microsoft database copy guide](https://learn.microsoft.com/en-us/azure/azure-sql/database/database-copy?view=azuresql).
+The first frontend attempt failed because the initial name-only subject did not match GitHub's assertion containing immutable IDs. Matching the actual subject fixed authentication; a rerun passed. Recheck the presented subject if federation configuration changes. Do not grant subscription-wide Contributor as a workaround. [Microsoft OIDC deployment guidance](https://learn.microsoft.com/en-us/azure/app-service/deploy-github-actions?tabs=openid).
 
-For either strategy:
+The three production workflows remain enabled on `main`, including the overlapping generated frontend workflow. Their copies on `stage` have `main` guards, but production consolidation/hardening has not been merged to `main`. Do not imply that production's overlapping pipeline issue has already been resolved.
 
-- Assert target database is `edu_stage` or `devdb`, and is different from production, **before any write**. Query `DB_NAME()` through the target connection. Deny unapproved target names in migration/sanitization tools.
-- Inventory actual tables, foreign keys, triggers, constraints, indexes, views, sequences/identities, schema migrations and `record_extras`. Reconcile to current contracts and SQL Server scripts `011`–`013`; numbering alone is not proof earlier changes were applied.
-- Use a stage-specific SQL principal with only needed rights. Remove/disable copied production principals on the copied DB where safe. A server admin credential would defeat DB isolation; do not reuse it as the stage runtime user.
-- Clear copied refresh sessions/token families, login attempts, OTP/setup codes, device registrations and provider callback/idempotency state that must not carry into tests. Inspect the actual SQL mapping: internal document collections can reside in shared metadata/extras rather than obvious standalone tables.
-- Replace business PII/contact details, addresses, IDs, financial references, messages and attachment references with coherent synthetic values; preserve relationships and required constraints. Do not merely mask names while leaving real recipient emails or phone numbers.
-- Provision named test Super Admin, limited office user, faculty, clerk, lab in-charge, student and two guardians/children to test both allowed and denied scope. Never use copied production credentials for UAT.
-- Preserve coherent test ledgers and receipts or rebuild them transactionally. Capture before/after schema and sanitized row-count reports with no PII.
-- Do not run seed or destructive integration-test tools against production; inspect `bootstrap_admin.py`, `seed_demo.py`, `seed_linked_academics.py` and opt-in test fixtures before use.
+## 5. Runtime configuration and secrets
 
-Do not automatically wipe a stage database on every deployment. Treat refresh-from-production as a deliberate audited operation with target checks, sanitization, side-effect shutdown and a recovery checkpoint.
+Use **`make_stage_settings.py`**, not the production `make_backend_settings.py` or its shared output. The stage generator requires explicit private input and validates DB/principal/origin boundaries. Actual values remain in ignored `deploy/azure/out/stage/` or Azure/GitHub secret stores. Never paste them into chat, public guides, logs or committed files.
 
-## 6. Phase D — isolate Blob data and signing material
-
-1. Create private non-production Blob storage. Separate accounts/keys are preferable; a separate container with a production account key changes the path but does not restrict that credential to the container.
-2. Set `EDUNEXA_FILE_STORAGE=azure`, the non-production account/credential, container and a valid prefix such as `uploads`. `AzureBlobFiles` currently validates prefix as a single key component; do not assume a proposed nested prefix like `stage/uploads` will validate.
-3. Use sample/sanitized files only. A copied SQL DB does not copy Blob bytes. Review `documents`, `file_storage_objects`, photos, deposit proofs, learning files, certificates and chat attachments for stored object keys/provider/container fields, then rewrite or remove references coherently.
-4. Prove upload and download operate on stage objects. Use unique stage object names, deny anonymous access, and verify read SAS expiration. Test that a stage user cannot obtain production files.
-5. Generate independent JWT and Ed25519 certificate signing secrets for each environment. Never overwrite the production signer. Use stage verification URLs and clearly marked test certificates; do not distribute copied production certificates as stage-generated outputs.
-6. Place secrets in App Service settings or an approved vault. A managed identity/Key Vault design is possible, but current Blob adapter uses an account key/connection string and SQL uses username/password; do not claim managed identity works without adding and testing the code/configuration.
-
-## 7. Phase E — configuration matrix and safe settings generation
-
-Create a checked-in **placeholder-only** template and validation tool, with actual values in ignored environment files or a secrets store. Support explicit `--env-file`, `--environment`, `--output`, API/portal URLs and expected DB targets; fail closed on unresolved placeholders or production references for stage/dev. Use separate private output paths per environment.
-
-Do not invoke `make_backend_settings.py` unchanged for stage: it always reads `backend/.env`, can reuse the production signing key, copies all provider settings and writes a common output. Do not swap production `.env` files in/out temporarily as a workaround. Refactor safely while preserving existing production behavior, or build a dedicated environment-aware tool.
-
-| Setting | Stage / hosted dev requirement |
+| Setting | Stage policy |
 |---|---|
 | `EDUNEXA_STORAGE_BACKEND` | `sqlserver` |
-| `EDUNEXA_MSSQL_HOST`, `PORT` | Verified non-production server / normally 1433 |
-| `EDUNEXA_MSSQL_NAME` | Exactly `edu_stage` / `devdb` |
-| `EDUNEXA_MSSQL_USER`, `PASSWORD` | Independent limited runtime credential |
-| `EDUNEXA_MSSQL_DB_SCHEMA` | `dbo` unless chosen otherwise; not `EDUNEXA_MSSQL_SCHEMA` |
-| `EDUNEXA_MSSQL_ENCRYPTION` | `require` or supported `strict` |
-| `EDUNEXA_MSSQL_CONNECT_TIMEOUT`, `QUERY_TIMEOUT` | Validate against `SqlServerSettings`; defaults 10 / 30 seconds |
-| `EDUNEXA_JWT_SECRET` | New random secret, at least 48 characters; never production value |
-| `EDUNEXA_ISSUER`, `AUDIENCE` | Optional distinct stage/dev values with tested client compatibility |
-| `EDUNEXA_DATA_DIR` | `/home/data/edunexa` per separate App Service |
-| `EDUNEXA_FILE_STORAGE` | `azure` for parity |
-| `EDUNEXA_AZURE_STORAGE_ACCOUNT`, `STORAGE_KEY` | Non-production account/key; or the connection-string path below |
-| `EDUNEXA_AZURE_STORAGE_CONNECTION_STRING` | Optional alternative; secret, non-production only |
-| `EDUNEXA_AZURE_STORAGE_CONTAINER`, `STORAGE_PREFIX` | `edu-stage` / `edu-dev`, prefix `uploads` |
-| `EDUNEXA_CERTIFICATE_SIGNING_KEY` | New base64-encoded 32-byte Ed25519 private key |
-| `EDUNEXA_PUBLIC_API_URL` | Actual stage/dev HTTPS API hostname |
-| `EDUNEXA_PUBLIC_PORTAL_URL` | `https://stage.edu.pragathiews.org` / dev URL |
-| `EDUNEXA_CORS_ORIGINS` | JSON array of explicit non-production browser origins |
-| `EDUNEXA_API_DOCS` | Prefer false on public stage; enable only for controlled internal dev |
-| `EDUNEXA_SEMESTER_REMINDERS_ENABLED` | `false` until controlled reminder testing |
-| `EDUNEXA_STAFF_PASSWORD_LOGIN` | `false` for OTP parity, with safe email configured |
-| `EDUNEXA_EMAIL_CONNECTION_STRING`, `EMAIL_SENDER`, `EMAIL_SENDER_NAME` | Test sender/service and controlled addresses |
-| `EDUNEXA_STUDENT_APP_LINK` | Stage/dev distribution link or unset; never a misleading production link |
-| `EDUNEXA_FCM_SERVICE_ACCOUNT_JSON` or `FCM_SERVICE_ACCOUNT_FILE` | Separate test Firebase project/credential, or unset |
-| `EDUNEXA_PUSH_ADAPTER_URL`, `PUSH_ADAPTER_TOKEN` | Test adapter, or unset |
-| `EDUNEXA_SMS_ADAPTER_URL`, `SMS_ADAPTER_TOKEN` | Sandbox/test adapter, or unset |
-| `EDUNEXA_PAYMENT_ADAPTER_URL`, `PAYMENT_ADAPTER_TOKEN`, `PAYMENT_CALLBACK_SECRET` | Sandbox-only with separate callback secret, or unset |
-| `SCM_DO_BUILD_DURING_DEPLOYMENT` | Backend `true`; frontend `false` |
-| `WEBSITES_PORT` | Backend 8000; frontend 8080, consistent with selected runtime |
-| `TZ` | `Asia/Kolkata` |
+| `EDUNEXA_MSSQL_HOST` / `NAME` | `pragathiedu.database.windows.net` / `edu_stage` |
+| `EDUNEXA_MSSQL_USER` / `PASSWORD` | `edunexa_stage` / independent private password |
+| `EDUNEXA_MSSQL_DB_SCHEMA` / `PORT` | `dbo` / `1433` |
+| `EDUNEXA_MSSQL_ENCRYPTION` | `require` |
+| `EDUNEXA_JWT_SECRET` | Independent generated stage secret, at least 48 characters |
+| `EDUNEXA_ISSUER` | `edunexa-stage-api` |
+| `EDUNEXA_CERTIFICATE_SIGNING_KEY` | Independent stage Ed25519 private key |
+| `EDUNEXA_FILE_STORAGE` | `azure` |
+| `EDUNEXA_AZURE_STORAGE_ACCOUNT` / `CONTAINER` / `PREFIX` | `pragathiedustage` / `edu-stage` / `uploads` |
+| `EDUNEXA_AZURE_STORAGE_KEY` | Stage account key, never the production storage key |
+| `EDUNEXA_PUBLIC_API_URL` | `https://edunexa-stage-api-pragathi.azurewebsites.net` |
+| `EDUNEXA_PUBLIC_PORTAL_URL` | `https://stage.edu.pragathiews.org` |
+| `EDUNEXA_CORS_ORIGINS` | JSON array: stage custom domain and stage Azure frontend origin |
+| `EDUNEXA_STAFF_PASSWORD_LOGIN` | `false`, preserving staff email OTP |
+| `EDUNEXA_EMAIL_CONNECTION_STRING` / `EMAIL_SENDER` | Existing ACS sender configuration, explicitly supplied for stage |
+| `EDUNEXA_EMAIL_ALLOWED_RECIPIENTS` | JSON list of active copied login emails; no unrestricted stage delivery |
+| `EDUNEXA_SEMESTER_REMINDERS_ENABLED` | `false` |
+| Push/FCM, SMS, payment adapter settings | Empty/disabled |
+| `EDUNEXA_API_DOCS` | `false` |
+| `EDUNEXA_DATA_DIR` / `TZ` | `/home/data/edunexa` / `Asia/Kolkata` |
 
-All uppercase names in shortened matrix groups inherit the `EDUNEXA_` prefix shown on the first member, e.g. `EMAIL_SENDER` means `EDUNEXA_EMAIL_SENDER`, and `STORAGE_KEY` in the Azure row means `EDUNEXA_AZURE_STORAGE_KEY`. Use actual `settings.py` and `sqlserver.py` names in generated files.
+Grouped variable suffixes above inherit their complete prefix, e.g. SQL `NAME` means `EDUNEXA_MSSQL_NAME`, and Azure `CONTAINER` means `EDUNEXA_AZURE_STORAGE_CONTAINER`. Use exact names in `settings.py` and `sqlserver.py` when editing configuration.
 
-Frontend App Service: `EDUNEXA_API_URL=<stage/dev API>`, `NODE_ENV=production` for the deployed Node server, `HOSTNAME=0.0.0.0`, `PORT=8080`, `WEBSITES_PORT=8080`, `SCM_DO_BUILD_DURING_DEPLOYMENT=false`, `NEXT_TELEMETRY_DISABLED=1`. `NODE_ENV=production` is a runtime optimization setting and does not mean the deployment uses production data.
+Frontend settings include `EDUNEXA_API_URL=https://edunexa-stage-api-pragathi.azurewebsites.net`, `NODE_ENV=production`, `HOSTNAME=0.0.0.0`, `PORT=8080`, `WEBSITES_PORT=8080`, `SCM_DO_BUILD_DURING_DEPLOYMENT=false`. Startup: `node server.js`. Backend uses `SCM_DO_BUILD_DURING_DEPLOYMENT=true`, Python 3.12, startup `sh startup.sh`, one Uvicorn worker. Both apps require HTTPS and TLS 1.2 or higher; FTPS is disabled.
 
-Build `NEXT_PUBLIC_BUILD_ID` from the deployed SHA. Do not expose DB/provider secrets via `NEXT_PUBLIC_*` or Dart defines. Add an explicit visible STAGE/DEVELOPMENT badge and distinct app title/branding using a new, documented configuration switch; such a switch is not already implemented merely because this guide requests it. Exclude non-production pages from indexing through appropriate robots/metadata and access controls; robots rules do not provide authentication.
+The CI bootstrap secret **`EDUNEXA_STAGE_BOOTSTRAP_SETTINGS`** was used to apply validated settings and has been deleted after acceptance. Runtime values remain in Azure and the approved private recovery location. Ordinary later deployments retain existing settings. Recreate the secret only for a deliberate validated configuration update; never commit its contents.
 
-### Outbound safety before starting a copied environment
+### Email behavior
 
-The application can send OTP, welcome emails, notices and push outside the hourly reminder worker. Disabling reminders alone is insufficient. This code does not currently provide a universal recipient-allowlist switch. Implement and test an email/SMS/push allowlist/redirect at the delivery boundary or use isolated services with only controlled recipients and sanitized data. Keep payment adapters unset until a sandbox is ready. Never provide fake successful OTP/payment delivery to conceal missing services.
+`email_delivery.py` now checks `EDUNEXA_EMAIL_ALLOWED_RECIPIENTS` before contacting ACS. `None` preserves existing unrestricted behavior outside stage; `[]` blocks all delivery; stage uses an explicit list. The list was expanded from the initial tester mailbox to the active copied production-login emails after the user requested identical logins.
 
-For staff login testing, configure test email delivery to actual approved tester mailboxes. If credentials are unavailable, retain explicit unavailable behavior and mark OTP acceptance incomplete; do not enable public password fallback without documenting and testing the policy change.
+Only user-requested login activity should send real OTPs during acceptance. Stage reminders remain off. New stage accounts will need an explicitly approved recipient-list update before OTP delivery can reach a new address. Provider acceptance is not proof of mailbox receipt. This is a shared ACS service with a stage application delivery restriction, not a separately provisioned email service.
 
-## 8. Phase F — provision two runtimes per hosted environment
+## 6. Database and account maintenance
 
-Use idempotent environment-specific IaC (Bicep/Terraform) or guarded CLI scripts. Require explicit subscription/resource group/environment/target arguments and tags. Record what already exists; don't replace a resource automatically.
+The schema-only source extraction used SqlPackage and excluded data, SQL users/logins, permissions and role memberships. The SQL runtime principal is contained in `edu_stage`, with reader/writer/execute rights needed by the application. Production SQL credentials are not the stage runtime credential.
 
-Provision SQL/storage and private settings first, then:
+Relevant tools:
 
-1. Linux App Service plan near the database, with verified SKU/capacity. Record cost/resource choices; old price estimates are not current quotes.
-2. Backend web app: Python 3.12 compatible with the repo, startup `sh startup.sh`, HTTPS only, minimum TLS 1.2+, health path `/health`, one instance/worker and persistent home as required.
-3. Frontend web app: Node 24 per pipeline, startup `node server.js`, HTTPS only, correct port/upstream.
-4. Network access only where needed; avoid copying the old blanket "allow all Azure services" instruction without considering narrower networking. Validate actual SQL TLS/firewall access and Blob permissions.
-5. Separate diagnostic logs/alerts and, if configured, environment-specific Application Insights. Monitoring is a new setup task, not an already verified repo capability.
-6. Deploy backend-only and standalone frontend packages. Review archives for `.env*`, credentials, private backups and unintended files before upload.
+| Tool | Use / guard |
+|---|---|
+| `initialize_stage_schema.py` | Extract schema, generate reviewed SQL, publish only to an **empty** `edu_stage`; refuses a populated schema |
+| `prepare_stage_database.py` | Initial contained user/key/bootstrap creation; not a daily deployment step |
+| `copy_stage_logins.py` | Preview, then explicit account/role parity migration; source is a read-only production snapshot |
+| `verify_stage_data.py` | Check SQL schema/active administrator and stage Blob round-trip |
+| `make_stage_settings.py` | Explicit private JSON input to stage app settings |
+| `apply_stage_settings.py` | Validate/apply optional CI bootstrap secret to stage API only |
 
-The backend deployment artifact excludes `database/` outside its folder; migrations need their own explicit artifact/job. Deployments must not depend on DDL files that never reach the target or on startup silently creating the schema.
+Do not rerun the bootstrap/schema initializer against the deployed database as a migration strategy. Do not automatically refresh logins or production data on every push. A future account refresh requires review of existing stage identities, email allowlist, session revocation and changed permissions. Preserve existing business records and audit history unless a specific disposable-stage reset was requested.
 
-## 9. Phase G — domain and TLS
+The current account snapshot contains system logins, so the copy did not require linked employee/student/guardian business rows. The migration tool supports explicit identity dependencies for future linked accounts but is not a general production database clone. It does not copy financial activity, grades, chat messages, certificates or file bytes.
 
-Use Azure's actual frontend `defaultHostName` for a CNAME. For the `pragathiews.org` DNS zone the record label is normally `stage.edu`; if the DNS provider manages a delegated `edu.pragathiews.org` zone, use `stage`. Add the corresponding `asuid.stage.edu` (or delegated-zone `asuid.stage`) TXT value shown by Azure. Bind `stage.edu.pragathiews.org` to the **stage frontend**, provision a supported TLS certificate and validate HTTPS. Do not alter the existing `edu` production binding. [Microsoft custom domain guide](https://learn.microsoft.com/en-us/azure/app-service/app-service-web-tutorial-custom-domain).
+PostgreSQL/MySQL schema files remain reference assets. Do not execute those directly as Azure SQL DDL. A general ordered SQL Server migration runner and restore rehearsal are still follow-up work.
 
-The optional API custom hostname needs its own CNAME, verification, app binding and certificate. Using the actual default Azure HTTPS API hostname initially is sufficient. Update API public URLs, portal URL, CORS, frontend upstream, certificate verification links and any sandbox callback together. Validate redirects, cookies and link generation on the custom domain, not only the Azure default address. [Microsoft certificate guide](https://learn.microsoft.com/en-us/azure/app-service/configure-ssl-certificate?tabs=apex).
+## 7. DNS and certificate operations
 
-## 10. Phase H — branch-bound CI/CD
+These records are saved in the existing cPanel/HostGator `pragathiews.org` zone:
 
-Recommended deliverables: explicit `backend-stage.yml` and `admin-stage.yml`, plus dev equivalents if hosted, or a carefully validated reusable workflow with unambiguous caller mappings. Do not use a default target that falls back to production.
+| Type | Name | Value | TTL |
+|---|---|---|---|
+| CNAME | `stage.edu` | `edunexa-stage-admin-pragathi.azurewebsites.net` | 300 |
+| TXT | `asuid.stage.edu` | `4955B365A7078FC9F165FAAF6AA683137E4842CCE2644F73512C1C8370B1C26A` | 300 |
 
-For each deploy job:
+Azure hostname `stage.edu.pragathiews.org` is bound to the stage frontend with SNI. Managed certificate thumbprint: `0243EF0E5A7AD7C1E114199E8A9D49EDAD553967`; observed expiry: 17 May 2027. Production `edu` / `api` records were not changed. No separate stage API custom hostname is needed for the current setup.
 
-- Bind the GitHub environment (`stage` / `development` / `production`). Configure allowed deployment branches in GitHub and scope credentials to that environment's resources.
-- Add a ref guard covering push and manual dispatch. Example stage job condition: `if: github.ref == 'refs/heads/stage'`; production must check `refs/heads/main`.
-- Use separate concurrency groups such as `stage-backend-azure` and `stage-admin-azure`; prevent an in-progress deployment from being canceled half way. Coordinate any workflows sharing a target.
-- Include source, workflow, deployment-tool and relevant DB/migration paths in triggers. Migration-only changes must run the appropriate gate, even if the backend code is unchanged.
-- Keep PR checks credential-free. Do not expose deployment secrets to untrusted fork PRs or use unchecked PR code in privileged deployment jobs.
-- Backend: install dev requirements, run isolated tests, package only backend source, verify excluded secret paths, deploy after tests/migration gates, then run real post-deploy smoke checks.
-- Frontend: Linux Node 24, `npm ci`, typecheck/lint as required, build with SHA, assemble `.next/standalone` + `.next/static` + `public`, remove `.env*`, deploy, smoke-test custom-domain login and API proxy.
-- Do not hardcode production publish profile names in stage workflows. Use dedicated stage/dev identity/profile; remove production-secret fallbacks from non-production jobs.
-- Store immutable artifacts and record deployed SHA/environment. Choose retention sufficient for agreed rollback needs; current frontend retention of 7 days may be inadequate.
+The Cloud Shell CLI's SSL-bind command failed with `NoneType` host-name deserialization. The existing certificate was successfully bound with the documented ARM `PUT .../sites/{app}/hostNameBindings/{hostname}?api-version=2024-11-01` operation, setting `sslState=SniEnabled` and the certificate thumbprint. Do not disable certificate validation or recreate resources to work around that CLI error. [Microsoft hostname-binding API](https://learn.microsoft.com/en-us/rest/api/appservice/web-apps/create-or-update-host-name-binding?view=rest-appservice-2024-11-01).
 
-Prefer environment-scoped OIDC federation and least-privilege Azure deployment rights. Configure `id-token: write` only where needed and bind the federation subject to the intended GitHub environment. If retaining publish profiles initially, use distinct profiles for each app/environment, keep them secret, and validate publishing authentication settings. [Microsoft GitHub Actions deployment guide](https://learn.microsoft.com/en-us/azure/app-service/deploy-github-actions?tabs=openid).
+## 8. Daily deployment and 503 troubleshooting
 
-Do not inject DB credentials into GitHub jobs unless a scoped migration/SQL acceptance step actually needs them. Runtime secrets remain on the appropriate App Services/vault. Changes to runtime configuration need validation even when code artifacts are identical.
+Work on `stage`, review changes, run relevant checks and push to `origin stage`. Watch both stage workflows. A frontend-only successful build is insufficient if the API is still deploying. Documentation-only changes do not trigger the stage deployment path filters.
 
-## 11. Phase I — migration and rollback lifecycle
+Check the three layers independently:
 
-Implement an explicit SQL Server-compatible migration runner/artifact, with ordered versions, applied-version tracking, target validation, one migration lock, failure logging and tested rollback/recovery procedures. Review existing `tools/migrate.py` and `apply_schema.py`: their PostgreSQL-oriented behavior is not a ready Azure SQL runner.
+```bash
+curl -fsS https://edunexa-stage-api-pragathi.azurewebsites.net/health
+curl -fsS https://edunexa-stage-api-pragathi.azurewebsites.net/api/v1/auth/roles
+curl -fsS https://stage.edu.pragathiews.org/api/college/auth/roles
+```
 
-For each release: back up/check recovery point → rehearse migration in stage → apply additive/backward-compatible DDL where possible → deploy compatible API/frontend → validate data plane → enable any intentionally tested side effects. Coordinate backend and frontend when contracts change; the current independent workflows provide no atomic cross-service release.
+Expected: health `status=ok`, `storage=sqlserver`, `files=azureblob`, signer configured; direct and proxied role lists return HTTP 200. `/auth/me` without a session should be unauthorized.
 
-Rollback: identify last accepted artifact/SHA and configuration snapshot, redeploy known compatible code, and verify flows. A code rollback does not undo schema/data changes. For incompatible data changes use the rehearsed forward-fix/restore path, with a separate target restoration and controlled cutover. Do not automatically copy `edu_stage` over production or promote sanitized stage data. Re-running an old workflow can use current settings and dependencies; retaining and redeploying known artifacts is stronger evidence of a reproducible rollback.
+The initial dashboard 503 occurred before its Node package was deployed. That cleared after frontend deployment. The later **roles API 503** occurred because the frontend was already live while the Python API was still in its test/build/deploy/startup sequence. Backend deployment then passed and the exact proxied roles URL returned HTTP 200 with 18 roles. This was initial deployment ordering/availability, not a DNS repair or role-permission change.
 
-## 12. Phase J — mobile environment parity
+For a recurrence:
 
-For **both** Flutter projects:
+1. Check direct API health, direct roles and proxied roles separately.
+2. If health is unavailable, inspect the backend workflow and Azure startup logs; verify Python runtime, `sh startup.sh`, dependency installation, port and required settings.
+3. If health works but direct roles fails, inspect SQL connectivity, contained user access, schema and database wake-up. `/health` alone does not query SQL. The stage database is serverless and may pause after inactivity.
+4. If direct roles works but proxied roles fails, verify the frontend's **runtime** `EDUNEXA_API_URL`, upstream TLS/reachability and the proxy timeout (25 seconds).
+5. If public roles works but sign-in fails, verify role assignment/client policy, active account, staff OTP sender/allowlist, code expiration and session-cookie behavior. Do not enable password fallback or broaden access merely to hide the error.
+6. For an OIDC failure, match issuer/audience/the actual presented subject and inspect stage app-scoped role assignments; do not use production publish-profile secrets.
 
-1. Provide explicit `API_BASE_URL` and `ALLOW_INSECURE_HTTP=false` for hosted stage/dev and all release builds. `allowInsecureHttp` currently defaults true, so do not rely on README HTTPS claims.
-2. Add stage/dev flavors or separate identifiers and visible display names for side-by-side installation. Confirm Android applicationId, iOS bundle ID, signing, URL schemes, secure-storage keys and any keychain groups are independent.
-3. Register separate stage/dev Firebase apps/projects and use their native config/build defines. Existing Android defaults point to the production Firebase project; changing only the API URL does not isolate push.
-4. Remove copied production device registrations server-side and prove logout unregisters the right environment. Test notifications on physical Android/iOS devices; emulator/widget tests do not prove APNs/FCM delivery.
-5. Test staff OTP, family setup, session refresh, role restore, linked-child boundaries, uploads, PDF/download/share, camera/audio permissions where used and sandbox payment resumption.
-6. Store signing credentials securely and produce clearly labeled stage artifacts through a controlled distribution channel. Do not replace the production app/store release while testing stage.
+Keep logs free of connection strings, keys, OTP values, password hashes and bearer/refresh tokens. A response from the public login page does not prove authenticated access.
 
-Local-only backend may use `local-json`/local files for fast work, but SQL Server staging checks remain necessary. Android emulator host access is `10.0.2.2:8010`; physical devices need a reachable development host. Allow HTTP only through an explicit debug-only setup and document that it is not the hosted/release policy.
+## 9. Release acceptance and rollback
 
-## 13. Acceptance criteria and evidence
+Completed: independent apps/plan/storage; schema and SQL isolation; copied login/role parity; DNS/TLS; branch/environment controls; backend/frontend CI/deploy success; public health and proxied role responses; local and CI tests; Blob round-trip; read-only production login-page HTTP 200.
 
-Do not mark setup complete merely because resources exist or `/health` returns 200. `/health` reports selected adapters, not DB/Blob connectivity. Save sanitized results in `docs/environments/VALIDATION.md` with timestamp, resource/environment, deployed SHA, steps and result.
+Still validate separately before treating stage as full institutional acceptance: authenticated session/OTP receipt where not yet recorded, every required business workflow with representative stage records, all client import templates, physical mobile builds/push, payment sandbox, recovery targets and restore/rollback rehearsal. Empty finance/student screens are expected until stage business data is entered or an explicitly approved data migration occurs.
 
-- [ ] Production resource/DNS/config baseline captured; production remains functional.
-- [ ] `stage` deploys only stage; `develop` deploys only development if hosted; `main` alone can deploy production, including manual runs.
-- [ ] Only one authoritative frontend pipeline per target; workflow and GitHub environment restrictions agree.
-- [ ] API SQL query confirms `edu_stage` / `devdb`; runtime credential cannot read/write the production database.
-- [ ] Schema/version/constraints agree with the selected release and startup has no missing-table/column errors.
-- [ ] SQL/Blob/reference data are coherent and sanitized; copied tokens/OTPs/devices are gone.
-- [ ] JWT/signing/deploy/provider credentials are independent, absent from packages/logs/source.
-- [ ] Login page, same-origin proxy, staff OTP and family setup work with controlled recipients.
-- [ ] Wrong role/client, unrelated child and unauthorized file requests are denied.
-- [ ] Enrollment, fees/receipt, deposit proof/review, academics, attendance, assignment and certificate flows pass.
-- [ ] Role/account changes, pending change acceptance/rejection and session revocation pass.
-- [ ] Test upload/download affects only non-production storage; anonymous access is denied.
-- [ ] Reminders and delivery boundaries cannot reach real students/parents; payment flow is unset or sandboxed.
-- [ ] Custom-domain DNS, certificate, redirects, public links and cookies work.
-- [ ] Both mobile apps use non-production API/Firebase/session namespaces and HTTPS.
-- [ ] Backend tests, relevant SQL tests, frontend checks/representative browser tests and Flutter checks have recorded results; failures are explained without weakening authorization.
-- [ ] Restore/rollback rehearsal completed in non-production with code/schema/config compatibility documented.
-- [ ] Owner/access/cost/backup/monitoring inventory and operator instructions are complete.
+Record release SHA, run URLs, settings snapshot location, schema version and test results. Roll code back to a retained compatible artifact/SHA; code rollback does not undo data/schema changes. Rehearse schema changes in stage first and use additive compatible migrations where possible. Never copy stage over production or promote stage sessions/secrets/data when merging code into `main`.
 
-Isolation proof should include a uniquely named staging test record/file, verified absent from production through authorized read-only inspection, plus credential-level denial of production access. Do not issue speculative production writes to test isolation. Capture email/push sandbox evidence without storing OTP values or real PII.
+## 10. Development and mobile follow-up
 
-## 14. Required final implementation deliverables
+No hosted development resource or `develop` branch was created in this staging task. For development, confirm branch convention, create an independent `devdb` and contained user, separate API/frontend/storage and secrets, then provision a `development` GitHub environment and identity restricted to that branch/resources. Recheck quotas and actual runtime availability. Existing stage tools deliberately hardcode stage targets; extend and test explicit environment parameters rather than blindly replacing strings or feeding them production `.env`.
 
-1. Reviewed branch/environment-specific workflow changes, with manual-ref guards and overlapping workflow resolution.
-2. Environment-aware config generator, placeholder templates, target/secret-leak validation and tests for rejection paths.
-3. Idempotent infrastructure instructions/IaC and a sanitized actual-resource inventory.
-4. SQL schema provisioning/migration artifacts, sanitized test seeding and safe refresh procedure.
-5. Separate storage and credential setup, recipient safety controls and sandbox callback instructions.
-6. DNS/TLS record instructions with actual stage host verification details delivered through appropriate private channels.
-7. Mobile flavor/build/distribution instructions and tested non-production configurations.
-8. Smoke/acceptance results, deployment SHAs/artifacts, recovery procedure and a list of genuine remaining blockers.
+Local work can use `local-json` and local files for fast testing. Azure SQL integration acceptance must still run against a private database/schema. Never run destructive integration fixtures against production.
 
-### Paste-ready task for the next Codex session
+Existing mobile builds continue to use their configured production backend. For each Flutter project, a stage build must explicitly use:
 
-> Read `docs/PROJECT_HANDOVER.md`, `docs/PROJECT_INVENTORY.md` and `docs/STAGE_AND_DEVELOPMENT_CODEX_INSTRUCTIONS.md`. Implement the isolated staging environment requested here: branch `stage`, Azure SQL database `edu_stage`, separate backend and frontend App Services, private non-production Blob storage, domain `stage.edu.pragathiews.org`, branch-bound CI/CD and independent secrets. Treat `stage_appservice` as a logical label and choose a valid available Azure app name. Also prepare the independent development environment using the documented proposed `develop`/`devdb` convention, resolving existing repository conventions first. Discover actual production resource settings before using historic examples. Preserve production on `main`, audit duplicate frontend workflows and manual dispatch guards, sanitize any copied data and sessions, and contain email/push/SMS/payment side effects before startup. Make settings generation and migrations explicitly environment-aware, update both Flutter projects for isolated builds, run the acceptance criteria and write actual-resource/validation/rollback documentation. Do not report any cloud step as complete without evidence. Continue through all authorized implementation and verification work; clearly identify missing external access or decisions that prevent completion.
+```bash
+flutter run --dart-define=API_BASE_URL=https://edunexa-stage-api-pragathi.azurewebsites.net --dart-define=ALLOW_INSECURE_HTTP=false
+```
+
+Separate stage package/bundle IDs, secure-storage namespaces, Firebase registrations, names and signing/distribution are future work for side-by-side installations. Native stage artifacts were not built in this task. A visible stage badge and no-index metadata are also follow-up UI changes, not claimed implemented behavior.
+
+### Task for a future Codex session
+
+> Read the three project docs and `docs/environments/STAGE_DEPLOYMENT.md`. Verify current stage health, direct/proxied roles and latest successful run/SHA before making changes. Preserve the existing `edu_stage`, App Services, private storage and production login behavior. Complete any remaining recorded acceptance, migration/recovery and mobile-stage work without claiming untested flows passed. If asked to create development, implement it with independent resources/credentials and branch-bound CI/CD, following the actual confirmed topology rather than obsolete `stagedb` or domain examples. Do not recreate a working stage environment or change production as a shortcut.

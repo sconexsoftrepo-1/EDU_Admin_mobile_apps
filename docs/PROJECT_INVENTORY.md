@@ -1,8 +1,8 @@
 # Edu-Pragathi source inventory
 
-Prepared: 18 November 2026. Baseline: `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb`.
+Updated: 18 November 2026. Source baseline: stage implementation `5fd5050c2104b6873dfb78597b5c39d86641ce8f` (production baseline `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb`).
 
-Generated from checked-in JSON contracts and Python literal descriptors without importing the application, connecting to a database or reading secrets. Read with [the narrative handover](PROJECT_HANDOVER.md) and [environment instructions](STAGE_AND_DEVELOPMENT_CODEX_INSTRUCTIONS.md).
+The screen/resource lists were generated from checked-in JSON contracts and Python literal descriptors without application imports. The deployment appendix below adds verified Azure, SQL and CI/CD evidence; no secret values are included. Read with [the narrative handover](PROJECT_HANDOVER.md) and [environment instructions](STAGE_AND_DEVELOPMENT_CODEX_INSTRUCTIONS.md).
 
 ## 1. Counts and meaning
 
@@ -503,7 +503,7 @@ Paths below come from `resources.json`; `generic_api` is a catalog flag, not a p
 
 The following are source-file counts, not executed/passed test counts:
 
-- `backend/tests`: 53 matching test files (`test_*.py`).
+- `backend/tests`: 54 matching test files (`test_*.py`).
 - `admin-dashboard/tests`: 21 matching test files (`*.spec.ts`).
 - `mobile-apps/admin_teachers/test`: 18 matching test files (`*_test.dart`).
 - `mobile-apps/parent_student/test`: 18 matching test files (`*_test.dart`).
@@ -511,3 +511,47 @@ The following are source-file counts, not executed/passed test counts:
 Representative backend coverage files: `test_otp_login.py`, `test_family_access.py`, `test_login_administration.py`, `test_person_login_management.py`, `test_edit_approvals.py`, `test_azure_blob_files.py`, `test_fee_payments_and_cash.py`, `test_attendance_workspace.py`, `test_assessment_workspace.py`, `test_academic_progress.py`, `test_certificate_workspace_regressions.py`, `test_sqlserver_integration.py`.
 
 Historical visual evidence: `docs/handover/2026-10-31/` and `docs/verification/2026-10-31/`. New product documentation should use freshly validated staging screenshots with fictional records.
+
+## 8. Verified deployment and access inventory
+
+| Item | Current evidence |
+|---|---|
+| Azure subscription / group | `fa7aff08-db6d-4b24-bb39-95dff95cf969` / `Pragathi` |
+| Production App Services / plan | `edunexa-api-pragathi`, `edunexa-admin-pragathi`; `asp-edunexa`, Linux B1, West US 3 |
+| Stage App Services / plan | `edunexa-stage-api-pragathi`, `edunexa-stage-admin-pragathi`; independent `asp-edunexa-stage`, Linux B1, West US 3 |
+| Production SQL | `pragathiedu.database.windows.net` / `eduadmin` |
+| Stage SQL | Same logical server / separate `edu_stage`, `dbo`, Central US |
+| Stage schema | 150 tables, 5 views, 162 DML triggers; matched to extracted source DACPAC |
+| Stage SQL principal | Contained `edunexa_stage`; successful stage connection and explicit production connection denial |
+| Application identities | 3 production accounts and 18 roles copied; login IDs/password hashes/client policies verified; temporary bootstrap identity removed |
+| Stage data scope | Schema and account/role snapshot; production transactions, sessions, OTPs, device registrations and file bytes not copied |
+| Stage Blob | Separate `pragathiedustage` account / private `edu-stage` container / `uploads` prefix, West US 3; test object upload/download/delete passed |
+| Stage website | `https://stage.edu.pragathiews.org`; login page deployed and HTTP 200 verified |
+| Stage API | `https://edunexa-stage-api-pragathi.azurewebsites.net`; deployed; health and proxied login roles verified HTTP 200 |
+| Stage deploy identity | User-assigned `edunexa-stage-github`; Website Contributor on the two stage apps only |
+| GitHub controls | Environment `stage`, stage-branch restriction, `STAGE_DEPLOY_ENABLED=true`, distinct concurrency per app |
+| Login email | Existing ACS sender with explicit active-copied-login recipient allowlist |
+| Disabled stage side effects | Semester reminders, push providers, SMS and payment adapters |
+| Hosted development / native stage release | Not created; proposals and build instructions remain in the environment runbook |
+
+Resource/schema counts describe different things: 141 catalog resources are not the same as 150 physical SQL tables, and 98 screen descriptors are not 98 independent business-workflow acceptance results.
+
+## 9. Deployment tools and verification evidence
+
+| File / workflow | Purpose |
+|---|---|
+| `deploy/azure/make_stage_settings.py` | Explicit private stage configuration; fixed DB/app/origin boundaries and controlled email recipients |
+| `deploy/azure/apply_stage_settings.py` | CI bootstrap configuration validation and application to stage API only |
+| `deploy/azure/initialize_stage_schema.py` | Schema-only extraction/script/first-time publish to empty `edu_stage` |
+| `deploy/azure/prepare_stage_database.py` | Contained runtime user, independent signing/JWT keys and temporary bootstrap |
+| `deploy/azure/copy_stage_logins.py` | Explicit account/role parity migration; no sessions/devices/payment/grade/message copy |
+| `deploy/azure/verify_stage_data.py` | Stage schema, active administrator and temporary Blob round-trip checks |
+| `deploy/azure/tests/test_stage_settings.py` | Seven target/origin/secret-input/recipient guard checks |
+| `backend/tests/test_email_allowlist.py` | Delivery-boundary allowlist and unchanged unrestricted-default behavior |
+| `.github/workflows/backend-stage.yml` | Stage backend tests/configuration/deployment/health |
+| `.github/workflows/admin-stage.yml` | Stage frontend standalone build/deployment/login check |
+| `docs/environments/STAGE_DEPLOYMENT.md` | Actual resources, DNS/TLS, release state and remaining acceptance |
+
+Verification performed: local backend **320 passed, 1 skipped**; focused OTP/family/email **17 passed**; stage configuration **7 passed**. Backend CI passed: **315 passed, 6 skipped**, plus seven deployment configuration tests. Both stage frontend/backend build/deploy workflows passed. Live SQL and Blob checks passed. Backend health and the exact proxied roles URL returned HTTP 200, with 18 roles; authenticated-session verification is recorded separately in the deployment log. A public login-page response alone does not prove API readiness.
+
+CI evidence: [stage frontend run](https://github.com/sconexsoftrepo-1/EDU_Admin_mobile_apps/actions/runs/44202660890), [stage backend run](https://github.com/sconexsoftrepo-1/EDU_Admin_mobile_apps/actions/runs/44202660972).

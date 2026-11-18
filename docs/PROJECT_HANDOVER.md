@@ -1,12 +1,12 @@
 # EduNexa / Edu-Pragathi — complete project handover
 
-Prepared: 18 November 2026. Source baseline: `main`, commit `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb`.
+Updated: 18 November 2026. Production source baseline: `fb0b8926ed8a5fc85fc73063a01b8b8cd02053cb`; staging implementation: branch `stage`, commit `5fd5050c2104b6873dfb78597b5c39d86641ce8f`.
 
 Purpose: give a new maintainer, college stakeholder, or document/presentation author a single source for understanding the application. Read this with [the complete screen and resource inventory](PROJECT_INVENTORY.md) and [the stage/development implementation instructions](STAGE_AND_DEVELOPMENT_CODEX_INSTRUCTIONS.md).
 
 ## 1. Evidence and interpretation
 
-This handover is based on the current repository, source contracts, configuration classes, workflows, test source, and selected non-secret local environment settings. No Azure resources, production records, GitHub settings, DNS records, or running applications were changed or queried for this handover. No application test suite was executed during this documentation task. Existing tests and archived screenshots provide verification material, not a new acceptance result.
+This handover now includes repository review and the staging implementation performed on 18 November 2026. Azure resources, GitHub Actions, SQL metadata, DNS, file storage and deployed web responses were inspected. Separate stage services/storage were created, the user-created `edu_stage` database was initialized, and production application logins/roles were copied into stage at the user’s request. Production business data, sessions and device registrations were not copied; production app resources and DNS bindings were not changed. Local backend tests passed: **320 passed, 1 skipped**; seven stage-configuration tests and 17 focused OTP/family/email tests also passed. Backend CI tests passed. Application acceptance remains distinct from those test results. See [the deployment record](environments/STAGE_DEPLOYMENT.md) for current release checks.
 
 Use these distinctions throughout:
 
@@ -63,6 +63,11 @@ EduDesk and EduNest (Android / iOS)
 GitHub main
   -> backend tests -> backend ZIP -> production API App Service
   -> Next.js build -> standalone ZIP -> production web App Service
+
+GitHub stage (environment-scoped OIDC; independent app targets)
+  -> backend tests + stage guards -> backend ZIP -> stage API App Service
+  -> Next.js build -> standalone ZIP -> stage web App Service
+  -> edu_stage + private pragathiedustage / edu-stage storage
 ```
 
 The browser uses the same-origin Next proxy. The proxy holds authentication tokens in HttpOnly cookies and forwards authorized requests to Python; normal web JavaScript does not need the bearer tokens. Mobile clients call the backend directly and manage refresh sessions using native secure storage. The server, rather than a selected UI role or hidden button, decides what records and actions a person may access.
@@ -173,7 +178,7 @@ Typical responsibilities, subject to actual grants:
 | Transport / driver | Vehicles, routes, allocations, manifests and assigned operations |
 | Student / parent | Own/linked academic, financial, attendance and service information |
 
-Role names and role selection are not authorization. A role being present in frontend templates does not establish that the live database has provisioned it.
+Role names and role selection are not authorization. A role being present in frontend templates does not establish that the live database has provisioned it. The current production identity snapshot contains **3 application logins and 18 roles**; those were copied to stage and checked for matching login IDs, password hashes, active flags, role assignments and client policies. This is a point-in-time copy, not continuous synchronization. Stage has independent JWT/signing keys and sessions. The temporary bootstrap login/role were removed.
 
 ## 7. Account management and governance
 
@@ -329,14 +334,14 @@ Android minimum SDK is documented as 24; iOS setup is documented as 15+ and requ
 | Local JSON `var/` | Offline/test data when explicitly selected | Development only; not a production data strategy |
 | Browser | HttpOnly session cookies; role/navigation preferences as implemented | Browser storage is not the college system of record |
 | Native secure storage | Refresh/session information via Keychain/Keystore | Environment-specific installs/namespaces must avoid mixed sessions |
-| GitHub artifacts | Packaged application code, retention currently 7 days for frontend build artifacts | Not DB backups and not a long-term rollback archive |
+| GitHub artifacts | Packaged application code; frontend artifact retention is 7 days in the existing production workflow and 30 days in the stage workflow | Not DB backups and not a long-term rollback archive |
 | Secrets stores / ignored local files | DB credentials, JWT/signing/provider keys | Never embed in user guides, frontend bundles or mobile builds |
 
 `files.py` supports Azure, S3, Supabase and local backends; current local configuration selects Azure. Azure metadata includes provider/container/blob reference; ordinary file inventory contains original filename, MIME, byte size, SHA-256 and timestamps. Azure download links can be read-only SAS links, normally 5 minutes. File metadata and corresponding bytes must remain consistent across backups/clones.
 
-Local non-secret observations: SQL server `pragathiedu.database.windows.net`, DB `eduadmin`, schema `dbo`; Blob account `pragathiedu`, container `edu`, prefix `uploads`. These are **candidate current targets**, not verified live Azure inventory. Older deploy notes name `edupragathi` / `edu-dev` and regions that differ from mobile URLs. Resolve actual live settings before provisioning or migration.
+Current deployment evidence identifies SQL server `pragathiedu.database.windows.net`, production DB `eduadmin` and schema `dbo`. Stage uses the same logical server with a separate **`edu_stage`** database and contained **`edunexa_stage`** principal; its inability to connect to `eduadmin` was verified. Stage schema matches the extracted source: **150 tables, 5 views and 162 triggers**. Stage files use the separate **`pragathiedustage`** account, private **`edu-stage`** container and `uploads` prefix; upload/download/delete verification passed. The older local production Blob settings name `pragathiedu` / `edu`; they are not used by stage. Older deploy notes naming `edupragathi` / `edu-dev` are obsolete for this deployment.
 
-Database size, Blob consumption, Azure SKU/region, retention, recovery point/time targets, budget and user limits were not measured. They must be recorded from actual resources rather than invented. Back up SQL, Blob and signing secrets together as a documented recovery set; test restoration in an isolated environment.
+Database size, Blob consumption, backup retention, recovery point/time targets, budget and user limits were not measured. App Service SKU/regions and stage database region are now recorded below. They must be recorded from actual resources rather than invented. Back up SQL, Blob and signing secrets together as a documented recovery set; test restoration in an isolated environment.
 
 ## 11. Azure services and operational configuration
 
@@ -344,12 +349,12 @@ Database size, Blob consumption, Azure SKU/region, retention, recovery point/tim
 |---|---|
 | Azure Linux App Service API | Workflow target `edunexa-api-pragathi`; Python source ZIP, Azure dependency build, `sh startup.sh` |
 | Azure Linux App Service frontend | Workflow target `edunexa-admin-pragathi`; standalone Node ZIP, `node server.js` |
-| App Service plan | Shared plan described in existing docs; actual SKU/region/capacity unverified |
-| Azure SQL Database | SQL Server runtime; exact deployed server/database must be discovered |
-| Azure Storage / private Blob | Implemented adapter and local Azure file settings |
-| Azure Communication Services Email | `EDUNEXA_EMAIL_CONNECTION_STRING`, sender and sender-name settings for codes/notices |
-| DNS and TLS | User identifies production at `edu.pragathinews.org`; bindings/certificates were not queried |
-| GitHub Actions | Current deployment automation; GitHub secrets hold deployment credentials |
+| App Service plans | Production `asp-edunexa`: Linux B1, West US 3. Stage `asp-edunexa-stage`: separate Linux B1, West US 3. Central US B1 creation was blocked by zero regional quota |
+| Azure SQL Database | `pragathiedu`: production `eduadmin`, stage `edu_stage`; stage database is in Central US, General Purpose Serverless |
+| Azure Storage / private Blob | Stage `pragathiedustage` / private `edu-stage`, West US 3; public Blob access disabled |
+| Azure Communication Services Email | Stage reuses the configured ACS sender with `EDUNEXA_EMAIL_ALLOWED_RECIPIENTS` restricted to active copied login emails; reminders disabled |
+| DNS and TLS | Production `edu.pragathiews.org`; stage `stage.edu.pragathiews.org`, CNAME and ownership TXT saved in cPanel, Azure SNI certificate bound |
+| GitHub Actions | Existing production workflows use publish profiles. Stage workflows use the `edunexa-stage-github` OIDC identity, scoped to the two stage apps |
 | Firebase | External to Azure; direct FCM service-account or push-adapter path |
 
 API settings include `EDUNEXA_JWT_SECRET` (minimum 48 characters), storage selection, `EDUNEXA_MSSQL_HOST/PORT/NAME/USER/PASSWORD/DB_SCHEMA/ENCRYPTION`, Azure file settings, public API/portal URLs, JSON CORS origins, certificate signing key, email settings, staff-password policy, API docs and reminder settings. See the environment runbook for a complete classified configuration map.
@@ -358,6 +363,24 @@ The backend runs an in-process hourly reminder worker when enabled and using rem
 
 `/health` reports configuration status, storage backend, file adapter and signer configuration. **It does not execute a DB query or Blob round-trip**, so HTTP 200 alone cannot prove the data plane is working. Add authorized record and upload/download checks to acceptance.
 
+## 11.1. Actual staging environment
+
+| Component | Current target / status |
+|---|---|
+| Branch / GitHub environment | `stage` / `stage`, deployments restricted to the stage branch |
+| Dashboard | `https://stage.edu.pragathiews.org/portal/login` — deployed, HTTP 200 verified |
+| Dashboard Azure host | `https://edunexa-stage-admin-pragathi.azurewebsites.net` |
+| API | `https://edunexa-stage-api-pragathi.azurewebsites.net` — deployed; health and proxied login roles verified HTTP 200 |
+| SQL | `pragathiedu.database.windows.net` / `edu_stage` / `dbo`; independent contained SQL user |
+| Files | `pragathiedustage` / private `edu-stage`; verified round-trip |
+| Access | Same 3 production application accounts and 18 roles; independent stage sessions/keys |
+| Business records | Fresh stage database; production transactional/master data and uploaded files were not cloned |
+| Outbound services | Login email limited to copied active login addresses; scheduled reminders, push, SMS and payments disabled |
+| Development | `develop` / `devdb` remain a proposal; no hosted development environment was created |
+| Native apps | Existing builds still use their configured production URL; stage builds require explicit `API_BASE_URL` |
+
+Backend/API availability must be checked separately from the dashboard. During initial deployment, the dashboard’s `/api/college/auth/roles` returned 503 while the API package was not yet running. That exact URL now returns HTTP 200 with 18 roles after backend startup. Direct health reports SQL Server, AzureBlob and a configured signer. Authenticated-session and business acceptance are separate from DNS/HTML readiness.
+
 ## 12. Current CI/CD and hazards to resolve
 
 | File | Trigger / behavior |
@@ -365,16 +388,18 @@ The backend runs an in-process hourly reminder worker when enabled and using rem
 | `.github/workflows/backend-azure.yml` | `main`, filtered to backend/workflow changes; Python tests → backend-only ZIP → API deployment → `/health` polling |
 | `.github/workflows/admin-azure.yml` | `main`, filtered to frontend/workflow changes; Node 24 install/build → standalone/static/public ZIP → frontend deployment → login polling |
 | `.github/workflows/main_edunexa-admin-pragathi.yml` | All `main` pushes; generated workflow uploads repository as artifact and deploys to the same frontend, without the curated standalone build |
+| `.github/workflows/backend-stage.yml` | `stage` backend/deploy/database changes; backend tests plus seven configuration guards → package → OIDC login → optional initial settings → stage API deploy → health polling |
+| `.github/workflows/admin-stage.yml` | `stage` frontend/deploy changes; standalone build → OIDC login → stage frontend deploy → login polling; artifact retention 30 days |
 
-The third workflow overlaps the curated frontend workflow and has no shared concurrency lock. It can redeploy the same production target independently and on documentation-only pushes. Its existence is a source finding; whether it is currently enabled in GitHub was not checked. Audit and consolidate it before creating environment workflows. Do not silently edit or disable production CI while preparing stage instructions.
+The generated production workflow overlaps the curated frontend workflow and has no shared concurrency lock; GitHub showed all three production workflows enabled. Production consolidation remains outstanding. Stage has one authoritative workflow per app. Stage jobs require both `github.ref == refs/heads/stage` and repository variable `STAGE_DEPLOY_ENABLED=true`, use the branch-restricted GitHub environment, and have no production publish-profile fallback. The Azure federation subject includes immutable repository identifiers: `repo:sconexsoftrepo-1@318086107/EDU_Admin_mobile_apps@1429245413:environment:stage`. Azure was updated to match the actual GitHub assertion after the first authentication attempt failed.
 
 Additional hazards:
 
-- Current production workflows allow manual dispatch without an explicit `main` guard; a dispatch from another ref can still use production targets. Protect both push and manual paths.
-- `make_backend_settings.py` reads **`backend/.env`**, copies all `EDUNEXA_*` values, may reuse/create a signing key, and writes a single ignored output. It has no environment-input option. Blind reuse can point stage at production data/providers.
+- The production workflow copies on `stage` now have explicit `main` deployment guards. These guard edits have not been merged into production `main`; review that production hardening separately.
+- `make_backend_settings.py` still reads **`backend/.env`** and is unsuitable for stage. Stage uses explicit private input through `make_stage_settings.py`, followed by target validation in `apply_stage_settings.py`. Never substitute the production generator for those tools.
 - `deploy.sh` reads one shared settings artifact and derives the API default hostname. Backend public URLs/CORS and frontend upstream must agree; explicit environment artifacts are needed.
 - Deployment checks test HTTP response, not record access, DB identity, upload isolation or payment safety.
-- Tests/builds do not run migrations; there is no complete stage/dev pipeline or automated SQL Server migration lifecycle shown by these workflows.
+- Stage CI/CD now exists; development CI/CD and a general SQL Server migration lifecycle remain unimplemented. The schema initializer is a first-time, empty-database tool, not a recurring deployment migration.
 - PostgreSQL/MySQL schemas are reference assets; never send them directly to Azure SQL as a new SQL Server installation script.
 
 ## 13. Development and validation reference
@@ -406,16 +431,16 @@ Backend default pytest fixtures explicitly use temporary local-json/file storage
 
 A handover acceptance session should exercise: Super Admin and delegated staff login; family first-time setup; role/client denials; unrelated-child denial; enrollment; fees/receipt; clerk deposit proof/review; attendance; assignment; assessment publication; certificate issuance/verification; private upload/download denial; payroll/payslip; import preview/commit; notifications; session expiry/logout; mobile physical-device login and downloads; deployment isolation and rollback.
 
-No fresh test-pass total, uptime percentage, concurrent-user capacity, completion percentage or production-readiness certification is asserted by this document.
+Verified local backend result for the staging change: **320 passed, 1 skipped**. The seven stage-generator checks and 17 focused OTP/family/email checks passed. Backend GitHub CI passed with **315 passed, 6 skipped**, plus seven configuration checks; both Azure application deployments succeeded. These results do not establish full business-workflow acceptance, uptime, load capacity, statutory compliance or a production-readiness certification.
 
 ## 14. Known gaps, dependencies and owner decisions
 
 | Item | Required next evidence/action |
 |---|---|
-| Live Azure topology differs across historic files | Record actual resource IDs, default hostnames, custom domains, region, plan and deployed settings |
-| Duplicate frontend deployment definition | Confirm enabled state, then consolidate with a reviewable change |
+| Historic Azure topology differs from current resources | Use the recorded subscription/resource group and current stage inventory; do not provision from old examples |
+| Duplicate production frontend deployment definition | Enabled state confirmed; consolidate with a reviewed production change |
 | Production/manual-dispatch branch isolation | Add explicit environment/ref guards and restricted credentials |
-| Stage/development do not yet exist in this review | Execute the separate instructions and capture proof |
+| Staging acceptance / development | Stage apps deployed and health/proxy roles verified; finish remaining authenticated/business UAT. Hosted development remains future work |
 | Mobile HTTP fallback | Enforce HTTPS in release configuration and platform manifests |
 | Payments/SMS | Establish provider, sandbox, callback/delivery tests and reconciliation |
 | Email/push | Validate real configured services with allowlisted test recipients; do not assume local keys prove delivery |
