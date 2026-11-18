@@ -114,7 +114,10 @@ export function roleScreens(
   if (!role) return [];
   if (role.system_admin) return screens;
   const allowed = screens.flatMap((screen) => {
-    if (screen.key === "change-requests") return [screen];
+    // Show Change Requests only when this role was explicitly granted the screen.
+    // The endpoint separately limits who may approve requests.
+    if (screen.key === "change-requests")
+      return role.screens?.includes(screen.key) ? [screen] : [];
     if (role.screens?.length && !role.screens.includes(screen.key)) return [];
     const resources = screen.resources.filter((target) =>
       role.permissions[target]?.includes("view"),
