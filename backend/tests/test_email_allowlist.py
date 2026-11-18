@@ -26,4 +26,6 @@ def test_allowed_recipient_and_existing_unrestricted_behavior(monkeypatch):
     monkeypatch.setattr("azure.communication.email.EmailClient.from_connection_string", lambda value: client)
     assert send_email(settings(["Tester@Example.org"]), "tester@example.org", "test", "body") is True
     assert send_email(settings(None), "ordinary@example.org", "test", "body") is True
-    assert len(messages) == 2
+    assert send_email(settings(["someone-else@example.org"]), "new-stage-user@example.org", "test", "body",
+                      allow_unlisted=True) is True
+    assert len(messages) == 3

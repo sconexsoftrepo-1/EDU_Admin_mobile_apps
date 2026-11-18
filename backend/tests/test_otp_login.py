@@ -12,7 +12,7 @@ VERIFY = "/api/v1/auth/otp/verify"
 @pytest.fixture
 def mailbox(app, monkeypatch):
     sent = []
-    monkeypatch.setattr(otp_login, "send_email", lambda settings, to, subject, text, html=None: sent.append(
+    monkeypatch.setattr(otp_login, "send_email", lambda settings, to, subject, text, html=None, **kwargs: sent.append(
         {"to": to, "subject": subject, "text": text, "html": html}) or True)
     with app.state.store.transaction() as d:
         d["accounts"]["ADMIN"]["email"] = "admin@pragathiews.org"
