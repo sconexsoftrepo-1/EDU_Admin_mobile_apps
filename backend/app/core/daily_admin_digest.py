@@ -81,7 +81,7 @@ def render_email(report, settings):
     report_date = _date.fromisoformat(report["day"])
     date_heading = report_date.strftime("%A, %d %B %Y")
     logo = "cid:pragathi-emblem"
-    navy, gold, pale, ink, muted = "#17356b", "#b87924", "#f4f7fb", "#202b3c", "#65748b"
+    navy, gold, pale, ink, muted = "#0B4E8A", "#C99700", "#F4F8FF", "#243247", "#66758A"
     def table(headers, rows):
         if not rows: rows = [["—" for _ in headers]]
         th = "".join(f"<th style='padding:10px 12px;text-align:left;background:{navy};color:#fff;font-size:12px'>{escape(str(h))}</th>" for h in headers)
@@ -95,20 +95,35 @@ def render_email(report, settings):
         for label, value in items:
             width = max(2, int(float(value)/maximum*100))
             shown = rupee(value) if money else str(value)
-            parts.append(f"<tr><td style='padding:5px 8px 5px 0;width:28%;font-size:12px;color:{ink}'>{escape(str(label))}</td><td style='padding:5px 0;width:52%'><div style='height:14px;width:{width}%;background:{gold};border-radius:3px'></div></td><td style='padding:5px 0 5px 8px;width:20%;font-size:12px;color:{ink}'>{shown}</td></tr>")
+            share = (float(value) / sum(float(v) for _, v in items) * 100) if money and sum(float(v) for _, v in items) else 0
+            parts.append(f"<tr><td style='padding:5px 8px 5px 0;width:28%;font-size:12px;color:{ink}'>{escape(str(label))}</td><td style='padding:5px 0;width:52%'><table role='presentation' width='100%' cellpadding='0' cellspacing='0'><tr><td style='height:13px;width:{width}%;background:{navy}'>&nbsp;</td><td style='height:13px;background:#E7EEF7'>&nbsp;</td></tr></table></td><td style='padding:5px 0 5px 8px;width:20%;font-size:12px;color:{ink}'>{shown}{f' ({share:.0f}%)' if money else ''}</td></tr>")
         return f"<h3 style='color:{navy};margin:16px 0 6px'>{escape(title)}</h3><table role='presentation' width='100%' cellpadding='0' cellspacing='0'>{''.join(parts)}</table>"
     def section(title, content):
         return f"<h2 style='margin:26px 0 10px;padding-bottom:8px;border-bottom:2px solid {gold};font-size:18px;color:{navy}'>{escape(title)}</h2>{content}"
     admissions_rows = [[kind, course, branch, year, count] for (kind,course,branch,year),count in sorted(report["admissions_breakdown"].items())]
     cash_rows = [["Opening balance",rupee(report["opening"])],["Cash received",rupee(report["cash_received"])],["Cash paid",rupee(report["cash_paid"])],["Accepted clerk deposits",rupee(report["deposits"])],["Closing balance",rupee(report["closing"])],["Tomorrow opening balance",rupee(report["tomorrow_opening"])]]
-    html = f"""<div style='margin:0 auto;max-width:760px;background:#fff;border:1px solid #e1e6ee;font-family:Arial,sans-serif;color:{ink}'>
-<div style='background:{navy};padding:24px;text-align:center'>{f"<img src='{escape(logo)}' alt='Pragathi logo' width='92' style='display:block;margin:0 auto 12px;background:#fff;border-radius:50%;padding:6px'>" if logo else ''}<div style='font-size:21px;font-weight:bold;color:#fff'>Pragathi Educational Institutions</div><div style='margin-top:8px;color:#f4d79e;font-size:16px'>Daily Analytics Report</div><div style='margin-top:5px;color:#fff;font-size:13px'>{escape(date_heading)}</div></div>
-<div style='padding:20px;background:{pale}'><table role='presentation' width='100%' cellpadding='0' cellspacing='8'><tr><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Payments received</div><b style='font-size:21px;color:{navy}'>{rupee(report['payment_total'])}</b></td><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Students paid</div><b style='font-size:21px;color:{navy}'>{report['students']}</b></td><td style='background:#fff;padding:14px;border-left:4px solid {gold}'><div style='color:{muted};font-size:12px'>Admissions</div><b style='font-size:21px;color:{navy}'>{report['applications']+report['enquiries']}</b></td></tr></table>
-{section('Payments',table(['Metric','Value'],[['Payment count',report['payments']],['Distinct students',report['students']],['Total received',rupee(report['payment_total'])]]))}
+    admissions_total = report['applications'] + report['enquiries']
+    total_admissions = report['applications'] + report['enquiries']
+    insights = []
+    if report['by_mode']:
+        mode, value = max(report['by_mode'].items(), key=lambda item: item[1])
+        share = float(value) / float(report['payment_total']) * 100 if report['payment_total'] else 0
+        insights.append(f"{mode} led collections at {share:.0f}% ({rupee(value)}).")
+    if report['by_course']:
+        course, value = max(report['by_course'].items(), key=lambda item: item[1])
+        insights.append(f"{course} recorded the highest course collections ({rupee(value)}).")
+    insights.append(f"Admissions received: {report['applications']} applications and {report['enquiries']} enquiries ({total_admissions} total records).")
+    insights.append(f"Cash closed at {rupee(report['closing'])}; tomorrow's opening balance is {rupee(report['tomorrow_opening'])}.")
+    insight_html = "<table role='presentation' width='100%' cellpadding='0' cellspacing='0' style='background:#FFF8E8;padding:14px'>" + "".join(f"<tr><td style='padding:5px 8px;color:{gold};font-size:16px'>&bull;</td><td style='padding:5px 0;color:{ink};font-size:13px'>{escape(item)}</td></tr>" for item in insights) + "</table>"
+    html = f"""<div style='margin:0 auto;max-width:760px;background:#fff;border:1px solid #e1e6ee;font-family:Arial,Helvetica,sans-serif;color:{ink}'>
+<div style='background:#fff;padding:20px;text-align:center;border-bottom:4px solid {gold}'>{f"<img src='{escape(logo)}' alt='Pragathi Educational Institutions logo' width='90' height='90' style='display:block;margin:0 auto 10px'>" if logo else ''}<div style='font-size:24px;font-weight:bold;color:#102A54'>Pragathi Educational Institutions</div><div style='margin-top:7px;color:{navy};font-size:19px;font-weight:bold'>Daily Analytics Report</div><div style='margin-top:6px;color:{muted};font-size:13px'>{escape(date_heading)}</div></div>
+<div style='padding:18px;background:{pale}'><h2 style='margin:0 0 10px;color:{navy};font-size:16px'>Executive Summary</h2><table role='presentation' width='100%' cellpadding='4' cellspacing='4'><tr><td width='25%' style='background:#fff;padding:12px;border:1px solid #d9e5f3;text-align:center'><div style='color:{muted};font-size:12px'>Payments Received</div><b style='font-size:20px;color:{navy}'>{rupee(report['payment_total'])}</b></td><td width='25%' style='background:#fff;padding:12px;border:1px solid #d9e5f3;text-align:center'><div style='color:{muted};font-size:12px'>Students Paid</div><b style='font-size:20px;color:{navy}'>{report['students']}</b></td><td width='25%' style='background:#fff;padding:12px;border:1px solid #d9e5f3;text-align:center'><div style='color:{muted};font-size:12px'>Admissions</div><b style='font-size:20px;color:{navy}'>{admissions_total}</b></td><td width='25%' style='background:#fff;padding:12px;border:1px solid #d9e5f3;text-align:center'><div style='color:{muted};font-size:12px'>Transactions</div><b style='font-size:20px;color:{navy}'>{report['payments']}</b></td></tr></table>
+{section('Payments Summary',table(['Metric','Value'],[['Payment count',report['payments']],['Distinct students',report['students']],['Total received',rupee(report['payment_total'])]]))}
 {bars('Received by transaction mode',report['by_mode'])}{bars('Received by course',report['by_course'])}{bars('Received by branch',report['by_branch'])}{bars('Received by academic year',report['by_year'])}
-{section('Admissions received',table(['Type','Course','Branch','Academic year','Count'],admissions_rows))}
+{section('Admissions Analysis',f"<table role='presentation' width='100%' cellpadding='4' cellspacing='4'><tr><td width='33%' style='background:#F4F8FF;padding:10px;text-align:center'><b>Applications<br>{report['applications']}</b></td><td width='33%' style='background:#F4F8FF;padding:10px;text-align:center'><b>Enquiries<br>{report['enquiries']}</b></td><td width='34%' style='background:#FFF4D6;padding:10px;text-align:center'><b>Total records<br>{admissions_total}</b></td></tr></table>" + table(['Type','Course','Branch','Academic year','Count'],admissions_rows))}
 {section('Daily operations',table(['Item','Count / amount'],[['Change requests raised',report['change_requests']],['Clerk deposits accepted',f"{report['deposit_count']} · {rupee(report['deposits'])}"]]))}
-{section('Cash position',table(['Balance item','Amount'],cash_rows))}<p style='margin:24px 0 0;color:{muted};font-size:11px'>Automated report for {escape(date_heading)}. Figures use records available at the time this report was generated.</p></div></div>"""
+{section('Cash Reconciliation',table(['Balance item','Amount'],cash_rows))}
+{section('Key Insights — Daily Observations',insight_html)}<p style='margin:24px 0 0;padding:12px;background:#F4F8FF;color:{muted};font-size:11px'>Automated Daily Analytics Report · {escape(date_heading)} · Figures reflect records available when this report was generated.</p></div></div>"""
     text = f"Daily college analytics — {date_heading}. Payments {rupee(report['payment_total'])}; {report['students']} students; admissions {report['applications']} applications and {report['enquiries']} enquiries; change requests {report['change_requests']}; clerk deposits {rupee(report['deposits'])}; cash closing {rupee(report['closing'])}; tomorrow opening {rupee(report['tomorrow_opening'])}."
     logo_file = Path(__file__).resolve().parents[2] / "assets" / "pragathi-emblem.png"
     attachments = []
