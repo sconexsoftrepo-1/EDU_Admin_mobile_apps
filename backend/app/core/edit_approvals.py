@@ -27,7 +27,7 @@ router = APIRouter(prefix="/edit-requests", tags=["Edit approvals"])
 TABLE = "edit_requests"
 PREFIX = "/api/v1"
 GATED_CLIENT = "admin-web"
-HIDDEN_FIELDS = {"code", "password", "password_hash", "storage_key", "profile_photo_storage_key", "revision"}
+HIDDEN_FIELDS = {"code", "password", "password_hash", "storage_key", "profile_photo_storage_key", "revision", "reason"}
 # Not edits of college records: the person's own session, messages and this approval API.
 EXEMPT = ("/auth/", "/chat/", "/mobile/", "/push/", "/public/", "/edit-requests")
 # Custom edit endpoints: route -> (table holding the data, readable name).
@@ -224,6 +224,7 @@ def queue(request, data, user, template, params, table, title, body):
             "before_record": json.dumps(before, ensure_ascii=False, default=str) if before else None,
             "requester_code": user["code"], "requester_name": viewer["name"],
             "requester_role": ", ".join(r for r in viewer["roles"] if r) or None,
+            "reason": str(body.get("reason") or "").strip() or None,
             "requested_at": now(), "decided_by": None, "decided_at": None, "decision_note": None, "last_error": None,
         }
         audit(live, user["code"], "edit_request", table or TABLE, request_code)
@@ -277,6 +278,10 @@ def evaluate(request, raw_body):
         return None  # The endpoint reports the malformed request.
     if not isinstance(body, dict):
         return None
+    if method == "PATCH" and template == "/finance/fee-payments/{code}":
+        reason = body.get("reason")
+        if not isinstance(reason, str) or not 8 <= len(reason.strip()) <= 500:
+            return JSONResponse({"detail": "Enter a reason for the change (8–500 characters)."}, status_code=422)
     # First save of a versioned record (for example today's attendance) creates it: nothing to approve.
     if request.method == "PUT" and body.get("revision") == 0:
         return None

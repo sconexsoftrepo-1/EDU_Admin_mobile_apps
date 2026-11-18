@@ -615,7 +615,7 @@ function TodayCollection({ refresh }: { refresh: number }) {
  * Shown when a payment is saved: the receipt in two copies (admin / staff and student), sent to
  * the printer as soon as it loads; it can be printed again or saved as a PDF.
  */
-function ReceiptPrintDialog({
+export function ReceiptPrintDialog({
   receipt,
   onClose,
 }: {
@@ -915,7 +915,7 @@ function amountInWords(value: number) {
 }
 
 /** Payment overview laid out like the printed receipt (same blocks, labels and order as the PDF). */
-function PaymentDetails({ row, onClose, onEdit }: { row: PaymentRow; onClose: () => void; onEdit?: () => void }) {
+export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: PaymentRow; onClose: () => void; onEdit?: () => void; onPrint?: () => void }) {
   const manualRow = !row.student_code;
   const number = row.receipt_number || row.code;
   const amount = rupees(Number(row.amount));
@@ -1027,6 +1027,11 @@ function PaymentDetails({ row, onClose, onEdit }: { row: PaymentRow; onClose: ()
         {row.note && <p className="rcp-note">Note: {row.note}</p>}
         {row.edited_at && <p className="rcp-note">Corrected on {shortDate(row.edited_at)}.</p>}
         <footer className="fcw-actions">
+          {onPrint && (
+            <button type="button" className="fcw-secondary" onClick={onPrint}>
+              <Printer size={15} /> Print receipt
+            </button>
+          )}
           {onEdit && (
             <button type="button" className="fcw-secondary" onClick={onEdit}>
               <Pencil size={15} /> Edit payment
@@ -1053,9 +1058,10 @@ const LEVEL_OPTIONS = [
  * Correct a manual payment. The admin's save applies at once; for any other role the change goes
  * to the admin as a change request and the payment stays as it is until the admin approves it.
  */
-function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () => void; onSaved: () => void }) {
+export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () => void; onSaved: () => void }) {
   const [from, to] = String(row.academic_year || "").split("-").map((y) => Number(y) || null);
   const [form, setForm] = useState({
+    reason: "",
     name: row.student_name || "",
     roll: row.roll_or_reference || "",
     admission: row.admission_number || "",
@@ -1078,6 +1084,7 @@ function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () =
     if (form.from === null || form.to === null || form.to <= form.from)
       return toast.warning("The academic year must end after it starts");
     const body: PaymentEdit = {
+      reason: form.reason.trim(),
       payer: {
         name: form.name.trim(),
         roll_or_reference: form.roll.trim() || null,
@@ -1111,10 +1118,15 @@ function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () =
     <SideDrawer title={`Edit payment · ${row.receipt_number || row.code}`} subtitle={row.student_name} onClose={onClose}>
       <form className="fcw-drawer-form fcw-form" onSubmit={save}>
         <p className="fcw-hint rcp-edit-hint">
-          The receipt number stays the same. Changes made by roles other than the admin are sent to the admin and apply only
-          after approval.
+          The receipt number and printed receipt format stay the same. Add a reason for this correction. Changes made by other
+          roles are sent to the admin and apply only after approval.
         </p>
         <div className="fcw-grid">
+          <label className="fcw-wide">
+            Reason for change *
+            <textarea required minLength={8} maxLength={500} rows={3} value={form.reason} onChange={(e) => set({ reason: e.target.value })}
+              placeholder="Explain why this payment needs to be corrected" />
+          </label>
           <label className="fcw-wide">
             Student name *
             <input required minLength={2} maxLength={200} value={form.name} onChange={(e) => set({ name: e.target.value })} />

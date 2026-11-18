@@ -195,6 +195,7 @@ function RequestCard({
       </header>
       <small className="edr-kind">{item.target_title}</small>
       {!canDecide && <Stages item={item} />}
+      {item.reason && <p className="edr-note"><strong>Reason for change:</strong> {item.reason}</p>}
       {item.changes.length > 0 ? (
         <div className="edr-table">
           <table>

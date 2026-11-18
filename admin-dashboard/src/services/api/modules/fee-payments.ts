@@ -51,6 +51,7 @@ export type PaymentRow = {
 };
 /** PATCH finance/fee-payments/{code}: correction to a manual payment. */
 export type PaymentEdit = {
+  reason: string;
   payer: {
     name: string;
     roll_or_reference: string | null;

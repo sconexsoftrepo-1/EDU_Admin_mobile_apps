@@ -14,6 +14,7 @@ export type EditRequest = {
   changes: EditRequestChange[];
   requester_name: string | null;
   requester_role: string | null;
+  reason?: string | null;
   requested_at: string;
   decided_at: string | null;
   decision_note: string | null;

@@ -316,6 +316,7 @@ def record(body: FeePaymentInput, request: Request, background: BackgroundTasks,
 class PaymentEditInput(StrictModel):
     """A correction to a payment recorded on the manual payments screen (the receipt number stays)."""
 
+    reason: str | None = Field(default=None, min_length=8, max_length=500)
     payer: PayerDetails
     semester: int = Field(ge=1, le=12)
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
@@ -349,6 +350,9 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
             raise HTTPException(404, "Payment not found")
         if not payment.get("payer"):
             raise HTTPException(409, "Only payments from the manual payments screen can be edited")
+        reason = body.reason.strip() if body.reason else None
+        if body.reason is not None and not reason:
+            raise HTTPException(422, "Enter a reason for the change")
         reference = body.transaction_reference
         if reference and any(p["code"] != code and p.get("transaction_reference") == reference and p.get("method") == body.method
                              for p in aw.rows(data, "payments")):
@@ -364,7 +368,7 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
         if receipt:
             receipt["issued_on"] = body.paid_on.isoformat()
             data["records"]["receipts"][receipt["code"]] = receipt
-        audit(data, user["code"], "edit", "payments", code)
+        audit(data, user["code"], "edit", "payments", code, reason=reason)
         return dict(payment)
 
 

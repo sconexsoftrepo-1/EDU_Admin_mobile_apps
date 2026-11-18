@@ -86,8 +86,8 @@ class Store:
             return copy.deepcopy(data)
 
 
-def audit(data, actor, action, resource, code):
-    # Deliberately excludes credentials, tokens, request bodies and student PII.
+def audit(data, actor, action, resource, code, reason=None):
+    # Deliberately excludes credentials, tokens and request bodies; details must stay concise.
     data["audit"].append(
         {
             "code": new_code("AUD"),
@@ -96,5 +96,6 @@ def audit(data, actor, action, resource, code):
             "resource": resource,
             "entity_code": code,
             "occurred_at": now(),
+            **({"reason": reason} if reason else {}),
         }
     )

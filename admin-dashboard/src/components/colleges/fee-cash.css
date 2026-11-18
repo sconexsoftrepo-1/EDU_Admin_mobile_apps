@@ -98,7 +98,7 @@
 .fcw-wide {
   grid-column: 1 / -1;
 }
-.fcw-form :is(input, select) {
+.fcw-form :is(input, select, textarea) {
   background: #fff;
   border: 1px solid var(--fcw-line);
   border-radius: 8px;
@@ -109,6 +109,13 @@
   min-width: 0;
   padding: 0 10px;
   width: 100%;
+}
+.fcw-form textarea {
+  font: inherit;
+  line-height: 1.45;
+  min-height: 84px;
+  padding: 9px 10px;
+  resize: vertical;
 }
 .fcw-hint {
   color: var(--fcw-muted);

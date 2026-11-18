@@ -109,6 +109,11 @@ class _ChangeRequestsWorkspaceState extends State<ChangeRequestsWorkspace> {
             ].join(' · '),
             style: text.bodySmall,
           ),
+          if ('${r['reason'] ?? ''}'.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text('Reason for change: ${r['reason']}', style: text.bodyMedium),
+            ),
           const SizedBox(height: 10),
           if (changes.isEmpty) Text('An action on this record.', style: text.bodySmall),
           for (final c in changes)

@@ -146,6 +146,7 @@ export type ReportsAnalyticsData = {
     days_overdue: number;
   }[];
   payments: {
+    code: string;
     date: string;
     amount: number;
     method: string;

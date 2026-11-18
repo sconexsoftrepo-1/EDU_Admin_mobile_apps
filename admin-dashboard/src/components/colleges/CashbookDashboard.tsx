@@ -6,12 +6,14 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Download, IndianRupee, Landmark, RotateCcw, Search, Smartphone, Wallet } from "lucide-react";
-import { api, errorText, type ReportsAnalyticsData } from "@/services/api";
+import { Download, Eye, IndianRupee, Landmark, Pencil, RotateCcw, Search, Smartphone, Wallet } from "lucide-react";
+import { api, errorText, type PaymentRow, type ReportsAnalyticsData } from "@/services/api";
 import { excelTable } from "@/lib/colleges/export-table";
 import { BarList, Donut, Empty, LoadFailed, Panel, rupees, shortDate } from "./AnalyticsParts";
 import { PeriodPicker, iso, periodBounds } from "./FeeCollectionAnalytics";
 import { Carousel } from "./ReportsAnalytics";
+import { EditPayment, PaymentDetails, ReceiptPrintDialog } from "./FeePaymentsWorkspace";
+import { toast } from "./toast";
 import "./reports-analytics.css";
 
 type Unit = "day" | "week" | "month" | "year";
@@ -39,6 +41,10 @@ export default function CashbookDashboard() {
   const [source, setSource] = useState<"all" | "linked" | "manual">("all");
   const [method, setMethod] = useState("");
   const [query, setQuery] = useState("");
+  const [paymentDetails, setPaymentDetails] = useState<PaymentRow | null>(null);
+  const [editingPayment, setEditingPayment] = useState<PaymentRow | null>(null);
+  const [printingPayment, setPrintingPayment] = useState<PaymentRow | null>(null);
+  const [openingPayment, setOpeningPayment] = useState("");
   const load = useCallback(() => {
     setError("");
     return api.analytics
@@ -46,6 +52,20 @@ export default function CashbookDashboard() {
       .then(setData)
       .catch((e) => setError(errorText(e)));
   }, []);
+  const openPayment = async (code: string, action: "view" | "edit" = "view") => {
+    setOpeningPayment(code);
+    try {
+      const result = await api.feePayments.history({ q: code });
+      const row = result.items.find((item) => item.code === code);
+      if (!row) throw new Error("The payment details could not be found.");
+      if (action === "edit" && row.student_code == null) setEditingPayment(row);
+      else setPaymentDetails(row);
+    } catch (e) {
+      toast.error("Payment details could not be opened", errorText(e));
+    } finally {
+      setOpeningPayment("");
+    }
+  };
   useEffect(() => {
     void Promise.resolve().then(load);
   }, [load]);
@@ -448,11 +468,12 @@ export default function CashbookDashboard() {
                   {columns.map((c) => (
                     <th key={c}>{c}</th>
                   ))}
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.slice(0, 100).map((p, i) => (
-                  <tr key={`${p.receipt_number}-${i}`}>
+                {transactions.slice(0, 100).map((p) => (
+                  <tr key={p.code}>
                     <td>{shortDate(p.date)}</td>
                     <td>{p.receipt_number || "—"}</td>
                     <td>{p.student || "—"}</td>
@@ -464,6 +485,20 @@ export default function CashbookDashboard() {
                     <td>
                       <strong>{rupees(p.amount)}</strong>
                     </td>
+                    <td>
+                      <span className="fcw-row-actions">
+                        <button type="button" className="fcw-icon" aria-label={`View transaction ${p.receipt_number || p.code}`}
+                          title="View payment details and print receipt" disabled={openingPayment === p.code} onClick={() => void openPayment(p.code)}>
+                          <Eye size={16} />
+                        </button>
+                        {p.source === "manual" && (
+                          <button type="button" className="fcw-icon" aria-label={`Edit manual payment ${p.receipt_number || p.code}`}
+                            title="Edit manual payment" disabled={openingPayment === p.code} onClick={() => void openPayment(p.code, "edit")}>
+                            <Pencil size={15} />
+                          </button>
+                        )}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -474,6 +509,39 @@ export default function CashbookDashboard() {
           <Empty>No transactions match these filters.</Empty>
         )}
       </Panel>
+      {paymentDetails && (
+        <PaymentDetails
+          row={paymentDetails}
+          onClose={() => setPaymentDetails(null)}
+          onPrint={() => setPrintingPayment(paymentDetails)}
+          onEdit={paymentDetails.student_code == null ? () => {
+            setEditingPayment(paymentDetails);
+            setPaymentDetails(null);
+          } : undefined}
+        />
+      )}
+      {printingPayment && (
+        <ReceiptPrintDialog
+          receipt={{
+            code: printingPayment.code,
+            receipt_code: printingPayment.receipt_code || printingPayment.code,
+            receipt_number: printingPayment.receipt_number || printingPayment.code,
+            amount: printingPayment.amount,
+            student: printingPayment.student_name,
+          }}
+          onClose={() => setPrintingPayment(null)}
+        />
+      )}
+      {editingPayment && (
+        <EditPayment
+          row={editingPayment}
+          onClose={() => setEditingPayment(null)}
+          onSaved={() => {
+            setEditingPayment(null);
+            void load();
+          }}
+        />
+      )}
       <p className="rpa-note">Figures use settled payments; UPI and bank transfers count on the day the money moved.</p>
     </div>
   );

@@ -287,7 +287,7 @@ def reports_analytics(request: Request, user=Depends(current_user)):
             info = infos.get(p.get("student_code")) or (student_info(data, student) if student else {})
             infos[p.get("student_code")] = info
             level, program, year = info.get("course_level"), info.get("program_code"), info.get("academic_year_code")
-        payments.append({"date": str(p.get("transaction_date") or p.get("paid_on") or "")[:10], "amount": float(amount(p.get("amount"))),
+        payments.append({"code": p["code"], "date": str(p.get("transaction_date") or p.get("paid_on") or "")[:10], "amount": float(amount(p.get("amount"))),
                          "method": p.get("method"), "source": "manual" if payer else "linked", "level": level,
                          "program_code": program, "year_code": year, "branch_label": payer.get("course_branch"),
                          "semester": p.get("semester"), "head": p.get("fee_head_name"), "student_code": p.get("student_code"),
