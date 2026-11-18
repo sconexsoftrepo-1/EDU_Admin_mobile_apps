@@ -122,6 +122,18 @@ async def semester_reminder_worker(app):
         await asyncio.sleep(3600)
 
 
+async def daily_admin_digest_worker(app):
+    """Send the previous completed local day shortly after midnight, once per date."""
+    from app.core.daily_admin_digest import deliver, previous_day, seconds_until_next_run
+    while True:
+        await asyncio.sleep(seconds_until_next_run())
+        try:
+            if app.state.settings.email_connection_string and app.state.settings.email_sender:
+                await asyncio.to_thread(deliver, app.state.store, app.state.settings, previous_day())
+        except Exception:
+            logging.getLogger(__name__).exception('Daily admin analytics email failed; it will retry tomorrow')
+
+
 def ensure_builtin_roles(app):
     """Roles the product relies on (e.g. "Lab In-charge"), created once when missing."""
     from app.core.cash_custody import CLERK_ROLE, ensure_clerk_role
@@ -144,12 +156,16 @@ async def application_lifespan(app):
     await asyncio.to_thread(ensure_builtin_roles, app)
     enabled=app.state.settings.semester_reminders_enabled and app.state.settings.storage_backend!='local-json'
     worker=asyncio.create_task(semester_reminder_worker(app)) if enabled else None
+    digest_worker=asyncio.create_task(daily_admin_digest_worker(app)) if app.state.settings.storage_backend!='local-json' else None
     try:
         yield
     finally:
         if worker:
             worker.cancel()
             with suppress(asyncio.CancelledError): await worker
+        if digest_worker:
+            digest_worker.cancel()
+            with suppress(asyncio.CancelledError): await digest_worker
 
 
 def create_app(settings=None):
