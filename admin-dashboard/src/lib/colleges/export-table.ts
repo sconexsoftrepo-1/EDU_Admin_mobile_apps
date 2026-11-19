@@ -132,7 +132,7 @@ function simpleExcel(
   const border = `<Borders>${["Bottom", "Left", "Right", "Top"]
     .map(
       (p) =>
-        `<Border ss:Position="${p}" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFBFBF"/>`,
+        `<Border ss:Position="${p}" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>`,
     )
     .join("")}</Borders>`;
   download(
@@ -142,11 +142,11 @@ function simpleExcel(
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
   <Styles>
     <Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11" ss:Color="#000000"/></Style>
-    <Style ss:ID="head"><Alignment ss:Vertical="Center" ss:WrapText="1"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#D9D9D9" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="head"><Alignment ss:Vertical="Center" ss:WrapText="1"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1D4ED8" ss:Pattern="Solid"/></Style>
     <Style ss:ID="cell"><Alignment ss:Vertical="Top" ss:WrapText="1"/>${border}</Style>
     <Style ss:ID="cellNum"><Alignment ss:Horizontal="Right" ss:Vertical="Top"/>${border}<NumberFormat ss:Format="#,##0.00"/></Style>
-    <Style ss:ID="total"><Alignment ss:Vertical="Center"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/></Style>
-    <Style ss:ID="totalNum"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#F2F2F2" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00"/></Style>
+    <Style ss:ID="total"><Alignment ss:Vertical="Center"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#DBEAFE" ss:Pattern="Solid"/></Style>
+    <Style ss:ID="totalNum"><Alignment ss:Horizontal="Right" ss:Vertical="Center"/>${border}<Font ss:FontName="Calibri" ss:Size="11" ss:Bold="1" ss:Color="#000000"/><Interior ss:Color="#DBEAFE" ss:Pattern="Solid"/><NumberFormat ss:Format="#,##0.00"/></Style>
   </Styles>
   <Worksheet ss:Name="${xml(sheet.replace(/[\\/?*[\]:]/g, " ").slice(0, 31) || "Sheet1")}">
     <Table>

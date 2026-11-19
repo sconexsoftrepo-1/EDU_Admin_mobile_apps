@@ -99,10 +99,10 @@
   align-items: center;
   gap: 10px;
   border: 1px solid #d6dde4;
-  border-left: 3px solid #a77524;
+  border-left: 3px solid #1d4ed8;
   border-radius: 6px;
   padding: 8px 10px;
-  background: #fffdf9;
+  background: #eff6ff;
 }
 .stf-docs li > span {
   font-weight: bold;
@@ -260,11 +260,11 @@
   align-items: center;
   gap: 6px;
   height: 32px;
-  border: 1px solid #a46a27;
+  border: 1px solid #1d4ed8;
   border-radius: 6px;
   padding: 0 10px;
   background: #fff;
-  color: #a46a27;
+  color: #1d4ed8;
   flex: 0 1 260px;
   width: min(260px, 100%);
   max-width: 260px;
@@ -296,13 +296,13 @@
 .edu-connected .stf-directory-actions .stf-directory-add {
   gap: 8px;
   padding: 0 14px;
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   border: 0;
   color: #fff;
-  box-shadow: 0 1px 2px #5a361333;
+  box-shadow: 0 1px 2px #1e40af33;
 }
 .edu-connected .stf-directory-actions .stf-directory-add:hover {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
   color: #fff;
   filter: brightness(0.94);
 }
@@ -320,8 +320,8 @@
   box-shadow: none;
 }
 .edu-connected label.stf-search:focus-within {
-  border-color: #8a5520;
-  box-shadow: 0 0 0 3px #a46a2726;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px #1d4ed826;
 }
 .stf-card {
   overflow: hidden;
@@ -364,8 +364,8 @@
   font-size: 12px;
   border-radius: 999px;
   padding: 2px 9px;
-  background: #fff4e0;
-  color: #7a5414;
+  background: #eff6ff;
+  color: #1e40af;
 }
 .stf-docs-badge.done {
   background: #e7f3ea;
@@ -419,7 +419,7 @@
 /* Appointment letters (offer / acceptance / joining). */
 .stf-letters-note {
   margin: -4px 0 12px;
-  color: #756b60;
+  color: #4b5563;
   font-size: 13px;
 }
 .stf-letter-grid {
@@ -431,24 +431,24 @@
   display: grid;
   gap: 8px;
   align-content: start;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 14px;
-  background: linear-gradient(180deg, #fcf9f3, #fff);
+  background: linear-gradient(180deg, #ffffff, #fff);
 }
 .stf-letter header {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  color: #7a4a1c;
+  color: #1e40af;
 }
 .stf-letter header strong {
-  color: #251e18;
+  color: #171b23;
 }
 .stf-letter p {
   margin: 0;
-  color: #756b60;
+  color: #4b5563;
   font-size: 12.5px;
 }
 .stf-letter-signed {
@@ -467,11 +467,11 @@
   align-items: center;
   gap: 6px;
   justify-self: start;
-  border: 1px dashed #dcc29d;
+  border: 1px dashed #cbd5e1;
   border-radius: 10px;
   padding: 6px 10px;
   font-size: 12.5px;
-  color: #7a4a1c;
+  color: #1e40af;
   cursor: pointer;
   background: #fff;
 }

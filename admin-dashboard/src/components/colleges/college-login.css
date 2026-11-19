@@ -2,8 +2,8 @@
 .college-login.campus-auth {
   --ca-navy: #10264b;
   --ca-muted: #61718c;
-  --ca-gold: var(--college-accent, #b77a20);
-  --ca-ivory: #faf6ef;
+  --ca-gold: var(--college-accent, #1d4ed8);
+  --ca-ivory: #ffffff;
   display: grid;
   grid-template-columns: 55% 45%;
   grid-template-rows: auto;
@@ -48,13 +48,13 @@
   z-index: -2;
   border-bottom-right-radius: 45% 14%;
   background:
-    linear-gradient(90deg, #fffaf1e6 0%, #fffaf1ba 29%, #fffaf100 70%),
+    linear-gradient(90deg, #eff6ffe6 0%, #eff6ffba 29%, #eff6ff00 70%),
     linear-gradient(
       0deg,
-      #faf6ef 0%,
+      #ffffff 0%,
       transparent 20%,
       transparent 92%,
-      #faf6ef40
+      #ffffff40
     );
 }
 .ca-hero::after {
@@ -81,7 +81,7 @@
   transition: color 150ms;
 }
 .campus-auth .ca-back:hover {
-  color: #855411;
+  color: #1e40af;
 }
 .ca-hero-copy {
   margin: clamp(70px, 13vh, 150px) 10% 65px;
@@ -89,7 +89,7 @@
   animation: ca-enter 500ms ease both;
 }
 .ca-eyebrow {
-  color: #87530f;
+  color: #1e40af;
   font-size: 11px;
   font-weight: 650;
   letter-spacing: 0.26em;
@@ -112,7 +112,7 @@
   letter-spacing: -0.045em;
 }
 .ca-hero h1 span {
-  color: #a66a17;
+  color: #1d4ed8;
 }
 .ca-intro {
   max-width: 310px;
@@ -131,8 +131,8 @@
   background: linear-gradient(
     0deg,
     var(--ca-ivory) 15%,
-    #faf6efe6 80%,
-    #faf6ef00
+    #ffffffe6 80%,
+    #ffffff00
   );
 }
 .ca-features li {
@@ -147,7 +147,7 @@
   height: 46px;
   border-radius: 50%;
   color: white;
-  background: linear-gradient(135deg, #d7a34b, #a26919);
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   box-shadow: inset 0 0 0 1px #ffffff50;
   transition: transform 180ms;
 }
@@ -202,7 +202,7 @@
   letter-spacing: 0.04em;
 }
 .ca-hero-footer p span {
-  color: #d9a347;
+  color: #3b82f6;
   font:
     12px Arial,
     sans-serif;
@@ -226,7 +226,7 @@
   padding: 40px 30px;
   isolation: isolate;
   background:
-    radial-gradient(ellipse at 0% 95%, #dcb26938, transparent 52%),
+    radial-gradient(ellipse at 0% 95%, #3b82f638, transparent 52%),
     var(--ca-ivory);
 }
 .ca-form-panel::before {
@@ -237,19 +237,19 @@
   width: 50%;
   height: 28%;
   z-index: -1;
-  background: linear-gradient(135deg, #fffaf4, #f3e6d44d);
+  background: linear-gradient(135deg, #eff6ff, #dbeafe4d);
   border-bottom-left-radius: 100%;
 }
 .ca-card {
   width: 100%;
   max-width: 468px;
   padding: 34px 36px 30px;
-  border: 1px solid #ede7de;
+  border: 1px solid #e2e8f0;
   border-radius: 24px;
   background: #fffffffa;
   box-shadow:
-    0 22px 60px #503b1b16,
-    0 3px 10px #503b1b05;
+    0 22px 60px #37415116,
+    0 3px 10px #37415105;
   animation: ca-enter 550ms 100ms ease both;
 }
 .ca-branding {
@@ -328,7 +328,7 @@
 }
 .ca-input:focus-within {
   border-color: var(--ca-gold);
-  box-shadow: 0 0 0 3px #b77a201b;
+  box-shadow: 0 0 0 3px #1d4ed81b;
 }
 .ca-input:has([aria-invalid="true"]) {
   border-color: #b34646;
@@ -356,11 +356,11 @@
   min-height: 50px;
   margin-top: 6px;
   padding: 12px;
-  border: 1px solid #9d6418;
+  border: 1px solid #1d4ed8;
   border-radius: 11px;
   color: #fff;
-  background: linear-gradient(110deg, #bc852c, #9a5e10);
-  box-shadow: 0 6px 14px #a66a1714;
+  background: linear-gradient(110deg, #1d4ed8, #1d4ed8);
+  box-shadow: 0 6px 14px #1d4ed814;
   font-size: 15px;
   font-weight: 600;
   transition:
@@ -370,8 +370,8 @@
 }
 .ca-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: linear-gradient(110deg, #b27a23, #8d540d);
-  box-shadow: 0 8px 20px #a66a172c;
+  background: linear-gradient(110deg, #1d4ed8, #1e40af);
+  box-shadow: 0 8px 20px #1d4ed82c;
 }
 .ca-submit:active:not(:disabled) {
   transform: translateY(0);
@@ -467,7 +467,7 @@
 .campus-auth .role-select-trigger:focus-visible {
   outline: 0;
   border-color: var(--ca-gold);
-  box-shadow: 0 0 0 3px #b77a201b;
+  box-shadow: 0 0 0 3px #1d4ed81b;
 }
 .campus-auth .role-select-trigger > span svg {
   color: #536787;
@@ -509,12 +509,12 @@
   box-shadow: inset 0 0 0 1px #d2dae7;
 }
 .campus-auth .role-select-list li[aria-selected="true"] {
-  background: #fff2d8;
+  background: #dbeafe;
   color: #10264b;
   font-weight: 600;
 }
 .campus-auth .role-select-list li[aria-selected="true"] svg {
-  color: #996216;
+  color: #1d4ed8;
 }
 .ca-spinner {
   animation: ca-spin 900ms linear infinite;
@@ -670,8 +670,8 @@
     inset: 0;
     border-radius: 0;
     background:
-      linear-gradient(90deg, #fff9efcf, #fff9ef30 60%),
-      linear-gradient(0deg, #faf6ef 0%, transparent 40%);
+      linear-gradient(90deg, #eff6ffcf, #eff6ff30 60%),
+      linear-gradient(0deg, #ffffff 0%, transparent 40%);
   }
   .ca-hero::after,
   .ca-hero-copy,
@@ -697,7 +697,7 @@
     padding: 25px 26px;
     border-radius: 20px;
     max-width: 440px;
-    box-shadow: 0 12px 35px #503b1b0d;
+    box-shadow: 0 12px 35px #3741510d;
   }
   .ca-logo {
     width: 66px;
@@ -802,4 +802,128 @@
   color: #5b6270;
   font-size: 0.85rem;
   line-height: 1.45;
+}
+
+/* Six-digit email verification: compact enough for a 320px viewport. */
+.campus-auth .ca-code-step {
+  animation: ca-code-enter 220ms ease-out both;
+}
+.campus-auth .ca-otp {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.campus-auth .ca-otp legend {
+  margin-bottom: 10px;
+  padding: 0;
+  color: #171b23;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ca-otp-digits {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(5px, 1.6vw, 10px);
+}
+.campus-auth .ca-otp-digits input {
+  width: 100%;
+  min-width: 0;
+  height: clamp(44px, 12vw, 58px);
+  margin: 0;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+  color: #171b23;
+  caret-color: #1d4ed8;
+  font: 650 clamp(21px, 5vw, 27px)/1 var(--sans), sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: border-color 160ms, background-color 160ms, box-shadow 160ms, transform 160ms;
+}
+.campus-auth .ca-otp-digits input.is-filled {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  animation: ca-digit-enter 160ms ease-out;
+}
+.campus-auth .ca-otp-digits input:focus-visible {
+  border-color: #1d4ed8;
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+  background: #fff;
+  box-shadow: 0 0 0 5px #1d4ed810;
+  transform: translateY(-2px);
+}
+.campus-auth .ca-otp-digits input:disabled {
+  opacity: 1;
+  -webkit-text-fill-color: #171b23;
+  cursor: wait;
+}
+.campus-auth .ca-otp.is-invalid .ca-otp-digits {
+  animation: ca-code-shake 330ms ease-out;
+}
+.campus-auth .ca-otp.is-invalid input {
+  border-color: #dc2626;
+  background: #fff5f5;
+  outline-color: #dc2626;
+  box-shadow: none;
+}
+.campus-auth .ca-otp.is-verified input {
+  border-color: #15803d;
+  background: #f0fdf4;
+  color: #166534;
+  -webkit-text-fill-color: #166534;
+}
+.campus-auth .ca-code-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  color: #1e40af;
+  background: #eff6ff;
+  font-size: 12px;
+  line-height: 1.5;
+  animation: ca-code-enter 220ms ease-out both;
+}
+.ca-code-feedback svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+.campus-auth .ca-code-feedback.ca-error {
+  border-color: #fecaca;
+  color: #991b1b;
+  background: #fff5f5;
+}
+.campus-auth .ca-code-success {
+  border-color: #bbf7d0;
+  color: #166534;
+  background: #f0fdf4;
+}
+.ca-code-success svg {
+  animation: ca-check-enter 280ms ease-out both;
+}
+.campus-auth .ca-submit.is-verified {
+  border-color: #15803d;
+  background: #15803d;
+  opacity: 1;
+}
+@keyframes ca-code-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ca-digit-enter {
+  from { transform: scale(.94); }
+  to { transform: scale(1); }
+}
+@keyframes ca-code-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+@keyframes ca-check-enter {
+  from { opacity: 0; transform: scale(.6) rotate(-15deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
 }

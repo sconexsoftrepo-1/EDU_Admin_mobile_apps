@@ -662,10 +662,10 @@
 }
 .erp-pdf-preview {
   border-radius: var(--edu-drawer-radius);
-  --erp-ink: #251e18;
-  --erp-surface: #fcf9f3;
-  --erp-border: #e9dfcf;
-  --erp-accent: #a46a27;
+  --erp-ink: #171b23;
+  --erp-surface: #ffffff;
+  --erp-border: #e2e8f0;
+  --erp-accent: #1d4ed8;
   position: fixed;
   inset: 0 0 0 auto;
   margin: 0;

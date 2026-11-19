@@ -1,17 +1,17 @@
 /* Searchable dropdown panel for every native select, in the look of the sign-in role picker. */
 select[data-picking="true"] {
-  border-color: #c99448 !important;
-  box-shadow: 0 0 0 3px #c9944826 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px #3b82f626 !important;
   outline: 0 !important;
 }
 .sx-panel {
   animation: sx-in 160ms ease both;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  box-shadow: 0 16px 34px #5a361326;
+  box-shadow: 0 16px 34px #1e40af26;
   box-sizing: border-box;
-  color: #241d18;
+  color: #171b23;
   display: flex;
   flex-direction: column;
   font-family: inherit;
@@ -40,8 +40,8 @@ select[data-picking="true"] {
   z-index: 2147483001;
 }
 .sx-field input {
-  border: 1px solid #c99448;
-  box-shadow: 0 0 0 3px #c9944826;
+  border: 1px solid #3b82f6;
+  box-shadow: 0 0 0 3px #3b82f626;
   box-sizing: border-box;
   height: 100%;
   margin: 0;
@@ -49,11 +49,11 @@ select[data-picking="true"] {
   width: 100%;
 }
 .sx-field input::placeholder {
-  color: #8a7d70;
+  color: #4b5563;
   opacity: 1;
 }
 .sx-chevron {
-  color: #a56824;
+  color: #1d4ed8;
   pointer-events: none;
   position: absolute;
   right: 11px;
@@ -69,7 +69,7 @@ select[data-picking="true"] {
   padding: 0;
 }
 .sx-group {
-  color: #a56824;
+  color: #1d4ed8;
   display: block;
   font-size: 10.5px;
   font-weight: 700;
@@ -94,23 +94,23 @@ select[data-picking="true"] {
   overflow-wrap: anywhere;
 }
 .sx-panel [role="option"] svg {
-  color: #a56824;
+  color: #1d4ed8;
   flex: 0 0 auto;
 }
 .sx-panel [role="option"].is-active {
-  background: #fbf3e6;
-  box-shadow: inset 0 0 0 1px #eadccb;
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1px #e2e8f0;
 }
 .sx-panel [role="option"][aria-selected="true"] {
-  background: #f6e6ce;
+  background: #dbeafe;
   font-weight: 600;
 }
 .sx-panel [role="option"][aria-disabled="true"] {
-  color: #b3a89c;
+  color: #64748b;
   cursor: default;
 }
 .sx-empty {
-  color: #76695e;
+  color: #4b5563;
   font-size: 13px;
   padding: 10px;
 }

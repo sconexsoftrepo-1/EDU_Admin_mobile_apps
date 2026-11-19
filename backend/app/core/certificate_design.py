@@ -10,11 +10,11 @@ from reportlab.platypus import Paragraph
 from reportlab.pdfgen.canvas import Canvas
 
 FORMATS={
-    'study_certificate':('A4 portrait',A4,'#214756','#bb984c','#fffdf5'),
-    'conduct_certificate':('A4 landscape',landscape(A4),'#243e69','#aebdd3','#f8faff'),
-    'attendance_certificate':('A5 portrait',A5,'#116b69','#bd994e','#f5fbf8'),
-    'course_completion':('US Letter landscape',landscape(letter),'#245844','#bba05c','#fafbf5'),
-    'achievement':('A4 landscape',landscape(A4),'#712c40','#c8a354','#fffbf7'),
+    'study_certificate':('A4 portrait',A4,'#171b23','#1d4ed8','#ffffff'),
+    'conduct_certificate':('A4 landscape',landscape(A4),'#171b23','#1d4ed8','#ffffff'),
+    'attendance_certificate':('A5 portrait',A5,'#171b23','#1d4ed8','#ffffff'),
+    'course_completion':('US Letter landscape',landscape(letter),'#171b23','#1d4ed8','#ffffff'),
+    'achievement':('A4 landscape',landscape(A4),'#171b23','#1d4ed8','#ffffff'),
 }
 
 

@@ -17,8 +17,8 @@
   flex: 0 1 360px;
 }
 .edu-search-field:focus-within {
-  border-color: #a46a27;
-  outline: 2px solid #a46a271a;
+  border-color: #1d4ed8;
+  outline: 2px solid #1d4ed81a;
   outline-offset: 1px;
 }
 .edu-search-field > svg {
@@ -70,7 +70,7 @@
   background: #f1f4f6;
 }
 .edu-search-clear:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid #1d4ed8;
 }
 .edu-search-suggestions {
   position: fixed;

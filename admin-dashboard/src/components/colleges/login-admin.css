@@ -12,7 +12,7 @@
 .la-filters select {
   min-height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, #e2e8f0);
   border-radius: 10px;
   background: #fff;
   font: inherit;
@@ -26,8 +26,8 @@
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
-  background: var(--erp-raised, #fcf9f3);
-  border: 1px solid var(--erp-border, #e9dfcf);
+  background: var(--erp-raised, #ffffff);
+  border: 1px solid var(--erp-border, #e2e8f0);
 }
 .la-tabs button {
   border: 0;
@@ -37,11 +37,11 @@
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
 }
 .la-tabs button.is-active {
   background: #fff;
-  color: var(--erp-ink, #251e18);
+  color: var(--erp-ink, #171b23);
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
 }
 .la-tabs small {
@@ -60,19 +60,19 @@
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
   padding: 10px 12px;
-  border-bottom: 1px solid var(--erp-border, #e9dfcf);
+  border-bottom: 1px solid var(--erp-border, #e2e8f0);
   white-space: nowrap;
 }
 .la-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--erp-border, #e9dfcf);
+  border-bottom: 1px solid var(--erp-border, #e2e8f0);
   vertical-align: middle;
 }
 .la-table tr.is-inactive td {
-  color: var(--erp-muted, #756b60);
-  background: #faf8f5;
+  color: var(--erp-muted, #4b5563);
+  background: #ffffff;
 }
 .la-person {
   display: flex;
@@ -81,7 +81,7 @@
 }
 .la-person > svg {
   flex: none;
-  color: var(--erp-accent, #a46a27);
+  color: var(--erp-accent, #1d4ed8);
 }
 .la-person span {
   display: grid;
@@ -90,7 +90,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
   font-size: 12px;
 }
 .la-chips {
@@ -105,8 +105,8 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 12px;
-  background: color-mix(in srgb, var(--erp-accent, #a46a27) 11%, #fff);
-  color: var(--erp-ink, #251e18);
+  background: color-mix(in srgb, var(--erp-accent, #1d4ed8) 11%, #fff);
+  color: var(--erp-ink, #171b23);
 }
 .la-chip-extra {
   background: #eef1f7;
@@ -137,7 +137,7 @@
   gap: 5px;
   padding: 5px 10px;
   border-radius: 8px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, #e2e8f0);
   background: #fff;
   font: inherit;
   font-size: 12.5px;
@@ -153,8 +153,8 @@
   border-color: #b9e0c4;
 }
 .la-row-actions .la-off {
-  color: #8a5a10;
-  border-color: #ecd6ad;
+  color: #1e40af;
+  border-color: #bfdbfe;
 }
 .la-row-actions .la-delete {
   color: var(--erp-danger, #b43540);
@@ -174,7 +174,7 @@
 }
 .la-empty {
   padding: 14px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
 }
 /* Login form (drawer) */
 .la-form {
@@ -207,7 +207,7 @@
 .la-grid select {
   min-height: 40px;
   padding: 0 11px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, #e2e8f0);
   border-radius: 10px;
   font: inherit;
   font-weight: 400;
@@ -216,7 +216,7 @@
   box-sizing: border-box;
 }
 .la-grid input[readonly] {
-  background: var(--erp-raised, #fcf9f3);
+  background: var(--erp-raised, #ffffff);
 }
 .la-input-icon {
   position: relative;
@@ -227,7 +227,7 @@
   left: 11px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
 }
 .la-input-icon input {
   padding-left: 32px;
@@ -242,24 +242,24 @@
   align-items: center;
   gap: 9px;
   padding: 9px 11px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, #e2e8f0);
   border-radius: 11px;
   background: #fff;
   cursor: pointer;
 }
 .la-checks label.is-on {
-  border-color: var(--erp-accent, #a46a27);
-  background: color-mix(in srgb, var(--erp-accent, #a46a27) 7%, #fff);
+  border-color: var(--erp-accent, #1d4ed8);
+  background: color-mix(in srgb, var(--erp-accent, #1d4ed8) 7%, #fff);
 }
 .la-checks label > svg {
   flex: none;
-  color: var(--erp-accent, #a46a27);
+  color: var(--erp-accent, #1d4ed8);
 }
 .la-checks input {
   width: 17px;
   height: 17px;
   flex: none;
-  accent-color: var(--erp-accent, #a46a27);
+  accent-color: var(--erp-accent, #1d4ed8);
 }
 .la-checks span {
   display: grid;
@@ -267,12 +267,12 @@
 }
 .la-checks small {
   font-size: 12px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
 }
 .la-note {
   margin: 0;
   font-size: 13px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, #4b5563);
 }
 .la-error {
   margin: 0;
@@ -295,13 +295,13 @@
   min-height: 40px;
   padding: 0 16px;
   border-radius: 10px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, #e2e8f0);
   background: #fff;
   font: inherit;
   cursor: pointer;
 }
 .la-actions .erp-primary {
-  background: var(--erp-accent, #a46a27);
+  background: var(--erp-accent, #1d4ed8);
   color: #fff;
-  border-color: var(--erp-accent, #a46a27);
+  border-color: var(--erp-accent, #1d4ed8);
 }

@@ -626,7 +626,7 @@ function QuickActions({ actions }: { actions: DashboardAction[] }) {
   );
 }
 
-const FUNNEL_COLOURS = ["#8a5520", "#a56824", "#c99448", "#e0bb82", "#f0d8b4"];
+const FUNNEL_COLOURS = ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"];
 function Funnel({
   stages,
 }: {

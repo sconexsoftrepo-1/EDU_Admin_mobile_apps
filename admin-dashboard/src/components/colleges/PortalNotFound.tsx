@@ -40,7 +40,7 @@ export default function PortalNotFound() {
             <path
               className="portal-missing-route"
               d="M12 168h72c30 0 30-64 60-64h52c30 0 30 64 60 64h72"
-              stroke="#a77524"
+              stroke="#1d4ed8"
               strokeWidth="2.5"
               strokeDasharray="5 9"
               strokeLinecap="round"
@@ -69,10 +69,10 @@ export default function PortalNotFound() {
             <path
               d="M170 76c0-16 12-29 28-29s28 13 28 29c0 20-28 42-28 42s-28-22-28-42Z"
               fill="#f9f3e7"
-              stroke="#a77524"
+              stroke="#1d4ed8"
               strokeWidth="2.5"
             />
-            <circle cx="198" cy="76" r="8" stroke="#a77524" strokeWidth="2.5" />
+            <circle cx="198" cy="76" r="8" stroke="#1d4ed8" strokeWidth="2.5" />
           </svg>
           <span className="portal-missing-map-label">
             <span /> Your workspace is still here

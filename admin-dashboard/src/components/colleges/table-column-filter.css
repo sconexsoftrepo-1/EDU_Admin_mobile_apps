@@ -15,14 +15,14 @@ button.edu-column-filter-icon {
   padding: 4px !important;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #8c7a62;
+  color: #4b5563;
   background: transparent;
 }
 button.edu-column-filter-icon:hover,
 button.edu-column-filter-icon.is-filtered {
-  color: #87511d;
-  background: #f2e6d1;
-  border-color: #dac4a4;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #cbd5e1;
 }
 .edu-filter-dot {
   position: absolute;
@@ -31,7 +31,7 @@ button.edu-column-filter-icon.is-filtered {
   right: 2px;
   top: 2px;
   border-radius: 50%;
-  background: #a46a27;
+  background: #1d4ed8;
 }
 /* Portaled to body so legacy table/form styles cannot affect the popup. */
 .edu-column-filter-popup {
@@ -43,13 +43,13 @@ button.edu-column-filter-icon.is-filtered {
   max-width: calc(100vw - 16px);
   max-height: calc(100dvh - 16px);
   padding: 0;
-  border: 1px solid #e2d8c9;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #fff;
-  color: #30251c;
+  color: #171b23;
   box-shadow:
-    0 8px 16px #30251c0a,
-    0 20px 48px #30251c1f;
+    0 8px 16px #171b230a,
+    0 20px 48px #171b231f;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 13px;
   font-weight: 400;
@@ -71,7 +71,7 @@ button.edu-column-filter-icon.is-filtered {
 }
 .edu-filter-popup-heading h3 {
   margin: 0;
-  color: #30251c;
+  color: #171b23;
   font: inherit;
   font-size: 14px;
   font-weight: 650;
@@ -87,12 +87,12 @@ button.edu-column-filter-icon.is-filtered {
   border-radius: 5px;
   padding: 3px;
   background: transparent;
-  color: #8a7962;
+  color: #4b5563;
   cursor: pointer;
 }
 .edu-filter-popup-heading button:hover {
-  color: #493724;
-  background: #f4eee5;
+  color: #374151;
+  background: #e2e8f0;
 }
 .edu-column-filter-popup .edu-filter-search {
   display: flex;
@@ -102,10 +102,10 @@ button.edu-column-filter-icon.is-filtered {
   box-sizing: border-box;
   margin: 0 16px;
   padding: 0 11px;
-  border: 1px solid #ded4c5;
+  border: 1px solid #cbd5e1;
   border-radius: 7px;
   background: #fff;
-  color: #9a8b78;
+  color: #64748b;
 }
 .edu-column-filter-popup .edu-filter-search input {
   display: block;
@@ -121,17 +121,17 @@ button.edu-column-filter-icon.is-filtered {
   background: transparent;
   font: inherit;
   font-size: 12px;
-  color: #30251c;
+  color: #171b23;
   outline: 0 !important;
   box-shadow: none !important;
 }
 .edu-column-filter-popup .edu-filter-search input::placeholder {
-  color: #9a8b78;
+  color: #64748b;
   opacity: 1;
 }
 .edu-column-filter-popup .edu-filter-search:focus-within {
-  border-color: #b88c50;
-  box-shadow: 0 0 0 2px #a46a2712;
+  border-color: #4b5563;
+  box-shadow: 0 0 0 2px #1d4ed812;
 }
 .edu-filter-selection {
   display: flex;
@@ -150,7 +150,7 @@ button.edu-column-filter-icon.is-filtered {
   background: transparent;
   font: inherit;
   font-weight: 500;
-  color: #946022;
+  color: #1d4ed8;
   cursor: pointer;
 }
 .edu-filter-selection button:hover {
@@ -158,7 +158,7 @@ button.edu-column-filter-icon.is-filtered {
 }
 .edu-filter-selection span {
   margin-left: auto;
-  color: #8c7a62;
+  color: #4b5563;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -167,7 +167,7 @@ button.edu-column-filter-icon.is-filtered {
   min-height: 80px;
   overflow: auto;
   overscroll-behavior: contain;
-  border-top: 1px solid #f0e9df;
+  border-top: 1px solid #e2e8f0;
   padding: 6px 10px;
   scrollbar-width: thin;
 }
@@ -180,7 +180,7 @@ button.edu-column-filter-icon.is-filtered {
   margin: 2px 0;
   padding: 9px 8px;
   border-radius: 6px;
-  color: #493c2c;
+  color: #374151;
   font: inherit;
   font-size: 12px;
   font-weight: 400;
@@ -189,13 +189,13 @@ button.edu-column-filter-icon.is-filtered {
   overflow-wrap: anywhere;
 }
 .edu-filter-values > label:hover {
-  background: #f8f5f0;
+  background: #ffffff;
 }
 .edu-filter-values > label:has(input:checked) {
-  background: #fbf6ed;
+  background: #ffffff;
 }
 .edu-filter-values > label:focus-within {
-  outline: 1px solid #b88c50;
+  outline: 1px solid #4b5563;
   outline-offset: -1px;
 }
 .edu-filter-values input {
@@ -203,7 +203,7 @@ button.edu-column-filter-icon.is-filtered {
   height: 15px;
   margin: 1px 0 0;
   padding: 0;
-  accent-color: #a46a27;
+  accent-color: #1d4ed8;
   flex-shrink: 0;
 }
 .edu-filter-values[data-empty="true"] {
@@ -217,7 +217,7 @@ button.edu-column-filter-icon.is-filtered {
   font: inherit;
   font-size: 12px;
   line-height: 1.5;
-  color: #9a8b78;
+  color: #64748b;
 }
 .edu-column-filter-popup .edu-filter-footer {
   position: sticky;
@@ -231,8 +231,8 @@ button.edu-column-filter-icon.is-filtered {
   height: auto;
   margin: 0;
   padding: 13px 16px;
-  border-top: 1px solid #eee6db;
-  background: #fcfaf7;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
 }
 .edu-column-filter-popup .edu-filter-footer button {
   display: inline-flex;
@@ -242,26 +242,26 @@ button.edu-column-filter-icon.is-filtered {
   min-height: 35px;
   margin: 0;
   padding: 8px 12px;
-  border: 1px solid #ded4c5;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
   background: #fff;
-  color: #6b5840;
+  color: #4b5563;
   cursor: pointer;
 }
 .edu-column-filter-popup .edu-filter-footer .edu-filter-apply {
-  background: #a46a27;
-  border-color: #a46a27;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
   color: #fff;
 }
 .edu-column-filter-popup .edu-filter-footer .edu-filter-apply:hover {
-  background: #87511d;
-  border-color: #87511d;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
 }
 .edu-column-filter-popup button:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid #1d4ed8;
   outline-offset: 3px;
 }

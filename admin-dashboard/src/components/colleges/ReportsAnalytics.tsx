@@ -44,7 +44,7 @@ import "./reports-analytics.css";
 
 type Period = "all" | "year" | "month" | "custom";
 const METHOD = { cash: "Cash", upi: "UPI", bank_transfer: "Bank transfer" } as Record<string, string>;
-const METHOD_COLOUR = { cash: "#a56824", upi: "#e0a85a", bank_transfer: "#5b3a17" } as Record<string, string>;
+const METHOD_COLOUR = { cash: "#1d4ed8", upi: "#60a5fa", bank_transfer: "#1e3a8a" } as Record<string, string>;
 const AGING = [
   ["current", "Not yet due"],
   ["1-30", "1–30 days"],
@@ -56,7 +56,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart
 const compact = (v: number) =>
   v >= 1e7 ? `₹${+(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `₹${+(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `₹${+(v / 1e3).toFixed(0)}K` : `₹${v}`;
 const sum = <T,>(rows: T[], pick: (r: T) => number) => rows.reduce((n, r) => n + pick(r), 0);
-const tooltip = { borderRadius: 10, border: "1px solid #eadccb", fontSize: 12 };
+const tooltip = { borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12 };
 const money = (v: unknown) => rupees(Number(v) || 0);
 
 /** A horizontal card carousel with previous / next buttons. */
@@ -510,7 +510,7 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tooltip} formatter={(v) => rupees(Number(v))} />
@@ -540,7 +540,7 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={levelRows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tooltip} formatter={(v) => rupees(Number(v))} />
@@ -559,7 +559,7 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={aging} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tooltip} formatter={(v) => rupees(Number(v))} />
@@ -693,14 +693,14 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={cashTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tooltip} formatter={(v) => rupees(Number(v))} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Area type="linear" dataKey="closing" name="Closing cash" stroke="#5b3a17" fill="#e8d5bb" />
+                  <Area type="linear" dataKey="closing" name="Closing cash" stroke="#1e3a8a" fill="#dbeafe" />
                   <Area type="linear" dataKey="received" name="Received" stroke="#2f6f4f" fill="#cfe3d6" />
-                  <Area type="linear" dataKey="deposited" name="Deposited to bank" stroke="#a56824" fill="#f3dfc2" />
+                  <Area type="linear" dataKey="deposited" name="Deposited to bank" stroke="#1d4ed8" fill="#dbeafe" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -731,12 +731,12 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={lateBySemester} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tooltip} formatter={(v) => rupees(Number(v))} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="applied" name="Applied" fill="#a56824" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="applied" name="Applied" fill="#1d4ed8" radius={[6, 6, 0, 0]} />
                   <Bar dataKey="pending" name="Pending" fill="#b43540" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -820,12 +820,12 @@ export default function ReportsAnalytics({ nav }: { nav: (module: string) => str
           <div className="rpa-chart">
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={branchRows.filter((r) => r.enquiries)} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#efe6d8" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip contentStyle={tooltip} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="enquiries" name="Enquiries" fill="#e0a85a" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="enquiries" name="Enquiries" fill="#60a5fa" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="joined" name="Joined" fill="#2f6f4f" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

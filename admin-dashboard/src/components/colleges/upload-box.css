@@ -9,14 +9,14 @@
   height: 40px;
   padding: 0 0 0 11px;
   overflow: hidden;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   background: #fff;
   font-weight: normal;
 }
 .upl-box:focus-within {
-  border-color: #a46a27;
-  box-shadow: 0 0 0 3px #a46a2718;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px #1d4ed818;
 }
 .upl-text {
   flex: 1;
@@ -60,7 +60,7 @@
   height: auto;
   margin: 0;
   padding: 0 14px;
-  border-left: 1px solid #e9dfcf;
+  border-left: 1px solid #e2e8f0;
   border-radius: 0;
   background: #f3f4f6;
   color: #1f2a36;

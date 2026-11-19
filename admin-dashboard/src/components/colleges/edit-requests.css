@@ -1,8 +1,8 @@
 .edr {
-  --edr-ink: #241d18;
-  --edr-muted: #76695e;
-  --edr-line: #eadccb;
-  --edr-amber: #a56824;
+  --edr-ink: #171b23;
+  --edr-muted: #4b5563;
+  --edr-line: #e2e8f0;
+  --edr-amber: #1d4ed8;
   color: var(--edr-ink);
   display: grid;
   gap: 16px;
@@ -59,7 +59,7 @@
   color: #fff;
 }
 .edr-tabs button:hover:not([aria-pressed="true"]) {
-  background: #fbf8f3;
+  background: #ffffff;
   color: var(--edr-ink);
 }
 .edr-refresh {
@@ -94,7 +94,7 @@
   justify-content: space-between;
 }
 .edr-card > header p {
-  color: #4f4338;
+  color: #374151;
   font-size: 14px;
   line-height: 1.5;
   min-width: 0;
@@ -138,7 +138,7 @@
   width: 100%;
 }
 .edr-table thead th {
-  background: #fbf8f3;
+  background: #ffffff;
   color: var(--edr-muted);
   font-size: 11px;
   font-weight: 600;
@@ -264,7 +264,7 @@
 .edr-badge {
   align-items: center;
   border-radius: 50%;
-  color: #4f4338;
+  color: #374151;
   display: inline-flex;
   flex: 0 0 auto;
   height: 40px;
@@ -277,7 +277,7 @@
 }
 .edr-badge:hover {
   background: #ffffffb3;
-  color: #241d18;
+  color: #171b23;
 }
 .edr-badge span {
   align-items: center;
@@ -317,7 +317,7 @@
   flex: 1;
 }
 .edr-tabs button[aria-selected="true"] {
-  background: #a56824;
+  background: #1d4ed8;
   color: #fff;
 }
 button.edr-badge {
@@ -336,15 +336,15 @@ button.edr-badge {
 }
 .edr-stages li {
   align-items: flex-start;
-  border-top: 3px solid #eadccb;
-  color: #76695e;
+  border-top: 3px solid #e2e8f0;
+  color: #4b5563;
   display: flex;
   gap: 8px;
   padding-top: 8px;
 }
 .edr-stages li > span {
   align-items: center;
-  border: 1.5px solid #d9c7ad;
+  border: 1.5px solid #cbd5e1;
   border-radius: 50%;
   display: inline-flex;
   flex: none;
@@ -367,7 +367,7 @@ button.edr-badge {
 }
 .edr-stages li.is-done {
   border-top-color: #2f7d4f;
-  color: #241d18;
+  color: #171b23;
 }
 .edr-stages li.is-done > span {
   background: #2f7d4f;
@@ -375,12 +375,12 @@ button.edr-badge {
   color: #fff;
 }
 .edr-stages li.is-current {
-  border-top-color: #a56824;
-  color: #241d18;
+  border-top-color: #1d4ed8;
+  color: #171b23;
 }
 .edr-stages li.is-current > span {
-  border-color: #a56824;
-  color: #a56824;
+  border-color: #1d4ed8;
+  color: #1d4ed8;
 }
 .edr-stages.is-rejected li:last-child {
   border-top-color: #b43540;

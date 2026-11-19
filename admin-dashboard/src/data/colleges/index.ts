@@ -35,7 +35,7 @@ export const colleges: College[] = [
     headline: "Shaping Brighter Futures.",
     description:
       "A place to discover your potential, challenge your thinking, and build a life of purpose.",
-    accent: "#a77524",
+    accent: "#1d4ed8",
     logo: "/assets/pragathi-emblem.png",
     programs: [
       ["science", "B.Sc. Applied Sciences", "Science"],

@@ -25,12 +25,12 @@ from .security import current_user
 
 router = APIRouter(prefix="/print", tags=["Printable documents"])
 
-BRAND = "7A4A12"      # dashboard brown
-BRAND_SOFT = "F6EFE4"
-ZEBRA = "FBF8F3"
-INK = "251E18"
-MUTED = "756B60"
-LINE = Side(style="thin", color="D9CDBB")
+BRAND = "1D4ED8"      # dashboard blue
+BRAND_SOFT = "DBEAFE"
+ZEBRA = "F8FAFC"
+INK = "171B23"
+MUTED = "4B5563"
+LINE = Side(style="thin", color="E2E8F0")
 BOX = Border(left=LINE, right=LINE, top=LINE, bottom=LINE)
 MONEY_FORMAT = '[$₹-4009] #,##,##0.00'
 MONEY_WORDS = ("amount", "fee", "fees", "salary", "pay", "paid", "balance", "due", "total", "inr", "₹", "net",

@@ -5,11 +5,12 @@ import Image from "next/image";
 import {
   ArrowRight,
   Building2,
+  CircleCheck,
+  CircleAlert,
   Eye,
   EyeOff,
   GraduationCap,
   LoaderCircle,
-  KeyRound,
   LockKeyhole,
   Mail,
   Settings,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { type College } from "@/data/colleges";
 import RoleSelect from "./RoleSelect";
+import SignInCode, { codeHaptic } from "./SignInCode";
 import "./college-login.css";
 
 const features = [
@@ -91,7 +93,7 @@ function CampusHero({ college }: { college: College }) {
           aria-hidden="true"
         >
           <path
-            fill="#D9A347"
+            fill="#60a5fa"
             fillOpacity=".55"
             d="M0 0C165 190 350 0 800 82V140H0Z"
           />
@@ -124,6 +126,8 @@ export default function CollegeLogin({
   onRequestCode,
   onVerifyCode,
   allowPassword = false,
+  verified = false,
+  onCodeEdit,
 }: {
   college: College;
   roles: { code: string; name: string }[];
@@ -138,6 +142,8 @@ export default function CollegeLogin({
   onVerifyCode?: (login: string, code: string) => Promise<void>;
   /** Staff sign in with an emailed code only; true brings back the password form. */
   allowPassword?: boolean;
+  verified?: boolean;
+  onCodeEdit?: () => void;
 }) {
   const [showPassword, setShowPassword] = useState(false);
   // "code": sign in with a 6-digit code sent to the login's email (staff only).
@@ -148,6 +154,7 @@ export default function CollegeLogin({
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState("");
   const [resendIn, setResendIn] = useState(0);
+  const [codeVersion, setCodeVersion] = useState(0);
   useEffect(() => {
     if (resendIn <= 0) return;
     const timer = window.setTimeout(() => setResendIn((left) => left - 1), 1000);
@@ -159,7 +166,9 @@ export default function CollegeLogin({
       await onRequestCode(codeLogin.trim());
       setCodeSent(true);
       setCode("");
+      setCodeVersion((version) => version + 1);
       setResendIn(60);
+      codeHaptic(15);
     } catch {
       /* the error is shown by the parent */
     }
@@ -168,7 +177,7 @@ export default function CollegeLogin({
     event.preventDefault();
     if (signingIn) return;
     if (!codeSent) await sendCode();
-    else if (onVerifyCode) await onVerifyCode(codeLogin.trim(), code);
+    else if (onVerifyCode && code.length === 6) await onVerifyCode(codeLogin.trim(), code);
   }
   function switchMode(next: "password" | "code") {
     setMode(next);
@@ -205,7 +214,7 @@ export default function CollegeLogin({
               <RoleSelect
                 options={roles}
                 value={role}
-                disabled={signingIn}
+                disabled={signingIn || codeSent}
                 onChange={onRoleChange}
               />
             </div>
@@ -222,31 +231,20 @@ export default function CollegeLogin({
                   disabled={signingIn || codeSent}
                   value={codeLogin}
                   onChange={(e) => setCodeLogin(e.target.value)}
-                  aria-describedby={error ? "sign-in-error" : undefined}
-                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error && !codeSent ? "sign-in-error" : undefined}
+                  aria-invalid={error && !codeSent ? true : undefined}
                 />
               </div>
             </div>
             {codeSent && (
-              <div className="ca-field">
-                <label htmlFor="campus-code">6-digit code</label>
-                <div className="ca-input">
-                  <KeyRound size={18} aria-hidden="true" />
-                  <input
-                    id="campus-code"
-                    name="code"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    placeholder="Enter the code from your email"
-                    pattern="[0-9]{6}"
-                    required
-                    autoFocus
-                    disabled={signingIn}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    aria-describedby="code-help"
-                  />
-                </div>
+              <div className="ca-field ca-code-step">
+                <SignInCode
+                  key={codeVersion}
+                  disabled={signingIn || verified}
+                  invalid={!!error}
+                  verified={verified}
+                  onChange={(value) => { setCode(value); onCodeEdit?.(); }}
+                />
                 <small id="code-help" className="ca-code-help">
                   If this login is assigned to the selected role and has an
                   email address, a code has been sent to it. It is valid for 5
@@ -267,6 +265,7 @@ export default function CollegeLogin({
                     onClick={() => {
                       setCodeSent(false);
                       setCode("");
+                      onCodeEdit?.();
                     }}
                   >
                     Change login
@@ -275,12 +274,20 @@ export default function CollegeLogin({
               </div>
             )}
             {error && (
-              <p id="sign-in-error" role="alert" className="ca-error">
-                {error}
+              <p id="sign-in-error" role="alert" className="ca-error ca-code-feedback">
+                <CircleAlert size={18} aria-hidden="true" /> <span>{error}</span>
               </p>
             )}
-            <button className="ca-submit" type="submit" disabled={signingIn}>
-              {signingIn ? (
+            {!error && codeSent && (
+              <p key={verified ? "verified" : "sent"} className={`ca-code-feedback ${verified ? "ca-code-success" : "ca-code-sent"}`} role="status" aria-live="polite">
+                {verified ? <CircleCheck size={19} aria-hidden="true" /> : <ShieldCheck size={19} aria-hidden="true" />}
+                <span>{verified ? "Code verified. Opening your workspace…" : "Code requested. Check your registered email."}</span>
+              </p>
+            )}
+            <button className={`ca-submit${verified ? " is-verified" : ""}`} type="submit" disabled={signingIn || verified || (codeSent && code.length !== 6)}>
+              {verified ? (
+                <><CircleCheck size={19} aria-hidden="true" /> Verified</>
+              ) : signingIn ? (
                 <>
                   <LoaderCircle className="ca-spinner" size={18} aria-hidden="true" />{" "}
                   {codeSent ? "Signing in…" : "Sending code…"}

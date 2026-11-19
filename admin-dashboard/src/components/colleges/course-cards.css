@@ -2,9 +2,9 @@
 .crs {
   --crs-ink: #142b44;
   --crs-muted: #617086;
-  --crs-rule: #e8e4dd;
+  --crs-rule: #e2e8f0;
   --crs-paper: #fff;
-  --crs-gold: #a46a27;
+  --crs-gold: #1d4ed8;
   color: var(--crs-ink);
   display: grid;
   gap: 20px;
@@ -21,7 +21,7 @@
   cursor: pointer;
 }
 .crs :is(button, select, input):focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid #1d4ed8;
   outline-offset: 3px;
 }
 .crs-filters {
@@ -32,7 +32,7 @@
   border: 1px solid var(--crs-rule);
   border-radius: 12px;
   background: #fff;
-  box-shadow: 0 3px 15px #382c151f;
+  box-shadow: 0 3px 15px #171b231f;
 }
 .crs-desktop-filters {
   display: contents;
@@ -100,7 +100,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 14px 20px;
-  background: #faf9f7;
+  background: #ffffff;
   border-radius: 9px;
   padding: 10px 12px;
 }
@@ -131,7 +131,7 @@
   gap: 3px;
   padding: 3px;
   background: #fff;
-  border: 1px solid #e7e4de;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
 }
 .edu-connected .crs-segment button {
@@ -153,7 +153,7 @@
 .edu-connected .crs-segment button[aria-pressed="true"] {
   background: var(--crs-gold);
   color: #fff;
-  box-shadow: 0 2px 5px #7d4a1c20;
+  box-shadow: 0 2px 5px #1e40af20;
 }
 .crs-segment button > span {
   font-size: 11px;
@@ -214,7 +214,7 @@
   border-radius: 12px;
   padding: 18px;
   min-width: 0;
-  box-shadow: 0 3px 14px #392f1e05;
+  box-shadow: 0 3px 14px #171b2305;
   cursor: pointer;
   transition:
     transform 0.2s,
@@ -224,15 +224,15 @@
 @media (hover: hover) {
   .crs-card:hover {
     transform: translateY(-2px);
-    border-color: #c89c65;
-    box-shadow: 0 9px 24px #51371012;
+    border-color: #64748b;
+    box-shadow: 0 9px 24px #1e40af12;
   }
   .crs-card:hover .crs-view svg {
     transform: translateX(3px);
   }
 }
 .crs-card:focus-within {
-  border-color: #a46a27;
+  border-color: #1d4ed8;
 }
 .crs-card[data-state] {
   border-color: #c88279;
@@ -249,8 +249,8 @@
   flex: 0 0 50px;
   height: 50px;
   border-radius: 11px;
-  background: #f7efdf;
-  color: #946023;
+  background: #dbeafe;
+  color: #1d4ed8;
   font-size: 13px;
   font-weight: 750;
   padding: 5px;
@@ -310,7 +310,7 @@
   background: #fff;
   border: 1px solid var(--crs-rule);
   border-radius: 9px;
-  box-shadow: 0 8px 24px #30201620;
+  box-shadow: 0 8px 24px #171b2320;
 }
 .edu-connected .crs-menu button {
   display: block;
@@ -323,7 +323,7 @@
   border-radius: 5px;
 }
 .edu-connected .crs-menu button:hover {
-  background: #f7f0e5;
+  background: #ffffff;
 }
 .crs-facts {
   display: flex;
@@ -403,8 +403,8 @@
   border: 0;
   border-radius: 50%;
   padding: 0;
-  color: #8f591e;
-  background: #f8efdf;
+  color: #1d4ed8;
+  background: #dbeafe;
   flex-shrink: 0;
 }
 .crs-view svg {
@@ -432,9 +432,9 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #e5d5be;
-  background: #fbf4e9;
-  color: #81531e;
+  border: 1px solid #cbd5e1;
+  background: #eff6ff;
+  color: #1e40af;
   border-radius: 20px;
   padding: 5px 10px;
   overflow-wrap: anywhere;
@@ -473,11 +473,11 @@
 .crs-table-wrap td {
   text-align: left;
   padding: 13px 16px;
-  border-bottom: 1px solid #eee9e1;
+  border-bottom: 1px solid #e2e8f0;
   font-size: 13px;
 }
 .crs-table-wrap th {
-  background: #faf8f4;
+  background: #ffffff;
   font-weight: 600;
 }
 .crs-table-actions {
@@ -517,7 +517,7 @@
   background: #fff;
 }
 .crs-filter-dialog::backdrop {
-  background: #1f1a1455;
+  background: #171b2355;
 }
 .crs-filter-dialog header,
 .crs-filter-dialog footer {
@@ -553,7 +553,7 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 .edu-connected .crs-filter-dialog .crs-apply {
-  background: #a46a27;
+  background: #1d4ed8;
   color: #fff;
 }
 .edu-course-workspace .crs-page-description {
@@ -639,7 +639,7 @@
   .crs-header-more > summary {
     display: block;
     list-style: none;
-    border: 1px solid #e4ded4;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 11px 14px;
     font-size: 13px;
@@ -659,10 +659,10 @@
     padding: 8px;
     top: 46px;
     right: 0;
-    border: 1px solid #e4ded4;
+    border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: #fff;
-    box-shadow: 0 8px 24px #30201620;
+    box-shadow: 0 8px 24px #171b2320;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -740,7 +740,7 @@
   background: rgba(255, 255, 255, 0.14);
 }
 .crs-panel-close:focus-visible {
-  outline: 3px solid #d8ae5e;
+  outline: 3px solid #3b82f6;
   outline-offset: 2px;
 }
 .crs-panel-body {
@@ -926,8 +926,8 @@
     :focus-visible
   ):not(:disabled) {
   color: #fff;
-  background: #6b441b;
-  border-color: #b78b51;
+  background: #1e40af;
+  border-color: #4b5563;
 }
 .edu-connected .crs .crs-btn-delete:is(:hover, :focus-visible):not(:disabled) {
   color: #8b2722;
@@ -944,32 +944,32 @@
   .crs-segment
   button:not([aria-pressed="true"]):is(:hover, :focus-visible):not(:disabled) {
   color: #fff;
-  background: #6b441b;
+  background: #1e40af;
 }
 .edu-connected
   .crs
   .crs-segment
   button[aria-pressed="true"]:is(:hover, :focus-visible):not(:disabled) {
   color: #fff;
-  background: #4a2e12;
+  background: #1e40af;
 }
 .edu-connected
   .crs
   :is(.crs-view, .crs-active-filters button):is(:hover, :focus-visible) {
-  color: #653b10;
-  background: #edddc4;
-  border-color: #b78b51;
+  color: #1e40af;
+  background: #dbeafe;
+  border-color: #4b5563;
 }
 .edu-connected
   .crs
   :is(.crs-title h4 button, .crs-table-name):is(:hover, :focus-visible) {
-  color: #87511d;
+  color: #1d4ed8;
   background: transparent;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .edu-connected .crs button:active:not(:disabled) {
-  box-shadow: inset 0 1px 3px #30201625;
+  box-shadow: inset 0 1px 3px #171b2325;
 }
 .edu-connected .crs button:disabled {
   opacity: 0.6;
@@ -987,13 +987,13 @@
   > button:not(.edu-primary):is(:hover, :focus-visible),
 .edu-course-workspace .crs-header-desktop button:is(:hover, :focus-visible) {
   color: #fff;
-  background: #6b441b;
-  border-color: #b78b51;
+  background: #1e40af;
+  border-color: #4b5563;
 }
 .edu-course-workspace .edu-heading .edu-primary:is(:hover, :focus-visible) {
   color: #fff;
-  background: #4a2e12;
-  border-color: #87511d;
+  background: #1e40af;
+  border-color: #1d4ed8;
 }
 @media (max-width: 650px) {
   .edu-course-workspace .crs-header-desktop {
@@ -1033,12 +1033,12 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-left: 1px solid #e8e0d4;
+  border-left: 1px solid #e2e8f0;
   border-radius: var(--edu-drawer-radius);
   overflow: hidden;
   color: var(--crs-ink);
-  background: #faf9f6;
-  box-shadow: -12px 0 48px #30201624;
+  background: #ffffff;
+  box-shadow: -12px 0 48px #171b2324;
   font-family: inherit;
   font-size: 14px;
   animation: crs-slide 0.22s ease-out;
@@ -1048,14 +1048,14 @@
   flex-direction: column;
 }
 .crs-details-drawer::backdrop {
-  background: #201c1855;
+  background: #171b2355;
   backdrop-filter: blur(2px);
 }
 .college-erp .crs-details-drawer .crs-panel-head {
   background: #fff;
   color: #142b44;
   padding: 24px 26px 20px;
-  border-bottom: 1px solid #e8e0d4;
+  border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 .crs-details-drawer .crs-panel-head > div {
@@ -1063,7 +1063,7 @@
 }
 .crs-details-drawer .crs-panel-eyebrow {
   display: block;
-  color: #8c591f;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -1088,23 +1088,23 @@
   display: inline-block;
   padding: 5px 9px;
   border-radius: 6px;
-  background: #f6eddf;
-  color: #80501c;
+  background: #dbeafe;
+  color: #1e40af;
   font-size: 12px;
 }
 .college-erp .crs-details-drawer .crs-panel-close {
   background: #fff;
   color: #35465a;
-  border: 1px solid #e5e1da;
+  border: 1px solid #e2e8f0;
   border-radius: 9px;
   width: 38px;
   height: 38px;
   padding: 0;
 }
 .college-erp .crs-details-drawer .crs-panel-close:is(:hover, :focus-visible) {
-  background: #f4eadb;
-  color: #553516;
-  border-color: #b78b51;
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #4b5563;
 }
 .crs-details-drawer .crs-panel-body {
   flex: 1;
@@ -1119,7 +1119,7 @@
   gap: 12px;
 }
 .crs-details-drawer .crs-kpi {
-  border-color: #e8e0d4;
+  border-color: #e2e8f0;
   padding: 16px;
   border-radius: 10px;
   gap: 6px;
@@ -1127,7 +1127,7 @@
 }
 .crs-details-drawer .crs-kpi-main {
   grid-column: 1/-1;
-  border-left: 3px solid #a46a27;
+  border-left: 3px solid #1d4ed8;
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 12px;
@@ -1145,7 +1145,7 @@
 .crs-details-drawer .crs-panel-section {
   background: #fff;
   padding: 18px;
-  border: 1px solid #e8e0d4;
+  border: 1px solid #e2e8f0;
   border-radius: 11px;
   min-width: 0;
 }
@@ -1160,8 +1160,8 @@
   font-size: 13px;
   line-height: 1.65;
   padding: 12px;
-  background: #faf8f4;
-  border: 1px dashed #ded4c4;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
   border-radius: 8px;
 }
 .crs-details-drawer .crs-details {
@@ -1176,7 +1176,7 @@
   grid-template-columns: 110px minmax(0, 1fr);
   gap: 16px;
   padding: 12px 0;
-  border-bottom: 1px solid #f0ebe4;
+  border-bottom: 1px solid #e2e8f0;
 }
 .crs-details-drawer .crs-details > div:last-child {
   border: 0;
@@ -1201,17 +1201,17 @@
   gap: 16px;
   flex-shrink: 0;
   padding: 16px 26px;
-  border-top: 1px solid #e8e0d4;
+  border-top: 1px solid #e2e8f0;
   background: #fff;
   color: #617086;
   font-size: 12px;
   margin: 0;
 }
 .college-erp .crs-details-drawer .crs-panel-footer button {
-  background: #a46a27;
+  background: #1d4ed8;
   color: #fff;
   padding: 10px 22px;
-  border: 1px solid #a46a27;
+  border: 1px solid #1d4ed8;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -1220,12 +1220,12 @@
   .crs-details-drawer
   .crs-panel-footer
   button:is(:hover, :focus-visible) {
-  background: #4a2e12;
-  border-color: #87511d;
+  background: #1e40af;
+  border-color: #1d4ed8;
   color: #fff;
 }
 .crs-details-drawer button:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid #1d4ed8;
   outline-offset: 3px;
 }
 @media (max-width: 650px) {
@@ -1286,16 +1286,16 @@
   border-radius: 8px;
   background: #fff;
   color: #142b44;
-  border: 1px solid #e5e0d8;
+  border: 1px solid #e2e8f0;
   font-size: 12px;
 }
 .college-erp
   .edu-connected.edu-course-workspace
   .crs-header-desktop
   button:is(:hover, :focus-visible) {
-  background: #f4eadb;
+  background: #dbeafe;
   color: #18344b;
-  border-color: #b78b51;
+  border-color: #4b5563;
 }
 @media (max-width: 1000px) {
   .college-erp .edu-connected.edu-course-workspace .edu-heading {

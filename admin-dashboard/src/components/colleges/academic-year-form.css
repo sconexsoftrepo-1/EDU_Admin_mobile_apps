@@ -10,7 +10,7 @@
 .edu-academic-year-section {
   padding: 22px;
   margin-bottom: 20px;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #fff;
 }
@@ -18,18 +18,18 @@
   margin: 0 0 18px;
   font-size: 16px;
   font-weight: 650;
-  color: #30251c;
+  color: #171b23;
 }
 .edu-academic-year-section label {
   display: grid;
   gap: 8px;
-  color: #62513c;
+  color: #374151;
   font-size: 12px;
   font-weight: 500;
 }
 .edu-academic-year-section p {
   margin: 12px 0 0;
-  color: #8b7962;
+  color: #4b5563;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -43,38 +43,38 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 42px;
-  border: 1px solid #ded4c5;
+  border: 1px solid #cbd5e1;
   border-radius: 7px;
   padding: 10px 12px;
-  color: #30251c;
+  color: #171b23;
   background: #fff;
   font: inherit;
   font-size: 13px;
   font-weight: 400;
 }
 .edu-academic-year-section input:read-only {
-  background: #faf7f1;
-  color: #7a5c32;
+  background: #ffffff;
+  color: #4b5563;
 }
 .edu-academic-year-section input:focus {
-  outline: 2px solid #a46a2720;
-  border-color: #b88c50;
+  outline: 2px solid #1d4ed820;
+  border-color: #4b5563;
 }
 .edu-academic-year-section .date-input > input {
   padding-right: 40px;
 }
 .edu-academic-year-section .date-input input:disabled {
-  background: #f5f2ed;
+  background: #ffffff;
 }
 .edu-academic-year-generated {
-  border-color: #dfcba9;
+  border-color: #cbd5e1;
 }
 .edu-academic-year-section-title {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  color: #a46a27;
+  color: #1d4ed8;
 }
 .edu-academic-year-footer {
   display: flex;
@@ -85,11 +85,11 @@
   bottom: -26px;
   margin: 0 -30px -26px;
   padding: 18px 30px;
-  border-top: 1px solid #e9dfcf;
+  border-top: 1px solid #e2e8f0;
   background: #fff;
 }
 .edu-academic-year-footer > span {
-  color: #8b7962;
+  color: #4b5563;
   font-size: 12px;
 }
 .edu-academic-year-footer > div {

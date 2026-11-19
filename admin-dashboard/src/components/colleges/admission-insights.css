@@ -1,9 +1,9 @@
 .adi-popup {
-  --adi-ink: var(--erp-ink, #251e18);
-  --adi-muted: var(--erp-muted, #756b60);
-  --adi-line: var(--erp-border, #e9dfcf);
-  --adi-accent: var(--erp-accent, #a46a27);
-  --adi-soft: var(--erp-raised, #fcf9f3);
+  --adi-ink: var(--erp-ink, #171b23);
+  --adi-muted: var(--erp-muted, #4b5563);
+  --adi-line: var(--erp-border, #e2e8f0);
+  --adi-accent: var(--erp-accent, #1d4ed8);
+  --adi-soft: var(--erp-raised, #ffffff);
   color: var(--adi-ink);
 }
 .adi-popup ul {

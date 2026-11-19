@@ -45,7 +45,7 @@
   gap: 10px;
   margin: 0;
   padding: 9px 11px;
-  border: 1px solid #e5e0d6;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;
   font-size: 13px;
@@ -53,8 +53,8 @@
   cursor: pointer;
 }
 .edu-connected .lab-subject-grid .lab-check:has(input:checked) {
-  border-color: #a46a27;
-  background: #fbf6ee;
+  border-color: #1d4ed8;
+  background: #ffffff;
 }
 .edu-connected .lab-check input[type="checkbox"] {
   flex: none;
@@ -62,7 +62,7 @@
   height: 17px;
   margin: 1px 0 0;
   padding: 0;
-  accent-color: #a46a27;
+  accent-color: #1d4ed8;
   cursor: pointer;
 }
 @media (max-width: 560px) {

@@ -45,7 +45,7 @@
   cursor: default;
 }
 .att-workspace button:focus-visible {
-  outline: 3px solid #af792c;
+  outline: 3px solid #1d4ed8;
   outline-offset: 2px;
 }
 .att-filters {
@@ -154,7 +154,7 @@
   background: #fff0ed;
 }
 .att-calendar-grid .has-leave {
-  background: #fff8e9;
+  background: #eff6ff;
 }
 .att-calendar-grid button[aria-pressed="true"] {
   border-color: #1e6470;
@@ -268,8 +268,8 @@
   color: #287453;
 }
 .att-workspace .att-cell-E {
-  background: #fff7e5;
-  color: #9b751b;
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 .att-workspace .att-cell-L {
   background: #eef3ff;
@@ -354,12 +354,12 @@
   color: #365b45;
 }
 .att-register-overview .att-ov-absent {
-  background: #f6e3d9;
+  background: #dbeafe;
   color: #98482f;
 }
 .att-register-overview .att-ov-leave {
-  background: #f6ecd3;
-  color: #7a5a22;
+  background: #dbeafe;
+  color: #1e40af;
 }
 .att-register-overview .att-ov-state {
   margin-left: auto;
@@ -376,7 +376,7 @@
   width: 34px;
   height: 30px;
   border-radius: 8px;
-  border: 1px solid #ddd3c4;
+  border: 1px solid #cbd5e1;
   background: #fff;
   color: #6e645b;
   font-weight: 800;
@@ -393,7 +393,7 @@
   color: #fff;
 }
 .att-toggle button.is-changed.is-on {
-  box-shadow: 0 0 0 2px #f6ecd3;
+  box-shadow: 0 0 0 2px #dbeafe;
 }
 .att-toggle button:disabled {
   opacity: 0.6;
@@ -402,8 +402,8 @@
   margin-left: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f6ecd3;
-  color: #7a5a22;
+  background: #dbeafe;
+  color: #1e40af;
   font-size: 11px;
   font-weight: 700;
 }

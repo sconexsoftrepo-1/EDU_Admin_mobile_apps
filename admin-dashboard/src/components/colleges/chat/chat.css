@@ -2,18 +2,18 @@
    Colours come from the dashboard template (college-erp.css --erp-* tokens). */
 .chat-fab,
 .chat-scrim {
-  --chat-accent: var(--erp-accent, #a46a27);
-  --chat-glow: var(--erp-glow, #c99445);
-  --chat-accent-soft: #f3e6d3;
-  --chat-accent-line: #dcc29d;
-  --chat-mine: #f4e7d4;
-  --chat-bg: var(--erp-bg, #f5efe5);
-  --chat-raised: var(--erp-raised, #fcf9f3);
-  --chat-ink: var(--erp-ink, #251e18);
-  --chat-muted: var(--erp-muted, #756b60);
-  --chat-border: var(--erp-border, #e9dfcf);
-  --chat-hover: #f3ebdf;
-  --chat-sidebar: var(--erp-sidebar, #302016);
+  --chat-accent: var(--erp-accent, #1d4ed8);
+  --chat-glow: var(--erp-glow, #3b82f6);
+  --chat-accent-soft: #dbeafe;
+  --chat-accent-line: #cbd5e1;
+  --chat-mine: #dbeafe;
+  --chat-bg: var(--erp-bg, #ffffff);
+  --chat-raised: var(--erp-raised, #ffffff);
+  --chat-ink: var(--erp-ink, #171b23);
+  --chat-muted: var(--erp-muted, #4b5563);
+  --chat-border: var(--erp-border, #e2e8f0);
+  --chat-hover: #e2e8f0;
+  --chat-sidebar: var(--erp-sidebar, #123b7a);
   --chat-danger: var(--erp-danger, #b43540);
 }
 .chat-fab {
@@ -30,7 +30,7 @@
   background: var(--chat-accent);
   color: #fff;
   box-shadow:
-    0 10px 24px rgba(164, 106, 39, 0.35),
+    0 10px 24px rgba(29, 78, 216, 0.35),
     0 2px 6px rgba(0, 0, 0, 0.12);
   cursor: pointer;
   transition:
@@ -299,19 +299,19 @@
   color: var(--chat-accent);
 }
 .chat-role-staff {
-  background: #ebe2d6;
+  background: #e2e8f0;
   color: var(--chat-sidebar);
 }
 .chat-role-student {
-  background: #f6e3d9;
+  background: #dbeafe;
   color: #98482f;
 }
 .chat-role-parent {
-  background: #ebe8d8;
+  background: #e2e8f0;
   color: #5f6b4f;
 }
 .chat-role-group {
-  background: #f6ead2;
+  background: #dbeafe;
   color: var(--chat-glow);
 }
 .chat-text-teacher {
@@ -461,7 +461,7 @@
   padding: 12px 18px;
   background-color: var(--chat-bg);
   background-image: radial-gradient(
-    rgba(164, 106, 39, 0.06) 1px,
+    rgba(29, 78, 216, 0.06) 1px,
     transparent 1px
   );
   background-size: 18px 18px;

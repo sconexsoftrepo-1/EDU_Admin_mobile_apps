@@ -1,19 +1,19 @@
 /*
  * One table design for every data table in the college app (ERP modules, API screens, staff,
  * courses, roles, configuration, enrollment fees, salary breakdown, faculty directory):
- * brown header, white / light-beige rows, subtle borders, consistent padding and alignment.
+ * blue header, white / pale-blue rows, subtle borders, consistent padding and alignment.
  * The weekly timetable grid (.academic-week-table) is a schedule, not a data table, and keeps
  * its own colour-coded design.
  */
 :root {
-  --tbl-head: #92591f;
-  --tbl-head-line: #7d4b18;
+  --tbl-head: #1d4ed8;
+  --tbl-head-line: #1e40af;
   --tbl-row: #ffffff;
-  --tbl-row-alt: #f8f3ea;
-  --tbl-row-hover: #f1e5d3;
-  --tbl-line: #e7d8c5;
-  --tbl-ink: #29231d;
-  --tbl-muted: #7a6a58;
+  --tbl-row-alt: #f8fafc;
+  --tbl-row-hover: #dbeafe;
+  --tbl-line: #e2e8f0;
+  --tbl-ink: #171b23;
+  --tbl-muted: #4b5563;
 }
 
 /* ---- Scroll container: rounded, bordered, horizontal scroll on narrow screens ---- */
@@ -49,7 +49,7 @@
   font-size: 13px;
 }
 
-/* ---- Header: brown, white medium-bold text ---- */
+/* ---- Header: blue, white medium-bold text ---- */
 :is(.college-erp, .edu-connected, .enw-backdrop)
   table:not(.academic-week-table)
   > thead
@@ -64,7 +64,7 @@
   padding: 11px 14px !important;
   border: 0 !important;
   border-bottom: 1px solid var(--tbl-head-line) !important;
-  border-right: 1px solid #a56a2e !important;
+  border-right: 1px solid #1d4ed8 !important;
   background: var(--tbl-head) !important;
   color: #fff !important;
   font-size: 12px !important;
@@ -106,7 +106,7 @@
   accent-color: #fff;
 }
 
-/* ---- Body: white rows, light-beige alternate rows, warm hover ---- */
+/* ---- Body: white rows, pale-blue alternate rows, blue hover ---- */
 :is(.college-erp, .edu-connected, .enw-backdrop)
   table:not(.academic-week-table)
   > tbody
@@ -115,7 +115,7 @@
   padding: 10px 14px !important;
   border: 0 !important;
   border-bottom: 1px solid var(--tbl-line) !important;
-  border-right: 1px solid #efe4d5 !important;
+  border-right: 1px solid #e2e8f0 !important;
   background: var(--tbl-row) !important;
   color: var(--tbl-ink) !important;
   font-size: 13px;
@@ -152,7 +152,7 @@
   > :is(td, th) {
   border-bottom: 0 !important;
 }
-/* Row labels inside the body (e.g. enrollment review) stay readable, not header-brown. */
+/* Row labels inside the body (e.g. enrollment review) stay readable, not header-blue. */
 :is(.college-erp, .edu-connected, .enw-backdrop)
   table:not(.academic-week-table)
   > tbody
@@ -165,7 +165,7 @@
   table:not(.academic-week-table)
   :is(tfoot > tr, tr.enw-total)
   > :is(td, th) {
-  background: #f3e7d6 !important;
+  background: #dbeafe !important;
   font-weight: 700;
 }
 
@@ -288,7 +288,7 @@
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  color: #7a6a58;
+  color: #4b5563;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -296,12 +296,12 @@
 .edu-table .edu-kv dt::after,
 .edu-special .edu-kv dt::after {
   content: ":";
-  color: #7a6a58;
+  color: #4b5563;
 }
 .edu-table .edu-kv dd,
 .edu-special .edu-kv dd {
   margin: 0;
-  color: #29231d;
+  color: #171b23;
   overflow-wrap: anywhere;
 }
 

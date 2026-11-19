@@ -6,9 +6,9 @@
   --tt-theory: #eef7fc;
   --tt-lab: #eee8fb;
   --tt-activity: #dcf1e4;
-  --tt-sports: #fde7d6;
-  --tt-library: #fbf0c9;
-  --tt-pause: #f8f5e7;
+  --tt-sports: #dbeafe;
+  --tt-library: #dbeafe;
+  --tt-pause: #ffffff;
   color: var(--tt-ink);
   display: grid;
   gap: 24px;
@@ -158,7 +158,7 @@
   background: #dceef8;
 }
 .tt-miniature i:nth-child(n + 13):nth-child(-n + 18) {
-  background: #f0eacd;
+  background: #dbeafe;
 }
 .tt-miniature i:nth-child(21) {
   background: #dcd0f5;
@@ -778,7 +778,7 @@
   display: none;
 }
 .tt-time-pause {
-  background: #f8f5e7;
+  background: #ffffff;
 }
 .college-erp .tt-workspace.tt-studio .tt-resize {
   min-height: 14px;

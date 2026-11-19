@@ -124,7 +124,7 @@
   font-weight: 700;
 }
 .adm-workspace .adm-tabs button:focus-visible {
-  outline: 2px solid #b77a20;
+  outline: 2px solid #1d4ed8;
   outline-offset: 2px;
 }
 .adm-list-panel,
@@ -445,20 +445,20 @@
   flex-wrap: wrap;
   padding: 14px 16px;
   margin-bottom: 16px;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  background: #fcf9f3;
+  background: #ffffff;
 }
 .adm-next-step div {
   display: grid;
   gap: 2px;
 }
 .adm-next-step span {
-  color: #756b60;
+  color: #4b5563;
   font-size: 13px;
 }
 .adm-create-form .adm-form-actions {
-  background: #fffdf9;
+  background: #eff6ff;
   border-top: 1px solid var(--adm-line);
   bottom: 0;
   flex-wrap: wrap;
@@ -492,16 +492,16 @@
 /* Admission enquiry details, laid out as a printable document. */
 .adm-doc {
   background: #fff;
-  border: 1px solid #e4d9c8;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  color: #251e18;
+  color: #171b23;
   display: grid;
   gap: 14px;
   padding: 20px 22px;
 }
 .adm-doc-head {
   align-items: center;
-  border-bottom: 3px solid #7a4a1c;
+  border-bottom: 3px solid #1e40af;
   display: grid;
   gap: 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -529,7 +529,7 @@
   text-align: right;
 }
 .adm-doc-title strong {
-  color: #7a4a1c;
+  color: #1e40af;
   font-size: 14px;
   letter-spacing: 0.06em;
 }
@@ -552,14 +552,14 @@
   margin-right: 18px;
 }
 .adm-doc-section {
-  border: 1px solid #e4d9c8;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   break-inside: avoid;
   overflow: hidden;
 }
 .adm-doc-section h3 {
-  background: #f3e6d3;
-  color: #7a4a1c;
+  background: #dbeafe;
+  color: #1e40af;
   font-size: 12px;
   letter-spacing: 0.06em;
   margin: 0;
@@ -574,7 +574,7 @@
   padding: 6px 14px 10px;
 }
 .adm-doc-section dl > div {
-  border-bottom: 1px dashed #efe6d8;
+  border-bottom: 1px dashed #e2e8f0;
   display: grid;
   gap: 10px;
   grid-template-columns: minmax(110px, 42%) 1fr;
@@ -600,7 +600,7 @@
   padding: 30px 0 0;
 }
 .adm-doc-sign span {
-  border-top: 1px solid #c9b9a3;
+  border-top: 1px solid #cbd5e1;
   color: #6b6158;
   font-size: 12px;
   min-width: 190px;
@@ -610,7 +610,7 @@
 .adm-print {
   align-items: center;
   background: #fff;
-  border: 1px solid #e4d9c8;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;

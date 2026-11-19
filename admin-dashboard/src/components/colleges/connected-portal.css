@@ -1,11 +1,11 @@
 .edu-connected {
-  --edu-ink: #18344b;
-  --edu-accent: #a77524;
+  --edu-ink: #171b23;
+  --edu-accent: #1d4ed8;
   color: var(--edu-ink);
   font-family: Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  background: #f4f6f8;
+  background: #ffffff;
   min-height: 100vh;
 }
 .edu-connected * {
@@ -35,7 +35,7 @@
 .edu-connected input:focus-visible,
 .edu-connected select:focus-visible,
 .edu-connected textarea:focus-visible {
-  outline: 3px solid #d8ae5e;
+  outline: 3px solid #3b82f6;
   outline-offset: 2px;
 }
 .edu-connected .edu-primary {
@@ -103,7 +103,7 @@
 }
 .edu-workspace nav button.active {
   background: #edf2f5;
-  border-left: 3px solid #a77524;
+  border-left: 3px solid #1d4ed8;
   font-weight: bold;
 }
 .edu-content {
@@ -322,8 +322,8 @@
 
 /* Edunexa record forms use the same full-height side sheet as the original ERP. */
 .edu-connected.edu-form-drawer {
-  --edu-ink: #30251c;
-  --edu-accent: #a46a27;
+  --edu-ink: #171b23;
+  --edu-accent: #1d4ed8;
   position: fixed;
   inset: 0 0 0 auto;
   margin: 0;
@@ -334,11 +334,11 @@
   max-height: 100dvh;
   padding: 0;
   border: 0;
-  border-left: 1px solid #e7ddce;
+  border-left: 1px solid #e2e8f0;
   border-radius: var(--edu-drawer-radius);
-  background: #fcfaf6;
+  background: #ffffff;
   color: var(--edu-ink);
-  box-shadow: -24px 0 80px #21160c30;
+  box-shadow: -24px 0 80px #171b2330;
   overflow: hidden;
 }
 .edu-form-drawer[open] {
@@ -347,7 +347,7 @@
   animation: edu-drawer-enter 0.24s ease-out;
 }
 .edu-form-drawer::backdrop {
-  background: #211a1359;
+  background: #171b2359;
   backdrop-filter: blur(3px);
 }
 .edu-drawer-header {
@@ -357,7 +357,7 @@
   gap: 24px;
   padding: 26px 30px 22px;
   background: #fff;
-  border-bottom: 1px solid #e9dfcf;
+  border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 .edu-drawer-header h2 {
@@ -365,17 +365,17 @@
   letter-spacing: -0.6px;
   line-height: 1.25;
   margin: 4px 0 8px;
-  color: #30251c;
+  color: #171b23;
 }
 .edu-drawer-header p {
   margin: 0;
-  color: #786c5e;
+  color: #4b5563;
   font-size: 12px;
 }
 .edu-drawer-header .edu-drawer-eyebrow {
   font-size: 11px;
   font-weight: 600;
-  color: #9a6a28;
+  color: #1d4ed8;
 }
 .edu-connected .edu-drawer-close {
   display: grid;
@@ -384,10 +384,10 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: #fcfaf6;
-  color: #514437;
+  background: #ffffff;
+  color: #374151;
 }
 .edu-drawer-sections {
   display: flex;
@@ -395,8 +395,8 @@
   padding: 12px 30px;
   overflow-x: auto;
   flex-shrink: 0;
-  background: #f8f3eb;
-  border-bottom: 1px solid #e9dfcf;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
 }
 .edu-connected .edu-drawer-sections button {
   display: inline-flex;
@@ -407,10 +407,10 @@
   white-space: nowrap;
   font-size: 11px;
   font-weight: 600;
-  border: 1px solid #e5dac8;
+  border: 1px solid #e2e8f0;
   border-radius: 7px;
   background: #fff;
-  color: #62513c;
+  color: #374151;
 }
 .edu-drawer-form {
   display: flex;
@@ -428,7 +428,7 @@
   padding: 26px 30px;
 }
 .edu-form-section {
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   background: #fff;
   padding: 22px;
@@ -442,21 +442,21 @@
   gap: 12px;
   padding-bottom: 16px;
   margin-bottom: 19px;
-  border-bottom: 1px solid #eee6da;
+  border-bottom: 1px solid #e2e8f0;
 }
 .edu-form-section-heading h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 650;
   letter-spacing: -0.2px;
-  color: #30251c;
+  color: #171b23;
 }
 .edu-form-section-heading > span {
-  border: 1px solid #e7dfd2;
-  background: #faf7f1;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
   border-radius: 20px;
   padding: 3px 9px;
-  color: #817362;
+  color: #4b5563;
   font-size: 10px;
 }
 .edu-form-drawer .edu-field-grid {
@@ -468,14 +468,14 @@
   gap: 8px;
   font-size: 14.4px;
   font-weight: 550;
-  color: #4b4034;
+  color: #374151;
   align-content: start;
 }
 .edu-form-drawer .edu-field-grid :is(input, select, textarea) {
-  border: 1px solid #ded5c8;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #fff;
-  color: #30251c;
+  color: #171b23;
   min-height: 41px;
   padding: 10px 12px;
   font-size: 13px;
@@ -493,13 +493,13 @@
   padding-bottom: 0;
 }
 .edu-form-drawer .edu-field-grid :is(input, select, textarea):focus {
-  border-color: #a46a27;
+  border-color: #1d4ed8;
   outline: 0;
-  box-shadow: 0 0 0 3px #a46a2715;
+  box-shadow: 0 0 0 3px #1d4ed815;
 }
 .edu-form-drawer .edu-field-grid :is(input, select, textarea):disabled {
-  background: #f7f4ee;
-  color: #8f8475;
+  background: #ffffff;
+  color: #4b5563;
   cursor: wait;
 }
 .edu-field-wide {
@@ -510,7 +510,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 1px solid #e9dfcf;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 12px;
   min-height: 43px;
@@ -519,7 +519,7 @@
   width: 17px;
   height: 17px;
   min-height: 0;
-  accent-color: #a46a27;
+  accent-color: #1d4ed8;
 }
 .edu-required {
   color: #a14c39;
@@ -532,7 +532,7 @@
   overflow-wrap: anywhere;
 }
 .edu-field-help {
-  color: #827564;
+  color: #4b5563;
 }
 .edu-field-error {
   color: #aa3c35;
@@ -545,12 +545,12 @@
   gap: 20px;
   padding: 17px 30px;
   background: #fff;
-  border-top: 1px solid #e9dfcf;
-  box-shadow: 0 -4px 18px #30251c04;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 18px #171b2304;
 }
 .edu-drawer-footer > span {
   font-size: 11px;
-  color: #827564;
+  color: #4b5563;
   max-width: 270px;
   line-height: 1.5;
 }
@@ -580,15 +580,15 @@
 }
 /* Explicit foreground/background pairs keep labels readable in every button state. */
 .edu-connected .edu-primary {
-  background: #a46a27;
+  background: #1d4ed8;
   color: #fff;
-  border-color: #a46a27;
+  border-color: #1d4ed8;
 }
 .edu-connected .edu-primary:is(:hover, :focus-visible, :active):not(:disabled) {
-  background: #87511d;
+  background: #1d4ed8;
   color: #fff;
-  border-color: #87511d;
-  box-shadow: 0 3px 10px #73441118;
+  border-color: #1d4ed8;
+  box-shadow: 0 3px 10px #1e40af18;
 }
 .edu-connected
   button:not(.edu-primary):not(.erp-danger):is(:hover, :focus-visible):not(
@@ -607,7 +607,7 @@
   justify-content: flex-end;
   align-items: stretch;
   padding: 0;
-  background: #211a1359;
+  background: #171b2359;
   backdrop-filter: blur(3px);
 }
 .edu-dialog {
@@ -616,8 +616,8 @@
   max-width: 100vw;
   width: min(980px, calc(100vw - 80px));
   border-radius: var(--edu-drawer-radius);
-  border-left: 1px solid #e9dfcf;
-  box-shadow: -24px 0 80px #21160c30;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -24px 0 80px #171b2330;
   animation: edu-drawer-enter 0.24s ease-out;
 }
 @keyframes edu-drawer-enter {
@@ -697,21 +697,21 @@
 /* Clear, accessible contact permission cards in enrollment forms. */
 .edu-form-drawer .edu-field-checkbox {
   cursor: pointer;
-  background: #faf8f4;
+  background: #ffffff;
   transition:
     border-color 0.15s,
     background-color 0.15s,
     box-shadow 0.15s;
 }
 .edu-form-drawer .edu-field-checkbox:hover {
-  border-color: #b58a52;
+  border-color: #4b5563;
 }
 .edu-form-drawer .edu-field-checkbox:has(input:checked) {
-  background: #f5ecdf;
-  border-color: #a46a27;
+  background: #dbeafe;
+  border-color: #1d4ed8;
 }
 .edu-form-drawer .edu-field-checkbox:focus-within {
-  outline: 2px solid #a46a27;
+  outline: 2px solid #1d4ed8;
   outline-offset: 3px;
 }
 .edu-form-drawer .edu-field-checkbox input[type="checkbox"] {
@@ -726,7 +726,7 @@
 .edu-form-drawer .edu-checkbox-description {
   display: block;
   margin-top: 4px;
-  color: #756650;
+  color: #4b5563;
   font-size: 12px;
   line-height: 1.5;
   font-weight: 400;
@@ -747,7 +747,7 @@
 
 /* Batch form: switch between creation and live management without losing entered values. */
 
-/* Segmented batch workspace, aligned with Edunexa's cream, white and gold surfaces. */
+/* Segmented batch workspace, aligned with the dashboard's white and blue surfaces. */
 
 .edu-drawer-header,
 .edu-drawer-body,

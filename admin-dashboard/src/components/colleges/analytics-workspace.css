@@ -1,11 +1,11 @@
 .anw {
-  --anw-ink: #241d18;
-  --anw-muted: #76695e;
-  --anw-line: #eadccb;
-  --anw-amber: #a56824;
-  --anw-gold: #c99448;
-  --anw-soft: #fbf8f3;
-  --anw-tint: #f6e6ce;
+  --anw-ink: #171b23;
+  --anw-muted: #4b5563;
+  --anw-line: #e2e8f0;
+  --anw-amber: #1d4ed8;
+  --anw-gold: #3b82f6;
+  --anw-soft: #ffffff;
+  --anw-tint: #dbeafe;
   color: var(--anw-ink);
   display: grid;
   gap: 14px;
@@ -132,7 +132,7 @@
 }
 .anw-reset:disabled,
 .anw-export:disabled {
-  color: #a79a8d;
+  color: #64748b;
   cursor: not-allowed;
 }
 
@@ -306,7 +306,7 @@
 }
 .anw-donut-track {
   cursor: default;
-  stroke: #f3e7d6;
+  stroke: #dbeafe;
 }
 .anw-donut-ring > div {
   align-content: center;
@@ -411,7 +411,7 @@
   font-weight: 600;
 }
 .anw-bars i {
-  background: #f3e7d6;
+  background: #dbeafe;
   border-radius: 99px;
   display: block;
   grid-column: 1 / -1;
@@ -495,7 +495,7 @@
 .anw-tag {
   background: var(--anw-tint);
   border-radius: 99px;
-  color: #6b441b;
+  color: #1e40af;
   flex: 0 0 auto;
   font-size: 11px;
   font-weight: 600;
@@ -506,7 +506,7 @@
   color: #a12f2f;
 }
 .anw-tag.is-today {
-  background: #fdf0d5;
+  background: #dbeafe;
 }
 
 /* Tables */
@@ -525,7 +525,7 @@
   width: 100%;
 }
 .anw-table th {
-  background: #8e571f;
+  background: #1d4ed8;
   color: #fff;
   font-size: 12px;
   font-weight: 600;
@@ -652,7 +652,7 @@
   padding: 0 10px;
 }
 .anw-pager button:disabled {
-  color: #a79a8d;
+  color: #64748b;
   cursor: not-allowed;
 }
 
@@ -770,7 +770,7 @@
   margin: 0 0 16px;
 }
 .anw-details > div {
-  border-bottom: 1px solid #eadccb;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   font-size: 14px;
   gap: 12px;
@@ -778,7 +778,7 @@
   padding: 9px 0;
 }
 .anw-details dt {
-  color: #76695e;
+  color: #4b5563;
 }
 .anw-details dd {
   font-weight: 600;
@@ -809,7 +809,7 @@
 }
 .anw-skeleton {
   animation: anw-pulse 1.3s ease-in-out infinite;
-  background: #efe6d8;
+  background: #e2e8f0;
   border-radius: 14px;
   height: 84px;
 }
@@ -824,7 +824,7 @@
 .anw-failed {
   align-items: center;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   display: flex;
   flex-wrap: wrap;
@@ -839,7 +839,7 @@
 .anw-failed button {
   align-items: center;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
@@ -909,16 +909,16 @@
 }
 .erp-manage-head > span {
   align-items: center;
-  background: #f6e6ce;
+  background: #dbeafe;
   border-radius: 12px;
-  color: #a56824;
+  color: #1d4ed8;
   display: inline-flex;
   flex: 0 0 42px;
   height: 42px;
   justify-content: center;
 }
 .erp-manage-head p {
-  color: #76695e;
+  color: #4b5563;
   font-size: 13px;
   margin: 2px 0 0;
 }
@@ -933,18 +933,18 @@
 }
 .edu-embedded .edu-summary > div {
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   display: grid;
   gap: 2px;
   padding: 10px 12px;
 }
 .edu-embedded .edu-summary span {
-  color: #76695e;
+  color: #4b5563;
   font-size: 12px;
 }
 .edu-embedded .edu-summary strong {
-  color: #241d18;
+  color: #171b23;
   font-size: 18px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
@@ -970,9 +970,9 @@
 }
 .edu-module-chips > div button {
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  color: #76695e;
+  color: #4b5563;
   cursor: pointer;
   flex: 0 0 auto;
   font-size: 13px;
@@ -981,16 +981,16 @@
   padding: 0 14px;
 }
 .edu-module-chips > div button[aria-pressed="true"] {
-  border-color: #a56824;
-  box-shadow: inset 0 0 0 1px #a56824;
-  color: #241d18;
+  border-color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px #1d4ed8;
+  color: #171b23;
 }
 .edu-module-arrow {
   align-items: center;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  color: #241d18;
+  color: #171b23;
   cursor: pointer;
   display: inline-flex;
   flex: 0 0 34px;
@@ -1015,12 +1015,12 @@
   text-decoration: underline;
 }
 .erp-manage-shortcuts {
-  border-top: 1px solid #eadccb;
+  border-top: 1px solid #e2e8f0;
   margin: 8px 20px 0;
   padding: 16px 0 24px;
 }
 .erp-manage-shortcuts h3 {
-  color: #241d18;
+  color: #171b23;
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -1034,9 +1034,9 @@
 .erp-manage-shortcuts a {
   align-items: center;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
-  color: #241d18;
+  color: #171b23;
   display: flex;
   gap: 10px;
   min-height: 60px;
@@ -1045,10 +1045,10 @@
   transition: border-color 150ms ease;
 }
 .erp-manage-shortcuts a:hover {
-  border-color: #c99448;
+  border-color: #3b82f6;
 }
 .erp-manage-shortcuts svg {
-  color: #a56824;
+  color: #1d4ed8;
   flex: 0 0 auto;
 }
 .erp-manage-shortcuts strong {
@@ -1057,7 +1057,7 @@
   font-weight: 600;
 }
 .erp-manage-shortcuts small {
-  color: #76695e;
+  color: #4b5563;
   font-size: 11px;
 }
 .edu-more-actions {
@@ -1066,9 +1066,9 @@
 .edu-more-actions > summary {
   align-items: center;
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  color: #241d18;
+  color: #171b23;
   cursor: pointer;
   display: inline-flex;
   font-size: 13px;
@@ -1083,9 +1083,9 @@
 }
 .edu-more-actions > div {
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 10px;
-  box-shadow: 0 10px 28px #5a361329;
+  box-shadow: 0 10px 28px #1e40af29;
   display: grid;
   gap: 4px;
   min-width: 190px;

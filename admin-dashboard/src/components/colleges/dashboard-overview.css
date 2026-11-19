@@ -1,11 +1,11 @@
 .dov {
-  --dov-ink: #241d18;
-  --dov-muted: #76695e;
-  --dov-line: #eadccb;
-  --dov-amber: #a56824;
-  --dov-gold: #c99448;
-  --dov-soft: #fbf8f3;
-  --dov-tint: #f6e6ce;
+  --dov-ink: #171b23;
+  --dov-muted: #4b5563;
+  --dov-line: #e2e8f0;
+  --dov-amber: #1d4ed8;
+  --dov-gold: #3b82f6;
+  --dov-soft: #ffffff;
+  --dov-tint: #dbeafe;
   color: var(--dov-ink);
   display: grid;
   gap: 16px;
@@ -40,7 +40,7 @@
   position: relative;
 }
 .dov-banner::before {
-  background: linear-gradient(90deg, #fbf3e6 0%, #fbf3e6f2 34%, #fbf3e680 62%, #fbf3e61a 100%);
+  background: linear-gradient(90deg, #eff6ff 0%, #eff6fff2 34%, #eff6ff80 62%, #eff6ff1a 100%);
   content: "";
   inset: 0;
   position: absolute;
@@ -68,16 +68,16 @@
   margin: 4px 0 8px;
 }
 .dov-banner-text > span {
-  color: #4f4338;
+  color: #374151;
   font-size: 14px;
 }
 .dov-date {
   align-content: center;
   backdrop-filter: blur(6px);
-  background: #24160fcc;
+  background: #171b23cc;
   border: 1px solid #ffffff24;
   border-radius: 12px;
-  color: #fff6e7;
+  color: #eff6ff;
   display: grid;
   flex: 0 0 auto;
   gap: 1px;
@@ -85,12 +85,12 @@
   padding: 12px 16px;
 }
 .dov-date small {
-  color: #e5d3b8;
+  color: #cbd5e1;
   font-size: 12px;
   min-height: 16px;
 }
 .dov .dov-date strong {
-  color: #fff6e7;
+  color: #eff6ff;
   font-size: 19px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -136,7 +136,7 @@
 }
 a.dov-kpi:hover {
   border-color: var(--dov-gold);
-  box-shadow: 0 6px 18px #5a361314;
+  box-shadow: 0 6px 18px #1e40af14;
 }
 .dov-kpi-icon {
   align-items: center;
@@ -330,7 +330,7 @@ a.dov-kpi:hover {
   background: var(--dov-amber);
 }
 .dov-legend .is-outstanding {
-  background: #e8cfa8;
+  background: #bfdbfe;
 }
 .dov-chart,
 .dov-chart-skeleton {
@@ -362,7 +362,7 @@ a.dov-kpi:hover {
   stroke-width: 10;
 }
 .dov-ring-track {
-  stroke: #f3e7d6;
+  stroke: #dbeafe;
 }
 .dov-ring-value {
   stroke: var(--dov-amber);
@@ -496,7 +496,7 @@ a.dov-kpi:hover {
   align-items: center;
   background: var(--dov-tint);
   border-radius: 50%;
-  color: #6b441b;
+  color: #1e40af;
   display: inline-flex;
   flex: 0 0 38px;
   font-size: 13px;
@@ -629,7 +629,7 @@ a.dov-kpi:hover {
   row-gap: 5px;
 }
 .dov-bars i {
-  background: #f3e7d6;
+  background: #dbeafe;
   border-radius: 99px;
   display: block;
   grid-column: 1 / -1;
@@ -651,7 +651,7 @@ a.dov-kpi:hover {
 }
 .dov-skeleton {
   animation: dov-pulse 1.3s ease-in-out infinite;
-  background: #efe6d8;
+  background: #e2e8f0;
   border-radius: 12px;
 }
 .dov-name-skeleton {
@@ -685,7 +685,7 @@ a.dov-kpi:hover {
   min-width: 0;
 }
 .dov-tabs {
-  border-bottom: 1px solid #eadccb;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   gap: 6px;
   overflow-x: auto;
@@ -693,9 +693,9 @@ a.dov-kpi:hover {
 }
 .dov-tabs button {
   background: #fff;
-  border: 1px solid #eadccb;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  color: #76695e;
+  color: #4b5563;
   cursor: pointer;
   flex: 0 0 auto;
   font-size: 13px;
@@ -708,8 +708,8 @@ a.dov-kpi:hover {
   margin-left: auto;
 }
 .dov-tabs button[aria-selected="true"] {
-  background: #a56824;
-  border-color: #a56824;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
   color: #fff;
 }
 
@@ -726,7 +726,7 @@ a.dov-kpi:hover {
     padding: 16px;
   }
   .dov-banner::before {
-    background: linear-gradient(180deg, #fbf3e6f5 0%, #fbf3e6e0 55%, #fbf3e680 100%);
+    background: linear-gradient(180deg, #eff6fff5 0%, #eff6ffe0 55%, #eff6ff80 100%);
   }
   .dov-date {
     align-self: stretch;

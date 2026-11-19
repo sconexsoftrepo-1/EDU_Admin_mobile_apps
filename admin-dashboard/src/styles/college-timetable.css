@@ -99,7 +99,7 @@
 .college-erp
   .academic-week-table
   td:is([data-kind="Break"], [data-kind="Lunch"]) {
-  background: color-mix(in srgb, #d6b867 14%, var(--erp-surface));
+  background: color-mix(in srgb, #3b82f6 14%, var(--erp-surface));
 }
 .college-erp .academic-week-table td[data-conflict="true"] {
   background: color-mix(in srgb, #ec6f7d 20%, var(--erp-surface));
@@ -166,7 +166,7 @@
   background: #31ad76;
 }
 .academic-grid-legend [data-kind="Break"]::before {
-  background: #d6b867;
+  background: #3b82f6;
 }
 .academic-faculty-directory {
   border-top: 1px solid var(--erp-border);

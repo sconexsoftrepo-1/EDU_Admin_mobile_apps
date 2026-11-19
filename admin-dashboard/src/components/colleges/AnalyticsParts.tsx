@@ -16,7 +16,7 @@ export const shortDate = (value: string | null | undefined) => formatDate(value)
 export const percentOf = (part: number, whole: number) =>
   whole ? Math.round((part * 1000) / whole) / 10 : 0;
 
-const COLOURS = ["#8a5520", "#a56824", "#c99448", "#e0bb82", "#6b441b", "#d9a766", "#f0d8b4", "#b98a54", "#7a6a58", "#e8cfa8"];
+const COLOURS = ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#1e3a8a", "#2563eb", "#bfdbfe", "#0e7490", "#64748b", "#7dd3fc"];
 export const colourAt = (index: number) => COLOURS[index % COLOURS.length];
 
 export type Slice = { key: string; label: string; value: number; display?: string };
