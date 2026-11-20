@@ -123,15 +123,14 @@ async def semester_reminder_worker(app):
 
 
 async def daily_admin_digest_worker(app):
-    """Send the previous completed local day shortly after midnight, once per date."""
-    from app.core.daily_admin_digest import deliver, previous_day, seconds_until_next_run
+    """Catch up after restart and retry failed recipients every five minutes."""
+    from app.core.daily_admin_digest import deliver_due, seconds_until_next_run, RETRY_SECONDS
     while True:
-        await asyncio.sleep(seconds_until_next_run())
         try:
-            if app.state.settings.email_connection_string and app.state.settings.email_sender:
-                await asyncio.to_thread(deliver, app.state.store, app.state.settings, previous_day())
+            await asyncio.to_thread(deliver_due, app.state.store, app.state.settings)
         except Exception:
-            logging.getLogger(__name__).exception('Daily admin analytics email failed; it will retry tomorrow')
+            logging.getLogger(__name__).exception('Daily admin analytics email failed; retrying in five minutes')
+        await asyncio.sleep(min(RETRY_SECONDS, seconds_until_next_run()))
 
 
 def ensure_builtin_roles(app):
