@@ -13,6 +13,7 @@ import {
   X,
   Search,
   Smartphone,
+  Trash2,
   Wallet,
 } from "lucide-react";
 import { api, errorText, type PaymentEdit, type PaymentOptions, type PaymentRow, type PaymentStudent } from "@/services/api";
@@ -25,6 +26,9 @@ import SideDrawer from "./SideDrawer";
 import { toast } from "./toast";
 import "./fee-cash.css";
 
+/** Course levels with a single course (from the backend): level key -> the branch name to show. */
+const singleBranches = (options: PaymentOptions | null): Record<string, string> =>
+  Object.fromEntries((options?.levels || []).filter((l) => l.single_branch).map((l) => [l.key, l.label]));
 const EMPTY_TYPED = { roll: "", admission: "", level: "", branch: "", from: null as number | null, to: null as number | null };
 const SEMESTERS = Array.from({ length: 8 }, (_, i) => i + 1);
 
@@ -37,9 +41,20 @@ function SemesterSelect({ value, onChange, required }: { value: string; onChange
           Semester {n}
         </option>
       ))}
+      <option value={YEAR_END}>Year end</option>
     </select>
   );
 }
+/** Dropdown value for a payment made at the end of the academic year (no single semester). */
+const YEAR_END = "year_end";
+/** Semester fields of a payment from the dropdown value. */
+const semesterFields = (value: string) =>
+  value === YEAR_END
+    ? { semester: null, year_end: true }
+    : { semester: value ? Number(value) : null, year_end: false };
+/** "Semester 3", "Year end" or null. */
+const semesterText = (row: { semester?: number | null; year_end?: boolean }) =>
+  row.year_end ? "Year end" : row.semester ? `Semester ${row.semester}` : null;
 
 const METHODS = [
   ["cash", "Cash", Wallet],
@@ -108,6 +123,7 @@ export default function FeePaymentsWorkspace({
 
 function RecordPayment({ manual }: { manual: boolean }) {
   const [options, setOptions] = useState<PaymentOptions | null>(null);
+  const SINGLE_BRANCH = singleBranches(options);
   const [error, setError] = useState("");
   // Linked: filters that narrow the student search. Manual: the student's details as typed.
   const [filters, setFilters] = useState({ level: "", program: "", year: "" });
@@ -218,7 +234,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
         transaction_date: method === "cash" ? null : transactionDate,
         paid_on: method === "cash" ? today() : paidOn,
         note: note.trim() || null,
-        semester: semester ? Number(semester) : null,
+        ...semesterFields(semester),
       });
       setSaved({
         code: String(result.payment.code),
@@ -272,7 +288,19 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course level *
-            <select required value={typed.level} onChange={(e) => setTyped({ ...typed, level: e.target.value, branch: otherBranch ? typed.branch : "" })}>
+            <select
+              required
+              value={typed.level}
+              onChange={(e) => {
+                const level = e.target.value;
+                if (SINGLE_BRANCH[level]) setOtherBranch(false);
+                setTyped({
+                  ...typed,
+                  level,
+                  branch: SINGLE_BRANCH[level] || (otherBranch && !SINGLE_BRANCH[typed.level] ? typed.branch : ""),
+                });
+              }}
+            >
               <option value="">Select level</option>
               {options?.levels.map((l) => (
                 <option key={l.key} value={l.key}>
@@ -283,7 +311,13 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course branch *
-            {/* Same dropdown as the other fields; "Other" types a branch not set up as a course. */}
+            {/* Same dropdown as the other fields; "Other" types a branch not set up as a course.
+                Single-branch levels (B.P.Ed, M.P.Ed, B.Ed, D.P.Ed, ITI) show the level itself, fixed. */}
+            {SINGLE_BRANCH[typed.level] ? (
+              <select required value={SINGLE_BRANCH[typed.level]} disabled aria-describedby="fcw-single-branch">
+                <option value={SINGLE_BRANCH[typed.level]}>{SINGLE_BRANCH[typed.level]}</option>
+              </select>
+            ) : (
             <select
               required
               value={otherBranch ? OTHER : typed.branch}
@@ -301,8 +335,12 @@ function RecordPayment({ manual }: { manual: boolean }) {
               ))}
               <option value={OTHER}>Other (type the branch)</option>
             </select>
+            )}
+            {SINGLE_BRANCH[typed.level] && (
+              <small id="fcw-single-branch" className="fcw-sub">Single-branch course</small>
+            )}
           </label>
-          {otherBranch && (
+          {otherBranch && !SINGLE_BRANCH[typed.level] && (
             <label>
               Branch name *
               <input
@@ -432,7 +470,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
             <label>
               Course branch
               <select value={filters.program} disabled={!!student} onChange={(e) => setFilters({ ...filters, program: e.target.value, year: "" })}>
-                <option value="">All courses</option>
+                <option value="">{SINGLE_BRANCH[filters.level] || "All courses"}</option>
                 {programs.map((p) => (
                   <option key={p.code} value={p.code}>
                     {p.name}
@@ -711,6 +749,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<PaymentRow | null>(null);
   const [editing, setEditing] = useState<PaymentRow | null>(null);
+  const [deleting, setDeleting] = useState<PaymentRow | null>(null);
   const load = useCallback(() => {
     setError("");
     api.feePayments
@@ -811,7 +850,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.code}>
+                  <tr key={r.code} className={r.deleted ? "fcw-deleted" : undefined}>
                     <td>{shortDate(r.paid_on)}</td>
                     <td>{r.receipt_number || "—"}</td>
                     <td>
@@ -826,7 +865,14 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                         <small className="fcw-sub">Paid {shortDate(r.transaction_date)}</small>
                       ) : null}
                     </td>
-                    <td>{rupees(Number(r.amount))}</td>
+                    <td>
+                      {rupees(Number(r.amount))}
+                      {r.deleted ? (
+                        <small className="fcw-sub fcw-deleted-badge" title={r.delete_reason || undefined}>
+                          Deleted
+                        </small>
+                      ) : null}
+                    </td>
                     <td>
                       <span className="fcw-row-actions">
                         <button
@@ -838,7 +884,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                         >
                           <Eye size={16} />
                         </button>
-                        {source === "manual" && (
+                        {source === "manual" && !r.deleted && (
                           <button
                             type="button"
                             className="fcw-icon"
@@ -847,6 +893,17 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                             onClick={() => setEditing(r)}
                           >
                             <Pencil size={15} />
+                          </button>
+                        )}
+                        {source !== "all" && !r.deleted && (
+                          <button
+                            type="button"
+                            className="fcw-icon fcw-icon-danger"
+                            aria-label={`Delete payment ${r.receipt_number || r.code}`}
+                            title="Delete payment"
+                            onClick={() => setDeleting(r)}
+                          >
+                            <Trash2 size={15} />
                           </button>
                         )}
                       </span>
@@ -872,6 +929,16 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                 }
               : undefined
           }
+        />
+      )}
+      {deleting && (
+        <DeletePayment
+          row={deleting}
+          onClose={() => setDeleting(null)}
+          onDone={() => {
+            setDeleting(null);
+            load();
+          }}
         />
       )}
       {editing && (
@@ -925,7 +992,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
     ["Course", row.course_branch],
     ["Academic year", row.academic_year],
     [manualRow ? "Course level" : "Section", row.course_level],
-    ["Current semester", row.semester ? `Semester ${row.semester}` : null],
+    ["Current semester", semesterText(row)],
     [manualRow ? "Roll / reference no." : "Student ID", manualRow ? row.roll_or_reference : row.student_code],
   ];
   const payment: [string, string | null | undefined][] = [
@@ -960,7 +1027,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
           <div>
             <small>Fee paid for</small>
             <strong>{row.purpose}</strong>
-            <em>{row.semester ? `Semester ${row.semester}` : "—"}</em>
+            <em>{semesterText(row) || "—"}</em>
           </div>
           <div>
             <small>Mode of payment</small>
@@ -1002,7 +1069,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
           <tbody>
             <tr>
               <td>{row.purpose}</td>
-              <td>{row.semester ? `Semester ${row.semester}` : "—"}</td>
+              <td>{semesterText(row) || "—"}</td>
               <td>{Number(row.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
             </tr>
           </tbody>
@@ -1046,19 +1113,85 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
   );
 }
 
-const LEVEL_OPTIONS = [
-  ["intermediate", "Intermediate"],
-  ["degree", "Degree"],
-  ["polytechnic", "Polytechnic"],
-  ["bped", "B.P.Ed"],
-  ["mped", "M.P.Ed"],
-] as const;
 
 /**
  * Correct a manual payment. The admin's save applies at once; for any other role the change goes
  * to the admin as a change request and the payment stays as it is until the admin approves it.
  */
+/** Delete a manual payment with a reason. Other roles' deletions wait for the admin's approval
+ * (Change requests); once approved the payment leaves every collection total and dashboard. */
+export function DeletePayment({ row, onClose, onDone }: { row: PaymentRow; onClose: () => void; onDone: () => void }) {
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (reason.trim().length < 8) return toast.warning("Enter a reason of at least 8 characters");
+    setSaving(true);
+    try {
+      const result = await api.feePayments.remove(row.code, reason.trim());
+      if (result.pending_approval)
+        toast.success("Delete request sent", "The payment is removed once the admin approves it.");
+      else toast.success("Payment deleted", `Receipt ${row.receipt_number || row.code}`);
+      onDone();
+    } catch (e) {
+      toast.error("Payment not deleted", errorText(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+  return (
+    <SideDrawer title={`Delete payment · ${row.receipt_number || row.code}`} subtitle={row.student_name} onClose={onClose}>
+      <form className="fcw-drawer-form fcw-form" onSubmit={submit}>
+        <dl className="fcw-details">
+          <div><dt>Receipt</dt><dd>{row.receipt_number || "—"}</dd></div>
+          <div><dt>Paid on</dt><dd>{shortDate(row.paid_on)}</dd></div>
+          <div><dt>Paid for</dt><dd>{row.purpose}</dd></div>
+          <div><dt>Method</dt><dd>{row.method_label}</dd></div>
+          <div><dt>Amount</dt><dd>{rupees(Number(row.amount))}</dd></div>
+        </dl>
+        <p className="fcw-hint rcp-edit-hint">
+          Deleting removes this payment from the collected amount, cashbook, ledgers and dashboards; for an enrolled student
+          the fees it paid become due again. The receipt stays on record as deleted. Requests from roles other than the
+          admin are sent to the admin and apply only after approval.
+        </p>
+        <div className="fcw-grid">
+          <label className="fcw-wide">
+            Reason for deleting *
+            <textarea
+              required
+              minLength={8}
+              maxLength={500}
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Explain why this payment should be deleted"
+            />
+          </label>
+        </div>
+        <footer className="fcw-actions">
+          <button type="button" className="fcw-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="fcw-primary fcw-danger" disabled={saving}>
+            <Trash2 size={15} /> {saving ? "Sending…" : "Delete payment"}
+          </button>
+        </footer>
+      </form>
+    </SideDrawer>
+  );
+}
+
 export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () => void; onSaved: () => void }) {
+  // Course levels come from the backend (same list as the payment form).
+  const [options, setOptions] = useState<PaymentOptions | null>(null);
+  useEffect(() => {
+    let active = true;
+    void api.feePayments.options().then((o) => active && setOptions(o)).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+  const SINGLE_BRANCH = singleBranches(options);
   const [from, to] = String(row.academic_year || "").split("-").map((y) => Number(y) || null);
   const [form, setForm] = useState({
     reason: "",
@@ -1069,7 +1202,7 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
     branch: row.course_branch || "",
     from: from ?? null,
     to: to ?? null,
-    semester: row.semester ? String(row.semester) : "",
+    semester: row.year_end ? YEAR_END : row.semester ? String(row.semester) : "",
     amount: String(Number(row.amount)),
     method: row.method,
     reference: row.transaction_reference || "",
@@ -1090,10 +1223,10 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
         roll_or_reference: form.roll.trim() || null,
         admission_number: form.admission.trim() || null,
         course_level: form.level,
-        course_branch: form.branch.trim(),
+        course_branch: (SINGLE_BRANCH[form.level] || form.branch).trim(),
         academic_year: `${form.from}-${form.to}`,
       },
-      semester: Number(form.semester),
+      ...semesterFields(form.semester),
       amount: Number(form.amount).toFixed(2),
       method: form.method,
       transaction_reference: form.method === "cash" ? null : form.reference.trim() || null,
@@ -1141,18 +1274,39 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
           </label>
           <label>
             Course level *
-            <select required value={form.level} onChange={(e) => set({ level: e.target.value })}>
+            <select
+              required
+              value={form.level}
+              onChange={(e) =>
+                set({
+                  level: e.target.value,
+                  ...(SINGLE_BRANCH[e.target.value]
+                    ? { branch: SINGLE_BRANCH[e.target.value] }
+                    : SINGLE_BRANCH[form.level]
+                      ? { branch: "" }
+                      : {}),
+                })
+              }
+            >
               <option value="">Select level</option>
-              {LEVEL_OPTIONS.map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
+              {(options?.levels || []).map((l) => (
+                <option key={l.key} value={l.key}>
+                  {l.label}
                 </option>
               ))}
+              {/* Keep the saved level selectable while the list loads. */}
+              {!options && form.level && <option value={form.level}>{row.course_level || form.level}</option>}
             </select>
           </label>
           <label>
             Course branch *
-            <input required maxLength={150} value={form.branch} onChange={(e) => set({ branch: e.target.value })} />
+            <input
+              required
+              maxLength={150}
+              value={SINGLE_BRANCH[form.level] || form.branch}
+              readOnly={!!SINGLE_BRANCH[form.level]}
+              onChange={(e) => set({ branch: e.target.value })}
+            />
           </label>
           <fieldset className="fcw-years fcw-wide">
             <legend>Academic year *</legend>

@@ -2,6 +2,7 @@
 
 Keep old catalog records untouched; new inputs use years independently of semester count.
 """
+import re
 from decimal import Decimal, InvalidOperation
 from math import ceil
 
@@ -9,9 +10,12 @@ from fastapi import HTTPException
 
 # Qualification shown with each course level (all levels the college offers).
 QUALIFICATIONS = {'intermediate': 'Intermediate', 'degree': 'Degree', 'polytechnic': 'Diploma',
-                  'bped': 'B.P.Ed', 'mped': 'M.P.Ed'}
+                  'bped': 'B.P.Ed', 'mped': 'M.P.Ed', 'bed': 'B.Ed', 'iti': 'ITI', 'dped': 'D.P.Ed'}
+# Levels with a single course (no branches): the course branch is the level itself.
+SINGLE_BRANCH_LEVELS = {'bped', 'mped', 'bed', 'dped', 'iti'}
 DEPARTMENT_NAMES = {'polytechnic': 'Polytechnic (Diploma in Engineering)', 'bped': 'Physical Education (B.P.Ed)',
-                    'mped': 'Physical Education (M.P.Ed)'}
+                    'mped': 'Physical Education (M.P.Ed)', 'bed': 'Teacher Education (B.Ed)',
+                    'iti': 'Industrial Training Institute (ITI)', 'dped': 'Physical Education (D.P.Ed)'}
 
 
 def course_years(program):
@@ -91,9 +95,11 @@ def normalize(data, body, old=None):
         departments = data['records'].setdefault('departments', {})
         level = current.get('course_level') or 'general'
         wanted = DEPARTMENT_NAMES.get(level, '').lower()
+        # Whole-word match only: "iti" must not match "Humanities".
         matching = next((d for d in departments.values()
-                         if level in str(d.get('name', '')).lower() or (wanted and str(d.get('name', '')).lower() == wanted)), None)
-        # Polytechnic / B.P.Ed / M.P.Ed get a department of their own rather than another level's.
+                         if re.search(rf'\b{re.escape(level)}\b', str(d.get('name', '')).lower())
+                         or (wanted and str(d.get('name', '')).lower() == wanted)), None)
+        # Polytechnic / B.P.Ed / M.P.Ed / B.Ed / ITI / D.P.Ed get a department of their own.
         existing = matching or (next(iter(departments.values()), None) if level in {'intermediate', 'degree', 'general'} else None)
         if existing:
             body['department_code'] = existing['code']

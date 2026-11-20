@@ -61,6 +61,7 @@ ACTIONS = {
     "/hostel/permissions/{code}/depart": ("hostel_permissions", "Hostel departure"),
     "/hostel/permissions/{code}/return": ("hostel_permissions", "Hostel return"),
     "/admissions/documents/{code}/review": ("admission_documents", "Admission document review"),
+    "/finance/fee-payments/{code}/delete": ("payments", "Fee payment deletion"),
 }
 # The only custom edits a teacher makes on the dashboard, because they own these records.
 TEACHING_EDITS = {
@@ -203,6 +204,10 @@ def queue(request, data, user, template, params, table, title, body):
     code = next((params[k] for k in ("code", "employee_code", "batch_code", "link_code") if k in params), None)
     before = data["records"].get(table, {}).get(code) if table and code else None
     changes = changes_of(before or {}, body)
+    if template.endswith("/delete") and before is not None:
+        # A deletion changes no field the requester typed: show what approving it does.
+        changes = [{"field": "status", "label": "Payment", "from": f"Recorded · {show(before.get('amount'))}",
+                    "to": "Deleted (left out of every collection total)"}]
     # Saving a form without changing anything needs no approval and changes nothing.
     if before is not None and request.method != "POST" and not changes:
         return JSONResponse({**before, "unchanged": True})
@@ -228,9 +233,11 @@ def queue(request, data, user, template, params, table, title, body):
             "requested_at": now(), "decided_by": None, "decided_at": None, "decision_note": None, "last_error": None,
         }
         audit(live, user["code"], "edit_request", table or TABLE, request_code)
-        codes = notice(live, super_admins(live), "Change request to review",
-                       f"{viewer['name']} edited {title}: {record_label(before or {}, str(code or title))}"
-                       f" ({len(changes)} change{'s' if len(changes) != 1 else ''}).", request_code)
+        label = record_label(before or {}, str(code or title))
+        summary = (f"{viewer['name']} asked to delete a fee payment: {label}."
+                   if template.endswith("/delete") else
+                   f"{viewer['name']} edited {title}: {label} ({len(changes)} change{'s' if len(changes) != 1 else ''}).")
+        codes = notice(live, super_admins(live), "Change request to review", summary, request_code)
     push_soon(request.app, codes)
     # Forms read fields from the response, so answer with the record as it would look.
     return JSONResponse({**(before or {}), **(body.get("values") if isinstance(body.get("values"), dict) else body),
@@ -278,9 +285,11 @@ def evaluate(request, raw_body):
         return None  # The endpoint reports the malformed request.
     if not isinstance(body, dict):
         return None
-    if request.method == "PATCH" and template == "/finance/fee-payments/{code}":
+    if template in ("/finance/fee-payments/{code}", "/finance/fee-payments/{code}/delete") \
+            and (request.method == "PATCH" or template.endswith("/delete")):
         reason = body.get("reason")
-        if reason is not None and (not isinstance(reason, str) or not 8 <= len(reason.strip()) <= 500):
+        required = template.endswith("/delete")
+        if (reason is not None or required) and (not isinstance(reason, str) or not 8 <= len(reason.strip()) <= 500):
             return JSONResponse({"detail": "Enter a reason for the change (8–500 characters)."}, status_code=422)
     # First save of a versioned record (for example today's attendance) creates it: nothing to approve.
     if request.method == "PUT" and body.get("revision") == 0:

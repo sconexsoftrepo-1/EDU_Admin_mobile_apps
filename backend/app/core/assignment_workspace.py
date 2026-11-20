@@ -197,7 +197,7 @@ def present(data, user, record, student_code=None, values=None):
 
 
 class AssignmentInput(StrictModel):
-    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped"]
+    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped", "bed", "iti", "dped"]
     program_code: str = Field(min_length=1, max_length=100)
     academic_year_code: str = Field(min_length=1, max_length=100)
     section_code: str | None = None

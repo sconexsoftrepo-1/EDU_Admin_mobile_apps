@@ -17,7 +17,8 @@ export type PaymentStudent = {
 };
 export type PaymentOptions = {
   methods: { key: string; label: string }[];
-  levels: { key: string; label: string }[];
+  /** single_branch: the course branch is the level itself (B.P.Ed, M.P.Ed, B.Ed, D.P.Ed, ITI). */
+  levels: { key: string; label: string; single_branch?: boolean }[];
   programs: { code: string; name: string; branch: string | null; level: string | null }[];
   academic_years: { code: string; name: string; program_code: string | null }[];
   fee_heads: { code: string; name: string; category: string; outstanding: string }[];
@@ -44,10 +45,16 @@ export type PaymentRow = {
   academic_year?: string | null;
   note?: string | null;
   semester?: number | null;
+  /** Paid at the end of the academic year rather than for one semester. */
+  year_end?: boolean;
   /** Stored course level (intermediate, degree, ...) of a manual payment. */
   course_level_code?: string | null;
   recorded_at?: string | null;
   edited_at?: string | null;
+  /** Deleted (with the admin's approval): kept for the record, left out of every total. */
+  deleted?: boolean;
+  deleted_at?: string | null;
+  delete_reason?: string | null;
 };
 /** PATCH finance/fee-payments/{code}: correction to a manual payment. */
 export type PaymentEdit = {
@@ -60,7 +67,8 @@ export type PaymentEdit = {
     course_branch: string;
     academic_year: string;
   };
-  semester: number;
+  semester: number | null;
+  year_end?: boolean;
   amount: string;
   method: string;
   transaction_reference: string | null;
@@ -207,6 +215,13 @@ export const feePaymentsApi = {
     return apiRequest<{ pending_approval?: boolean; edit_request_code?: string; unchanged?: boolean }>(
       `finance/fee-payments/${encodeURIComponent(code)}`,
       { method: "PATCH", body },
+    );
+  },
+  /** Delete a manual payment. Admin: done at once. Other roles: 202 with pending_approval until the admin decides. */
+  remove(code: string, reason: string) {
+    return apiRequest<{ pending_approval?: boolean; edit_request_code?: string; deleted_at?: string }>(
+      `finance/fee-payments/${encodeURIComponent(code)}/delete`,
+      { method: "POST", body: { reason } },
     );
   },
   analytics(query: Record<string, string | undefined>) {

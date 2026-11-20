@@ -101,8 +101,12 @@ def test_role_choice_is_respected(client, mailbox):
 
 
 def test_a_code_is_only_sent_for_a_role_the_login_holds(client, mailbox):
-    client.post(REQUEST, json={"login": "admin", "client": "admin-web", "role_code": "TEACHER"})
+    wrong = client.post(REQUEST, json={"login": "admin", "client": "admin-web", "role_code": "TEACHER"})
+    assert wrong.status_code == 403 and "select the role assigned" in wrong.json()["detail"]
     assert mailbox == []
+    # Unknown logins still get the neutral answer: the page never reveals which logins exist.
+    unknown = client.post(REQUEST, json={"login": "nobody@example.com", "client": "admin-web", "role_code": "TEACHER"})
+    assert unknown.status_code == 200 and mailbox == []
     client.post(REQUEST, json={"login": "admin", "client": "admin-web", "role_code": "ROOT"})
     assert len(mailbox) == 1
 

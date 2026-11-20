@@ -103,8 +103,12 @@ def request_code(body: OtpRequest, request: Request, response: Response, backgro
             raise HTTPException(429, "Too many code requests. Try again later.", headers={"Retry-After": "3600"})
         attempts[ip_key].append(now)
         account = staff_account(data, body.login)
-        if account and account.get("email") and account_client_allowed(account, body.client) \
-                and (not body.role_code or body.role_code in account["role_codes"]):
+        # A known login with the wrong role chosen on the sign-in page is told so (no code is sent),
+        # so the person picks their assigned role instead of waiting for an email that never comes.
+        if account and body.role_code and body.role_code not in account["role_codes"]:
+            raise HTTPException(403, "This login is not assigned to the selected role. "
+                                     "Please select the role assigned to this login ID or email.")
+        if account and account.get("email") and account_client_allowed(account, body.client):
             codes = store(data)
             entry = codes.get(account["code"], {})
             sent = [t for t in entry.get("sent", []) if t > now - 3600]

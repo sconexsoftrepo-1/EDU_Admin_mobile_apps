@@ -30,5 +30,8 @@ export function courseLevelLabel(value: unknown): string {
   if (level === "polytechnic") return "Polytechnic";
   if (level === "bped") return "B.P.Ed";
   if (level === "mped") return "M.P.Ed";
+  if (level === "bed") return "B.Ed";
+  if (level === "iti") return "ITI";
+  if (level === "dped") return "D.P.Ed";
   return level ? level.charAt(0).toUpperCase() + level.slice(1) : "—";
 }

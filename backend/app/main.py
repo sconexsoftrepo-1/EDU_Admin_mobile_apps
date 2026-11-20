@@ -153,6 +153,9 @@ def ensure_builtin_roles(app):
 @asynccontextmanager
 async def application_lifespan(app):
     await asyncio.to_thread(ensure_builtin_roles, app)
+    if app.state.settings.storage_backend != 'local-json':  # real databases only (tests use local-json)
+        from app.core.catalog_courses import ensure_catalog_courses
+        await asyncio.to_thread(ensure_catalog_courses, app)
     enabled=app.state.settings.semester_reminders_enabled and app.state.settings.storage_backend!='local-json'
     worker=asyncio.create_task(semester_reminder_worker(app)) if enabled else None
     digest_worker=asyncio.create_task(daily_admin_digest_worker(app)) if app.state.settings.storage_backend!='local-json' else None

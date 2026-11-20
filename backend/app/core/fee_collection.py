@@ -14,6 +14,7 @@ from pydantic import Field, model_validator
 from . import assignment_workspace as aw
 from .resources import staff_only
 from .security import StrictModel, current_user, has_permission
+from .course_form import SINGLE_BRANCH_LEVELS
 from .storage import audit, new_code, next_number, now
 
 router = APIRouter(prefix="/finance/fee-payments", tags=["Fee payments"])
@@ -28,7 +29,8 @@ CERTIFICATE_HEADS = [
     ("migration", "Migration certificate fee"),
     ("duplicate", "Duplicate certificate fee"),
 ]
-LEVELS = {"intermediate": "Intermediate", "degree": "Degree", "polytechnic": "Polytechnic", "bped": "B.P.Ed", "mped": "M.P.Ed"}
+LEVELS = {"intermediate": "Intermediate", "degree": "Degree", "polytechnic": "Polytechnic", "bped": "B.P.Ed", "mped": "M.P.Ed",
+          "bed": "B.Ed", "iti": "ITI", "dped": "D.P.Ed"}
 # Every payment must point to a student record. Fees taken before a student is enrolled point to
 # this one system record; the details typed in the form are kept on the payment itself.
 PAYER_CODE = "FEE-PAYERS"
@@ -176,7 +178,8 @@ def options(request: Request, student_code: str | None = None, user=Depends(curr
     programs = aw.rows(data, "programs")
     return {
         "methods": [{"key": k, "label": v} for k, v in METHODS.items()],
-        "levels": [{"key": k, "label": v} for k, v in LEVELS.items()],
+        # single_branch: the course branch is the level itself (B.P.Ed, M.P.Ed, B.Ed, D.P.Ed, ITI).
+        "levels": [{"key": k, "label": v, "single_branch": k in SINGLE_BRANCH_LEVELS} for k, v in LEVELS.items()],
         "programs": sorted(({"code": p["code"], "name": p.get("name"), "branch": p.get("branch"), "level": p.get("course_level")}
                             for p in programs), key=lambda p: str(p["name"])),
         "academic_years": sorted(({"code": y["code"], "name": y.get("name"), "program_code": y.get("program_code")}
@@ -195,7 +198,7 @@ class PayerDetails(StrictModel):
     name: str = Field(min_length=2, max_length=200)
     roll_or_reference: str | None = Field(default=None, max_length=60)
     admission_number: str | None = Field(default=None, max_length=60)
-    course_level: str = Field(pattern="^(intermediate|degree|polytechnic|bped|mped)$")
+    course_level: str = Field(pattern="^(intermediate|degree|polytechnic|bped|mped|bed|iti|dped)$")
     course_branch: str = Field(min_length=1, max_length=150)
     academic_year: str = Field(min_length=2, max_length=40)
 
@@ -212,6 +215,7 @@ class FeePaymentInput(StrictModel):
     paid_on: date
     note: str | None = Field(default=None, max_length=300)
     semester: int | None = Field(default=None, ge=1, le=12, description="Student's current semester")
+    year_end: bool = Field(default=False, description="Paid at the end of the academic year (no single semester)")
 
     @model_validator(mode="after")
     def rules(self):
@@ -219,7 +223,9 @@ class FeePaymentInput(StrictModel):
             raise ValueError("Choose what the fee is paid for")
         if not self.student_code and not self.payer:
             raise ValueError("Enter the student's details")
-        if self.payer and self.semester is None:
+        if self.year_end:
+            self.semester = None
+        if self.payer and self.semester is None and not self.year_end:
             raise ValueError("Choose the student's current semester")
         if self.method == "bank_transfer" and not (self.transaction_reference or "").strip():
             raise ValueError("Enter the bank transaction number")
@@ -287,6 +293,7 @@ def record(body: FeePaymentInput, request: Request, background: BackgroundTasks,
             "note": body.note, "payer": payer,
             "transaction_date": body.transaction_date.isoformat() if body.transaction_date else None,
             "semester": body.semester,
+            **({"year_end": True} if body.year_end else {}),
         }
         data["records"].setdefault("payments", {})[payment["code"]] = payment
         # Settle the oldest unpaid charges of this fee head; anything left is kept as an advance.
@@ -313,12 +320,16 @@ def record(body: FeePaymentInput, request: Request, background: BackgroundTasks,
     return result
 
 
+YEAR_END = 99  # analytics group of payments marked "Year end"
+
+
 class PaymentEditInput(StrictModel):
     """A correction to a payment recorded on the manual payments screen (the receipt number stays)."""
 
     reason: str | None = Field(default=None, min_length=8, max_length=500)
     payer: PayerDetails
-    semester: int = Field(ge=1, le=12)
+    semester: int | None = Field(default=None, ge=1, le=12)
+    year_end: bool = False
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
     method: str = Field(pattern="^(cash|upi|bank_transfer)$")
     transaction_reference: str | None = Field(default=None, max_length=100)
@@ -328,6 +339,10 @@ class PaymentEditInput(StrictModel):
 
     @model_validator(mode="after")
     def rules(self):
+        if self.year_end:
+            self.semester = None
+        elif self.semester is None:
+            raise ValueError("Choose the student's current semester")
         self.transaction_reference = (self.transaction_reference or "").strip() or None
         if self.method == "bank_transfer" and not self.transaction_reference:
             raise ValueError("Enter the bank transaction number")
@@ -359,7 +374,7 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
             raise HTTPException(409, "This transaction number is already recorded")
         payer = body.payer.model_dump(mode="json")
         payer["course_level_label"] = LEVELS[payer["course_level"]]
-        payment.update(payer=payer, semester=body.semester, amount=str(money(body.amount)), method=body.method,
+        payment.update(payer=payer, semester=body.semester, year_end=body.year_end, amount=str(money(body.amount)), method=body.method,
                        transaction_reference=reference, paid_on=body.paid_on.isoformat(), note=body.note,
                        transaction_date=body.transaction_date.isoformat() if body.transaction_date else None,
                        edited_at=now(), edited_by=user["code"])
@@ -369,6 +384,44 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
             receipt["issued_on"] = body.paid_on.isoformat()
             data["records"]["receipts"][receipt["code"]] = receipt
         audit(data, user["code"], "edit", "payments", code, reason=reason)
+        return dict(payment)
+
+
+class PaymentDeleteInput(StrictModel):
+    reason: str = Field(min_length=8, max_length=500)
+
+
+@router.post("/{code}/delete")
+def delete_payment(code: str, body: PaymentDeleteInput, request: Request, user=Depends(current_user)):
+    """Delete a fee payment (manual screen or Payments & receipts). Other roles' requests wait for the
+    admin's approval (edit_approvals gate, like edits). On approval the payment is kept for the record
+    but marked deleted (status "failed"), so every collection total, cashbook and dashboard leaves it
+    out; an enrolled student's allocations are removed (copied onto the payment), so the charges it
+    paid are due again in the fee ledger, dues, late fees and the apps."""
+    with request.app.state.store.transaction() as data:
+        require(data, user, "edit")
+        payment = data["records"].get("payments", {}).get(code)
+        if not payment:
+            raise HTTPException(404, "Payment not found")
+        if payment.get("deleted_at"):
+            raise HTTPException(409, "This payment is already deleted")
+        reason = body.reason.strip()
+        if len(reason) < 8:
+            raise HTTPException(422, "Enter a reason for deleting (at least 8 characters)")
+        if any(r.get("payment_code") == code for r in aw.rows(data, "refunds")):
+            raise HTTPException(409, "Part of this payment was refunded; it cannot be deleted")
+        allocations = data["records"].get("payment_allocations", {})
+        removed = [dict(a) for a in list(allocations.values()) if a.get("payment_code") == code]
+        for a in removed:
+            allocations.pop(a["code"], None)
+        payment.update(status="failed", deleted_at=now(), deleted_by=user["code"], delete_reason=reason,
+                       deleted_allocations=[{"charge_code": a["charge_code"], "amount": str(a["amount"])} for a in removed])
+        data["records"]["payments"][code] = payment
+        receipt = next((r for r in aw.rows(data, "receipts") if r.get("payment_code") == code), None)
+        if receipt:
+            receipt.update(cancelled=True, cancelled_at=payment["deleted_at"], cancel_reason=reason)
+            data["records"]["receipts"][receipt["code"]] = receipt
+        audit(data, user["code"], "delete", "payments", code, reason=reason)
         return dict(payment)
 
 
@@ -410,8 +463,10 @@ def history(request: Request, method: str | None = None, start: date | None = No
                "roll_or_reference": payer.get("roll_or_reference") if payer else None,
                "course_level": payer.get("course_level_label"), "course_branch": payer.get("course_branch"),
                "academic_year": payer.get("academic_year"), "note": p.get("note"), "semester": p.get("semester"),
+               "year_end": bool(p.get("year_end")),
                "recorded_at": p.get("recorded_at"), "course_level_code": payer.get("course_level"),
                "edited_at": p.get("edited_at"),
+               "deleted": bool(p.get("deleted_at")), "deleted_at": p.get("deleted_at"), "delete_reason": p.get("delete_reason"),
                "receipt_code": receipts.get(p["code"], {}).get("code"), "receipt_number": receipts.get(p["code"], {}).get("receipt_number")}
         if text and text not in " ".join(str(v or "") for v in row.values()).casefold():
             continue
@@ -496,7 +551,10 @@ def analytics(request: Request, start: date | None = None, end: date | None = No
         add("summary", "all", amount, who)
         add("method", method, amount, who, label=METHODS.get(method, method.replace("_", " ").capitalize()))
         semester = p.get("semester")
-        add("semester", semester or 0, amount, who, label=f"Semester {semester}" if semester else "Not recorded")
+        if p.get("year_end"):
+            add("semester", YEAR_END, amount, who, label="Year end")
+        else:
+            add("semester", semester or 0, amount, who, label=f"Semester {semester}" if semester else "Not recorded")
         head = p.get("fee_head_name") or heads.get(p.get("fee_head_code"), {}).get("name") or "Other fees"
         add("head", head, amount, who)
         if not payer and p.get("student_code") not in infos:
@@ -521,8 +579,9 @@ def analytics(request: Request, start: date | None = None, end: date | None = No
 
     total = groups.get("summary", {}).get("all", {"amount": ZERO, "payments": 0, "payers": set()})
     ordered = sorted(days)
-    semesters = sorted((out(v, semester=k or None) for k, v in groups.get("semester", {}).items()),
-                       key=lambda r: (r["semester"] is None, r["semester"] or 0))
+    # Semesters in order, then Year end, then payments without a semester.
+    semesters = [out(v, semester=None if k in (0, YEAR_END) else k, **({"year_end": True} if k == YEAR_END else {}))
+                 for k, v in sorted(groups.get("semester", {}).items(), key=lambda kv: (kv[0] == 0, kv[0]))]
     return {
         "summary": {**out(total), "average": str((total["amount"] / total["payments"]).quantize(Decimal("0.01")))
                     if total["payments"] else "0.00",

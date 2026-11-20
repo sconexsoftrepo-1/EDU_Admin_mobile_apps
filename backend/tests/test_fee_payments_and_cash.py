@@ -231,3 +231,95 @@ def test_collection_analytics_by_day_semester_and_source(client, headers, colleg
     assert {s["source"]: s["payments"] for s in a["by_source"]} == {"manual": 2, "linked": 1}
     narrowed = client.get(f"{PAY}/analytics?source=manual&start=2026-11-06", headers=headers).json()
     assert narrowed["summary"]["amount"] == "700.00"
+
+
+def manual_payment(client, headers, amount="500"):
+    payer = {"name": "Sai Kumar", "roll_or_reference": "R-12", "course_level": "degree", "course_branch": "BCA", "academic_year": "2026-27"}
+    made = client.post(PAY, headers=headers, json={"payer": payer, "fee_head_code": "TUI", "amount": amount, "method": "cash",
+                                                   "paid_on": "2026-11-07", "semester": 2})
+    assert made.status_code == 201, made.text
+    return made.json()["payment"]["code"]
+
+
+@pytest.fixture
+def accountant(app, client, college):
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C", "name": "Main"}}
+        d["roles"]["ACCTS"] = {"code": "ACCTS", "name": "Accounts Manager", "scope": "college",
+                               "permissions": {"payments": ["view", "create", "edit"], "receipts": ["view"]}}
+        d["accounts"]["acc"] = {**d["accounts"]["ADMIN"], "code": "acc", "login_id": "accounts", "role_codes": ["ACCTS"]}
+    login = client.post("/api/v1/auth/login", json={"login_id": "accounts", "password": "Strong-Test-Password-245!", "client": "admin-web"})
+    assert login.status_code == 200, login.text
+    return {"Authorization": "Bearer " + login.json()["access_token"]}
+
+
+def test_delete_request_waits_for_the_admin_then_leaves_every_total(client, headers, accountant, app):
+    keep, gone = manual_payment(client, headers, "500"), manual_payment(client, headers, "700")
+    # A reason is required.
+    assert client.post(f"{PAY}/{gone}/delete", headers=accountant, json={}).status_code == 422
+    asked = client.post(f"{PAY}/{gone}/delete", headers=accountant, json={"reason": "Entered twice by mistake"})
+    assert asked.status_code == 202 and asked.json()["pending_approval"] is True
+    # Nothing changes until the admin approves.
+    assert app.state.store.snapshot()["records"]["payments"][gone]["status"] == "settled"
+    requests = client.get("/api/v1/edit-requests?status=pending", headers=headers).json()
+    request = next(r for r in (requests.get("items", requests) if isinstance(requests, dict) else requests) if r["target_code"] == gone)
+    assert request["target_title"] == "Fee payment deletion" and request["reason"] == "Entered twice by mistake"
+    assert request["changes"][0]["to"].startswith("Deleted")
+    accepted = client.post(f"/api/v1/edit-requests/{request['code']}/accept", headers=headers, json={})
+    assert accepted.status_code == 200, accepted.text
+    payment = app.state.store.snapshot()["records"]["payments"][gone]
+    assert payment["status"] == "failed" and payment["delete_reason"] == "Entered twice by mistake"
+    rows = {r["code"]: r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"]}
+    assert rows[gone]["deleted"] is True and rows[keep]["deleted"] is False
+    history = client.get(f"{PAY}?source=manual", headers=headers).json()
+    assert history["totals_by_method"] == {"cash": "500.00"}
+    people = client.get(f"{PAY}/collected-students", headers=headers).json()["items"]
+    assert people[0]["total_paid"] == "500.00" and people[0]["payments"] == 1
+    # It cannot be deleted twice.
+    assert client.post(f"{PAY}/{gone}/delete", headers=headers, json={"reason": "Again, by mistake"}).status_code == 409
+
+
+def test_super_admin_deletes_straight_away(client, headers, college, app):
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C", "name": "Main"}}
+    code = manual_payment(client, headers)
+    done = client.post(f"{PAY}/{code}/delete", headers=headers, json={"reason": "Wrong student selected"})
+    assert done.status_code == 200, done.text
+    assert done.json()["status"] == "failed" and done.json()["deleted_at"]
+
+
+def test_deleting_a_students_payment_makes_the_fee_due_again(client, headers, college, app):
+    from app.modules.finance.transactions.api import balance
+    made = pay(client, headers, fee_head_code="TUI", amount="400")
+    assert made.status_code == 201, made.text
+    code = made.json()["payment"]["code"]
+    with app.state.store.transaction() as d:
+        assert balance(d, d["records"]["student_fee_charges"]["C1"])["outstanding"] == 600
+    done = client.post(f"{PAY}/{code}/delete", headers=headers, json={"reason": "Collected from the wrong student"})
+    assert done.status_code == 200, done.text
+    assert done.json()["deleted_allocations"] == [{"charge_code": "C1", "amount": "400.00"}]
+    with app.state.store.transaction() as d:
+        assert balance(d, d["records"]["student_fee_charges"]["C1"])["outstanding"] == 1000
+    row = next(r for r in client.get(f"{PAY}?source=linked", headers=headers).json()["items"] if r["code"] == code)
+    assert row["deleted"] is True and row["status"] == "failed"
+
+
+def test_year_end_payments(client, headers, college, app):
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C", "name": "Main"}}
+    payer = {"name": "Sai Kumar", "roll_or_reference": "R-12", "course_level": "degree", "course_branch": "BCA", "academic_year": "2026-27"}
+    base = {"payer": payer, "fee_head_code": "TUI", "method": "cash", "paid_on": "2026-11-07"}
+    made = client.post(PAY, headers=headers, json={**base, "amount": "900", "year_end": True})
+    assert made.status_code == 201, made.text
+    client.post(PAY, headers=headers, json={**base, "amount": "100", "semester": 2})
+    row = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["amount"] == "900.00")
+    assert row["year_end"] is True and row["semester"] is None
+    groups = {g["label"]: g["amount"] for g in client.get(f"{PAY}/analytics", headers=headers).json()["by_semester"]}
+    assert groups == {"Semester 2": "100.00", "Year end": "900.00"}
+    # A manual payment still needs a semester or Year end.
+    assert client.post(PAY, headers=headers, json={**base, "amount": "5"}).status_code == 422
+    # Editing can move a payment to Year end and back.
+    edit = {"reason": "Moved to the year-end collection", "payer": payer, "amount": "100", "method": "cash", "paid_on": "2026-11-07"}
+    other = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["amount"] == "100.00")
+    assert client.patch(f"{PAY}/{other['code']}", headers=headers, json={**edit, "year_end": True}).json()["year_end"] is True
+    assert client.patch(f"{PAY}/{other['code']}", headers=headers, json=edit).status_code == 422
