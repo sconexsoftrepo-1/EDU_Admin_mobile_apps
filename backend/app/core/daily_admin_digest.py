@@ -146,7 +146,7 @@ def deliver(store, settings, day):
         return False
     with store.transaction() as data:
         marker = data.setdefault("documents", {}).setdefault("daily_admin_digest", {})
-        if marker.get("sent_for") == day:
+        if marker.get("sent_for") == day or marker.get(day, {}).get("status") == "accepted":
             return False
         report = build(data, day)
         admins = sorted({a["email"].strip().casefold() for a in data.get("accounts", {}).values()
@@ -189,7 +189,6 @@ def deliver(store, settings, day):
                    accepted_count=accepted_count)
         if complete:
             run["completed_at"] = datetime.now(TZ).isoformat()
-            marker["sent_for"] = day
     log.info("Daily admin digest %s: %s/%s accepted", day, accepted_count, len(admins))
     return complete
 

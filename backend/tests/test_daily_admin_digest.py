@@ -38,7 +38,7 @@ def test_failed_recipient_retries_without_resending_success(delivery, monkeypatc
     assert calls == ['one@example.org', 'two@example.org', 'two@example.org']
     assert digest.deliver(store, settings, '2026-11-19') is False
     assert len(calls) == 3
-    assert store.snapshot()['documents']['daily_admin_digest']['sent_for'] == '2026-11-19'
+    assert store.snapshot()['documents']['daily_admin_digest']['2026-11-19']['status'] == 'accepted'
 
 
 def test_unconfigured_or_no_admins_never_marks_sent(delivery, monkeypatch):
@@ -135,3 +135,21 @@ def test_legacy_completed_marker_is_not_resent(delivery, monkeypatch):
         data['documents'] = {'daily_admin_digest': {'sent_for': '2026-11-19'}}
     monkeypatch.setattr(digest, 'send_email', lambda *a, **k: pytest.fail('legacy completed report must not resend'))
     assert not digest.deliver(store, settings, '2026-11-19')
+
+
+def test_delivery_markers_meet_sql_server_json_constraint(delivery, monkeypatch):
+    """SQL Server ISJSON(data) accepts objects/arrays, not JSON scalar strings."""
+    from contextlib import contextmanager
+    store, settings = delivery
+    transaction = store.transaction
+    @contextmanager
+    def sql_compatible_transaction():
+        with transaction() as data:
+            yield data
+            for row in data.get('documents', {}).get('daily_admin_digest', {}).values():
+                assert isinstance(row, (dict, list)), 'record_extras JSON CHECK rejects scalar document rows'
+    monkeypatch.setattr(store, 'transaction', sql_compatible_transaction)
+    monkeypatch.setattr(digest, 'send_email', lambda *a, **k: True)
+    assert digest.deliver(store, settings, '2026-11-19')
+    assert digest.deliver(store, settings, '2026-11-19') is False
+    assert store.snapshot()['documents']['daily_admin_digest']['2026-11-19']['accepted_count'] == 2
