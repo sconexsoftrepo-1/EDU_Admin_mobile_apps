@@ -2748,7 +2748,7 @@ END $$;
 
 -- 1. Courses are Intermediate or Degree programmes with a branch (MPC, BPC, Computers, ...).
 ALTER TABLE programs
-  ADD COLUMN course_level TEXT CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped')),
+  ADD COLUMN course_level TEXT CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped','bed','iti','dped')),
   ADD COLUMN branch TEXT;
 CREATE INDEX ix_programs_course_level ON programs(course_level);
 
@@ -2770,7 +2770,7 @@ CREATE TABLE student_admission_profiles (
   academic_year_code VARCHAR(100) NOT NULL REFERENCES academic_years(code) ON UPDATE CASCADE ON DELETE RESTRICT,
   batch_code VARCHAR(100) REFERENCES batches(code) ON UPDATE CASCADE ON DELETE RESTRICT,
   section_code VARCHAR(100) REFERENCES sections(code) ON UPDATE CASCADE ON DELETE RESTRICT,
-  course_level TEXT NOT NULL CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped')),
+  course_level TEXT NOT NULL CHECK (course_level IN ('intermediate','degree','polytechnic','bped','mped','bed','iti','dped')),
   registration_number VARCHAR(100) NOT NULL UNIQUE,
   last_qualification JSONB NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(last_qualification) = 'object'),
   referral JSONB CHECK (referral IS NULL OR jsonb_typeof(referral) = 'object'),

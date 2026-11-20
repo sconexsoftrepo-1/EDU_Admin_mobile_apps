@@ -26,6 +26,9 @@ import SideDrawer from "./SideDrawer";
 import { toast } from "./toast";
 import "./fee-cash.css";
 
+/** Course levels with a single course (from the backend): level key -> the branch name to show. */
+const singleBranches = (options: PaymentOptions | null): Record<string, string> =>
+  Object.fromEntries((options?.levels || []).filter((l) => l.single_branch).map((l) => [l.key, l.label]));
 const EMPTY_TYPED = { roll: "", admission: "", level: "", branch: "", from: null as number | null, to: null as number | null };
 const SEMESTERS = Array.from({ length: 8 }, (_, i) => i + 1);
 
@@ -38,9 +41,20 @@ function SemesterSelect({ value, onChange, required }: { value: string; onChange
           Semester {n}
         </option>
       ))}
+      <option value={YEAR_END}>Year end</option>
     </select>
   );
 }
+/** Dropdown value for a payment made at the end of the academic year (no single semester). */
+const YEAR_END = "year_end";
+/** Semester fields of a payment from the dropdown value. */
+const semesterFields = (value: string) =>
+  value === YEAR_END
+    ? { semester: null, year_end: true }
+    : { semester: value ? Number(value) : null, year_end: false };
+/** "Semester 3", "Year end" or null. */
+const semesterText = (row: { semester?: number | null; year_end?: boolean }) =>
+  row.year_end ? "Year end" : row.semester ? `Semester ${row.semester}` : null;
 
 const METHODS = [
   ["cash", "Cash", Wallet],
@@ -109,6 +123,7 @@ export default function FeePaymentsWorkspace({
 
 function RecordPayment({ manual }: { manual: boolean }) {
   const [options, setOptions] = useState<PaymentOptions | null>(null);
+  const SINGLE_BRANCH = singleBranches(options);
   const [error, setError] = useState("");
   // Linked: filters that narrow the student search. Manual: the student's details as typed.
   const [filters, setFilters] = useState({ level: "", program: "", year: "" });
@@ -219,7 +234,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
         transaction_date: method === "cash" ? null : transactionDate,
         paid_on: method === "cash" ? today() : paidOn,
         note: note.trim() || null,
-        semester: semester ? Number(semester) : null,
+        ...semesterFields(semester),
       });
       setSaved({
         code: String(result.payment.code),
@@ -273,7 +288,19 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course level *
-            <select required value={typed.level} onChange={(e) => setTyped({ ...typed, level: e.target.value, branch: otherBranch ? typed.branch : "" })}>
+            <select
+              required
+              value={typed.level}
+              onChange={(e) => {
+                const level = e.target.value;
+                if (SINGLE_BRANCH[level]) setOtherBranch(false);
+                setTyped({
+                  ...typed,
+                  level,
+                  branch: SINGLE_BRANCH[level] || (otherBranch && !SINGLE_BRANCH[typed.level] ? typed.branch : ""),
+                });
+              }}
+            >
               <option value="">Select level</option>
               {options?.levels.map((l) => (
                 <option key={l.key} value={l.key}>
@@ -284,7 +311,13 @@ function RecordPayment({ manual }: { manual: boolean }) {
           </label>
           <label>
             Course branch *
-            {/* Same dropdown as the other fields; "Other" types a branch not set up as a course. */}
+            {/* Same dropdown as the other fields; "Other" types a branch not set up as a course.
+                Single-branch levels (B.P.Ed, M.P.Ed, B.Ed, D.P.Ed, ITI) show the level itself, fixed. */}
+            {SINGLE_BRANCH[typed.level] ? (
+              <select required value={SINGLE_BRANCH[typed.level]} disabled aria-describedby="fcw-single-branch">
+                <option value={SINGLE_BRANCH[typed.level]}>{SINGLE_BRANCH[typed.level]}</option>
+              </select>
+            ) : (
             <select
               required
               value={otherBranch ? OTHER : typed.branch}
@@ -302,8 +335,12 @@ function RecordPayment({ manual }: { manual: boolean }) {
               ))}
               <option value={OTHER}>Other (type the branch)</option>
             </select>
+            )}
+            {SINGLE_BRANCH[typed.level] && (
+              <small id="fcw-single-branch" className="fcw-sub">Single-branch course</small>
+            )}
           </label>
-          {otherBranch && (
+          {otherBranch && !SINGLE_BRANCH[typed.level] && (
             <label>
               Branch name *
               <input
@@ -433,7 +470,7 @@ function RecordPayment({ manual }: { manual: boolean }) {
             <label>
               Course branch
               <select value={filters.program} disabled={!!student} onChange={(e) => setFilters({ ...filters, program: e.target.value, year: "" })}>
-                <option value="">All courses</option>
+                <option value="">{SINGLE_BRANCH[filters.level] || "All courses"}</option>
                 {programs.map((p) => (
                   <option key={p.code} value={p.code}>
                     {p.name}
@@ -955,7 +992,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
     ["Course", row.course_branch],
     ["Academic year", row.academic_year],
     [manualRow ? "Course level" : "Section", row.course_level],
-    ["Current semester", row.semester ? `Semester ${row.semester}` : null],
+    ["Current semester", semesterText(row)],
     [manualRow ? "Roll / reference no." : "Student ID", manualRow ? row.roll_or_reference : row.student_code],
   ];
   const payment: [string, string | null | undefined][] = [
@@ -990,7 +1027,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
           <div>
             <small>Fee paid for</small>
             <strong>{row.purpose}</strong>
-            <em>{row.semester ? `Semester ${row.semester}` : "—"}</em>
+            <em>{semesterText(row) || "—"}</em>
           </div>
           <div>
             <small>Mode of payment</small>
@@ -1032,7 +1069,7 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
           <tbody>
             <tr>
               <td>{row.purpose}</td>
-              <td>{row.semester ? `Semester ${row.semester}` : "—"}</td>
+              <td>{semesterText(row) || "—"}</td>
               <td>{Number(row.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
             </tr>
           </tbody>
@@ -1076,13 +1113,6 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
   );
 }
 
-const LEVEL_OPTIONS = [
-  ["intermediate", "Intermediate"],
-  ["degree", "Degree"],
-  ["polytechnic", "Polytechnic"],
-  ["bped", "B.P.Ed"],
-  ["mped", "M.P.Ed"],
-] as const;
 
 /**
  * Correct a manual payment. The admin's save applies at once; for any other role the change goes
@@ -1152,6 +1182,16 @@ export function DeletePayment({ row, onClose, onDone }: { row: PaymentRow; onClo
 }
 
 export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () => void; onSaved: () => void }) {
+  // Course levels come from the backend (same list as the payment form).
+  const [options, setOptions] = useState<PaymentOptions | null>(null);
+  useEffect(() => {
+    let active = true;
+    void api.feePayments.options().then((o) => active && setOptions(o)).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+  const SINGLE_BRANCH = singleBranches(options);
   const [from, to] = String(row.academic_year || "").split("-").map((y) => Number(y) || null);
   const [form, setForm] = useState({
     reason: "",
@@ -1162,7 +1202,7 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
     branch: row.course_branch || "",
     from: from ?? null,
     to: to ?? null,
-    semester: row.semester ? String(row.semester) : "",
+    semester: row.year_end ? YEAR_END : row.semester ? String(row.semester) : "",
     amount: String(Number(row.amount)),
     method: row.method,
     reference: row.transaction_reference || "",
@@ -1183,10 +1223,10 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
         roll_or_reference: form.roll.trim() || null,
         admission_number: form.admission.trim() || null,
         course_level: form.level,
-        course_branch: form.branch.trim(),
+        course_branch: (SINGLE_BRANCH[form.level] || form.branch).trim(),
         academic_year: `${form.from}-${form.to}`,
       },
-      semester: Number(form.semester),
+      ...semesterFields(form.semester),
       amount: Number(form.amount).toFixed(2),
       method: form.method,
       transaction_reference: form.method === "cash" ? null : form.reference.trim() || null,
@@ -1234,18 +1274,39 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
           </label>
           <label>
             Course level *
-            <select required value={form.level} onChange={(e) => set({ level: e.target.value })}>
+            <select
+              required
+              value={form.level}
+              onChange={(e) =>
+                set({
+                  level: e.target.value,
+                  ...(SINGLE_BRANCH[e.target.value]
+                    ? { branch: SINGLE_BRANCH[e.target.value] }
+                    : SINGLE_BRANCH[form.level]
+                      ? { branch: "" }
+                      : {}),
+                })
+              }
+            >
               <option value="">Select level</option>
-              {LEVEL_OPTIONS.map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
+              {(options?.levels || []).map((l) => (
+                <option key={l.key} value={l.key}>
+                  {l.label}
                 </option>
               ))}
+              {/* Keep the saved level selectable while the list loads. */}
+              {!options && form.level && <option value={form.level}>{row.course_level || form.level}</option>}
             </select>
           </label>
           <label>
             Course branch *
-            <input required maxLength={150} value={form.branch} onChange={(e) => set({ branch: e.target.value })} />
+            <input
+              required
+              maxLength={150}
+              value={SINGLE_BRANCH[form.level] || form.branch}
+              readOnly={!!SINGLE_BRANCH[form.level]}
+              onChange={(e) => set({ branch: e.target.value })}
+            />
           </label>
           <fieldset className="fcw-years fcw-wide">
             <legend>Academic year *</legend>

@@ -5418,7 +5418,10 @@
           "degree",
           "polytechnic",
           "bped",
-          "mped"
+          "mped",
+          "bed",
+          "iti",
+          "dped"
         ]
       },
       {
@@ -8151,7 +8154,10 @@
           "degree",
           "polytechnic",
           "bped",
-          "mped"
+          "mped",
+          "bed",
+          "iti",
+          "dped"
         ]
       },
       {

@@ -302,3 +302,24 @@ def test_deleting_a_students_payment_makes_the_fee_due_again(client, headers, co
         assert balance(d, d["records"]["student_fee_charges"]["C1"])["outstanding"] == 1000
     row = next(r for r in client.get(f"{PAY}?source=linked", headers=headers).json()["items"] if r["code"] == code)
     assert row["deleted"] is True and row["status"] == "failed"
+
+
+def test_year_end_payments(client, headers, college, app):
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C", "name": "Main"}}
+    payer = {"name": "Sai Kumar", "roll_or_reference": "R-12", "course_level": "degree", "course_branch": "BCA", "academic_year": "2026-27"}
+    base = {"payer": payer, "fee_head_code": "TUI", "method": "cash", "paid_on": "2026-11-07"}
+    made = client.post(PAY, headers=headers, json={**base, "amount": "900", "year_end": True})
+    assert made.status_code == 201, made.text
+    client.post(PAY, headers=headers, json={**base, "amount": "100", "semester": 2})
+    row = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["amount"] == "900.00")
+    assert row["year_end"] is True and row["semester"] is None
+    groups = {g["label"]: g["amount"] for g in client.get(f"{PAY}/analytics", headers=headers).json()["by_semester"]}
+    assert groups == {"Semester 2": "100.00", "Year end": "900.00"}
+    # A manual payment still needs a semester or Year end.
+    assert client.post(PAY, headers=headers, json={**base, "amount": "5"}).status_code == 422
+    # Editing can move a payment to Year end and back.
+    edit = {"reason": "Moved to the year-end collection", "payer": payer, "amount": "100", "method": "cash", "paid_on": "2026-11-07"}
+    other = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["amount"] == "100.00")
+    assert client.patch(f"{PAY}/{other['code']}", headers=headers, json={**edit, "year_end": True}).json()["year_end"] is True
+    assert client.patch(f"{PAY}/{other['code']}", headers=headers, json=edit).status_code == 422

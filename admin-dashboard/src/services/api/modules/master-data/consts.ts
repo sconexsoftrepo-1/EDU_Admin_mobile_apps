@@ -14,7 +14,7 @@ export const UPLOAD_SCREENS = ["documents", "student-enrollment"] as const;
 
 // ---- Student enrollment wizard (POST master-data/enrollment) ---------------------------------
 
-export type CourseLevel = "intermediate" | "degree" | "polytechnic" | "bped" | "mped";
+export type CourseLevel = "intermediate" | "degree" | "polytechnic" | "bped" | "mped" | "bed" | "iti" | "dped";
 export type FeeCategory = "academic" | "hostel" | "transport" | "other";
 
 export interface WizardCourse {
@@ -106,6 +106,9 @@ export interface LastQualification {
     | "pg"
     | "bped"
     | "mped"
+    | "bed"
+    | "iti"
+    | "dped"
     | "other";
   institution: string;
   board?: string;

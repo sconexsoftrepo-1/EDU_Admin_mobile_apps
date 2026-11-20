@@ -221,7 +221,8 @@ def apply_concession(data, charges, amount, kind, reason, approver, actor):
 
 def qualification_title(q):
     title = {"ssc": "10th class", "intermediate": "Intermediate", "polytechnic": "Polytechnic", "degree": "Degree",
-             "pg": "Post graduation", "bped": "B.P.Ed", "mped": "M.P.Ed", "other": ""}[q.level]
+             "pg": "Post graduation", "bped": "B.P.Ed", "mped": "M.P.Ed", "bed": "B.Ed", "iti": "ITI", "dped": "D.P.Ed",
+             "other": ""}[q.level]
     return "10th class" if q.level == "ssc" else f"{title} {q.group or ''}".strip() or "Other qualification"
 
 

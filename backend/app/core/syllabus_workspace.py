@@ -83,7 +83,7 @@ def present(data, user, record):
 
 
 class SyllabusInput(StrictModel):
-    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped"]
+    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped", "bed", "iti", "dped"]
     program_code: str = Field(min_length=1, max_length=100)
     specialization: str = Field(min_length=1, max_length=160)
     academic_year_code: str = Field(min_length=1, max_length=100)

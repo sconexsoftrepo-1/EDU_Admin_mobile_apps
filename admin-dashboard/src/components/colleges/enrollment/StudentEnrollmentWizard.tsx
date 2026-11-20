@@ -85,16 +85,22 @@ const QUALIFICATION_LEVELS = [
   ["pg", "Post graduation"],
   ["bped", "B.P.Ed"],
   ["mped", "M.P.Ed"],
+  ["bed", "B.Ed"],
+  ["iti", "ITI"],
+  ["dped", "D.P.Ed"],
   ["other", "Other"],
 ] as const;
 /** Course and semester details apply to every qualification after Intermediate. */
-const HAS_SEMESTERS = new Set(["polytechnic", "degree", "pg", "bped", "mped", "other"]);
+const HAS_SEMESTERS = new Set(["polytechnic", "degree", "pg", "bped", "mped", "bed", "iti", "dped", "other"]);
 const COURSE_LABEL: Record<string, string> = {
   polytechnic: "Branch *",
   degree: "Degree course *",
   pg: "PG course *",
   bped: "Specialization",
   mped: "Specialization",
+  bed: "Specialization",
+  iti: "Trade",
+  dped: "Specialization",
   other: "Course name *",
 };
 const COURSE_HINT: Record<string, string> = {

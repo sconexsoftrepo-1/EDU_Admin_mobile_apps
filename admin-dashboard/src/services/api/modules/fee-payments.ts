@@ -17,7 +17,8 @@ export type PaymentStudent = {
 };
 export type PaymentOptions = {
   methods: { key: string; label: string }[];
-  levels: { key: string; label: string }[];
+  /** single_branch: the course branch is the level itself (B.P.Ed, M.P.Ed, B.Ed, D.P.Ed, ITI). */
+  levels: { key: string; label: string; single_branch?: boolean }[];
   programs: { code: string; name: string; branch: string | null; level: string | null }[];
   academic_years: { code: string; name: string; program_code: string | null }[];
   fee_heads: { code: string; name: string; category: string; outstanding: string }[];
@@ -44,6 +45,8 @@ export type PaymentRow = {
   academic_year?: string | null;
   note?: string | null;
   semester?: number | null;
+  /** Paid at the end of the academic year rather than for one semester. */
+  year_end?: boolean;
   /** Stored course level (intermediate, degree, ...) of a manual payment. */
   course_level_code?: string | null;
   recorded_at?: string | null;
@@ -64,7 +67,8 @@ export type PaymentEdit = {
     course_branch: string;
     academic_year: string;
   };
-  semester: number;
+  semester: number | null;
+  year_end?: boolean;
   amount: string;
   method: string;
   transaction_reference: string | null;

@@ -63,7 +63,7 @@ class SemesterScore(StrictModel):
 class LastQualification(StrictModel):
     """One qualification: 10th class, Intermediate, Polytechnic, a degree (UG, PG, B.P.Ed, M.P.Ed) or another course."""
 
-    level: Literal["ssc", "intermediate", "polytechnic", "degree", "pg", "bped", "mped", "other"]
+    level: Literal["ssc", "intermediate", "polytechnic", "degree", "pg", "bped", "mped", "bed", "iti", "dped", "other"]
     institution: str = Field(min_length=2, max_length=200, description="School or college name")
     board: str | None = Field(default=None, max_length=60, description="SSC, CBSE, ICSE, State board, ...")
     group: str | None = Field(default=None, max_length=30, description="Intermediate group: MPC, BPC, MEC, CEC, ...")
@@ -123,7 +123,7 @@ class Certification(StrictModel):
 
 
 class CourseChoice(StrictModel):
-    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped"]
+    course_level: Literal["intermediate", "degree", "polytechnic", "bped", "mped", "bed", "iti", "dped"]
     program_code: str
     academic_year_code: str
     batch_code: str | None = None

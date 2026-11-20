@@ -5,7 +5,8 @@ import re
 
 from fastapi import HTTPException
 
-COURSE_CODES = {"intermediate": "INT", "degree": "DEG", "polytechnic": "POLY", "bped": "BPED", "mped": "MPED"}
+COURSE_CODES = {"intermediate": "INT", "degree": "DEG", "polytechnic": "POLY", "bped": "BPED", "mped": "MPED",
+                "bed": "BED", "iti": "ITI", "dped": "DPED"}
 # Every course level; all but Intermediate are semester-based like a degree.
 COURSE_LEVELS = tuple(COURSE_CODES)
 
