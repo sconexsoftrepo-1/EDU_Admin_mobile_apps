@@ -11,16 +11,24 @@ def setup(app):
 
 def test_courses_are_added_once_with_subjects_and_labs(app):
     setup(app)
+    with app.state.store.transaction() as d:  # "iti" is inside "Humanities": ITI must not land there
+        d["records"].setdefault("departments", {})["DEP-ARTS"] = {"code": "DEP-ARTS", "campus_code": "C",
+                                                                   "name": "Arts, Humanities and Social Sciences"}
     catalog_courses.ensure_catalog_courses(app)
     data = app.state.store.snapshot()
     programs = data["records"]["programs"]
     assert {c: (programs[c]["name"], programs[c]["duration_semesters"]) for c in ("BED-GEN", "ITI-GEN", "DPED-GEN")} == {
         "BED-GEN": ("B.Ed", 4), "ITI-GEN": ("ITI", 4), "DPED-GEN": ("D.P.Ed", 4)}
+    assert programs["ITI-GEN"]["department_code"] != "DEP-ARTS"
+    assert data["records"]["departments"][programs["ITI-GEN"]["department_code"]]["name"] == "Industrial Training Institute (ITI)"
     links = Counter((l["program_code"], l["semester_number"]) for l in data["records"]["curriculum_subjects"].values())
     assert all(links[(c, n)] >= 4 for c in ("BED-GEN", "ITI-GEN", "DPED-GEN") for n in (1, 2, 3, 4))
     subjects = data["records"]["subjects"]
     iti = [subjects[l["subject_code"]] for l in data["records"]["curriculum_subjects"].values() if l["program_code"] == "ITI-GEN"]
     assert {"theory", "practical"} <= {s["subject_type"] for s in iti}
+    # SQL Server's record_extras accepts only JSON objects/arrays as document rows.
+    marker = app.state.store.snapshot()["documents"]["catalog_courses"]
+    assert all(isinstance(row, (dict, list)) for row in marker.values())
     # A course the college deletes later is never added back.
     with app.state.store.transaction() as d:
         for code in [k for k, l in d["records"]["curriculum_subjects"].items() if l["program_code"] == "ITI-GEN"]:

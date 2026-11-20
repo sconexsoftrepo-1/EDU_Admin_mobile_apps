@@ -2,6 +2,7 @@
 
 Keep old catalog records untouched; new inputs use years independently of semester count.
 """
+import re
 from decimal import Decimal, InvalidOperation
 from math import ceil
 
@@ -94,8 +95,10 @@ def normalize(data, body, old=None):
         departments = data['records'].setdefault('departments', {})
         level = current.get('course_level') or 'general'
         wanted = DEPARTMENT_NAMES.get(level, '').lower()
+        # Whole-word match only: "iti" must not match "Humanities".
         matching = next((d for d in departments.values()
-                         if level in str(d.get('name', '')).lower() or (wanted and str(d.get('name', '')).lower() == wanted)), None)
+                         if re.search(rf'\b{re.escape(level)}\b', str(d.get('name', '')).lower())
+                         or (wanted and str(d.get('name', '')).lower() == wanted)), None)
         # Polytechnic / B.P.Ed / M.P.Ed / B.Ed / ITI / D.P.Ed get a department of their own.
         existing = matching or (next(iter(departments.values()), None) if level in {'intermediate', 'degree', 'general'} else None)
         if existing:

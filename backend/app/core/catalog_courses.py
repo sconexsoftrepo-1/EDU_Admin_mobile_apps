@@ -96,16 +96,17 @@ def ensure_catalog_courses(app):
     store = app.state.store
     try:
         with store.request_scope() if hasattr(store, "request_scope") else nullcontext():
-            if (store.snapshot().get("documents", {}).get(MARKER) or {}).get("version") == VERSION:
+            # One marker row per version; SQL Server stores each row as a JSON object (ISJSON check).
+            if VERSION in (store.snapshot().get("documents", {}).get(MARKER) or {}):
                 return
             with store.transaction() as data:
                 done = data.setdefault("documents", {}).setdefault(MARKER, {})
-                if done.get("version") == VERSION:
+                if VERSION in done:
                     return
                 if not data["records"].get("campuses"):
                     return  # a brand-new database: courses need a campus first; tried again next start
                 created = add_courses(data)
-                done.update(version=VERSION, created=created)
+                done[VERSION] = {"created": created}
         if created:
             logging.getLogger(__name__).info("Added courses: %s", ", ".join(created))
     except Exception:
