@@ -1,15 +1,22 @@
 """Previous-day finance and admissions digest for active administrators."""
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 import base64
+import hashlib
+import logging
+import time as clock
+from uuid import uuid4
 from decimal import Decimal
 from html import escape
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from app.core.email_delivery import send_email
+from app.core.email_delivery import email_configured, send_email
 from app.modules.reports.downloads.api import cash_entries
 
 TZ = ZoneInfo("Asia/Kolkata")
+log = logging.getLogger(__name__)
+RETRY_SECONDS = 300
+LEASE_SECONDS = 1800
 
 
 def build(data, day):
@@ -134,18 +141,57 @@ def render_email(report, settings):
 
 
 def deliver(store, settings, day):
+    if not email_configured(settings):
+        log.warning("Daily admin digest skipped: email is not configured")
+        return False
     with store.transaction() as data:
         marker = data.setdefault("documents", {}).setdefault("daily_admin_digest", {})
         if marker.get("sent_for") == day:
             return False
         report = build(data, day)
-        admins = [a.get("email") for code, a in data.get("accounts", {}).items()
-                  if a.get("active") and a.get("email") and any(data.get("roles", {}).get(r, {}).get("system_admin") for r in a.get("role_codes", []))]
-        marker["sent_for"] = day
+        admins = sorted({a["email"].strip().casefold() for a in data.get("accounts", {}).values()
+                         if a.get("active") and (a.get("email") or "").strip()
+                         and any(data.get("roles", {}).get(r, {}).get("system_admin")
+                                 for r in a.get("role_codes", []))})
+    if not admins:
+        log.warning("Daily admin digest %s has no eligible recipients", day)
+        return False
     subject, text, html, attachments = render_email(report, settings)
     for email in admins:
-        send_email(settings, email, subject, text, html, attachments=attachments)
-    return bool(admins)
+        key = hashlib.sha256(email.encode()).hexdigest()
+        token = uuid4().hex
+        with store.transaction() as data:
+            marker = data.setdefault("documents", {}).setdefault("daily_admin_digest", {})
+            run = marker.setdefault(day, {"recipients": {}})
+            recipient = run["recipients"].setdefault(key, {})
+            if recipient.get("status") == "accepted" or recipient.get("lease_until", 0) > clock.time():
+                continue
+            recipient.update(status="sending", lease_until=clock.time() + LEASE_SECONDS,
+                             token=token, attempts=recipient.get("attempts", 0) + 1)
+        try:
+            accepted = send_email(settings, email, subject, text, html, attachments=attachments)
+        except Exception:
+            log.exception("Daily admin digest %s delivery failed", day)
+            accepted = False
+        with store.transaction() as data:
+            recipient = data["documents"]["daily_admin_digest"][day]["recipients"][key]
+            if recipient.get("token") == token:
+                recipient.update(status="accepted" if accepted else "failed", lease_until=0,
+                                 attempted_at=datetime.now(TZ).isoformat())
+                recipient.pop("token", None)
+    with store.transaction() as data:
+        marker = data["documents"]["daily_admin_digest"]
+        run = marker[day]
+        accepted_count = sum(run["recipients"].get(hashlib.sha256(email.encode()).hexdigest(), {}).get("status") == "accepted"
+                             for email in admins)
+        complete = accepted_count == len(admins)
+        run.update(status="accepted" if complete else "pending", recipient_count=len(admins),
+                   accepted_count=accepted_count)
+        if complete:
+            run["completed_at"] = datetime.now(TZ).isoformat()
+            marker["sent_for"] = day
+    log.info("Daily admin digest %s: %s/%s accepted", day, accepted_count, len(admins))
+    return complete
 
 
 def previous_day(now=None):
@@ -154,5 +200,30 @@ def previous_day(now=None):
 
 def seconds_until_next_run(now=None):
     now = (now or datetime.now(TZ)).astimezone(TZ)
-    next_run = datetime.combine(now.date() + timedelta(days=1), time(0, 5), TZ)
+    next_run = datetime.combine(now.date(), time(0, 5), TZ)
+    if now >= next_run:
+        next_run += timedelta(days=1)
     return max(1, (next_run-now).total_seconds())
+
+
+def latest_due_day(now=None):
+    """Latest report whose 00:05 IST deadline has passed, including after a restart."""
+    now = (now or datetime.now(TZ)).astimezone(TZ)
+    days = 1 if now >= datetime.combine(now.date(), time(0, 5), TZ) else 2
+    return (now.date() - timedelta(days=days)).isoformat()
+
+
+def deliver_due(store, settings, now=None):
+    """Retry recorded unfinished reports as well as the latest scheduled report."""
+    latest = latest_due_day(now)
+    with store.transaction() as data:
+        marker = data.setdefault("documents", {}).setdefault("daily_admin_digest", {})
+        pending = {key for key, run in marker.items()
+                   if isinstance(run, dict) and run.get("status") != "accepted"
+                   and len(key) == 10 and key <= latest}
+    for day in sorted(pending | {latest}):
+        try:
+            date.fromisoformat(day)
+            deliver(store, settings, day)
+        except Exception:
+            log.exception("Daily admin digest %s failed; retrying in five minutes", day)
