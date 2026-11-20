@@ -1,10 +1,10 @@
 /* Courses & enrollment: scoped catalog controls, cards, and table. */
 .crs {
-  --crs-ink: #142b44;
-  --crs-muted: #617086;
-  --crs-rule: #e8e4dd;
-  --crs-paper: #fff;
-  --crs-gold: #a46a27;
+  --crs-ink: var(--color-text-primary);
+  --crs-muted: var(--color-text-secondary);
+  --crs-rule: var(--color-border);
+  --crs-paper: var(--color-surface);
+  --crs-gold: var(--color-primary);
   color: var(--crs-ink);
   display: grid;
   gap: 20px;
@@ -21,7 +21,7 @@
   cursor: pointer;
 }
 .crs :is(button, select, input):focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 .crs-filters {
@@ -31,8 +31,8 @@
   padding: 16px 20px;
   border: 1px solid var(--crs-rule);
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 3px 15px #382c151f;
+  background: var(--color-surface);
+  box-shadow: 0 3px 15px color-mix(in srgb, var(--color-text-primary) 12.16%, transparent);
 }
 .crs-desktop-filters {
   display: contents;
@@ -77,7 +77,7 @@
   height: 42px;
   border: 1px solid #dedfe3;
   border-radius: 9px;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--crs-ink);
   padding: 8px 30px 8px 12px;
 }
@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid #dedfe3;
-  background: #fff;
+  background: var(--color-surface);
   padding: 9px 14px;
   border-radius: 9px;
   color: var(--crs-ink);
@@ -100,7 +100,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 14px 20px;
-  background: #faf9f7;
+  background: var(--color-surface);
   border-radius: 9px;
   padding: 10px 12px;
 }
@@ -130,8 +130,8 @@
   align-items: center;
   gap: 3px;
   padding: 3px;
-  background: #fff;
-  border: 1px solid #e7e4de;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
 }
 .edu-connected .crs-segment button {
@@ -152,8 +152,8 @@
 }
 .edu-connected .crs-segment button[aria-pressed="true"] {
   background: var(--crs-gold);
-  color: #fff;
-  box-shadow: 0 2px 5px #7d4a1c20;
+  color: var(--color-surface);
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--color-primary-hover) 12.55%, transparent);
 }
 .crs-segment button > span {
   font-size: 11px;
@@ -163,8 +163,8 @@
   color: #566783;
 }
 .crs-segment button[aria-pressed="true"] > span {
-  background: #ffffff30;
-  color: #fff;
+  background: color-mix(in srgb, var(--color-surface) 18.82%, transparent);
+  color: var(--color-surface);
 }
 .edu-connected .crs-mobile-filter {
   display: none;
@@ -209,12 +209,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--crs-rule);
   border-radius: 12px;
   padding: 18px;
   min-width: 0;
-  box-shadow: 0 3px 14px #392f1e05;
+  box-shadow: 0 3px 14px color-mix(in srgb, var(--color-text-primary) 1.96%, transparent);
   cursor: pointer;
   transition:
     transform 0.2s,
@@ -224,15 +224,15 @@
 @media (hover: hover) {
   .crs-card:hover {
     transform: translateY(-2px);
-    border-color: #c89c65;
-    box-shadow: 0 9px 24px #51371012;
+    border-color: var(--color-text-secondary);
+    box-shadow: 0 9px 24px color-mix(in srgb, var(--color-primary-hover) 7.06%, transparent);
   }
   .crs-card:hover .crs-view svg {
     transform: translateX(3px);
   }
 }
 .crs-card:focus-within {
-  border-color: #a46a27;
+  border-color: var(--color-primary);
 }
 .crs-card[data-state] {
   border-color: #c88279;
@@ -249,8 +249,8 @@
   flex: 0 0 50px;
   height: 50px;
   border-radius: 11px;
-  background: #f7efdf;
-  color: #946023;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 750;
   padding: 5px;
@@ -295,7 +295,7 @@
   width: 32px;
   min-height: 32px;
   padding: 0;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #e7eaf0;
   border-radius: 8px;
   color: var(--crs-ink);
@@ -307,10 +307,10 @@
   top: 38px;
   width: 155px;
   padding: 5px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--crs-rule);
   border-radius: 9px;
-  box-shadow: 0 8px 24px #30201620;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary) 12.55%, transparent);
 }
 .edu-connected .crs-menu button {
   display: block;
@@ -323,7 +323,7 @@
   border-radius: 5px;
 }
 .edu-connected .crs-menu button:hover {
-  background: #f7f0e5;
+  background: var(--color-surface);
 }
 .crs-facts {
   display: flex;
@@ -390,7 +390,7 @@
 }
 .edu-connected .crs-btn-danger {
   background: #a43730;
-  color: #fff;
+  color: var(--color-surface);
   border-color: #a43730;
 }
 .edu-connected .crs-view {
@@ -403,8 +403,8 @@
   border: 0;
   border-radius: 50%;
   padding: 0;
-  color: #8f591e;
-  background: #f8efdf;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
   flex-shrink: 0;
 }
 .crs-view svg {
@@ -432,9 +432,9 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #e5d5be;
-  background: #fbf4e9;
-  color: #81531e;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary-hover);
   border-radius: 20px;
   padding: 5px 10px;
   overflow-wrap: anywhere;
@@ -445,7 +445,7 @@
   padding: 40px 20px;
   border: 1px dashed var(--crs-rule);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .crs-empty h3 {
   font-size: 18px;
@@ -462,7 +462,7 @@
   overflow-x: auto;
   border: 1px solid var(--crs-rule);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .crs-table-wrap table {
   width: 100%;
@@ -473,11 +473,11 @@
 .crs-table-wrap td {
   text-align: left;
   padding: 13px 16px;
-  border-bottom: 1px solid #eee9e1;
+  border-bottom: 1px solid var(--color-border);
   font-size: 13px;
 }
 .crs-table-wrap th {
-  background: #faf8f4;
+  background: var(--color-surface);
   font-weight: 600;
 }
 .crs-table-actions {
@@ -513,11 +513,11 @@
   max-width: 100%;
   max-height: 90dvh;
   margin: auto 0 0;
-  color: #142b44;
-  background: #fff;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
 }
 .crs-filter-dialog::backdrop {
-  background: #1f1a1455;
+  background: color-mix(in srgb, var(--color-text-primary) 33.33%, transparent);
 }
 .crs-filter-dialog header,
 .crs-filter-dialog footer {
@@ -553,11 +553,11 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 .edu-connected .crs-filter-dialog .crs-apply {
-  background: #a46a27;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-surface);
 }
 .edu-course-workspace .crs-page-description {
-  color: #617086;
+  color: var(--color-text-secondary);
   font-size: 14px;
   margin: 8px 0 0;
   line-height: 1.5;
@@ -568,7 +568,7 @@
   align-items: flex-start;
 }
 .edu-course-workspace .edu-heading h1 {
-  color: #142b44;
+  color: var(--color-text-primary);
   font-size: clamp(25px, 2.4vw, 34px);
 }
 .edu-course-workspace .edu-heading .edu-row-actions {
@@ -618,8 +618,8 @@
     align-items: center;
     gap: 6px;
     padding: 8px 10px;
-    background: #fff;
-    color: #142b44;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     border: 1px solid #dedfe3;
     border-radius: 8px;
   }
@@ -639,12 +639,12 @@
   .crs-header-more > summary {
     display: block;
     list-style: none;
-    border: 1px solid #e4ded4;
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 11px 14px;
     font-size: 13px;
     cursor: pointer;
-    background: #fff;
+    background: var(--color-surface);
   }
   .crs-header-more > div {
     display: none;
@@ -659,10 +659,10 @@
     padding: 8px;
     top: 46px;
     right: 0;
-    border: 1px solid #e4ded4;
+    border: 1px solid var(--color-border);
     border-radius: 10px;
-    background: #fff;
-    box-shadow: 0 8px 24px #30201620;
+    background: var(--color-surface);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text-primary) 12.55%, transparent);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -684,7 +684,7 @@
   animation: crs-fade 0.2s ease-out;
 }
 .crs-panel {
-  --crs-ink: #18344b;
+  --crs-ink: var(--color-text-primary);
   --crs-muted: #5f6f7e;
   width: min(560px, 100%);
   height: 100%;
@@ -711,7 +711,7 @@
   gap: 12px;
   padding: 22px 22px 18px;
   background: var(--family);
-  color: #fff;
+  color: var(--color-surface);
 }
 .crs-panel-head h2 {
   margin: 0;
@@ -727,7 +727,7 @@
 .crs-panel-close {
   border: 1px solid rgba(255, 255, 255, 0.4);
   background: transparent;
-  color: #fff;
+  color: var(--color-surface);
   border-radius: 50%;
   width: 38px;
   height: 38px;
@@ -740,7 +740,7 @@
   background: rgba(255, 255, 255, 0.14);
 }
 .crs-panel-close:focus-visible {
-  outline: 3px solid #d8ae5e;
+  outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
 .crs-panel-body {
@@ -775,7 +775,7 @@
   gap: 10px;
 }
 .crs-kpi {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #dde3e9;
   border-radius: 8px;
   padding: 12px;
@@ -844,7 +844,7 @@
   display: grid;
   gap: 10px;
   margin: 0;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #dde3e9;
   border-radius: 8px;
   padding: 12px 14px;
@@ -925,9 +925,9 @@
     :hover,
     :focus-visible
   ):not(:disabled) {
-  color: #fff;
-  background: #6b441b;
-  border-color: #b78b51;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
+  border-color: var(--color-text-secondary);
 }
 .edu-connected .crs .crs-btn-delete:is(:hover, :focus-visible):not(:disabled) {
   color: #8b2722;
@@ -935,7 +935,7 @@
   border-color: #ce8a82;
 }
 .edu-connected .crs .crs-btn-danger:is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
+  color: var(--color-surface);
   background: #83241e;
   border-color: #83241e;
 }
@@ -943,33 +943,33 @@
   .crs
   .crs-segment
   button:not([aria-pressed="true"]):is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background: #6b441b;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
 }
 .edu-connected
   .crs
   .crs-segment
   button[aria-pressed="true"]:is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background: #4a2e12;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
 }
 .edu-connected
   .crs
   :is(.crs-view, .crs-active-filters button):is(:hover, :focus-visible) {
-  color: #653b10;
-  background: #edddc4;
-  border-color: #b78b51;
+  color: var(--color-primary-hover);
+  background: var(--color-primary-light);
+  border-color: var(--color-text-secondary);
 }
 .edu-connected
   .crs
   :is(.crs-title h4 button, .crs-table-name):is(:hover, :focus-visible) {
-  color: #87511d;
+  color: var(--color-primary);
   background: transparent;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .edu-connected .crs button:active:not(:disabled) {
-  box-shadow: inset 0 1px 3px #30201625;
+  box-shadow: inset 0 1px 3px color-mix(in srgb, var(--color-text-primary) 14.51%, transparent);
 }
 .edu-connected .crs button:disabled {
   opacity: 0.6;
@@ -986,14 +986,14 @@
   .edu-row-actions
   > button:not(.edu-primary):is(:hover, :focus-visible),
 .edu-course-workspace .crs-header-desktop button:is(:hover, :focus-visible) {
-  color: #fff;
-  background: #6b441b;
-  border-color: #b78b51;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
+  border-color: var(--color-text-secondary);
 }
 .edu-course-workspace .edu-heading .edu-primary:is(:hover, :focus-visible) {
-  color: #fff;
-  background: #4a2e12;
-  border-color: #87511d;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary);
 }
 @media (max-width: 650px) {
   .edu-course-workspace .crs-header-desktop {
@@ -1005,7 +1005,7 @@
   .edu-connected .crs .crs-filter-dialog footer {
     display: flex;
     padding: 12px 0 env(safe-area-inset-bottom);
-    background: #fff;
+    background: var(--color-surface);
     margin: 0;
     border: 0;
   }
@@ -1021,8 +1021,8 @@
 
 /* Course details: native modal drawer with a fixed header/footer and one scroll area. */
 .college-erp .crs-details-drawer {
-  --crs-ink: #142b44;
-  --crs-muted: #617086;
+  --crs-ink: var(--color-text-primary);
+  --crs-muted: var(--color-text-secondary);
   position: fixed;
   inset: 0 0 0 auto;
   /* Half the screen, never narrower than 720px (the subject and faculty layout needs it). */
@@ -1033,12 +1033,12 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-left: 1px solid #e8e0d4;
+  border-left: 1px solid var(--color-border);
   border-radius: var(--edu-drawer-radius);
   overflow: hidden;
   color: var(--crs-ink);
-  background: #faf9f6;
-  box-shadow: -12px 0 48px #30201624;
+  background: var(--color-surface);
+  box-shadow: -12px 0 48px color-mix(in srgb, var(--color-text-primary) 14.12%, transparent);
   font-family: inherit;
   font-size: 14px;
   animation: crs-slide 0.22s ease-out;
@@ -1048,14 +1048,14 @@
   flex-direction: column;
 }
 .crs-details-drawer::backdrop {
-  background: #201c1855;
+  background: color-mix(in srgb, var(--color-text-primary) 33.33%, transparent);
   backdrop-filter: blur(2px);
 }
 .college-erp .crs-details-drawer .crs-panel-head {
-  background: #fff;
-  color: #142b44;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   padding: 24px 26px 20px;
-  border-bottom: 1px solid #e8e0d4;
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 .crs-details-drawer .crs-panel-head > div {
@@ -1063,7 +1063,7 @@
 }
 .crs-details-drawer .crs-panel-eyebrow {
   display: block;
-  color: #8c591f;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 8px;
@@ -1079,7 +1079,7 @@
 .crs-details-drawer .crs-panel-head p {
   opacity: 1;
   font-size: 12px;
-  color: #617086;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   overflow-wrap: anywhere;
   margin: 8px 0;
@@ -1088,23 +1088,23 @@
   display: inline-block;
   padding: 5px 9px;
   border-radius: 6px;
-  background: #f6eddf;
-  color: #80501c;
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
   font-size: 12px;
 }
 .college-erp .crs-details-drawer .crs-panel-close {
-  background: #fff;
+  background: var(--color-surface);
   color: #35465a;
-  border: 1px solid #e5e1da;
+  border: 1px solid var(--color-border);
   border-radius: 9px;
   width: 38px;
   height: 38px;
   padding: 0;
 }
 .college-erp .crs-details-drawer .crs-panel-close:is(:hover, :focus-visible) {
-  background: #f4eadb;
-  color: #553516;
-  border-color: #b78b51;
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
+  border-color: var(--color-text-secondary);
 }
 .crs-details-drawer .crs-panel-body {
   flex: 1;
@@ -1119,7 +1119,7 @@
   gap: 12px;
 }
 .crs-details-drawer .crs-kpi {
-  border-color: #e8e0d4;
+  border-color: var(--color-border);
   padding: 16px;
   border-radius: 10px;
   gap: 6px;
@@ -1127,13 +1127,13 @@
 }
 .crs-details-drawer .crs-kpi-main {
   grid-column: 1/-1;
-  border-left: 3px solid #a46a27;
+  border-left: 3px solid var(--color-primary);
   grid-template-columns: auto auto 1fr;
   align-items: center;
   gap: 12px;
 }
 .crs-details-drawer .crs-kpi strong {
-  color: #142b44;
+  color: var(--color-text-primary);
   font-size: 26px;
   line-height: 1.2;
 }
@@ -1143,25 +1143,25 @@
   font-weight: 700;
 }
 .crs-details-drawer .crs-panel-section {
-  background: #fff;
+  background: var(--color-surface);
   padding: 18px;
-  border: 1px solid #e8e0d4;
+  border: 1px solid var(--color-border);
   border-radius: 11px;
   min-width: 0;
 }
 .crs-details-drawer .crs-panel-section h3 {
-  color: #142b44;
+  color: var(--color-text-primary);
   font-size: 15px;
   font-weight: 700;
   margin: 0 0 14px;
 }
 .crs-details-drawer .crs-panel-empty {
-  color: #617086;
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 1.65;
   padding: 12px;
-  background: #faf8f4;
-  border: 1px dashed #ded4c4;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
   border-radius: 8px;
 }
 .crs-details-drawer .crs-details {
@@ -1176,19 +1176,19 @@
   grid-template-columns: 110px minmax(0, 1fr);
   gap: 16px;
   padding: 12px 0;
-  border-bottom: 1px solid #f0ebe4;
+  border-bottom: 1px solid var(--color-border);
 }
 .crs-details-drawer .crs-details > div:last-child {
   border: 0;
   padding-bottom: 0;
 }
 .crs-details-drawer .crs-details dt {
-  color: #617086;
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.6;
 }
 .crs-details-drawer .crs-details dd {
-  color: #142b44;
+  color: var(--color-text-primary);
   font-size: 13px;
   line-height: 1.65;
   margin: 0;
@@ -1201,17 +1201,17 @@
   gap: 16px;
   flex-shrink: 0;
   padding: 16px 26px;
-  border-top: 1px solid #e8e0d4;
-  background: #fff;
-  color: #617086;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font-size: 12px;
   margin: 0;
 }
 .college-erp .crs-details-drawer .crs-panel-footer button {
-  background: #a46a27;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-surface);
   padding: 10px 22px;
-  border: 1px solid #a46a27;
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -1220,12 +1220,12 @@
   .crs-details-drawer
   .crs-panel-footer
   button:is(:hover, :focus-visible) {
-  background: #4a2e12;
-  border-color: #87511d;
-  color: #fff;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
 }
 .crs-details-drawer button:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 @media (max-width: 650px) {
@@ -1265,7 +1265,7 @@
   align-items: center;
 }
 .college-erp .edu-connected.edu-course-workspace .edu-heading h1 {
-  color: #142b44;
+  color: var(--color-text-primary);
   font-size: clamp(26px, 2.2vw, 34px);
   line-height: 1.2;
   letter-spacing: -0.7px;
@@ -1275,7 +1275,7 @@
   .edu-connected.edu-course-workspace
   .edu-heading
   .crs-page-description {
-  color: #617086;
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.5;
   margin: 8px 0 0;
@@ -1284,18 +1284,18 @@
   min-height: 40px;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #fff;
-  color: #142b44;
-  border: 1px solid #e5e0d8;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   font-size: 12px;
 }
 .college-erp
   .edu-connected.edu-course-workspace
   .crs-header-desktop
   button:is(:hover, :focus-visible) {
-  background: #f4eadb;
-  color: #18344b;
-  border-color: #b78b51;
+  background: var(--color-primary-light);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-secondary);
 }
 @media (max-width: 1000px) {
   .college-erp .edu-connected.edu-course-workspace .edu-heading {
@@ -1312,6 +1312,6 @@
   padding-inline: var(--edu-drawer-gutter);
 }
 .edu-connected .crs .crs-segment button:is(:hover, :focus-visible):not(:disabled) > span {
-  color: #fff;
-  background: #ffffff26;
+  color: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) 14.9%, transparent);
 }

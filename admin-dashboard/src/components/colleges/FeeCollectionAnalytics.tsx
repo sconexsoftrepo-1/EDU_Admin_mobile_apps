@@ -10,7 +10,7 @@ import { BarList, Donut, Empty, FilterDate, LoadFailed, Panel, rupees, Stat } fr
 type Scale = "day" | "week" | "month" | "year";
 type Range = "day" | "week" | "month" | "year" | "all" | "custom";
 
-const METHOD_COLOURS: Record<string, string> = { cash: "#a56824", upi: "#e0a85a", bank_transfer: "#5b3a17" };
+const METHOD_COLOURS: Record<string, string> = { cash: "#2454d6", upi: "#60a5fa", bank_transfer: "#1e3a8a" };
 const METHOD_NAMES: Record<string, string> = { cash: "Cash", upi: "UPI", bank_transfer: "Bank transfer" };
 export const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const parse = (s: string) => new Date(`${s}T00:00:00`);
@@ -114,7 +114,7 @@ function series(daily: FeeAnalytics["daily"], scale: Scale): Point[] {
   return out;
 }
 
-const tooltipStyle = { borderRadius: 10, border: "1px solid #eadccb", fontSize: 12 };
+const tooltipStyle = { borderRadius: 10, border: "1px solid #dfe7f2", fontSize: 12 };
 
 export default function FeeCollectionAnalytics() {
   const [range, setRange] = useState<Range>("month");
@@ -220,7 +220,7 @@ export default function FeeCollectionAnalytics() {
                 <div className="fca-chart">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={points} margin={{ top: 8, right: 8, left: 0 }}>
-                      <CartesianGrid vertical={false} stroke="#efe6d8" />
+                      <CartesianGrid vertical={false} stroke="#dfe7f2" />
                       <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#76695e" }} minTickGap={8} />
                       <YAxis yAxisId="a" width={52} axisLine={false} tickLine={false} tickFormatter={compact} tick={{ fontSize: 11, fill: "#76695e" }} />
                       <YAxis yAxisId="r" orientation="right" width={52} axisLine={false} tickLine={false} tickFormatter={compact} tick={{ fontSize: 11, fill: "#2f6f4f" }} />
@@ -268,7 +268,7 @@ export default function FeeCollectionAnalytics() {
                   <div className="fca-chart fca-chart-sm">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={semesters.map((r) => ({ ...r, value: Number(r.amount) }))} margin={{ top: 8, right: 4, left: 0 }}>
-                        <CartesianGrid vertical={false} stroke="#efe6d8" />
+                        <CartesianGrid vertical={false} stroke="#dfe7f2" />
                         <XAxis dataKey="label" interval={0} axisLine={false} tickLine={false} tick={{ fontSize: 10.5, fill: "#76695e" }} />
                         <YAxis width={52} axisLine={false} tickLine={false} tickFormatter={compact} tick={{ fontSize: 11, fill: "#76695e" }} />
                         <Tooltip
@@ -276,7 +276,7 @@ export default function FeeCollectionAnalytics() {
                           contentStyle={tooltipStyle}
                           formatter={(value) => [rupees(Number(value)), "Collected"]}
                         />
-                        <Bar dataKey="value" fill="#a56824" radius={[4, 4, 0, 0]} maxBarSize={46} />
+                        <Bar dataKey="value" fill="#2454d6" radius={[4, 4, 0, 0]} maxBarSize={46} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>

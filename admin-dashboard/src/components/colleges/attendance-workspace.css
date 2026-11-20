@@ -45,7 +45,7 @@
   cursor: default;
 }
 .att-workspace button:focus-visible {
-  outline: 3px solid #af792c;
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 .att-filters {
@@ -53,7 +53,7 @@
   grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
   gap: 14px;
   padding: 20px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #e0e5e7;
   border-radius: 14px;
 }
@@ -70,7 +70,7 @@
   min-height: 42px;
   border: 1px solid #d9e0e5;
   border-radius: 8px;
-  background-color: #fff;
+  background-color: var(--color-surface);
   padding: 8px 12px;
   color: #253e4c;
   font: inherit;
@@ -83,7 +83,7 @@
 .att-tabs button[aria-pressed="true"],
 .att-workspace .att-save {
   background: #1e6470;
-  color: #fff;
+  color: var(--color-surface);
   border-color: #1e6470;
 }
 .att-metrics {
@@ -97,7 +97,7 @@
   padding: 20px;
   border: 1px solid #dfe6e6;
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .att-metrics span {
   color: #697b86;
@@ -117,7 +117,7 @@
 .att-register {
   border: 1px solid #dfe6e6;
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-surface);
   padding: 20px;
   min-width: 0;
 }
@@ -154,7 +154,7 @@
   background: #fff0ed;
 }
 .att-calendar-grid .has-leave {
-  background: #fff8e9;
+  background: var(--color-primary-subtle);
 }
 .att-calendar-grid button[aria-pressed="true"] {
   border-color: #1e6470;
@@ -239,7 +239,7 @@
   text-align: left;
   position: sticky;
   left: 0;
-  background: #fff;
+  background: var(--color-surface);
   z-index: 1;
   min-width: 180px;
 }
@@ -268,8 +268,8 @@
   color: #287453;
 }
 .att-workspace .att-cell-E {
-  background: #fff7e5;
-  color: #9b751b;
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
 }
 .att-workspace .att-cell-L {
   background: #eef3ff;
@@ -354,12 +354,12 @@
   color: #365b45;
 }
 .att-register-overview .att-ov-absent {
-  background: #f6e3d9;
+  background: var(--color-primary-light);
   color: #98482f;
 }
 .att-register-overview .att-ov-leave {
-  background: #f6ecd3;
-  color: #7a5a22;
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
 }
 .att-register-overview .att-ov-state {
   margin-left: auto;
@@ -376,8 +376,8 @@
   width: 34px;
   height: 30px;
   border-radius: 8px;
-  border: 1px solid #ddd3c4;
-  background: #fff;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
   color: #6e645b;
   font-weight: 800;
   cursor: pointer;
@@ -385,15 +385,15 @@
 .att-toggle button.att-toggle-present.is-on {
   background: #365b45;
   border-color: #365b45;
-  color: #fff;
+  color: var(--color-surface);
 }
 .att-toggle button.att-toggle-absent.is-on {
   background: #b64d42;
   border-color: #b64d42;
-  color: #fff;
+  color: var(--color-surface);
 }
 .att-toggle button.is-changed.is-on {
-  box-shadow: 0 0 0 2px #f6ecd3;
+  box-shadow: 0 0 0 2px var(--color-primary-light);
 }
 .att-toggle button:disabled {
   opacity: 0.6;
@@ -402,8 +402,8 @@
   margin-left: 4px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f6ecd3;
-  color: #7a5a22;
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
   font-size: 11px;
   font-weight: 700;
 }

@@ -7,6 +7,7 @@ import "@/styles/college-erp.css";
 import "@/styles/college-operations.css";
 import "@/styles/academic-calendar.css";
 import "@/styles/college-timetable.css";
+import "@/styles/portal-design-system.css";
 export const metadata: Metadata = {
   title: `${colleges[0].name} | Campus portal`,
   description: `Sign in to ${colleges[0].name} campus management.`,

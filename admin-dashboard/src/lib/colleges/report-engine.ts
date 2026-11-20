@@ -23,9 +23,9 @@ export async function createReport(report: PDFReport): Promise<Blob> {
     usable = width - margin * 2;
   const context = report.context || {},
     useAreaDefault = false;
-  const accent: [number, number, number] = [151, 101, 40];
-  const ink: [number, number, number] = [28, 38, 52],
-    muted: [number, number, number] = [95, 107, 122];
+  const accent: [number, number, number] = [29, 78, 216];
+  const ink: [number, number, number] = [23, 27, 35],
+    muted: [number, number, number] = [75, 85, 99];
   // Pragathi College logo in the report header (fitted into the 16 x 19 mm box, centred).
   let crest: string | undefined;
   if (typeof document !== "undefined")

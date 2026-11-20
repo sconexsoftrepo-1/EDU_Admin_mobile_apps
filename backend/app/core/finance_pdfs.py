@@ -36,6 +36,25 @@ def _due_label(due, today):
 
 RECEIPT_COPIES = ["ADMIN / STAFF COPY", "STUDENT COPY"]
 COPY_NOTES = {"ADMIN / STAFF COPY": "Kept by the accounts office", "STUDENT COPY": "Given to the student / parent"}
+RECEIPT_IDENTITY = ("Pragathi", (
+    "Educational Institutions",
+    "Kothavalasa-Vizianagaram Rd, Ardhannapalem, Andhra Pradesh-535183",
+    "Contact: +91 94403 19293",
+))
+
+
+def _receipt_title(data, payment, charges):
+    """Use the recorded head, or the heads actually allocated by an older payment."""
+    head = payment.get("fee_head_name") or data["records"].get("fee_heads", {}).get(
+        payment.get("fee_head_code"), {}).get("name")
+    names = [str(head).strip()] if head and str(head).strip() else []
+    if not names:
+        for allocation in aw.rows(data, "payment_allocations"):
+            if allocation.get("payment_code") == payment.get("code"):
+                name = charges.get(allocation.get("charge_code"), {}).get("fee_head")
+                if name and str(name).strip() and str(name).strip() not in names:
+                    names.append(str(name).strip())
+    return f"{' + '.join(names).upper()} RECEIPT" if names else "FEE RECEIPT"
 
 
 def fee_receipt_pdf(data, receipt, payment, copies=None):
@@ -57,6 +76,7 @@ def fee_receipt_pdf(data, receipt, payment, copies=None):
         student = {**student, "admission_number": payer.get("admission_number") or "Not assigned yet",
                    "code": payer.get("roll_or_reference") or "-"}
     by_charge = {c["code"]: c for c in charges}
+    receipt_title = _receipt_title(data, payment, by_charge)
     balance = amount(totals.get("outstanding")) if totals else Decimal("0")
     concessions = amount(totals.get("discount")) + amount(totals.get("scholarship")) if totals else Decimal("0")
     mode = METHODS.get(payment.get("method"), str(payment.get("method") or "").title())
@@ -65,10 +85,10 @@ def fee_receipt_pdf(data, receipt, payment, copies=None):
     copies = copies or [None]
     doc = None
     for copy in copies:
-        title = f"FEE RECEIPT · {copy}" if copy else "FEE RECEIPT"
+        title = f"{receipt_title} · {copy}" if copy else receipt_title
         if doc is None:
             doc = Document(data, title, f"No. {number}", campus_code=student.get("campus_code"),
-                           reference=f"Issued {paid_on}")
+                           reference=f"Issued {paid_on}", header_identity=RECEIPT_IDENTITY)
         else:
             doc.page_break(title, f"No. {number}")
         if copy:

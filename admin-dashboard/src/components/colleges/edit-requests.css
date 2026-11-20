@@ -1,8 +1,8 @@
 .edr {
-  --edr-ink: #241d18;
-  --edr-muted: #76695e;
-  --edr-line: #eadccb;
-  --edr-amber: #a56824;
+  --edr-ink: var(--color-text-primary);
+  --edr-muted: var(--color-text-secondary);
+  --edr-line: var(--color-border);
+  --edr-amber: var(--color-primary);
   color: var(--edr-ink);
   display: grid;
   gap: 16px;
@@ -43,7 +43,7 @@
   overflow: hidden;
 }
 .edr-tabs button {
-  background: #fff;
+  background: var(--color-surface);
   border: 0;
   color: var(--edr-muted);
   cursor: pointer;
@@ -56,15 +56,15 @@
 }
 .edr-tabs button[aria-pressed="true"] {
   background: var(--edr-amber);
-  color: #fff;
+  color: var(--color-surface);
 }
 .edr-tabs button:hover:not([aria-pressed="true"]) {
-  background: #fbf8f3;
+  background: var(--color-surface);
   color: var(--edr-ink);
 }
 .edr-refresh {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--edr-line);
   border-radius: 8px;
   color: var(--edr-ink);
@@ -79,7 +79,7 @@
   gap: 12px;
 }
 .edr-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--edr-line);
   border-radius: 14px;
   display: grid;
@@ -94,7 +94,7 @@
   justify-content: space-between;
 }
 .edr-card > header p {
-  color: #4f4338;
+  color: var(--color-text-primary);
   font-size: 14px;
   line-height: 1.5;
   min-width: 0;
@@ -138,7 +138,7 @@
   width: 100%;
 }
 .edr-table thead th {
-  background: #fbf8f3;
+  background: var(--color-surface);
   color: var(--edr-muted);
   font-size: 11px;
   font-weight: 600;
@@ -186,7 +186,7 @@
   padding: 8px 12px;
 }
 .edr-empty {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--edr-line);
   border-radius: 14px;
   color: var(--edr-muted);
@@ -223,7 +223,7 @@
 }
 .edr-card > footer button {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--edr-line);
   border-radius: 8px;
   color: var(--edr-ink);
@@ -239,10 +239,10 @@
 .edr-card > footer .edr-accept {
   background: #18824b;
   border-color: #18824b;
-  color: #fff;
+  color: var(--color-surface);
 }
 .edr-card > footer .edr-accept:hover:not(:disabled) {
-  background: #fff;
+  background: var(--color-surface);
   color: #14683d;
 }
 .edr-card > footer .edr-reject {
@@ -264,7 +264,7 @@
 .edr-badge {
   align-items: center;
   border-radius: 50%;
-  color: #4f4338;
+  color: var(--color-text-primary);
   display: inline-flex;
   flex: 0 0 auto;
   height: 40px;
@@ -276,14 +276,14 @@
   width: 40px;
 }
 .edr-badge:hover {
-  background: #ffffffb3;
-  color: #241d18;
+  background: color-mix(in srgb, var(--color-surface) 70.2%, transparent);
+  color: var(--color-text-primary);
 }
 .edr-badge span {
   align-items: center;
   background: #c93d3d;
   border-radius: 99px;
-  color: #fff;
+  color: var(--color-surface);
   display: inline-flex;
   font-size: 10px;
   font-variant-numeric: tabular-nums;
@@ -317,8 +317,8 @@
   flex: 1;
 }
 .edr-tabs button[aria-selected="true"] {
-  background: #a56824;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-surface);
 }
 button.edr-badge {
   cursor: pointer;
@@ -336,15 +336,15 @@ button.edr-badge {
 }
 .edr-stages li {
   align-items: flex-start;
-  border-top: 3px solid #eadccb;
-  color: #76695e;
+  border-top: 3px solid var(--color-border);
+  color: var(--color-text-secondary);
   display: flex;
   gap: 8px;
   padding-top: 8px;
 }
 .edr-stages li > span {
   align-items: center;
-  border: 1.5px solid #d9c7ad;
+  border: 1.5px solid var(--color-border-strong);
   border-radius: 50%;
   display: inline-flex;
   flex: none;
@@ -367,20 +367,20 @@ button.edr-badge {
 }
 .edr-stages li.is-done {
   border-top-color: #2f7d4f;
-  color: #241d18;
+  color: var(--color-text-primary);
 }
 .edr-stages li.is-done > span {
   background: #2f7d4f;
   border-color: #2f7d4f;
-  color: #fff;
+  color: var(--color-surface);
 }
 .edr-stages li.is-current {
-  border-top-color: #a56824;
-  color: #241d18;
+  border-top-color: var(--color-primary);
+  color: var(--color-text-primary);
 }
 .edr-stages li.is-current > span {
-  border-color: #a56824;
-  color: #a56824;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 .edr-stages.is-rejected li:last-child {
   border-top-color: #b43540;

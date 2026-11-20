@@ -12,9 +12,9 @@
   flex: 1 1 220px;
   min-height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-surface);
   font: inherit;
 }
 .ap-total {
@@ -22,7 +22,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .ap-modules {
   display: grid;
@@ -31,21 +31,21 @@
   align-items: start;
 }
 .ap-module {
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-surface);
   overflow: hidden;
 }
 .ap-module.has-access {
-  border-color: color-mix(in srgb, var(--erp-accent, #a46a27) 45%, transparent);
+  border-color: color-mix(in srgb, var(--erp-accent, var(--color-primary)) 45%, transparent);
 }
 .ap-module header {
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 11px 12px;
-  background: var(--erp-raised, #fcf9f3);
-  border-bottom: 1px solid var(--erp-border, #e9dfcf);
+  background: var(--erp-raised, var(--color-surface));
+  border-bottom: 1px solid var(--erp-border, var(--color-border));
 }
 .ap-module header strong {
   flex: 1;
@@ -53,7 +53,7 @@
 }
 .ap-module header small {
   font-size: 12px;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .ap-module-icon {
   display: grid;
@@ -61,8 +61,8 @@
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  color: var(--erp-accent, #a46a27);
-  background: color-mix(in srgb, var(--erp-accent, #a46a27) 12%, #fff);
+  color: var(--erp-accent, var(--color-primary));
+  background: color-mix(in srgb, var(--erp-accent, var(--color-primary)) 12%, var(--color-surface));
 }
 .ap-collapse {
   display: grid;
@@ -72,7 +72,7 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, var(--color-text-secondary));
   cursor: pointer;
 }
 .ap-collapse[aria-expanded="false"] svg {
@@ -95,7 +95,7 @@
   border-radius: 9px;
 }
 .ap-module li.is-on {
-  background: color-mix(in srgb, var(--erp-accent, #a46a27) 7%, #fff);
+  background: color-mix(in srgb, var(--erp-accent, var(--color-primary)) 7%, var(--color-surface));
 }
 .ap-screen {
   display: flex;
@@ -108,10 +108,10 @@
 }
 .ap-screen svg {
   flex: none;
-  color: var(--erp-muted, #756b60);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .ap-module li.is-on .ap-screen svg {
-  color: var(--erp-accent, #a46a27);
+  color: var(--erp-accent, var(--color-primary));
 }
 .ap-screen em {
   font-style: normal;
@@ -124,12 +124,12 @@
 .ap input[type="checkbox"] {
   width: 17px;
   height: 17px;
-  accent-color: var(--erp-accent, #a46a27);
+  accent-color: var(--erp-accent, var(--color-primary));
   flex: none;
 }
 .ap-levels {
   display: inline-flex;
-  border: 1px solid var(--erp-border, #e9dfcf);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 8px;
   overflow: hidden;
 }
@@ -138,16 +138,16 @@
   padding: 4px 9px;
   font: inherit;
   font-size: 12px;
-  background: #fff;
-  color: var(--erp-muted, #756b60);
+  background: var(--color-surface);
+  color: var(--erp-muted, var(--color-text-secondary));
   cursor: pointer;
 }
 .ap-levels button + button {
-  border-left: 1px solid var(--erp-border, #e9dfcf);
+  border-left: 1px solid var(--erp-border, var(--color-border));
 }
 .ap-levels button.is-active {
-  background: var(--erp-accent, #a46a27);
-  color: #fff;
+  background: var(--erp-accent, var(--color-primary));
+  color: var(--color-surface);
 }
 .ap-levels button:disabled {
   cursor: default;

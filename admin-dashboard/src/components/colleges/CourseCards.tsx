@@ -737,7 +737,7 @@ export default function CourseCards({
       {insights && (
         <CourseInsightsPanel
           course={insights}
-          colour="#a46a27"
+          colour="#2454d6"
           onClose={() => setInsights(null)}
         />
       )}

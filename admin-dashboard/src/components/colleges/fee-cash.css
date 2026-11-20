@@ -1,9 +1,9 @@
 .fcw {
-  --fcw-ink: #241d18;
-  --fcw-muted: #76695e;
-  --fcw-line: #eadccb;
-  --fcw-amber: #a56824;
-  --fcw-soft: #fbf8f3;
+  --fcw-ink: var(--color-text-primary);
+  --fcw-muted: var(--color-text-secondary);
+  --fcw-line: var(--color-border);
+  --fcw-amber: var(--color-primary);
+  --fcw-soft: var(--color-surface);
   color: var(--fcw-ink);
   display: grid;
   gap: 14px;
@@ -41,7 +41,7 @@
 .fcw-tabs button,
 .fcw-chips button {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 10px;
   color: var(--fcw-muted);
@@ -60,7 +60,7 @@
   color: var(--fcw-ink);
 }
 .fcw-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 14px;
   padding: 18px;
@@ -99,7 +99,7 @@
   grid-column: 1 / -1;
 }
 .fcw-form :is(input, select, textarea) {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 8px;
   color: var(--fcw-ink);
@@ -129,7 +129,7 @@
 }
 .fcw-search {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 8px;
   display: flex;
@@ -147,10 +147,10 @@
   padding: 0;
 }
 .fcw-matches {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 10px;
-  box-shadow: 0 12px 28px #5a361324;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--color-primary-hover) 14.12%, transparent);
   left: 0;
   list-style: none;
   margin: 0;
@@ -211,7 +211,7 @@
   padding: 0 14px;
 }
 .fcw-form .fcw-methods label.is-on {
-  background: #f6e6ce;
+  background: var(--color-primary-light);
   border-color: var(--fcw-amber);
 }
 .fcw-form .fcw-methods input {
@@ -235,10 +235,10 @@
 .fcw :is(.fcw-primary, .fcw-actions button, .fcw-row-actions button, .fcw-accept, .fcw-reject),
 .fcw-drawer-form :is(.fcw-primary, .fcw-actions button, .fcw-accept, .fcw-reject) {
   align-items: center;
-  background: #fff;
-  border: 1px solid var(--fcw-line, #eadccb);
+  background: var(--color-surface);
+  border: 1px solid var(--fcw-line, var(--color-border));
   border-radius: 8px;
-  color: var(--fcw-ink, #241d18);
+  color: var(--fcw-ink, var(--color-text-primary));
   cursor: pointer;
   display: inline-flex;
   font-size: 13px;
@@ -250,9 +250,9 @@
 .fcw .fcw-primary,
 .fcw-drawer-form .fcw-primary,
 .fcw-drawer-form .fcw-accept {
-  background: #a56824;
-  border-color: #a56824;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
 }
 .fcw-drawer-form .fcw-accept {
   background: #18824b;
@@ -299,7 +299,7 @@
 }
 .fcw-filters {
   align-items: flex-end;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 14px;
   display: flex;
@@ -316,7 +316,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 .fcw-alert {
-  border-color: #e3bd80;
+  border-color: var(--color-accent);
 }
 .fcw-list {
   display: grid;
@@ -370,7 +370,7 @@
   font-size: 12px;
 }
 .fcw-drawer-form {
-  color: #241d18;
+  color: var(--color-text-primary);
 }
 .fcw-balance {
   display: grid;
@@ -379,13 +379,13 @@
   margin: 0;
 }
 .fcw-balance > div {
-  background: #fbf8f3;
-  border: 1px solid #eadccb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 10px 12px;
 }
 .fcw-balance dt {
-  color: #76695e;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .fcw-balance dd {
@@ -398,8 +398,8 @@
   color: #a12f2f;
 }
 .fcw-slip {
-  background: #fbf8f3;
-  border: 1px solid #eadccb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   min-height: 200px;
   overflow: hidden;
@@ -422,27 +422,27 @@
 .college-erp .fcw .fcw-primary,
 .college-erp .fcw-drawer-form .fcw-primary,
 .fcw-drawer-form .fcw-primary {
-  background: #a56824;
-  border-color: #a56824;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
 }
 .college-erp .fcw .fcw-primary:hover:not(:disabled),
 .fcw-drawer-form .fcw-primary:hover:not(:disabled) {
-  background: #fff;
-  color: #241d18;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 .college-erp .fcw-drawer-form .fcw-accept {
   background: #18824b;
   border-color: #18824b;
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .fcw-icon {
   align-items: center;
-  background: #fff;
-  border: 1px solid #eadccb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #241d18;
+  color: var(--color-text-primary);
   cursor: pointer;
   display: inline-flex;
   height: 34px;
@@ -450,8 +450,8 @@
   width: 34px;
 }
 .college-erp .fcw .fcw-icon:hover {
-  background: #f6e6ce;
-  color: #241d18;
+  background: var(--color-primary-light);
+  color: var(--color-text-primary);
 }
 .fcw-details {
   display: grid;
@@ -459,14 +459,14 @@
   margin: 0 0 14px;
 }
 .fcw-details > div {
-  border-bottom: 1px dashed #efe6d8;
+  border-bottom: 1px dashed var(--color-border);
   display: grid;
   gap: 12px;
   grid-template-columns: minmax(130px, 40%) 1fr;
   padding: 8px 0;
 }
 .fcw-details dt {
-  color: #76695e;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 .fcw-details dd {
@@ -478,9 +478,9 @@
 
 /* Student suggestions styled like the role list. */
 .fcw-form .fcw-matches {
-  border-color: #eadccb;
+  border-color: var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 16px 34px #5a361326;
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--color-primary-hover) 14.9%, transparent);
   padding: 6px;
 }
 .fcw-form .fcw-matches button {
@@ -491,14 +491,14 @@
   padding: 8px 10px;
 }
 .fcw-form .fcw-matches button.is-active {
-  background: #fbf3e6;
-  box-shadow: inset 0 0 0 1px #eadccb;
+  background: var(--color-primary-subtle);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 .fcw-avatar {
   align-items: center;
-  background: #f6e6ce;
+  background: var(--color-primary-light);
   border-radius: 50%;
-  color: #6b441b;
+  color: var(--color-primary-hover);
   display: inline-flex;
   flex: 0 0 36px;
   font-size: 12.5px;
@@ -517,10 +517,10 @@
 }
 .fcw-match-course {
   align-items: center;
-  background: #fbf8f3;
-  border: 1px solid #f0e6d8;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 99px;
-  color: #76695e;
+  color: var(--color-text-secondary);
   display: inline-flex;
   flex: 0 1 auto;
   font-size: 11.5px;
@@ -561,10 +561,10 @@
 .fcw-form .ypk-field,
 .ypk-field {
   align-items: center;
-  background: #fff;
-  border: 1px solid var(--fcw-line, #e3d6c3);
+  background: var(--color-surface);
+  border: 1px solid var(--fcw-line, var(--color-border-strong));
   border-radius: 8px;
-  color: var(--fcw-ink, #241d18);
+  color: var(--fcw-ink, var(--color-text-primary));
   cursor: pointer;
   display: flex;
   font-size: 14px;
@@ -575,19 +575,19 @@
   width: 100%;
 }
 .ypk-field svg {
-  color: #a56824;
+  color: var(--color-primary);
 }
 .college-erp .fcw .ypk-field:hover,
 .ypk-field[aria-expanded="true"],
 .ypk-field:focus-visible {
-  background: #fff;
-  border-color: #c99448;
-  box-shadow: 0 0 0 3px #c9944826;
-  color: var(--fcw-ink, #241d18);
+  background: var(--color-surface);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14.9%, transparent);
+  color: var(--fcw-ink, var(--color-text-primary));
   outline: 0;
 }
 .ypk-placeholder {
-  color: #9a8d80;
+  color: var(--color-text-secondary);
 }
 .ypk-proxy {
   border: 0;
@@ -602,10 +602,10 @@
 }
 .ypk-panel {
   animation: sx-in 160ms ease both;
-  background: #fff;
-  border: 1px solid #eadccb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 16px 34px #5a361326;
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--color-primary-hover) 14.9%, transparent);
   left: 0;
   padding: 8px;
   position: absolute;
@@ -630,14 +630,14 @@
   margin-bottom: 6px;
 }
 .ypk-nav strong {
-  color: #241d18;
+  color: var(--color-text-primary);
   font-size: 13px;
 }
 .ypk-panel button {
   background: transparent;
   border: 0;
   border-radius: 8px;
-  color: #241d18;
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 13.5px;
   min-height: 36px;
@@ -654,20 +654,20 @@
   grid-template-columns: repeat(3, 1fr);
 }
 .college-erp .fcw .ypk-panel button:hover:not(:disabled) {
-  background: #fbf3e6;
-  color: #241d18;
+  background: var(--color-primary-subtle);
+  color: var(--color-text-primary);
 }
 .ypk-grid button.is-now {
-  box-shadow: inset 0 0 0 1px #c99448;
+  box-shadow: inset 0 0 0 1px var(--color-accent);
 }
 .college-erp .fcw .ypk-grid button[aria-pressed="true"],
 .ypk-grid button[aria-pressed="true"] {
-  background: #a56824;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-surface);
   font-weight: 600;
 }
 .ypk-panel button:disabled {
-  color: #c8bdb1;
+  color: var(--color-border-strong);
   cursor: default;
 }
 @keyframes sx-in {
@@ -692,7 +692,7 @@
   margin: 0;
 }
 .fca-scale {
-  background: #f6efe4;
+  background: var(--color-primary-light);
   border-radius: 9px;
   display: inline-flex;
   gap: 2px;
@@ -702,7 +702,7 @@
   background: transparent;
   border: 0;
   border-radius: 7px;
-  color: #76695e;
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 12.5px;
   font-weight: 600;
@@ -710,9 +710,9 @@
 }
 .college-erp .fcw .fca-scale button[aria-selected="true"],
 .fca-scale button[aria-selected="true"] {
-  background: #fff;
-  box-shadow: 0 1px 3px #5a36131f;
-  color: #6b441b;
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-primary-hover) 12.16%, transparent);
+  color: var(--color-primary-hover);
 }
 .fca-chart {
   height: 300px;
@@ -722,7 +722,7 @@
   height: 210px;
 }
 .fca-key {
-  color: #76695e;
+  color: var(--color-text-secondary);
   display: flex;
   flex-wrap: wrap;
   font-size: 12px;
@@ -758,7 +758,7 @@
   white-space: nowrap;
 }
 .fca .fca-sub {
-  color: #76695e;
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -774,10 +774,10 @@
 .fcw .fcw-secondary,
 .fcw-drawer-form .fcw-secondary {
   align-items: center;
-  background: #fff;
-  border: 1px solid var(--fcw-line, #eadccb);
+  background: var(--color-surface);
+  border: 1px solid var(--fcw-line, var(--color-border));
   border-radius: 8px;
-  color: var(--fcw-ink, #241d18);
+  color: var(--fcw-ink, var(--color-text-primary));
   cursor: pointer;
   display: inline-flex;
   font-size: 13px;
@@ -788,9 +788,9 @@
 }
 .college-erp .fcw .fcw-secondary:hover:not(:disabled),
 .college-erp .fcw-drawer-form .fcw-secondary:hover:not(:disabled) {
-  background: #fbf3e6;
-  border-color: #c99448;
-  color: #241d18;
+  background: var(--color-primary-subtle);
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
 }
 .lfw-bar {
   align-items: center;
@@ -815,9 +815,9 @@
 }
 .college-erp .fcw .lfw-card,
 .lfw-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
-  border-left: 4px solid #c99448;
+  border-left: 4px solid var(--color-accent);
   border-radius: 12px;
   color: var(--fcw-ink);
   cursor: pointer;
@@ -848,8 +848,8 @@
 }
 .college-erp .fcw .lfw-card:hover,
 .lfw-card:focus-visible {
-  background: #fff;
-  box-shadow: 0 10px 24px #5a36131c;
+  background: var(--color-surface);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-primary-hover) 10.98%, transparent);
   color: var(--fcw-ink);
   transform: translateY(-1px);
 }
@@ -882,7 +882,7 @@
   padding: 3px 9px;
 }
 .lfw-chip.is-uncleared {
-  background: #fdebe1;
+  background: var(--color-primary-subtle);
   color: #9a3412;
 }
 .lfw-chip.is-cleared {
@@ -890,11 +890,11 @@
   color: #166534;
 }
 .lfw-chip.is-no_late_fee {
-  background: #f1efec;
+  background: var(--color-surface);
   color: #57534e;
 }
 .lfw-figures {
-  border-top: 1px solid #f0e6d8;
+  border-top: 1px solid var(--color-border);
   display: grid;
   gap: 8px;
   grid-template-columns: auto 1fr 1fr;
@@ -919,7 +919,7 @@
   margin: 18px 0 8px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #a56824;
+  color: var(--color-primary);
 }
 .lfw-fees {
   display: grid;
@@ -929,8 +929,8 @@
   padding: 0;
 }
 .lfw-fees > li {
-  background: #fbf8f3;
-  border: 1px solid #f0e6d8;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   display: grid;
   gap: 6px;
@@ -945,7 +945,7 @@
   gap: 8px;
 }
 .lfw-fee-head svg {
-  color: #a56824;
+  color: var(--color-primary);
 }
 .lfw-fee-head strong {
   flex: 1;
@@ -958,7 +958,7 @@
 .college-erp .lfw-fees .lfw-cancel,
 .lfw-fees .lfw-cancel {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #dfb4b4;
   border-radius: 8px;
   color: #a12f2f;
@@ -990,7 +990,7 @@
   background: #b42318;
   border: 1px solid #b42318;
   border-radius: 8px;
-  color: #fff;
+  color: var(--color-surface);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
@@ -999,7 +999,7 @@
 }
 .college-erp .lfw-confirm .lfw-danger:hover:not(:disabled) {
   background: #8f1c13;
-  color: #fff;
+  color: var(--color-surface);
 }
 .lfw-note {
   color: var(--fcw-muted);
@@ -1022,7 +1022,7 @@
 
 /* Receipt popup shown when a payment is saved */
 .fcw-print {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--fcw-line);
   border-radius: 14px;
   box-shadow: 0 24px 60px rgb(36 29 24 / 0.25);
@@ -1091,12 +1091,12 @@
 
 /* Payment overview drawn like the printed receipt (pdf_kit colours). */
 .rcp {
-  --rcp-ink: #251e18;
-  --rcp-muted: #6b6158;
-  --rcp-line: #e4d9c8;
-  --rcp-band: #f7f1e7;
-  --rcp-accent: #7a4a1c;
-  --rcp-soft: #f3e6d3;
+  --rcp-ink: var(--color-text-primary);
+  --rcp-muted: var(--color-text-secondary);
+  --rcp-line: var(--color-border);
+  --rcp-band: var(--color-primary-subtle);
+  --rcp-accent: var(--color-primary);
+  --rcp-soft: var(--color-primary-light);
   color: var(--rcp-ink);
   display: grid;
   gap: 14px;
@@ -1165,7 +1165,7 @@
   border-color: var(--rcp-accent);
 }
 .rcp-tiles > .is-dark :is(small, strong, em) {
-  color: #fff;
+  color: var(--color-surface);
 }
 .rcp-panels {
   display: grid;
@@ -1291,7 +1291,7 @@
     grid-template-columns: 1fr;
   }
 }
-/* The app styles every table header brown; the receipt table follows the printed receipt instead. */
+/* The app styles every table header blue; the receipt table follows the printed receipt instead. */
 .rcp .rcp-table.rcp-table > thead > tr,
 .rcp .rcp-table.rcp-table > thead > tr > th {
   background: var(--rcp-soft) !important;
@@ -1310,8 +1310,8 @@
   gap: 12px;
 }
 .ctd-heading {
-  border-bottom: 1px solid #eadccb;
-  color: #a56824;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-primary);
   font-size: 13px;
   letter-spacing: 0.04em;
   margin: 6px 0 0;
@@ -1319,7 +1319,7 @@
   text-transform: uppercase;
 }
 .ctd-muted {
-  color: #76695e;
+  color: var(--color-text-secondary);
   font-size: 13px;
   margin: 0;
 }
@@ -1331,14 +1331,14 @@
   padding: 0;
 }
 .ctd-timeline li {
-  border-left: 2px solid #eadccb;
+  border-left: 2px solid var(--color-border);
   display: grid;
   gap: 2px;
   padding: 0 0 12px 16px;
   position: relative;
 }
 .ctd-timeline li::before {
-  background: #a56824;
+  background: var(--color-primary);
   border-radius: 50%;
   content: "";
   height: 10px;
@@ -1354,11 +1354,11 @@
   font-size: 13px;
 }
 .ctd-timeline small {
-  color: #76695e;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .ctd-deposit {
-  border: 1px solid #eadccb;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   display: grid;
   gap: 8px;
@@ -1371,7 +1371,7 @@
   justify-content: space-between;
 }
 .ctd-deposit > small {
-  color: #76695e;
+  color: var(--color-text-secondary);
 }
 .ctd-slip img {
   border-radius: 10px;
@@ -1388,8 +1388,8 @@
 /* Collection analytics: the selected day / week / month / year. */
 .fca-period {
   align-items: center;
-  background: #fff;
-  border: 1px solid #eadccb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   display: inline-flex;
   flex-wrap: wrap;
@@ -1402,7 +1402,7 @@
   text-align: center;
 }
 .fca-period-pick :is(input, select) {
-  border: 1px solid #eadccb;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font: inherit;
   font-size: 13px;
@@ -1413,7 +1413,7 @@
 .fca-period-now {
   background: none;
   border: 0;
-  color: #a56824;
+  color: var(--color-primary);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;

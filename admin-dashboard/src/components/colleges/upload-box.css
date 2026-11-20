@@ -9,14 +9,14 @@
   height: 40px;
   padding: 0 0 0 11px;
   overflow: hidden;
-  border: 1px solid #e9dfcf;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   font-weight: normal;
 }
 .upl-box:focus-within {
-  border-color: #a46a27;
-  box-shadow: 0 0 0 3px #a46a2718;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 9.41%, transparent);
 }
 .upl-text {
   flex: 1;
@@ -24,7 +24,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #1f2a36;
+  color: var(--color-text-primary);
   font-size: 13px;
 }
 .upl-text.is-empty {
@@ -45,7 +45,7 @@
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
-  color: #1f2a36;
+  color: var(--color-text-primary);
   font-size: 13px;
 }
 /* `label.` beats the app-wide `.edu-connected label { display: grid }`. */
@@ -60,10 +60,10 @@
   height: auto;
   margin: 0;
   padding: 0 14px;
-  border-left: 1px solid #e9dfcf;
+  border-left: 1px solid var(--color-border);
   border-radius: 0;
   background: #f3f4f6;
-  color: #1f2a36;
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -76,7 +76,7 @@
 }
 .upl-icon {
   display: inline-flex;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .upl-btn input[type="file"] {
   position: absolute;
@@ -99,7 +99,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #6b7785;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 .upl-box .upl-remove:hover {

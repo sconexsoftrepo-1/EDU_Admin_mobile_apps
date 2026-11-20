@@ -6,6 +6,7 @@ import { useCollege } from "./CollegeStore";
 import { FormPhoneInput, isPhoneField } from "./CountryCodePicker";
 import UploadBox from "./UploadBox";
 import DateInput from "./DateInput";
+import WorkspaceEmptyState from "./WorkspaceEmptyState";
 export type OpsField = {
   key: string;
   label: string;
@@ -212,5 +213,5 @@ export function OpsMetrics({ items }: { items: [string, string | number][] }) {
   );
 }
 export function OpsEmpty({ children }: { children: ReactNode }) {
-  return <p className="ops-empty">{children}</p>;
+  return <WorkspaceEmptyState className="ops-empty">{children}</WorkspaceEmptyState>;
 }

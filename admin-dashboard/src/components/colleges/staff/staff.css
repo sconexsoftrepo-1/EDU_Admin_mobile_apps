@@ -67,11 +67,11 @@
 }
 .stf-id span {
   font-size: 11px;
-  color: #627383;
+  color: var(--color-text-secondary);
 }
 .stf-id strong {
   font-size: 18px;
-  color: #18344b;
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
 .stf-id small {
@@ -98,11 +98,11 @@
   grid-template-columns: minmax(160px, 1fr) minmax(0, 2fr) auto;
   align-items: center;
   gap: 10px;
-  border: 1px solid #d6dde4;
-  border-left: 3px solid #a77524;
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
   border-radius: 6px;
   padding: 8px 10px;
-  background: #fffdf9;
+  background: var(--color-primary-subtle);
 }
 .stf-docs li > span {
   font-weight: bold;
@@ -118,7 +118,7 @@
   background: #fbefed;
 }
 .stf-entry {
-  border: 1px solid #d6dde4;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 14px 14px;
   margin: 0 0 12px;
@@ -147,7 +147,7 @@
 .stf-salary th {
   text-align: left;
   font-size: 11px;
-  color: #627383;
+  color: var(--color-text-secondary);
   font-weight: normal;
   padding: 4px 6px;
 }
@@ -172,14 +172,14 @@
 }
 .stf-totals div {
   flex: 1 1 150px;
-  border: 1px solid #d6dde4;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 10px 14px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .stf-totals dt {
   font-size: 12px;
-  color: #627383;
+  color: var(--color-text-secondary);
 }
 .stf-totals dd {
   margin: 2px 0 0;
@@ -201,7 +201,7 @@
   font-weight: bold;
 }
 .stf-estimate small {
-  color: #627383;
+  color: var(--color-text-secondary);
   font-weight: normal;
 }
 
@@ -223,7 +223,7 @@
 }
 .edu-connected .stf-dir-heading p {
   margin: 0 0 3px;
-  color: #627383;
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 .edu-connected .stf-dir-heading h1 {
@@ -237,7 +237,7 @@
   width: 40px;
   min-height: 40px;
   padding: 0;
-  background: #fff;
+  background: var(--color-surface);
 }
 .stf-dir-bar {
   display: flex;
@@ -245,14 +245,14 @@
   gap: 12px;
   flex-wrap: wrap;
   padding: 14px 16px;
-  border: 1px solid #d6dde4;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .stf-dir-bar p {
   flex: 0 0 auto;
   margin: 0 auto 0 0;
-  color: #627383;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .edu-connected label.stf-search {
@@ -260,11 +260,11 @@
   align-items: center;
   gap: 6px;
   height: 32px;
-  border: 1px solid #a46a27;
+  border: 1px solid var(--color-primary);
   border-radius: 6px;
   padding: 0 10px;
-  background: #fff;
-  color: #a46a27;
+  background: var(--color-surface);
+  color: var(--color-primary);
   flex: 0 1 260px;
   width: min(260px, 100%);
   max-width: 260px;
@@ -296,14 +296,14 @@
 .edu-connected .stf-directory-actions .stf-directory-add {
   gap: 8px;
   padding: 0 14px;
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%);
   border: 0;
-  color: #fff;
-  box-shadow: 0 1px 2px #5a361333;
+  color: var(--color-surface);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-primary-hover) 20%, transparent);
 }
 .edu-connected .stf-directory-actions .stf-directory-add:hover {
-  background: linear-gradient(135deg, #a46a27 0%, #8a5520 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%);
+  color: var(--color-surface);
   filter: brightness(0.94);
 }
 .edu-connected .stf-search input,
@@ -320,13 +320,13 @@
   box-shadow: none;
 }
 .edu-connected label.stf-search:focus-within {
-  border-color: #8a5520;
-  box-shadow: 0 0 0 3px #a46a2726;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14.9%, transparent);
 }
 .stf-card {
   overflow: hidden;
-  background: #fff;
-  border: 1px solid #d6dde4;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
 }
 .stf-card .stf-dir-bar {
@@ -338,7 +338,7 @@
 }
 .stf-table-wrap {
   overflow-x: auto;
-  background: #fff;
+  background: var(--color-surface);
 }
 .stf-dir > .edu-error {
   margin: 12px 0;
@@ -355,7 +355,7 @@
 .stf-code {
   font-size: 12px;
   font-weight: bold;
-  color: #18344b;
+  color: var(--color-text-primary);
   background: #eef2f6;
   border-radius: 4px;
   padding: 2px 6px;
@@ -364,8 +364,8 @@
   font-size: 12px;
   border-radius: 999px;
   padding: 2px 9px;
-  background: #fff4e0;
-  color: #7a5414;
+  background: var(--color-primary-subtle);
+  color: var(--color-primary-hover);
 }
 .stf-docs-badge.done {
   background: #e7f3ea;
@@ -374,7 +374,7 @@
 .stf-empty {
   margin: 0;
   padding: 18px;
-  color: #627383;
+  color: var(--color-text-secondary);
 }
 @media (max-width: 760px) {
   .stf-dir-bar {
@@ -419,7 +419,7 @@
 /* Appointment letters (offer / acceptance / joining). */
 .stf-letters-note {
   margin: -4px 0 12px;
-  color: #756b60;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 .stf-letter-grid {
@@ -431,24 +431,24 @@
   display: grid;
   gap: 8px;
   align-content: start;
-  border: 1px solid #e9dfcf;
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 14px;
-  background: linear-gradient(180deg, #fcf9f3, #fff);
+  background: linear-gradient(180deg, var(--color-surface), var(--color-surface));
 }
 .stf-letter header {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  color: #7a4a1c;
+  color: var(--color-primary-hover);
 }
 .stf-letter header strong {
-  color: #251e18;
+  color: var(--color-text-primary);
 }
 .stf-letter p {
   margin: 0;
-  color: #756b60;
+  color: var(--color-text-secondary);
   font-size: 12.5px;
 }
 .stf-letter-signed {
@@ -467,13 +467,13 @@
   align-items: center;
   gap: 6px;
   justify-self: start;
-  border: 1px dashed #dcc29d;
+  border: 1px dashed var(--color-border-strong);
   border-radius: 10px;
   padding: 6px 10px;
   font-size: 12.5px;
-  color: #7a4a1c;
+  color: var(--color-primary-hover);
   cursor: pointer;
-  background: #fff;
+  background: var(--color-surface);
 }
 .stf-letter label.stf-letter-upload {
   display: inline-flex;

@@ -11,14 +11,14 @@
   padding: 0 12px;
   border: 1px solid #d9dfe5;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-surface);
   color: #718092;
   box-shadow: none;
   flex: 0 1 360px;
 }
 .edu-search-field:focus-within {
-  border-color: #a46a27;
-  outline: 2px solid #a46a271a;
+  border-color: var(--color-primary);
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 10.2%, transparent);
   outline-offset: 1px;
 }
 .edu-search-field > svg {
@@ -70,7 +70,7 @@
   background: #f1f4f6;
 }
 .edu-search-clear:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid var(--color-primary);
 }
 .edu-search-suggestions {
   position: fixed;
@@ -79,7 +79,7 @@
   padding: 5px;
   border: 1px solid #d9dfe5;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-surface);
   color: #263747;
   box-shadow: 0 8px 24px #172a3b1a;
   overflow-y: auto;
@@ -118,7 +118,7 @@
   flex: 1 1 300px;
   max-width: 560px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .edu-filter-search.edu-search-field,
 .cc-search.edu-search-field {

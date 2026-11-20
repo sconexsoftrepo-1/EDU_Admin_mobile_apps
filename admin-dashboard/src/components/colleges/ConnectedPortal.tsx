@@ -312,6 +312,7 @@ export default function ConnectedPortal({
   const [signInRoles, setSignInRoles] = useState<SignInRole[]>([]),
     [signInRole, setSignInRole] = useState(""),
     [signingIn, setSigningIn] = useState(false);
+  const [signInVerified, setSignInVerified] = useState(false);
   const [configuration, setConfiguration] = useState<{
     kind: "role" | "form" | "account";
     initial?: Row;
@@ -669,6 +670,10 @@ export default function ConnectedPortal({
         code,
         ...(signInRole ? { role_code: signInRole } : {}),
       });
+      // Confirm the successful API verification before transitioning to the workspace.
+      setSignInVerified(true);
+      await new Promise((resolve) => setTimeout(resolve,
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 250 : 700));
       await start(
         signedIn.roles
           ? { account: signedIn.account, roles: signedIn.roles }
@@ -689,6 +694,7 @@ export default function ConnectedPortal({
       );
       setBusy(false);
     } finally {
+      setSignInVerified(false);
       setSigningIn(false);
     }
   }
@@ -1022,6 +1028,8 @@ export default function ConnectedPortal({
         roles={signInRoles}
         role={signInRole}
         signingIn={signingIn}
+        verified={signInVerified}
+        onCodeEdit={() => setError("")}
         error={error}
         onSubmit={login}
         onRequestCode={requestSignInCode}

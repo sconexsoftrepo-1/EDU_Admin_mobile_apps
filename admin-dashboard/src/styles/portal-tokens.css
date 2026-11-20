@@ -1,0 +1,36 @@
+/* Pragathi campus design system. Existing module aliases resolve to these tokens. */
+:root {
+  --color-primary: #2454d6;
+  --color-primary-hover: #1c46b8;
+  --color-primary-dark: #153a70;
+  --color-accent: #3478f6;
+  --color-primary-light: #dceaff;
+  --color-primary-subtle: #eff5ff;
+  --color-background: #f5f8fd;
+  --color-surface: #ffffff;
+  --color-text-primary: #17263d;
+  /* Slightly darker than the guide's #687992 to meet AA for small body text. */
+  --color-text-secondary: #62738c;
+  --color-border: #dfe7f2;
+  --color-border-strong: #bdcce1;
+  --color-success: #159a68;
+  --color-warning: #d58a13;
+  --color-danger: #dc4555;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-card: 0 3px 14px rgb(21 58 112 / 4.5%);
+  --shadow-hover: 0 8px 24px rgb(21 58 112 / 9%);
+  --transition-fast: 150ms ease;
+  --transition-normal: 220ms ease;
+  --portal-font: "Manrope", "DM Sans", Arial, sans-serif;
+  /* AnalyticsParts is also used outside .anw, e.g. payment summaries. */
+  --anw-ink: var(--color-text-primary);
+  --anw-muted: var(--color-text-secondary);
+  --anw-line: var(--color-border);
+  --anw-amber: var(--color-primary);
+  --anw-gold: var(--color-accent);
+  --anw-soft: var(--color-primary-subtle);
+  --anw-tint: var(--color-primary-light);
+}

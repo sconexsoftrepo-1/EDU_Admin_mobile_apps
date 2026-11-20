@@ -21,11 +21,11 @@ export type EnrollmentForm = {
   signatures: string[];
 };
 
-const ACCENT: [number, number, number] = [165, 104, 36];
-const BAND: [number, number, number] = [246, 230, 206];
-const INK: [number, number, number] = [36, 29, 24];
-const MUTED: [number, number, number] = [118, 105, 94];
-const LINE: [number, number, number] = [226, 214, 198];
+const ACCENT: [number, number, number] = [29, 78, 216];
+const BAND: [number, number, number] = [219, 234, 254];
+const INK: [number, number, number] = [23, 27, 35];
+const MUTED: [number, number, number] = [75, 85, 99];
+const LINE: [number, number, number] = [226, 232, 240];
 const clean = (value: string) =>
   String(value ?? "")
     .replaceAll("₹", "Rs. ")
@@ -148,13 +148,13 @@ export async function enrollmentPdf(name: string, form: EnrollmentForm) {
       const columns = section.columns || [];
       head = [
         band(section.title, columns.length),
-        columns.map((c) => ({ content: clean(c), styles: { fillColor: [251, 248, 243] as [number, number, number], textColor: MUTED, fontSize: 7, fontStyle: "bold" as const } })),
+        columns.map((c) => ({ content: clean(c), styles: { fillColor: [239, 246, 255] as [number, number, number], textColor: MUTED, fontSize: 7, fontStyle: "bold" as const } })),
       ];
       body = (section.rows || []).map((row) => {
         const total = /^(Gross fee|Net payable)$/.test(row[0]);
         return row.map((cell) => ({
           content: clean(cell),
-          styles: total ? { fontStyle: "bold" as const, fillColor: [246, 230, 206] as [number, number, number] } : {},
+          styles: total ? { fontStyle: "bold" as const, fillColor: [219, 234, 254] as [number, number, number] } : {},
         }));
       });
       if (/fee breakdown/i.test(section.title)) columnStyles = { [columns.length - 1]: { halign: "right" } };

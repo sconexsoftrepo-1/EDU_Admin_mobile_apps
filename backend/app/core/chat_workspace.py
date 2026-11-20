@@ -121,10 +121,22 @@ def account_role(data, account):
     return "staff"
 
 
+def role_label(data, account):
+    """Display current assigned role names, independently of chat permission categories."""
+    names = []
+    for code in account.get("role_codes", []):
+        role = data.get("roles", {}).get(code, {})
+        name = str(role.get("name") or "").strip()
+        if name and role.get("active", True) and name not in names:
+            names.append(name)
+    return ", ".join(names)
+
+
 def describe(data, account, viewer_students=None):
     """Second line under a name: subjects taught, a student's class, or a parent's children."""
     kind = account.get("person_type")
     person = account_person(data, account)
+    assigned = role_label(data, account)
     if kind == "employee":
         teachers = employee_teacher_codes(data, person.get("code"))
         offerings = [o for o in aw.rows(data, "subject_offerings") if o.get("teacher_code") in teachers]
@@ -133,19 +145,20 @@ def describe(data, account, viewer_students=None):
             offerings = [o for o in offerings if o.get("section_code") in sections] or offerings
         subjects = sorted({data["records"].get("subjects", {}).get(o["subject_code"], {}).get("name", o["subject_code"])
                            for o in offerings})
-        title = person.get("designation") or ("Teacher" if subjects else "Staff")
+        title = assigned or person.get("designation") or ("Teacher" if subjects else "Staff")
         return f"{title} · {', '.join(subjects[:3])}" if subjects else title
     if kind == "student":
         place = student_place(data, person.get("code"))
         roll = roll_number(data, person.get("code"))
         bits = [person.get("admission_number"), roll and f"Roll {roll}", place.get("course_name"),
                 place.get("section_name") and f"Section {place['section_name']}"]
-        return "Student · " + " · ".join(b for b in bits if b)
+        return (assigned or "Student") + " · " + " · ".join(b for b in bits if b)
     if kind == "parent":
         kids = [data["records"].get("students", {}).get(s, {}) for s in sorted(children(data, person.get("code")))]
         names = ", ".join(" ".join(aw.name(k).split()) for k in kids if k)
-        return f"Parent of {names}" if names else "Parent"
-    return "Administrator"
+        relationship = f"Parent of {names}" if names else "Parent"
+        return f"{assigned} · {relationship}" if assigned and assigned != "Parent" else relationship
+    return assigned or "User"
 
 
 def roll_number(data, student_code):
@@ -155,6 +168,7 @@ def roll_number(data, student_code):
 
 def contact(data, account, viewer_students=None):
     return {"code": account["code"], "name": display_name(data, account), "role": account_role(data, account),
+            "role_label": role_label(data, account),
             "detail": describe(data, account, viewer_students)}
 
 
@@ -219,14 +233,17 @@ def conversation(data, user, thread, mine=None, messages=None):
     if kind == "direct":
         other = others[0] if others else {}
         title, subtitle, role = display_name(data, other), describe(data, other) if other.get("person_type") else "", account_role(data, other)
+        assigned = role_label(data, other)
     else:
         title = thread.get("title") or thread.get("subject") or "Group"
         subtitle = thread.get("description") or f"{len(everyone)} members"
         role = "group"
+        assigned = ""
     last_sender = ""
     if last and kind == "group":
         last_sender = "You" if last.get("sender_code") == user["code"] else display_name(data, accounts.get(last.get("sender_code"), {})).split(" ")[0]
     return {"code": thread["code"], "kind": kind, "title": title, "subtitle": subtitle, "role": role,
+            "role_label": assigned,
             "subject": thread.get("subject") if kind == "direct" and thread.get("subject") not in {None, "", "Chat"} else None,
             "members": len(everyone), "can_post": can_post(data, user, thread),
             "last_message": preview(last) if last else "", "last_sender": last_sender,
@@ -297,6 +314,7 @@ def message_view(data, user, message, everyone):
     return {"code": message["code"], "body": message.get("body") or "", "kind": message.get("kind") or "text",
             "sent_at": message.get("sent_at"), "mine": mine, "sender_code": message.get("sender_code"),
             "sender_name": "You" if mine else display_name(data, sender), "sender_role": account_role(data, sender),
+            "sender_role_label": role_label(data, sender),
             "attachment": attachment, "client_id": message.get("client_id"),
             "status": ("read" if others and read_by >= len(others) else "delivered") if mine else None,
             "read_by": read_by if mine else None}

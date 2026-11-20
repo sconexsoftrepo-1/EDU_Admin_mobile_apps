@@ -8,6 +8,7 @@ export interface Conversation {
   title: string;
   subtitle: string;
   role: string;
+  role_label?: string;
   members: number;
   can_post: boolean;
   last_message: string;
@@ -35,6 +36,7 @@ export interface ChatMessage {
   sender_code: string;
   sender_name: string;
   sender_role: string;
+  sender_role_label?: string;
   attachment: Attachment | null;
   client_id?: string | null;
   status?: "delivered" | "read" | null;
@@ -48,6 +50,7 @@ export interface Contact {
   code: string;
   name: string;
   role: string;
+  role_label?: string;
   detail: string;
   admission_number?: string | null;
   parents?: {

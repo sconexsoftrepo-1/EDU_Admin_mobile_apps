@@ -8,11 +8,11 @@ dialog.edu-record-drawer {
   height: 100dvh;
   max-height: 100dvh;
   border: 0;
-  border-left: 1px solid #e7ddce;
+  border-left: 1px solid var(--color-border);
   border-radius: var(--edu-drawer-radius);
-  background: #fcfaf6;
-  color: #30251c;
-  box-shadow: -24px 0 80px #21160c30;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: -24px 0 80px color-mix(in srgb, var(--color-text-primary) 18.82%, transparent);
   overflow: hidden;
 }
 dialog.edu-record-drawer-expanded {
@@ -24,7 +24,7 @@ dialog.edu-record-drawer[open] {
   animation: edu-drawer-enter 0.24s ease-out;
 }
 .edu-record-drawer::backdrop {
-  background: #211a1359;
+  background: color-mix(in srgb, var(--color-text-primary) 34.9%, transparent);
   backdrop-filter: blur(3px);
 }
 .edu-record-drawer-header {
@@ -33,8 +33,8 @@ dialog.edu-record-drawer[open] {
   justify-content: space-between;
   gap: 20px;
   padding: 22px 24px 18px;
-  background: #fff;
-  border-bottom: 1px solid #e9dfcf;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 .edu-record-drawer-header h2 {
@@ -47,7 +47,7 @@ dialog.edu-record-drawer[open] {
 .edu-record-drawer-header p {
   margin: 7px 0 0;
   font-size: 13px;
-  color: #7d6b54;
+  color: var(--color-text-secondary);
 }
 .edu-record-drawer-actions {
   display: flex;
@@ -60,17 +60,17 @@ dialog.edu-record-drawer[open] {
   justify-content: center;
   gap: 7px;
   min-height: 36px;
-  border: 1px solid #e5dac8;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 8px 11px;
-  background: #fff;
-  color: #62513c;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   font: inherit;
   font-size: 12px;
   cursor: pointer;
 }
 .edu-record-drawer button:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 .edu-record-drawer button:disabled {
@@ -98,8 +98,8 @@ dialog.edu-record-drawer[open] {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: #f3eadb;
-  color: #a46a27;
+  background: var(--color-border);
+  color: var(--color-primary);
 }
 .edu-student-summary strong {
   font-size: 16px;
@@ -107,7 +107,7 @@ dialog.edu-record-drawer[open] {
 .edu-student-summary p {
   margin: 5px 0 0;
   font-size: 13px;
-  color: #7d6b54;
+  color: var(--color-text-secondary);
 }
 .edu-student-status {
   margin-left: auto;
@@ -130,7 +130,7 @@ dialog.edu-record-drawer[open] {
   padding: 0;
   margin: 0 0 20px;
   border: 0;
-  border-bottom: 1px solid #e8dece;
+  border-bottom: 1px solid var(--color-border);
   border-radius: 0;
   background: transparent;
 }
@@ -144,7 +144,7 @@ dialog.edu-record-drawer[open] {
   border: 0;
   border-bottom: 2px solid transparent;
   border-radius: 0;
-  color: #756957;
+  color: var(--color-text-secondary);
   background: transparent;
   box-shadow: none;
   font-weight: 500;
@@ -161,23 +161,23 @@ dialog.edu-record-drawer[open] {
   .edu-record-drawer
   .edu-detail-tabs
   button:is(:hover, :focus-visible):not(:disabled) {
-  color: #81511b;
-  background: #faf5ed;
-  border-bottom-color: #d7c3a5;
+  color: var(--color-primary-hover);
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border-strong);
 }
 .edu-record-drawer .edu-detail-tabs button[aria-current="page"],
 .edu-connected
   .edu-record-drawer
   .edu-detail-tabs
   button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled) {
-  color: #81511b;
+  color: var(--color-primary-hover);
   background: transparent;
-  border-bottom-color: #a46a27;
+  border-bottom-color: var(--color-primary);
   box-shadow: none;
   font-weight: 600;
 }
 .edu-record-drawer .edu-detail-tabs button:focus-visible {
-  outline: 2px solid #a46a27;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 @media (max-width: 680px) {
@@ -200,9 +200,9 @@ dialog.edu-record-drawer[open] {
 .edu-person-files {
   padding: 22px;
   margin: 0 0 20px;
-  border: 1px solid #e9dfcf;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .edu-student-section > h3,
 .edu-detail-section-heading h3 {
@@ -213,7 +213,7 @@ dialog.edu-record-drawer[open] {
 }
 .edu-student-section > h3 {
   padding-bottom: 16px;
-  border-bottom: 1px solid #eee6da;
+  border-bottom: 1px solid var(--color-border);
 }
 .edu-student-values {
   display: grid;
@@ -223,7 +223,7 @@ dialog.edu-record-drawer[open] {
 }
 .edu-student-values dt {
   font-size: 12px;
-  color: #7d6b54;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   margin-bottom: 5px;
 }
@@ -240,7 +240,7 @@ dialog.edu-record-drawer[open] {
 .edu-student-values .edu-student-values {
   margin-top: 8px;
   padding: 14px 18px;
-  background: #fcfaf6;
+  background: var(--color-surface);
   border-radius: 8px;
 }
 .edu-value-entry + .edu-value-entry {
@@ -254,7 +254,7 @@ dialog.edu-record-drawer[open] {
 }
 .edu-detail-section-heading p,
 .edu-detail-empty {
-  color: #7d6b54;
+  color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -271,7 +271,7 @@ dialog.edu-record-drawer[open] {
   align-items: center;
   gap: 14px;
   padding: 16px 0;
-  border-top: 1px solid #eee6da;
+  border-top: 1px solid var(--color-border);
 }
 .edu-file-type {
   display: grid;
@@ -279,8 +279,8 @@ dialog.edu-record-drawer[open] {
   width: 44px;
   height: 48px;
   border-radius: 8px;
-  background: #f7f2e8;
-  color: #a46a27;
+  background: var(--color-surface);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 .edu-file-description {
@@ -297,7 +297,7 @@ dialog.edu-record-drawer[open] {
   display: block;
   margin-top: 5px;
   font-size: 12px;
-  color: #7d6b54;
+  color: var(--color-text-secondary);
   overflow-wrap: anywhere;
 }
 .edu-file-actions {
@@ -310,26 +310,26 @@ dialog.edu-record-drawer[open] {
   gap: 14px;
   margin-top: 20px;
   padding: 18px;
-  background: #fcfaf6;
-  border: 1px dashed #d4c2a9;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
   border-radius: 8px;
 }
 .edu-file-upload-form label {
   display: grid;
   gap: 7px;
   font-size: 12px;
-  color: #62513c;
+  color: var(--color-text-primary);
 }
 .edu-file-upload-form :is(input:not([type="file"]), select) {
   width: 100%;
   padding: 11px 12px;
-  border: 1px solid #dfd4c4;
+  border: 1px solid var(--color-border-strong);
   border-radius: 7px;
-  background: #fff;
-  color: #30251c;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 .edu-file-upload-form small {
-  color: #7d6b54;
+  color: var(--color-text-secondary);
 }
 .edu-image-controls {
   display: flex;
@@ -342,8 +342,8 @@ dialog.edu-record-drawer[open] {
 .edu-image-viewer {
   overflow: auto;
   padding: 20px;
-  background: #f0ece6;
-  border: 1px solid #e5dac8;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   min-height: 55dvh;
 }
@@ -437,10 +437,10 @@ dialog.edu-record-drawer[open] {
 }
 .edu-file-preview {
   min-width: 0;
-  border: 1px solid #e1d4c2;
+  border: 1px solid var(--color-border-strong);
   border-radius: 10px;
   padding: 14px;
-  background: #fcfaf6;
+  background: var(--color-surface);
   outline: none;
   scroll-margin: 16px;
 }
@@ -459,7 +459,7 @@ dialog.edu-record-drawer[open] {
 .edu-file-preview-header small {
   display: block;
   margin-top: 4px;
-  color: #7d6b54;
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 .edu-file-preview-header > div:last-child {
@@ -477,10 +477,10 @@ dialog.edu-record-drawer[open] {
   font-size: 11px;
 }
 .edu-file-preview-header .edu-file-original {
-  border: 1px solid #e5dac8;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #fff;
-  color: #62513c;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   text-decoration: none;
 }
 .edu-file-preview-header > div:last-child {
@@ -571,14 +571,14 @@ dialog.edu-record-drawer[open] {
 /* Keep selected and unselected detail-tab hover labels readable. */
 .edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled),
 .edu-connected .edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background: #6b441b;
-  border-bottom-color: #6b441b;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
+  border-bottom-color: var(--color-primary-hover);
 }
 .edu-record-drawer .edu-detail-tabs button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled),
 .edu-connected .edu-record-drawer .edu-detail-tabs button[aria-current="page"]:is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background: #4a2e12;
-  border-bottom-color: #4a2e12;
+  color: var(--color-surface);
+  background: var(--color-primary-hover);
+  border-bottom-color: var(--color-primary-hover);
 }
 .edu-record-drawer .edu-detail-tabs button:is(:hover, :focus-visible):not(:disabled) :is(span, small, svg) { color: inherit; }

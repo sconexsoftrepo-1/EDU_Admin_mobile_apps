@@ -1,0 +1,336 @@
+/* Shared portal composition. Module styles retain their existing responsive layouts. */
+.college-erp,
+.edu-connected,
+.college-login.campus-auth {
+  font-family: var(--portal-font);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+.college-erp {
+  --erp-bg: var(--color-background);
+  --erp-surface: var(--color-surface);
+  --erp-raised: var(--color-primary-subtle);
+  --erp-ink: var(--color-text-primary);
+  --erp-muted: var(--color-text-secondary);
+  --erp-border: var(--color-border);
+  --erp-accent: var(--color-primary);
+  --erp-blue: var(--color-primary);
+  --erp-navy: var(--color-primary-dark);
+  --erp-sidebar: var(--color-primary-dark);
+  --erp-danger: var(--color-danger);
+  font-size: 14px;
+  background: var(--color-background);
+}
+.college-erp .erp-content {
+  padding: 20px 24px 32px;
+}
+.college-erp :is(.erp-page-heading, .edu-heading, .fcw-head, .as-header, .mhub-header) h1 {
+  font-family: var(--portal-font);
+  font-size: clamp(24px, 2.1vw, 28px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.25;
+}
+.college-erp :is(.erp-page-heading, .edu-heading, .fcw-head, .as-header, .mhub-header) p {
+  max-width: 90ch;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* Institution navigation: quiet blue depth, compact rhythm, identifiable active route. */
+.college-erp .erp-sidebar {
+  background-color: var(--color-primary-dark);
+  background-image: linear-gradient(145deg, transparent 62%, rgb(52 120 246 / 15%) 62%, transparent 90%);
+  border-color: rgb(255 255 255 / 14%);
+  box-shadow: 0 6px 20px rgb(21 58 112 / 10%);
+}
+.college-erp .erp-sidebar-brand {
+  min-height: 78px;
+  padding: 20px 16px 16px;
+  gap: 10px;
+}
+.college-erp .erp-sidebar-brand strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.college-erp .erp-sidebar-label {
+  margin: 2px 20px 12px;
+  color: var(--color-primary-light);
+  font-size: 11px;
+}
+.college-erp .erp-sidebar .erp-hub-navigation > a,
+.college-erp .erp-sidebar .erp-nav-group :is(summary, a) {
+  min-height: 38px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+  gap: 10px;
+}
+.college-erp .erp-sidebar .erp-hub-navigation > a > span {
+  font-size: inherit;
+  font-weight: inherit;
+}
+.college-erp .erp-sidebar :is(.erp-hub-navigation > a, .erp-nav-group a, .erp-nav-group summary) > svg {
+  width: 18px;
+  height: 18px;
+  color: #bed7ff;
+  stroke-width: 1.8;
+}
+.college-erp .erp-sidebar :is(.erp-hub-navigation > a, .erp-nav-group a):is(.active, [aria-current="page"]) {
+  background: var(--color-primary-light);
+  color: #111827;
+  box-shadow: inset 3px 0 var(--color-accent);
+  font-weight: 750;
+}
+.college-erp .erp-sidebar :is(.erp-hub-navigation > a, .erp-nav-group a):is(.active, [aria-current="page"]) :is(svg, span) {
+  color: #111827;
+}
+.college-erp .erp-sidebar :is(.erp-hub-navigation > a, .erp-nav-group a):hover:not(.active) {
+  background: rgb(255 255 255 / 10%);
+}
+.college-erp .erp-campus-card {
+  padding: 10px 12px;
+  background: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 14%);
+}
+.college-erp .erp-sidebar-foot {
+  padding: 12px 16px;
+  background: rgb(0 0 0 / 7%);
+}
+.college-erp .erp-sidebar .erp-sidebar-foot :is(button, a) {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* The header is a continuous navigation strip, with no heavy blur or floating shadow. */
+.college-erp .erp-topbar {
+  height: 68px;
+  margin: 0;
+  top: 0;
+  padding: 0 24px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-surface);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  gap: 14px;
+}
+.college-erp .erp-topbar-breadcrumb {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.college-erp .erp-global-search {
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-background);
+  box-shadow: none;
+}
+.college-erp .erp-global-search input {
+  font-size: 12px;
+}
+.college-erp .erp-header-actions summary {
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  min-height: 38px;
+}
+.college-erp .erp-header-actions summary:hover {
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+.college-erp .erp-profile-menu summary {
+  border: 0;
+  background: transparent;
+}
+.college-erp .erp-profile-menu summary strong { font-size: 12px; }
+.college-erp .erp-profile-menu summary small { font-size: 11px; }
+.college-erp .erp-avatar { background: var(--color-primary); width: 34px; height: 34px; }
+
+/* Shared surfaces extend across admissions, academics, HR, operations and finance. */
+.college-erp :is(.dov-card, .dov-kpi, .anw-panel, .anw-stat, .mhub-metric, .mhub-section, .edu-card, .stf-card, .fcw-card, .as-card, .erp-panel) {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.college-erp :is(a.dov-kpi, .mhub-link) {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+@media (hover: hover) {
+  .college-erp :is(a.dov-kpi, .mhub-link):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--color-border-strong);
+  }
+}
+.college-erp :is(.anw-stat, .mhub-metric) {
+  min-height: 86px;
+  padding: 14px 16px;
+  gap: 12px;
+}
+.college-erp :is(.anw-stat-icon, .mhub-metric-icon) {
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+  border-radius: 12px;
+  flex-basis: 42px;
+  height: 42px;
+}
+.college-erp .anw-stat-text strong {
+  color: var(--color-text-primary);
+  font-size: 26px;
+  font-weight: 750;
+  line-height: 1.2;
+}
+.college-erp .anw-stat.is-warn { border-color: #f3d69f; }
+.college-erp .anw-stat.is-warn .anw-stat-icon { color: #955e00; background: #fff7e7; }
+.college-erp :is(.erp-empty, .ops-empty, .anw-empty) {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  min-height: 132px;
+  padding: 24px 18px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+.college-erp :is(.erp-empty, .ops-empty, .anw-empty) > svg { color: var(--color-accent); }
+.college-erp :is(.mhub-header, .mhub-link) { background: var(--color-surface); }
+.college-erp .mhub-link::before { opacity: .22; }
+.college-erp .mhub-header { padding: 20px; border-radius: var(--radius-lg); }
+.college-erp .as-cert-preview {
+  color: var(--color-text-primary);
+  border-color: var(--color-primary-light);
+  background: var(--color-primary-subtle);
+}
+
+/* One control hierarchy across every existing workspace. */
+.college-erp :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  border-color: var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-primary);
+}
+.college-erp :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.college-erp :is(.fcw-primary, .as-primary, .anw-primary, .rpa-export, .mhub-open) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.college-erp :is(.fcw-primary, .as-primary, .anw-primary, .rpa-export, .mhub-open):hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: #fff;
+}
+.college-erp :is(.fcw-tabs, .fcw-chips, .crs-tabs, .edu-tabs) button {
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  min-height: 38px;
+  padding-inline: 12px;
+}
+.college-erp :is(.fcw-tabs, .fcw-chips, .crs-tabs, .edu-tabs) button:is([aria-selected="true"], [aria-pressed="true"]) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+  color: #fff;
+}
+.college-erp :is(.fcw-tabs, .fcw-chips, .crs-tabs, .edu-tabs) button:is([aria-selected="true"], [aria-pressed="true"]):hover {
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+
+/* Finance: frame summaries and compact the toolbar instead of filling space with content. */
+.college-erp .fcw { gap: 18px; }
+.college-erp .fcw-head { gap: 12px 24px; align-items: center; }
+.college-erp .fcw-head > div:first-child { flex: 1 1 320px; }
+.college-erp .fcw-head p { max-width: 82ch; }
+.college-erp .fcw-filters {
+  padding: 12px;
+  gap: 12px;
+  align-items: flex-end;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.college-erp .fcw-filters .fcw-chips { gap: 4px; }
+.college-erp .fcw-filters .anw-filter { flex: 0 1 140px; }
+.college-erp .fcw-filters .fcw-search { flex: 1 1 220px; min-height: 40px; }
+.college-erp .fcw-filters input { min-height: 40px; }
+.college-erp .fcw-stats { gap: 12px; }
+.college-erp .fcw .anw-panel { padding: 16px; }
+.college-erp .fcw .anw-panel > header { margin-bottom: 12px; }
+.college-erp .fcw .anw-panel > header h3 { font-size: 16px; font-weight: 700; }
+.college-erp .fcw .anw-table table { min-width: 860px; }
+.college-erp .fcw .anw-table td:is(:first-child, :nth-child(2), :nth-last-child(2)) { white-space: nowrap; }
+.college-erp :is(.fcw-row-actions, .edu-row-actions, .erp-row-actions) { gap: 6px; }
+
+/* Modal surfaces are native dialogs and keep their existing focus and dismissal behaviour. */
+:is(.edu-record-drawer, .erp-api-drawer, .erp-modal, .enw-panel) {
+  color: var(--color-text-primary);
+  font-family: var(--portal-font);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+.edu-record-drawer .edu-record-drawer-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.edu-record-drawer .edu-record-drawer-header h2 {
+  font: 700 20px/1.3 var(--portal-font);
+  letter-spacing: -.025em;
+}
+
+@media (min-width: 1024px) {
+  .college-erp .erp-sidebar, .college-erp.erp-rail-expanded .erp-sidebar {
+    inset: 12px auto 12px 12px;
+    width: 236px;
+    max-height: calc(100dvh - 24px);
+    border-radius: var(--radius-xl);
+  }
+  .college-erp .erp-workspace, .college-erp.erp-rail-expanded .erp-workspace { margin-left: 260px; }
+  .college-erp.erp-compact .erp-sidebar { width: 72px; }
+  .college-erp.erp-compact .erp-workspace { margin-left: 96px; }
+}
+@media (max-width: 760px) {
+  .college-erp .erp-topbar { height: 58px; padding: 0 12px; gap: 8px; }
+  .college-erp .erp-content { padding: 16px 12px 24px; }
+  .college-erp .fcw-head { align-items: flex-start; }
+  .college-erp .fcw-tabs { width: 100%; }
+  .college-erp .fcw-filters > :is(.fcw-chips, .fcw-search) { flex-basis: 100%; }
+  .college-erp .fcw-filters .anw-filter { flex: 1 1 100px; }
+  .college-erp .fcw-stats { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 650px) {
+  .college-erp .erp-workspace, .college-erp.erp-compact .erp-workspace, .college-erp.erp-rail-expanded .erp-workspace { margin-left: 0; }
+  .college-erp .erp-content { padding-inline: 12px; }
+  .college-erp .erp-profile-menu summary { padding: 0; }
+  .college-erp .erp-topbar-breadcrumb { flex: 0 0 auto; max-width: 66px; min-width: 0; overflow: hidden; }
+  .college-erp .erp-topbar-breadcrumb > :not(:first-child) { display: none; }
+  .college-erp .erp-global-search { flex: 1; min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .college-erp *, .college-erp *::before, .college-erp *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media print {
+  .college-erp { background: #fff; }
+  .college-erp .erp-workspace, .college-erp.erp-compact .erp-workspace { margin-left: 0; }
+  .college-erp :is(.dov-card, .anw-panel, .anw-stat, .fcw-card) { box-shadow: none; }
+}
