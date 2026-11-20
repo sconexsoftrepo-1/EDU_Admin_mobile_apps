@@ -48,6 +48,10 @@ export type PaymentRow = {
   course_level_code?: string | null;
   recorded_at?: string | null;
   edited_at?: string | null;
+  /** Deleted (with the admin's approval): kept for the record, left out of every total. */
+  deleted?: boolean;
+  deleted_at?: string | null;
+  delete_reason?: string | null;
 };
 /** PATCH finance/fee-payments/{code}: correction to a manual payment. */
 export type PaymentEdit = {
@@ -207,6 +211,13 @@ export const feePaymentsApi = {
     return apiRequest<{ pending_approval?: boolean; edit_request_code?: string; unchanged?: boolean }>(
       `finance/fee-payments/${encodeURIComponent(code)}`,
       { method: "PATCH", body },
+    );
+  },
+  /** Delete a manual payment. Admin: done at once. Other roles: 202 with pending_approval until the admin decides. */
+  remove(code: string, reason: string) {
+    return apiRequest<{ pending_approval?: boolean; edit_request_code?: string; deleted_at?: string }>(
+      `finance/fee-payments/${encodeURIComponent(code)}/delete`,
+      { method: "POST", body: { reason } },
     );
   },
   analytics(query: Record<string, string | undefined>) {

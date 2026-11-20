@@ -372,6 +372,44 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
         return dict(payment)
 
 
+class PaymentDeleteInput(StrictModel):
+    reason: str = Field(min_length=8, max_length=500)
+
+
+@router.post("/{code}/delete")
+def delete_payment(code: str, body: PaymentDeleteInput, request: Request, user=Depends(current_user)):
+    """Delete a fee payment (manual screen or Payments & receipts). Other roles' requests wait for the
+    admin's approval (edit_approvals gate, like edits). On approval the payment is kept for the record
+    but marked deleted (status "failed"), so every collection total, cashbook and dashboard leaves it
+    out; an enrolled student's allocations are removed (copied onto the payment), so the charges it
+    paid are due again in the fee ledger, dues, late fees and the apps."""
+    with request.app.state.store.transaction() as data:
+        require(data, user, "edit")
+        payment = data["records"].get("payments", {}).get(code)
+        if not payment:
+            raise HTTPException(404, "Payment not found")
+        if payment.get("deleted_at"):
+            raise HTTPException(409, "This payment is already deleted")
+        reason = body.reason.strip()
+        if len(reason) < 8:
+            raise HTTPException(422, "Enter a reason for deleting (at least 8 characters)")
+        if any(r.get("payment_code") == code for r in aw.rows(data, "refunds")):
+            raise HTTPException(409, "Part of this payment was refunded; it cannot be deleted")
+        allocations = data["records"].get("payment_allocations", {})
+        removed = [dict(a) for a in list(allocations.values()) if a.get("payment_code") == code]
+        for a in removed:
+            allocations.pop(a["code"], None)
+        payment.update(status="failed", deleted_at=now(), deleted_by=user["code"], delete_reason=reason,
+                       deleted_allocations=[{"charge_code": a["charge_code"], "amount": str(a["amount"])} for a in removed])
+        data["records"]["payments"][code] = payment
+        receipt = next((r for r in aw.rows(data, "receipts") if r.get("payment_code") == code), None)
+        if receipt:
+            receipt.update(cancelled=True, cancelled_at=payment["deleted_at"], cancel_reason=reason)
+            data["records"]["receipts"][receipt["code"]] = receipt
+        audit(data, user["code"], "delete", "payments", code, reason=reason)
+        return dict(payment)
+
+
 @router.get("")
 def history(request: Request, method: str | None = None, start: date | None = None, end: date | None = None,
             q: str = Query("", max_length=100), source: str = Query("all", pattern="^(all|manual|linked)$"),
@@ -412,6 +450,7 @@ def history(request: Request, method: str | None = None, start: date | None = No
                "academic_year": payer.get("academic_year"), "note": p.get("note"), "semester": p.get("semester"),
                "recorded_at": p.get("recorded_at"), "course_level_code": payer.get("course_level"),
                "edited_at": p.get("edited_at"),
+               "deleted": bool(p.get("deleted_at")), "deleted_at": p.get("deleted_at"), "delete_reason": p.get("delete_reason"),
                "receipt_code": receipts.get(p["code"], {}).get("code"), "receipt_number": receipts.get(p["code"], {}).get("receipt_number")}
         if text and text not in " ".join(str(v or "") for v in row.values()).casefold():
             continue

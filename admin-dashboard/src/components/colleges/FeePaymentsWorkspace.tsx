@@ -13,6 +13,7 @@ import {
   X,
   Search,
   Smartphone,
+  Trash2,
   Wallet,
 } from "lucide-react";
 import { api, errorText, type PaymentEdit, type PaymentOptions, type PaymentRow, type PaymentStudent } from "@/services/api";
@@ -711,6 +712,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<PaymentRow | null>(null);
   const [editing, setEditing] = useState<PaymentRow | null>(null);
+  const [deleting, setDeleting] = useState<PaymentRow | null>(null);
   const load = useCallback(() => {
     setError("");
     api.feePayments
@@ -811,7 +813,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.code}>
+                  <tr key={r.code} className={r.deleted ? "fcw-deleted" : undefined}>
                     <td>{shortDate(r.paid_on)}</td>
                     <td>{r.receipt_number || "—"}</td>
                     <td>
@@ -826,7 +828,14 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                         <small className="fcw-sub">Paid {shortDate(r.transaction_date)}</small>
                       ) : null}
                     </td>
-                    <td>{rupees(Number(r.amount))}</td>
+                    <td>
+                      {rupees(Number(r.amount))}
+                      {r.deleted ? (
+                        <small className="fcw-sub fcw-deleted-badge" title={r.delete_reason || undefined}>
+                          Deleted
+                        </small>
+                      ) : null}
+                    </td>
                     <td>
                       <span className="fcw-row-actions">
                         <button
@@ -838,7 +847,7 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                         >
                           <Eye size={16} />
                         </button>
-                        {source === "manual" && (
+                        {source === "manual" && !r.deleted && (
                           <button
                             type="button"
                             className="fcw-icon"
@@ -847,6 +856,17 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                             onClick={() => setEditing(r)}
                           >
                             <Pencil size={15} />
+                          </button>
+                        )}
+                        {source !== "all" && !r.deleted && (
+                          <button
+                            type="button"
+                            className="fcw-icon fcw-icon-danger"
+                            aria-label={`Delete payment ${r.receipt_number || r.code}`}
+                            title="Delete payment"
+                            onClick={() => setDeleting(r)}
+                          >
+                            <Trash2 size={15} />
                           </button>
                         )}
                       </span>
@@ -872,6 +892,16 @@ export function PaymentHistory({ fixedMethod, source = "all" }: { fixedMethod?: 
                 }
               : undefined
           }
+        />
+      )}
+      {deleting && (
+        <DeletePayment
+          row={deleting}
+          onClose={() => setDeleting(null)}
+          onDone={() => {
+            setDeleting(null);
+            load();
+          }}
         />
       )}
       {editing && (
@@ -1058,6 +1088,69 @@ const LEVEL_OPTIONS = [
  * Correct a manual payment. The admin's save applies at once; for any other role the change goes
  * to the admin as a change request and the payment stays as it is until the admin approves it.
  */
+/** Delete a manual payment with a reason. Other roles' deletions wait for the admin's approval
+ * (Change requests); once approved the payment leaves every collection total and dashboard. */
+export function DeletePayment({ row, onClose, onDone }: { row: PaymentRow; onClose: () => void; onDone: () => void }) {
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (reason.trim().length < 8) return toast.warning("Enter a reason of at least 8 characters");
+    setSaving(true);
+    try {
+      const result = await api.feePayments.remove(row.code, reason.trim());
+      if (result.pending_approval)
+        toast.success("Delete request sent", "The payment is removed once the admin approves it.");
+      else toast.success("Payment deleted", `Receipt ${row.receipt_number || row.code}`);
+      onDone();
+    } catch (e) {
+      toast.error("Payment not deleted", errorText(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+  return (
+    <SideDrawer title={`Delete payment · ${row.receipt_number || row.code}`} subtitle={row.student_name} onClose={onClose}>
+      <form className="fcw-drawer-form fcw-form" onSubmit={submit}>
+        <dl className="fcw-details">
+          <div><dt>Receipt</dt><dd>{row.receipt_number || "—"}</dd></div>
+          <div><dt>Paid on</dt><dd>{shortDate(row.paid_on)}</dd></div>
+          <div><dt>Paid for</dt><dd>{row.purpose}</dd></div>
+          <div><dt>Method</dt><dd>{row.method_label}</dd></div>
+          <div><dt>Amount</dt><dd>{rupees(Number(row.amount))}</dd></div>
+        </dl>
+        <p className="fcw-hint rcp-edit-hint">
+          Deleting removes this payment from the collected amount, cashbook, ledgers and dashboards; for an enrolled student
+          the fees it paid become due again. The receipt stays on record as deleted. Requests from roles other than the
+          admin are sent to the admin and apply only after approval.
+        </p>
+        <div className="fcw-grid">
+          <label className="fcw-wide">
+            Reason for deleting *
+            <textarea
+              required
+              minLength={8}
+              maxLength={500}
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Explain why this payment should be deleted"
+            />
+          </label>
+        </div>
+        <footer className="fcw-actions">
+          <button type="button" className="fcw-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="fcw-primary fcw-danger" disabled={saving}>
+            <Trash2 size={15} /> {saving ? "Sending…" : "Delete payment"}
+          </button>
+        </footer>
+      </form>
+    </SideDrawer>
+  );
+}
+
 export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClose: () => void; onSaved: () => void }) {
   const [from, to] = String(row.academic_year || "").split("-").map((y) => Number(y) || null);
   const [form, setForm] = useState({

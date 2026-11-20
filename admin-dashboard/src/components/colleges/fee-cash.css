@@ -1419,3 +1419,36 @@
   font-weight: 600;
   padding: 4px 6px;
 }
+
+/* Deleting a manual payment */
+.fcw .fcw-icon-danger,
+.college-erp .fcw .fcw-icon-danger {
+  color: var(--color-danger, #b43540);
+}
+.college-erp .fcw .fcw-icon-danger:hover {
+  background: color-mix(in srgb, var(--color-danger, #b43540) 10%, var(--color-surface));
+  color: var(--color-danger, #b43540);
+}
+.fcw tr.fcw-deleted td {
+  color: var(--color-text-secondary);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--color-danger, #b43540) 45%, transparent);
+}
+.fcw tr.fcw-deleted td:last-child,
+.fcw .fcw-deleted-badge {
+  text-decoration: none;
+}
+.fcw .fcw-deleted-badge {
+  display: inline-block;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-danger, #b43540) 12%, var(--color-surface));
+  color: var(--color-danger, #b43540);
+  font-weight: 600;
+}
+.fcw-drawer-form .fcw-primary.fcw-danger,
+.fcw .fcw-primary.fcw-danger {
+  background: var(--color-danger, #b43540);
+  border-color: var(--color-danger, #b43540);
+}
