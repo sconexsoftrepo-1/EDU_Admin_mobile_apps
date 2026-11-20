@@ -1,0 +1,33 @@
+.college-erp .workspace-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 140px;
+  padding: 22px 16px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.workspace-empty-state .workspace-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--color-primary-light);
+  border-radius: 15px;
+  color: var(--color-accent);
+  background: var(--color-primary-subtle);
+}
+.college-erp .workspace-empty-state strong {
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 650;
+}
+.college-erp .workspace-empty-state p {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}

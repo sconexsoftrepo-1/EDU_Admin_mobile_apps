@@ -85,7 +85,7 @@
   padding: 11px 15px;
 }
 .adm-tabs button[aria-selected="true"] {
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 2px 7px #1e293b12;
   color: var(--adm-ink);
 }
@@ -118,13 +118,13 @@
 }
 .adm-workspace .adm-tabs button[aria-selected="true"] {
   background: #eef5f7;
-  border-bottom-color: #195e72;
+  border-bottom-color: var(--color-primary);
   box-shadow: none;
   color: #164a5e;
   font-weight: 700;
 }
 .adm-workspace .adm-tabs button:focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 .adm-list-panel,
@@ -445,20 +445,20 @@
   flex-wrap: wrap;
   padding: 14px 16px;
   margin-bottom: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 .adm-next-step div {
   display: grid;
   gap: 2px;
 }
 .adm-next-step span {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 .adm-create-form .adm-form-actions {
-  background: #eff6ff;
+  background: var(--color-primary-subtle);
   border-top: 1px solid var(--adm-line);
   bottom: 0;
   flex-wrap: wrap;
@@ -474,7 +474,7 @@
   font-size: 12px;
 }
 .adm-create-form .adm-form-actions > button:not(.adm-submit) {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--adm-line);
   border-radius: 8px;
   color: var(--adm-ink);
@@ -491,17 +491,17 @@
 
 /* Admission enquiry details, laid out as a printable document. */
 .adm-doc {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
-  color: #171b23;
+  color: var(--color-text-primary);
   display: grid;
   gap: 14px;
   padding: 20px 22px;
 }
 .adm-doc-head {
   align-items: center;
-  border-bottom: 3px solid #1e40af;
+  border-bottom: 3px solid var(--color-primary-hover);
   display: grid;
   gap: 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -529,7 +529,7 @@
   text-align: right;
 }
 .adm-doc-title strong {
-  color: #1e40af;
+  color: var(--color-primary-hover);
   font-size: 14px;
   letter-spacing: 0.06em;
 }
@@ -552,14 +552,14 @@
   margin-right: 18px;
 }
 .adm-doc-section {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   break-inside: avoid;
   overflow: hidden;
 }
 .adm-doc-section h3 {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--color-primary-light);
+  color: var(--color-primary-hover);
   font-size: 12px;
   letter-spacing: 0.06em;
   margin: 0;
@@ -574,7 +574,7 @@
   padding: 6px 14px 10px;
 }
 .adm-doc-section dl > div {
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px dashed var(--color-border);
   display: grid;
   gap: 10px;
   grid-template-columns: minmax(110px, 42%) 1fr;
@@ -600,7 +600,7 @@
   padding: 30px 0 0;
 }
 .adm-doc-sign span {
-  border-top: 1px solid #cbd5e1;
+  border-top: 1px solid var(--color-border-strong);
   color: #6b6158;
   font-size: 12px;
   min-width: 190px;
@@ -609,8 +609,8 @@
 }
 .adm-print {
   align-items: center;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
@@ -645,7 +645,7 @@
     visibility: visible !important;
   }
   .adm-doc-drawer {
-    background: #fff !important;
+    background: var(--color-surface) !important;
     border: 0 !important;
     box-shadow: none !important;
     inset: 0 !important;
@@ -656,7 +656,7 @@
     width: 100% !important;
   }
   .adm-doc-drawer::backdrop {
-    background: #fff !important;
+    background: var(--color-surface) !important;
   }
   .adm-doc-drawer .adm-doc {
     border: 0;

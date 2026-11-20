@@ -86,7 +86,7 @@
 }
 .college-erp :is(.ops-workspace, .ops-transport, .ops-sheet) .erp-primary {
   background: var(--erp-accent);
-  color: #fff;
+  color: var(--color-surface);
 }
 .college-erp :is(.ops-workspace, .ops-transport, .ops-sheet) button:disabled {
   opacity: 0.45;
@@ -321,7 +321,7 @@
   border-radius: 8px 8px 4px 4px;
   border-bottom: 4px solid #0003;
   background: #20a880;
-  color: #fff;
+  color: var(--color-surface);
 }
 .college-erp .ops-seat-grid [data-status="Student"] {
   background: #197af4;
@@ -344,7 +344,7 @@
 }
 .ops-seat-grid small {
   font-size: 9px;
-  color: #fff;
+  color: var(--color-surface);
 }
 .ops-seat-legend {
   display: flex;
@@ -380,7 +380,7 @@
   padding: 2px 4px;
   border-radius: 3px;
   background: #061325dd;
-  color: #fff;
+  color: var(--color-surface);
   font: 9px sans-serif;
   white-space: nowrap;
 }
@@ -400,7 +400,7 @@
   width: 22px;
   height: 22px;
   background: var(--erp-accent);
-  color: #fff;
+  color: var(--color-surface);
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -626,7 +626,7 @@
   height: 30px;
   border-radius: 6px;
   background: #197af4;
-  color: #fff;
+  color: var(--color-surface);
   font-size: 11px;
 }
 .ops-occupied-list button > span:last-child {
@@ -662,10 +662,10 @@
 }
 .erp-pdf-preview {
   border-radius: var(--edu-drawer-radius);
-  --erp-ink: #171b23;
-  --erp-surface: #ffffff;
-  --erp-border: #e2e8f0;
-  --erp-accent: #1d4ed8;
+  --erp-ink: var(--color-text-primary);
+  --erp-surface: var(--color-surface);
+  --erp-border: var(--color-border);
+  --erp-accent: var(--color-primary);
   position: fixed;
   inset: 0 0 0 auto;
   margin: 0;
@@ -835,7 +835,7 @@
 .erp-pdf-page-number {
   font-size: 11.5px;
   font-weight: 600;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   background: #fffc;
   border-radius: 10px;
   padding: 2px 10px;

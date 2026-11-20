@@ -13,7 +13,7 @@
   font-size: 18px;
 }
 .erp-fee-schedules-heading > span {
-  color: #657582;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .erp-fee-card-grid {
@@ -26,7 +26,7 @@
   padding: 16px;
   border: 1px solid var(--erp-border, #dde5eb);
   border-radius: 12px;
-  background: var(--erp-surface, #fff);
+  background: var(--erp-surface, var(--color-surface));
   color: var(--erp-ink, #18384b);
 }
 .erp-fee-card-heading {
@@ -49,7 +49,7 @@
 }
 .erp-fee-card-heading p {
   margin: 0;
-  color: #657582;
+  color: var(--color-text-secondary);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -79,7 +79,7 @@
 .erp-fee-card-breakdown h4 span {
   font-size: 10px;
   font-weight: 400;
-  color: #657582;
+  color: var(--color-text-secondary);
 }
 .erp-fee-card dl {
   margin: 0;
@@ -111,7 +111,7 @@
   column-gap: 14px;
   margin-top: 10px;
   padding: 8px 12px;
-  background: #f3f6f8;
+  background: var(--color-background);
   border-radius: 8px;
 }
 .erp-fee-card-totals > div {
@@ -134,7 +134,7 @@
   margin: 7px 0 10px;
   font-size: 10px;
   line-height: 1.5;
-  color: #657582;
+  color: var(--color-text-secondary);
 }
 .erp-fee-card-actions {
   display: flex;
@@ -181,7 +181,7 @@
 }
 .erp-fee-manager-title p {
   margin: 0;
-  color: #657582;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .erp-fee-manager button {
@@ -226,7 +226,7 @@
   font-size: 12px;
 }
 .erp-fee-manager th {
-  background: #f3f6f8;
+  background: var(--color-background);
   text-align: left;
   color: #526977;
   font-size: 11px;
@@ -291,7 +291,7 @@
 }
 
 .erp-fee-term-preview {
-  border-top: 1px solid var(--erp-border, #e2e8f0);
+  border-top: 1px solid var(--erp-border, var(--color-border));
   padding-top: 10px;
   font-size: 12px;
   display: grid;
@@ -327,7 +327,7 @@
 }
 .erp-fee-term-heads dd {
   margin: 3px 0;
-  color: #64748b;
+  color: var(--color-text-secondary);
 }
 .erp-fee-student summary {
   cursor: pointer;

@@ -1,9 +1,9 @@
 .adi-popup {
-  --adi-ink: var(--erp-ink, #171b23);
-  --adi-muted: var(--erp-muted, #4b5563);
-  --adi-line: var(--erp-border, #e2e8f0);
-  --adi-accent: var(--erp-accent, #1d4ed8);
-  --adi-soft: var(--erp-raised, #ffffff);
+  --adi-ink: var(--erp-ink, var(--color-text-primary));
+  --adi-muted: var(--erp-muted, var(--color-text-secondary));
+  --adi-line: var(--erp-border, var(--color-border));
+  --adi-accent: var(--erp-accent, var(--color-primary));
+  --adi-soft: var(--erp-raised, var(--color-surface));
   color: var(--adi-ink);
 }
 .adi-popup ul {
@@ -12,7 +12,7 @@
   padding: 0;
 }
 .adi-popup {
-  background: #fff;
+  background: var(--color-surface);
   border: 0;
   border-radius: 16px;
   box-shadow: 0 24px 70px rgb(30 20 10 / 28%);
@@ -111,7 +111,7 @@
 }
 .adi-popup .adi-popup-body footer {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border-top: 1px solid var(--adi-line);
   display: flex;
   gap: 10px;
@@ -131,15 +131,15 @@
 }
 .adi-popup footer a {
   background: var(--adi-accent);
-  color: #fff;
+  color: var(--color-surface);
 }
 .adi-popup footer a:hover {
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: inset 0 0 0 1px var(--adi-accent);
   color: var(--adi-ink);
 }
 .adi-popup footer button {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--adi-line);
   color: var(--adi-ink);
 }

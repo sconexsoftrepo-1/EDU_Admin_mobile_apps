@@ -196,6 +196,7 @@ function ChatWindow({
       .conversations()
       .then((r) => {
         setItems(r.items);
+        setActive((current) => current ? r.items.find((item) => item.code === current.code) || current : null);
         setCanGroup(r.can_create_groups);
         onUnread(r.unread);
         setError("");
@@ -570,9 +571,9 @@ function NewChat({
                 <span className="chat-row-main">
                   <span className="chat-row-top">
                     <strong>{p.name}</strong>
-                    <small>{ROLE_LABEL[p.role] || ""}</small>
+                    <small className="chat-contact-role" title={p.role_label || ROLE_LABEL[p.role] || ""}>{p.role_label || ROLE_LABEL[p.role] || ""}</small>
                   </span>
-                  <span className="chat-preview">{p.detail}</span>
+                  {p.detail !== p.role_label && <span className="chat-preview">{p.detail}</span>}
                 </span>
                 {busy === p.code && <Loader2 className="chat-spin" size={16} />}
               </button>
@@ -1129,16 +1130,20 @@ function Thread({
         <button
           type="button"
           className="chat-thread-title"
-          onClick={() => group && setShowPeople((v) => !v)}
+          onClick={() => {
+            if (!group) return;
+            setShowPeople((value) => !value);
+            if (!showPeople) void chatService.conversation(code).then(setInfo).catch(() => undefined);
+          }}
           aria-expanded={group ? showPeople : undefined}
         >
           <Avatar name={info.title} role={info.role} size={40} />
           <span>
             <strong>{info.title}</strong>
-            <small>
+            <small title={group ? info.subtitle : summary.subtitle}>
               {group
                 ? `${info.members} members · ${info.subtitle}`
-                : info.subtitle}
+                : summary.subtitle || summary.role_label || info.subtitle}
             </small>
           </span>
         </button>
@@ -1148,7 +1153,7 @@ function Thread({
           {info.people.map((p) => (
             <span key={p.code} className="chat-person">
               <Avatar name={p.name} role={p.role} size={26} />
-              {p.name}
+              <span>{p.name}{p.role_label && <small className="chat-person-role">{p.role_label}</small>}</span>
             </span>
           ))}
         </div>
@@ -1347,6 +1352,7 @@ function Bubble({
         {showName && (
           <span className={`chat-sender chat-text-${m.sender_role}`}>
             {m.sender_name}
+            {m.sender_role_label && <small className="chat-sender-role">{m.sender_role_label}</small>}
           </span>
         )}
         {m.kind === "image" && url && (

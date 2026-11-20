@@ -98,11 +98,13 @@ class _Numbered(Canvas):
 
 
 class Document:
-    def __init__(self, data, title, subtitle="", *, wide=False, campus_code=None, footer=None, reference=""):
+    def __init__(self, data, title, subtitle="", *, wide=False, campus_code=None, footer=None, reference="",
+                 header_identity: tuple[str, tuple[str, ...]] | None = None):
         self.size = rotate(A4) if wide else A4
         self.width, self.height = self.size
         self.left, self.right = 36, self.width - 36
         self.college, self.campus = college(data, campus_code)
+        self.header_identity = header_identity
         self.title, self.subtitle, self.reference = title, subtitle, reference
         self.out = io.BytesIO()
         note = footer or "Computer-generated document. No signature is required."
@@ -113,6 +115,9 @@ class Document:
 
     # -- layout ---------------------------------------------------------------------------
     def header(self, full=False):
+        if self.header_identity is not None:
+            self.identity_header()
+            return
         c, h = self.c, (96 if full else 58)
         c.setFillColor(BAND)
         c.rect(0, self.height - h, self.width, h, stroke=0, fill=1)
@@ -148,6 +153,57 @@ class Document:
             c.setFont("Helvetica", 8)
             c.setFillColor(MUTED)
             c.drawRightString(self.right, top - 52, self.reference[:70])
+        self.y = self.height - h - 24
+
+    def identity_header(self):
+        """Receipt stationery with contact details and an untruncated, wrapping title."""
+        name, details = self.header_identity
+        c = self.c
+        logo_size = 64
+        x = self.left + logo_size + 16
+        available = self.right - x
+        identity_width = available * .55
+        title_left = x + identity_width + 16
+        title_width = self.right - title_left
+        title_lines = wrap(self.title, "Helvetica-Bold", 11, title_width)
+        detail_lines = []
+        for index, detail in enumerate(details):
+            size = 10 if index == 0 else 7.5
+            detail_lines.extend((line, size) for line in wrap(detail, "Helvetica", size, identity_width))
+        h = max(124, 72 + len(title_lines) * 14, 55 + len(detail_lines) * 12)
+        top = self.height - 24
+        c.setFillColor(BAND)
+        c.rect(0, self.height - h, self.width, h, stroke=0, fill=1)
+        c.setFillColor(ACCENT)
+        c.rect(0, self.height - h, self.width, 3, stroke=0, fill=1)
+        if LOGO.exists():
+            c.setFillColor(white)
+            c.roundRect(self.left - 4, top - logo_size - 4, logo_size + 8, logo_size + 8, 8, stroke=0, fill=1)
+            c.drawImage(ImageReader(str(LOGO)), self.left, top - logo_size,
+                        width=logo_size, height=logo_size, preserveAspectRatio=True, mask="auto")
+        c.setFillColor(INK)
+        c.setFont("Times-Bold", 21)
+        c.drawString(x, top - 16, name)
+        y = top - 33
+        for text, size in detail_lines:
+            c.setFillColor(INK if size == 10 else MUTED)
+            c.setFont("Helvetica", size)
+            c.drawString(x, y, text)
+            y -= 12
+        c.setFillColor(ACCENT)
+        c.setFont("Helvetica-Bold", 11)
+        y = top - 12
+        for text in title_lines:
+            c.drawRightString(self.right, y, text)
+            y -= 14
+        if self.subtitle:
+            c.setFillColor(INK)
+            c.setFont("Helvetica", 9)
+            c.drawRightString(self.right, y - 4, self.subtitle[:70])
+        if self.reference:
+            c.setFillColor(MUTED)
+            c.setFont("Helvetica", 8)
+            c.drawRightString(self.right, y - 18, self.reference[:70])
         self.y = self.height - h - 24
 
     def ensure(self, space):

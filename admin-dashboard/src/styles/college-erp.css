@@ -1,16 +1,16 @@
 /* Campus ERP identities. Tokens apply only to authenticated workspaces. */
 .college-erp {
-  --erp-bg: #ffffff;
-  --erp-surface: #ffffff;
-  --erp-raised: #f8fafc;
-  --erp-ink: #171b23;
-  --erp-muted: #4b5563;
-  --erp-border: #e2e8f0;
-  --erp-accent: #1d4ed8;
-  --erp-glow: #3b82f6;
-  --erp-blue: #1d4ed8;
-  --erp-navy: #171b23;
-  --erp-sidebar: #123b7a;
+  --erp-bg: var(--color-surface);
+  --erp-surface: var(--color-surface);
+  --erp-raised: var(--color-background);
+  --erp-ink: var(--color-text-primary);
+  --erp-muted: var(--color-text-secondary);
+  --erp-border: var(--color-border);
+  --erp-accent: var(--color-primary);
+  --erp-glow: var(--color-accent);
+  --erp-blue: var(--color-primary);
+  --erp-navy: var(--color-text-primary);
+  --erp-sidebar: var(--color-primary-dark);
   --erp-danger: #b43540;
   background: var(--erp-bg);
   color: var(--erp-ink);
@@ -58,10 +58,10 @@
   outline-offset: 3px;
 }
 .college-erp .erp-primary {
-  background: linear-gradient(125deg, #1d4ed8, #1d4ed8);
-  border-color: #1d4ed8;
+  background: linear-gradient(125deg, var(--color-primary), var(--color-primary));
+  border-color: var(--color-primary);
   color: white;
-  box-shadow: 0 3px 10px #1e40af16;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--color-primary-hover) 8.63%, transparent);
 }
 .college-erp .erp-primary:hover:not(:disabled) {
   filter: brightness(1.12);
@@ -70,8 +70,8 @@
 .college-erp .erp-sidebar {
   width: 258px;
   background: var(--erp-sidebar);
-  border-right: 1px solid #3b82f64d;
-  box-shadow: 8px 0 30px #171b2312;
+  border-right: 1px solid color-mix(in srgb, var(--color-accent) 30.2%, transparent);
+  box-shadow: 8px 0 30px color-mix(in srgb, var(--color-text-primary) 7.06%, transparent);
   z-index: 70;
   transition:
     width 0.28s ease,
@@ -82,7 +82,7 @@
   min-height: 90px;
 }
 .college-erp .erp-sidebar-brand strong {
-  color: #dbeafe;
+  color: var(--color-primary-light);
   font:
     600 24px/1.1 Georgia,
     serif;
@@ -93,13 +93,13 @@
   height: 42px;
 }
 .college-erp .erp-sidebar-label {
-  color: #bfdbfe;
+  color: var(--color-primary-light);
   margin: 3px 23px 16px;
   font-size: 10px;
 }
 .college-erp .erp-sidebar nav {
   padding: 0 12px 16px;
-  scrollbar-color: #ffffff30 transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-surface) 18.82%, transparent) transparent;
 }
 .erp-nav-group {
   margin-bottom: 5px;
@@ -110,7 +110,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  color: #dbeafe;
+  color: var(--color-primary-light);
   cursor: pointer;
   border-radius: 6px;
   font-size: 11px;
@@ -133,7 +133,7 @@
   margin: 2px 0;
   min-height: 38px;
   border-radius: 6px;
-  color: #e2e8f0;
+  color: var(--color-border);
   font-size: 11px;
   white-space: nowrap;
 }
@@ -146,14 +146,14 @@
   flex-shrink: 0;
 }
 .college-erp .erp-nav-group a.active {
-  background: linear-gradient(100deg, #1d4ed8, #4b556347);
+  background: linear-gradient(100deg, var(--color-primary), color-mix(in srgb, var(--color-text-secondary) 27.84%, transparent));
   box-shadow:
-    inset 2px 0 #3b82f6,
-    0 0 15px #3b82f610;
+    inset 2px 0 var(--color-accent),
+    0 0 15px color-mix(in srgb, var(--color-accent) 6.27%, transparent);
   color: white;
 }
 .college-erp .erp-nav-group a:hover {
-  background: #ffffff12;
+  background: color-mix(in srgb, var(--color-surface) 7.06%, transparent);
 }
 .college-erp .erp-sidebar-foot {
   padding: 17px 20px;
@@ -161,7 +161,7 @@
   flex-shrink: 0;
 }
 .college-erp .erp-sidebar-foot :is(a, button) {
-  color: #cbd5e1;
+  color: var(--color-border-strong);
 }
 .college-erp .erp-sidebar-foot button {
   background: transparent;
@@ -331,7 +331,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, #171b23a6, transparent 80%);
+  background: linear-gradient(0deg, color-mix(in srgb, var(--color-text-primary) 65.1%, transparent), transparent 80%);
 }
 .erp-campus-banner > div {
   position: absolute;
@@ -360,7 +360,7 @@
   color: white;
   font-size: 10px;
   padding: 8px 12px;
-  border: 1px solid #ffffff55;
+  border: 1px solid color-mix(in srgb, var(--color-surface) 33.33%, transparent);
   border-radius: 20px;
   backdrop-filter: blur(12px);
 }
@@ -388,7 +388,7 @@
   padding: 13px 16px;
   margin-bottom: 24px;
   gap: 12px;
-  box-shadow: 0 3px 12px #171b2304;
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--color-text-primary) 1.57%, transparent);
 }
 .college-erp .erp-filters label {
   font-size: 9px;
@@ -428,7 +428,7 @@
   background: var(--erp-surface);
   border: 1px solid var(--erp-border);
   border-radius: 10px;
-  box-shadow: 0 4px 18px #171b2305;
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--color-text-primary) 1.96%, transparent);
   padding: 17px 16px;
   min-height: 124px;
   position: relative;
@@ -474,7 +474,7 @@
   background: var(--erp-surface);
   border: 1px solid var(--erp-border);
   border-radius: 11px;
-  box-shadow: 0 5px 20px #171b2304;
+  box-shadow: 0 5px 20px color-mix(in srgb, var(--color-text-primary) 1.57%, transparent);
   padding: 20px;
   min-width: 0;
 }
@@ -1412,7 +1412,7 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-student-id,
 .college-erp .erp-finance-overview > div:first-child,
 .college-erp .erp-staff-overview > div:first-child {
-  background: linear-gradient(130deg, #374151, #171b23);
+  background: linear-gradient(130deg, #374151, var(--color-text-primary));
 }
 .college-erp
   :is(
@@ -1432,7 +1432,7 @@ body:has(.college-erp dialog[open]) {
     .erp-staff-overview > div:first-child
   )
   :is(p, small, span, dt) {
-  color: #cbd5e1;
+  color: var(--color-border-strong);
 }
 @media (min-width: 651px) and (max-width: 1180px) {
   .college-erp.erp-rail-expanded .erp-sidebar {
@@ -1782,11 +1782,11 @@ body:has(.college-erp dialog[open]) {
   .college-erp.erp-rail-expanded .erp-sidebar {
     inset: 14px auto 14px 14px;
     width: 258px;
-    border: 1px solid #3b82f655;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 33.33%, transparent);
     border-radius: 20px;
     box-shadow:
-      0 18px 48px #171b2330,
-      0 2px 8px #171b2318;
+      0 18px 48px color-mix(in srgb, var(--color-text-primary) 18.82%, transparent),
+      0 2px 8px color-mix(in srgb, var(--color-text-primary) 9.41%, transparent);
     max-height: calc(100dvh - 28px);
   }
   .college-erp .erp-workspace,
@@ -1848,7 +1848,7 @@ body:has(.college-erp dialog[open]) {
     background: var(--erp-sidebar);
     border: 1px solid var(--erp-glow);
     border-radius: 50%;
-    color: #dbeafe;
+    color: var(--color-primary-light);
     box-shadow: 0 3px 12px #0003;
     z-index: 2;
   }
@@ -1869,7 +1869,7 @@ body:has(.college-erp dialog[open]) {
     inset: 10px auto 10px 10px;
     width: min(286px, calc(100vw - 28px));
     max-height: calc(100dvh - 20px);
-    border: 1px solid #3b82f655;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 33.33%, transparent);
     border-radius: 18px;
     box-shadow: 0 18px 60px #0005;
     transform: translateX(calc(-100% - 12px));
@@ -2596,14 +2596,14 @@ body:has(.college-erp dialog[open]) {
     border: 0;
     border-radius: 12px;
     background: transparent;
-    color: #cbd5e1;
+    color: var(--color-border-strong);
     cursor: pointer;
   }
   .college-erp.erp-compact
     .erp-nav-rail
     > button:is(:hover, [aria-current="true"]) {
-    background: #3b82f638;
-    color: #dbeafe;
+    background: color-mix(in srgb, var(--color-accent) 21.96%, transparent);
+    color: var(--color-primary-light);
   }
   .college-erp.erp-compact .erp-sidebar-brand {
     min-height: 62px;
@@ -2709,7 +2709,7 @@ body:has(.college-erp dialog[open]) {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: #171b2370;
+  background: color-mix(in srgb, var(--color-text-primary) 43.92%, transparent);
   display: flex;
   justify-content: flex-end;
 }
@@ -2719,7 +2719,7 @@ body:has(.college-erp dialog[open]) {
   height: 100%;
   overflow: auto;
   background: var(--erp-bg);
-  box-shadow: -20px 0 60px #171b2330;
+  box-shadow: -20px 0 60px color-mix(in srgb, var(--color-text-primary) 18.82%, transparent);
 }
 .erp-api-drawer > header {
   display: flex;
@@ -2843,8 +2843,8 @@ body:has(.college-erp dialog[open]) {
   background: transparent;
 }
 .erp-role-directory nav button.is-selected {
-  background: #dbeafe;
-  border-color: #cbd5e1;
+  background: var(--color-primary-light);
+  border-color: var(--color-border-strong);
 }
 .erp-role-directory nav button > span:nth-child(2) {
   flex: 1;
@@ -2861,7 +2861,7 @@ body:has(.college-erp dialog[open]) {
 }
 .erp-role-count {
   border-radius: 20px;
-  background: #fff;
+  background: var(--color-surface);
   padding: 1px 7px;
 }
 .erp-role-details {
@@ -2891,7 +2891,7 @@ body:has(.college-erp dialog[open]) {
 }
 .erp-role-protected {
   padding: 7px 10px;
-  background: #dbeafe;
+  background: var(--color-primary-light);
   border-radius: 6px;
 }
 .erp-role-table {
@@ -3024,16 +3024,16 @@ body:has(.college-erp dialog[open]) {
   margin-bottom: 22px;
 }
 .erp-skeleton-cards > div {
-  border: 1px solid var(--erp-border, #e2e8f0);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 12px;
-  background: var(--erp-surface, #fff);
+  background: var(--erp-surface, var(--color-surface));
   padding: 22px;
 }
 .erp-skeleton i,
 .erp-skeleton b {
   display: block;
   border-radius: 5px;
-  background: linear-gradient(90deg, #e2e8f0 25%, #ffffff 45%, #e2e8f0 65%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface) 45%, var(--color-border) 65%);
   background-size: 240% 100%;
   animation: erp-skeleton-shimmer 1.5s linear infinite;
   height: 12px;
@@ -3047,9 +3047,9 @@ body:has(.college-erp dialog[open]) {
   width: 38%;
 }
 .erp-skeleton-table {
-  border: 1px solid var(--erp-border, #e2e8f0);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 12px;
-  background: var(--erp-surface, #fff);
+  background: var(--erp-surface, var(--color-surface));
   padding: 8px 20px;
 }
 .erp-skeleton-table > div {
@@ -3057,14 +3057,14 @@ body:has(.college-erp dialog[open]) {
   grid-template-columns: 1.5fr 1fr 1fr 0.5fr;
   gap: 20px;
   padding: 16px 0;
-  border-bottom: 1px solid var(--erp-border, #e2e8f0);
+  border-bottom: 1px solid var(--erp-border, var(--color-border));
 }
 .erp-skeleton-table > div:last-child {
   border-bottom: 0;
 }
 .erp-background-refresh {
   font-size: 11px;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
   margin: 6px 0 12px;
   display: flex;
   align-items: center;
@@ -3074,7 +3074,7 @@ body:has(.college-erp dialog[open]) {
   content: "";
   width: 7px;
   height: 7px;
-  background: var(--erp-accent, #1d4ed8);
+  background: var(--erp-accent, var(--color-primary));
   border-radius: 50%;
   opacity: 0.65;
 }
@@ -3113,7 +3113,7 @@ body:has(.college-erp dialog[open]) {
   display: block;
   width: 20px;
   height: 20px;
-  background: #ffffff20;
+  background: color-mix(in srgb, var(--color-surface) 12.55%, transparent);
   border-radius: 5px;
 }
 .erp-shell-header-skeleton {
@@ -3122,22 +3122,22 @@ body:has(.college-erp dialog[open]) {
   width: 120px;
   height: 18px;
   border-radius: 5px;
-  background: #e2e8f080;
+  background: color-mix(in srgb, var(--color-border) 50.2%, transparent);
 }
 
 /* Connected enrollment screens retain the original Edunexa warm surfaces and clear controls. */
 .college-erp .erp-primary:is(:hover, :focus-visible, :active):not(:disabled) {
-  background: linear-gradient(125deg, #1d4ed8, #1d4ed8);
-  color: #fff;
-  border-color: #1d4ed8;
+  background: linear-gradient(125deg, var(--color-primary), var(--color-primary));
+  color: var(--color-surface);
+  border-color: var(--color-primary);
   filter: none;
 }
 .college-erp
   .edu-connected
   .edu-primary:is(:hover, :focus-visible, :active):not(:disabled) {
-  background: #1d4ed8;
-  color: #fff;
-  border-color: #1d4ed8;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border-color: var(--color-primary);
 }
 .college-erp .edu-embedded > .edu-content {
   overflow-x: hidden;
@@ -3192,13 +3192,13 @@ body:has(.college-erp dialog[open]) {
   min-height: 40px;
   font-size: 12px;
   border-color: var(--erp-border);
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 8px;
 }
 .college-erp .edu-embedded .edu-table {
   border: 1px solid var(--erp-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
   overflow-x: auto;
 }
 .college-erp .edu-embedded .edu-table table {
@@ -3207,8 +3207,8 @@ body:has(.college-erp dialog[open]) {
   min-width: 100%;
 }
 .college-erp .edu-embedded .edu-table th {
-  background: #ffffff;
-  color: #4b5563;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   font-size: 10px;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -3219,12 +3219,12 @@ body:has(.college-erp dialog[open]) {
 .college-erp .edu-embedded .edu-table td {
   padding: 14px 16px;
   font-size: 12px;
-  border-color: #e2e8f0;
+  border-color: var(--color-border);
   max-width: 280px;
   overflow-wrap: anywhere;
 }
 .college-erp .edu-embedded .edu-table tbody tr:hover {
-  background: #eff6ff;
+  background: var(--color-primary-subtle);
 }
 .college-erp .edu-embedded .edu-table + p {
   font-size: 12px;
@@ -3259,7 +3259,7 @@ body:has(.college-erp dialog[open]) {
 
 /* Readable, compact campus navigation in expanded and collapsed sidebars. */
 .college-erp .erp-sidebar .erp-nav-group :is(summary, a) {
-  color: #fff;
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 700;
   line-height: 1.4;
@@ -3269,7 +3269,7 @@ body:has(.college-erp dialog[open]) {
   padding-bottom: 9px;
 }
 .college-erp .erp-sidebar .erp-nav-group :is(summary, a):is(:hover, :focus-visible, .active) {
-  color: #fff;
+  color: var(--color-surface);
 }
 .college-erp .erp-sidebar .erp-nav-group summary > svg:first-child,
 .college-erp .erp-sidebar .erp-nav-group a > svg,
@@ -3278,7 +3278,7 @@ body:has(.college-erp dialog[open]) {
   height: 22px;
   flex-shrink: 0;
   stroke-width: 2;
-  color: #fff;
+  color: var(--color-surface);
 }
 .college-erp .erp-sidebar .erp-nav-group summary > svg:last-child {
   width: 15px;
@@ -3292,7 +3292,7 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .erp-sidebar .erp-sidebar-foot :is(button, a),
 .college-erp .erp-sidebar .erp-rail-tooltip {
-  color: #fff;
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 700;
 }
@@ -3337,8 +3337,8 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .erp-back {
   align-items: center;
-  background: #fff;
-  border: 1.5px solid #171b23;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-text-primary);
   border-radius: 10px;
   color: #111;
   display: inline-flex;
@@ -3352,7 +3352,7 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-back:focus-visible {
   background: #111;
   border-color: #111;
-  color: #fff;
+  color: var(--color-surface);
 }
 @media (max-width: 650px) {
   .college-erp .erp-topbar-breadcrumb {
@@ -3377,7 +3377,7 @@ body:has(.college-erp dialog[open]) {
 .college-erp .edu-embedded .edu-enroll .edu-card {
   display: block;
   overflow: hidden;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #d6dde4;
   border-radius: 8px;
 }
@@ -3418,10 +3418,10 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-primary {
   padding: 0 14px;
-  background: linear-gradient(135deg, #1d4ed8 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary) 100%);
   border: 0;
-  color: #fff;
-  box-shadow: 0 1px 2px #1e40af33;
+  color: var(--color-surface);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-primary-hover) 20%, transparent);
 }
 .college-erp .edu-embedded .edu-enroll .edu-toolbar > .edu-primary:hover {
   filter: brightness(0.94);
@@ -3435,7 +3435,7 @@ body:has(.college-erp dialog[open]) {
 .college-erp .edu-embedded .edu-enroll .edu-empty {
   border: 0;
   border-radius: 0;
-  background: #fff;
+  background: var(--color-surface);
   padding: 20px 16px;
   color: #3b4f61;
   font-size: 13px;
@@ -3475,16 +3475,16 @@ body:has(.college-erp dialog[open]) {
   height: 32px;
   min-height: 0;
   padding: 0 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   color: #1f2a36;
   font-size: 12px;
   font-weight: 600;
 }
 .college-erp .edu-embedded .edu-toolbar > .edu-export:hover:not(:disabled) {
-  border-color: #1d4ed8;
-  background: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
 }
 .college-erp .edu-embedded .edu-toolbar > .edu-export:disabled {
   opacity: 0.5;
@@ -3503,9 +3503,9 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-table-panel.is-single-card {
   padding: 0;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: none;
 }
 .college-erp .erp-table-panel.is-single-card .erp-table-scroll {
@@ -3521,9 +3521,9 @@ body:has(.college-erp dialog[open]) {
   margin: 0;
   padding: 14px 16px 12px;
   border: 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
   border-radius: 0;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: none;
   position: static;
 }
@@ -3543,9 +3543,9 @@ body:has(.college-erp dialog[open]) {
   min-height: 0;
   padding-top: 0;
   padding-bottom: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   color: #1f2a36;
   font-size: 12px;
   font-weight: 400;
@@ -3555,9 +3555,9 @@ body:has(.college-erp dialog[open]) {
   min-height: 0;
   margin-left: auto;
   padding: 0 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   font-size: 12px;
   font-weight: 600;
 }
@@ -3570,7 +3570,7 @@ body:has(.college-erp dialog[open]) {
   margin: 0;
   padding: 12px 16px;
   border: 0;
-  background: #fff;
+  background: var(--color-surface);
 }
 .college-erp .erp-table-panel.is-single-card .erp-search {
   display: flex;
@@ -3581,14 +3581,14 @@ body:has(.college-erp dialog[open]) {
   min-width: 180px;
   height: 32px;
   padding: 0 10px;
-  border: 1px solid #1d4ed8;
+  border: 1px solid var(--color-primary);
   border-radius: 6px;
-  background: #fff;
-  color: #1d4ed8;
+  background: var(--color-surface);
+  color: var(--color-primary);
 }
 .college-erp .erp-table-panel.is-single-card .erp-search:focus-within {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px #1d4ed826;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14.9%, transparent);
 }
 .college-erp .erp-table-panel.is-single-card .erp-search input {
   flex: 1;
@@ -3609,9 +3609,9 @@ body:has(.college-erp dialog[open]) {
   height: 32px;
   min-height: 0;
   padding: 0 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   font-size: 12px;
 }
 .college-erp .erp-table-panel.is-single-card .erp-table-count {
@@ -3621,7 +3621,7 @@ body:has(.college-erp dialog[open]) {
   white-space: nowrap;
 }
 .college-erp .erp-table-panel.is-single-card .erp-table-count strong {
-  color: #171b23;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 .college-erp .erp-table-panel.is-single-card :is(.erp-export-actions, .erp-pdf-actions) {
@@ -3637,17 +3637,17 @@ body:has(.college-erp dialog[open]) {
   height: 32px;
   min-height: 0;
   padding: 0 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface);
   color: #1f2a36;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
 .college-erp .erp-table-panel.is-single-card .erp-table-tools button:hover:not(:disabled) {
-  border-color: #1d4ed8;
-  background: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
 }
 @media (max-width: 760px) {
   .college-erp .erp-table-panel.is-single-card .erp-card-filters > label {
@@ -3713,7 +3713,7 @@ body:has(.college-erp dialog[open]) {
 
 /* Sidebar and header, matched to the dashboard reference. */
 .college-erp {
-  --erp-bg: #ffffff;
+  --erp-bg: var(--color-surface);
 }
 .college-erp .erp-sidebar {
   background: var(--erp-sidebar);
@@ -3738,21 +3738,21 @@ body:has(.college-erp dialog[open]) {
 }
 .college-erp .erp-nav-single a:is(.active, [aria-current="page"]),
 .college-erp .erp-nav-group a:is(.active, [aria-current="page"]) {
-  background: #dbeafe;
+  background: var(--color-primary-light);
   border-radius: 10px;
-  color: #171b23;
+  color: var(--color-text-primary);
 }
 .college-erp .erp-sidebar .erp-nav-group a:is(.active, [aria-current="page"]),
 .college-erp .erp-sidebar .erp-nav-group a:is(.active, [aria-current="page"]):is(:hover, :focus-visible),
 .college-erp .erp-sidebar .erp-nav-group a:is(.active, [aria-current="page"]) :is(span, svg) {
-  color: #171b23;
+  color: var(--color-text-primary);
 }
 .college-erp .erp-campus-card {
   align-items: center;
-  background: #ffffff12;
-  border: 1px solid #ffffff14;
+  background: color-mix(in srgb, var(--color-surface) 7.06%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 7.84%, transparent);
   border-radius: 12px;
-  color: #bfdbfe;
+  color: var(--color-primary-light);
   display: flex;
   gap: 10px;
   margin: 10px 14px 0;
@@ -3767,12 +3767,12 @@ body:has(.college-erp dialog[open]) {
   min-width: 0;
 }
 .college-erp .erp-campus-card strong {
-  color: #dbeafe;
+  color: var(--color-primary-light);
   font-size: 13px;
   font-weight: 600;
 }
 .college-erp .erp-campus-card small {
-  color: #bfdbfe;
+  color: var(--color-primary-light);
   font-size: 11px;
 }
 .college-erp.erp-compact .erp-campus-card {
@@ -3787,12 +3787,12 @@ body:has(.college-erp dialog[open]) {
 .college-erp .erp-topbar {
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   backdrop-filter: blur(18px) saturate(160%);
-  background: #ffffff;
-  border: 1px solid #ffffff99;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 60%, transparent);
   border-radius: 16px;
   box-shadow:
-    0 8px 28px #1e40af1f,
-    inset 0 1px 0 #ffffffb3;
+    0 8px 28px color-mix(in srgb, var(--color-primary-hover) 12.16%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-surface) 70.2%, transparent);
   gap: 12px;
   height: 64px;
   margin: 12px 20px 0;
@@ -3805,56 +3805,56 @@ body:has(.college-erp dialog[open]) {
   font-weight: 500;
 }
 .college-erp .erp-global-search {
-  background: #ffffff8c;
-  border: 1px solid #ffffffb3;
+  background: color-mix(in srgb, var(--color-surface) 54.9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 70.2%, transparent);
   border-radius: 12px;
-  box-shadow: inset 0 1px 2px #1e40af12;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--color-primary-hover) 7.06%, transparent);
   max-width: 460px;
   transition:
     background-color 150ms ease,
     box-shadow 150ms ease;
 }
 .college-erp .erp-global-search:focus-within {
-  background: #fff;
-  box-shadow: 0 0 0 2px #3b82f6;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 .college-erp .erp-header-actions summary {
-  background: linear-gradient(135deg, #1d4ed8, #1d4ed8);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary));
   border: 0;
   border-radius: 10px;
-  color: #fff;
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 600;
   min-height: 40px;
   touch-action: manipulation;
 }
 .college-erp .erp-header-actions summary:hover {
-  background: #fff;
-  color: #171b23;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 .college-erp .erp-profile-menu summary {
-  background: #ffffff8c;
-  border: 1px solid #ffffffb3;
+  background: color-mix(in srgb, var(--color-surface) 54.9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 70.2%, transparent);
   border-radius: 14px;
   min-height: 46px;
   padding: 3px 10px 3px 4px;
   transition: background-color 150ms ease;
 }
 .college-erp .erp-profile-menu summary:hover {
-  background: #fff;
+  background: var(--color-surface);
 }
 .college-erp .erp-profile-menu summary strong {
-  color: #171b23;
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
 }
 .college-erp .erp-profile-menu summary small {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 .college-erp .erp-avatar {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 700;
   height: 38px;

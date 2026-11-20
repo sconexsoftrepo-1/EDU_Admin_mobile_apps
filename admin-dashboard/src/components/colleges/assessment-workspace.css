@@ -15,7 +15,7 @@
   flex: 1;
 }
 .assessment-tabs button[aria-selected="true"] {
-  background: var(--edu-primary, #1d4ed8);
+  background: var(--edu-primary, var(--color-primary));
   color: white;
 }
 .assessment-performance {
@@ -25,7 +25,7 @@
 }
 .assessment-performance > div {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 18px 24px;
   min-width: 180px;
@@ -37,7 +37,7 @@
 .assessment-table {
   overflow: auto;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 16px;
 }
 .assessment-table table {
@@ -49,10 +49,10 @@
 .assessment-table td {
   text-align: left;
   padding: 16px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 .assessment-table th {
-  background: #ffffff;
+  background: var(--color-surface);
 }
 .assessment-form {
   display: grid;
@@ -78,7 +78,7 @@
 .assessment-form textarea {
   font: inherit;
   padding: 12px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 9px;
   width: 100%;
   box-sizing: border-box;
@@ -88,7 +88,7 @@
   min-height: 110px;
 }
 .assessment-form fieldset {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 22px;
   min-width: 0;
@@ -103,7 +103,7 @@
 }
 .assessment-curriculum > div {
   padding: 14px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 10px;
 }
 .assessment-curriculum span {

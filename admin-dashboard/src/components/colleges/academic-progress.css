@@ -17,11 +17,11 @@
 }
 .ap-heading p,
 .ap-panel p {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 .ap-eyebrow {
-  color: #1e40af;
+  color: var(--color-primary-hover);
   font-size: 13px;
   font-weight: 700;
 }
@@ -47,14 +47,14 @@
 .ap-metrics article,
 .ap-panel {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 24px;
   min-width: 0;
 }
 .ap-metrics article span {
   display: block;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 .ap-metrics article strong {
@@ -92,9 +92,9 @@
   flex-wrap: wrap;
 }
 .ap-tabs button[aria-selected="true"] {
-  background: #1e40af;
+  background: var(--color-primary-hover);
   color: white;
-  border-color: #1e40af;
+  border-color: var(--color-primary-hover);
 }
 .ap-classes,
 .ap-subjects {
@@ -104,7 +104,7 @@
 }
 .ap-classes article,
 .ap-subjects article {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 18px;
   display: flex;
@@ -129,7 +129,7 @@
 }
 .ap-subjects article span {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .ap-comparison {
   display: grid;
@@ -144,14 +144,14 @@
 }
 .ap-bar-track {
   height: 12px;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 10px;
   overflow: hidden;
 }
 .ap-bar-track i {
   display: block;
   height: 100%;
-  background: #1d4ed8;
+  background: var(--color-primary);
   border-radius: 10px;
 }
 .ap-semester-chart {
@@ -172,7 +172,7 @@
 .ap-semester-chart > button > div {
   height: 110px;
   width: 40px;
-  background: #e2e8f0;
+  background: var(--color-border);
   display: flex;
   align-items: end;
   border-radius: 7px;
@@ -191,19 +191,19 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 15px;
-  background: #ffffff;
+  background: var(--color-surface);
   padding: 18px;
   border-radius: 12px;
 }
 .ap-semester-stats span {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .ap-semester-stats strong {
   display: block;
   font-size: 24px;
   margin-bottom: 5px;
-  color: #374151;
+  color: var(--color-text-primary);
 }
 .ap-table {
   overflow: auto;
@@ -218,11 +218,11 @@
 .ap-table td {
   padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
   vertical-align: top;
 }
 .ap-table th {
-  background: #ffffff;
+  background: var(--color-surface);
   font-size: 13px;
 }
 .ap-table details p {
@@ -232,7 +232,7 @@
 .ap-badge {
   padding: 5px 9px;
   border-radius: 5px;
-  background: #e2e8f0;
+  background: var(--color-border);
   font-size: 12px;
   white-space: nowrap;
 }
@@ -247,8 +247,8 @@
 }
 .ap-note {
   padding: 15px;
-  border-left: 3px solid #4b5563;
-  background: #eff6ff;
+  border-left: 3px solid var(--color-text-secondary);
+  background: var(--color-primary-subtle);
 }
 .ap-editor {
   display: grid;
@@ -257,7 +257,7 @@
 }
 .ap-editor input:not([type="checkbox"]) {
   font: inherit;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 8px;
   padding: 11px;
   width: 100%;
@@ -267,7 +267,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 20px;
 }
@@ -334,18 +334,18 @@
   min-height: 42px;
   padding: 10px 16px;
   white-space: nowrap;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 9px;
 }
 .college-erp .ap-workspace nav.ap-tabs > button[aria-selected="true"],
 .ap-section-drawer nav.ap-tabs > button[aria-selected="true"] {
-  background: #1e40af;
-  border-color: #1e40af;
-  color: #fff;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: var(--color-surface);
 }
-.ap-batch-manager table small { display: block; margin-top: 6px; color: #4b5563; }
+.ap-batch-manager table small { display: block; margin-top: 6px; color: var(--color-text-secondary); }
 .ap-section-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 16px; }
-.ap-section-settings > div { display: grid; gap: 12px; padding: 18px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; }
+.ap-section-settings > div { display: grid; gap: 12px; padding: 18px; border: 1px solid var(--color-border); border-radius: 12px; background: white; }
 .ap-section-drawer { width: min(1380px, calc(100vw - 24px)); }
 .ap-section-drawer .ap-table-wrap { overflow-x: auto; }
 .ap-section-drawer .ap-table-wrap table { min-width: 650px; }
@@ -355,7 +355,7 @@
  .ap-workspace .ap-panel { padding: 18px; }
 }
 .college-erp .erp-api-drawer.erp-academics-drawer > header {
-  background: #fff;
+  background: var(--color-surface);
   z-index: 5;
   isolation: isolate;
 }

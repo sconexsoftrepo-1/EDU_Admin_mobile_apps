@@ -14,7 +14,7 @@
   cursor: pointer;
 }
 .hr-row:hover td {
-  background: #ffffff;
+  background: var(--color-surface);
 }
 .stf-table .hr-name,
 .hr-name {
@@ -35,20 +35,20 @@
 .hr-name small,
 .hr-by {
   display: block;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .hr-meter {
   width: 120px;
   height: 8px;
   border-radius: 4px;
-  background: #e2e8f0;
+  background: var(--color-border);
   overflow: hidden;
 }
 .hr-meter span {
   display: block;
   height: 100%;
-  background: #1d4ed8;
+  background: var(--color-primary);
   border-radius: 4px;
 }
 .hr-leave {
@@ -63,17 +63,17 @@
   font-size: 12.5px;
 }
 .hr-leave-head span {
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .hr-leave-bar {
   display: flex;
   height: 10px;
   border-radius: 5px;
-  background: #e2e8f0;
+  background: var(--color-border);
   overflow: hidden;
 }
 .hr-leave-bar .taken {
-  background: #1d4ed8;
+  background: var(--color-primary);
 }
 .hr-leave-bar .pending {
   background: repeating-linear-gradient(
@@ -85,7 +85,7 @@
   );
 }
 .hr-leave small {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 11.5px;
 }
 .hr-pending {
@@ -118,7 +118,7 @@
   gap: 2px;
 }
 .hr-pending small {
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .hr-drawer {
   display: grid;
@@ -130,7 +130,7 @@
 }
 .hr-drawer h3 small {
   font-weight: 500;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 12.5px;
 }
 .hr-leave-grid {
@@ -148,33 +148,33 @@
   gap: 1px;
   padding: 6px 8px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   font-size: 11.5px;
 }
 .hr-day span,
 .hr-day small {
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .hr-day strong {
   font-size: 15px;
 }
 .hr-day.present {
-  background: #dbeafe;
-  border-color: #cbd5e1;
+  background: var(--color-primary-light);
+  border-color: var(--color-border-strong);
 }
 .hr-day.half_day {
-  background: #dbeafe;
+  background: var(--color-primary-light);
 }
 .hr-day.leave {
-  background: #e2e8f0;
+  background: var(--color-border);
 }
 .hr-day.absent {
   background: #f7e1df;
   border-color: #e7b8b3;
 }
 .hr-day.holiday {
-  background: #ffffff;
+  background: var(--color-surface);
   opacity: 0.75;
 }
 .hr-form {
@@ -185,20 +185,20 @@
   display: grid;
   gap: 4px;
   font-size: 12.5px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 .hr-form input,
 .hr-form select {
   height: 38px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 10px;
   padding: 0 10px;
   font: inherit;
   font-size: 14px;
-  color: #171b23;
-  background: #fff;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
 }
 .pay-slip-paid {
   font-size: 12px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }

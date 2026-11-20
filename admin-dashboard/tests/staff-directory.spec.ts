@@ -25,7 +25,7 @@ test("compact detail tabs fit a small mobile drawer and support keyboard selecti
   await expect(files).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(files).toHaveAttribute("aria-pressed", "true");
-  await expect(files).toHaveCSS("border-bottom-color", "rgb(74, 46, 18)");
+  await expect(files).toHaveCSS("border-bottom-color", "rgb(28, 70, 184)");
   expect((await tabs.boundingBox())!.width).toBeLessThan(285);
   expect((await files.boundingBox())!.width).toBeLessThan(160);
   expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(

@@ -1,9 +1,9 @@
 /* Local authentication identity; no changes to public sites or workspaces. */
 .college-login.campus-auth {
-  --ca-navy: #10264b;
-  --ca-muted: #61718c;
-  --ca-gold: var(--college-accent, #1d4ed8);
-  --ca-ivory: #ffffff;
+  --ca-navy: var(--color-text-primary);
+  --ca-muted: var(--color-text-secondary);
+  --ca-gold: var(--college-accent, var(--color-primary));
+  --ca-ivory: var(--color-surface);
   display: grid;
   grid-template-columns: 55% 45%;
   grid-template-rows: auto;
@@ -48,13 +48,13 @@
   z-index: -2;
   border-bottom-right-radius: 45% 14%;
   background:
-    linear-gradient(90deg, #eff6ffe6 0%, #eff6ffba 29%, #eff6ff00 70%),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-primary-subtle) 90.2%, transparent) 0%, color-mix(in srgb, var(--color-primary-subtle) 72.94%, transparent) 29%, color-mix(in srgb, var(--color-primary-subtle) 0%, transparent) 70%),
     linear-gradient(
       0deg,
-      #ffffff 0%,
+      var(--color-surface) 0%,
       transparent 20%,
       transparent 92%,
-      #ffffff40
+      color-mix(in srgb, var(--color-surface) 25.1%, transparent)
     );
 }
 .ca-hero::after {
@@ -81,7 +81,7 @@
   transition: color 150ms;
 }
 .campus-auth .ca-back:hover {
-  color: #1e40af;
+  color: var(--color-primary-hover);
 }
 .ca-hero-copy {
   margin: clamp(70px, 13vh, 150px) 10% 65px;
@@ -89,7 +89,7 @@
   animation: ca-enter 500ms ease both;
 }
 .ca-eyebrow {
-  color: #1e40af;
+  color: var(--color-primary-hover);
   font-size: 11px;
   font-weight: 650;
   letter-spacing: 0.26em;
@@ -112,7 +112,7 @@
   letter-spacing: -0.045em;
 }
 .ca-hero h1 span {
-  color: #1d4ed8;
+  color: var(--color-primary);
 }
 .ca-intro {
   max-width: 310px;
@@ -131,8 +131,8 @@
   background: linear-gradient(
     0deg,
     var(--ca-ivory) 15%,
-    #ffffffe6 80%,
-    #ffffff00
+    color-mix(in srgb, var(--color-surface) 90.2%, transparent) 80%,
+    color-mix(in srgb, var(--color-surface) 0%, transparent)
   );
 }
 .ca-features li {
@@ -147,18 +147,18 @@
   height: 46px;
   border-radius: 50%;
   color: white;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  box-shadow: inset 0 0 0 1px #ffffff50;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-surface) 31.37%, transparent);
   transition: transform 180ms;
 }
 .ca-features li:nth-child(2) .ca-feature-icon {
-  background: linear-gradient(135deg, #5fa8df, #2672ba);
+  background: var(--color-accent);
 }
 .ca-features li:nth-child(3) .ca-feature-icon {
-  background: linear-gradient(135deg, #60b39e, #277d69);
+  background: var(--color-primary);
 }
 .ca-features li:nth-child(4) .ca-feature-icon {
-  background: linear-gradient(135deg, #b79bdd, #7e5bb8);
+  background: var(--color-primary-dark);
 }
 .ca-features li:hover .ca-feature-icon {
   transform: translateY(-3px);
@@ -202,7 +202,7 @@
   letter-spacing: 0.04em;
 }
 .ca-hero-footer p span {
-  color: #3b82f6;
+  color: var(--color-accent);
   font:
     12px Arial,
     sans-serif;
@@ -226,7 +226,7 @@
   padding: 40px 30px;
   isolation: isolate;
   background:
-    radial-gradient(ellipse at 0% 95%, #3b82f638, transparent 52%),
+    radial-gradient(ellipse at 0% 95%, color-mix(in srgb, var(--color-accent) 21.96%, transparent), transparent 52%),
     var(--ca-ivory);
 }
 .ca-form-panel::before {
@@ -237,16 +237,16 @@
   width: 50%;
   height: 28%;
   z-index: -1;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe4d);
+  background: linear-gradient(135deg, var(--color-primary-subtle), color-mix(in srgb, var(--color-primary-light) 30.2%, transparent));
   border-bottom-left-radius: 100%;
 }
 .ca-card {
   width: 100%;
   max-width: 468px;
   padding: 34px 36px 30px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 24px;
-  background: #fffffffa;
+  background: color-mix(in srgb, var(--color-surface) 98.04%, transparent);
   box-shadow:
     0 22px 60px #37415116,
     0 3px 10px #37415105;
@@ -297,7 +297,7 @@
   min-height: 50px;
   border: 1px solid #d2dae7;
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-surface);
   color: #536787;
   transition:
     border-color 150ms,
@@ -328,7 +328,7 @@
 }
 .ca-input:focus-within {
   border-color: var(--ca-gold);
-  box-shadow: 0 0 0 3px #1d4ed81b;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10.59%, transparent);
 }
 .ca-input:has([aria-invalid="true"]) {
   border-color: #b34646;
@@ -356,11 +356,11 @@
   min-height: 50px;
   margin-top: 6px;
   padding: 12px;
-  border: 1px solid #1d4ed8;
+  border: 1px solid var(--color-primary);
   border-radius: 11px;
-  color: #fff;
-  background: linear-gradient(110deg, #1d4ed8, #1d4ed8);
-  box-shadow: 0 6px 14px #1d4ed814;
+  color: var(--color-surface);
+  background: linear-gradient(110deg, var(--color-primary), var(--color-primary));
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--color-primary) 7.84%, transparent);
   font-size: 15px;
   font-weight: 600;
   transition:
@@ -370,8 +370,8 @@
 }
 .ca-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: linear-gradient(110deg, #1d4ed8, #1e40af);
-  box-shadow: 0 8px 20px #1d4ed82c;
+  background: linear-gradient(110deg, var(--color-primary), var(--color-primary-hover));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--color-primary) 17.25%, transparent);
 }
 .ca-submit:active:not(:disabled) {
   transform: translateY(0);
@@ -437,8 +437,8 @@
   padding: 0 14px;
   border: 1px solid #d2dae7;
   border-radius: 10px;
-  color: #10264b;
-  background: #fff;
+  color: var(--color-primary-dark);
+  background: var(--color-surface);
   font:
     400 16px var(--sans),
     Arial,
@@ -467,7 +467,7 @@
 .campus-auth .role-select-trigger:focus-visible {
   outline: 0;
   border-color: var(--ca-gold);
-  box-shadow: 0 0 0 3px #1d4ed81b;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10.59%, transparent);
 }
 .campus-auth .role-select-trigger > span svg {
   color: #536787;
@@ -502,19 +502,19 @@
 }
 .campus-auth .role-select-list li svg {
   flex: 0 0 auto;
-  color: #10264b;
+  color: var(--color-primary-dark);
 }
 .campus-auth .role-select-list li.is-active {
   background: #f1f4f9;
   box-shadow: inset 0 0 0 1px #d2dae7;
 }
 .campus-auth .role-select-list li[aria-selected="true"] {
-  background: #dbeafe;
-  color: #10264b;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
   font-weight: 600;
 }
 .campus-auth .role-select-list li[aria-selected="true"] svg {
-  color: #1d4ed8;
+  color: var(--color-primary);
 }
 .ca-spinner {
   animation: ca-spin 900ms linear infinite;
@@ -670,8 +670,8 @@
     inset: 0;
     border-radius: 0;
     background:
-      linear-gradient(90deg, #eff6ffcf, #eff6ff30 60%),
-      linear-gradient(0deg, #ffffff 0%, transparent 40%);
+      linear-gradient(90deg, color-mix(in srgb, var(--color-primary-subtle) 81.18%, transparent), color-mix(in srgb, var(--color-primary-subtle) 18.82%, transparent) 60%),
+      linear-gradient(0deg, var(--color-surface) 0%, transparent 40%);
   }
   .ca-hero::after,
   .ca-hero-copy,
@@ -817,7 +817,7 @@
 .campus-auth .ca-otp legend {
   margin-bottom: 10px;
   padding: 0;
-  color: #171b23;
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -832,11 +832,11 @@
   height: clamp(44px, 12vw, 58px);
   margin: 0;
   padding: 0;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 12px;
-  background: #fff;
-  color: #171b23;
-  caret-color: #1d4ed8;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  caret-color: var(--color-primary);
   font: 650 clamp(21px, 5vw, 27px)/1 var(--sans), sans-serif;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -844,20 +844,20 @@
 }
 .campus-auth .ca-otp-digits input.is-filled {
   border-color: #93c5fd;
-  background: #eff6ff;
+  background: var(--color-primary-subtle);
   animation: ca-digit-enter 160ms ease-out;
 }
 .campus-auth .ca-otp-digits input:focus-visible {
-  border-color: #1d4ed8;
-  outline: 2px solid #1d4ed8;
+  border-color: var(--color-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  background: #fff;
-  box-shadow: 0 0 0 5px #1d4ed810;
+  background: var(--color-surface);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 6.27%, transparent);
   transform: translateY(-2px);
 }
 .campus-auth .ca-otp-digits input:disabled {
   opacity: 1;
-  -webkit-text-fill-color: #171b23;
+  -webkit-text-fill-color: var(--color-text-primary);
   cursor: wait;
 }
 .campus-auth .ca-otp.is-invalid .ca-otp-digits {
@@ -880,10 +880,10 @@
   align-items: flex-start;
   gap: 9px;
   padding: 11px 12px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid var(--color-primary-light);
   border-radius: 10px;
-  color: #1e40af;
-  background: #eff6ff;
+  color: var(--color-primary-hover);
+  background: var(--color-primary-subtle);
   font-size: 12px;
   line-height: 1.5;
   animation: ca-code-enter 220ms ease-out both;
@@ -926,4 +926,42 @@
 @keyframes ca-check-enter {
   from { opacity: 0; transform: scale(.6) rotate(-15deg); }
   to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* Campus reference: photography carries the identity, the form stays quiet. */
+.college-login.campus-auth { background: var(--color-background); font-family: var(--portal-font); }
+.campus-auth .ca-form-panel { background: linear-gradient(150deg, var(--color-surface) 35%, var(--color-primary-subtle)); }
+.campus-auth .ca-form-panel::before { display: none; }
+.campus-auth .ca-card {
+  border-radius: var(--radius-xl);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-hover);
+  background: var(--color-surface);
+  padding: 30px;
+}
+.campus-auth .ca-branding h2 {
+  font: 700 clamp(25px, 2.2vw, 30px)/1.2 var(--portal-font);
+  letter-spacing: -.04em;
+}
+.campus-auth .ca-input { border-color: var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+.campus-auth .ca-submit {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 3px 8px rgb(36 84 214 / 12%);
+}
+.campus-auth .ca-submit:hover:not(:disabled) { background: var(--color-primary-hover); border-color: var(--color-primary-hover); transform: none; }
+.campus-auth .ca-submit.is-verified { background: #15803d; border-color: #15803d; }
+.campus-auth .ca-hero-footer { min-height: 66px; padding-block: 18px; background: var(--color-primary-subtle); }
+.campus-auth .ca-wave, .campus-auth .ca-footer-building { display: none; }
+.campus-auth .ca-hero-footer p { color: var(--color-primary-dark); font-size: 21px; }
+.campus-auth .ca-help { background: var(--color-primary-subtle); border-color: var(--color-border); }
+.campus-auth .ca-help p { color: var(--color-text-secondary); font-size: 11px; }
+.campus-auth .ca-code-help { font-weight: 400; }
+@media (max-width: 767px), (max-width: 991px) and (max-height: 500px) {
+  .campus-auth .ca-hero { height: 110px; }
+  .campus-auth .ca-form-panel { padding: 0 16px 20px; background: var(--color-background); }
+  .campus-auth .ca-card { padding: 22px 20px; }
+  .campus-auth .ca-logo { width: 60px; height: 60px; margin-bottom: 12px; }
+  .campus-auth .ca-form { margin-top: 20px; gap: 14px; }
 }

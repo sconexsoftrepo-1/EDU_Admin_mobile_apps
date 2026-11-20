@@ -30,8 +30,8 @@
   cursor: pointer;
 }
 .date-input .date-input-open:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 /* Kept in the layout (so the browser can anchor its picker) but invisible and unclickable. */
 .date-input > input.date-input-native {

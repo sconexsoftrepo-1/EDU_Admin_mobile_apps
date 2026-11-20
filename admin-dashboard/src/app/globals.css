@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;750;800&display=swap");
+@import "../styles/portal-tokens.css";
 :root {
   --ink: #21143c;
   --purple: #7639cc;
@@ -7,11 +8,11 @@
   --line: #ece8f2;
   --serif: Georgia, "Times New Roman", serif;
   --sans: "DM Sans", Arial, sans-serif;
-  --edu-ink: #171b23;
-  --edu-action: #1d4ed8;
-  --edu-action-hover: #1e40af;
-  --edu-surface: #fff;
-  --edu-border: #e2e8f0;
+  --edu-ink: var(--color-text-primary);
+  --edu-action: var(--color-primary);
+  --edu-action-hover: var(--color-primary-hover);
+  --edu-surface: var(--color-surface);
+  --edu-border: var(--color-border);
   --edu-radius: 12px;
   --edu-drawer-radius: 22px 0 0 22px;
   --edu-drawer-gutter: clamp(20px, 2.5vw, 32px);

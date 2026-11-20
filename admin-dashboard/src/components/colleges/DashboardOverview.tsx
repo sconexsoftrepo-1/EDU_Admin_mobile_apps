@@ -38,6 +38,7 @@ import {
 } from "@/services/api";
 import "./dashboard-overview.css";
 import { formatDate } from "@/lib/colleges/dates";
+import WorkspaceEmptyState from "./WorkspaceEmptyState";
 
 const DashboardFeeChart = dynamic(() => import("./DashboardFeeChart"), {
   ssr: false,
@@ -250,7 +251,7 @@ const HeadLink = ({ href, label }: { href?: string; label: string }) =>
     </Link>
   ) : null;
 const Empty = ({ children }: { children: ReactNode }) => (
-  <p className="dov-empty">{children}</p>
+  <WorkspaceEmptyState className="dov-empty">{children}</WorkspaceEmptyState>
 );
 const SectionFailed = ({ retry }: { retry: () => void }) => (
   <div className="dov-failed" role="alert">
@@ -537,7 +538,9 @@ function ActivityCard({
           })}
         </ul>
       ) : (
-        <Empty>No campus activities scheduled.</Empty>
+        <WorkspaceEmptyState className="dov-empty" icon={CalendarDays} title="No campus activities scheduled">
+          Campus events and upcoming activities will appear here.
+        </WorkspaceEmptyState>
       )}
     </Card>
   );
@@ -626,7 +629,7 @@ function QuickActions({ actions }: { actions: DashboardAction[] }) {
   );
 }
 
-const FUNNEL_COLOURS = ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"];
+const FUNNEL_COLOURS = ["#2454d6", "#3478f6", "#60a5fa", "#93c5fd", "#dceaff"];
 function Funnel({
   stages,
 }: {

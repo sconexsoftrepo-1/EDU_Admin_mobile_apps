@@ -12,9 +12,9 @@
 .la-filters select {
   min-height: 38px;
   padding: 0 12px;
-  border: 1px solid var(--erp-border, #e2e8f0);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-surface);
   font: inherit;
 }
 .la-filters input {
@@ -26,8 +26,8 @@
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
-  background: var(--erp-raised, #ffffff);
-  border: 1px solid var(--erp-border, #e2e8f0);
+  background: var(--erp-raised, var(--color-surface));
+  border: 1px solid var(--erp-border, var(--color-border));
 }
 .la-tabs button {
   border: 0;
@@ -37,11 +37,11 @@
   font: inherit;
   font-size: 13px;
   cursor: pointer;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .la-tabs button.is-active {
-  background: #fff;
-  color: var(--erp-ink, #171b23);
+  background: var(--color-surface);
+  color: var(--erp-ink, var(--color-text-primary));
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.08);
 }
 .la-tabs small {
@@ -60,19 +60,19 @@
   text-align: left;
   font-size: 12px;
   font-weight: 600;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
   padding: 10px 12px;
-  border-bottom: 1px solid var(--erp-border, #e2e8f0);
+  border-bottom: 1px solid var(--erp-border, var(--color-border));
   white-space: nowrap;
 }
 .la-table td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--erp-border, #e2e8f0);
+  border-bottom: 1px solid var(--erp-border, var(--color-border));
   vertical-align: middle;
 }
 .la-table tr.is-inactive td {
-  color: var(--erp-muted, #4b5563);
-  background: #ffffff;
+  color: var(--erp-muted, var(--color-text-secondary));
+  background: var(--color-surface);
 }
 .la-person {
   display: flex;
@@ -81,7 +81,7 @@
 }
 .la-person > svg {
   flex: none;
-  color: var(--erp-accent, #1d4ed8);
+  color: var(--erp-accent, var(--color-primary));
 }
 .la-person span {
   display: grid;
@@ -90,7 +90,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
   font-size: 12px;
 }
 .la-chips {
@@ -105,8 +105,8 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 12px;
-  background: color-mix(in srgb, var(--erp-accent, #1d4ed8) 11%, #fff);
-  color: var(--erp-ink, #171b23);
+  background: color-mix(in srgb, var(--erp-accent, var(--color-primary)) 11%, var(--color-surface));
+  color: var(--erp-ink, var(--color-text-primary));
 }
 .la-chip-extra {
   background: #eef1f7;
@@ -137,8 +137,8 @@
   gap: 5px;
   padding: 5px 10px;
   border-radius: 8px;
-  border: 1px solid var(--erp-border, #e2e8f0);
-  background: #fff;
+  border: 1px solid var(--erp-border, var(--color-border));
+  background: var(--color-surface);
   font: inherit;
   font-size: 12.5px;
   cursor: pointer;
@@ -153,8 +153,8 @@
   border-color: #b9e0c4;
 }
 .la-row-actions .la-off {
-  color: #1e40af;
-  border-color: #bfdbfe;
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary-light);
 }
 .la-row-actions .la-delete {
   color: var(--erp-danger, #b43540);
@@ -169,12 +169,12 @@
 }
 .la-confirm .erp-danger {
   background: var(--erp-danger, #b43540);
-  color: #fff;
+  color: var(--color-surface);
   border-color: var(--erp-danger, #b43540);
 }
 .la-empty {
   padding: 14px;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 /* Login form (drawer) */
 .la-form {
@@ -207,16 +207,16 @@
 .la-grid select {
   min-height: 40px;
   padding: 0 11px;
-  border: 1px solid var(--erp-border, #e2e8f0);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 10px;
   font: inherit;
   font-weight: 400;
-  background: #fff;
+  background: var(--color-surface);
   width: 100%;
   box-sizing: border-box;
 }
 .la-grid input[readonly] {
-  background: var(--erp-raised, #ffffff);
+  background: var(--erp-raised, var(--color-surface));
 }
 .la-input-icon {
   position: relative;
@@ -227,7 +227,7 @@
   left: 11px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .la-input-icon input {
   padding-left: 32px;
@@ -242,24 +242,24 @@
   align-items: center;
   gap: 9px;
   padding: 9px 11px;
-  border: 1px solid var(--erp-border, #e2e8f0);
+  border: 1px solid var(--erp-border, var(--color-border));
   border-radius: 11px;
-  background: #fff;
+  background: var(--color-surface);
   cursor: pointer;
 }
 .la-checks label.is-on {
-  border-color: var(--erp-accent, #1d4ed8);
-  background: color-mix(in srgb, var(--erp-accent, #1d4ed8) 7%, #fff);
+  border-color: var(--erp-accent, var(--color-primary));
+  background: color-mix(in srgb, var(--erp-accent, var(--color-primary)) 7%, var(--color-surface));
 }
 .la-checks label > svg {
   flex: none;
-  color: var(--erp-accent, #1d4ed8);
+  color: var(--erp-accent, var(--color-primary));
 }
 .la-checks input {
   width: 17px;
   height: 17px;
   flex: none;
-  accent-color: var(--erp-accent, #1d4ed8);
+  accent-color: var(--erp-accent, var(--color-primary));
 }
 .la-checks span {
   display: grid;
@@ -267,12 +267,12 @@
 }
 .la-checks small {
   font-size: 12px;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .la-note {
   margin: 0;
   font-size: 13px;
-  color: var(--erp-muted, #4b5563);
+  color: var(--erp-muted, var(--color-text-secondary));
 }
 .la-error {
   margin: 0;
@@ -289,19 +289,19 @@
   position: sticky;
   bottom: 0;
   padding: 12px 0 4px;
-  background: linear-gradient(transparent, #fff 30%);
+  background: linear-gradient(transparent, var(--color-surface) 30%);
 }
 .la-actions button {
   min-height: 40px;
   padding: 0 16px;
   border-radius: 10px;
-  border: 1px solid var(--erp-border, #e2e8f0);
-  background: #fff;
+  border: 1px solid var(--erp-border, var(--color-border));
+  background: var(--color-surface);
   font: inherit;
   cursor: pointer;
 }
 .la-actions .erp-primary {
-  background: var(--erp-accent, #1d4ed8);
-  color: #fff;
-  border-color: var(--erp-accent, #1d4ed8);
+  background: var(--erp-accent, var(--color-primary));
+  color: var(--color-surface);
+  border-color: var(--erp-accent, var(--color-primary));
 }

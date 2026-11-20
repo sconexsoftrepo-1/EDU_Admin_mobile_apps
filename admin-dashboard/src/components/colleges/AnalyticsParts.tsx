@@ -4,6 +4,7 @@ import { RefreshCw, type LucideProps } from "lucide-react";
 import { money } from "@/data/colleges";
 import "./analytics-workspace.css";
 import { formatDate } from "@/lib/colleges/dates";
+import WorkspaceEmptyState from "./WorkspaceEmptyState";
 
 /** The analytics APIs send rupees; money() takes paise. */
 export const rupees = (value: number) => money(value * 100);
@@ -16,7 +17,7 @@ export const shortDate = (value: string | null | undefined) => formatDate(value)
 export const percentOf = (part: number, whole: number) =>
   whole ? Math.round((part * 1000) / whole) / 10 : 0;
 
-const COLOURS = ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#1e3a8a", "#2563eb", "#bfdbfe", "#0e7490", "#64748b", "#7dd3fc"];
+const COLOURS = ["#2454d6", "#3478f6", "#60a5fa", "#93c5fd", "#1e3a8a", "#2563eb", "#dceaff", "#0e7490", "#64748b", "#7dd3fc"];
 export const colourAt = (index: number) => COLOURS[index % COLOURS.length];
 
 export type Slice = { key: string; label: string; value: number; display?: string };
@@ -232,7 +233,7 @@ export function FilterDate({
 }
 
 export const Empty = ({ children }: { children: ReactNode }) => (
-  <p className="anw-empty">{children}</p>
+  <WorkspaceEmptyState className="anw-empty">{children}</WorkspaceEmptyState>
 );
 
 export function LoadFailed({ message, retry }: { message: string; retry: () => void }) {

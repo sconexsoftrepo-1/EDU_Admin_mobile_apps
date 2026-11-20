@@ -1,17 +1,17 @@
 /* Searchable dropdown panel for every native select, in the look of the sign-in role picker. */
 select[data-picking="true"] {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px #3b82f626 !important;
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14.9%, transparent) !important;
   outline: 0 !important;
 }
 .sx-panel {
   animation: sx-in 160ms ease both;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  box-shadow: 0 16px 34px #1e40af26;
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--color-primary-hover) 14.9%, transparent);
   box-sizing: border-box;
-  color: #171b23;
+  color: var(--color-text-primary);
   display: flex;
   flex-direction: column;
   font-family: inherit;
@@ -40,8 +40,8 @@ select[data-picking="true"] {
   z-index: 2147483001;
 }
 .sx-field input {
-  border: 1px solid #3b82f6;
-  box-shadow: 0 0 0 3px #3b82f626;
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14.9%, transparent);
   box-sizing: border-box;
   height: 100%;
   margin: 0;
@@ -49,11 +49,11 @@ select[data-picking="true"] {
   width: 100%;
 }
 .sx-field input::placeholder {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   opacity: 1;
 }
 .sx-chevron {
-  color: #1d4ed8;
+  color: var(--color-primary);
   pointer-events: none;
   position: absolute;
   right: 11px;
@@ -69,7 +69,7 @@ select[data-picking="true"] {
   padding: 0;
 }
 .sx-group {
-  color: #1d4ed8;
+  color: var(--color-primary);
   display: block;
   font-size: 10.5px;
   font-weight: 700;
@@ -94,23 +94,23 @@ select[data-picking="true"] {
   overflow-wrap: anywhere;
 }
 .sx-panel [role="option"] svg {
-  color: #1d4ed8;
+  color: var(--color-primary);
   flex: 0 0 auto;
 }
 .sx-panel [role="option"].is-active {
-  background: #eff6ff;
-  box-shadow: inset 0 0 0 1px #e2e8f0;
+  background: var(--color-primary-subtle);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 .sx-panel [role="option"][aria-selected="true"] {
-  background: #dbeafe;
+  background: var(--color-primary-light);
   font-weight: 600;
 }
 .sx-panel [role="option"][aria-disabled="true"] {
-  color: #64748b;
+  color: var(--color-text-secondary);
   cursor: default;
 }
 .sx-empty {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 13px;
   padding: 10px;
 }

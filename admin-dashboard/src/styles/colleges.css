@@ -2,11 +2,11 @@
 .college-login,
 .college-erp,
 .college-verification {
-  --college-accent: #1d4ed8;
+  --college-accent: var(--color-primary);
   color: #14253b;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.55;
-  background: #ffffff;
+  background: var(--color-surface);
 }
 .college-login *,
 .college-erp * {
@@ -120,7 +120,7 @@
   max-width: 650px;
 }
 .college-verification dl {
-  background: #fff;
+  background: var(--color-surface);
   padding: 30px;
   border: 1px solid #dde3ea;
 }
@@ -153,7 +153,7 @@
   justify-content: center;
   gap: 7px;
   border: 1px solid #d8e1ed;
-  background: #fff;
+  background: var(--color-surface);
   color: #18304e;
   padding: 8px 11px;
   border-radius: 5px;
@@ -173,7 +173,7 @@
 .college-erp select,
 .college-erp textarea {
   border: 1px solid #d5dfeb;
-  background: #fff;
+  background: var(--color-surface);
   color: #17314f;
   padding: 9px 11px;
   border-radius: 5px;
@@ -256,12 +256,12 @@
   min-height: 37px;
 }
 .erp-sidebar nav > a:hover {
-  background: #ffffff0c;
-  color: #fff;
+  background: color-mix(in srgb, var(--color-surface) 4.71%, transparent);
+  color: var(--color-surface);
 }
 .erp-sidebar nav > a.active {
-  background: #ffffff15;
-  color: #fff;
+  background: color-mix(in srgb, var(--color-surface) 8.24%, transparent);
+  color: var(--color-surface);
   box-shadow: inset 3px 0 var(--college-accent);
 }
 .erp-sidebar nav svg {
@@ -270,7 +270,7 @@
 }
 .erp-sidebar-foot {
   padding: 15px 20px;
-  border-top: 1px solid #ffffff18;
+  border-top: 1px solid color-mix(in srgb, var(--color-surface) 9.41%, transparent);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -295,7 +295,7 @@
 }
 .erp-topbar {
   height: 72px;
-  background: #fff;
+  background: var(--color-surface);
   border-bottom: 1px solid var(--erp-border);
   padding: 0 28px;
   display: flex;
@@ -390,7 +390,7 @@
   right: 0;
   top: 50px;
   padding: 20px;
-  background: #fff;
+  background: var(--color-surface);
   min-width: 220px;
   box-shadow: 0 15px 30px #12223822;
   border: 1px solid #dbe4ee;
@@ -476,7 +476,7 @@
 }
 .erp-primary {
   background: #1769e0;
-  color: #fff;
+  color: var(--color-surface);
   border-color: #1769e0;
 }
 .erp-quick-actions {
@@ -491,7 +491,7 @@
   margin-bottom: 23px;
 }
 .erp-metrics > article {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #e0e9f4;
   border-radius: 8px;
   padding: 21px 15px 17px;
@@ -515,8 +515,8 @@
   color: #0aa67d;
 }
 .erp-metrics > article:nth-child(4n + 3) .erp-metric-icon {
-  background: #eff6ff;
-  color: #3b82f6;
+  background: var(--color-primary-subtle);
+  color: var(--color-accent);
 }
 .erp-metrics > article:nth-child(4n + 4) .erp-metric-icon {
   background: #f1eaff;
@@ -546,7 +546,7 @@
   gap: 20px;
 }
 .erp-panel {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #e0e8f2;
   border-radius: 8px;
   padding: 21px;
@@ -769,14 +769,14 @@
   padding: 8px 12px;
   border: 1px solid #d5dfeb;
   border-radius: 5px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .erp-columns > div {
   position: absolute;
   z-index: 8;
   top: 38px;
   right: 0;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid #d7e2ee;
   box-shadow: 0 12px 35px #14253b20;
   padding: 15px;
@@ -1029,7 +1029,7 @@
   padding: 26px;
   max-height: 88vh;
   color: #14253b;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 20px 80px #081b3544;
 }
 .erp-modal::backdrop {
@@ -1067,7 +1067,7 @@
   max-width: min(460px, 90vw);
   z-index: 200;
   background: #122c48;
-  color: #fff;
+  color: var(--color-surface);
   border: 1px solid #496e98;
   border-radius: 8px;
   padding: 16px 18px;
@@ -1080,7 +1080,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: var(--color-surface);
   min-height: 20px;
 }
 .erp-footer {
@@ -1164,7 +1164,7 @@
   min-height: 100vh;
   min-height: 100svh;
   overflow-x: clip;
-  background: #fff;
+  background: var(--color-surface);
 }
 .erp-password {
   display: flex;
@@ -1609,7 +1609,7 @@
   border-radius: 9px;
   overflow: hidden;
   border: 1px solid #d8e4f3;
-  background: #fff;
+  background: var(--color-surface);
 }
 .erp-leadership-note,
 .erp-student-id,
@@ -1910,7 +1910,7 @@
 
 /* Sign-in: form on a white card over a cream panel, crest centred above the welcome text. */
 .college-login {
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 /* Sign-in role picker: list always opens below the field. */
@@ -1944,10 +1944,10 @@
   padding: 4px;
   overflow-y: auto;
   list-style: none;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 12px 28px #171b2324;
+  background: var(--color-surface);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--color-text-primary) 14.12%, transparent);
 }
 .role-select-list li {
   display: flex;
@@ -1960,12 +1960,12 @@
   cursor: pointer;
 }
 .role-select-list li.is-active {
-  background: #dbeafe;
+  background: var(--color-primary-light);
 }
 .role-select-list li[aria-selected="true"] {
-  color: #1d4ed8;
+  color: var(--color-primary);
   font-weight: 600;
 }
 .role-select-list li svg {
-  color: #1d4ed8;
+  color: var(--color-primary);
 }

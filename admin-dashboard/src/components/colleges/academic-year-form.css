@@ -10,26 +10,26 @@
 .edu-academic-year-section {
   padding: 22px;
   margin-bottom: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .edu-academic-year-section h3 {
   margin: 0 0 18px;
   font-size: 16px;
   font-weight: 650;
-  color: #171b23;
+  color: var(--color-text-primary);
 }
 .edu-academic-year-section label {
   display: grid;
   gap: 8px;
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 12px;
   font-weight: 500;
 }
 .edu-academic-year-section p {
   margin: 12px 0 0;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.6;
 }
@@ -43,38 +43,38 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 42px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 7px;
   padding: 10px 12px;
-  color: #171b23;
-  background: #fff;
+  color: var(--color-text-primary);
+  background: var(--color-surface);
   font: inherit;
   font-size: 13px;
   font-weight: 400;
 }
 .edu-academic-year-section input:read-only {
-  background: #ffffff;
-  color: #4b5563;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
 }
 .edu-academic-year-section input:focus {
-  outline: 2px solid #1d4ed820;
-  border-color: #4b5563;
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 12.55%, transparent);
+  border-color: var(--color-text-secondary);
 }
 .edu-academic-year-section .date-input > input {
   padding-right: 40px;
 }
 .edu-academic-year-section .date-input input:disabled {
-  background: #ffffff;
+  background: var(--color-surface);
 }
 .edu-academic-year-generated {
-  border-color: #cbd5e1;
+  border-color: var(--color-border-strong);
 }
 .edu-academic-year-section-title {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  color: #1d4ed8;
+  color: var(--color-primary);
 }
 .edu-academic-year-footer {
   display: flex;
@@ -85,11 +85,11 @@
   bottom: -26px;
   margin: 0 -30px -26px;
   padding: 18px 30px;
-  border-top: 1px solid #e2e8f0;
-  background: #fff;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 .edu-academic-year-footer > span {
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 .edu-academic-year-footer > div {

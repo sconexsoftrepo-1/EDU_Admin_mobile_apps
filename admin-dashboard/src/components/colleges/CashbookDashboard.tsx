@@ -20,14 +20,14 @@ type Unit = "day" | "week" | "month" | "year";
 type Range = Unit | "all";
 type Payment = ReportsAnalyticsData["payments"][number];
 const METHODS = [
-  ["cash", "Cash", "#1d4ed8", Wallet],
+  ["cash", "Cash", "#2454d6", Wallet],
   ["upi", "UPI", "#60a5fa", Smartphone],
   ["bank_transfer", "Bank transfer", "#1e3a8a", Landmark],
 ] as const;
 const NAME: Record<string, string> = { cash: "Cash", upi: "UPI", bank_transfer: "Bank transfer" };
 const compact = (v: number) =>
   v >= 1e7 ? `₹${+(v / 1e7).toFixed(1)}Cr` : v >= 1e5 ? `₹${+(v / 1e5).toFixed(1)}L` : v >= 1e3 ? `₹${+(v / 1e3).toFixed(0)}K` : `₹${v}`;
-const tip = { borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12 };
+const tip = { borderRadius: 10, border: "1px solid #dfe7f2", fontSize: 12 };
 const total = (rows: Payment[]) => rows.reduce((n, p) => n + p.amount, 0);
 
 export default function CashbookDashboard() {
@@ -377,7 +377,7 @@ export default function CashbookDashboard() {
             <div className="rpa-chart">
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={trend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#dfe7f2" vertical={false} />
                   <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
                   <YAxis tickFormatter={compact} tick={{ fontSize: 11 }} width={60} />
                   <Tooltip contentStyle={tip} formatter={(v) => rupees(Number(v))} />

@@ -9,7 +9,7 @@
   border-radius: 6px;
   overflow: hidden;
   vertical-align: middle;
-  background: var(--erp-raised, #f3f6f8);
+  background: var(--erp-raised, var(--color-background));
 }
 .person-photo img {
   display: block;
@@ -21,7 +21,7 @@
   color: var(--erp-muted, #6a7b85);
 }
 .person-photo.is-loading {
-  background: linear-gradient(110deg, #eef2f4 30%, #fff 45%, #eef2f4 60%);
+  background: linear-gradient(110deg, #eef2f4 30%, var(--color-surface) 45%, #eef2f4 60%);
   background-size: 200% 100%;
   animation: person-photo-loading 1.2s linear infinite;
 }

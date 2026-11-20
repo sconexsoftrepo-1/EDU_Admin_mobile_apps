@@ -22,11 +22,11 @@
   box-sizing: border-box;
   height: 40px;
   padding: 0 8px 0 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border);
   border-right: 0;
   border-radius: 6px 0 0 6px;
   background: #f6f7f9;
-  color: #1f2a36;
+  color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
@@ -39,8 +39,8 @@
 .cc-trigger:focus-visible,
 .cc-trigger[aria-expanded="true"] {
   outline: 0;
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 3px #1d4ed820;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12.55%, transparent);
 }
 .cc-trigger svg {
   color: #74849b;
@@ -72,10 +72,10 @@
   flex-direction: column;
   width: min(320px, 100%);
   min-width: 260px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 12px 28px #171b2324;
+  background: var(--color-surface);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--color-text-primary) 14.12%, transparent);
   font-weight: normal;
 }
 .cc-search {
@@ -84,7 +84,7 @@
   gap: 6px;
   margin: 6px;
   padding: 0 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
   color: #74849b;
 }
@@ -118,14 +118,14 @@
   cursor: pointer;
 }
 .cc-list li.is-active {
-  background: #dbeafe;
+  background: var(--color-primary-light);
 }
 .cc-list li[aria-selected="true"] {
-  color: #1d4ed8;
+  color: var(--color-primary);
   font-weight: 600;
 }
 .cc-list li > svg {
-  color: #1d4ed8;
+  color: var(--color-primary);
 }
 .cc-name {
   flex: 1;
@@ -135,7 +135,7 @@
   white-space: nowrap;
 }
 .cc-code {
-  color: #6b7785;
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 .cc-list li.combo-empty {
@@ -149,8 +149,8 @@
 
 /* Search box at the top of the country list: one clean border, no inner focus ring. */
 .cc-search:focus-within {
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 2px #1d4ed818;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 9.41%, transparent);
 }
 .cc-panel .cc-search input,
 .cc-panel .cc-search input:focus,

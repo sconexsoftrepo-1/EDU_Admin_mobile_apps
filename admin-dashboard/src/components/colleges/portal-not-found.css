@@ -1,10 +1,10 @@
 .portal-missing {
   --missing-ink: #18384b;
   --missing-muted: #637582;
-  --missing-gold: #1d4ed8;
+  --missing-gold: var(--color-primary);
   min-height: 100svh;
   padding: 36px clamp(20px, 5vw, 80px);
-  background: #f3f6f8;
+  background: var(--color-background);
   color: var(--missing-ink);
   font-family: Arial, Helvetica, sans-serif;
   display: flex;
@@ -237,7 +237,7 @@
 }
 .portal-missing a:focus-visible,
 .portal-missing button:focus-visible {
-  outline: 3px solid #4b5563;
+  outline: 3px solid var(--color-text-secondary);
   outline-offset: 5px;
 }
 @media (max-width: 720px) {

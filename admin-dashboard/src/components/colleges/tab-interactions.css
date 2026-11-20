@@ -28,9 +28,9 @@
     .crs-segment > button,
     .edu-detail-tabs > button
   ):is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background-color: #1e40af;
-  border-color: #1e40af;
+  color: var(--color-surface);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 :is(.college-erp, .edu-connected)
   :is(
@@ -49,9 +49,9 @@
     [aria-current="page"],
     .active
   ):is(:hover, :focus-visible):not(:disabled) {
-  color: #fff;
-  background-color: #1e40af;
-  border-color: #1e40af;
+  color: var(--color-surface);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 :is(.college-erp, .edu-connected)
   :is(
@@ -80,7 +80,7 @@
     .crs-segment > button,
     .edu-detail-tabs > button
   ):focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {

@@ -2,18 +2,18 @@
    Colours come from the dashboard template (college-erp.css --erp-* tokens). */
 .chat-fab,
 .chat-scrim {
-  --chat-accent: var(--erp-accent, #1d4ed8);
-  --chat-glow: var(--erp-glow, #3b82f6);
-  --chat-accent-soft: #dbeafe;
-  --chat-accent-line: #cbd5e1;
-  --chat-mine: #dbeafe;
-  --chat-bg: var(--erp-bg, #ffffff);
-  --chat-raised: var(--erp-raised, #ffffff);
-  --chat-ink: var(--erp-ink, #171b23);
-  --chat-muted: var(--erp-muted, #4b5563);
-  --chat-border: var(--erp-border, #e2e8f0);
-  --chat-hover: #e2e8f0;
-  --chat-sidebar: var(--erp-sidebar, #123b7a);
+  --chat-accent: var(--erp-accent, var(--color-primary));
+  --chat-glow: var(--erp-glow, var(--color-accent));
+  --chat-accent-soft: var(--color-primary-light);
+  --chat-accent-line: var(--color-border-strong);
+  --chat-mine: var(--color-primary-light);
+  --chat-bg: var(--erp-bg, var(--color-surface));
+  --chat-raised: var(--erp-raised, var(--color-surface));
+  --chat-ink: var(--erp-ink, var(--color-text-primary));
+  --chat-muted: var(--erp-muted, var(--color-text-secondary));
+  --chat-border: var(--erp-border, var(--color-border));
+  --chat-hover: var(--color-border);
+  --chat-sidebar: var(--erp-sidebar, var(--color-primary-dark));
   --chat-danger: var(--erp-danger, #b43540);
 }
 .chat-fab {
@@ -28,7 +28,7 @@
   display: grid;
   place-items: center;
   background: var(--chat-accent);
-  color: #fff;
+  color: var(--color-surface);
   box-shadow:
     0 10px 24px rgba(29, 78, 216, 0.35),
     0 2px 6px rgba(0, 0, 0, 0.12);
@@ -53,12 +53,12 @@
   padding: 0 6px;
   border-radius: 11px;
   background: var(--chat-danger);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 12px;
   font-weight: 800;
   display: grid;
   place-items: center;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-surface);
 }
 
 .chat-scrim {
@@ -75,7 +75,7 @@
   position: relative;
   width: min(1040px, 100%);
   height: min(760px, calc(100vh - 40px));
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 20px;
   overflow: hidden;
   display: grid;
@@ -184,7 +184,7 @@
 .chat-filters button,
 .chat-audience button {
   border: 1px solid var(--chat-border);
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 16px;
   padding: 5px 12px;
   font-size: 13px;
@@ -259,6 +259,21 @@
   color: var(--chat-accent);
   font-weight: 800;
 }
+.chat-row-top .chat-contact-role {
+  max-width: 55%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-person-role,
+.chat-sender-role {
+  display: block;
+  color: var(--chat-muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+}
 .chat-preview {
   flex: 1;
   min-width: 0;
@@ -279,7 +294,7 @@
   padding: 0 6px;
   border-radius: 10px;
   background: var(--chat-accent);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 11px;
   font-weight: 800;
   display: grid;
@@ -299,19 +314,19 @@
   color: var(--chat-accent);
 }
 .chat-role-staff {
-  background: #e2e8f0;
+  background: var(--color-border);
   color: var(--chat-sidebar);
 }
 .chat-role-student {
-  background: #dbeafe;
+  background: var(--color-primary-light);
   color: #98482f;
 }
 .chat-role-parent {
-  background: #e2e8f0;
+  background: var(--color-border);
   color: #5f6b4f;
 }
 .chat-role-group {
-  background: #dbeafe;
+  background: var(--color-primary-light);
   color: var(--chat-glow);
 }
 .chat-text-teacher {
@@ -356,7 +371,7 @@
   border-radius: 22px;
   padding: 10px 18px;
   background: var(--chat-accent);
-  color: #fff;
+  color: var(--color-surface);
   font-weight: 700;
   cursor: pointer;
 }
@@ -401,7 +416,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 14px;
-  background: #fff;
+  background: var(--color-surface);
   border-bottom: 1px solid var(--chat-border);
 }
 .chat-back {
@@ -449,7 +464,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--chat-border);
   border-radius: 14px;
   padding: 2px 8px 2px 2px;
@@ -470,7 +485,7 @@
   display: block;
   margin: 0 auto 8px;
   border: 0;
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 14px;
   padding: 5px 12px;
   font-size: 12px;
@@ -496,7 +511,7 @@
 }
 .chat-bubble {
   max-width: min(72%, 520px);
-  background: #fff;
+  background: var(--color-surface);
   border-radius: 14px 14px 14px 4px;
   padding: 6px 10px 5px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -586,7 +601,7 @@
   height: 42px;
   border-radius: 6px;
   background: var(--chat-danger);
-  color: #fff;
+  color: var(--color-surface);
   font-size: 11px;
   font-weight: 900;
   display: grid;
@@ -604,7 +619,7 @@
   height: 34px;
   border-radius: 50%;
   background: var(--chat-sidebar);
-  color: #fff;
+  color: var(--color-surface);
   display: grid;
   place-items: center;
   flex: none;
@@ -641,7 +656,7 @@
   font-size: 14.5px;
   max-height: 140px;
   min-height: 40px;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--chat-ink);
   field-sizing: content;
   outline: none;
@@ -656,7 +671,7 @@
   border: 0;
   border-radius: 50%;
   background: var(--chat-accent);
-  color: #fff;
+  color: var(--color-surface);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -664,7 +679,7 @@
 }
 .chat-recording {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
 }
 .chat-rec-dot {
   width: 12px;
@@ -686,7 +701,7 @@
   margin: 0;
   padding: 14px;
   text-align: center;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--chat-muted);
   font-size: 13px;
 }
@@ -708,7 +723,7 @@
   position: absolute;
   top: 12px;
   right: 12px;
-  color: #fff;
+  color: var(--color-surface);
 }
 
 /* New chat / group sheets slide over the list pane. */
@@ -797,7 +812,7 @@
   border: 1px solid var(--chat-border);
   border-radius: 10px;
   padding: 0 10px;
-  background: #fff;
+  background: var(--color-surface);
   font: inherit;
   font-size: 14px;
   color: var(--chat-ink);

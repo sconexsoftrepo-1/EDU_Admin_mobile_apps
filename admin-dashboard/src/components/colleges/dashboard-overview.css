@@ -1,11 +1,11 @@
 .dov {
-  --dov-ink: #171b23;
-  --dov-muted: #4b5563;
-  --dov-line: #e2e8f0;
-  --dov-amber: #1d4ed8;
-  --dov-gold: #3b82f6;
-  --dov-soft: #ffffff;
-  --dov-tint: #dbeafe;
+  --dov-ink: var(--color-text-primary);
+  --dov-muted: var(--color-text-secondary);
+  --dov-line: var(--color-border);
+  --dov-amber: var(--color-primary);
+  --dov-gold: var(--color-accent);
+  --dov-soft: var(--color-surface);
+  --dov-tint: var(--color-primary-light);
   color: var(--dov-ink);
   display: grid;
   gap: 16px;
@@ -34,13 +34,13 @@
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  min-height: 164px;
+  min-height: 160px;
   overflow: hidden;
   padding: 20px 24px;
   position: relative;
 }
 .dov-banner::before {
-  background: linear-gradient(90deg, #eff6ff 0%, #eff6fff2 34%, #eff6ff80 62%, #eff6ff1a 100%);
+  background: linear-gradient(90deg, var(--color-primary-subtle) 0%, color-mix(in srgb, var(--color-primary-subtle) 94.9%, transparent) 34%, color-mix(in srgb, var(--color-primary-subtle) 50.2%, transparent) 62%, color-mix(in srgb, var(--color-primary-subtle) 10.2%, transparent) 100%);
   content: "";
   inset: 0;
   position: absolute;
@@ -68,16 +68,15 @@
   margin: 4px 0 8px;
 }
 .dov-banner-text > span {
-  color: #374151;
+  color: var(--color-text-primary);
   font-size: 14px;
 }
 .dov-date {
   align-content: center;
-  backdrop-filter: blur(6px);
-  background: #171b23cc;
-  border: 1px solid #ffffff24;
+  background: var(--color-primary-dark);
+  border: 1px solid color-mix(in srgb, var(--color-surface) 14.12%, transparent);
   border-radius: 12px;
-  color: #eff6ff;
+  color: var(--color-primary-subtle);
   display: grid;
   flex: 0 0 auto;
   gap: 1px;
@@ -85,12 +84,12 @@
   padding: 12px 16px;
 }
 .dov-date small {
-  color: #cbd5e1;
+  color: var(--color-border-strong);
   font-size: 12px;
   min-height: 16px;
 }
 .dov .dov-date strong {
-  color: #eff6ff;
+  color: var(--color-primary-subtle);
   font-size: 19px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -119,7 +118,7 @@
 }
 .dov-kpi {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--dov-line);
   border-radius: 14px;
   color: inherit;
@@ -136,7 +135,7 @@
 }
 a.dov-kpi:hover {
   border-color: var(--dov-gold);
-  box-shadow: 0 6px 18px #1e40af14;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary-hover) 7.84%, transparent);
 }
 .dov-kpi-icon {
   align-items: center;
@@ -158,7 +157,7 @@ a.dov-kpi:hover {
   font-size: 13px;
 }
 .dov-kpi-text strong {
-  font-size: clamp(20px, 1.9vw, 26px);
+  font-size: clamp(26px, 2vw, 30px);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -194,7 +193,7 @@ a.dov-kpi:hover {
   gap: 14px;
 }
 .dov-card {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--dov-line);
   border-radius: 14px;
   display: flex;
@@ -205,13 +204,13 @@ a.dov-kpi:hover {
   padding: 16px 18px;
 }
 .dov-fee {
-  flex: 40 1 340px;
+  flex: 40 1 300px;
 }
 .dov-academic {
-  flex: 35 1 320px;
+  flex: 35 1 280px;
 }
 .dov-activity {
-  flex: 25 1 260px;
+  flex: 25 1 240px;
 }
 .dov-recent,
 .dov-actions,
@@ -239,7 +238,7 @@ a.dov-kpi:hover {
   gap: 6px;
 }
 .dov-head-actions select {
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--dov-line);
   border-radius: 8px;
   color: var(--dov-ink);
@@ -286,7 +285,7 @@ a.dov-kpi:hover {
 }
 .dov-failed button {
   align-items: center;
-  background: #fff;
+  background: var(--color-surface);
   border: 1px solid var(--dov-line);
   border-radius: 8px;
   color: var(--dov-ink);
@@ -330,7 +329,7 @@ a.dov-kpi:hover {
   background: var(--dov-amber);
 }
 .dov-legend .is-outstanding {
-  background: #bfdbfe;
+  background: var(--color-primary-light);
 }
 .dov-chart,
 .dov-chart-skeleton {
@@ -362,7 +361,7 @@ a.dov-kpi:hover {
   stroke-width: 10;
 }
 .dov-ring-track {
-  stroke: #dbeafe;
+  stroke: var(--color-primary-light);
 }
 .dov-ring-value {
   stroke: var(--dov-amber);
@@ -496,7 +495,7 @@ a.dov-kpi:hover {
   align-items: center;
   background: var(--dov-tint);
   border-radius: 50%;
-  color: #1e40af;
+  color: var(--color-primary-hover);
   display: inline-flex;
   flex: 0 0 38px;
   font-size: 13px;
@@ -521,7 +520,7 @@ a.dov-kpi:hover {
 .dov-status {
   background: var(--dov-tint);
   border-radius: 99px;
-  color: #6b441b;
+  color: var(--color-primary-hover);
   flex: 0 0 auto;
   font-size: 11px;
   font-weight: 600;
@@ -569,7 +568,7 @@ a.dov-kpi:hover {
   color: var(--dov-amber);
 }
 .dov-action-grid :is(a, button):hover {
-  background: #fff;
+  background: var(--color-surface);
   border-color: var(--dov-gold);
   color: var(--dov-ink);
 }
@@ -629,7 +628,7 @@ a.dov-kpi:hover {
   row-gap: 5px;
 }
 .dov-bars i {
-  background: #dbeafe;
+  background: var(--color-primary-light);
   border-radius: 99px;
   display: block;
   grid-column: 1 / -1;
@@ -651,7 +650,7 @@ a.dov-kpi:hover {
 }
 .dov-skeleton {
   animation: dov-pulse 1.3s ease-in-out infinite;
-  background: #e2e8f0;
+  background: var(--color-border);
   border-radius: 12px;
 }
 .dov-name-skeleton {
@@ -685,17 +684,17 @@ a.dov-kpi:hover {
   min-width: 0;
 }
 .dov-tabs {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   gap: 6px;
   overflow-x: auto;
   padding-bottom: 8px;
 }
 .dov-tabs button {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   cursor: pointer;
   flex: 0 0 auto;
   font-size: 13px;
@@ -708,9 +707,9 @@ a.dov-kpi:hover {
   margin-left: auto;
 }
 .dov-tabs button[aria-selected="true"] {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
 }
 
 @media (max-width: 1100px) {
@@ -726,7 +725,7 @@ a.dov-kpi:hover {
     padding: 16px;
   }
   .dov-banner::before {
-    background: linear-gradient(180deg, #eff6fff5 0%, #eff6ffe0 55%, #eff6ff80 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-primary-subtle) 96.08%, transparent) 0%, color-mix(in srgb, var(--color-primary-subtle) 87.84%, transparent) 55%, color-mix(in srgb, var(--color-primary-subtle) 50.2%, transparent) 100%);
   }
   .dov-date {
     align-self: stretch;
