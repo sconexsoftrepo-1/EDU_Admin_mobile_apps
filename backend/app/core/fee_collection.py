@@ -5,6 +5,7 @@ first), so ledgers, overdue figures and receipts stay consistent. Fees without a
 a transfer certificate, are recorded against the fee head itself. Certificate fee heads are
 offered from the start and created the first time one is used; "Other" creates a custom head.
 """
+import re
 from datetime import date
 from decimal import Decimal
 
@@ -13,7 +14,8 @@ from pydantic import Field, model_validator
 
 from . import assignment_workspace as aw
 from .resources import staff_only
-from .security import StrictModel, current_user, has_permission
+from .receipt_email import receipt_message, send_receipt
+from .security import EMAIL, StrictModel, current_user, has_permission
 from .course_form import SINGLE_BRANCH_LEVELS
 from .storage import audit, new_code, next_number, now
 
@@ -125,6 +127,9 @@ def student_info(data, student):
         "branch": program.get("branch"),
         "academic_year_code": year.get("code") or profile.get("academic_year_code"),
         "academic_year": year.get("name") or batch.get("name"),
+        # Pre-fill the optional contact fields of the payment form.
+        "phone": student.get("phone"),
+        "email": student.get("email"),
     }
 
 
@@ -203,6 +208,16 @@ class PayerDetails(StrictModel):
     academic_year: str = Field(min_length=2, max_length=40)
 
 
+STUDENT_MOBILE = r"^\+?[0-9]{10,13}$"
+
+
+def _contact(model):
+    """Trim the optional student contact; an empty value means none."""
+    model.student_mobile = (model.student_mobile or "").replace(" ", "").strip() or None
+    model.student_email = (model.student_email or "").strip().lower() or None
+    return model
+
+
 class FeePaymentInput(StrictModel):
     student_code: str | None = None
     payer: PayerDetails | None = None
@@ -216,9 +231,17 @@ class FeePaymentInput(StrictModel):
     note: str | None = Field(default=None, max_length=300)
     semester: int | None = Field(default=None, ge=1, le=12, description="Student's current semester")
     year_end: bool = Field(default=False, description="Paid at the end of the academic year (no single semester)")
+    # Optional; when an email is given the receipt is emailed there (also after a change or deletion).
+    student_mobile: str | None = Field(default=None, max_length=20)
+    student_email: str | None = Field(default=None, max_length=254)
 
     @model_validator(mode="after")
     def rules(self):
+        _contact(self)
+        if self.student_mobile and not re.fullmatch(STUDENT_MOBILE, self.student_mobile):
+            raise ValueError("Enter a valid student mobile number (10 digits)")
+        if self.student_email and not re.fullmatch(EMAIL, self.student_email):
+            raise ValueError("Enter a valid student email address")
         if not self.fee_head_code and not self.custom_fee_head:
             raise ValueError("Choose what the fee is paid for")
         if not self.student_code and not self.payer:
@@ -294,6 +317,8 @@ def record(body: FeePaymentInput, request: Request, background: BackgroundTasks,
             "transaction_date": body.transaction_date.isoformat() if body.transaction_date else None,
             "semester": body.semester,
             **({"year_end": True} if body.year_end else {}),
+            **({"student_mobile": body.student_mobile} if body.student_mobile else {}),
+            **({"student_email": body.student_email} if body.student_email else {}),
         }
         data["records"].setdefault("payments", {})[payment["code"]] = payment
         # Settle the oldest unpaid charges of this fee head; anything left is kept as an advance.
@@ -314,9 +339,12 @@ def record(body: FeePaymentInput, request: Request, background: BackgroundTasks,
         audit(data, user["code"], "collect", "payments", payment["code"])
         notices = payment_notices(data, payment, receipt)
         result = {"payment": payment, "receipt": receipt, "allocations": allocations, "advance": str(left), "student": info}
+        receipt_mail = receipt_message(data, request.app.state.settings, payment["code"], "recorded")
     if notices:
         from .push_delivery import deliver
         background.add_task(deliver, request, notices)
+    if receipt_mail:
+        background.add_task(send_receipt, request.app.state.settings, receipt_mail)
     return result
 
 
@@ -330,6 +358,8 @@ class PaymentEditInput(StrictModel):
     payer: PayerDetails
     semester: int | None = Field(default=None, ge=1, le=12)
     year_end: bool = False
+    student_mobile: str | None = Field(default=None, max_length=20)
+    student_email: str | None = Field(default=None, max_length=254)
     amount: Decimal = Field(gt=0, max_digits=14, decimal_places=2)
     method: str = Field(pattern="^(cash|upi|bank_transfer)$")
     transaction_reference: str | None = Field(default=None, max_length=100)
@@ -339,6 +369,11 @@ class PaymentEditInput(StrictModel):
 
     @model_validator(mode="after")
     def rules(self):
+        _contact(self)
+        if self.student_mobile and not re.fullmatch(STUDENT_MOBILE, self.student_mobile):
+            raise ValueError("Enter a valid student mobile number (10 digits)")
+        if self.student_email and not re.fullmatch(EMAIL, self.student_email):
+            raise ValueError("Enter a valid student email address")
         if self.year_end:
             self.semester = None
         elif self.semester is None:
@@ -356,7 +391,7 @@ class PaymentEditInput(StrictModel):
 
 
 @router.patch("/{code}")
-def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(current_user)):
+def edit(code: str, body: PaymentEditInput, request: Request, background: BackgroundTasks, user=Depends(current_user)):
     """Admins save directly; other roles' edits wait for the admin's approval (edit_approvals gate)."""
     with request.app.state.store.transaction() as data:
         require(data, user, "edit")
@@ -374,6 +409,7 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
             raise HTTPException(409, "This transaction number is already recorded")
         payer = body.payer.model_dump(mode="json")
         payer["course_level_label"] = LEVELS[payer["course_level"]]
+        payment.update(student_mobile=body.student_mobile, student_email=body.student_email)
         payment.update(payer=payer, semester=body.semester, year_end=body.year_end, amount=str(money(body.amount)), method=body.method,
                        transaction_reference=reference, paid_on=body.paid_on.isoformat(), note=body.note,
                        transaction_date=body.transaction_date.isoformat() if body.transaction_date else None,
@@ -384,7 +420,11 @@ def edit(code: str, body: PaymentEditInput, request: Request, user=Depends(curre
             receipt["issued_on"] = body.paid_on.isoformat()
             data["records"]["receipts"][receipt["code"]] = receipt
         audit(data, user["code"], "edit", "payments", code, reason=reason)
-        return dict(payment)
+        receipt_mail = receipt_message(data, request.app.state.settings, code, "updated")
+        result = dict(payment)
+    if receipt_mail:
+        background.add_task(send_receipt, request.app.state.settings, receipt_mail)
+    return result
 
 
 class PaymentDeleteInput(StrictModel):
@@ -392,7 +432,8 @@ class PaymentDeleteInput(StrictModel):
 
 
 @router.post("/{code}/delete")
-def delete_payment(code: str, body: PaymentDeleteInput, request: Request, user=Depends(current_user)):
+def delete_payment(code: str, body: PaymentDeleteInput, request: Request, background: BackgroundTasks,
+                   user=Depends(current_user)):
     """Delete a fee payment (manual screen or Payments & receipts). Other roles' requests wait for the
     admin's approval (edit_approvals gate, like edits). On approval the payment is kept for the record
     but marked deleted (status "failed"), so every collection total, cashbook and dashboard leaves it
@@ -422,7 +463,11 @@ def delete_payment(code: str, body: PaymentDeleteInput, request: Request, user=D
             receipt.update(cancelled=True, cancelled_at=payment["deleted_at"], cancel_reason=reason)
             data["records"]["receipts"][receipt["code"]] = receipt
         audit(data, user["code"], "delete", "payments", code, reason=reason)
-        return dict(payment)
+        receipt_mail = receipt_message(data, request.app.state.settings, code, "deleted")
+        result = dict(payment)
+    if receipt_mail:
+        background.add_task(send_receipt, request.app.state.settings, receipt_mail)
+    return result
 
 
 @router.get("")
@@ -464,6 +509,7 @@ def history(request: Request, method: str | None = None, start: date | None = No
                "course_level": payer.get("course_level_label"), "course_branch": payer.get("course_branch"),
                "academic_year": payer.get("academic_year"), "note": p.get("note"), "semester": p.get("semester"),
                "year_end": bool(p.get("year_end")),
+               "student_mobile": p.get("student_mobile"), "student_email": p.get("student_email"),
                "recorded_at": p.get("recorded_at"), "course_level_code": payer.get("course_level"),
                "edited_at": p.get("edited_at"),
                "deleted": bool(p.get("deleted_at")), "deleted_at": p.get("deleted_at"), "delete_reason": p.get("delete_reason"),

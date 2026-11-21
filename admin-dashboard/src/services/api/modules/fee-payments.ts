@@ -14,6 +14,9 @@ export type PaymentStudent = {
   branch: string | null;
   academic_year_code: string | null;
   academic_year: string | null;
+  /** From the student's record: pre-fills the optional contact fields. */
+  phone?: string | null;
+  email?: string | null;
 };
 export type PaymentOptions = {
   methods: { key: string; label: string }[];
@@ -47,6 +50,9 @@ export type PaymentRow = {
   semester?: number | null;
   /** Paid at the end of the academic year rather than for one semester. */
   year_end?: boolean;
+  /** Optional contact entered on the form; the receipt is emailed to student_email. */
+  student_mobile?: string | null;
+  student_email?: string | null;
   /** Stored course level (intermediate, degree, ...) of a manual payment. */
   course_level_code?: string | null;
   recorded_at?: string | null;
@@ -69,6 +75,8 @@ export type PaymentEdit = {
   };
   semester: number | null;
   year_end?: boolean;
+  student_mobile?: string | null;
+  student_email?: string | null;
   amount: string;
   method: string;
   transaction_reference: string | null;

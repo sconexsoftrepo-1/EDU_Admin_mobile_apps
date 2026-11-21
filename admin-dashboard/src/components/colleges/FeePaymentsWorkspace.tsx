@@ -141,6 +141,9 @@ function RecordPayment({ manual }: { manual: boolean }) {
   const [paidOn, setPaidOn] = useState(today());
   const [transactionDate, setTransactionDate] = useState(today());
   const [note, setNote] = useState("");
+  // Optional; with an email the receipt is emailed to the student (and again after a change or deletion).
+  const [studentMobile, setStudentMobile] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<{ code: string; receipt_code: string; receipt_number: string; amount: string; student: string } | null>(null);
   const [savedCount, setSavedCount] = useState(0);
@@ -187,6 +190,8 @@ function RecordPayment({ manual }: { manual: boolean }) {
     setQuery(found.name);
     setMatches([]);
     setFilters({ level: found.course_level || "", program: found.program_code || "", year: found.academic_year_code || "" });
+    setStudentMobile(found.phone || "");
+    setStudentEmail(found.email || "");
     loadOptions(found.code);
   }
   function reset() {
@@ -201,6 +206,8 @@ function RecordPayment({ manual }: { manual: boolean }) {
     setAmount("");
     setReference("");
     setNote("");
+    setStudentMobile("");
+    setStudentEmail("");
     setMethod("cash");
     setPaidOn(today());
     setTransactionDate(today());
@@ -234,6 +241,8 @@ function RecordPayment({ manual }: { manual: boolean }) {
         transaction_date: method === "cash" ? null : transactionDate,
         paid_on: method === "cash" ? today() : paidOn,
         note: note.trim() || null,
+        student_mobile: studentMobile.trim() || null,
+        student_email: studentEmail.trim() || null,
         ...semesterFields(semester),
       });
       setSaved({
@@ -598,6 +607,36 @@ function RecordPayment({ manual }: { manual: boolean }) {
         {method !== "cash" && (
           <small className="fcw-wide fcw-hint">
             Transaction date is when the money was transferred; the receipt shows it as proof of the transfer date.
+          </small>
+        )}
+        <label>
+          Student mobile number <small className="fcw-optional">(optional)</small>
+          <input
+            type="tel"
+            inputMode="tel"
+            maxLength={16}
+            pattern="\+?[0-9 ]{10,16}"
+            title="10-digit mobile number"
+            autoComplete="off"
+            placeholder="e.g. 9876543210"
+            value={studentMobile}
+            onChange={(e) => setStudentMobile(e.target.value)}
+          />
+        </label>
+        <label>
+          Student email <small className="fcw-optional">(optional)</small>
+          <input
+            type="email"
+            maxLength={254}
+            autoComplete="off"
+            placeholder="Receipt is emailed here"
+            value={studentEmail}
+            onChange={(e) => setStudentEmail(e.target.value)}
+          />
+        </label>
+        {studentEmail.trim() && (
+          <small className="fcw-wide fcw-hint">
+            The fee receipt (PDF) is emailed to the student after saving, and again if the payment is changed or deleted.
           </small>
         )}
         <label className="fcw-wide">
@@ -994,6 +1033,8 @@ export function PaymentDetails({ row, onClose, onEdit, onPrint }: { row: Payment
     [manualRow ? "Course level" : "Section", row.course_level],
     ["Current semester", semesterText(row)],
     [manualRow ? "Roll / reference no." : "Student ID", manualRow ? row.roll_or_reference : row.student_code],
+    ["Mobile", row.student_mobile],
+    ["Email", row.student_email],
   ];
   const payment: [string, string | null | undefined][] = [
     ["Receipt no.", number],
@@ -1209,6 +1250,8 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
     transactionDate: row.transaction_date || row.paid_on,
     paidOn: row.paid_on,
     note: row.note || "",
+    mobile: row.student_mobile || "",
+    email: row.student_email || "",
   });
   const [saving, setSaving] = useState(false);
   const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
@@ -1233,6 +1276,8 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
       transaction_date: form.method === "cash" ? null : form.transactionDate,
       paid_on: form.paidOn,
       note: form.note.trim() || null,
+      student_mobile: form.mobile.trim() || null,
+      student_email: form.email.trim() || null,
     };
     setSaving(true);
     try {
@@ -1371,6 +1416,16 @@ export function EditPayment({ row, onClose, onSaved }: { row: PaymentRow; onClos
               </label>
             </>
           )}
+          <label>
+            Student mobile number <small className="fcw-optional">(optional)</small>
+            <input type="tel" inputMode="tel" maxLength={16} pattern="\+?[0-9 ]{10,16}" title="10-digit mobile number"
+              value={form.mobile} onChange={(e) => set({ mobile: e.target.value })} />
+          </label>
+          <label>
+            Student email <small className="fcw-optional">(optional)</small>
+            <input type="email" maxLength={254} value={form.email} onChange={(e) => set({ email: e.target.value })}
+              placeholder="The updated receipt is emailed here" />
+          </label>
           <label className="fcw-wide">
             Note
             <input maxLength={300} value={form.note} onChange={(e) => set({ note: e.target.value })} />

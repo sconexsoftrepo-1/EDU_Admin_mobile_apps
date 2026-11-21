@@ -1452,3 +1452,8 @@
   background: var(--color-danger, #b43540);
   border-color: var(--color-danger, #b43540);
 }
+
+.fcw-optional {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
