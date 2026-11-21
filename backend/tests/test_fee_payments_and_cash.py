@@ -323,3 +323,54 @@ def test_year_end_payments(client, headers, college, app):
     other = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["amount"] == "100.00")
     assert client.patch(f"{PAY}/{other['code']}", headers=headers, json={**edit, "year_end": True}).json()["year_end"] is True
     assert client.patch(f"{PAY}/{other['code']}", headers=headers, json=edit).status_code == 422
+
+
+@pytest.fixture
+def mailbox(monkeypatch):
+    sent = []
+    from app.core import email_delivery
+    monkeypatch.setattr(email_delivery, "send_email", lambda settings, to, subject, text, html=None, **kw: sent.append(
+        {"to": to, "subject": subject, "text": text, "html": html, "attachments": kw.get("attachments") or []}) or True)
+    return sent
+
+
+def test_receipt_is_emailed_on_record_change_and_delete(client, headers, college, app, mailbox):
+    import base64
+    with app.state.store.transaction() as d:
+        d["records"]["campuses"] = {"C": {"code": "C", "name": "Main"}}
+    payer = {"name": "Sai Kumar", "roll_or_reference": "R-12", "course_level": "degree", "course_branch": "BCA", "academic_year": "2026-27"}
+    base = {"payer": payer, "fee_head_code": "TUI", "method": "cash", "paid_on": "2026-11-07", "semester": 2}
+    # Contact details are optional and validated.
+    assert client.post(PAY, headers=headers, json={**base, "amount": "5", "student_email": "not-an-email"}).status_code == 422
+    assert client.post(PAY, headers=headers, json={**base, "amount": "5", "student_mobile": "12"}).status_code == 422
+    none = client.post(PAY, headers=headers, json={**base, "amount": "5"})
+    assert none.status_code == 201 and mailbox == []
+    made = client.post(PAY, headers=headers, json={**base, "amount": "1500", "student_mobile": "98765 43210",
+                                                   "student_email": " Sai.Kumar@Example.com "})
+    assert made.status_code == 201, made.text
+    code = made.json()["payment"]["code"]
+    assert made.json()["payment"]["student_email"] == "sai.kumar@example.com" and made.json()["payment"]["student_mobile"] == "9876543210"
+    mail = mailbox[-1]
+    assert mail["to"] == "sai.kumar@example.com" and mail["subject"].startswith("Fee Receipt")
+    assert "Sai Kumar" in mail["html"] and "1,500.00" in mail["html"] and "Semester 2" in mail["html"]
+    pdf = next(a for a in mail["attachments"] if a["contentType"] == "application/pdf")
+    # The emblem and icons are inline images; the receipt PDF is the only real attachment.
+    assert {a["contentId"] for a in mail["attachments"] if a.get("contentId")} >= {"emblem", "check-circle", "coins"}
+    # Only images the email shows are embedded (Gmail lists unused ones as attachments).
+    assert not {"refresh", "x-circle"} & {a.get("contentId") for a in mail["attachments"]}
+    assert sum(1 for a in mail["attachments"] if not a.get("contentId")) == 1
+    assert "cid:emblem" in mail["html"] and "Payment Successful" in mail["html"] and "Tuition fee" in mail["html"]
+    assert pdf["contentType"] == "application/pdf" and base64.b64decode(pdf["contentInBase64"])[:4] == b"%PDF"
+    row = next(r for r in client.get(f"{PAY}?source=manual", headers=headers).json()["items"] if r["code"] == code)
+    assert row["student_email"] == "sai.kumar@example.com" and row["student_mobile"] == "9876543210"
+    edit = {"reason": "Corrected the amount received", "payer": payer, "amount": "1600", "method": "cash", "paid_on": "2026-11-07",
+            "semester": 2, "student_email": "sai.kumar@example.com"}
+    assert client.patch(f"{PAY}/{code}", headers=headers, json=edit).status_code == 200
+    assert mailbox[-1]["subject"].startswith("Updated Fee Receipt") and "Receipt Updated" in mailbox[-1]["html"] and "1,600.00" in mailbox[-1]["html"]
+    assert client.post(f"{PAY}/{code}/delete", headers=headers, json={"reason": "Paid twice by mistake"}).status_code == 200
+    cancelled = mailbox[-1]
+    assert cancelled["subject"].startswith("Fee Payment Cancelled") and "Paid twice by mistake" in cancelled["html"]
+    assert "Payment Successful" not in cancelled["html"] and "Payment Cancelled" in cancelled["html"]
+    cancelled_pdf = next(a for a in cancelled["attachments"] if a["contentType"] == "application/pdf")
+    assert base64.b64decode(cancelled_pdf["contentInBase64"])[:4] == b"%PDF"
+    assert len(mailbox) == 3

@@ -106,7 +106,8 @@ def fee_receipt_pdf(data, receipt, payment, copies=None):
             ("Payment", [("Receipt no.", number), ("Payment date", paid_on), ("Mode of payment", mode),
                          *([("Transaction date", str(payment["transaction_date"])[:10])] if payment.get("transaction_date") else []),
                          ("Transaction no.", payment.get("transaction_reference") or ("Cash — no reference" if payment.get("method") == "cash" else "—")),
-                         ("Payment type", payment_type), ("Status", status.title() or "—")]),
+                         ("Payment type", payment_type),
+                         ("Status", "Cancelled" if payment.get("deleted_at") else status.title() or "—")]),
         ])
         rows = []
         for alloc in aw.rows(data, "payment_allocations"):
@@ -121,7 +122,8 @@ def fee_receipt_pdf(data, receipt, payment, copies=None):
         doc.table(["Fee head", "Term", "Due date", "Charged (INR)", "Paid now (INR)"], rows, widths=[3, 1.4, 1.3, 1.5, 1.5],
                   align="LLLRR", totals=["Total received", "", "", "", inr(payment.get("amount"))])
         doc.highlight("Amount received", f"INR {inr(payment.get('amount'))}", words(payment.get("amount")),
-                      stamp={"settled": "PAID", "pending": "PENDING", "failed": "FAILED", "refunded": "REFUNDED"}.get(status, "RECEIVED"),
+                      stamp="CANCELLED" if payment.get("deleted_at") else
+                      {"settled": "PAID", "pending": "PENDING", "failed": "FAILED", "refunded": "REFUNDED"}.get(status, "RECEIVED"),
                       stamp_color=None if status in {"settled", ""} else HexColor("#b43540"))
         if balance > 0:
             doc.note(f"A balance of INR {inr(balance)} remains on this student's fee account. The balance statement on the next "
